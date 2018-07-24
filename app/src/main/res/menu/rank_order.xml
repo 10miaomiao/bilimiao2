@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:checkableBehavior="single">
+
+        <!--arrayOf("click", "scores", "stow", "coin", "dm")-->
+
+        <item android:title="播放数"
+            android:checked="true"
+            android:id="@+id/order_click"/>
+
+        <item android:title="评论数"
+            android:id="@+id/order_scores"/>
+
+        <item android:title="收藏数"
+            android:id="@+id/order_stow"/>
+
+        <item android:title="硬币数"
+            android:id="@+id/order_coin"/>
+
+        <item android:title="弹幕数"
+            android:id="@+id/order_dm"/>
+
+    </group>
+</menu>
