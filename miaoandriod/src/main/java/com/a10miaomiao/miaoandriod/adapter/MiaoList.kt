@@ -1,8 +1,11 @@
 package com.a10miaomiao.miaoandriod.adapter
 
+import android.support.v7.widget.RecyclerView
+
 class MiaoList<E> : ArrayList<E>(){
 
     var updateView: (() -> Unit)? = null
+    var layoutManager: RecyclerView.LayoutManager? = null
 
     override fun add(element: E): Boolean {
         var r = super.add(element)

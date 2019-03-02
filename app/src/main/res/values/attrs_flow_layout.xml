@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="FlowLayout">
+        <attr name="itemLeft" format="dimension" />
+        <attr name="itemTop" format="dimension" />
+        <attr name="itemRight" format="dimension" />
+        <attr name="itemBottom" format="dimension" />
+        <attr name="choiceMode" format="enum">
+            <enum name="none" value="0" />
+            <enum name="singleChoice" value="1" />
+            <enum name="multipleChoice" value="2" />
+        </attr>
+        <attr name="maxChecked" format="integer" />
+    </declare-styleable>
+
+</resources>

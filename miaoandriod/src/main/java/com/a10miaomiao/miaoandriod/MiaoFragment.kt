@@ -1,22 +1,13 @@
 package com.a10miaomiao.miaoandriod
 
-import android.app.ProgressDialog
-import android.content.Context
 import android.os.Bundle
-import android.os.Debug
 import android.support.annotation.LayoutRes
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import org.jetbrains.anko.AnkoContext
-import org.jetbrains.anko.UI
-import org.jetbrains.anko.internals.AnkoInternals
-import kotlin.properties.ObservableProperty
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
+import com.a10miaomiao.miaoandriod.anko.MiaoAnkoContext
+import com.a10miaomiao.miaoandriod.binding.LifecycleBinding
 
 
 /**
@@ -25,7 +16,7 @@ import kotlin.reflect.KProperty0
 abstract class MiaoFragment : Fragment() {
     private var parentView: View? = null
 
-    var binding = MiaoBindingImpl()
+    var binding = LifecycleBinding{ this }
 
     // 标志位 标志已经初始化完成。
     protected var isPrepared: Boolean = false

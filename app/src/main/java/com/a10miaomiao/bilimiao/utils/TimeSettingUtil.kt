@@ -1,12 +1,6 @@
 package com.a10miaomiao.bilimiao.utils
 
 import android.content.Context
-import android.renderscript.Sampler
-import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
-import com.a10miaomiao.miaoandriod.MiaoBinding
-import com.a10miaomiao.miaoandriod.MiaoBindingImpl
-import com.a10miaomiao.miaoandriod.MiaoModel
-import java.util.*
 
 object TimeSettingUtil {
 

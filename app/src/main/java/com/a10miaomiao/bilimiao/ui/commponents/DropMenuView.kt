@@ -5,10 +5,10 @@ import android.support.v7.widget.PopupMenu
 import android.view.Gravity
 import android.view.MenuItem
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.miaoandriod.MiaoAnkoContext
+import com.a10miaomiao.bilimiao.utils.selectableItemBackground
+import com.a10miaomiao.bilimiao.utils.selectableItemBackgroundBorderless
 import com.a10miaomiao.miaoandriod.MiaoView
-import com.a10miaomiao.miaoandriod.bind
-import org.jetbrains.anko.button
+import com.a10miaomiao.miaoandriod.binding.bind
 import org.jetbrains.anko.imageView
 import org.jetbrains.anko.linearLayout
 import org.jetbrains.anko.textView
@@ -36,6 +36,7 @@ class DropMenuView(context: Context) : MiaoView(context) {
     override fun render() = MiaoUI {
         linearLayout {
             gravity = Gravity.CENTER_VERTICAL
+
             setOnClickListener {
                 popupMenu.show()
             }
@@ -43,6 +44,7 @@ class DropMenuView(context: Context) : MiaoView(context) {
                 bind (this@DropMenuView::text){ text = it }
             }
             imageView{
+                selectableItemBackgroundBorderless()
                 bind (::ico){ setImageResource(it) }
             }
         }

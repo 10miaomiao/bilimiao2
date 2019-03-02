@@ -13,7 +13,6 @@ import org.jetbrains.anko.AnkoContextImpl
 import org.jetbrains.anko.UI
 import org.jetbrains.anko.matchParent
 
-
 /**
  * Created by 10喵喵 on 2018/2/23.
  */
@@ -93,8 +92,8 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MiaoViewHolder<T> {
         return when {
             isShowStateView -> MiaoViewHolder(stateView!!)
-            mHeaderViews.get(viewType) != null -> MiaoViewHolder(mHeaderViews.get(viewType))
-            mFootViews.get(viewType) != null -> MiaoViewHolder(mFootViews.get(viewType))
+            mHeaderViews.get(viewType) != null -> MiaoViewHolder(mHeaderViews.get(viewType) as View)
+            mFootViews.get(viewType) != null -> MiaoViewHolder(mFootViews.get(viewType) as View)
 //            else -> MiaoViewHolder(parent!!.context.UI(_itemView).view)
             else -> {
                 if (_viemFn == null) {
@@ -137,6 +136,19 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
 
     fun layoutManager(layoutManager: RecyclerView.LayoutManager): MiaoRecyclerViewAdapter<T> {
         recyclerView?.layoutManager = layoutManager
+        val listData = itemsSource
+        // 让RecyclerView滚动到上次位置
+        if (listData is MiaoList<T>) {
+            if (listData.layoutManager != null) {
+                val topView = listData.layoutManager!!.getChildAt(0)
+                if (topView != null) {
+                    if (layoutManager is LinearLayoutManager) {
+                        layoutManager.scrollToPositionWithOffset(layoutManager.getPosition(topView), topView.top)
+                    }
+                }
+            }
+            listData.layoutManager = layoutManager
+        }
         return this
     }
 

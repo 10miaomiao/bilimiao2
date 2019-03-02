@@ -1,6 +1,7 @@
 package com.a10miaomiao.miaoandriod
 
-import kotlin.properties.ObservableProperty
+import com.a10miaomiao.miaoandriod.binding.MiaoBinding
+import com.a10miaomiao.miaoandriod.binding.key
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 

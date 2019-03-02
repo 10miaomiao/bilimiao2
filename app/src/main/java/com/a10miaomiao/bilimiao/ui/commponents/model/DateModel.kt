@@ -2,12 +2,9 @@ package com.a10miaomiao.bilimiao.ui.commponents.model
 
 import android.content.Context
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.SettingUtil
 import com.a10miaomiao.bilimiao.utils.TimeSettingUtil
-import com.a10miaomiao.miaoandriod.MiaoAnkoContext
-import com.a10miaomiao.miaoandriod.MiaoBinding
-import com.a10miaomiao.miaoandriod.MiaoBindingImpl
+import com.a10miaomiao.miaoandriod.binding.MiaoBinding
 import java.util.*
 
 class DateModel(val binding: MiaoBinding) {

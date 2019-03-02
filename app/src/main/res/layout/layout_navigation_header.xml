@@ -8,7 +8,6 @@
         android:id="@+id/iv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/top_bg1" />
+        android:scaleType="centerCrop" />
 
 </FrameLayout>

@@ -2,32 +2,31 @@ package com.a10miaomiao.bilimiao.ui.home
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.os.Bundle
-import android.support.v4.widget.DrawerLayout
 import android.support.v7.widget.GridLayoutManager
+import android.util.SizeF
 import android.view.Gravity
+import android.view.MenuItem
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Home
-import com.a10miaomiao.bilimiao.entity.RxBusMsg
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.ui.region.RegionFragment
+import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.MiaoFragment
-import com.a10miaomiao.miaoandriod.MiaoInstanceState
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
-import com.a10miaomiao.miaoandriod.MiaoUI
+import com.a10miaomiao.miaoandriod.anko.MiaoUI
 import com.a10miaomiao.miaoandriod.adapter.miao
-import com.a10miaomiao.miaoandriod.bind
+import com.a10miaomiao.miaoandriod.binding.bind
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.jetbrains.anko.*
+import org.jetbrains.anko.collections.forEachWithIndex
 import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.nestedScrollView
 import org.jetbrains.anko.support.v4.toast
@@ -55,7 +54,7 @@ class HomeFragment : MiaoFragment() {
         Observable.just(readAssetsJson())
                 .map { Gson().fromJson(it, Home.RegionData::class.java) }
                 .map { it.data }
-                .doOnNext { it.forEachIndexed(::regionIcon) }
+                .doOnNext { it.forEachWithIndex(::regionIcon) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
@@ -104,6 +103,15 @@ class HomeFragment : MiaoFragment() {
 //        )[index]
     }
 
+    private fun onMenuItemClick(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.search -> {
+                startFragment(SearchFragment.newInstance())
+            }
+        }
+        return true
+    }
+
     /**
      * 读取assets下的json数据
      */
@@ -128,15 +136,22 @@ class HomeFragment : MiaoFragment() {
     @SuppressLint("SetTextI18n")
     override fun render() = MiaoUI {
         verticalLayout {
+            backgroundColor = config.background
             headerView {
                 bind<String>(::title, this::title)
                 navigationIcon(R.drawable.ic_menu_white_24dp)
                 navigationOnClick {
                     RxBus.getInstance().send(ConstantUtil.OPEN_DRAWER)
                 }
+                inflateMenu(R.menu.search)
+                onMenuItemClick(this@HomeFragment::onMenuItemClick)
             }
             nestedScrollView {
                 verticalLayout {
+                    lparams {
+                        width = matchParent
+                        bottomMargin = config.dividerSize
+                    }
                     // 分区列表
                     recyclerView {
                         isNestedScrollingEnabled = false
@@ -163,7 +178,7 @@ class HomeFragment : MiaoFragment() {
                             }
                         }
                     }.onItemClick { item, position ->
-                        RxBus.getInstance().send(ConstantUtil.START_FRAGMENT, RegionFragment.newInstance(item))
+                        startFragment(RegionFragment.newInstance(item))
                     }.layoutManager(GridLayoutManager(activity, 5))
 
                     // 时间线时间显示
@@ -172,10 +187,10 @@ class HomeFragment : MiaoFragment() {
                         backgroundColor = Color.WHITE
                         padding = config.dividerSize
                         textView {
-                            bind(::time) { setText("当前时间线：$it") }
+                            bind(::time) { text = "当前时间线：$it" }
                         }
                         setOnClickListener {
-                            RxBus.getInstance().send(ConstantUtil.START_FRAGMENT, TimeSettingFragment())
+                            startFragment(TimeSettingFragment())
                         }
                     }.lparams {
                         width = matchParent

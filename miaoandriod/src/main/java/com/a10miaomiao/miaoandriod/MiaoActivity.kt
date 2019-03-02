@@ -1,20 +1,11 @@
 package com.a10miaomiao.miaoandriod
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.support.annotation.LayoutRes
-import android.support.v4.app.SupportActivity
 import android.support.v7.app.AppCompatActivity
-import android.text.Editable
-import android.text.TextWatcher
-import android.widget.EditText
-import org.jetbrains.anko.AnkoContext
-import kotlin.properties.ObservableProperty
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
+import com.a10miaomiao.miaoandriod.anko.MiaoAnkoContext
+import com.a10miaomiao.miaoandriod.binding.MiaoBindingImpl
 
 abstract class MiaoActivity : AppCompatActivity() {
 

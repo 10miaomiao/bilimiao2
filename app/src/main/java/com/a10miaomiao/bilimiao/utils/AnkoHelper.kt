@@ -1,6 +1,9 @@
 package com.a10miaomiao.bilimiao.utils
 
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProvider
 import android.content.Context
+import android.os.Build
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
 import android.support.v7.widget.RecyclerView
@@ -16,14 +19,21 @@ import com.a10miaomiao.miaoandriod.adapter.MiaoRecyclerViewAdapter
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.view.*
+import me.yokeyword.fragmentation.SupportActivity
+import me.yokeyword.fragmentation.SupportFragment
 import org.jetbrains.anko.AnkoContext
 import org.jetbrains.anko.AnkoViewDslMarker
 import org.jetbrains.anko.backgroundResource
 import org.jetbrains.anko.custom.ankoView
 import org.jetbrains.anko.dip
 
-inline fun ImageView.src(value: String) {
-    val url = if ("://" in value) value else "http:$value"
+fun ImageView.network(value: String) {
+    val url = if ("://" in value)
+        value.replace("http://","https://")
+    else
+        "https:$value"
     Glide.with(context)
             .load(url)
             .centerCrop()
@@ -35,23 +45,33 @@ inline fun ImageView.src(value: String) {
 
 }
 
+fun Fragment.getStatusBarHeight() = context!!.getStatusBarHeight()
+fun View.getStatusBarHeight() = context.getStatusBarHeight()
+fun Context.getStatusBarHeight(): Int {
+    val activity = this
+    if (activity is MainActivity){
+        activity.windowInsets?.let {
+            return it.systemWindowInsetTop
+        }
+    }
+    var result = 0
+    val resourceId = this.resources.getIdentifier("status_bar_height", "dimen",
+            "android")
+    if (resourceId > 0) {
+        result = this.resources.getDimensionPixelSize(resourceId)
+    }
+    return result
+}
+
 /**
  * 跳转到另一个Fragment
  */
-inline fun MiaoFragment.startFragment(fragment: Fragment) {
-//    if (activity is MainActivity){
-//        (activity as MainActivity).goto(fragment)
-//        return
-//    }
-    activity!!.supportFragmentManager.beginTransaction()
-            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            .setCustomAnimations(R.anim.in_from_right, R.anim.out_to_left)
-//            .setCustomAnimations(
-//                    R.animator.fragment_slide_left_in, R.animator.fragment_slide_left_out,
-//                    R.animator.fragment_slide_right_in, R.animator.fragment_slide_right_out)
-            .replace(R.id.mContainer, fragment, null)
-            .addToBackStack(null)
-            .commit()
+inline fun Fragment.startFragment(fragment: SupportFragment) {
+    activity?.let { activity ->
+        if (activity is SupportActivity) {
+            activity.start(fragment)
+        }
+    }
 }
 
 /**
@@ -79,4 +99,12 @@ inline fun View.selectableItemBackground() {
 
 inline fun View.selectableItemBackgroundBorderless() {
     this.backgroundResource = context.attr(android.R.attr.selectableItemBackgroundBorderless)
+}
+
+fun <T : ViewModel> newViewModelFactory(initializer: (() -> T)): ViewModelProvider.Factory {
+    return object : ViewModelProvider.Factory {
+        override fun <R : ViewModel?> create(modelClass: Class<R>): R {
+            return initializer.invoke() as R
+        }
+    }
 }

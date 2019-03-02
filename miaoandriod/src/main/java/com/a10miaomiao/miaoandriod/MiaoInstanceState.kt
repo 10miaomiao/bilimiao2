@@ -1,11 +1,8 @@
 package com.a10miaomiao.miaoandriod
 
 import android.os.Bundle
-import android.util.Log
+import com.a10miaomiao.miaoandriod.binding.key
 import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
-import kotlin.reflect.KProperty1
 
 class MiaoInstanceState {
 

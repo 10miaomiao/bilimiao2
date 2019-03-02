@@ -1,1 +1,1 @@
-include ':app', ':miaoandriod'
+include ':app', ':miaoandriod', ':player'

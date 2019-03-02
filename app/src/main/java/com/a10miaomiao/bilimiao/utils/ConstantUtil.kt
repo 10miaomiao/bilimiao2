@@ -16,6 +16,11 @@ object ConstantUtil {
     val OPEN_DRAWER = "OPEN_DRAWER" // 打开汉堡菜单
     val START_FRAGMENT = "START_FRAGMENT" // 跳转Fragment
 
+    val VIDEO = "video" // 普通视频
+    val BANGUMI = "bangumi" // 番剧
+
     val REGION = "REGION"
+    val INFO = "INFO"
     val TID = "TID"
+    val ID = "ID"
 }

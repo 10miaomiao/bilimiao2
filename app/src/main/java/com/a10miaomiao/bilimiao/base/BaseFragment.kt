@@ -1,29 +1,15 @@
 package com.a10miaomiao.bilimiao.base
 
-import android.app.Activity
-import android.app.ProgressDialog
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.annotation.LayoutRes
-import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.a10miaomiao.bilimiao.ui.MainActivity
-import com.a10miaomiao.bilimiao.utils.DebugMiao
-import com.a10miaomiao.miaoandriod.MiaoAnkoContext
-import com.a10miaomiao.miaoandriod.MiaoBindingImpl
-import com.a10miaomiao.miaoandriod.MiaoInstanceState
-import com.a10miaomiao.miaoandriod.createMiaoAnkoContext
+import com.a10miaomiao.miaoandriod.anko.MiaoAnkoContext
+import com.a10miaomiao.miaoandriod.anko.createMiaoAnkoContext
+import com.a10miaomiao.miaoandriod.binding.MiaoBindingImpl
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
-import org.jetbrains.anko.AnkoContext
 import org.jetbrains.anko.AnkoException
-import org.jetbrains.anko.UI
-import org.jetbrains.anko.internals.AnkoInternals
-import org.jetbrains.anko.support.v4.UI
-import org.jetbrains.anko.support.v4.startActivity
 import java.io.Serializable
 
 

@@ -1,18 +1,11 @@
 package com.a10miaomiao.bilimiao.ui.home
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.graphics.Color
-import android.support.annotation.ColorRes
-import android.support.v4.widget.DrawerLayout
-import android.view.Gravity
-import android.widget.ArrayAdapter
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.RxBus
 import com.a10miaomiao.miaoandriod.MiaoFragment
-import com.a10miaomiao.miaoandriod.MiaoUI
+import com.a10miaomiao.miaoandriod.anko.MiaoUI
 import org.jetbrains.anko.*
 
 

@@ -10,10 +10,12 @@
             android:title="排行榜"
             android:icon="@drawable/ic_sort_gray_24dp"/>
         <item
+            android:enabled="false"
             android:id="@+id/nav_dowmload"
             android:title="下载"
             android:icon="@drawable/ic_arrow_downward_gray_24dp"/>
         <item
+            android:enabled="false"
             android:id="@+id/nav_filter"
             android:title="屏蔽设置"
             android:icon="@drawable/ic_visibility_off_gray_24dp"

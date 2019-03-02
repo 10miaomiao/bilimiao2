@@ -5,7 +5,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.ui.widget.PickerView
 import com.a10miaomiao.miaoandriod.MiaoView
-import com.a10miaomiao.miaoandriod.bind
+import com.a10miaomiao.miaoandriod.binding.bind
 import kotlinx.android.synthetic.main.layout_date_picker.view.*
 import java.util.*
 

@@ -1,8 +1,5 @@
 package com.a10miaomiao.bilimiao.ui.time
 
-import android.content.Context
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
@@ -18,11 +15,11 @@ import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.ui.commponents.monthPickerView
 import com.a10miaomiao.bilimiao.utils.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.custom.style
-import java.util.*
 import android.os.Bundle
 import android.view.ViewManager
-import com.a10miaomiao.miaoandriod.*
+import com.a10miaomiao.bilimiao.ui.commponents.HeaderView
+import com.a10miaomiao.miaoandriod.binding.MiaoBindingImpl
+import com.a10miaomiao.miaoandriod.binding.bind
 import org.jetbrains.anko.support.v4.nestedScrollView
 
 
@@ -33,12 +30,14 @@ class TimeSettingFragment : BaseFragment() {
     var timeTo = DateModel(binding)
     var isLink by binding.miao(false)
     var gapCount by binding.miao(0)
+    var headerView: HeaderView? = null
 
     override fun initView() {
         isLink = SettingUtil.getBoolean(context!!, ConstantUtil.TIME_IS_LINK, false)
         spinnerSelected = SettingUtil.getInt(context!!, ConstantUtil.TIME_TYPE, 0)
         timeFrom.read(context!!, ConstantUtil.TIME_FROM)
         timeTo.read(context!!, ConstantUtil.TIME_TO)
+        headerView!!.fitsSystemWindows = true
     }
 
     private fun View.isShow(ishow: Boolean) {
@@ -48,6 +47,7 @@ class TimeSettingFragment : BaseFragment() {
     private fun Spinner.onItemChanged(onChanged: (position: Int) -> Unit) {
         this.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
+
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -91,6 +91,7 @@ class TimeSettingFragment : BaseFragment() {
         verticalLayout {
             headerView {
                 title("时间线设置")
+                let { headerView = it }
                 navigationIcon(R.drawable.ic_arrow_back_white_24dp)
                 navigationOnClick {
                     pop()

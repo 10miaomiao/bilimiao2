@@ -1,10 +1,12 @@
 package com.a10miaomiao.bilimiao.netword
 
 import com.a10miaomiao.bilimiao.entity.RegionTypeDetailsInfo
+import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import okhttp3.*
-import java.io.IOException
+import java.lang.reflect.Type
 
 class MiaoHttp(var url: String?) {
     val client = OkHttpClient()
@@ -35,17 +37,16 @@ class MiaoHttp(var url: String?) {
             it.onComplete()
         }
 
-        fun <T> getJson(url: String? = null
-                        , classOfT: Class<T>
-                        , init: (MiaoHttp.() -> Unit)? = null) = get(url, gsonConverterFactory(classOfT), init)
+        inline fun <reified T> getJson(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, gsonConverterFactory<T>(object : TypeToken<T>() {}.type), init)
+        inline fun getString(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, { it.body()!!.string() }, init)
 
         fun post() {
 
         }
 
-        fun <T> gsonConverterFactory(classOfT: Class<T>): (response: Response) -> T = { response ->
+        fun <T> gsonConverterFactory(type: Type): (response: Response) -> T = { response ->
             val json_str = response.body()!!.string()
-            Gson().fromJson(json_str, classOfT)
+            Gson().fromJson(json_str, type)
         }
     }
 }

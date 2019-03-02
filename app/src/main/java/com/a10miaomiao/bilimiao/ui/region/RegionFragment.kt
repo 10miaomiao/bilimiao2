@@ -4,30 +4,44 @@ import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.widget.NestedScrollView
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.base.BaseFragment
 import com.a10miaomiao.bilimiao.entity.Home
-import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.bilimiao.utils.attr
-import com.a10miaomiao.miaoandriod.MiaoAnkoContext
-import io.reactivex.Observable
+import com.a10miaomiao.bilimiao.utils.DebugMiao
+import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
 import kotlinx.android.synthetic.main.fragment_region.*
-import org.jetbrains.anko.design.coordinatorLayout
-import org.jetbrains.anko.design.tabLayout
-import org.jetbrains.anko.frameLayout
-import org.jetbrains.anko.linearLayout
-import org.jetbrains.anko.support.v4.nestedScrollView
-import org.jetbrains.anko.support.v4.viewPager
-import org.jetbrains.anko.verticalLayout
+import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 
-class RegionFragment : BaseFragment() {
-    override fun layout() = R.layout.fragment_region
+class RegionFragment : SwipeBackFragment() {
+
+    companion object {
+        fun newInstance(region: Home.Region): RegionFragment {
+            val fragment = RegionFragment()
+            val bundle = Bundle()
+            bundle.putParcelable(ConstantUtil.REGION, region)
+            fragment.arguments = bundle
+            return fragment
+        }
+    }
 
     val region by lazy { arguments!!.getParcelable(ConstantUtil.REGION) as Home.Region }
     val fragments = ArrayList<Fragment>(0)
 
-    override fun initView() {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return attachToSwipeBack(inflater.inflate(R.layout.fragment_region, container, false))
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        initView()
+        initToolbar()
+    }
+
+    private fun initView() {
         initToolbar()
         val titles = region.children.map {
             fragments.add(RegionDetailsFragment.newInstance(it.tid))
@@ -45,30 +59,15 @@ class RegionFragment : BaseFragment() {
     }
 
     private fun initToolbar() {
-        app_bar_layout.setPadding(0, getStatusBarHeight(), 0, 0)
+        app_bar_layout.setPadding(0, app_bar_layout.getStatusBarHeight(), 0, 0)
         toolbar.title = region.name
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
         toolbar.setNavigationOnClickListener { pop() }
     }
 
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = context!!.resources.getIdentifier("status_bar_height", "dimen",
-                "android")
-        if (resourceId > 0) {
-            result = context!!.resources.getDimensionPixelSize(resourceId)
-        }
-        return result
-    }
-
-    companion object {
-        fun newInstance(region: Home.Region): RegionFragment {
-            val fragment = RegionFragment()
-            val bundle = Bundle()
-            bundle.putParcelable(ConstantUtil.REGION, region)
-            fragment.arguments = bundle
-            return fragment
-        }
+    override fun onSupportVisible(){
+        super.onSupportVisible()
+        mViewPager.adapter?.notifyDataSetChanged()
     }
 
 }

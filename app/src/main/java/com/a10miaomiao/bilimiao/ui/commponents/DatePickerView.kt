@@ -1,22 +1,14 @@
 package com.a10miaomiao.bilimiao.ui.commponents
 
 import android.content.Context
-import android.os.Parcel
-import android.os.Parcelable
-import android.renderscript.ScriptGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
-import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.ui.widget.PickerView
-import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.TimeSettingUtil
-import com.a10miaomiao.miaoandriod.MiaoAnkoContext
-import com.a10miaomiao.miaoandriod.MiaoBinding
 
 import com.a10miaomiao.miaoandriod.MiaoView
-import com.a10miaomiao.miaoandriod.bind
+import com.a10miaomiao.miaoandriod.binding.bind
 import kotlinx.android.synthetic.main.layout_date_picker.view.*
-import java.time.chrono.MinguoDate
 import java.util.*
 
 class DatePickerView(context: Context) : MiaoView(context) {
@@ -30,7 +22,7 @@ class DatePickerView(context: Context) : MiaoView(context) {
         onCreateView()
         val now = Date()
         val yearSize = now.year - 108
-        mYearPicker.displayedValues = Array(yearSize, { (it + 2009).toString() })
+        mYearPicker.displayedValues = Array(yearSize) { (it + 2009).toString() }
         mYearPicker.minValue = 1
         mYearPicker.maxValue = yearSize
         mMonthPicker.minValue = 1
@@ -41,10 +33,10 @@ class DatePickerView(context: Context) : MiaoView(context) {
         binding.bind(date::year) { if (it > 2008) mYearPicker.setValue(it - 2008) }
         binding.bind(date::month, mMonthPicker::setValue)
         binding.bind(date::date, mDatePicker::setValue)
-        binding.bind({
+        binding.bind {
             mDatePicker.maxValue = TimeSettingUtil.getMonthDate(date.year, date.month)
             mDatePicker.value = date.date
-        })
+        }
         mYearPicker.setOnValueChangedListener(::onValueChange)
         mMonthPicker.setOnValueChangedListener(::onValueChange)
         mDatePicker.setOnValueChangedListener(::onValueChange)

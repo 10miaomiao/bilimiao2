@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mediacontroller_buttons_top_margin">2dp</dimen>
+    <dimen name="mediacontroller_bottom_layout_center_margin">12dp</dimen>
+    <dimen name="mediacontroller_bottom_layout_danmaku_padding">3dp</dimen>
+
+    <dimen name="default_tiny_text_size">12sp</dimen>
+    <dimen name="default_medium_text_size">16sp</dimen>
+    <dimen name="default_tiny_padding">5dp</dimen>
+    <dimen name="default_general_margin">10dp</dimen>
+    <dimen name="default_grow_margin">5dp</dimen>
+
+    <dimen name="default_small_padding">8dp</dimen>
+    <dimen name="default_tiny_margin">3dp</dimen>
+    <dimen name="default_long_margin">20dp</dimen>
+    <dimen name="head_image_bg_height">128dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+</resources>
