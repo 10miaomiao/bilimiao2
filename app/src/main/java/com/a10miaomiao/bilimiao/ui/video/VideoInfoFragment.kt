@@ -48,12 +48,20 @@ class VideoInfoFragment : SwipeBackFragment() {
         instance = this
         initToolbar()
         videoInfoDetailsFragment = VideoInfoDetailsFragment.newInstance(id)
-        videoCommentFragment = VideoCommentFragment()
+        videoCommentFragment = VideoCommentFragment.newInstance(id)
         initView()
         viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoInfoViewModel(id) })
                 .get(VideoInfoViewModel::class.java)
         viewModel.info.observe(this, Observer {
             it?.let(::updateView)
+        })
+        viewModel.state.observe(this, Observer {
+            if (it == null) {
+                stateTv.visibility = View.GONE
+            } else {
+                stateTv.text = it
+                stateTv.visibility = View.VISIBLE
+            }
         })
     }
 
@@ -75,7 +83,7 @@ class VideoInfoFragment : SwipeBackFragment() {
 
         val onPlay = View.OnClickListener {
             viewModel.info.value?.let { info ->
-                PlayerActivity.play(activity!!,  id, info.cid.toString(),  info.title)
+                PlayerActivity.play(activity!!, id, info.cid.toString(), info.title)
             }
 //            viewModel.playVideo()
         }
@@ -83,7 +91,7 @@ class VideoInfoFragment : SwipeBackFragment() {
         mTvPlay.setOnClickListener(onPlay)
     }
 
-    private fun initToolbar(){
+    private fun initToolbar() {
         avTv.text = "av$id"
         val statusBarHeight = getStatusBarHeight()
         toolbar.layoutParams.height += statusBarHeight
@@ -94,7 +102,7 @@ class VideoInfoFragment : SwipeBackFragment() {
         }
         toolbar.inflateMenu(R.menu.video_info)
         toolbar.setOnMenuItemClickListener {
-            when(it.itemId){
+            when (it.itemId) {
                 R.id.open -> {
                     IntentHandlerUtil.openWithPlayer(activity!!, IntentHandlerUtil.TYPE_VIDEO, id)
                 }

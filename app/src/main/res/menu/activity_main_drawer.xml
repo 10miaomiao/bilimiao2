@@ -24,7 +24,8 @@
 
     <group android:id="@+id/down"
         android:checkableBehavior="none">
-        <item android:id="@+id/nav_theme"
+        <item android:enabled="false"
+            android:id="@+id/nav_theme"
             android:title="切换主题"/>
         <item android:id="@+id/nav_setting"
             android:title="设置"/>

@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.ui.rank
 
 import android.os.Bundle
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
@@ -65,6 +66,10 @@ class RankCategoryFragment : SwipeBackFragment() {
         toolbar.title = rankInfo.rank_name
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
         toolbar.setNavigationOnClickListener { pop() }
+
+        app_bar_layout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            toolbar.alpha = 1 - Math.abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
+        })
     }
 
     override fun onSupportVisible(){

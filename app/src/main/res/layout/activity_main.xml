@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout android:id="@+id/rootContainer"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@color/colorBackground">
+    android:id="@+id/rootLayout">
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rootContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorBackground"
+        android:fitsSystemWindows="false">
+
+    </FrameLayout>
+
+    <!--<fragment-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:name="com.a10miaomiao.bilimiao.ui.home.MainFragment"/>-->
+
+    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--android:id="@+id/rightContainer"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:fitsSystemWindows="false">-->
+
+    <!--</FrameLayout>-->
 
 </FrameLayout>
-

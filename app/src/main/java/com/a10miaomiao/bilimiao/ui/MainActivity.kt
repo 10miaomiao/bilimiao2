@@ -27,8 +27,9 @@ import java.nio.file.Files.size
 import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.FragmentAnimator
 import android.view.WindowInsets
-
-
+import com.a10miaomiao.bilimiao.ui.search.SearchFragment
+import me.yokeyword.fragmentation.ISupportFragment
+import me.yokeyword.fragmentation.SupportHelper
 
 
 class MainActivity : SupportActivity() {
@@ -39,12 +40,22 @@ class MainActivity : SupportActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            windowInsets = rootContainer.rootWindowInsets
+            windowInsets = rootLayout.rootWindowInsets
         }
         if (findFragment(MainFragment::class.java) == null) {
             loadRootFragment(R.id.rootContainer, MainFragment())
         }
+//        loadRootFragment(R.id.rightContainer, SearchFragment())
     }
+
+//    override fun start(toFragment: ISupportFragment?) {
+//        loadMultipleRootFragment(R.id.rightContainer,1, toFragment)
+////        if (SupportHelper.getActiveFragment(supportFragmentManager) == null) {
+////            loadMultipleRootFragment()
+////        } else {
+////            super.start(toFragment)
+////        }
+//    }
 
     override fun onBackPressedSupport() {
         // 对于 4个类别的主Fragment内的回退back逻辑,已经在其onBackPressedSupport里各自处理了

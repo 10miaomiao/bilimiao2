@@ -1,9 +1,9 @@
 package com.a10miaomiao.bilimiao.entity
 
 data class Stat(
-    val aid: Double,
+    val aid: String,
     val coin: Int,
-    val danmaku: Int,
+    val danmaku: String,
     val dislike: Int,
     val favorite: Int,
     val his_rank: Int,
@@ -11,5 +11,5 @@ data class Stat(
     val now_rank: Int,
     val reply: Int,
     val share: Int,
-    val view: Int
+    val view: String
 )

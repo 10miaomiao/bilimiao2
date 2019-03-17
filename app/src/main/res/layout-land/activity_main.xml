@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:id="@+id/rootLayout">
+
+    <FrameLayout android:id="@+id/rootContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="false"
+        android:background="@color/colorBackground">
+
+    </FrameLayout>
+    <!--<fragment-->
+        <!--android:layout_width="320dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:name="com.a10miaomiao.bilimiao.ui.home.MainFragment"-->
+        <!--android:background="@color/colorBackground"/>-->
+
+    <!--<View-->
+        <!--android:layout_width="1dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:background="@color/colorPrimary"/>-->
+
+    <!--<FrameLayout android:id="@+id/rightContainer"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:fitsSystemWindows="false"-->
+        <!--android:background="@color/colorBackground">-->
+
+    <!--</FrameLayout>-->
+
+
+</LinearLayout>

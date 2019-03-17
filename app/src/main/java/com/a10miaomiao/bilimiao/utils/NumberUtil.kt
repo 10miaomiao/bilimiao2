@@ -35,7 +35,7 @@ object NumberUtil {
     }
 
     fun converCTime(ctime: Long): String {
-        val date = Date(ctime!! * 1000)
+        val date = Date(ctime * 1000)
         val now = Calendar.getInstance().timeInMillis
         val deltime = (now - date.time) / 1000
         return when {

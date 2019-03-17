@@ -1,7 +1,7 @@
 package com.a10miaomiao.bilimiao.entity
 
 data class Page(
-    val cid: Double,
+    val cid: Long,
     val dimension: Dimension,
     val dm: Dm,
     val dmlink: String,

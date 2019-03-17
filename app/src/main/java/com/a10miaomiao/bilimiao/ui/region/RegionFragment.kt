@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.ui.region
 
 import android.os.Bundle
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
@@ -15,6 +16,7 @@ import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
 import kotlinx.android.synthetic.main.fragment_region.*
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
+import org.jetbrains.anko.support.v4.dip
 
 class RegionFragment : SwipeBackFragment() {
 
@@ -56,6 +58,8 @@ class RegionFragment : SwipeBackFragment() {
         mTabLayout.setTabsFromPagerAdapter(mAdapter)
         mTabLayout.tabMode = TabLayout.MODE_SCROLLABLE
         mTabLayout.setupWithViewPager(mViewPager)
+
+
     }
 
     private fun initToolbar() {
@@ -63,9 +67,13 @@ class RegionFragment : SwipeBackFragment() {
         toolbar.title = region.name
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
         toolbar.setNavigationOnClickListener { pop() }
+
+        app_bar_layout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            toolbar.alpha = 1 - Math.abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
+        })
     }
 
-    override fun onSupportVisible(){
+    override fun onSupportVisible() {
         super.onSupportVisible()
         mViewPager.adapter?.notifyDataSetChanged()
     }

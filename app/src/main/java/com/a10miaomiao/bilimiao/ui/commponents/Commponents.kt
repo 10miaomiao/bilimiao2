@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewManager
 import android.widget.LinearLayout
+import com.a10miaomiao.bilimiao.ui.widget.MySpannableTextView
 import org.jetbrains.anko.AnkoViewDslMarker
 import org.jetbrains.anko._LinearLayout
 import org.jetbrains.anko.custom.ankoView
@@ -37,4 +38,9 @@ inline fun ViewManager.loadMoreView(theme: Int = 0, init: (@AnkoViewDslMarker Lo
 inline fun ViewManager.dropMenuView(theme: Int = 0): DropMenuView = dropMenuView(theme) {}
 inline fun ViewManager.dropMenuView(theme: Int = 0, init: (@AnkoViewDslMarker DropMenuView).() -> Unit): DropMenuView {
     return ankoView({ ctx: Context -> DropMenuView(ctx) }, theme, init)
+}
+
+inline fun ViewManager.mySpannableTextView(theme: Int = 0): MySpannableTextView = mySpannableTextView(theme) {}
+inline fun ViewManager.mySpannableTextView(theme: Int = 0, init: (@AnkoViewDslMarker MySpannableTextView).() -> Unit): MySpannableTextView {
+    return ankoView({ ctx: Context -> MySpannableTextView(ctx) }, theme, init)
 }

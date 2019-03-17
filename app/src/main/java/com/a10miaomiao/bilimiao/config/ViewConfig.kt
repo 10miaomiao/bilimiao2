@@ -12,6 +12,8 @@ class ViewConfig(val context: Context) {
 
     val blackAlpha45 = 0x71000000
     val black80 = 0xff222222.toInt()
+
+    val white80 = 0xAAFFFFFF.toInt()
 }
 
 inline val Context.config get() = ViewConfig(this)

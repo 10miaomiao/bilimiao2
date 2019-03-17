@@ -28,6 +28,9 @@ import me.yokeyword.fragmentation.SupportFragment
 import org.jetbrains.anko.support.v4.toast
 import android.os.Build
 import android.app.Activity
+import com.a10miaomiao.bilimiao.ui.setting.AboutFragment
+import com.a10miaomiao.bilimiao.ui.setting.SettingFragment
+import com.a10miaomiao.bilimiao.utils.startFragment
 
 
 class MainFragment : SupportFragment() {
@@ -79,10 +82,10 @@ class MainFragment : SupportFragment() {
                     toast("施工中")
                 }
                 R.id.nav_about -> {
-                    toast("施工中")
+                    startFragment(AboutFragment())
                 }
                 R.id.nav_setting -> {
-                    toast("施工中")
+                    startFragment(SettingFragment())
                 }
             }
             mDlytContainer.closeDrawers()

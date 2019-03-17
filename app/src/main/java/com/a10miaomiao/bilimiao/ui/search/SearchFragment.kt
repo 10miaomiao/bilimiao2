@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.os.Bundle
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
@@ -71,8 +72,10 @@ class SearchFragment : SwipeBackFragment() {
             }
         })
         viewModel.keyword.observe(this, Observer { keyword ->
-            if (et_search_keyword.text.toString() != keyword)
+            if (et_search_keyword.text.toString() != keyword) {
                 et_search_keyword.setText(keyword)
+                et_search_keyword.setSelection(keyword!!.length)
+            }
             tv_search_keyword.text = keyword
             viewModel.loadSuggestData(suggestAdapter) // 加载提示
         })
@@ -100,6 +103,9 @@ class SearchFragment : SwipeBackFragment() {
         toolbar.setNavigationOnClickListener { pop() }
         toolbar2.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
         toolbar2.setNavigationOnClickListener { pop() }
+        app_bar_layout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+            toolbar.alpha = 1 - Math.abs(verticalOffset).toFloat() / appBarLayout.totalScrollRange
+        })
     }
 
     private fun initSearchBox() {

@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.ui.video
 import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import com.a10miaomiao.bilimiao.entity.Page
 import com.a10miaomiao.bilimiao.entity.Relate
 import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.entity.VideoInfo
@@ -20,26 +21,35 @@ class VideoInfoViewModel(val id: String) : MiaoViewModel() {
     private val _info = MutableLiveData<VideoInfo>()
     val info: LiveData<VideoInfo> get() = _info
     val relates = MiaoList<Relate>()
+    val pages = MiaoList<Page>()
 
+    val state = MutableLiveData<String>()
 
     init {
         loadData()
     }
 
     fun loadData() {
+        state.value = null
         val url = BiliApiService.getVideoInfo(id)
         MiaoHttp.getJson<ResultInfo<VideoInfo>>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ data ->
-                    if (data.code == 0) {
-                        _info.value = data.data
+                .subscribe({ r ->
+                    if (r.code == 0) {
+                        val data = r.data
+                        _info.value = data
                         relates.clear()
-                        relates.addAll(data.data.relates)
+                        relates.addAll(data.relates)
+                        pages.clear()
+                        pages.addAll(data.pages)
+                    } else if (r.code == -403) {
+                        state.value = "绝对领域，拒绝访问＞﹏＜"
                     } else {
-
+                        state.value = r.message
                     }
                 }, { err ->
+                    state.value = "网络错误"
                     err.printStackTrace()
                 })
     }
