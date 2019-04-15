@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.ui.setting
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.service.quicksettings.Tile
 import android.view.*
@@ -16,6 +18,13 @@ class AboutFragment : SwipeBackFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return attachToSwipeBack(createUI().view)
+    }
+
+
+    private fun openUri(uriString: String){
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(uriString)
+        startActivity(intent)
     }
 
     private fun createUI() = UI {
@@ -56,26 +65,26 @@ class AboutFragment : SwipeBackFragment() {
                     view().lparams(height = dip(10))
                     createLine()
                     createItem("作者", "by 10miaomiao.cn") { view ->
-
+                        openUri("https://10miaomiao.cn/")
                     }
                     createLine()
                     createItem("酷安", "_10喵喵"){ view ->
-
+                        openUri("http://www.coolapk.com/u/602470")
                     }
                     createLine()
                     createItem("b站", "10喵喵"){ view ->
-
+                        openUri("https://space.bilibili.com/6789810")
                     }
                     createLine()
                     createItem("Github", "10miaomiao"){ view ->
-
+                        openUri("https://github.com/10miaomiao")
                     }
                     createLine()
 
                     view().lparams(height = dip(10))
                     createLine()
                     createItem("项目地址", "github.com/10miaomiao/bilimiao2"){ view ->
-
+                        openUri("https://github.com/10miaomiao/bilimiao2")
                     }
                     createLine()
                     createItem("使用声明", getString(R.string.statement))

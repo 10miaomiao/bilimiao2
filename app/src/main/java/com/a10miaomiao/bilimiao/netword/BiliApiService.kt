@@ -20,7 +20,10 @@ object BiliApiService {
      * 获取视频信息
      */
     fun getVideoInfo(aid: String): String {
-        val url = "https://app.bilibili.com/x/view?_device=wp&_ulv=10000&access_key=&aid=$aid&appkey=${ApiHelper.appKey_Android}&build=411005&plat=4&platform=android&ts=${ApiHelper.getTimeSpen()}"
+//        "http://app.bilibili.com/x/view?access_key={0}&aid={1}&appkey=422fd9d7289a1dd9&build=510000&platform=android&ts={2}"
+//        val url = "https://app.bilibili.com/x/view?_device=wp&_ulv=10000&access_key=&aid=$aid&appkey=${ApiHelper.appKey_Android}&build=411005&plat=4&platform=android&ts=${ApiHelper.getTimeSpen()}"
+        var url = "https://app.bilibili.com//x/v2/view?aid=$aid&appkey=1d8b6e7d45233436&autoplay=0&build=5340000&fnval=16&fnver=0&from=52&mobi_app=android&plat=0&platform=android&qn=32&ts=${ApiHelper.getTimeSpen()}"
+        url += "&sign=" + ApiHelper.getNewSign(url)
         return url
     }
 
@@ -39,7 +42,7 @@ object BiliApiService {
     /**
      * 单集番剧
      */
-    fun getSeasonEpisodeInfo(id: String): String{
+    fun getSeasonEpisodeInfo(id: String): String {
         var url = "https://api.bilibili.com/pgc/view/app/season?access_key=&appkey=1d8b6e7d45233436&build=5310300&ep_id=$id&mobi_app=android&platform=android&track_path=22&ts=${ApiHelper.getTimeSpen()}"
         url += "&sign=" + ApiHelper.getNewSign(url)
         return url
@@ -63,7 +66,11 @@ object BiliApiService {
     /**
      * 获取专栏信息
      */
-    fun getCvInfo(aid: String) = "https://www.bilibili.com/read/mobile/$aid"
+    fun getCvInfo(aid: String): String {
+        var url = "https://api.bilibili.com/x/article/viewinfo?appkey=1d8b6e7d45233436&build=5340000&id=$aid&mobi_app=android&platform=android&ts=${ApiHelper.getTimeSpen()}"
+        url += "&sign=" + ApiHelper.getNewSign(url)
+        return url
+    }
 
     /**
      * 获取弹幕列表
@@ -71,12 +78,29 @@ object BiliApiService {
     fun getDanmakuList(cid: String) = "https://comment.bilibili.com/$cid.xml"
 
 
+    /**
+     * 视频评论
+     */
     fun getCommentList(aid: String, minid: Int, pageSize: Int): String {
-        // https@//api.bilibili.com/x/v2/reply/cursor?appkey=1d8b6e7d45233436&build=5340000&max_id=218&mobi_app=android&oid=36286263&plat=2&platform=android&size=20&sort=0&ts=1543072948&type=1&sign=53df67ea7816a2bf644b49075bb1406e
+        // https://api.bilibili.com/x/v2/reply/cursor?appkey=1d8b6e7d45233436&build=5340000&max_id=218&mobi_app=android&oid=36286263&plat=2&platform=android&size=20&sort=0&ts=1543072948&type=1&sign=53df67ea7816a2bf644b49075bb1406e
         // https://api.bilibili.com/x/v2/reply/cursor?appkey=1d8b6e7d45233436&build=5340000&mobi_app=android&oid=36417189&plat=2&platform=android&size=20&sort=1543073266199&ts=1543072187&type=1&sign=49da459239fa0c249b95f322525b8636
         var url = "https://api.bilibili.com/x/v2/reply/cursor?appkey=1d8b6e7d45233436&build=5340000&mobi_app=android&oid=$aid&plat=2&platform=android&size=$pageSize&sort=0&ts=${ApiHelper.getTimeSpen()}&type=1"
         if (minid > 1)
             url += "&max_id=" + (minid - 1)
+        url += "&sign=" + ApiHelper.getNewSign(url)
+        return url
+    }
+
+    /**
+     * 评论回复列表
+     */
+    fun getCommentReplyList(oid: String, rpid: String, min_id: Int, pageSize: Int): String {
+        // GET /x/v2/reply/reply/cursor?appkey=1d8b6e7d45233436&build=5390000&channel=bilibili197&mobi_app=android&oid=49004387&plat=2&platform=android&root=1520702961&size=20&sort=0&ts=1555223623&type=1&sign=44e7d9738c1c171703f2c972c99d9679 HTTP/1.1
+        // GET /x/v2/reply/reply/cursor?appkey=1d8b6e7d45233436&build=5390000&channel=bilibili197&min_id=22&mobi_app=android&oid=49004387&plat=2&platform=android&root=1520702961&size=20&sort=0&ts=1555223644&type=1&sign=f9cc0e37cae8498c02245cd6f76b949f HTTP/1.1
+        // GET /x/v2/reply/reply/cursor?appkey=1d8b6e7d45233436&build=5390000&channel=bilibili197&min_id=42&mobi_app=android&oid=49004387&plat=2&platform=android&root=1520702961&size=20&sort=0&ts=1555223644&type=1&sign=1e1d083c4e9da2aac49cf173d8060a6c HTTP/1.1
+        var url = "https://api.bilibili.com/x/v2/reply/reply/cursor?appkey=1d8b6e7d45233436&build=5390000&channel=bilibili197&mobi_app=android&oid=$oid&plat=2&platform=android&root=$rpid&size=$pageSize&sort=0&ts=${ApiHelper.getTimeSpen()}&type=1"
+        if (min_id > 1)
+            url += "&min_id=" + (min_id + 1)
         url += "&sign=" + ApiHelper.getNewSign(url)
         return url
     }
@@ -174,7 +198,9 @@ object BiliApiService {
             "https://bangumi.bilibili.com/jsonp/season_rank_list/$region/$dayNum.ver?callback=bangumiRankCallback&_=${ApiHelper.getTimeSpen()}"
 
     //播放地址
-    fun getPlayUrl(){
+    fun getPlayUrl() {
 //        val url =  "https://app.bilibili.com/x/playurl?device=android&expire=0&mobi_app=android&mid=0&appkey=iVGUTjsxvpLeuDCf&fnval=16&qn=32&npcybs=0&cid=70240545&otype=json&platform=android&ts=1549444302234&build=5340000&fnver=0&buvid=KREhESMULBkrGiNGOkY6QDgJblpoC3sRdQinfoc&aid=40000061&sign=befde9bca9ea3f55c33eaba77777359c"
     }
+
+
 }

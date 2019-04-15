@@ -30,6 +30,7 @@ import com.a10miaomiao.bilimiao.ui.widget.flow.FlowAdapter
 import com.a10miaomiao.bilimiao.ui.widget.flow.FlowLayout
 import com.a10miaomiao.bilimiao.utils.*
 import org.jetbrains.anko.*
+import org.jetbrains.anko.support.v4.alert
 
 
 class SearchFragment : SwipeBackFragment() {
@@ -58,7 +59,9 @@ class SearchFragment : SwipeBackFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, newViewModelFactory {
+            SearchViewModel(context!!)
+        }).get(SearchViewModel::class.java)
         initView()
         initToolbar()
         initSearchBox()
@@ -151,17 +154,44 @@ class SearchFragment : SwipeBackFragment() {
                 et_search_keyword.setText("")
             }
         }
-        val onItemClickListener = { position: Int ->
+        search_box_layout.setOnClickListener {
+
+        }
+        deleteAllTv.setOnClickListener { deleteHistoryAll() }
+        suggestAdapter.onItemClickListener = { position: Int ->
             val text = viewModel.suggestList[position]
             viewModel.startSearch(text)
         }
-        suggestAdapter.onItemClickListener = onItemClickListener
-        historyAdapter.onItemClickListener = onItemClickListener
-        historyAdapter.onItemLongClickListener = { position ->
-            // 长按删除
+        historyAdapter.onItemClickListener = { position: Int ->
+            val text = viewModel.historyList[position]
+            viewModel.startSearch(text)
         }
+        historyAdapter.onItemLongClickListener = { position -> deleteHistoryItem(position) }
         suggestFlowLayout.setAdapter(suggestAdapter)
         historyFlowLayout.setAdapter(historyAdapter)
+        viewModel.historyFlowAdapter = historyAdapter
+    }
+
+    private fun deleteHistoryItem(position: Int) {
+        val text = viewModel.historyList[position]
+        alert {
+            title = "确定删除“$text”？"
+            yesButton {
+                viewModel.deleteSearchHistory(text)
+            }
+            noButton {  }
+            show()
+        }
+    }
+    private fun deleteHistoryAll() {
+        alert {
+            title = "确定清空？"
+            yesButton {
+                viewModel.deleteAllSearchHistory()
+            }
+            noButton {  }
+            show()
+        }
     }
 
     override fun onPause() {
@@ -174,6 +204,13 @@ class SearchFragment : SwipeBackFragment() {
         mViewPager.adapter?.notifyDataSetChanged()
     }
 
+    override fun onBackPressedSupport(): Boolean {
+        if (viewModel.canGoBack) {
+            viewModel.showSearchBox.value = false
+            return true
+        }
+        return super.onBackPressedSupport()
+    }
 
     private inner class MyAdapter(dataList: List<String>) : FlowAdapter<String>(dataList) {
         var onItemClickListener: ((position: Int) -> Unit)? = null

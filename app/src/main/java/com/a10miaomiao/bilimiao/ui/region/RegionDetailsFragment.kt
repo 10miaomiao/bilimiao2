@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.ui.region
 
 import android.arch.lifecycle.ViewModelProviders
 import android.graphics.Color
+import android.graphics.Path
 import android.os.Bundle
 import android.support.annotation.IdRes
 import android.support.v4.app.Fragment
@@ -14,9 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.entity.RegionTypeDetailsInfo
-import com.a10miaomiao.bilimiao.ui.commponents.dropMenuView
-import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
+import com.a10miaomiao.bilimiao.ui.commponents.*
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
@@ -112,13 +111,22 @@ class RegionDetailsFragment : Fragment() {
                     selectableItemBackground()
                     padding = dip(5)
 
-                    rcLayout {
-                        roundCorner = dip(5)
-                        imageView {
-                            // scaleType = ImageView.ScaleType.CENTER
-                            binding.bind { item -> network(item.pic) }
-                        }.lparams(matchParent, matchParent)
-                    }.lparams(width = dip(140), height = dip(85)) {
+//                    rcLayout {
+//                        roundCorner = dip(5)
+//                        imageView {
+//                            // scaleType = ImageView.ScaleType.CENTER
+//                            binding.bind { item -> network(item.pic) }
+//                        }.lparams(matchParent, matchParent)
+//                    }.lparams(width = dip(140), height = dip(85)) {
+//
+//                    }
+
+                    rcImageView {
+                        radius = dip(5)
+                        binding.bind { item -> network(item.pic) }
+                    }.lparams {
+                        width = dip(140)
+                        height = dip(85)
                         rightMargin = dip(5)
                     }
 

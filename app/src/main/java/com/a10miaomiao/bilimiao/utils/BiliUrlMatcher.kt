@@ -20,35 +20,35 @@ object BiliUrlMatcher {
     fun findIDByUrl(text: String): Array<String> {
         DebugMiao.log(text)
         var a = ""
-        a = matchingID(text, ".*http://www.bilibili.com/video/av(\\d+)")
+        a = matchingID(text, ".*://www.bilibili.com/video/av(\\d+)")
         if (a != "") {
             return arrayOf("AV", a)
         }
-        a = matchingID(text,".*https://m.bilibili.com/bangumi/play/ep(\\d+).*")
+        a = matchingID(text,".*://m.bilibili.com/bangumi/play/ep(\\d+).*")
         if (a != "") {
             return arrayOf("EP", a)
         }
-        a = matchingID(text, ".*http://bangumi.bilibili.com/anime/(\\d+)/")
+        a = matchingID(text, ".*://bangumi.bilibili.com/anime/(\\d+)/")
         if (a != "") {
             return arrayOf("SS", a)
         }
-        a = matchingID(text, ".*http://live.bilibili.com/live/(\\d+).html")
+        a = matchingID(text, ".*://live.bilibili.com/live/(\\d+).html")
         if (a != "") {
             return arrayOf("ROOM", a)
         }
-        a = matchingID(text, ".*http://m.bilibili.com/audio/au(\\d+)")
+        a = matchingID(text, ".*://m.bilibili.com/audio/au(\\d+)")
+        if (a != "") {
+            return arrayOf("AU", a)
+        }
+        a = matchingID(text, ".*://www.bilibili.com/read/cv(\\d+)")
         if (a != "") {
             return arrayOf("CV", a)
         }
-        a = matchingID(text, ".*http://www.bilibili.com/read/cv(\\d+)")
+        a = matchingID(text, ".*://m.bilibili.com/bangumi/play/ss(\\d+)")
         if (a != "") {
             return arrayOf("SS", a)
         }
-        a = matchingID(text, ".*http://m.bilibili.com/bangumi/play/ss(\\d+)")
-        if (a != "") {
-            return arrayOf("SS", a)
-        }
-        a = matchingID(text, ".*http://live.bilibili.com/(\\d+)")
+        a = matchingID(text, ".*://live.bilibili.com/(\\d+)")
         if (a != "") {
             return arrayOf("ROOM", a)
         }

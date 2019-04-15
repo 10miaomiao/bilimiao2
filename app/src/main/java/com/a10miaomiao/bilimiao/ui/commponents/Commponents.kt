@@ -30,6 +30,12 @@ inline fun ViewManager.rcLayout(theme: Int = 0, init: (@AnkoViewDslMarker RCLayo
     return ankoView({ ctx: Context -> RCLayout(ctx) }, theme, init)
 }
 
+inline fun ViewManager.rcImageView(theme: Int = 0): RCImageView = rcImageView(theme) {}
+inline fun ViewManager.rcImageView(theme: Int = 0, init: (@AnkoViewDslMarker RCImageView).() -> Unit): RCImageView {
+    return ankoView({ ctx: Context -> RCImageView(ctx) }, theme, init)
+}
+
+
 inline fun ViewManager.loadMoreView(theme: Int = 0): LoadMoreView = loadMoreView(theme) {}
 inline fun ViewManager.loadMoreView(theme: Int = 0, init: (@AnkoViewDslMarker LoadMoreView).() -> Unit): LoadMoreView {
     return ankoView({ ctx: Context -> LoadMoreView(ctx) }, theme, init)
@@ -44,3 +50,9 @@ inline fun ViewManager.mySpannableTextView(theme: Int = 0): MySpannableTextView 
 inline fun ViewManager.mySpannableTextView(theme: Int = 0, init: (@AnkoViewDslMarker MySpannableTextView).() -> Unit): MySpannableTextView {
     return ankoView({ ctx: Context -> MySpannableTextView(ctx) }, theme, init)
 }
+
+inline fun ViewManager.commentItemView(theme: Int = 0): CommentItemView = commentItemView(theme) {}
+inline fun ViewManager.commentItemView(theme: Int = 0, init: (@AnkoViewDslMarker CommentItemView).() -> Unit): CommentItemView {
+    return ankoView({ ctx: Context -> CommentItemView(ctx) }, theme, init)
+}
+

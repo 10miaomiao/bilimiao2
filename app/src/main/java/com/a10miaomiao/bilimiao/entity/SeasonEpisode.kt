@@ -25,6 +25,7 @@ data class SeasonEpisode(
         val status: Int,
         val title: String,
         val total: Int,
+        val total_ep: Int,
         val type: Int,
         val user_status: UserStatus
 )

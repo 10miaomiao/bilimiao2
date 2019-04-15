@@ -14,7 +14,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.ui.bangumi.BangumiFragment
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
@@ -56,11 +58,9 @@ class BangumiResultFragment : Fragment() {
                 selectableItemBackground()
                 padding = dip(5)
 
-                rcLayout {
-                    roundCorner = dip(5)
-                    imageView {
-                        binding.bind { item -> network(item.cover) }
-                    }.lparams(matchParent, matchParent)
+                rcImageView {
+                    radius = dip(5)
+                    binding.bind { item -> network(item.cover) }
                 }.lparams(width = dip(100), height = dip(133)) {
                     rightMargin = dip(5)
                 }
@@ -99,8 +99,7 @@ class BangumiResultFragment : Fragment() {
             }
         }
         onItemClick { item, position ->
-            startFragment(VideoInfoFragment.newInstance(item.param))
-//                    IntentHandlerUtil.openWithPlayer(activity!!, IntentHandlerUtil.TYPE_VIDEO, item.id)
+            startFragment(BangumiFragment.newInstance(item.param))
         }
         addFootView {
             loadMoreView {

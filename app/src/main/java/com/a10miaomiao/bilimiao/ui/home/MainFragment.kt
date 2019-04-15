@@ -59,7 +59,8 @@ class MainFragment : SupportFragment() {
                 .load(R.drawable.top_bg1)
                 .centerCrop()
                 .dontAnimate()
-                .into(mNavHeaderPic) //直接在xml设置滑动会卡顿
+                .into(mNavHeaderPic) // 直接在xml设置，滑动会卡顿
+
 //        setSwipeBackEnable(false)
         mNavigation.setCheckedItem(R.id.nav_home)
         // 添加侧边菜单的点击事件

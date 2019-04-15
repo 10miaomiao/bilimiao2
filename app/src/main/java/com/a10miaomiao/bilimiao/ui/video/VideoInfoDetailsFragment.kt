@@ -11,7 +11,10 @@ import android.view.*
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.ui.MainActivity
+import com.a10miaomiao.bilimiao.ui.bangumi.EpisodesFragment
 import com.a10miaomiao.bilimiao.ui.commponents.mySpannableTextView
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.player.PlayerActivity
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
@@ -130,20 +133,53 @@ class VideoInfoDetailsFragment : Fragment() {
                 }
 
                 // 分P列表
-                recyclerView {
-                    val lm = LinearLayoutManager(context)
-                    lm.orientation = LinearLayoutManager.HORIZONTAL
-                    layoutManager = lm
-                    val adapte = createPagesAdapter()
-                    viewModel.pages.updateView = {
-                        visibility = if (viewModel.pages.size < 2) View.GONE else View.VISIBLE
-                        adapte.notifyDataSetChanged()
+                linearLayout {
+                    frameLayout {
+                        recyclerView {
+                            val lm = LinearLayoutManager(context)
+                            lm.orientation = LinearLayoutManager.HORIZONTAL
+                            layoutManager = lm
+                            val adapte = createPagesAdapter()
+                            val updateView = {
+                                this@linearLayout.visibility = if (viewModel.pages.size < 2) View.GONE else View.VISIBLE
+                                adapte.notifyDataSetChanged()
+                            }
+                            viewModel.pages.updateView = updateView
+                            updateView.invoke()
+                        }.lparams {
+                            width = matchParent
+                            height = matchParent
+                        }
+                        view {
+                            backgroundResource = R.drawable.shape_gradient
+                        }.lparams {
+                            gravity = Gravity.RIGHT
+                            width = dip(10)
+                            height = matchParent
+                        }
+                    }.lparams {
+                        width = matchParent
+                        height = matchParent
+                        weight = 1f
+                    }
+
+                    imageView {
+                        setImageResource(R.drawable.ic_navigate_next_black_24dp)
+                        selectableItemBackgroundBorderless()
+                        setOnClickListener {
+                            val fragment = PagesFragment.newInstance(viewModel.id, viewModel.pages)
+                            MainActivity.of(context)
+                                    .showBottomSheet(fragment)
+                        }
+                    }.lparams(dip(24), dip(24)) {
+                        gravity = Gravity.CENTER
                     }
                 }.lparams {
                     width = matchParent
                     height = dip(48)
                     margin = dip(10)
                 }
+
 
                 // up主信息
                 linearLayout {
@@ -156,15 +192,15 @@ class VideoInfoDetailsFragment : Fragment() {
                         startFragment(UpperInfoFragment.newInstance(viewModel.info.value!!.owner))
                     }
 
-                    rcLayout {
-                        mRoundAsCircle = true
-                        imageView {
-                            ::network.bind { it.owner.face }
-                        }
+                    rcImageView {
+                        isCircle = true
+                        ::network.bind { it.owner.face }
                     }.lparams {
                         height = dip(40)
                         width = dip(40)
                     }
+
+
                     verticalLayout {
                         lparams {
                             leftMargin = dip(8)
@@ -199,14 +235,13 @@ class VideoInfoDetailsFragment : Fragment() {
                     lparams(matchParent, wrapContent)
                     selectableItemBackground()
                     padding = dip(5)
-                    rcLayout {
-                        roundCorner = dip(5)
-                        imageView {
-                            // scaleType = ImageView.ScaleType.CENTER
 
-                            binding.bind { item -> if (item.pic != null) network(item.pic) }
-                        }.lparams(matchParent, matchParent)
-                    }.lparams(width = dip(140), height = dip(85)) {
+                    rcImageView {
+                        radius = dip(5)
+                        binding.bind { item -> network(item.pic) }
+                    }.lparams {
+                        width = dip(140)
+                        height = dip(85)
                         rightMargin = dip(5)
                     }
 
@@ -297,15 +332,20 @@ class VideoInfoDetailsFragment : Fragment() {
                     verticalPadding = dip(5)
                     textColorResource = R.color.text_black
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                    maxWidth = dip(120)
+                    minWidth = dip(60)
+                    maxLines = 1
+                    gravity = Gravity.LEFT
+                    ellipsize = TextUtils.TruncateAt.END
+                    textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
                     b.bind { item -> text = item.part }
                 }.lparams {
                     gravity = Gravity.CENTER
-                    minimumWidth = dip(60)
                 }
             }
         }
         onItemClick { item, position ->
-            PlayerActivity.play(context, viewModel.id, item.cid.toString(), item.part)
+            PlayerActivity.playVideo(context, viewModel.id, item.cid.toString(), item.part)
         }
     }
 }

@@ -83,7 +83,7 @@ class VideoInfoFragment : SwipeBackFragment() {
 
         val onPlay = View.OnClickListener {
             viewModel.info.value?.let { info ->
-                PlayerActivity.play(activity!!, id, info.cid.toString(), info.title)
+                PlayerActivity.playVideo(activity!!, id, info.cid, info.title)
             }
 //            viewModel.playVideo()
         }
@@ -124,7 +124,7 @@ class VideoInfoFragment : SwipeBackFragment() {
         })
     }
 
-    private fun updateView(info: VideoInfo) {
+    private fun updateView(info: VideoInfoViewModel.PageInfo) {
         imageview.network(info.pic)
     }
 

@@ -14,8 +14,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.entity.BiliMiaoRank
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.rank.RankCategoryDetailsFragment
 import com.a10miaomiao.bilimiao.ui.rank.RankCategoryFragment
@@ -25,10 +27,12 @@ import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.a10miaomiao.miaoandriod.binding.bind
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import jp.wasabeef.glide.transformations.BlurTransformation
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
+import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.nestedScrollView
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
 
@@ -40,6 +44,18 @@ class RankFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProviders.of(this).get(RankViewModel::class.java)
         return render().view
+    }
+
+    private fun handleItemClick(item: BiliMiaoRank, position: Int) {
+        if (item.type == ConstantUtil.BANGUMI || item.type == ConstantUtil.VIDEO) {
+            startFragment(RankCategoryFragment.newInstance(item))
+        } else {
+            alert {
+                title = "请更新版本后查看"
+                okButton { }
+                show()
+            }
+        }
     }
 
     private fun render() = UI {
@@ -58,7 +74,7 @@ class RankFragment : Fragment() {
                 viewModel.bind(viewModel::loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
-//                    backgroundColor = Color.WHITE
+                    //                    backgroundColor = Color.WHITE
                     createAdapter()
                 }
             }
@@ -68,50 +84,48 @@ class RankFragment : Fragment() {
     private fun RecyclerView.createAdapter() = miao(viewModel.list) {
         layoutManager(LinearLayoutManager(context))
         itemView { binding ->
-            rcLayout {
+            frameLayout {
                 lparams(matchParent, dip(120)) {
                     verticalMargin = dip(2.5f)
                 }
-                roundCorner = dip(5)
                 padding = dip(5)
 
-                frameLayout {
+                rcImageView {
+                    radius = dip(5)
+                    binding.bind { item ->
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        Glide.with(context)
+                                .load(item.rank_pic)
+                                .centerCrop()
+                                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                .bitmapTransform(BlurTransformation(context, 14, 6)) // 高斯模糊
+                                .into(this)
+                    }
+                }.lparams(matchParent, matchParent)
+
+                verticalLayout {
                     lparams(matchParent, matchParent)
                     selectableItemBackground()
-                    imageView {
-                        // scaleType = ImageView.ScaleType.CENTER
-                        binding.bind { item ->
-                            scaleType = ImageView.ScaleType.CENTER_CROP
-                            Glide.with(context)
-                                    .load(item.rank_pic)
-                                    .bitmapTransform(BlurTransformation(context, 14, 6)) // 高斯模糊
-                                    .into(this)
-                        }
-                    }.lparams(matchParent, matchParent)
-                    verticalLayout {
-                        lparams(matchParent, matchParent)
-                        gravity = Gravity.CENTER
+                    gravity = Gravity.CENTER
 
-                        textView {
-                            paint.isFakeBoldText = true
-                            gravity = Gravity.CENTER
-                            textSize = 16f
-                            textColor = Color.WHITE
-                            binding.bind { item -> text = item.rank_name }
-                        }
-                        textView {
-                            textColor = Color.WHITE
-                            gravity = Gravity.CENTER
-                            textSize = 14f
-                            binding.bind { item -> text = item.rank_info }
-                        }
+                    textView {
+                        paint.isFakeBoldText = true
+                        gravity = Gravity.CENTER
+                        textSize = 16f
+                        textColor = Color.WHITE
+                        binding.bind { item -> text = item.rank_name }
+                    }
+                    textView {
+                        textColor = Color.WHITE
+                        gravity = Gravity.CENTER
+                        textSize = 14f
+                        binding.bind { item -> text = item.rank_info }
                     }
                 }
-
             }
+
+
         }
-        onItemClick { item, position ->
-            startFragment(RankCategoryFragment.newInstance(item))
-        }
+        onItemClick(::handleItemClick)
     }
 }

@@ -17,7 +17,9 @@ import com.a10miaomiao.bilimiao.ui.commponents.MonthPickerView
 import com.a10miaomiao.miaoandriod.MiaoFragment
 import com.a10miaomiao.miaoandriod.adapter.MiaoRecyclerViewAdapter
 import com.a10miaomiao.miaoandriod.adapter.miao
+import com.bumptech.glide.DrawableTypeRequest
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
@@ -29,13 +31,17 @@ import org.jetbrains.anko.backgroundResource
 import org.jetbrains.anko.custom.ankoView
 import org.jetbrains.anko.dip
 
-fun ImageView.network(value: String) {
+fun RequestManager.loadPic(value: String): DrawableTypeRequest<String> {
     val url = if ("://" in value)
         value.replace("http://","https://")
     else
         "https:$value"
+    return load(url)
+}
+
+fun ImageView.network(url: String) {
     Glide.with(context)
-            .load(url)
+            .loadPic(url)
             .centerCrop()
 //            .transform(GlideRoundTransform(context))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -44,6 +50,8 @@ fun ImageView.network(value: String) {
             .into(this)
 
 }
+
+
 
 fun Fragment.getStatusBarHeight() = context!!.getStatusBarHeight()
 fun View.getStatusBarHeight() = context.getStatusBarHeight()

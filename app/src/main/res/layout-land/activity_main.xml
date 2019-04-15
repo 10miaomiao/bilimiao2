@@ -1,36 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     android:id="@+id/rootLayout">
 
-    <FrameLayout android:id="@+id/rootContainer"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rootContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false"
-        android:background="@color/colorBackground">
+        android:background="@color/colorBackground"
+        android:fitsSystemWindows="false">
 
     </FrameLayout>
+
     <!--<fragment-->
-        <!--android:layout_width="320dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:name="com.a10miaomiao.bilimiao.ui.home.MainFragment"-->
-        <!--android:background="@color/colorBackground"/>-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:name="com.a10miaomiao.bilimiao.ui.home.MainFragment"/>-->
 
-    <!--<View-->
-        <!--android:layout_width="1dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:background="@color/colorPrimary"/>-->
-
-    <!--<FrameLayout android:id="@+id/rightContainer"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:fitsSystemWindows="false"-->
-        <!--android:background="@color/colorBackground">-->
+    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--android:id="@+id/rightContainer"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:fitsSystemWindows="false">-->
 
     <!--</FrameLayout>-->
 
+    <View
+        android:id="@+id/shadeView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000"
+        android:alpha="0.6"
+        android:visibility="gone">
 
-</LinearLayout>
+    </View>
+
+    <RelativeLayout
+        android:id="@+id/bottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:behavior_peekHeight="300dp"
+        app:behavior_hideable="true"
+        app:elevation="4dp"
+        app:layout_behavior="@string/bottom_sheet_behavior">
+
+        <FrameLayout
+            android:id="@+id/bottomSheettContainer"
+            android:layout_width="480dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:background="@color/colorBackground">
+
+        </FrameLayout>
+
+
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -15,30 +15,21 @@ open class LiveAnkoContext(
         override val owner: LifecycleOwner,
         private val setContentView: Boolean
 ) : AnkoContextImpl<LifecycleOwner>(ctx, owner, setContentView) {
-    fun <T> observe(liveData: LiveData<T>, observer: (value: T?) -> Unit) {
-        liveData.observe(owner, Observer { observer.invoke(it) })
+
+    fun <T> LiveData<T>.observe(observer: (value: T?) -> Unit) {
+        this.observe(owner, Observer { observer.invoke(it) })
     }
 
-    fun <T> observeNotNull(liveData: LiveData<T>, observer: (value: T) -> Unit) {
-        liveData.observe(owner, Observer { it?.let(observer) })
-    }
-
-    fun <T, R> T.observe(liveData: LiveData<R>, observer: T.(value: R?) -> Unit): T {
-        liveData.observe(owner, Observer { this.observer(it) })
-        return this
-    }
-
-    fun <T, R> T.observeNotNull(liveData: LiveData<R>, observer: T.(value: R) -> Unit): T {
-        liveData.observe(owner, Observer { if (it != null) this.observer(it) })
-        return this
+    fun <T> LiveData<T>.observeNotNull(observer: (value: T) -> Unit) {
+        this.observe(owner, Observer { it?.let(observer) })
     }
 
     fun ((CharSequence?) -> Unit).observeText(liveData: LiveData<String>) {
-        observe(liveData) { this.invoke(it) }
+        liveData.observe { this.invoke(it) }
     }
 
     fun <T> ((T?) -> Unit).observe(liveData: LiveData<T>) {
-        observe(liveData, this)
+        liveData.observe(this)
     }
 }
 

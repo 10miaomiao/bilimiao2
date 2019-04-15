@@ -16,7 +16,10 @@ import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import cn.a10miaomiao.player.callback.MediaController
+import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.netword.BiliApiService
+import com.a10miaomiao.bilimiao.netword.PlayurlHelper
+import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -37,17 +40,37 @@ import java.util.regex.Pattern
 class PlayerActivity : AppCompatActivity() {
 
     companion object {
-        fun play(ctx: Context, aid: String, cid: String, title: String) {
+        /**
+         * 普通视频
+         */
+        fun playVideo(ctx: Context, aid: String, cid: String, title: String) {
             val intent = Intent(ctx, PlayerActivity::class.java)
+            intent.putExtra("type", ConstantUtil.VIDEO)
             intent.putExtra("aid", aid)
+            intent.putExtra("cid", cid)
+            intent.putExtra("title", title)
+            ctx.startActivity(intent)
+        }
+
+        /**
+         * 番剧
+         */
+        fun playBangumi(ctx: Context, sid: String, epid: String, cid: String, title: String) {
+            val intent = Intent(ctx, PlayerActivity::class.java)
+            intent.putExtra("type", ConstantUtil.BANGUMI)
+            intent.putExtra("sid", sid)
+            intent.putExtra("epid", epid)
             intent.putExtra("cid", cid)
             intent.putExtra("title", title)
             ctx.startActivity(intent)
         }
     }
 
-    val aid by lazy { intent.extras.getString("aid") }
-    val cid by lazy { intent.extras.getString("cid") }
+    val type by lazy { intent.extras.getString("type") }
+    val aid by lazy { intent.extras.getString("aid") ?: "" }
+    val cid by lazy { intent.extras.getString("cid") ?: "" }
+    val epid by lazy { intent.extras.getString("epid") ?: "" }
+    val sid by lazy { intent.extras.getString("sid") ?: "" }
     val title by lazy { intent.extras.getString("title") }
 
     private val sources = ArrayList<VideoSource>()
@@ -94,6 +117,7 @@ class PlayerActivity : AppCompatActivity() {
                 mDanmaku.hide()
             }
         }
+        mController.setVideoBackEvent { finish() }
         disposable = Observable.interval(1000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -162,65 +186,13 @@ class PlayerActivity : AppCompatActivity() {
             parser
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe ({ parser ->
+                .subscribe({ parser ->
                     mDanmaku.prepare(parser, danmakuContext)
                     mDanmaku.showFPS(false)
                     mDanmaku.enableDanmakuDrawingCache(false)
-
-                    mDanmaku.setCallback(object : DrawHandler.Callback {
-                        override fun drawingFinished() {
-
-                        }
-
-                        override fun danmakuShown(danmaku: BaseDanmaku?) {
-
-                        }
-
-                        override fun prepared() {
-                            runOnUiThread {
-                                palyUrlVideo()
-                            }
-                        }
-
-                        override fun updateTimer(timer: DanmakuTimer) {
-//                            timer.update(mPlayer.currentPosition)
-                        }
-                    })
-                },{
+                    mDanmaku.setCallback(onDrawHandlerCallback)
+                }, {
                     showText("装载弹幕失败")
-                })
-    }
-
-    /**
-     * 获取视频播放地址
-     */
-    private fun palyUrlVideo(quality: Int = 0) {
-        showText("读取播放地址")
-        var url = "https://interface.bilibili.com/v2/playurl?cid=$cid&player=1&quality=$quality&qn=$quality&ts=${ApiHelper.getTimeSpen()}"
-        url += "&sign=" + ApiHelper.getSing(url, "1c15888dc316e05a15fdd0a02ed6584f")
-        MiaoHttp.getString(url) {
-            headers = mapOf(
-                    "Referer" to "https://www.bilibili.com/bangumi/play/ep$aid",
-                    "User-Agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
-            )
-        }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ res ->
-                    DebugMiao.log(res)
-                    val pattern = """<durl>.*?<length>(.*?)</length>.*?<size>(.*?)</size>.*?<url>.*?<!\[CDATA\[(.*?)]]></url>.*?</durl>"""
-                    val matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE or Pattern.DOTALL).matcher(res)
-                    while (matcher.find()) {
-                        sources += VideoSource().apply {
-                            uri = Uri.parse(matcher.group(3))
-                            length = matcher.group(1).toLong()
-                            size = matcher.group(2).toLong()
-                        }
-                    }
-                    DebugMiao.log(sources.size)
-                    startPlay()
-                }, { err ->
-                    err.printStackTrace()
-                    showText("读取播放地址失败")
                 })
     }
 
@@ -230,7 +202,7 @@ class PlayerActivity : AppCompatActivity() {
                 "Referer" to "https://www.bilibili.com/video/av$aid",
                 "User-Agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
         ))
-        if (lastPosition != 0L){
+        if (lastPosition != 0L) {
             mPlayer.seekTo(lastPosition)
         }
     }
@@ -253,6 +225,42 @@ class PlayerActivity : AppCompatActivity() {
 //                mBufferingIndicator.setVisibility(View.GONE);
         }
         true
+    }
+
+    /**
+     * 弹幕加载回调
+     */
+    private val onDrawHandlerCallback = object : DrawHandler.Callback {
+        override fun drawingFinished() {
+
+        }
+
+        override fun danmakuShown(danmaku: BaseDanmaku?) {
+
+        }
+
+        override fun prepared() {
+            runOnUiThread {
+                showText("读取播放地址")
+                val observer = if (type == ConstantUtil.VIDEO)
+                    PlayurlHelper.getVideoPalyUrl(aid, cid)
+                else
+                    PlayurlHelper.getBangumiUrl(cid)
+                observer.subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                            sources.clear()
+                            sources.addAll(it)
+                            startPlay()
+                        }, {
+                            showText(it.message ?: "网络错误")
+                        })
+            }
+        }
+
+        override fun updateTimer(timer: DanmakuTimer) {
+//                            timer.update(mPlayer.currentPosition)
+        }
     }
 
     /**

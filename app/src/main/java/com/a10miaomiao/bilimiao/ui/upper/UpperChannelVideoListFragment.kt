@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.entity.UpperChannel
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
@@ -78,11 +79,9 @@ class UpperChannelVideoListFragment : SwipeBackFragment() {
                 selectableItemBackground()
                 padding = dip(5)
 
-                rcLayout {
-                    roundCorner = dip(5)
-                    imageView {
-                        binding.bind { item -> network(item.pic) }
-                    }.lparams(matchParent, matchParent)
+                rcImageView {
+                    radius = dip(5)
+                    binding.bind { item -> network(item.pic) }
                 }.lparams(width = dip(140), height = dip(85)) {
                     rightMargin = dip(5)
                 }

@@ -12,17 +12,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.entity.VideoComment
-import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
-import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.bilimiao.utils.NumberUtil
-import com.a10miaomiao.bilimiao.utils.network
-import com.a10miaomiao.bilimiao.utils.newViewModelFactory
+import com.a10miaomiao.bilimiao.entity.comment.ReplyBean
+import com.a10miaomiao.bilimiao.entity.comment.VideoComment
+import com.a10miaomiao.bilimiao.ui.MainActivity
+import com.a10miaomiao.bilimiao.ui.commponents.*
+import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import com.a10miaomiao.miaoandriod.adapter.miao
-import kotlinx.android.synthetic.main.fragment_video_info.view.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
@@ -99,71 +95,28 @@ class VideoCommentFragment : Fragment() {
 
     }
 
-    private fun RecyclerView.createAdapter(list: MiaoList<VideoComment.ReplyBean>) = miao(list) {
+    private fun RecyclerView.createAdapter(list: MiaoList<ReplyBean>) = miao(list) {
         itemView { b ->
-            linearLayout {
-
-                // 头像
-                rcLayout {
-                    mRoundAsCircle = true
-                    imageView {
-                        b.bind { item -> network(item.member.avatar) }
-                    }.lparams {
-                        width = dip(32)
-                        height = dip(32)
-                    }
-                }.lparams {
-                    margin = dip(10)
-                }
-
-                verticalLayout {
-                    verticalPadding = dip(3)
-
-                    textView {
-                        b.bind { item -> text = item.member.uname }
-                        textColor = Color.BLACK
-                        textSize = 12f
-                    }.lparams {
-                        topMargin = dip(3)
-                    }
-
-                    linearLayout {
-                        textView {
-                            b.bind { item -> text = NumberUtil.converCTime(item.ctime) }
-                            textColor = config.black80
-                            textSize = 12f
-                        }.lparams {
-                            rightMargin = dip(3)
-                        }
-                        textView {
-                            b.bind { item -> text = "#" + item.floor }
-                            textColor = config.black80
-                            textSize = 12f
-                        }.lparams {
-                            rightMargin = dip(3)
-                        }
-                    }.lparams {
-                        topMargin = dip(3)
-                    }
-
-                    textView {
-                        b.bind { item -> text = item.content.message }
-                        textColor = config.black80
-                        textSize = 12f
-                    }.lparams {
-                        topMargin = dip(3)
-                    }
-
-                    textView {
-                        b.bind { item -> text = "${item.like}赞    ${item.count}评论" }
-                        textColor = Color.BLACK
-                        textSize = 12f
-                    }.lparams {
-                        topMargin = dip(3)
-                    }
-
+            commentItemView {
+                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+                b.bind {
+                    data = CommentItemView.CommentItemModel(
+                            uname = it.member.uname
+                            , avatar = it.member.avatar
+                            , time = NumberUtil.converCTime(it.ctime)
+                            , floor = it.floor
+                            , content = it.content.message
+                            , like = it.like
+                            , count = it.count
+                    )
                 }
             }
+        }
+
+        onItemClick { item, position ->
+            val fragment = VideoCommentDetailsFragment.newInstance(item)
+            MainActivity.of(context)
+                    .showBottomSheet(fragment)
         }
     }
 

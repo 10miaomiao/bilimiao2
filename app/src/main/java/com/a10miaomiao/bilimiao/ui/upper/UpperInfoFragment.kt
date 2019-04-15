@@ -15,6 +15,7 @@ import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -148,16 +149,13 @@ class UpperInfoFragment : SwipeBackFragment() {
         verticalLayout {
             gravity = Gravity.CENTER
 
-            rcLayout {
-                mRoundAsCircle = true
-
-                imageView {
-                    network(viewModel.owner.face)
-                    backgroundColor = config.background
-                }
+            rcImageView {
+                isCircle = true
+                network(viewModel.owner.face)
             }.lparams(dip(64), dip(64)) {
                 bottomMargin = dip(5)
             }
+
             textView(viewModel.owner.name) {
                 textSize = 18f
                 textColor = Color.WHITE
@@ -174,46 +172,44 @@ class UpperInfoFragment : SwipeBackFragment() {
      */
     private fun RecyclerView.createAdapter() = miao(viewModel.list) {
         itemView { binding ->
-            rcLayout {
+            frameLayout {
+
                 lparams(matchParent, dip(120)) {
                     verticalMargin = dip(2.5f)
                 }
-                roundCorner = dip(5)
                 padding = dip(5)
 
-                frameLayout {
-                    lparams(matchParent, matchParent)
-                    selectableItemBackground()
-                    imageView {
-                        // scaleType = ImageView.ScaleType.CENTER
-                        binding.bind { item ->
-                            scaleType = ImageView.ScaleType.CENTER_CROP
-                            Glide.with(context)
-                                    .load(item.cover)
-                                    .bitmapTransform(BlurTransformation(context, 14, 6)) // 高斯模糊
-                                    .into(this)
-                        }
-                    }.lparams(matchParent, matchParent)
-                    verticalLayout {
-                        lparams(matchParent, matchParent)
-                        gravity = Gravity.CENTER
+                selectableItemBackground()
 
-                        textView {
-                            paint.isFakeBoldText = true
-                            gravity = Gravity.CENTER
-                            textSize = 16f
-                            textColor = Color.WHITE
-                            binding.bind { item -> text = item.name }
-                        }
-                        textView {
-                            textColor = Color.WHITE
-                            gravity = Gravity.CENTER
-                            textSize = 14f
-                            binding.bind { item -> text = "共${item.count}个投稿" }
-                        }
+                rcImageView {
+                    radius = dip(5)
+                    binding.bind { item ->
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        Glide.with(context)
+                                .load(item.cover)
+                                .bitmapTransform(BlurTransformation(context, 14, 6)) // 高斯模糊
+                                .into(this)
                     }
                 }
 
+                verticalLayout {
+                    lparams(matchParent, matchParent)
+                    gravity = Gravity.CENTER
+
+                    textView {
+                        paint.isFakeBoldText = true
+                        gravity = Gravity.CENTER
+                        textSize = 16f
+                        textColor = Color.WHITE
+                        binding.bind { item -> text = item.name }
+                    }
+                    textView {
+                        textColor = Color.WHITE
+                        gravity = Gravity.CENTER
+                        textSize = 14f
+                        binding.bind { item -> text = "共${item.count}个投稿" }
+                    }
+                }
             }
         }
         onItemClick { item, position ->

@@ -3,10 +3,12 @@ package com.a10miaomiao.bilimiao.ui.video
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.entity.ResultInfo
-import com.a10miaomiao.bilimiao.entity.VideoComment
+import com.a10miaomiao.bilimiao.entity.comment.ReplyBean
+import com.a10miaomiao.bilimiao.entity.comment.VideoComment
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
+import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -17,8 +19,8 @@ class VideoCommentViewModel(val id: String) : ViewModel() {
     private var minid = 0
     private val pageSize = 20
 
-    var list = MiaoList<VideoComment.ReplyBean>()
-    var hotList = MiaoList<VideoComment.ReplyBean>()
+    var list = MiaoList<ReplyBean>()
+    var hotList = MiaoList<ReplyBean>()
 
     var loading = MutableLiveData<Boolean>()
     val loadState = MutableLiveData<LoadMoreView.State>()
@@ -36,6 +38,7 @@ class VideoCommentViewModel(val id: String) : ViewModel() {
             return
         loading.value = true
         val url = BiliApiService.getCommentList(id, minid, pageSize)
+        DebugMiao.log(url)
         MiaoHttp.getJson<ResultInfo<VideoComment>>(url)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())

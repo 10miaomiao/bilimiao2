@@ -12,6 +12,9 @@ object IntentHandlerUtil {
     val TYPE_VIDEO = "video"
     val TYPE_AUTHOR = "author"
     val TYPE_BANGUMI = "bangumi"
+
+
+
     /**
      * 调用b站打开打开
      */

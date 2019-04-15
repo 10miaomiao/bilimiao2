@@ -2,11 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:title="自定义文件名"
-        android:id="@+id/order_click"/>
+        android:id="@+id/order_click"
+        android:enabled="false"/>
 
     <item android:title="查看更多"
-        android:id="@+id/order_scores"/>
+        android:id="@+id/order_scores"
+        android:enabled="false"/>
 
     <item android:title="查看up主"
-        android:id="@+id/order_stow"/>
+        android:id="@+id/order_stow"
+        android:enabled="false"/>
 </menu>

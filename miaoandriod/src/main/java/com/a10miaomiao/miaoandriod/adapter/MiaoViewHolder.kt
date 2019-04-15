@@ -19,25 +19,25 @@ class MiaoViewHolder<T>(val parentView: View, val binding: Binding<T>? = null) :
 
         var fns = ArrayList<(item: T, index: Int) -> Unit>()
 
-        fun bind(fn: ((item: T, index: Int) -> Unit)) {
+        fun bindIndexed(fn: ((item: T, index: Int) -> Unit)) {
             fns.add(fn)
         }
 
         fun bind(fn: ((item: T) -> Unit)) {
-            bind({ item, index -> fn(item) })
+            bindIndexed { item, index -> fn(item) }
         }
 
-        fun bindClick(view: View, fn: ((item: T, index: Int) -> Unit)) {
-            bind { item, index ->
-                view.setOnClickListener {
+        fun View.bindClick(fn: ((item: T, index: Int) -> Unit)) {
+            bindIndexed { item, index ->
+                this.setOnClickListener {
                     fn(item, index)
                     mAdapter.notifyDataSetChanged() //直接更新视图，省去每次都要手动更新
                 }
             }
         }
 
-        fun bindClick(view: View, fn: ((item: T) -> Unit)) {
-            bindClick(view, { item, index -> fn(item) })
+        fun View.bindClick( fn: ((item: T) -> Unit)) {
+            bindClick { item, index -> fn(item) }
         }
 
         /**

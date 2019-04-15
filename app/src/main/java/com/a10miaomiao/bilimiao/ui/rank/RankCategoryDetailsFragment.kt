@@ -11,7 +11,9 @@ import android.view.*
 import android.widget.*
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.entity.BiliMiaoRank
+import com.a10miaomiao.bilimiao.ui.bangumi.BangumiFragment
 import com.a10miaomiao.bilimiao.ui.commponents.dropMenuView
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
@@ -82,7 +84,7 @@ class RankCategoryDetailsFragment : Fragment() {
 
             swipeRefreshLayout {
                 setColorSchemeResources(R.color.colorPrimary)
-                observeNotNull(viewModel.loading, ::setRefreshing)
+                viewModel.loading.observeNotNull(::setRefreshing)
 //                viewModel.bind(viewModel::loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.loadData() }
                 recyclerView {
@@ -106,7 +108,7 @@ class RankCategoryDetailsFragment : Fragment() {
 
                 textView {
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                    binding.bind { item, index ->
+                    binding.bindIndexed { item, index ->
                         text = (index + 1).toString()
                         setTextColor(context.resources.getColor(
                                 if (index > 2) R.color.text_black else R.color.colorAccent
@@ -116,12 +118,9 @@ class RankCategoryDetailsFragment : Fragment() {
                     gravity = Gravity.CENTER
                 }
 
-                rcLayout {
-                    roundCorner = dip(5)
-                    imageView {
-                        // scaleType = ImageView.ScaleType.CENTER
-                        binding.bind { item -> network(item.pic) }
-                    }.lparams(matchParent, matchParent)
+                rcImageView {
+                    radius = dip(5)
+                    binding.bind { item -> network(item.pic) }
                 }.lparams(width = dip(140), height = dip(85)) {
                     rightMargin = dip(5)
                 }
@@ -174,7 +173,7 @@ class RankCategoryDetailsFragment : Fragment() {
 
                 textView {
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                    binding.bind { item, index ->
+                    binding.bindIndexed { item, index ->
                         text = (index + 1).toString()
                         setTextColor(context.resources.getColor(
                                 if (index > 2) R.color.text_black else R.color.colorAccent
@@ -184,12 +183,9 @@ class RankCategoryDetailsFragment : Fragment() {
                     gravity = Gravity.CENTER
                 }
 
-                rcLayout {
-                    roundCorner = dip(5)
-                    imageView {
-                        // scaleType = ImageView.ScaleType.CENTER
-                        binding.bind { item -> network(item.cover) }
-                    }.lparams(matchParent, matchParent)
+                rcImageView {
+                    radius = dip(5)
+                    binding.bind { item -> network(item.cover) }
                 }.lparams(width = dip(100), height = dip(133)) {
                     rightMargin = dip(5)
                 }
@@ -225,7 +221,7 @@ class RankCategoryDetailsFragment : Fragment() {
             }
         }
         onItemClick { item, position ->
-//            startFragment(VideoInfoFragment.newInstance(item.aid))
+            startFragment(BangumiFragment.newInstance(item.season_id))
         }
         layoutManager(LinearLayoutManager(context))
     }

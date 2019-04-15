@@ -13,8 +13,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
+import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -54,11 +57,10 @@ class UpperResultFragment : Fragment() {
                 selectableItemBackground()
                 padding = dip(10)
 
-                rcLayout {
-                    mRoundAsCircle = true
-                    imageView {
-                        binding.bind { item -> network(item.cover) }
-                    }.lparams(matchParent, matchParent)
+
+                rcImageView {
+                    isCircle = true
+                    binding.bind { item -> network(item.cover) }
                 }.lparams(width = dip(64), height = dip(64)) {
                     rightMargin = dip(10)
                 }
@@ -94,7 +96,13 @@ class UpperResultFragment : Fragment() {
             }
         }
         onItemClick { item, position ->
-            startFragment(VideoInfoFragment.newInstance(item.param))
+            startFragment(UpperInfoFragment.newInstance(
+                    Owner(
+                            face = item.cover
+                            , name = item.title
+                            , mid = item.param.toInt()
+                    )
+            ))
 //                    IntentHandlerUtil.openWithPlayer(activity!!, IntentHandlerUtil.TYPE_VIDEO, item.id)
         }
         addFootView {

@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.commponents.dropMenuView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
+import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.region.RegionDetailsViewModel
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
@@ -132,7 +133,7 @@ class SearchResultFragment : Fragment() {
                             selectableItemBackgroundBorderless()
                             verticalPadding = dip(5)
                             textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                            binding.bind { item, index ->
+                            binding.bindIndexed { item, index ->
                                 text = item
                                 textColorResource = if (index == i.value) {
                                     R.color.colorAccent
@@ -162,11 +163,10 @@ class SearchResultFragment : Fragment() {
                 selectableItemBackground()
                 padding = dip(5)
 
-                rcLayout {
-                    roundCorner = dip(5)
-                    imageView {
-                        binding.bind { item -> network(item.cover) }
-                    }.lparams(matchParent, matchParent)
+
+                rcImageView {
+                    radius = dip(5)
+                    binding.bind { item -> network(item.cover) }
                 }.lparams(width = dip(140), height = dip(85)) {
                     rightMargin = dip(5)
                 }

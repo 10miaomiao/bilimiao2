@@ -10,8 +10,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 32
-        versionName "2.0 施工版0.1"
+        versionCode 33
+        versionName "2.0 咕咕咕版0.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -19,6 +19,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
     }
 }
 
@@ -29,6 +35,7 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:2.0.0-alpha1'
+//    implementation 'com.android.support:preference-v7:28.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
@@ -64,6 +71,7 @@ dependencies {
 //    implementation 'com.liang.android:tags:0.9.0'
 //    implementation 'com.github.LRH1993:AutoFlowLayout:1.0.5'
     implementation 'com.google.android:flexbox:1.0.0'
+//    implementation 'com.ksxkq:materialpreference:1.0.5'
 
     implementation project(':miaoandriod')
     implementation project(':player')

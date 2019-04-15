@@ -12,7 +12,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
 import java.util.Locale;
+
 import cn.a10miaomiao.player.callback.MediaController;
 import cn.a10miaomiao.player.callback.MediaPlayerListener;
 
@@ -85,7 +87,8 @@ public class MyMediaController extends FrameLayout implements MediaController
         mBackIV.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                videoBackEvent.accept();
+                if (videoBackEvent != null)
+                    videoBackEvent.accept();
             }
         });
         mDanmakuSwitchLayout.setOnClickListener(new OnClickListener() {
@@ -242,8 +245,8 @@ public class MyMediaController extends FrameLayout implements MediaController
     /**
      * 设置播放进度
      */
-    public long setProgress(){
-        if(mPlayer == null || mDragging){
+    public long setProgress() {
+        if (mPlayer == null || mDragging) {
             return 0;
         }
         long position = mPlayer.getCurrentPosition();
@@ -262,7 +265,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         return position;
     }
 
-    public void setProgress(long position){
+    public void setProgress(long position) {
         long duration = mPlayer.getDuration();
         long pos = 1000L * position / duration;
         mProgress.setProgress((int) pos);
@@ -270,11 +273,11 @@ public class MyMediaController extends FrameLayout implements MediaController
     }
 
     public void updatePausePlay() {
-        if (mPlayer != null){
-            if (mPlayer.isPlaying()){
+        if (mPlayer != null) {
+            if (mPlayer.isPlaying()) {
                 mPauseButton.setImageResource(R.drawable.bili_player_play_can_pause);
                 mTvPlay.setImageResource(R.drawable.ic_tv_stop);
-            }else{
+            } else {
                 mPauseButton.setImageResource(R.drawable.bili_player_play_can_play);
                 mTvPlay.setImageResource(R.drawable.ic_tv_play);
             }
@@ -289,14 +292,14 @@ public class MyMediaController extends FrameLayout implements MediaController
         return isLocked;
     }
 
-    public static String generateTime(long position){
+    public static String generateTime(long position) {
         int totalSeconds = (int) (position / 1000.0 + 0.5);
         int seconds = totalSeconds % 60;
         int minutes = totalSeconds / 60 % 60;
         int hours = totalSeconds / 3600;
         return hours > 0 ?
-            String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds) :
-            String.format(Locale.US, "%02d:%02d", minutes, seconds);
+                String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds) :
+                String.format(Locale.US, "%02d:%02d", minutes, seconds);
     }
 
 

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="常规">
+        <!--<Preference-->
+        <!--android:key="player"-->
+        <!--android:summary="当前播放器：哔哩哔哩"-->
+        <!--android:title="选择播放器"-->
+        <!--/>-->
+
+        <SwitchPreference
+            android:key="is_bili_player"
+            android:defaultValue="false"
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="使用外部播放器" />
+
+
+
+        <Preference
+            android:enabled="false"
+            android:key="theme"
+            android:summary="库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
+            android:title="切换主题" />
+
+        <Preference
+            android:enabled="false"
+            android:key="p"
+            android:title="播放设置" />
+
+        <Preference
+            android:enabled="false"
+            android:key="d"
+            android:title="弹幕设置" />
+
+
+  </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="其它">
+        <Preference
+            android:key="about"
+            android:summary="版本"
+            android:title="关于"></Preference>
+        <Preference
+            android:key="donate"
+            android:summary="开发者想买内存条"
+            android:title="捐助" />
+
+        <Preference
+            android:key="help"
+            android:title="帮助" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
