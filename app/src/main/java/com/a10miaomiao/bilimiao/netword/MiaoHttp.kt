@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import okhttp3.*
 import java.lang.reflect.Type
+import java.util.concurrent.TimeUnit
 
 class MiaoHttp(var url: String?) {
     val client = OkHttpClient()
@@ -26,16 +27,18 @@ class MiaoHttp(var url: String?) {
     companion object {
         fun <T> get(url: String? = null
                     , converterFactory: (response: Response) -> T
-                    , init: (MiaoHttp.() -> Unit)? = null) = Observable.create<T> {
-            val http = MiaoHttp(url)
-            if (init != null)
-                http.init()
-            var response = http.get()
-            if (response.isSuccessful) {
-                it.onNext(converterFactory(response))
-            }
-            it.onComplete()
-        }
+                    , init: (MiaoHttp.() -> Unit)? = null) = Observable.timer(200, TimeUnit.MILLISECONDS) // 延迟200毫秒加载，避免页面切换时动画卡顿
+                .map {
+                        val http = MiaoHttp(url)
+                        if (init != null)
+                            http.init()
+                        var response = http.get()
+                        if (response.isSuccessful) {
+                            return@map converterFactory(response)
+                        }else{
+                            throw Exception("MiaoHttp: error")
+                        }
+                }
 
         inline fun <reified T> getJson(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, gsonConverterFactory<T>(object : TypeToken<T>() {}.type), init)
         inline fun getString(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, { it.body()!!.string() }, init)

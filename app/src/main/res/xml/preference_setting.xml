@@ -8,13 +8,26 @@
         <!--/>-->
 
         <SwitchPreference
-            android:key="is_bili_player"
             android:defaultValue="false"
+            android:key="is_bili_player"
             android:summaryOff=""
             android:summaryOn=""
             android:title="使用外部播放器" />
 
+        <ListPreference
+            android:dialogTitle="请选择动画效果"
+            android:key="fragment_animator"
+            android:summary="每段四季，每轮星移，时光长旅，漫漫行迹..."
+            android:title="页面切换动画"
+            android:entries="@array/fragment_animator_entries"
+            android:entryValues="@array/fragment_animator_entry_values"
+            android:defaultValue="vertical"/>
 
+        <SwitchPreference
+            android:key="player_background"
+            android:summary="遇到困难时，不要停下来."
+            android:title="后台播放"
+            android:defaultValue="true"/>
 
         <Preference
             android:enabled="false"
@@ -33,7 +46,7 @@
             android:title="弹幕设置" />
 
 
-  </PreferenceCategory>
+    </PreferenceCategory>
 
 
     <PreferenceCategory android:title="其它">

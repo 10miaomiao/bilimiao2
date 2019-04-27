@@ -5,11 +5,14 @@ import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.ui.MainActivity
+import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
+import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
 
 /**
  * Created by 10喵喵 on 2017/10/28.
@@ -25,11 +28,22 @@ class SettingPreferenceFragment : PreferenceFragment() {
     val help by lazy {
         findPreference("help") as Preference
     }
+    val fragmentAnimator by lazy {
+        findPreference("fragment_animator") as ListPreference
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.preference_setting)
         showVersion()
+        fragmentAnimator.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
+            MainActivity.of(context).fragmentAnimator = when (newValue as String) {
+                "vertical" -> DefaultVerticalAnimator()
+                "horizontal" -> DefaultHorizontalAnimator()
+                else -> DefaultVerticalAnimator()
+            }
+            true
+        }
     }
 
     /**
@@ -76,4 +90,5 @@ class SettingPreferenceFragment : PreferenceFragment() {
         }
         return false
     }
+
 }

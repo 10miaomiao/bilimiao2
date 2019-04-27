@@ -18,6 +18,7 @@
         android:theme="@style/AppTheme">
 
         <activity android:name=".ui.MainActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,6 +46,9 @@
             android:windowSoftInputMode="stateAlwaysHidden">
 
         </activity>
+
+        <service android:name="cn.a10miaomiao.player.PlayerService"
+            android:exported="true"/>
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.ui.video
 
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -167,7 +168,9 @@ class VideoInfoDetailsFragment : Fragment() {
                         setImageResource(R.drawable.ic_navigate_next_black_24dp)
                         selectableItemBackgroundBorderless()
                         setOnClickListener {
-                            val fragment = PagesFragment.newInstance(viewModel.id, viewModel.pages)
+                            val fragment = PagesFragment.newInstance(viewModel.id
+                                    , viewModel.pages
+                                    , viewModel.pageIndex.value!!)
                             MainActivity.of(context)
                                     .showBottomSheet(fragment)
                         }
@@ -238,7 +241,7 @@ class VideoInfoDetailsFragment : Fragment() {
 
                     rcImageView {
                         radius = dip(5)
-                        binding.bind { item -> network(item.pic) }
+                        binding.bind { item -> if (item.pic != null) network(item.pic) }
                     }.lparams {
                         width = dip(140)
                         height = dip(85)
@@ -338,14 +341,27 @@ class VideoInfoDetailsFragment : Fragment() {
                     gravity = Gravity.LEFT
                     ellipsize = TextUtils.TruncateAt.END
                     textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
-                    b.bind { item -> text = item.part }
+                    b.bindIndexed { item, index ->
+                        if (viewModel.pageIndex.value == index) {
+                            this@frameLayout.isEnabled = false
+                            textColorResource = R.color.colorAccent
+                        } else {
+                            this@frameLayout.isEnabled = true
+                            textColorResource = R.color.text_black
+                        }
+                        text = item.part
+                    }
                 }.lparams {
                     gravity = Gravity.CENTER
                 }
             }
         }
         onItemClick { item, position ->
-            PlayerActivity.playVideo(context, viewModel.id, item.cid.toString(), item.part)
+            viewModel.pageIndex.value = position
+            VideoInfoFragment.instance.palyVideo(item.cid.toString(), item.part)
+//            PlayerActivity.playVideo(context, viewModel.id, item.cid.toString(), item.part)
         }
+        viewModel.pageIndex.observe(this@VideoInfoDetailsFragment
+                , Observer { notifyDataSetChanged() })
     }
 }

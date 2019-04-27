@@ -1,98 +1,99 @@
 package com.a10miaomiao.bilimiao.ui.player
 
-import android.annotation.SuppressLint
+import android.arch.lifecycle.Observer
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.media.AudioManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
+import android.preference.PreferenceManager
+import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.view.MotionEvent
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import cn.a10miaomiao.player.*
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.netword.ApiHelper
-import com.a10miaomiao.bilimiao.netword.MiaoHttp
-import com.a10miaomiao.bilimiao.utils.DebugMiao
-import cn.a10miaomiao.player.callback.MediaController
-import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.netword.BiliApiService
+import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.netword.PlayurlHelper
+import com.a10miaomiao.bilimiao.ui.MainActivity
+import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
+import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.android.synthetic.main.fragment_player.*
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
-import master.flame.danmaku.danmaku.model.IDisplayer
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import java.io.ByteArrayInputStream
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerFragment : Fragment() {
 
     companion object {
         /**
          * 普通视频
          */
-        fun playVideo(ctx: Context, aid: String, cid: String, title: String) {
-            val intent = Intent(ctx, PlayerActivity::class.java)
-            intent.putExtra("type", ConstantUtil.VIDEO)
-            intent.putExtra("aid", aid)
-            intent.putExtra("cid", cid)
-            intent.putExtra("title", title)
-            ctx.startActivity(intent)
+        fun newVideoPlayerInstance(aid: String, cid: String, title: String): PlayerFragment {
+            val fragment = PlayerFragment()
+            val bundle = Bundle()
+            bundle.putString("type", ConstantUtil.VIDEO)
+            bundle.putString("aid", aid)
+            bundle.putString("cid", cid)
+            bundle.putString("title", title)
+            fragment.arguments = bundle
+            return fragment
         }
 
         /**
          * 番剧
          */
-        fun playBangumi(ctx: Context, sid: String, epid: String, cid: String, title: String) {
-            val intent = Intent(ctx, PlayerActivity::class.java)
-            intent.putExtra("type", ConstantUtil.BANGUMI)
-            intent.putExtra("sid", sid)
-            intent.putExtra("epid", epid)
-            intent.putExtra("cid", cid)
-            intent.putExtra("title", title)
-            ctx.startActivity(intent)
+        fun newBangumiPlayerInstance(sid: String, epid: String, cid: String, title: String): PlayerFragment {
+            val fragment = PlayerFragment()
+            val bundle = Bundle()
+            bundle.putString("type", ConstantUtil.BANGUMI)
+            bundle.putString("sid", sid)
+            bundle.putString("epid", epid)
+            bundle.putString("cid", cid)
+            bundle.putString("title", title)
+            return fragment
         }
     }
 
-    val type by lazy { intent.extras.getString("type") }
-    val aid by lazy { intent.extras.getString("aid") ?: "" }
-    val cid by lazy { intent.extras.getString("cid") ?: "" }
-    val epid by lazy { intent.extras.getString("epid") ?: "" }
-    val sid by lazy { intent.extras.getString("sid") ?: "" }
-    val title by lazy { intent.extras.getString("title") }
+    val type by lazy { arguments!!.getString("type") }
+    val aid by lazy { arguments!!.getString("aid") ?: "" }
+    val cid by lazy { arguments!!.getString("cid") ?: "" }
+    val epid by lazy { arguments!!.getString("epid") ?: "" }
+    val sid by lazy { arguments!!.getString("sid") ?: "" }
+    val title by lazy { arguments!!.getString("title") }
 
     private val sources = ArrayList<VideoSource>()
     private var danmakuContext: DanmakuContext? = null
     private var disposable: Disposable? = null
 
     private val width by lazy {
-        (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.width
+        (context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.width
     }
     private val height by lazy {
-        (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.height
+        (context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.height
     }
     private val mAudioManager by lazy {
-        getSystemService(AUDIO_SERVICE) as AudioManager
+        context!!.getSystemService(AppCompatActivity.AUDIO_SERVICE) as AudioManager
     }
 
     private var lastPosition = 0L //记录播放位置
-
     lateinit var playerService: PlayerService
+    private var isMini = true
+
     private val mConnection = object : ServiceConnection {
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -107,25 +108,32 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_player, container, false)
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_player)
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        isMini = VideoInfoFragment.instance.isMiniPlayer.value!!
+        VideoInfoFragment.instance.isMiniPlayer.observe(this, Observer {
+            isMini = it!!
+            mPlayer?.setVideoLayout()
+            setPlayerMediaController()
+        })
         initController()
-        val serviceIntent = Intent(this, PlayerService::class.java)
-        startService(serviceIntent)
-        bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
+        val serviceIntent = Intent(context, PlayerService::class.java)
+        context!!.startService(serviceIntent)
+        context!!.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
 
         // 隐藏导航栏
-        val decorView = window.decorView
-        val uiOptions = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-        decorView.systemUiVisibility = uiOptions
+        setSystemUIVisible(true)
+        mController.hide()
+        mController.setHeaderLayoutPadding(0, getStatusBarHeight(), 0, 0)
     }
 
     /**
-     * 初始化控制器
+     * 初始化媒体控制器
      */
     private fun initController() {
         mController.setTitle(title)
@@ -138,13 +146,24 @@ class PlayerActivity : AppCompatActivity() {
                 mDanmaku.hide()
             }
         }
-        mController.setVideoBackEvent { finish() }
+        mController.setVideoBackEvent {
+            VideoInfoFragment.instance.isMiniPlayer.value = true
+        }
         disposable = Observable.interval(1000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     mController.setProgress()
                     mController.updatePausePlay()
+                    mMiniController.setProgress()
+                    mMiniController.updatePausePlay()
                 }
+
+        mMiniController.setTitle("av$aid")
+        mMiniController.setMediaPlayer(mPlayer)
+        mMiniController.setBackOnClick(View.OnClickListener { MainActivity.of(context!!).pop() })
+        mMiniController.setZoomOnClick(View.OnClickListener {
+            VideoInfoFragment.instance.isMiniPlayer.value = false
+        })
     }
 
     /**
@@ -179,8 +198,6 @@ class PlayerActivity : AppCompatActivity() {
      */
     private fun initPlayer() {
         showText("初始化播放器")
-        //配置播放器
-        mPlayer.setMediaController(mController)
         //mPlayerView.setMediaBufferingIndicator(mBufferingIndicator)
         mPlayer.requestFocus()
         mPlayer.setOnInfoListener(onInfoListener)
@@ -262,7 +279,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         override fun prepared() {
-            runOnUiThread {
+            activity!!.runOnUiThread {
                 showText("读取播放地址")
                 val observer = if (type == ConstantUtil.VIDEO)
                     PlayurlHelper.getVideoPalyUrl(aid, cid)
@@ -341,7 +358,7 @@ class PlayerActivity : AppCompatActivity() {
             isLeft = e.x < width / 2
             maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
             volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-            screenBrightness = window.attributes.screenBrightness
+            screenBrightness = activity!!.window.attributes.screenBrightness
             num = if (isLeft) {
                 (screenBrightness * 100).toInt()
             } else {
@@ -362,9 +379,9 @@ class PlayerActivity : AppCompatActivity() {
             num += distanceY.toInt() / 2
             num = if (num > 100) 100 else if (0 > num) 0 else num
             if (isLeft) {
-                val lp = window.attributes
+                val lp = activity!!.window.attributes
                 lp.screenBrightness = num / 100f
-                window.attributes = lp
+                activity!!.window.attributes = lp
                 showCenterText("亮度：$num%")
             } else {
                 volume = ((num / 100f) * maxVolume).toInt()
@@ -401,11 +418,6 @@ class PlayerActivity : AppCompatActivity() {
         mProgressLayout.visibility = View.GONE
     }
 
-    override fun onBackPressed() {
-        if (!mController.isLocked)
-            finish()
-    }
-
     override fun onResume() {
         super.onResume()
 //        if (mDanmaku != null && mDanmaku.isPrepared && mDanmaku.isPaused) {
@@ -415,19 +427,28 @@ class PlayerActivity : AppCompatActivity() {
 //            mPlayer.seekTo(lastPosition)
 //        }
 //        lastPosition = 0
-
-        if (mDanmaku != null && mDanmaku.isPrepared && mDanmaku.isPaused) {
-//            mDanmaku.seekTo(mPlayer.currentPosition)
-            mDanmaku.start(mPlayer.currentPosition)
+        if (mPlayer != null){
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            if (!prefs.getBoolean("player_background", true)){
+                mPlayer.start()
+            }
+            if (mDanmaku != null
+                    && mDanmaku.isPrepared
+                    && mDanmaku.isPaused
+                    && mPlayer.isPlaying) {
+                mDanmaku.start(mPlayer.currentPosition)
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
-//        if (mPlayer != null) {
-//            lastPosition = mPlayer.currentPosition
-//            mPlayer.pause()
-//        }
+        if (mPlayer != null) {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            if (!prefs.getBoolean("player_background", true)){
+                mPlayer.pause()
+            }
+        }
         if (mDanmaku != null && mDanmaku.isPrepared) {
             mDanmaku.pause()
         }
@@ -441,15 +462,32 @@ class PlayerActivity : AppCompatActivity() {
         if (mDanmaku != null && mDanmaku.isPaused) {
             mDanmaku.release()
         }
+        activity!!.window.decorView.systemUiVisibility = 0x00001000
         playerService.release(false)
         disposable?.dispose()
         disposable = null
+
+        MainActivity.of(context!!).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
     private fun setSystemUIVisible(show: Boolean) {
-        val uiFlags = if (show) View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        else View.SYSTEM_UI_FLAG_FULLSCREEN
-        window.decorView.systemUiVisibility = uiFlags or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or 0x00001000
+        if (isMini) { // 竖屏情况
+            activity!!.window.decorView.systemUiVisibility = 0x00001000
+        } else {
+            val uiFlags = if (show) View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            else View.SYSTEM_UI_FLAG_FULLSCREEN
+            activity!!.window.decorView.systemUiVisibility = uiFlags or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or 0x00001000
+        }
     }
 
+    private fun setPlayerMediaController(){
+        if (isMini){
+            mPlayer.setMediaController(mMiniController)
+            mController.visibility = View.GONE
+        }else{
+            mPlayer.setMediaController(mController)
+            mMiniController.visibility = View.GONE
+        }
+
+    }
 }

@@ -12,10 +12,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.entity.comment.ReplyBean
 import com.a10miaomiao.bilimiao.entity.comment.VideoComment
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.*
+import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -24,6 +26,12 @@ import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.nestedScrollView
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Context.CLIPBOARD_SERVICE
+import android.support.v4.content.ContextCompat.getSystemService
+
 
 class VideoCommentFragment : Fragment() {
 
@@ -41,7 +49,7 @@ class VideoCommentFragment : Fragment() {
     lateinit var viewModel: VideoCommentViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProviders.of(VideoInfoFragment.instance, newViewModelFactory { VideoCommentViewModel(id) })
+        viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoCommentViewModel(id) })
                 .get(VideoCommentViewModel::class.java)
         return createUI().view
     }
@@ -99,17 +107,28 @@ class VideoCommentFragment : Fragment() {
         itemView { b ->
             commentItemView {
                 layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-                b.bind {
+                b.bind { item ->
                     data = CommentItemView.CommentItemModel(
-                            uname = it.member.uname
-                            , avatar = it.member.avatar
-                            , time = NumberUtil.converCTime(it.ctime)
-                            , floor = it.floor
-                            , content = it.content.message
-                            , like = it.like
-                            , count = it.count
+                            uname = item.member.uname
+                            , avatar = item.member.avatar
+                            , time = NumberUtil.converCTime(item.ctime)
+                            , floor = item.floor
+                            , content = item.content.message
+                            , like = item.like
+                            , count = item.count
                     )
+                    onUpperClick = {
+                        val member = item.member
+                        startFragment(UpperInfoFragment.newInstance(
+                                Owner(
+                                        face = member.avatar,
+                                        name = member.uname,
+                                        mid = member.mid.toInt()
+                                )
+                        ))
+                    }
                 }
+
             }
         }
 

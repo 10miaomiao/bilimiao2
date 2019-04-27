@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.ui.commponents
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import android.view.View
 import android.widget.FrameLayout
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.utils.NumberUtil
@@ -31,8 +32,11 @@ class CommentItemView @JvmOverloads constructor(context: Context
             var floor: Int = 0,
             var content: String = "",
             var like: Int = 0,
-            var count: Int = 0
+            var count: Int = 0,
+            var textIsSelectable: Boolean = false
     )
+
+    var onUpperClick: (() -> Unit)? = null
 
     val fns = arrayListOf<() -> Unit>()
 
@@ -67,6 +71,9 @@ class CommentItemView @JvmOverloads constructor(context: Context
                             .into(this)
 //                    network(data.avatar)
                 }
+                setOnClickListener {
+                    onUpperClick?.invoke()
+                }
             }.lparams {
                 width = dip(32)
                 height = dip(32)
@@ -76,9 +83,15 @@ class CommentItemView @JvmOverloads constructor(context: Context
 
             verticalLayout {
                 textView {
-                    b { text = data.uname }
+                    b {
+                        text = data.uname
+//                        setTextIsSelectable(data.textIsSelectable)
+                    }
                     textColor = Color.parseColor("#222222")
                     textSize = 14f
+                    setOnClickListener {
+                        onUpperClick?.invoke()
+                    }
                 }
 
                 linearLayout {
@@ -97,7 +110,10 @@ class CommentItemView @JvmOverloads constructor(context: Context
                 }
 
                 textView {
-                    b { text = data.content }
+                    b {
+                        text = data.content
+                        setTextIsSelectable(data.textIsSelectable)
+                    }
                     textColor = Color.parseColor("#222222")
                     textSize = 14f
                 }.lparams {

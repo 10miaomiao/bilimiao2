@@ -57,11 +57,18 @@
         <item>31</item>
     </string-array>
 
-
     <string name="statement">
         1、本程序为哔哩哔哩动画的第三方助手类工具，资源来自哔哩哔哩动画\n
         2、如果侵犯您的合法权益，请及时联系本人以第一时间删除
     </string>
 
+    <string-array name="fragment_animator_entries">
+        <item>竖向(原生安卓风格)</item>
+        <item>横向</item>
+    </string-array>
+    <string-array name="fragment_animator_entry_values">
+        <item>vertical</item>
+        <item>horizontal</item>
+    </string-array>
 
 </resources>

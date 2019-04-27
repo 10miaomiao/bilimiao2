@@ -319,5 +319,9 @@ public class MyMediaController extends FrameLayout implements MediaController
         void accept(boolean b);
     }
 
+    public void setHeaderLayoutPadding(int left, int top, int right, int bottom){
+        mHeaderLayout.setPadding(left, top, right, bottom);
+    }
+
 
 }

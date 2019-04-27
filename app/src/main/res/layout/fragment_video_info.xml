@@ -24,21 +24,38 @@
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
                 app:statusBarScrim="@android:color/transparent">
 
-                <!--封面图片-->
-                <ImageView
-                    android:id="@+id/imageview"
+                <FrameLayout
+                    android:id="@+id/minScreenLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fitsSystemWindows="true"
-                    android:scaleType="centerCrop"
-                    app:layout_collapseMode="parallax"
-                    app:layout_collapseParallaxMultiplier="0.7"
-                    android:background="#F2F2F2"
-                    android:src="@drawable/bili_default_image_tv"/>
+                    android:layout_height="match_parent">
+
+
+                    <FrameLayout
+                        android:id="@+id/playerContainerLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <!--封面图片-->
+                        <ImageView
+                            android:id="@+id/imageview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="#F2F2F2"
+                            android:fitsSystemWindows="true"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/bili_default_image_tv"
+                            app:layout_collapseMode="parallax"
+                            app:layout_collapseParallaxMultiplier="0.7" />
+
+
+                    </FrameLayout>
+
+
+                </FrameLayout>
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="64dp"
                     android:background="@drawable/gradient"
                     android:fitsSystemWindows="true" />
 
@@ -105,7 +122,7 @@
         </android.support.design.widget.AppBarLayout>
 
         <android.support.v4.widget.NestedScrollView
-            android:id="@+id/nsv"
+            android:id="@+id/mNestedScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
@@ -124,8 +141,16 @@
         android:id="@+id/stateTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:textSize="18sp"
-        android:visibility="gone"
-        android:layout_gravity="center"/>
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/fullScreenLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+    </FrameLayout>
 
 </FrameLayout>

@@ -10,8 +10,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 33
-        versionName "2.0 咕咕咕版0.2"
+        versionCode 35
+        versionName "2.0 咕咕咕版0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

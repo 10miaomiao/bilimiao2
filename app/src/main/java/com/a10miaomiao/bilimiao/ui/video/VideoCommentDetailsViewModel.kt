@@ -16,7 +16,7 @@ import io.reactivex.schedulers.Schedulers
 
 class VideoCommentDetailsViewModel(var reply: ReplyBean) : ViewModel() {
 
-    private var minid = 0
+    private var maxid = 0
     private val pageSize = 20
 
     var list = MiaoList<ReplyBean>()
@@ -27,8 +27,8 @@ class VideoCommentDetailsViewModel(var reply: ReplyBean) : ViewModel() {
     init {
         loading.value = false
         loadState.value = LoadMoreView.State.LOADING
-        if (reply.count >= reply.replies.size) {
-            minid = reply.replies[reply.replies.size - 1].floor
+        if (reply.replies != null && reply.count > reply.replies.size) {
+            maxid = reply.replies[reply.replies.size - 1].floor
             list.addAll(reply.replies)
             loadData()
         } else {
@@ -44,13 +44,13 @@ class VideoCommentDetailsViewModel(var reply: ReplyBean) : ViewModel() {
         if (loadState.value!! != LoadMoreView.State.LOADING)
             return
         loading.value = true
-        val url = BiliApiService.getCommentReplyList(reply.oid, reply.rpid_str, minid, pageSize)
+        val url = BiliApiService.getCommentReplyList(reply.oid, reply.rpid_str, maxid, pageSize)
         DebugMiao.log(url)
         MiaoHttp.getJson<ResultInfo<ReplyCursor>>(url)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe({ r ->
-                    minid = r.data.cursor.min_id
+                    maxid = r.data.cursor.max_id
                     list.addAll(r.data.root.replies)
                     loading.value = false
                     if (r.data.root.replies.size < pageSize) {
@@ -64,7 +64,7 @@ class VideoCommentDetailsViewModel(var reply: ReplyBean) : ViewModel() {
 
     fun refreshList() {
         list.clear()
-        minid = 0
+        maxid = 0
         loadState.value = LoadMoreView.State.LOADING
         loadData()
     }

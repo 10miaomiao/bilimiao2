@@ -23,11 +23,12 @@ import org.jetbrains.anko.support.v4.UI
 class PagesFragment : Fragment() {
 
     companion object {
-        fun newInstance(aid: String, pages: ArrayList<Page>): PagesFragment {
+        fun newInstance(aid: String, pages: ArrayList<Page>, index: Int): PagesFragment {
             val fragment = PagesFragment()
             val bundle = Bundle()
             bundle.putString("aid", aid)
             bundle.putParcelableArrayList("episode", pages)
+            bundle.putInt("index", index)
             fragment.arguments = bundle
             return fragment
         }
@@ -35,6 +36,7 @@ class PagesFragment : Fragment() {
 
     val aid by lazy { arguments!!.getString("aid") }
     val pages by lazy { arguments!!.getParcelableArrayList<Page>("episode") }
+    val index by lazy { arguments!!.getInt("index") }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return createUI().view
@@ -63,12 +65,24 @@ class PagesFragment : Fragment() {
                                 textColorResource = R.color.text_black
                                 maxLines = 1
                                 ellipsize = TextUtils.TruncateAt.END
-                                b.bind { item -> text = item.part }
+                                b.bindIndexed { item, i ->
+                                    if (index == i) {
+                                        this@frameLayout.isEnabled = false
+                                        textColorResource = R.color.colorAccent
+                                    } else {
+                                        this@frameLayout.isEnabled = true
+                                        textColorResource = R.color.text_black
+                                    }
+                                    text = item.part
+                                }
                             }
                         }
                     }
                     onItemClick { item, position ->
-                        PlayerActivity.playVideo(context, aid, item.cid.toString(), item.part)
+                        VideoInfoFragment.instance
+                                .palyVideo(item.cid.toString(), item.part, position)
+                        MainActivity.of(context)
+                                .hideBottomSheet()
                     }
                 }
             }

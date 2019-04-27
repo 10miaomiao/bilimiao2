@@ -11,16 +11,15 @@ import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.entity.comment.ReplyBean
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.CommentItemView
 import com.a10miaomiao.bilimiao.ui.commponents.bottomSheetHeaderView
 import com.a10miaomiao.bilimiao.ui.commponents.commentItemView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
-import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.bilimiao.utils.NumberUtil
-import com.a10miaomiao.bilimiao.utils.newViewModelFactory
-import com.a10miaomiao.bilimiao.utils.selectableItemBackgroundBorderless
+import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
+import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import com.a10miaomiao.miaoandriod.adapter.miao
 import org.jetbrains.anko.*
@@ -51,7 +50,6 @@ class VideoCommentDetailsFragment : Fragment() {
     }
 
     private fun createUI() = UI {
-
         verticalLayout {
             bottomSheetHeaderView("查看评论", View.OnClickListener {
                 MainActivity.of(context)
@@ -82,8 +80,20 @@ class VideoCommentDetailsFragment : Fragment() {
                     , content = reply.content.message
                     , like = reply.like
                     , count = reply.count
+                    , textIsSelectable = true
             )
-
+            onUpperClick = {
+                val member = reply.member
+                startFragment(UpperInfoFragment.newInstance(
+                        Owner(
+                                face = member.avatar,
+                                name = member.uname,
+                                mid = member.mid.toInt()
+                        )
+                ))
+                MainActivity.of(context)
+                        .hideBottomSheet()
+            }
         }.lparams(matchParent, matchParent) {
             topMargin = dip(10)
         }
@@ -124,17 +134,31 @@ class VideoCommentDetailsFragment : Fragment() {
         itemView { b ->
             commentItemView {
                 layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-                b.bind {
+                b.bind { item ->
                     data = CommentItemView.CommentItemModel(
-                            uname = it.member.uname
-                            , avatar = it.member.avatar
-                            , time = NumberUtil.converCTime(it.ctime)
-                            , floor = it.floor
-                            , content = it.content.message
-                            , like = it.like
-                            , count = it.count
+                            uname = item.member.uname
+                            , avatar = item.member.avatar
+                            , time = NumberUtil.converCTime(item.ctime)
+                            , floor = item.floor
+                            , content = item.content.message
+                            , like = item.like
+                            , count = item.count
+                            , textIsSelectable = true
                     )
+                    onUpperClick = {
+                        val member = item.member
+                        startFragment(UpperInfoFragment.newInstance(
+                                Owner(
+                                        face = member.avatar,
+                                        name = member.uname,
+                                        mid = member.mid.toInt()
+                                )
+                        ))
+                        MainActivity.of(context)
+                                .hideBottomSheet()
+                    }
                 }
+
             }
         }
         onItemClick { item, position ->

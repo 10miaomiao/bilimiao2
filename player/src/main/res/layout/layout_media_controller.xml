@@ -29,6 +29,7 @@
             android:maxLines="1"
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_medium_text_size"/>
+
     </LinearLayout>
 
 

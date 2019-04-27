@@ -40,6 +40,7 @@ import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
 import me.yokeyword.fragmentation.ISupportFragment
 import me.yokeyword.fragmentation.SupportHelper
+import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
 
 
 class MainActivity : SupportActivity() {
@@ -71,7 +72,6 @@ class MainActivity : SupportActivity() {
 //        } else {
 //            super.start(toFragment)
 //        }
-
         if (toFragment is VideoInfoFragment) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(this)
             // 判断是否选择了使用 外部播放器
@@ -90,8 +90,11 @@ class MainActivity : SupportActivity() {
                 }
                 return
             }
+            super.start(toFragment, SupportFragment.SINGLETASK)
+        } else {
+            super.start(toFragment)
         }
-        super.start(toFragment)
+
     }
 
     override fun onBackPressedSupport() {
@@ -102,8 +105,12 @@ class MainActivity : SupportActivity() {
     }
 
     override fun onCreateFragmentAnimator(): FragmentAnimator {
-        // 设置横向(和安卓4.x动画相同)
-        return DefaultHorizontalAnimator()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        return when (prefs.getString("fragment_animator", "vertical")) {
+            "vertical" -> DefaultVerticalAnimator()
+            "horizontal" -> DefaultHorizontalAnimator()
+            else -> super.onCreateFragmentAnimator()
+        }
     }
 
     private fun initBottomSheet() {
@@ -115,7 +122,6 @@ class MainActivity : SupportActivity() {
                 } else {
                     shadeView.alpha = 0.6f
                 }
-
             }
 
             override fun onStateChanged(p0: View, p1: Int) {
@@ -164,6 +170,4 @@ class MainActivity : SupportActivity() {
             }
         }
     }
-
-
 }
