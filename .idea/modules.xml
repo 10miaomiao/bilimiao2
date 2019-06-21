@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/bilimiao2.iml" filepath="$PROJECT_DIR$/bilimiao2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dragging_sheet/dragging_sheet.iml" filepath="$PROJECT_DIR$/dragging_sheet/dragging_sheet.iml" />
       <module fileurl="file://$PROJECT_DIR$/miaoandriod/miaoandriod.iml" filepath="$PROJECT_DIR$/miaoandriod/miaoandriod.iml" />
       <module fileurl="file://$PROJECT_DIR$/player/player.iml" filepath="$PROJECT_DIR$/player/player.iml" />
     </modules>

@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.ui.commponents
 import android.content.Context
 import android.view.Gravity
 import android.view.View
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.miaoandriod.MiaoView
 import com.a10miaomiao.miaoandriod.binding.bind
 import org.jetbrains.anko.*

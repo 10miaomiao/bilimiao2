@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewManager
 import android.widget.LinearLayout
 import com.a10miaomiao.bilimiao.ui.widget.MySpannableTextView
+import com.a10miaomiao.bilimiao.ui.widget.flow.FlowLayout
 import org.jetbrains.anko.AnkoViewDslMarker
 import org.jetbrains.anko._LinearLayout
 import org.jetbrains.anko.custom.ankoView
@@ -25,10 +26,6 @@ inline fun ViewManager.monthPickerView(theme: Int = 0, init: (@AnkoViewDslMarker
     return ankoView({ ctx: Context -> MonthPickerView(ctx) }, theme, init)
 }
 
-inline fun ViewManager.rcLayout(theme: Int = 0): RCLayout = rcLayout(theme) {}
-inline fun ViewManager.rcLayout(theme: Int = 0, init: (@AnkoViewDslMarker RCLayout).() -> Unit): RCLayout {
-    return ankoView({ ctx: Context -> RCLayout(ctx) }, theme, init)
-}
 
 inline fun ViewManager.rcImageView(theme: Int = 0): RCImageView = rcImageView(theme) {}
 inline fun ViewManager.rcImageView(theme: Int = 0, init: (@AnkoViewDslMarker RCImageView).() -> Unit): RCImageView {
@@ -54,5 +51,10 @@ inline fun ViewManager.mySpannableTextView(theme: Int = 0, init: (@AnkoViewDslMa
 inline fun ViewManager.commentItemView(theme: Int = 0): CommentItemView = commentItemView(theme) {}
 inline fun ViewManager.commentItemView(theme: Int = 0, init: (@AnkoViewDslMarker CommentItemView).() -> Unit): CommentItemView {
     return ankoView({ ctx: Context -> CommentItemView(ctx) }, theme, init)
+}
+
+inline fun ViewManager.flowLayout(theme: Int = 0): FlowLayout = flowLayout(theme) {}
+inline fun ViewManager.flowLayout(theme: Int = 0, init: (@AnkoViewDslMarker FlowLayout).() -> Unit): FlowLayout {
+    return ankoView({ ctx: Context -> FlowLayout(ctx) }, theme, init)
 }
 

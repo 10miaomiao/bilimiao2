@@ -36,7 +36,7 @@ class MiaoViewHolder<T>(val parentView: View, val binding: Binding<T>? = null) :
             }
         }
 
-        fun View.bindClick( fn: ((item: T) -> Unit)) {
+        fun View.bindClick(fn: ((item: T) -> Unit)) {
             bindClick { item, index -> fn(item) }
         }
 

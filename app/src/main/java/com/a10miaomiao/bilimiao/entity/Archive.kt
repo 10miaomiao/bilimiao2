@@ -12,5 +12,6 @@ data class Archive(
         val status: Int,
         val title: String,
         val total_count: Int,
-        val uri: String
+        val uri: String,
+        val mid: Long
 )

@@ -14,6 +14,7 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -138,10 +139,11 @@ public class MySpannableTextView extends AppCompatTextView {
                     @Override
                     public void updateDrawState(TextPaint ds) {
                         super.updateDrawState(ds);
-                        ds.setColor(textView.getResources().getColor(R.color.colorAccent));
+                        ds.setColor(getColorAccent());
                         ds.setAntiAlias(true);
                         ds.setUnderlineText(false);
                     }
+
                     @Override
                     public void onClick(View widget) {
                         if (onAvTextClickListener != null)
@@ -156,7 +158,7 @@ public class MySpannableTextView extends AppCompatTextView {
             @Override
             public void updateDrawState(TextPaint ds) {
                 super.updateDrawState(ds);
-                ds.setColor(textView.getResources().getColor(R.color.colorAccent));
+                ds.setColor(getColorAccent());
 //                ds.setColor(textView.getResources().getColor(R.color.colorPrimary));
                 ds.setAntiAlias(true);
                 ds.setUnderlineText(false);
@@ -181,7 +183,7 @@ public class MySpannableTextView extends AppCompatTextView {
             public void updateDrawState(TextPaint ds) {
                 super.updateDrawState(ds);
 //                ds.setColor(textView.getResources().getColor(R.color.colorPrimary));
-                ds.setColor(textView.getResources().getColor(R.color.colorAccent));
+                ds.setColor(getColorAccent());
                 ds.setAntiAlias(true);
                 ds.setUnderlineText(false);
             }
@@ -210,5 +212,12 @@ public class MySpannableTextView extends AppCompatTextView {
 
     public interface OnAvTextClickListener {
         void onAvTextClick(MySpannableTextView view, String avId);
+    }
+
+    private int getColorAccent() {
+        TypedValue typedValue = new TypedValue();
+        getContext().getTheme()
+                .resolveAttribute(android.R.attr.colorAccent, typedValue, true);
+        return getResources().getColor(typedValue.resourceId);
     }
 }

@@ -10,9 +10,9 @@ import java.util.*
  * Created by 10喵喵 on 2017/10/24.
  */
 class SearchHistoryDB(context: Context, name: String, factory: SQLiteDatabase.CursorFactory?, version: Int) :
-        SQLiteOpenHelper(context,name,factory,version){
+        SQLiteOpenHelper(context, name, factory, version) {
 
-    companion object{
+    companion object {
         val DB_NAME = "PreventKeyWord_db2"
         val TABLE_NAME = "PreventKeyWord2"
     }
@@ -76,6 +76,8 @@ class SearchHistoryDB(context: Context, name: String, factory: SQLiteDatabase.Cu
         //关闭数据库
         db.close()
     }
+
+
     /**
      * 按序号删除某条数据
      */
@@ -86,6 +88,7 @@ class SearchHistoryDB(context: Context, name: String, factory: SQLiteDatabase.Cu
         //关闭数据库
         db.close()
     }
+
     /**
      * 删除全部数据
      */

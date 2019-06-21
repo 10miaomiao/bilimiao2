@@ -88,7 +88,7 @@ class VideoCommentDetailsFragment : Fragment() {
                         Owner(
                                 face = member.avatar,
                                 name = member.uname,
-                                mid = member.mid.toInt()
+                                mid = member.mid.toLong()
                         )
                 ))
                 MainActivity.of(context)
@@ -151,7 +151,7 @@ class VideoCommentDetailsFragment : Fragment() {
                                 Owner(
                                         face = member.avatar,
                                         name = member.uname,
-                                        mid = member.mid.toInt()
+                                        mid = member.mid.toLong()
                                 )
                         ))
                         MainActivity.of(context)

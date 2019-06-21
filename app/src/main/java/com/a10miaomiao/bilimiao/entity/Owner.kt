@@ -5,18 +5,18 @@ import android.os.Parcelable
 
 data class Owner(
     val face: String,
-    val mid: Int,
+    val mid: Long,
     val name: String
 ) : Parcelable{
     constructor(parcel: Parcel) : this(
             parcel.readString(),
-            parcel.readInt(),
+            parcel.readLong(),
             parcel.readString()) {
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(face)
-        parcel.writeInt(mid)
+        parcel.writeLong(mid)
         parcel.writeString(name)
     }
 

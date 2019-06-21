@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -15,13 +16,14 @@ import android.widget.ImageView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.BiliMiaoRank
+import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.rank.RankCategoryDetailsFragment
 import com.a10miaomiao.bilimiao.ui.rank.RankCategoryFragment
 import com.a10miaomiao.bilimiao.ui.region.RegionDetailsViewModel
+import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -43,7 +45,7 @@ class RankFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProviders.of(this).get(RankViewModel::class.java)
-        return render().view
+        return MainActivity.of(context!!).dynamicTheme(this) { render().view }
     }
 
     private fun handleItemClick(item: BiliMiaoRank, position: Int) {
@@ -58,6 +60,15 @@ class RankFragment : Fragment() {
         }
     }
 
+    private val onMenuItemClick = Toolbar.OnMenuItemClickListener { menuItem ->
+        when (menuItem.itemId) {
+            R.id.search -> {
+                startFragment(SearchFragment.newInstance())
+            }
+        }
+        true
+    }
+
     private fun render() = UI {
         verticalLayout {
             backgroundColor = config.background
@@ -67,10 +78,12 @@ class RankFragment : Fragment() {
                 navigationOnClick {
                     RxBus.getInstance().send(ConstantUtil.OPEN_DRAWER)
                 }
+                inflateMenu(R.menu.search)
+                onMenuItemClick(onMenuItemClick)
             }
 
             swipeRefreshLayout {
-                setColorSchemeResources(R.color.colorPrimary)
+                setColorSchemeResources(config.themeColorResource)
                 viewModel.bind(viewModel::loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
@@ -123,8 +136,6 @@ class RankFragment : Fragment() {
                     }
                 }
             }
-
-
         }
         onItemClick(::handleItemClick)
     }

@@ -10,11 +10,11 @@ import android.text.TextUtils
 import android.view.*
 import android.widget.*
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.BiliMiaoRank
 import com.a10miaomiao.bilimiao.ui.bangumi.BangumiFragment
 import com.a10miaomiao.bilimiao.ui.commponents.dropMenuView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -42,7 +42,7 @@ class RankCategoryDetailsFragment : Fragment() {
     private lateinit var viewModel: RankCategoryDetailsViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProviders.of(this, newViewModelFactory { RankCategoryDetailsViewModel(info, _id) })
+        viewModel = ViewModelProviders.of(this, newViewModelFactory { RankCategoryDetailsViewModel(context!!, info, _id) })
                 .get(RankCategoryDetailsViewModel::class.java)
         return render().view
     }
@@ -83,7 +83,7 @@ class RankCategoryDetailsFragment : Fragment() {
             }
 
             swipeRefreshLayout {
-                setColorSchemeResources(R.color.colorPrimary)
+                setColorSchemeResources(config.themeColorResource)
                 viewModel.loading.observeNotNull(::setRefreshing)
 //                viewModel.bind(viewModel::loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.loadData() }
@@ -111,7 +111,7 @@ class RankCategoryDetailsFragment : Fragment() {
                     binding.bindIndexed { item, index ->
                         text = (index + 1).toString()
                         setTextColor(context.resources.getColor(
-                                if (index > 2) R.color.text_black else R.color.colorAccent
+                                if (index > 2) R.color.text_black else config.themeColorResource
                         ))
                     }
                 }.lparams(dip(30), wrapContent) {
@@ -176,7 +176,7 @@ class RankCategoryDetailsFragment : Fragment() {
                     binding.bindIndexed { item, index ->
                         text = (index + 1).toString()
                         setTextColor(context.resources.getColor(
-                                if (index > 2) R.color.text_black else R.color.colorAccent
+                                if (index > 2) R.color.text_black else config.themeColorResource
                         ))
                     }
                 }.lparams(dip(30), wrapContent) {

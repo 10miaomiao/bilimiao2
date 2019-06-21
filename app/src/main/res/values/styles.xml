@@ -14,6 +14,8 @@
         <item name="android:fitsSystemWindows">true</item>
     </style>
 
+
+
     <!--透明activity-->
     <style name="TranslucentTheme" parent="AppTheme.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>

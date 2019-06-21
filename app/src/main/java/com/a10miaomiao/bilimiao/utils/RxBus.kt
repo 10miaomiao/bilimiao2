@@ -46,5 +46,21 @@ class RxBus {
         fun getInstance(): RxBus {
             return BUS
         }
+
+        fun send(tag: RxBusMsg) {
+            getInstance().send(tag)
+        }
+
+        fun send(tag: String) {
+            getInstance().send(tag)
+        }
+
+        fun send(tag: String, data: Any) {
+            send(RxBusMsg(tag, data))
+        }
+
+        fun on(tag: String, fn: (data: Any?) -> Unit): Disposable {
+            return getInstance().on(tag, fn)
+        }
     }
 }

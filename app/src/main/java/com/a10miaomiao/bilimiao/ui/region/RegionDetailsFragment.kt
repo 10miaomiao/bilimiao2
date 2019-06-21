@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.ui.commponents.*
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
@@ -92,7 +93,7 @@ class RegionDetailsFragment : Fragment() {
                 }
             }.lparams(width = matchParent) { bottomMargin = dip(5) }
             swipeRefreshLayout {
-                setColorSchemeResources(R.color.colorPrimary)
+                setColorSchemeResources(config.themeColorResource)
                 viewModel.bind(viewModel::loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
@@ -111,15 +112,6 @@ class RegionDetailsFragment : Fragment() {
                     selectableItemBackground()
                     padding = dip(5)
 
-//                    rcLayout {
-//                        roundCorner = dip(5)
-//                        imageView {
-//                            // scaleType = ImageView.ScaleType.CENTER
-//                            binding.bind { item -> network(item.pic) }
-//                        }.lparams(matchParent, matchParent)
-//                    }.lparams(width = dip(140), height = dip(85)) {
-//
-//                    }
 
                     rcImageView {
                         radius = dip(5)

@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView
 import com.a10miaomiao.bilimiao.entity.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
@@ -30,6 +32,8 @@ class RegionDetailsViewModel(val context: Context, val tid: Int) : MiaoViewModel
     var loadState by miao(LoadMoreView.State.LOADING)
 
     var list = MiaoList<RegionTypeDetailsInfo.Result>()
+
+    val filterStore by lazy { MainActivity.of(context).filterStore }
 
     private var subscriber = RxBus.getInstance().on(ConstantUtil.TIME_CHANGE) {
         val timeFrom = DateModel(this).read(context!!, ConstantUtil.TIME_FROM)
@@ -60,20 +64,35 @@ class RegionDetailsViewModel(val context: Context, val tid: Int) : MiaoViewModel
         }
         loading = true
         val url = BiliApiService.getRegionTypeVideoList(tid, rankOrder, pageNum, pageSize, timeFrom.getValue(), timeTo.getValue())
+        var totalCount = 0 // 屏蔽前数量
         MiaoHttp.getJson<RegionTypeDetailsInfo>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ data ->
-                    loading = false
-                    list.addAll(data.result)
-                    DebugMiao.log(data.result.size )
-                    if (data.result.size < pageSize) {
+                .map { data -> data.result }
+                .doOnNext { result ->
+                    if (result.size < pageSize) {
                         loadState = LoadMoreView.State.NOMORE
                     }
+                }
+                .map { result ->
+                    totalCount = result.size
+                    result.filter {
+                        filterStore.filterWord(it.title)
+                                && filterStore.filterUpper(it.mid.toLong())
+                    }
+                }
+                .subscribe({ result ->
+                    list.addAll(result)
+                    if (list.size < 10 && totalCount != result.size) {
+                        loading = false
+                        pageNum++
+                        loadData()
+                    }
                 }, { err ->
-                    loading = false
                     loadState = LoadMoreView.State.FAIL
                     err.printStackTrace()
+                }, {
+                    loading = false
                 })
     }
 

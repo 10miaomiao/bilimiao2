@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="PinkTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/pink</item>
+        <item name="colorPrimaryDark">@color/pink</item>
+        <item name="colorAccent">@color/pink</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <style name="RedTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/red</item>
+        <item name="colorPrimaryDark">@color/red</item>
+        <item name="colorAccent">@color/red</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <style name="YellowTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/orange</item>
+        <item name="colorPrimaryDark">@color/orange</item>
+        <item name="colorAccent">@color/orange</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <style name="GreenTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/green_light</item>
+        <item name="colorPrimaryDark">@color/green_light</item>
+        <item name="colorAccent">@color/green_light</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <style name="BlueTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/blue</item>
+        <item name="colorPrimaryDark">@color/blue</item>
+        <item name="colorAccent">@color/blue</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <style name="PurpleTheme" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">@color/purple</item>
+        <item name="colorPrimaryDark">@color/purple</item>
+        <item name="colorAccent">@color/purple</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <style name="NightTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/nightColorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/nightColorPrimaryDark</item>
+        <item name="colorAccent">@color/pink</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/nightColorPrimaryDark</item>
+        <item name="cardBackgroundColor">@color/nightColorPrimaryDark</item>
+    </style>
+</resources>

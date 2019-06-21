@@ -13,11 +13,8 @@ import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.MainActivity
-import com.a10miaomiao.bilimiao.ui.bangumi.EpisodesFragment
 import com.a10miaomiao.bilimiao.ui.commponents.mySpannableTextView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
-import com.a10miaomiao.bilimiao.ui.player.PlayerActivity
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -42,7 +39,7 @@ class VideoInfoDetailsFragment : Fragment() {
     private lateinit var viewModel: VideoInfoViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProviders.of(VideoInfoFragment.instance, newViewModelFactory { VideoInfoViewModel(id) })
+        viewModel = ViewModelProviders.of(VideoInfoFragment.instance, newViewModelFactory { VideoInfoViewModel(context!!, id) })
                 .get(VideoInfoViewModel::class.java)
         return createUI().view
     }
@@ -344,7 +341,7 @@ class VideoInfoDetailsFragment : Fragment() {
                     b.bindIndexed { item, index ->
                         if (viewModel.pageIndex.value == index) {
                             this@frameLayout.isEnabled = false
-                            textColorResource = R.color.colorAccent
+                            textColorResource = config.themeColorResource
                         } else {
                             this@frameLayout.isEnabled = true
                             textColorResource = R.color.text_black

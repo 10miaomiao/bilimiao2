@@ -30,7 +30,6 @@
             android:defaultValue="true"/>
 
         <Preference
-            android:enabled="false"
             android:key="theme"
             android:summary="库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
             android:title="切换主题" />

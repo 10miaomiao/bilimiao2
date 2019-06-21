@@ -11,6 +11,7 @@ import android.preference.PreferenceFragment
 import android.preference.PreferenceScreen
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.ui.MainActivity
+import com.a10miaomiao.bilimiao.ui.theme.ThemeFragment
 import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
 
@@ -37,7 +38,7 @@ class SettingPreferenceFragment : PreferenceFragment() {
         addPreferencesFromResource(R.xml.preference_setting)
         showVersion()
         fragmentAnimator.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
-            MainActivity.of(context).fragmentAnimator = when (newValue as String) {
+            MainActivity.of(activity).fragmentAnimator = when (newValue as String) {
                 "vertical" -> DefaultVerticalAnimator()
                 "horizontal" -> DefaultHorizontalAnimator()
                 else -> DefaultVerticalAnimator()
@@ -80,7 +81,7 @@ class SettingPreferenceFragment : PreferenceFragment() {
                 return true
             }
             "theme" -> {
-//                ThemePickerActivity.launch(activity)
+                MainActivity.of(activity).start(ThemeFragment())
             }
             "help" -> {
                 val intent = Intent(Intent.ACTION_VIEW)

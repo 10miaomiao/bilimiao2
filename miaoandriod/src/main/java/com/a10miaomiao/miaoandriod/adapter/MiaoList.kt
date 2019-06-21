@@ -41,4 +41,9 @@ class MiaoList<E> : ArrayList<E>(){
         updateView?.invoke()
         return r
     }
+
+    override fun clear() {
+        super.clear()
+        updateView?.invoke()
+    }
 }

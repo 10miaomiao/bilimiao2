@@ -9,14 +9,16 @@ import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CollapsingToolbarLayout
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
+import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.bumptech.glide.Glide
@@ -29,7 +31,6 @@ import org.jetbrains.anko.design.collapsingToolbarLayout
 import org.jetbrains.anko.design.coordinatorLayout
 import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
-import org.jetbrains.anko.support.v4.nestedScrollView
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
 
 class UpperInfoFragment : SwipeBackFragment() {
@@ -46,11 +47,29 @@ class UpperInfoFragment : SwipeBackFragment() {
 
     val owner by lazy { arguments!!.getParcelable<Owner>("owner") }
     lateinit var viewModel: UpperInfoViewModel
+    lateinit var filterStore: FilterStore
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        filterStore = MainActivity.of(context!!).filterStore
         viewModel = ViewModelProviders.of(this, newViewModelFactory { UpperInfoViewModel(owner) })
                 .get(UpperInfoViewModel::class.java)
         return attachToSwipeBack(createUI().view)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        viewModel.noLike.value = !filterStore.filterUpper(owner.mid)
+    }
+
+    private val onMenuItemClickListener = Toolbar.OnMenuItemClickListener {
+        if (viewModel.noLike.value == true) {
+            filterStore.deleteUpper(owner.mid)
+            viewModel.noLike.value = false
+        } else {
+            filterStore.addUpper(owner.mid, owner.name)
+            viewModel.noLike.value = true
+        }
+        true
     }
 
     private fun createUI() = UI {
@@ -81,7 +100,7 @@ class UpperInfoFragment : SwipeBackFragment() {
             }
 
             swipeRefreshLayout {
-                setColorSchemeResources(R.color.colorPrimary)
+                setColorSchemeResources(config.themeColorResource)
                 viewModel.loading.observe(owner, Observer {
                     isRefreshing = it!! != 2
                 })
@@ -102,7 +121,7 @@ class UpperInfoFragment : SwipeBackFragment() {
     /**
      * 工具栏
      */
-    private fun ViewManager.createToolbar(appBarLayout: AppBarLayout, statusBarHeight: Int) = toolbar {
+    private fun ViewManager.createToolbar(appBarLayout: AppBarLayout, statusBarHeight: Int) = include<Toolbar>(R.layout.layout_toolbar) {
         topPadding = statusBarHeight
         contentInsetStartWithNavigation = 0
         setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
@@ -123,6 +142,18 @@ class UpperInfoFragment : SwipeBackFragment() {
                 }
             })
         }
+
+
+        menu.add("屏蔽该up主").apply {
+            viewModel.noLike.observe(this@UpperInfoFragment, Observer {
+                title = if (it == true) {
+                    "取消屏蔽该up主"
+                } else {
+                    "屏蔽该up主"
+                }
+            })
+        }
+        setOnMenuItemClickListener(onMenuItemClickListener)
     }
 
 
@@ -185,8 +216,9 @@ class UpperInfoFragment : SwipeBackFragment() {
                     radius = dip(5)
                     binding.bind { item ->
                         scaleType = ImageView.ScaleType.CENTER_CROP
+
                         Glide.with(context)
-                                .load(item.cover)
+                                .loadPic(item.cover)
                                 .bitmapTransform(BlurTransformation(context, 14, 6)) // 高斯模糊
                                 .into(this)
                     }

@@ -31,6 +31,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.support.v4.content.ContextCompat.getSystemService
+import com.a10miaomiao.bilimiao.config.config
 
 
 class VideoCommentFragment : Fragment() {
@@ -56,7 +57,7 @@ class VideoCommentFragment : Fragment() {
 
     private fun createUI() = UI {
         swipeRefreshLayout {
-            setColorSchemeResources(R.color.colorPrimary)
+            setColorSchemeResources(config.themeColorResource)
             viewModel.loading.observe(owner, Observer {
                 isRefreshing = it!!
             })
@@ -123,7 +124,7 @@ class VideoCommentFragment : Fragment() {
                                 Owner(
                                         face = member.avatar,
                                         name = member.uname,
-                                        mid = member.mid.toInt()
+                                        mid = member.mid.toLong()
                                 )
                         ))
                     }

@@ -8,17 +8,14 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.bangumi.BangumiFragment
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
-import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
 import org.jetbrains.anko.*
@@ -37,7 +34,7 @@ class BangumiResultFragment : Fragment() {
 
     private fun render() = UI {
         swipeRefreshLayout {
-            setColorSchemeResources(R.color.colorPrimary)
+            setColorSchemeResources(config.themeColorResource)
             viewModel.loading.observe(owner, Observer {
                 isRefreshing = it!!
             })
@@ -57,6 +54,7 @@ class BangumiResultFragment : Fragment() {
                 lparams(matchParent, wrapContent)
                 selectableItemBackground()
                 padding = dip(5)
+
 
                 rcImageView {
                     radius = dip(5)

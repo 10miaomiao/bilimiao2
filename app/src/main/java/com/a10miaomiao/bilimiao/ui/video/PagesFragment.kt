@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Page
 import com.a10miaomiao.bilimiao.entity.bangumi.BangumiEpisode
 import com.a10miaomiao.bilimiao.ui.MainActivity
@@ -68,7 +69,7 @@ class PagesFragment : Fragment() {
                                 b.bindIndexed { item, i ->
                                     if (index == i) {
                                         this@frameLayout.isEnabled = false
-                                        textColorResource = R.color.colorAccent
+                                        textColorResource = config.themeColorResource
                                     } else {
                                         this@frameLayout.isEnabled = true
                                         textColorResource = R.color.text_black

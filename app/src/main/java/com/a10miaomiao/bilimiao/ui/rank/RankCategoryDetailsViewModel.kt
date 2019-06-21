@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.ui.rank
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.content.Context
 import android.view.Menu
 import android.view.MenuItem
 import com.a10miaomiao.bilimiao.entity.BangumiRankInfo
@@ -9,6 +10,7 @@ import com.a10miaomiao.bilimiao.entity.BiliMiaoRank
 import com.a10miaomiao.bilimiao.entity.VideoRankInfo
 import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
@@ -16,7 +18,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 
-class RankCategoryDetailsViewModel(var info: BiliMiaoRank, var id: Int) : ViewModel() {
+class RankCategoryDetailsViewModel(
+        val context: Context,
+        var info: BiliMiaoRank,
+        var id: Int
+) : ViewModel() {
 
     val myFilter = info.filter.map {
         BiliMiaoRank.FilterItem(
@@ -43,13 +49,20 @@ class RankCategoryDetailsViewModel(var info: BiliMiaoRank, var id: Int) : ViewMo
     fun loadVideoData() {
         loading.value = true
         val url = createUrl()
+        val filterStore = MainActivity.of(context).filterStore
         MiaoHttp.getJson<VideoRankInfo>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ data ->
+                .map { data ->
+                    data.rank.list.filter {
+                        filterStore.filterWord(it.title)
+                                && filterStore.filterUpper(it.mid)
+                    }
+                }
+                .subscribe({ list ->
                     loading.value = false
                     videoList.clear()
-                    videoList.addAll(data.rank.list)
+                    videoList.addAll(list)
                 }, { e ->
                     loading.value = false
                     e.printStackTrace()

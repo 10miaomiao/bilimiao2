@@ -60,7 +60,7 @@ class VideoInfoFragment : SwipeBackFragment() {
         instance = this
         initToolbar()
         initView()
-        viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoInfoViewModel(id) })
+        viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoInfoViewModel(context!!, id) })
                 .get(VideoInfoViewModel::class.java)
         viewModel.info.observe(this, updateView)
         viewModel.state.observe(this, Observer {

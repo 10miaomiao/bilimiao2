@@ -3,11 +3,9 @@ package com.a10miaomiao.bilimiao.ui.search
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.text.Editable
 import android.text.TextWatcher
@@ -16,14 +14,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.entity.BiliMiaoRank
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
-import com.a10miaomiao.bilimiao.ui.rank.RankCategoryDetailsFragment
-import com.a10miaomiao.bilimiao.ui.rank.RankCategoryDetailsViewModel
-import com.a10miaomiao.bilimiao.ui.region.RegionFragment
+import com.a10miaomiao.bilimiao.config.ViewStyle
 import kotlinx.android.synthetic.main.fragment_search.*
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 import com.a10miaomiao.bilimiao.ui.widget.flow.FlowAdapter
@@ -179,17 +171,18 @@ class SearchFragment : SwipeBackFragment() {
             yesButton {
                 viewModel.deleteSearchHistory(text)
             }
-            noButton {  }
+            noButton { }
             show()
         }
     }
+
     private fun deleteHistoryAll() {
         alert {
             title = "确定清空？"
             yesButton {
                 viewModel.deleteAllSearchHistory()
             }
-            noButton {  }
+            noButton { }
             show()
         }
     }
@@ -217,22 +210,21 @@ class SearchFragment : SwipeBackFragment() {
         var onItemLongClickListener: ((position: Int) -> Unit)? = null
 
         override fun getView(position: Int, parent: FlowLayout) = parent.context!!.UI {
-            rcLayout {
-                roundCorner = dip(5)
-                frameLayout {
-                    backgroundColorResource = R.color.colorBackground
-                    textView {
-                        text = getItem(position)
-                        padding = dip(5)
-                        selectableItemBackground()
-                        setOnClickListener { onItemClickListener?.invoke(position) }
-                        setOnLongClickListener {
-                            onItemLongClickListener?.invoke(position)
-                            return@setOnLongClickListener true
-                        }
+            frameLayout {
+                applyRecursively(ViewStyle.roundRect(dip(5)))
+                backgroundColorResource = R.color.colorBackground
+                textView {
+                    text = getItem(position)
+                    padding = dip(5)
+                    selectableItemBackground()
+                    setOnClickListener { onItemClickListener?.invoke(position) }
+                    setOnLongClickListener {
+                        onItemLongClickListener?.invoke(position)
+                        return@setOnLongClickListener true
                     }
                 }
             }
+
         }.view
     }
 

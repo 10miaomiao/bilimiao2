@@ -109,13 +109,13 @@ object BiliApiService {
     /**
      * 获取up主的视频列表
      */
-    fun getUpperVideo(mid: Int, pageNum: Int, pageSize: Int) =
+    fun getUpperVideo(mid: Long, pageNum: Int, pageSize: Int) =
             "https://space.bilibili.com/ajax/member/getSubmitVideos?mid=$mid&page=$pageNum&pagesize=$pageSize"
 
     /**
      * 获取up主的频道列表
      */
-    fun getUpperChanne(mid: Int) =
+    fun getUpperChanne(mid: Long) =
             "https://api.bilibili.com/x/space/channel/index?mid=$mid&guest=false&jsonp=jsonp"
 
     /**

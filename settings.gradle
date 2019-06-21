@@ -1,1 +1,1 @@
-include ':app', ':miaoandriod', ':player'
+include ':app', ':miaoandriod', ':player', ':dragging_sheet'

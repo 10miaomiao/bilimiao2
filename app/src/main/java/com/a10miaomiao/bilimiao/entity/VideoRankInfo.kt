@@ -17,7 +17,7 @@ data class VideoRankInfo (
             var aid: String,
             var title: String,
             var author: String,
-            var mid: String,
+            var mid: Long,
             var coins: Int,//硬币数
             var duration: String,
             var pic: String,

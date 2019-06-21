@@ -19,7 +19,6 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.commponents.dropMenuView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.region.RegionDetailsViewModel
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
@@ -40,7 +39,7 @@ class SearchResultFragment : Fragment() {
     lateinit var viewModel: SearchResultViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProviders.of(this, newViewModelFactory { SearchResultViewModel(this) }).get(SearchResultViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, newViewModelFactory { SearchResultViewModel(context!!, this) }).get(SearchResultViewModel::class.java)
         return render().view
     }
 
@@ -70,7 +69,7 @@ class SearchResultFragment : Fragment() {
                 }.lparams(width = matchParent) { bottomMargin = dip(5) }
 
                 swipeRefreshLayout {
-                    setColorSchemeResources(R.color.colorPrimary)
+                    setColorSchemeResources(config.themeColorResource)
                     viewModel.loading.observe(owner, Observer {
                         isRefreshing = it!!
                     })
@@ -136,7 +135,7 @@ class SearchResultFragment : Fragment() {
                             binding.bindIndexed { item, index ->
                                 text = item
                                 textColorResource = if (index == i.value) {
-                                    R.color.colorAccent
+                                    config.themeColorResource
                                 } else {
                                     R.color.text_black
                                 }

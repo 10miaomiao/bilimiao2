@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.ui
 
+import android.arch.lifecycle.LifecycleOwner
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -25,19 +26,18 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.widget.DrawerLayout
 import com.a10miaomiao.bilimiao.base.BaseFragment
 import com.a10miaomiao.bilimiao.ui.home.MainFragment
-import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.bilimiao.utils.DebugMiao
-import com.a10miaomiao.bilimiao.utils.RxBus
 import me.yokeyword.fragmentation.SupportActivity
 import me.yokeyword.fragmentation.SupportFragment
 import java.nio.file.Files.size
 import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.FragmentAnimator
 import android.view.WindowInsets
+import cn.a10miaomiao.dragging_sheet.YouTuDraggingView
+import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.ui.bangumi.BangumiFragment
 import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
+import com.a10miaomiao.bilimiao.utils.*
 import me.yokeyword.fragmentation.ISupportFragment
 import me.yokeyword.fragmentation.SupportHelper
 import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
@@ -50,16 +50,18 @@ class MainActivity : SupportActivity() {
         BottomSheetBehavior.from(bottomSheet)
     }
     var bottomSheetFragment: Fragment? = null
+    val filterStore by lazy { FilterStore(this) }
+    val themeUtil by lazy { ThemeUtil(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        themeUtil.init()
         setContentView(R.layout.activity_main)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             windowInsets = rootLayout.rootWindowInsets
         }
         initBottomSheet()
         if (findFragment(MainFragment::class.java) == null) {
-//            loadRootFragment(R.id.rootContainer, BangumiFragment.newInstance("24951"))
             loadRootFragment(R.id.rootContainer, MainFragment())
         }
 //        loadRootFragment(R.id.rightContainer, SearchFragment())
@@ -160,6 +162,9 @@ class MainActivity : SupportActivity() {
     fun hideBottomSheet() {
         behavior.state = BottomSheetBehavior.STATE_HIDDEN
     }
+
+    fun dynamicTheme(owner: LifecycleOwner, builder: () -> View)
+            = themeUtil.dynamicTheme(owner, builder)
 
     companion object {
         fun of(context: Context): MainActivity {

@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.ui.search
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
+import android.content.Context
 import android.support.v4.app.Fragment
 import com.a10miaomiao.bilimiao.entity.Archive
 import com.a10miaomiao.bilimiao.entity.ResultInfo
@@ -10,12 +11,16 @@ import com.a10miaomiao.bilimiao.entity.SearchData
 import com.a10miaomiao.bilimiao.entity.SearchItems
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class SearchResultViewModel(val fragment: Fragment) : ViewModel() {
+class SearchResultViewModel(
+        val context: Context,
+        val fragment: Fragment
+) : ViewModel() {
 
     val list = MiaoList<Archive>()
     val loading = MutableLiveData<Boolean>()
@@ -66,20 +71,35 @@ class SearchResultViewModel(val fragment: Fragment) : ViewModel() {
 
     fun loadData() {
         loading.value = true
+        val filterStore = MainActivity.of(context).filterStore
+        var totalCount = 0 // 屏蔽前数量
         MiaoHttp.getJson<ResultInfo<SearchData<SearchItems>>>(getUrl())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ res ->
-                    loading.value = false
-                    val archive = res.data.items.archive
-                    list.addAll(archive)
+                .map { r -> r.data.items.archive }
+                .doOnNext { archive ->
                     if (archive.size < pageSize) {
                         loadState.value = LoadMoreView.State.NOMORE
                     }
+                }
+                .map { result ->
+                    totalCount = result.size
+                    result.filter {
+                        filterStore.filterWord(it.title)
+                                && filterStore.filterUpper(it.mid)
+                    }
+                }
+                .subscribe({ archive ->
+                    list.addAll(archive)
+                    if (list.size < 10 && totalCount != archive.size) {
+                        pageNum++
+                        loadData()
+                    }
                 }, { err ->
-                    loading.value = false
                     loadState.value = LoadMoreView.State.FAIL
                     err.printStackTrace()
+                }, {
+                    loading.value = false
                 })
     }
 

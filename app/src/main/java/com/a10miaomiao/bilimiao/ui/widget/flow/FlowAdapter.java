@@ -43,6 +43,14 @@ public abstract class FlowAdapter<T> {
         mOnDataChangedListener = listener;
     }
 
+    public List<T> getDataList() {
+        return mDataList;
+    }
+
+    public void setDataList(List<T> mDataList) {
+        this.mDataList = mDataList;
+    }
+
     public interface OnDataChangedListener {
         void onDataChanged();
     }

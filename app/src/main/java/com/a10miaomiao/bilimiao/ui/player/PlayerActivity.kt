@@ -23,6 +23,7 @@ import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.PlayurlHelper
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
+import com.a10miaomiao.bilimiao.utils.ThemeUtil
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -110,6 +111,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemeUtil(this).init()
         setContentView(R.layout.activity_player)
 
         initController()

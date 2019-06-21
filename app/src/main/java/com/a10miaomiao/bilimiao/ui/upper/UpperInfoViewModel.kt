@@ -15,12 +15,14 @@ import io.reactivex.schedulers.Schedulers
 class UpperInfoViewModel(val owner: Owner) : ViewModel() {
 
     var list = MiaoList<UpperChannel>()
+    val noLike = MutableLiveData<Boolean>() // 不喜欢，是否屏蔽
     val loading = MutableLiveData<Int>()
     val loadState = MutableLiveData<LoadMoreView.State>()
 
     init {
         loadData()
         loadState.value = LoadMoreView.State.LOADING
+        noLike.value = false
     }
 
     private fun loadData() {
@@ -45,7 +47,7 @@ class UpperInfoViewModel(val owner: Owner) : ViewModel() {
                                 mid = 0,
                                 name = "全部投稿",
                                 count = data.count,
-                                cover = "https://" + data.vlist[0].pic,
+                                cover = data.vlist[0].pic,
 //                                archives = ArrayList<UpperArchives>(),
                                 mtime = 0,
                                 intro = "全部投稿",

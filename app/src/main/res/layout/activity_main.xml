@@ -59,4 +59,12 @@
 
     </RelativeLayout>
 
+    <!--<cn.a10miaomiao.dragging_sheet.YouTuDraggingView-->
+        <!--android:id="@+id/mYouTuDraggingView"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_gravity="bottom"-->
+        <!--android:orientation="vertical"-->
+        <!--android:visibility="invisible"/>-->
+
 </android.support.design.widget.CoordinatorLayout>

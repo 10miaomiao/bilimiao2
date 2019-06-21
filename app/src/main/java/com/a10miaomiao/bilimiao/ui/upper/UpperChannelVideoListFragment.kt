@@ -12,12 +12,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.entity.UpperChannel
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -58,7 +58,7 @@ class UpperChannelVideoListFragment : SwipeBackFragment() {
             }
 
             swipeRefreshLayout {
-                setColorSchemeResources(R.color.colorPrimary)
+                setColorSchemeResources(config.themeColorResource)
                 viewModel.loading.observe(owner, Observer {
                     isRefreshing = it!!
                 })

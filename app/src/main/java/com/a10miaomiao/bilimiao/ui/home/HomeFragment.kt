@@ -1,13 +1,11 @@
 package com.a10miaomiao.bilimiao.ui.home
 
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.Toolbar
 import android.view.*
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
@@ -15,9 +13,7 @@ import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.region.RegionFragment
 import com.a10miaomiao.bilimiao.ui.search.SearchFragment
-import com.a10miaomiao.bilimiao.ui.search.SearchViewModel
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
-import com.a10miaomiao.bilimiao.ui.video.VideoCommentDetailsFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.a10miaomiao.miaoandriod.anko.liveUI
@@ -35,17 +31,17 @@ class HomeFragment : Fragment() {
         viewModel = ViewModelProviders.of(this, newViewModelFactory {
             HomeViewModel(context!!)
         }).get(HomeViewModel::class.java)
-        return render().view
+        return MainActivity.of(context!!).dynamicTheme(this) { render().view }
     }
 
 
-    private fun onMenuItemClick(menuItem: MenuItem): Boolean {
+    private val onMenuItemClick = Toolbar.OnMenuItemClickListener { menuItem ->
         when (menuItem.itemId) {
             R.id.search -> {
                 startFragment(SearchFragment.newInstance())
             }
         }
-        return true
+        true
     }
 
     private fun render() = liveUI {
@@ -58,7 +54,7 @@ class HomeFragment : Fragment() {
                     RxBus.getInstance().send(ConstantUtil.OPEN_DRAWER)
                 }
                 inflateMenu(R.menu.search)
-                onMenuItemClick(this@HomeFragment::onMenuItemClick)
+                onMenuItemClick(onMenuItemClick)
             }
             nestedScrollView {
                 verticalLayout {
@@ -113,15 +109,16 @@ class HomeFragment : Fragment() {
 
                     // 广告通知
                     linearLayout {
-                        viewModel.adInfo.observeNotNull {
-                            visibility = if (it.isShow) View.VISIBLE else View.GONE
+                        visibility = View.GONE
+                        viewModel.adInfo.observe {
+                            visibility = if (it?.isShow == true) View.VISIBLE else View.GONE
                         }
 
                         backgroundColor = Color.WHITE
                         padding = config.dividerSize
                         textView {
                             viewModel.adInfo.observeNotNull { text = it.title }
-                        }.lparams{
+                        }.lparams {
                             width = matchParent
                             weight = 1f
                         }
@@ -137,14 +134,6 @@ class HomeFragment : Fragment() {
                         width = matchParent
                         topMargin = config.dividerSize
                     }
-
-
-//                    button("测试"){
-//                        setOnClickListener {
-//                            MainActivity.of(context)
-//                                    .showBottomSheet(VideoCommentDetailsFragment.newInstance())
-//                        }
-//                    }
 
 
                 }

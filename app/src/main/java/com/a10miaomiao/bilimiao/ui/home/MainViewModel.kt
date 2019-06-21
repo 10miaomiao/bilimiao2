@@ -4,10 +4,6 @@ import android.arch.lifecycle.ViewModel
 import android.support.v4.app.Fragment
 
 class MainViewModel : ViewModel() {
-    val homeFragment = HomeFragment()
-    val rankFragment = RankFragment()
-    val dowmloadFragment = DowmloadFragment()
-    val filterFragment = FilterFragment()
-
+    var checkedMenuItemId: Int? = null
     var currentFragment: Fragment? = null
 }

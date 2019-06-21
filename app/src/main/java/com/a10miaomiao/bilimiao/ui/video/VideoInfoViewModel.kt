@@ -3,10 +3,12 @@ package com.a10miaomiao.bilimiao.ui.video
 import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.content.Context
 import android.util.Log
 import com.a10miaomiao.bilimiao.entity.*
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
@@ -18,7 +20,10 @@ import org.json.JSONTokener
 import java.text.DateFormat
 import java.util.*
 
-class VideoInfoViewModel(var id: String) : MiaoViewModel() {
+class VideoInfoViewModel(
+        val context: Context,
+        var id: String
+) : MiaoViewModel() {
 
     private val _info = MutableLiveData<PageInfo>()
     val info: LiveData<PageInfo> get() = _info
@@ -36,6 +41,7 @@ class VideoInfoViewModel(var id: String) : MiaoViewModel() {
     fun loadData() {
         state.value = null
         val url = BiliApiService.getVideoInfo(id)
+        val filterStore = MainActivity.of(context).filterStore
         MiaoHttp.getJson<ResultInfo<VideoInfo>>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -44,7 +50,13 @@ class VideoInfoViewModel(var id: String) : MiaoViewModel() {
                         val data = r.data
                         _info.value = PageInfo(data)
                         relates.clear()
-                        relates.addAll(data.relates)
+                        relates.addAll(
+                                data.relates.filter {
+                                    filterStore.filterWord(it.title)
+                                            && it.owner != null
+                                            && filterStore.filterUpper(it.owner.mid)
+                                }
+                        )
                         pages.clear()
                         pages.addAll(data.pages)
                     } else if (r.code == -403) {

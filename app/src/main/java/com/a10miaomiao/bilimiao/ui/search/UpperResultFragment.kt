@@ -13,10 +13,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.commponents.rcLayout
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
@@ -36,7 +36,7 @@ class UpperResultFragment : Fragment() {
 
     private fun render() = UI {
         swipeRefreshLayout {
-            setColorSchemeResources(R.color.colorPrimary)
+            setColorSchemeResources(config.themeColorResource)
             viewModel.loading.observe(owner, Observer {
                 isRefreshing = it!!
             })
@@ -100,7 +100,7 @@ class UpperResultFragment : Fragment() {
                     Owner(
                             face = item.cover
                             , name = item.title
-                            , mid = item.param.toInt()
+                            , mid = item.param.toLong()
                     )
             ))
 //                    IntentHandlerUtil.openWithPlayer(activity!!, IntentHandlerUtil.TYPE_VIDEO, item.id)

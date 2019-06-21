@@ -1,12 +1,14 @@
 package com.a10miaomiao.bilimiao.ui.setting
 
 import android.annotation.SuppressLint
+import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.preference.PreferenceScreen
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 import org.jetbrains.anko.frameLayout
@@ -19,18 +21,25 @@ class SettingFragment : SwipeBackFragment() {
     private val ID_PREFS_FRAME = 231434
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return attachToSwipeBack(createUI().view)
+        val view = MainActivity.of(context!!).dynamicTheme(this) { createUI().view }
+        return attachToSwipeBack(view)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        var fragment = SettingPreferenceFragment()
-        activity!!.fragmentManager.beginTransaction()
-//        childFragmentManager.beginTransaction()
-                .replace(ID_PREFS_FRAME, fragment)
-                .commit()
+        MainActivity.of(context!!)
+                .themeUtil
+                .observeTheme(this, Observer {
+                    initFragment()
+                })
+        initFragment()
+    }
 
+    private fun initFragment(){
+        activity!!.fragmentManager.beginTransaction()
+                .replace(ID_PREFS_FRAME, SettingPreferenceFragment())
+                .commit()
     }
 
     private fun createUI() = UI {

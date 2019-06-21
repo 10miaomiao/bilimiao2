@@ -15,6 +15,7 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.SeasonEpisode
 import com.a10miaomiao.bilimiao.entity.bangumi.Bangumi
 import com.a10miaomiao.bilimiao.ui.MainActivity
@@ -240,7 +241,7 @@ class BangumiFragment : SwipeBackFragment() {
                 textView {
                     text = "查看 >"
                     textSize = 16f
-                    textColorResource = R.color.colorAccent
+                    textColorResource = config.themeColorResource
                     setOnClickListener {
                         val fragment = EpisodesFragment.newInstance(viewModel.episodes)
                         MainActivity.of(context)
@@ -410,7 +411,7 @@ class BangumiFragment : SwipeBackFragment() {
                     b.bindIndexed { item, index ->
                         if (item.season_id == viewModel.sid) {
                             this@frameLayout.isEnabled = false
-                            textColorResource = R.color.colorAccent
+                            textColorResource = config.themeColorResource
                         } else {
                             this@frameLayout.isEnabled = true
                             textColorResource = R.color.text_black
