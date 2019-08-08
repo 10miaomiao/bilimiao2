@@ -18,10 +18,10 @@ import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
-import com.a10miaomiao.miaoandriod.anko.liveUI
 import org.jetbrains.anko.*
 import org.jetbrains.anko.collections.forEachWithIndex
 import org.jetbrains.anko.recyclerview.v7.recyclerView
+import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
 
 class RankCategoryDetailsFragment : Fragment() {
@@ -51,7 +51,7 @@ class RankCategoryDetailsFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
     }
 
-    private fun render() = liveUI {
+    private fun render() = UI {
         verticalLayout {
             lparams(matchParent, matchParent)
 
@@ -84,7 +84,7 @@ class RankCategoryDetailsFragment : Fragment() {
 
             swipeRefreshLayout {
                 setColorSchemeResources(config.themeColorResource)
-                viewModel.loading.observeNotNull(::setRefreshing)
+                viewModel.loading.observeNotNull()(::setRefreshing)
 //                viewModel.bind(viewModel::loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.loadData() }
                 recyclerView {

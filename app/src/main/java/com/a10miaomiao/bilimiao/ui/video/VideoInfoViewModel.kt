@@ -1,40 +1,35 @@
 package com.a10miaomiao.bilimiao.ui.video
 
-import android.annotation.SuppressLint
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.ViewModel
 import android.content.Context
-import android.util.Log
 import com.a10miaomiao.bilimiao.entity.*
+import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.ui.MainActivity
-import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.bilimiao.utils.DebugMiao
+import com.a10miaomiao.miaoandriod.MiaoLiveData
+import com.a10miaomiao.miaoandriod.MiaoViewModel
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
-import com.a10miaomiao.miaoandriod.binding.MiaoViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.json.JSONObject
-import org.json.JSONTokener
-import java.text.DateFormat
-import java.util.*
+import okhttp3.FormBody
 
 class VideoInfoViewModel(
         val context: Context,
         var id: String
-) : MiaoViewModel() {
+) : ViewModel() {
 
-    private val _info = MutableLiveData<PageInfo>()
-    val info: LiveData<PageInfo> get() = _info
+    val info = MiaoLiveData<PageInfo?>(null)
     val relates = MiaoList<Relate>()
     val pages = MiaoList<Page>()
-    var pageIndex = MutableLiveData<Int>()
+    var pageIndex = MiaoLiveData(0)
 
     val state = MutableLiveData<String>()
 
     init {
-        pageIndex.value = 0
         loadData()
     }
 
@@ -48,7 +43,7 @@ class VideoInfoViewModel(
                 .subscribe({ r ->
                     if (r.code == 0) {
                         val data = r.data
-                        _info.value = PageInfo(data)
+                        info set PageInfo(data)
                         relates.clear()
                         relates.addAll(
                                 data.relates.filter {
@@ -71,8 +66,8 @@ class VideoInfoViewModel(
     }
 
     fun clear() {
-        pageIndex.value = 0
-        _info.value = null
+        pageIndex set 0
+        info set null
         relates.clear()
         pages.clear()
     }

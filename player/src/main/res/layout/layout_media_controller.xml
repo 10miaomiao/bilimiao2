@@ -175,8 +175,7 @@
                 android:layout_height="wrap_content"
                 android:foreground="?attr/selectableItemBackground"
                 android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:orientation="vertical">
 
                 <ImageView
                     android:layout_width="wrap_content"

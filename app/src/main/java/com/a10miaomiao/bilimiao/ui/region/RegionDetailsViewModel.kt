@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.ui.region
 
+import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -13,47 +14,29 @@ import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.RxBus
+import com.a10miaomiao.miaoandriod.MiaoLiveData
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import com.a10miaomiao.miaoandriod.adapter.MiaoRecyclerViewAdapter
-import com.a10miaomiao.miaoandriod.binding.MiaoViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
-class RegionDetailsViewModel(val context: Context, val tid: Int) : MiaoViewModel() {
-    val timeFrom = DateModel(this)
-    val timeTo = DateModel(this)
+class RegionDetailsViewModel(
+        val context: Context,
+        val tid: Int
+) : ViewModel() {
 
     var pageNum = 1
     val pageSize = 10
     var rankOrder = "click"  //排行依据
-
-    var loading by miao(false)
-    var loadState by miao(LoadMoreView.State.LOADING)
-
+    var loading = MiaoLiveData(false)
+    var loadState = MiaoLiveData(LoadMoreView.State.LOADING)
     var list = MiaoList<RegionTypeDetailsInfo.Result>()
-
-    val filterStore by lazy { MainActivity.of(context).filterStore }
-
-    private var subscriber = RxBus.getInstance().on(ConstantUtil.TIME_CHANGE) {
-        val timeFrom = DateModel(this).read(context!!, ConstantUtil.TIME_FROM)
-        val timeTo = DateModel(this).read(context!!, ConstantUtil.TIME_TO)
-        if (this.timeFrom.diff(timeFrom) || this.timeTo.diff(timeTo)) {
-            this.timeFrom.setValue(timeFrom)
-            this.timeTo.setValue(timeTo)
-            refreshList()
-        }
-    }
+    val filterStore = MainActivity.of(context).filterStore
+    val timeSettingStore = MainActivity.of(context).timeSettingStore
 
     init {
-        timeFrom.read(context!!, ConstantUtil.TIME_FROM)
-        timeTo.read(context!!, ConstantUtil.TIME_TO)
         loadData()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        subscriber?.dispose()
     }
 
     fun loadData() {
@@ -62,8 +45,8 @@ class RegionDetailsViewModel(val context: Context, val tid: Int) : MiaoViewModel
         if (loadState == LoadMoreView.State.NOMORE) {
             return
         }
-        loading = true
-        val url = BiliApiService.getRegionTypeVideoList(tid, rankOrder, pageNum, pageSize, timeFrom.getValue(), timeTo.getValue())
+        loading set true
+        val url = BiliApiService.getRegionTypeVideoList(tid, rankOrder, pageNum, pageSize, timeSettingStore.timeFromValue, timeSettingStore.timeToValue)
         var totalCount = 0 // 屏蔽前数量
         MiaoHttp.getJson<RegionTypeDetailsInfo>(url)
                 .subscribeOn(Schedulers.io())
@@ -71,7 +54,7 @@ class RegionDetailsViewModel(val context: Context, val tid: Int) : MiaoViewModel
                 .map { data -> data.result }
                 .doOnNext { result ->
                     if (result.size < pageSize) {
-                        loadState = LoadMoreView.State.NOMORE
+                        loadState set LoadMoreView.State.NOMORE
                     }
                 }
                 .map { result ->
@@ -84,22 +67,22 @@ class RegionDetailsViewModel(val context: Context, val tid: Int) : MiaoViewModel
                 .subscribe({ result ->
                     list.addAll(result)
                     if (list.size < 10 && totalCount != result.size) {
-                        loading = false
+                        loading set false
                         pageNum++
                         loadData()
                     }
                 }, { err ->
-                    loadState = LoadMoreView.State.FAIL
+                    loadState set LoadMoreView.State.FAIL
                     err.printStackTrace()
                 }, {
-                    loading = false
+                    loading set false
                 })
     }
 
     fun refreshList() {
         pageNum = 1
         list.clear()
-        loadState = LoadMoreView.State.LOADING
+        loadState set LoadMoreView.State.LOADING
         loadData()
     }
 }

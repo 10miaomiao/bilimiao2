@@ -4,36 +4,49 @@ import android.content.Context
 import android.support.v7.widget.PopupMenu
 import android.view.Gravity
 import android.view.MenuItem
+import android.widget.FrameLayout
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.utils.selectableItemBackground
 import com.a10miaomiao.bilimiao.utils.selectableItemBackgroundBorderless
+import com.a10miaomiao.miaoandriod.MiaoLiveData
 import com.a10miaomiao.miaoandriod.MiaoView
-import com.a10miaomiao.miaoandriod.binding.bind
+import org.jetbrains.anko.UI
 import org.jetbrains.anko.imageView
 import org.jetbrains.anko.linearLayout
 import org.jetbrains.anko.textView
 
 class DropMenuView(context: Context) : MiaoView(context) {
 
-    var text by binding.miao("")
-    var ico by binding.miao( R.drawable.ic_arrow_drop_down_24dp)
+    private val _text = MiaoLiveData("")
+    var text
+        get() = -_text
+        set(value) {
+            _text set value
+        }
+
+    private val _ico = MiaoLiveData(R.drawable.ic_arrow_drop_down_24dp)
+    var ico
+        get() = -_ico
+        set(value) {
+            _ico set value
+        }
 
     val popupMenu = PopupMenu(context, this)
 
     init {
-        onCreateView()
+        addView(render().view)
     }
 
-    fun onMenuItemClick(listener: (menu: MenuItem) -> Unit){
+    fun onMenuItemClick(listener: (menu: MenuItem) -> Unit) {
         popupMenu.setOnMenuItemClickListener {
             text = it.title.toString()
             it.isChecked = true
             listener(it)
-             false
+            false
         }
     }
 
-    override fun render() = MiaoUI {
+    private fun render() = context.UI {
+
         linearLayout {
             gravity = Gravity.CENTER_VERTICAL
 
@@ -41,11 +54,11 @@ class DropMenuView(context: Context) : MiaoView(context) {
                 popupMenu.show()
             }
             textView {
-                bind (this@DropMenuView::text){ text = it }
+                (+_text){ text = it }
             }
-            imageView{
+            imageView {
                 selectableItemBackgroundBorderless()
-                bind (::ico){ setImageResource(it) }
+                (+_ico){ setImageResource(it) }
             }
         }
     }

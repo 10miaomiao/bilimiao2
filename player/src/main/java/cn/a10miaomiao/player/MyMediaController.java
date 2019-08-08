@@ -45,6 +45,7 @@ public class MyMediaController extends FrameLayout implements MediaController
     private TextView mDanmakuSwitchTV;
     private ImageView mDanmakuSwitchIV;
     private LinearLayout mLockLayout;
+    private LinearLayout mQualityLayout;
 
     private Fun2 visibilityChangedEvent;
 
@@ -79,6 +80,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         mDanmakuSwitchTV = findViewById(R.id.mDanmakuSwitchTV);
         mDanmakuSwitchIV = findViewById(R.id.mDanmakuSwitchIV);
         mLockLayout = findViewById(R.id.mLockLayout);
+        mQualityLayout = findViewById(R.id.mQualityLayout);
     }
 
     private void initView() {
@@ -106,9 +108,15 @@ public class MyMediaController extends FrameLayout implements MediaController
                     danmakuSwitchEvent.accept(mDanmakuShow);
             }
         });
-//        mQualityLayout.setOnClickListener {
-//            _qualityEvent?.invoke()
-//        }
+        mQualityLayout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (qualityEvent != null){
+                    hide();
+                    qualityEvent.accept();
+                }
+            }
+        });
         mLockLayout.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -319,7 +327,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         void accept(boolean b);
     }
 
-    public void setHeaderLayoutPadding(int left, int top, int right, int bottom){
+    public void setHeaderLayoutPadding(int left, int top, int right, int bottom) {
         mHeaderLayout.setPadding(left, top, right, bottom);
     }
 

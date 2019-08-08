@@ -130,8 +130,8 @@ public class PlayerService extends Service {
         IjkMediaPlayer ijkMediaPlayer = null;
 
         ijkMediaPlayer = new IjkMediaPlayer();
-        ijkMediaPlayer.setLogEnabled(false);
-        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", "48");
+//        ijkMediaPlayer.setLogEnabled(false);
+//        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", "48");
         if (mUserAgent != null) {
             ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "user_agent", mUserAgent);
             //ijkMediaPlayer.setAvFormatOption("user_agent", mUserAgent);

@@ -13,6 +13,7 @@ import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.DebugMiao
+import com.a10miaomiao.miaoandriod.MiaoLiveData
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -33,7 +34,7 @@ class RankCategoryDetailsViewModel(
 
     val videoList = MiaoList<VideoRankInfo.VideoInfo>()
     val bangumioList = MiaoList<BangumiRankInfo.BangumiInfo>()
-    var loading = MutableLiveData<Boolean>()
+    var loading = MiaoLiveData<Boolean>(false)
 
     init {
         loadData()
@@ -47,7 +48,7 @@ class RankCategoryDetailsViewModel(
     }
 
     fun loadVideoData() {
-        loading.value = true
+        loading set  true
         val url = createUrl()
         val filterStore = MainActivity.of(context).filterStore
         MiaoHttp.getJson<VideoRankInfo>(url)
@@ -60,28 +61,28 @@ class RankCategoryDetailsViewModel(
                     }
                 }
                 .subscribe({ list ->
-                    loading.value = false
+                    loading set false
                     videoList.clear()
                     videoList.addAll(list)
                 }, { e ->
-                    loading.value = false
+                    loading set false
                     e.printStackTrace()
                 })
     }
 
     fun loadBangumiData() {
-        loading.value = true
+        loading set true
         val url = createUrl()
         MiaoHttp.getJson<BangumiRankInfo>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ data ->
                     DebugMiao.log(data)
-                    loading.value = false
+                    loading set false
                     bangumioList.clear()
                     bangumioList.addAll(data.result.list)
                 }, { e ->
-                    loading.value = false
+                    loading set false
                     e.printStackTrace()
                 })
     }

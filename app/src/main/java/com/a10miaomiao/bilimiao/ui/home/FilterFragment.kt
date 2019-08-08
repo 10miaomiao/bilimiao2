@@ -55,7 +55,7 @@ class FilterFragment : Fragment() {
                 title("屏蔽设置")
                 navigationIcon(R.drawable.ic_menu_white_24dp)
                 navigationOnClick {
-                    RxBus.getInstance().send(ConstantUtil.OPEN_DRAWER)
+                    MainActivity.of(context!!).openDrawer()
                 }
                 inflateMenu(R.menu.search)
                 onMenuItemClick(onMenuItemClick)

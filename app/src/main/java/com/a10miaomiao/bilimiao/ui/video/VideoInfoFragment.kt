@@ -150,7 +150,7 @@ class VideoInfoFragment : SwipeBackFragment() {
     }
 
     fun palyVideo(cid: String, title: String, index: Int) {
-        viewModel.pageIndex.value = index
+        viewModel.pageIndex set index
         palyVideo(cid, title)
     }
 
@@ -169,7 +169,7 @@ class VideoInfoFragment : SwipeBackFragment() {
     }
 
 
-    private val updateView = Observer<VideoInfoViewModel.PageInfo> { info ->
+    private val updateView = Observer<VideoInfoViewModel.PageInfo?> { info ->
         imageview.network(info?.pic ?: "")
     }
 

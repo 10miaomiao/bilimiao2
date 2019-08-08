@@ -15,7 +15,6 @@ import com.a10miaomiao.bilimiao.ui.commponents.bottomSheetHeaderView
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.utils.attr
 import com.a10miaomiao.bilimiao.utils.selectableItemBackground
-import com.a10miaomiao.miaoandriod.binding.bind
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.UI

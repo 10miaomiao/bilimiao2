@@ -18,9 +18,9 @@ import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
-import com.a10miaomiao.miaoandriod.anko.liveUI
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
+import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.nestedScrollView
 
 class VideoInfoDetailsFragment : Fragment() {
@@ -44,7 +44,8 @@ class VideoInfoDetailsFragment : Fragment() {
         return createUI().view
     }
 
-    private fun createUI() = liveUI(viewModel.info) {
+    private fun createUI() = UI {
+        val observeInfo = viewModel.info.observeNotNull()
         nestedScrollView {
             verticalLayout {
                 lparams {
@@ -58,8 +59,8 @@ class VideoInfoDetailsFragment : Fragment() {
                     ellipsize = TextUtils.TruncateAt.END
                     maxLines = 2
                     textColorResource = R.color.colorForeground
-                    observeNotNull {
-                        text = it.title
+                    observeInfo {
+                        text = it!!.title
                     }
                 }.lparams {
                     horizontalMargin = dip(10)
@@ -84,8 +85,8 @@ class VideoInfoDetailsFragment : Fragment() {
                     textView {
                         textSize = 12f
                         textColor = config.blackAlpha45
-                        observeNotNull {
-                            text = NumberUtil.converString(it.stat.view)
+                        observeInfo {
+                            text = NumberUtil.converString(it!!.stat.view)
                         }
                     }.lparams {
                         leftMargin = dip(3)
@@ -101,8 +102,8 @@ class VideoInfoDetailsFragment : Fragment() {
                     textView {
                         textSize = 12f
                         textColor = config.blackAlpha45
-                        observeNotNull {
-                            text = NumberUtil.converString(it.stat.danmaku)
+                        observeInfo {
+                            text = NumberUtil.converString(it!!.stat.danmaku)
                         }
                     }.lparams {
                         leftMargin = dip(3)
@@ -112,16 +113,16 @@ class VideoInfoDetailsFragment : Fragment() {
                     textView {
                         textSize = 12f
                         textColor = config.blackAlpha45
-                        observeNotNull {
-                            text = NumberUtil.converCTime(it.pubdate)
+                        observeInfo {
+                            text = NumberUtil.converCTime(it!!.pubdate)
                         }
                     }
                 }
 
                 // 视频简介
                 mySpannableTextView {
-                    observeNotNull {
-                        setLimitText(it.desc)
+                    observeInfo {
+                        setLimitText(it!!.desc)
                     }
                     setOnAvTextClickListener { view, avId ->
                         startFragment(VideoInfoFragment.newInstance(avId))
@@ -194,7 +195,9 @@ class VideoInfoDetailsFragment : Fragment() {
 
                     rcImageView {
                         isCircle = true
-                        ::network.bind { it.owner.face }
+                        observeInfo {
+                            network(it!!.owner.face)
+                        }
                     }.lparams {
                         height = dip(40)
                         width = dip(40)
@@ -207,13 +210,13 @@ class VideoInfoDetailsFragment : Fragment() {
                         }
                         textView {
                             textColor = config.black80
-                            observeNotNull {
-                                text = it.owner.name
+                            observeInfo {
+                                text = it!!.owner.name
                             }
                         }
                         textView {
-                            observeNotNull {
-                                text = NumberUtil.converString(it.owner_ext.fans) + "粉丝"
+                            observeInfo {
+                                text = NumberUtil.converString(it!!.owner_ext.fans) + "粉丝"
                             }
                         }
                     }
@@ -354,9 +357,8 @@ class VideoInfoDetailsFragment : Fragment() {
             }
         }
         onItemClick { item, position ->
-            viewModel.pageIndex.value = position
+            viewModel.pageIndex set position
             VideoInfoFragment.instance.palyVideo(item.cid.toString(), item.part)
-//            PlayerActivity.playVideo(context, viewModel.id, item.cid.toString(), item.part)
         }
         viewModel.pageIndex.observe(this@VideoInfoDetailsFragment
                 , Observer { notifyDataSetChanged() })

@@ -2,34 +2,22 @@ package com.a10miaomiao.bilimiao.utils
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
-import android.os.Build
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
-import android.support.v7.widget.RecyclerView
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewManager
 import android.widget.ImageView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.ui.MainActivity
-import com.a10miaomiao.bilimiao.ui.commponents.MonthPickerView
-import com.a10miaomiao.miaoandriod.MiaoFragment
-import com.a10miaomiao.miaoandriod.adapter.MiaoRecyclerViewAdapter
-import com.a10miaomiao.miaoandriod.adapter.miao
+import com.a10miaomiao.bilimiao.ui.rank.RankCategoryDetailsViewModel
 import com.bumptech.glide.DrawableTypeRequest
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.view.*
 import me.yokeyword.fragmentation.SupportActivity
 import me.yokeyword.fragmentation.SupportFragment
-import org.jetbrains.anko.AnkoContext
-import org.jetbrains.anko.AnkoViewDslMarker
 import org.jetbrains.anko.backgroundResource
-import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.dip
 
 fun RequestManager.loadPic(value: String): DrawableTypeRequest<String> {
     val url = if ("://" in value)
@@ -82,12 +70,6 @@ inline fun Fragment.startFragment(fragment: SupportFragment) {
     }
 }
 
-/**
- * 结束当前Fragment
- */
-inline fun MiaoFragment.goback() {
-    this.activity!!.onBackPressed()
-}
 
 inline fun Fragment.attr(resid: Int): Int {
     val typedValue = TypedValue()
@@ -116,3 +98,16 @@ fun <T : ViewModel> newViewModelFactory(initializer: (() -> T)): ViewModelProvid
         }
     }
 }
+
+inline fun <reified T : ViewModel> Fragment.getViewModel(): T {
+    return ViewModelProviders.of(this).get(T::class.java)
+}
+
+inline fun <reified T : ViewModel> Fragment.getViewModel(noinline initializer: (() -> T)): T {
+    return ViewModelProviders.of(this, newViewModelFactory(initializer))
+            .get(T::class.java)
+}
+
+
+
+

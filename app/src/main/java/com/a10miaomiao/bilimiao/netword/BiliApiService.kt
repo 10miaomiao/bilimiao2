@@ -8,6 +8,25 @@ import io.reactivex.Observable
  * Created by 10喵喵 on 2017/11/14.
  */
 object BiliApiService {
+
+    fun createUrl(url: String, vararg pairs: Pair<String, String>): String {
+        val params = ApiHelper.createParams(*pairs)
+        return url + "?" + ApiHelper.urlencode(params)
+    }
+
+    fun biliApi(path: String, vararg pairs: Pair<String, String>): String {
+        return createUrl("https://api.bilibili.com/$path", *pairs)
+    }
+
+    fun biliApp(path: String, vararg pairs: Pair<String, String>): String {
+        return createUrl("https://app.bilibili.com/$path", *pairs)
+    }
+
+    fun biliBangumi(path: String, vararg pairs: Pair<String, String>): String {
+        return createUrl("https://bangumi.bilibili.com/$path", *pairs)
+    }
+
+
     //-------------分区-----------------------
     /**
      * 获取分区视频列表
@@ -19,34 +38,22 @@ object BiliApiService {
     /**
      * 获取视频信息
      */
-    fun getVideoInfo(aid: String): String {
-//        "http://app.bilibili.com/x/view?access_key={0}&aid={1}&appkey=422fd9d7289a1dd9&build=510000&platform=android&ts={2}"
-//        val url = "https://app.bilibili.com/x/view?_device=wp&_ulv=10000&access_key=&aid=$aid&appkey=${ApiHelper.appKey_Android}&build=411005&plat=4&platform=android&ts=${ApiHelper.getTimeSpen()}"
-        var url = "https://app.bilibili.com//x/v2/view?aid=$aid&appkey=1d8b6e7d45233436&autoplay=0&build=5340000&fnval=16&fnver=0&from=52&mobi_app=android&plat=0&platform=android&qn=32&ts=${ApiHelper.getTimeSpen()}"
-        url += "&sign=" + ApiHelper.getNewSign(url)
-        return url
-    }
+    fun getVideoInfo(aid: String) = biliApp("x/v2/view",
+            "aid" to aid,
+            "autoplay" to "0",
+            "qn" to "32")
 
     /**
      * 获取番剧信息
      */
-    fun getBangumiInfo(aid: String): String {
-        // var url = "https://bangumi.bilibili.com/api/season_v3?_device=android&_ulv=10000&access_key=&appkey=${ApiHelper.appKey_Android}&build=411005&platform=android&season_id=$aid&ts=${ApiHelper.getTimeSpen()}&type=bangumi"
-        //var url = "http://bangumi.bilibili.com/api/season_v3?_device=wp&access_key=${ApiHelper.appKey_Android}&_ulv=10000&build=411005&platform=android&appkey=422fd9d7289a1dd9&ts=${ApiHelper.GetTimeSpen()}000&type=bangumi&season_id=$aid"
-        //val url = "http://bangumi.bilibili.com/api/season_v4?access_key=19946e1ef3b5cad1a756c475a67185bb&actionKey=appkey&appkey=27eb53fc9058f8c3&build=3940&device=phone&mobi_app=iphone&platform=ios&season_id=$aid&sign=3e5d4d7460961d9bab5da2341fd98dc1&ts=1477898526&type=bangumi"
-        var url = "https://bangumi.bilibili.com/view/api/season?access_key=&appkey=1d8b6e7d45233436&build=5310300&mobi_app=android&platform=android&season_id=$aid&ts=${ApiHelper.getTimeSpen()}"
-        url += "&sign=" + ApiHelper.getNewSign(url)
-        return url
-    }
+    fun getBangumiInfo(seasonId: String) = biliBangumi("view/api/season",
+            "season_id" to seasonId)
 
     /**
      * 单集番剧
      */
-    fun getSeasonEpisodeInfo(id: String): String {
-        var url = "https://api.bilibili.com/pgc/view/app/season?access_key=&appkey=1d8b6e7d45233436&build=5310300&ep_id=$id&mobi_app=android&platform=android&track_path=22&ts=${ApiHelper.getTimeSpen()}"
-        url += "&sign=" + ApiHelper.getNewSign(url)
-        return url
-    }
+    fun getSeasonEpisodeInfo(id: String) = biliApi("pgc/view/app/season",
+            "ep_id" to id)
 
     /**
      * 获取直播信息
@@ -161,46 +168,26 @@ object BiliApiService {
      */
     fun getKeyWord(keyword: String) =
             "https://s.search.bilibili.com/main/suggest?suggest_type=accurate&sub_type=tag&main_ver=v1&term=$keyword"
-    //------------排行榜部分----------------
-    /**
-     * 全站
-     * https://www.bilibili.com/index/rank/all-3-1.json  全部投稿
-     * https://www.bilibili.com/index/rank/all-03-1.json   近期投稿
-     */
-    fun getRankAll(isall: Boolean, dayNum: Int, rid: Int) =
-            if (isall)
-                "https://www.bilibili.com/index/rank/all-$dayNum-$rid.json"
-            else
-                "https://www.bilibili.com/index/rank/all-0$dayNum-$rid.json"
 
     /**
-     * 原创
+     * 收藏夹列表
      */
-    fun getRankOrigin(isall: Boolean, dayNum: Int, rid: Int) =
-            if (isall)
-                "https://www.bilibili.com/index/rank/origin-$dayNum-$rid.json"
-            else
-                "https://www.bilibili.com/index/rank/origin-0$dayNum-$rid.json"
+    fun gatMedialist() = biliApi("medialist/gateway/base/space")
 
     /**
-     * 新人
+     * 收藏夹列表详情
      */
-    fun getRankRookie(isall: Boolean, dayNum: Int, rid: Int) =
-            if (isall)
-                "https://www.bilibili.com/index/rank/rookie-$dayNum-$rid.json"
-            else
-                "https://www.bilibili.com/index/rank/rookie-0$dayNum-$rid.json"
+    fun gatMedialistDetail(
+            media_id: Long,
+            pn: Int,
+            ps: Int
+    ) = biliApi(
+            "medialist/gateway/base/detail",
+            "media_id" to media_id.toString(),
+            "pn" to pn.toString(),
+            "ps" to ps.toString()
+    )
 
-    /**
-     * 番剧
-     */
-    fun getRankBangumi(region: String, dayNum: Int) =
-            "https://bangumi.bilibili.com/jsonp/season_rank_list/$region/$dayNum.ver?callback=bangumiRankCallback&_=${ApiHelper.getTimeSpen()}"
-
-    //播放地址
-    fun getPlayUrl() {
-//        val url =  "https://app.bilibili.com/x/playurl?device=android&expire=0&mobi_app=android&mid=0&appkey=iVGUTjsxvpLeuDCf&fnval=16&qn=32&npcybs=0&cid=70240545&otype=json&platform=android&ts=1549444302234&build=5340000&fnver=0&buvid=KREhESMULBkrGiNGOkY6QDgJblpoC3sRdQinfoc&aid=40000061&sign=befde9bca9ea3f55c33eaba77777359c"
-    }
-
-
+    fun oss() = createUrl("https://passport.bilibili.com/api/login/sso",
+            "gourl" to "https://account.bilibili.com/account/home")
 }

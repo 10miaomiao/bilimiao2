@@ -30,6 +30,14 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_player.*
+import kotlinx.android.synthetic.main.activity_player.mCenterLayout
+import kotlinx.android.synthetic.main.activity_player.mCenterTv
+import kotlinx.android.synthetic.main.activity_player.mController
+import kotlinx.android.synthetic.main.activity_player.mDanmaku
+import kotlinx.android.synthetic.main.activity_player.mPlayer
+import kotlinx.android.synthetic.main.activity_player.mProgressLayout
+import kotlinx.android.synthetic.main.activity_player.mText
+import kotlinx.android.synthetic.main.fragment_player.*
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -78,6 +86,9 @@ class PlayerActivity : AppCompatActivity() {
     val title by lazy { intent.extras.getString("title") }
 
     private val sources = ArrayList<VideoSource>()
+    private var acceptDescription = listOf<String>()
+    private var acceptQuality = listOf<Int>()
+    private var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
     private var danmakuContext: DanmakuContext? = null
     private var disposable: Disposable? = null
 
@@ -141,6 +152,13 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
         mController.setVideoBackEvent { finish() }
+        mController.setQualityEvent {
+            val popupWindow = QualityPopupWindow(this, mController)
+            popupWindow.setData(acceptDescription)
+            popupWindow.checkItemPosition = acceptQuality.indexOf(quality)
+            popupWindow.onCheckItemPositionChanged = this::changedQuality
+            popupWindow.show()
+        }
         disposable = Observable.interval(1000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -190,7 +208,7 @@ class PlayerActivity : AppCompatActivity() {
         mPlayer.setOnCompletionListener(onCompletionListener)
         mPlayer.setOnControllerEventsListener(onControllerEventsListener)
         mPlayer.setOnGestureEventsListener(onGestureEventsListener)
-        playerService.setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36")
+        playerService.setUserAgent("Bilibili Freedoooooom/MarkII")
         playerService.setVideoPlayerView(mPlayer)
     }
 
@@ -220,17 +238,47 @@ class PlayerActivity : AppCompatActivity() {
                 })
     }
 
+    /**
+     * 加载视频播放地址
+     */
+    private fun loadPlayurl() {
+        showText("读取播放地址")
+        val observer = if (type == ConstantUtil.VIDEO)
+            PlayurlHelper.getVideoPalyUrl(aid, cid, quality)
+        else
+            PlayurlHelper.getBangumiUrl(epid, cid, quality)
+        observer.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    sources.clear()
+                    for (durl in it.durl) {
+                        sources += VideoSource().apply {
+                            uri = Uri.parse(durl.url.replace("https://", "http://")) // 简单粗暴
+                            length = durl.length
+                            size = durl.size
+                        }
+                    }
+                    acceptDescription = it.accept_description
+                    acceptQuality = it.accept_quality
+                    quality = it.quality
+                    startPlay()
+                }, {
+                    showText(it.message ?: "网络错误")
+                })
+    }
+
     fun startPlay() {
         hideProgressText()
-        playerService.setVideoURI(sources, mapOf(
-                "Referer" to "https://www.bilibili.com/video/av$aid",
-                "User-Agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
-        ))
+        playerService.setVideoURI(sources, mapOf())
         if (lastPosition != 0L) {
             mPlayer.seekTo(lastPosition)
         }
     }
 
+    private fun changedQuality(value: String, position: Int) {
+        quality = acceptQuality[position]
+        loadPlayurl()
+    }
     private val onInfoListener = IMediaPlayer.OnInfoListener { mp, what, extra ->
         if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_START) {
             if (mDanmaku != null && mDanmaku.isPrepared) {
@@ -265,20 +313,7 @@ class PlayerActivity : AppCompatActivity() {
 
         override fun prepared() {
             runOnUiThread {
-                showText("读取播放地址")
-                val observer = if (type == ConstantUtil.VIDEO)
-                    PlayurlHelper.getVideoPalyUrl(aid, cid)
-                else
-                    PlayurlHelper.getBangumiUrl(cid)
-                observer.subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
-                            sources.clear()
-                            sources.addAll(it)
-                            startPlay()
-                        }, {
-                            showText(it.message ?: "网络错误")
-                        })
+                loadPlayurl()
             }
         }
 

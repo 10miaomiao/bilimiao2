@@ -8,6 +8,7 @@ import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.preference.PreferenceManager
@@ -16,12 +17,14 @@ import android.support.v7.app.AppCompatActivity
 import android.view.*
 import cn.a10miaomiao.player.*
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.netword.PlayurlHelper
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
+import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -33,6 +36,7 @@ import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
+import okhttp3.FormBody
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import java.io.ByteArrayInputStream
 import java.util.concurrent.TimeUnit
@@ -77,8 +81,12 @@ class PlayerFragment : Fragment() {
     val title by lazy { arguments!!.getString("title") }
 
     private val sources = ArrayList<VideoSource>()
+    private var acceptDescription = listOf<String>()
+    private var acceptQuality = listOf<Int>()
+    private var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
     private var danmakuContext: DanmakuContext? = null
     private var disposable: Disposable? = null
+    private var historyDisposable: Disposable? = null // 记录历史记录
 
     private val width by lazy {
         (context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.width
@@ -149,6 +157,13 @@ class PlayerFragment : Fragment() {
         mController.setVideoBackEvent {
             VideoInfoFragment.instance.isMiniPlayer.value = true
         }
+        mController.setQualityEvent {
+            val popupWindow = QualityPopupWindow(context!!, mController)
+            popupWindow.setData(acceptDescription)
+            popupWindow.checkItemPosition = acceptQuality.indexOf(quality)
+            popupWindow.onCheckItemPositionChanged = this::changedQuality
+            popupWindow.show()
+        }
         disposable = Observable.interval(1000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -156,6 +171,10 @@ class PlayerFragment : Fragment() {
                     mController.updatePausePlay()
                     mMiniController.setProgress()
                     mMiniController.updatePausePlay()
+                }
+        historyDisposable = Observable.interval(10, TimeUnit.SECONDS)
+                .subscribe {
+                    historyReport()
                 }
 
         mMiniController.setTitle("av$aid")
@@ -235,8 +254,62 @@ class PlayerFragment : Fragment() {
                 })
     }
 
-    fun startPlay() {
+    /**
+     * 加载视频播放地址
+     */
+    private fun loadPlayurl() {
+        showText("读取播放地址")
+        val observer = if (type == ConstantUtil.VIDEO)
+            PlayurlHelper.getVideoPalyUrl(aid, cid, quality)
+        else
+            PlayurlHelper.getBangumiUrl(epid, cid, quality)
+        observer.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    sources.clear()
+                    for (durl in it.durl) {
+                        sources += VideoSource().apply {
+                            uri = Uri.parse(durl.url.replace("https://", "http://")) // 简单粗暴
+                            length = durl.length
+                            size = durl.size
+                        }
+                    }
+                    acceptDescription = it.accept_description
+                    acceptQuality = it.accept_quality
+                    quality = it.quality
+                    startPlay()
+                }, {
+                    showText(it.message ?: "网络错误")
+                })
+    }
+
+    /**
+     * 记录历史进度
+     */
+    fun historyReport(){
+        val url = "https://api.bilibili.com/x/v2/history/report"
+        val realtimeProgress = (mPlayer.currentPosition / 1000).toString()  // 秒数
+        val params = ApiHelper.createParams(
+                "aid" to aid,
+                "cid" to cid,
+                "progress" to realtimeProgress,
+                "realtime" to realtimeProgress,
+                "type" to "3"
+        )
+        MiaoHttp.postString(url) {
+            body = FormBody.Builder().apply {
+                params.keys.forEach { add(it, params[it]) }
+            }.build()
+        }.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    DebugMiao.log(it)
+                }
+    }
+
+    private fun startPlay() {
         hideProgressText()
+        lastPosition = mPlayer?.currentPosition ?: 0
         playerService.setVideoURI(sources, mapOf(
                 "Referer" to "https://www.bilibili.com/video/av$aid",
                 "User-Agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
@@ -244,6 +317,12 @@ class PlayerFragment : Fragment() {
         if (lastPosition != 0L) {
             mPlayer.seekTo(lastPosition)
         }
+        historyReport()
+    }
+
+    private fun changedQuality(value: String, position: Int) {
+        quality = acceptQuality[position]
+        loadPlayurl()
     }
 
     private val onInfoListener = IMediaPlayer.OnInfoListener { mp, what, extra ->
@@ -280,20 +359,7 @@ class PlayerFragment : Fragment() {
 
         override fun prepared() {
             activity!!.runOnUiThread {
-                showText("读取播放地址")
-                val observer = if (type == ConstantUtil.VIDEO)
-                    PlayurlHelper.getVideoPalyUrl(aid, cid)
-                else
-                    PlayurlHelper.getBangumiUrl(cid)
-                observer.subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
-                            sources.clear()
-                            sources.addAll(it)
-                            startPlay()
-                        }, {
-                            showText(it.message ?: "网络错误")
-                        })
+                loadPlayurl()
             }
         }
 
@@ -427,9 +493,9 @@ class PlayerFragment : Fragment() {
 //            mPlayer.seekTo(lastPosition)
 //        }
 //        lastPosition = 0
-        if (mPlayer != null){
+        if (mPlayer != null) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            if (!prefs.getBoolean("player_background", true)){
+            if (!prefs.getBoolean("player_background", true)) {
                 mPlayer.start()
             }
             if (mDanmaku != null
@@ -445,7 +511,7 @@ class PlayerFragment : Fragment() {
         super.onPause()
         if (mPlayer != null) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            if (!prefs.getBoolean("player_background", true)){
+            if (!prefs.getBoolean("player_background", true)) {
                 mPlayer.pause()
             }
         }
@@ -466,6 +532,8 @@ class PlayerFragment : Fragment() {
         playerService.release(false)
         disposable?.dispose()
         disposable = null
+        historyDisposable?.dispose()
+        historyDisposable = null
 
         MainActivity.of(context!!).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
@@ -480,11 +548,11 @@ class PlayerFragment : Fragment() {
         }
     }
 
-    private fun setPlayerMediaController(){
-        if (isMini){
+    private fun setPlayerMediaController() {
+        if (isMini) {
             mPlayer.setMediaController(mMiniController)
             mController.visibility = View.GONE
-        }else{
+        } else {
             mPlayer.setMediaController(mController)
             mMiniController.visibility = View.GONE
         }

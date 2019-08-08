@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.ui.home
 
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -11,15 +12,17 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
+import com.a10miaomiao.bilimiao.ui.cover.CoverActivity
 import com.a10miaomiao.bilimiao.ui.region.RegionFragment
 import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
-import com.a10miaomiao.miaoandriod.anko.liveUI
+import com.a10miaomiao.miaoandriod.mergeMiaoObserver
 import com.bumptech.glide.Glide
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
+import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.nestedScrollView
 
 
@@ -28,9 +31,7 @@ class HomeFragment : Fragment() {
     lateinit var viewModel: HomeViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProviders.of(this, newViewModelFactory {
-            HomeViewModel(context!!)
-        }).get(HomeViewModel::class.java)
+        viewModel = getViewModel { HomeViewModel(context!!) }
         return MainActivity.of(context!!).dynamicTheme(this) { render().view }
     }
 
@@ -44,14 +45,17 @@ class HomeFragment : Fragment() {
         true
     }
 
-    private fun render() = liveUI {
+    private fun render() = UI {
+        val timeSettingStore = MainActivity.of(context!!).timeSettingStore
+        val observeTime = timeSettingStore.observe()
+
         verticalLayout {
             backgroundColor = config.background
             headerView {
-                viewModel.title.observeNotNull(::title)
+                viewModel.title.observe()(::title)
                 navigationIcon(R.drawable.ic_menu_white_24dp)
                 navigationOnClick {
-                    RxBus.getInstance().send(ConstantUtil.OPEN_DRAWER)
+                    MainActivity.of(context!!).openDrawer()
                 }
                 inflateMenu(R.menu.search)
                 onMenuItemClick(onMenuItemClick)
@@ -97,7 +101,9 @@ class HomeFragment : Fragment() {
                         backgroundColor = Color.WHITE
                         padding = config.dividerSize
                         textView {
-                            viewModel.time.observeNotNull { text = "当前时间线：$it" }
+                            observeTime {
+                                text = "当前时间线：" + timeSettingStore.value
+                            }
                         }
                         setOnClickListener {
                             startFragment(TimeSettingFragment())
@@ -110,14 +116,17 @@ class HomeFragment : Fragment() {
                     // 广告通知
                     linearLayout {
                         visibility = View.GONE
-                        viewModel.adInfo.observe {
+                        backgroundColor = Color.WHITE
+                        padding = config.dividerSize
+
+                        val observeAdInfo = viewModel.adInfo.observeNotNull()
+
+                        observeAdInfo {
                             visibility = if (it?.isShow == true) View.VISIBLE else View.GONE
                         }
 
-                        backgroundColor = Color.WHITE
-                        padding = config.dividerSize
                         textView {
-                            viewModel.adInfo.observeNotNull { text = it.title }
+                            observeAdInfo { text = it!!.title }
                         }.lparams {
                             width = matchParent
                             weight = 1f
@@ -126,7 +135,7 @@ class HomeFragment : Fragment() {
                         textView {
                             selectableItemBackgroundBorderless()
                             textColorResource = attr(android.R.attr.colorAccent)
-                            viewModel.adInfo.observeNotNull { text = it.link.text }
+                            observeAdInfo { text = it!!.link.text }
                         }
 
                         setOnClickListener { viewModel.openAd() }
@@ -134,8 +143,6 @@ class HomeFragment : Fragment() {
                         width = matchParent
                         topMargin = config.dividerSize
                     }
-
-
                 }
             }
         }

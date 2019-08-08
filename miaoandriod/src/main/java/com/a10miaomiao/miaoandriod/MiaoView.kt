@@ -1,34 +1,40 @@
 package com.a10miaomiao.miaoandriod
 
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleObserver
+import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.LifecycleRegistry
 import android.content.Context
-import android.support.annotation.LayoutRes
-import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import com.a10miaomiao.miaoandriod.anko.MiaoAnkoContext
-import com.a10miaomiao.miaoandriod.anko.MiaoUI
-import com.a10miaomiao.miaoandriod.binding.MiaoBindingImpl
-import org.jetbrains.anko.matchParent
 
-open class MiaoView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+open class MiaoView(context: Context) : FrameLayout(context), LifecycleOwner {
 
-    var binding = MiaoBindingImpl()
+    val _lifecycle = LifecycleRegistry(this)
 
-    fun onCreateView(){
-        val mac = render()
-        val layout = layout()
-        if (mac != null) {
-            binding.bindFns = mac.binding.bindFns
-            addView(mac.view, matchParent, matchParent)
-        } else if (layout != null) {
-            View.inflate(context, layout, this)
+    init {
+        _lifecycle.markState(Lifecycle.State.CREATED)
+    }
+
+    override fun getLifecycle() = _lifecycle
+
+    override fun onAttachedToWindow() {
+        _lifecycle.markState(Lifecycle.State.STARTED)
+        super.onAttachedToWindow()
+    }
+
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        when (visibility) {
+            VISIBLE -> _lifecycle.markState(Lifecycle.State.STARTED)
+            GONE -> _lifecycle.markState(Lifecycle.State.CREATED)
         }
     }
 
+    override fun onDetachedFromWindow() {
+        _lifecycle.markState(Lifecycle.State.DESTROYED)
+        super.onDetachedFromWindow()
+    }
 
-    @LayoutRes open fun layout(): Int? = null
-    open fun render(): MiaoAnkoContext<Context>? = null
 
-    protected fun MiaoUI(init: MiaoAnkoContext<Context>.() -> Unit): MiaoAnkoContext<Context> = context!!.MiaoUI(init)
 }
-

@@ -1,7 +1,5 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
@@ -10,8 +8,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 36
-        versionName "2.0 咕咕咕版0.5"
+        versionCode 37
+        versionName "2.0 咕咕咕版0.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -25,6 +23,9 @@ android {
         // Or, if you prefer, you can continue to check for errors in release builds,
         // but continue the build even when errors are found:
         abortOnError false
+    }
+    androidExtensions {
+        experimental = true
     }
 }
 
@@ -75,5 +76,5 @@ dependencies {
     implementation project(':miaoandriod')
     implementation project(':player')
     implementation project(':dragging_sheet')
-    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.4'
+    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
 }

@@ -6,19 +6,17 @@ import android.support.annotation.MenuRes
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.View
+import android.widget.FrameLayout
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.utils.attr
 import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
-import com.a10miaomiao.miaoandriod.MiaoView
 import kotlinx.android.synthetic.main.include_header_bar.view.*
 import org.jetbrains.anko.backgroundResource
 
-class HeaderView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : MiaoView(context, attrs, defStyleAttr) {
-
-    override fun layout() = R.layout.include_header_bar
+class HeaderView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     init {
-        onCreateView()
+        View.inflate(context, R.layout.include_header_bar, this)
         val statusBarHeight = getStatusBarHeight()
         backgroundResource = context.attr(R.attr.colorPrimary)
         setPadding(0, statusBarHeight, 0, 0)

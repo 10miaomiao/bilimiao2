@@ -1,12 +1,18 @@
 package com.a10miaomiao.bilimiao.netword
 
 import android.net.Uri
+import android.os.SystemClock
 import cn.a10miaomiao.player.VideoSource
 import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import okhttp3.Cookie
+import okhttp3.CookieJar
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import java.util.HashMap
 
 object PlayurlHelper {
 
@@ -21,22 +27,23 @@ object PlayurlHelper {
     /**
      * 获取视频播放地址
      */
-    fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 0) = Observable.create<List<VideoSource>> {
-        val sources = ArrayList<VideoSource>()
-        var url = "https://api.bilibili.com/x/player/playurl?avid=$avid&cid=$cid&qn=$quality&type=&otype=json&appkey=$_appKey_VIDEO"
-        url += "&sign=" + ApiHelper.getSing(url, _appSecret_VIDEO)
+    fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 64) = Observable.create<PlayurlData> {
+        val params = mutableMapOf(
+                "avid" to avid,
+                "cid" to cid,
+                "qn" to quality.toString(),
+                "type" to "",
+                "otype" to "json",
+                "appkey" to _appKey_VIDEO
+        )
+        ApiHelper.addAccessKeyAndMidToParams(params)
+        params["sign"] = ApiHelper.getSing(params, _appSecret_VIDEO)
+        var url = "https://api.bilibili.com/x/player/playurl?" + ApiHelper.urlencode(params)
         MiaoHttp.getJson<ResultInfo<PlayurlData>>(url) {
             headers = getVideoHeaders(avid)
         }.subscribe({ r ->
             if (r.code == 0) {
-                for (durl in r.data.durl) {
-                    sources += VideoSource().apply {
-                        uri = Uri.parse(durl.url)
-                        length = durl.length
-                        size = durl.size
-                    }
-                }
-                it.onNext(sources)
+                it.onNext(r.data)
                 it.onComplete()
             } else {
                 it.onError(Throwable(r.message))
@@ -51,25 +58,32 @@ object PlayurlHelper {
     /**
      * 获取番剧播放地址
      */
-    fun getBangumiUrl(cid: String, qn: Int = 64) = Observable.create<List<VideoSource>> {
-        // https://bangumi.bilibili.com/player/web_api/v2/playurl?cid={1}&appkey={0}&otype=json&type=&quality={2}&module=bangumi&season_type=1&qn={2}&ts={3}", ApiHelper._appKey_VIDEO, model.Mid, qn, ApiHelper.GetTimeSpan_2)
-        val sources = ArrayList<VideoSource>()
-        var url = "https://bangumi.bilibili.com/player/web_api/v2/playurl?cid=$cid&appkey=$_appKey_VIDEO&otype=json&type=&quality=$qn&module=bangumi&season_type=1&qn=$qn&ts=${ApiHelper.getTimeSpen()}"
-        url += "&sign=" + ApiHelper.getSing(url, _appSecret_VIDEO)
+    fun getBangumiUrl(epid: String, cid: String, qn: Int = 64) = Observable.create<PlayurlData> {
+        val params = mutableMapOf(
+                "aid" to epid,
+                "cid" to cid,
+                "fnval" to "2",
+                "fnver" to "0",
+                "module" to "bangumi",
+                "qn" to qn.toString(),
+                "season_type" to "1",
+                "session" to ApiHelper.getMD5((System.currentTimeMillis() - SystemClock.currentThreadTimeMillis()).toString()),
+                "track_path" to "",
+                "appkey" to ApiHelper.APP_KEY_NEW,
+                "device" to "android",
+                "mobi_app" to "android",
+                "platform" to "android"
+        )
+        ApiHelper.addAccessKeyAndMidToParams(params)
+        params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET_NEW)
+        var url = "https://api.bilibili.com/pgc/player/api/playurl?" + ApiHelper.urlencode(params)
         MiaoHttp.getJson<PlayurlData>(url)
                 .subscribe({ r ->
                     if (r.code == 0) {
-                        for (durl in r.durl) {
-                            sources += VideoSource().apply {
-                                uri = Uri.parse(durl.url)
-                                length = durl.length
-                                size = durl.size
-                            }
-                        }
-                        it.onNext(sources)
+                        it.onNext(r)
                         it.onComplete()
                     } else {
-                        it.onError(Throwable("读取播放地址失败"))
+                        it.onError(Throwable(r.message))
                     }
                     DebugMiao.log(r)
                 }, { e ->

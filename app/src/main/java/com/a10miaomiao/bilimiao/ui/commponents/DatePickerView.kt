@@ -1,25 +1,30 @@
 package com.a10miaomiao.bilimiao.ui.commponents
 
 import android.content.Context
+import android.view.View
+import android.widget.FrameLayout
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.ui.widget.PickerView
 import com.a10miaomiao.bilimiao.utils.TimeSettingUtil
-
-import com.a10miaomiao.miaoandriod.MiaoView
-import com.a10miaomiao.miaoandriod.binding.bind
 import kotlinx.android.synthetic.main.layout_date_picker.view.*
 import java.util.*
 
-class DatePickerView(context: Context) : MiaoView(context) {
+class DatePickerView(context: Context) : FrameLayout(context) {
 
-    val date: DateModel = DateModel(binding)
+    var date = DateModel()
+        set(value) {
+            if (value.year > 2008) mYearPicker?.value = value.year - 2008
+            mMonthPicker?.value = value.month
+            mDatePicker?.maxValue = TimeSettingUtil.getMonthDate(value.year, value.month)
+            mDatePicker?.value = value.date
+            field = value
+        }
 
-    override fun layout() = R.layout.layout_date_picker
-    private var _onChanged: ((date: DateModel) -> Unit)? = null
+    var onChanged: ((date: DateModel) -> Unit)? = null
 
     init {
-        onCreateView()
+        View.inflate(context, R.layout.layout_date_picker, this)
         val now = Date()
         val yearSize = now.year - 108
         mYearPicker.displayedValues = Array(yearSize) { (it + 2009).toString() }
@@ -30,13 +35,6 @@ class DatePickerView(context: Context) : MiaoView(context) {
         mDatePicker.minValue = 1
         mDatePicker.maxValue = 31
 
-        binding.bind(date::year) { if (it > 2008) mYearPicker.setValue(it - 2008) }
-        binding.bind(date::month, mMonthPicker::setValue)
-        binding.bind(date::date, mDatePicker::setValue)
-        binding.bind {
-            mDatePicker.maxValue = TimeSettingUtil.getMonthDate(date.year, date.month)
-            mDatePicker.value = date.date
-        }
         mYearPicker.setOnValueChangedListener(::onValueChange)
         mMonthPicker.setOnValueChangedListener(::onValueChange)
         mDatePicker.setOnValueChangedListener(::onValueChange)
@@ -55,11 +53,7 @@ class DatePickerView(context: Context) : MiaoView(context) {
                 date.date = newVal
             }
         }
-        binding.updateView()
-        _onChanged?.invoke(date)
+        onChanged?.invoke(date)
     }
 
-    fun onChanged(callback: ((date: DateModel) -> Unit)) {
-        _onChanged = callback
-    }
 }

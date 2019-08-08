@@ -13,9 +13,6 @@ object ConstantUtil {
     val TIME_IS_LINK = "timeIsLink"
     val TIME_CHANGE = "TIME_CHANGE"
 
-    val OPEN_DRAWER = "OPEN_DRAWER" // 打开汉堡菜单
-    val START_FRAGMENT = "START_FRAGMENT" // 跳转Fragment
-
     val VIDEO = "video" // 普通视频
     val BANGUMI = "bangumi" // 番剧
 

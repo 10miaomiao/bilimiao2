@@ -3,9 +3,8 @@ package com.a10miaomiao.bilimiao.ui.commponents
 import android.content.Context
 import android.view.Gravity
 import android.view.View
-import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.miaoandriod.MiaoLiveData
 import com.a10miaomiao.miaoandriod.MiaoView
-import com.a10miaomiao.miaoandriod.binding.bind
 import org.jetbrains.anko.*
 
 class LoadMoreView(context: Context) : MiaoView(context) {
@@ -13,27 +12,31 @@ class LoadMoreView(context: Context) : MiaoView(context) {
         LOADING, NOMORE, FAIL
     }
 
-    var state by binding.miao(State.LOADING)
+    private val _state = MiaoLiveData(State.LOADING)
+    var state
+        get() = -_state
+        set(value) = _state set value
 
     init {
-        onCreateView()
+        addView(render().view)
     }
 
-    override fun render() = MiaoUI {
+    private fun render() = context.UI {
+        val observe = +_state
         linearLayout {
             lparams(matchParent, wrapContent)
             gravity = Gravity.CENTER
             padding = dip(10)
-            progressBar{
-                bind { visibility = if (state == State.LOADING) View.VISIBLE else View.GONE }
+            progressBar {
+                observe { visibility = if (state == State.LOADING) View.VISIBLE else View.GONE }
             }.lparams {
                 width = dip(20)
                 height = dip(20)
                 rightMargin = dip(5)
             }
-            textView("加载中"){
-                bind {
-                    text = when(state){
+            textView("加载中") {
+                observe {
+                    text = when (state) {
                         State.LOADING -> "加载中"
                         State.NOMORE -> "下面没有了"
                         State.FAIL -> "无法连接到御坂网络"

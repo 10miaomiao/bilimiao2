@@ -24,7 +24,6 @@ import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
-import com.a10miaomiao.miaoandriod.binding.bind
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.linearLayoutCompat
 import org.jetbrains.anko.design.navigationView

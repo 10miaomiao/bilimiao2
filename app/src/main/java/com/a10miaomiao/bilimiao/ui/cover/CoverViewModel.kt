@@ -42,6 +42,7 @@ class CoverViewModel(val activity: Activity, val type: String, val id: String) :
     // 普通视频
     private fun loadAvData() {
         val url = BiliApiService.getVideoInfo(id)
+        DebugMiao.log(url)
         MiaoHttp.getJson<ResultInfo<VideoInfo>>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

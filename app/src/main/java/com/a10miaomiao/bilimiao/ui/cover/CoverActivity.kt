@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -17,22 +18,25 @@ import android.support.v7.widget.PopupMenu
 import android.util.Log
 import android.view.View
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoViewModel
 import com.a10miaomiao.bilimiao.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.utils.FileUtil
 import com.a10miaomiao.bilimiao.utils.newViewModelFactory
 import kotlinx.android.synthetic.main.activity_cover.*
+import org.jetbrains.anko.dip
 import org.jetbrains.anko.toast
 
 
 class CoverActivity : AppCompatActivity() {
 
     companion object {
-        fun launch(activity: Activity, id: String, type: String) {
-            val mIntent = Intent(activity, CoverActivity::class.java)
+        fun launch(context: Context, id: String, type: String) {
+            val mIntent = Intent(context, CoverActivity::class.java)
             mIntent.putExtra("id", id)
             mIntent.putExtra("type", type)
-            activity.startActivity(mIntent)
+            context.startActivity(mIntent)
         }
     }
 
@@ -82,6 +86,9 @@ class CoverActivity : AppCompatActivity() {
                 }
             }
         })
+        // 设置圆角
+        ViewStyle.roundRect(dip(5))(mMainContainerLl)
+
         mColseIv.setOnClickListener {
             mMotionLayout.transitionToStart()
         }

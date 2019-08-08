@@ -7,52 +7,37 @@ import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.View
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.entity.Home
 import com.a10miaomiao.bilimiao.entity.MiaoAdInfo
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
-import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
-import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.bilimiao.utils.RxBus
+import com.a10miaomiao.miaoandriod.MiaoLiveData
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
-import com.a10miaomiao.miaoandriod.binding.MiaoBindingImpl
 import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.jetbrains.anko.collections.forEachWithIndex
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
+import android.os.Build
 
-class HomeViewModel(val context: Context) : ViewModel() {
 
-    var title = MutableLiveData<String>()
-    var time = MutableLiveData<String>()
+class HomeViewModel(
+        val context: Context
+) : ViewModel() {
+
+    var title = MiaoLiveData("时光姬")
+    var adInfo = MiaoLiveData<MiaoAdInfo.DataBean?>(null)
     var region = MiaoList<Home.Region>()
-    var adInfo = MutableLiveData<MiaoAdInfo.DataBean>()
 
     init {
         loadRegionData()
         randomTitle()
-        updateTime()
-        RxBus.getInstance().on(ConstantUtil.TIME_CHANGE) {
-            updateTime()
-        }
         loadAdData()
-    }
-
-    private fun updateTime() {
-        val b = MiaoBindingImpl()
-        val time_from = DateModel(b)
-        val time_to = DateModel(b)
-        time_from.read(context, ConstantUtil.TIME_FROM)
-        time_to.read(context, ConstantUtil.TIME_TO)
-        time.value = time_from.getValue("-") + " 至 " + time_to.getValue("-")
     }
 
 
@@ -75,13 +60,20 @@ class HomeViewModel(val context: Context) : ViewModel() {
      * 加载广告信息
      */
     private fun loadAdData() {
-        val url = "https://10miaomiao.cn/miao/bilimiao/ad?v=2"
+        val manager = context.packageManager
+        val info = manager.getPackageInfo(context.packageName, 0)
+        val longVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            info.longVersionCode
+        } else {
+            info.versionCode.toLong()
+        }
+        val url = "https://10miaomiao.cn/miao/bilimiao/ad?v=$longVersionCode"
         MiaoHttp.getJson<MiaoAdInfo>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ r ->
                     if (r.code == 0) {
-                        adInfo.value = r.data
+                        adInfo set r.data
                     }
                 }, { e ->
 
@@ -127,7 +119,7 @@ class HomeViewModel(val context: Context) : ViewModel() {
         val titles = arrayOf("时光姬", "时光基", "时光姬", "时光姬")
         val subtitles = arrayOf("ε=ε=ε=┏(゜ロ゜;)┛", "(　o=^•ェ•)o　┏━┓", "(/▽＼)", "ヽ(✿ﾟ▽ﾟ)ノ")
         val random = Random()
-        title.value = titles[random.nextInt(titles.size)] + "  " + subtitles[random.nextInt(titles.size)]
+        title set titles[random.nextInt(titles.size)] + "  " + subtitles[random.nextInt(titles.size)]
     }
 
     /**

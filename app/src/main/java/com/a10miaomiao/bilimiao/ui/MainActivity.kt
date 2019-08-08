@@ -3,43 +3,30 @@ package com.a10miaomiao.bilimiao.ui
 import android.arch.lifecycle.LifecycleOwner
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomSheetBehavior
-import android.support.design.widget.BottomSheetDialogFragment
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentTransaction
+import android.view.Gravity
 import android.view.View
-import android.view.WindowManager
-import com.a10miaomiao.miaoandriod.MiaoActivity
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.ui.home.HomeFragment
-import com.a10miaomiao.bilimiao.ui.home.RankFragment
 import kotlinx.android.synthetic.main.activity_main.*
-import android.support.v4.app.FragmentActivity
-import android.support.v4.app.FragmentManager
-import android.support.v4.widget.DrawerLayout
-import com.a10miaomiao.bilimiao.base.BaseFragment
 import com.a10miaomiao.bilimiao.ui.home.MainFragment
 import me.yokeyword.fragmentation.SupportActivity
 import me.yokeyword.fragmentation.SupportFragment
-import java.nio.file.Files.size
 import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.FragmentAnimator
 import android.view.WindowInsets
-import cn.a10miaomiao.dragging_sheet.YouTuDraggingView
+import com.a10miaomiao.bilimiao.netword.LoginHelper
 import com.a10miaomiao.bilimiao.store.FilterStore
-import com.a10miaomiao.bilimiao.ui.bangumi.BangumiFragment
-import com.a10miaomiao.bilimiao.ui.search.SearchFragment
+import com.a10miaomiao.bilimiao.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import me.yokeyword.fragmentation.ISupportFragment
-import me.yokeyword.fragmentation.SupportHelper
 import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
 
 
@@ -50,7 +37,10 @@ class MainActivity : SupportActivity() {
         BottomSheetBehavior.from(bottomSheet)
     }
     var bottomSheetFragment: Fragment? = null
+
+    val timeSettingStore by lazy { TimeSettingStore(this) }
     val filterStore by lazy { FilterStore(this) }
+    val userStore by lazy { UserStore(this) }
     val themeUtil by lazy { ThemeUtil(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +55,7 @@ class MainActivity : SupportActivity() {
             loadRootFragment(R.id.rootContainer, MainFragment())
         }
 //        loadRootFragment(R.id.rightContainer, SearchFragment())
+        LoginHelper.oss()
     }
 
     override fun start(toFragment: ISupportFragment?) {
@@ -115,6 +106,10 @@ class MainActivity : SupportActivity() {
         }
     }
 
+    fun openDrawer() {
+        findFragment(MainFragment::class.java)?.openDrawer()
+    }
+
     private fun initBottomSheet() {
         behavior.state = BottomSheetBehavior.STATE_HIDDEN
         behavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -163,8 +158,7 @@ class MainActivity : SupportActivity() {
         behavior.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
-    fun dynamicTheme(owner: LifecycleOwner, builder: () -> View)
-            = themeUtil.dynamicTheme(owner, builder)
+    fun dynamicTheme(owner: LifecycleOwner, builder: () -> View) = themeUtil.dynamicTheme(owner, builder)
 
     companion object {
         fun of(context: Context): MainActivity {

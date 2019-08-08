@@ -14,139 +14,147 @@
         android:layout_height="match_parent"
         android:background="#000000" />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/mContainer"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="@color/colorBackground"
-        android:orientation="vertical">
+        android:layout_width="wrap_content"
+        android:layout_height="600dp"
+        android:fitsSystemWindows="true">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="#FFF"
-            android:gravity="center">
-
-            <ImageView
-                android:id="@+id/mColseIv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="10dp"
-                android:src="@drawable/ic_close_grey_24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="查看封面 · "
-                android:gravity="start"
-                android:paddingVertical="10dp"/>
-
-            <TextView
-                android:id="@+id/mIDTv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="查看封面 · AV10071"
-                android:gravity="start"
-                android:paddingVertical="10dp"/>
-
-        </LinearLayout>
-
-        <FrameLayout
+            android:id="@+id/mMainContainerLl"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:background="@color/colorBackground"
+            android:orientation="vertical"
+            android:layout_margin="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="start">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="#FFF"
+                android:gravity="center">
 
                 <ImageView
-                    android:id="@+id/mCoverIv"
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:padding="10dp"
-                    android:layout_marginTop="5dp"
-                    android:scaleType="fitCenter"
-                    android:background="#fff"/>
-
-                <TextView
-                    android:id="@+id/mTitleTv"
-                    android:layout_width="match_parent"
+                    android:id="@+id/mColseIv"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:paddingHorizontal="10dp"
-                    android:paddingBottom="10dp"
-                    android:text=""
-                    android:textSize="16sp"
-                    android:background="#fff"
-                    android:maxLines="2"/>
+                    android:src="@drawable/ic_close_grey_24dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
 
-            </LinearLayout>
-
-            <ProgressBar
-                android:id="@+id/mProgress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:indeterminateTint="@color/colorPrimary" />
-
-        </FrameLayout>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:background="#FFF">
-
-            <LinearLayout
-                android:id="@+id/mSaveCoverLl"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:paddingVertical="5dp"
-                android:background="?attr/selectableItemBackground">
 
                 <TextView
-                    android:id="@+id/mSaveCoverTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="查看封面 · "
+                    android:gravity="start"
+                    android:paddingVertical="10dp"/>
+
+                <TextView
+                    android:id="@+id/mIDTv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="保存封面"
-                    android:gravity="center" />
-
-                <TextView
-                    android:textSize="10sp"
-                    android:id="@+id/mPermissionTv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="请给予存储权限( •̀ ω •́ )✧" />
+                    android:text="查看封面 · AV10071"
+                    android:gravity="start"
+                    android:paddingVertical="10dp"/>
 
             </LinearLayout>
 
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="start"
+                    android:paddingVertical="5dp">
 
-            <ImageView
-                android:id="@+id/mMoreIv"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:paddingHorizontal="10dp"
-                android:src="@drawable/ic_more_vert_grey_24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
+                    <ImageView
+                        android:id="@+id/mCoverIv"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:padding="10dp"
+                        android:scaleType="fitCenter"
+                        android:background="#fff"/>
+
+                    <TextView
+                        android:id="@+id/mTitleTv"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:gravity="center"
+                        android:paddingHorizontal="10dp"
+                        android:paddingBottom="10dp"
+                        android:text=""
+                        android:textSize="16sp"
+                        android:background="#fff"
+                        android:maxLines="2"/>
+
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/mProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/colorPrimary" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:background="#FFF">
+
+                <LinearLayout
+                    android:id="@+id/mSaveCoverLl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingVertical="5dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:id="@+id/mSaveCoverTv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="保存封面"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:textSize="10sp"
+                        android:id="@+id/mPermissionTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="请给予存储权限( •̀ ω •́ )✧" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/mMoreIv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="10dp"
+                    android:src="@drawable/ic_more_vert_grey_24dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            </LinearLayout>
 
         </LinearLayout>
+    </FrameLayout>
 
-    </LinearLayout>
+
+
 
 
 </android.support.constraint.motion.MotionLayout>

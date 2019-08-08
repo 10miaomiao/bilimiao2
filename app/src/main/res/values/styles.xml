@@ -11,10 +11,7 @@
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:fitsSystemWindows">true</item>
     </style>
-
-
 
     <!--透明activity-->
     <style name="TranslucentTheme" parent="AppTheme.NoActionBar">
@@ -43,5 +40,11 @@
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!--pupupWindow向左弹出-->
+    <style name="popwindow_anim_left">
+        <item name="android:windowEnterAnimation">@anim/popshow_operation_anim_left</item>
+        <item name="android:windowExitAnimation">@anim/pophidden_operation_anim_left</item>
+    </style>
 
 </resources>

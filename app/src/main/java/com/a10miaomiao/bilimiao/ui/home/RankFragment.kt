@@ -27,7 +27,6 @@ import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
-import com.a10miaomiao.miaoandriod.binding.bind
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import jp.wasabeef.glide.transformations.BlurTransformation
@@ -76,7 +75,7 @@ class RankFragment : Fragment() {
                 title("排行榜")
                 navigationIcon(R.drawable.ic_menu_white_24dp)
                 navigationOnClick {
-                    RxBus.getInstance().send(ConstantUtil.OPEN_DRAWER)
+                    MainActivity.of(context!!).openDrawer()
                 }
                 inflateMenu(R.menu.search)
                 onMenuItemClick(onMenuItemClick)
@@ -84,10 +83,9 @@ class RankFragment : Fragment() {
 
             swipeRefreshLayout {
                 setColorSchemeResources(config.themeColorResource)
-                viewModel.bind(viewModel::loading) { isRefreshing = it }
+                (+viewModel.loading){ isRefreshing = it }
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
-                    //                    backgroundColor = Color.WHITE
                     createAdapter()
                 }
             }
