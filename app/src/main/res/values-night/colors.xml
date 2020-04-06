@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="line_bg">#2c2c2c</color>
+
+    <color name="text_black">#787878</color>
+
+    <color name="black_alpha_45">#71FFFFFF</color>
+    <color name="black_alpha_30">#48FFFFFF</color>
+    <color name="black_alpha_60">#4fFFFFFF</color>
+
+    <color name="black_80">#DDDDDD</color>
+</resources>

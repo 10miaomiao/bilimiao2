@@ -108,7 +108,7 @@ class BangumiFragment : SwipeBackFragment() {
             }
 
             swipeRefreshLayout {
-                setColorSchemeResources(R.color.colorPrimary)
+                setColorSchemeResources(config.themeColorResource)
                 viewModel.loading.observe(owner, Observer {
                     isRefreshing = it!!
                 })
@@ -141,7 +141,7 @@ class BangumiFragment : SwipeBackFragment() {
 
         textView {
             textSize = 16f
-            textColorResource = R.color.colorWhite
+            textColor = Color.WHITE
             text = "ss$sid"
         }
     }
@@ -208,12 +208,12 @@ class BangumiFragment : SwipeBackFragment() {
     private fun ViewManager.createBody() = verticalLayout {
 
         verticalLayout {
-            backgroundColor = Color.WHITE
+            backgroundColor = config.blockBackgroundColor
             padding = dip(10)
 
             textView("简介：") {
                 textSize = 16f
-                textColor = Color.parseColor("#222222")
+                textColor = config.foregroundColor
             }.lparams { bottomMargin = dip(5) }
             textView {
                 observeNotNull {
@@ -227,13 +227,13 @@ class BangumiFragment : SwipeBackFragment() {
 
 
         verticalLayout {
-            backgroundColor = Color.WHITE
+            backgroundColor = config.blockBackgroundColor
             padding = dip(10)
 
             linearLayout {
                 textView("剧集列表：") {
                     textSize = 16f
-                    textColor = Color.parseColor("#222222")
+                    textColor = config.foregroundColor
                 }.lparams {
                     weight = 1f
                 }
@@ -258,6 +258,7 @@ class BangumiFragment : SwipeBackFragment() {
                 lm.orientation = LinearLayoutManager.HORIZONTAL
                 layoutManager = lm
                 createPagesAdapter()
+                isNestedScrollingEnabled = false
             }.lparams {
                 width = matchParent
                 height = wrapContent
@@ -269,12 +270,12 @@ class BangumiFragment : SwipeBackFragment() {
         }
 
         verticalLayout {
-            backgroundColor = Color.WHITE
+            backgroundColor = config.blockBackgroundColor
             padding = dip(10)
 
             textView("系列：") {
                 textSize = 16f
-                textColor = Color.parseColor("#222222")
+                textColor = config.foregroundColor
             }.lparams { bottomMargin = dip(5) }
 
             recyclerView {
@@ -282,6 +283,7 @@ class BangumiFragment : SwipeBackFragment() {
                 lm.orientation = LinearLayoutManager.HORIZONTAL
                 layoutManager = lm
                 createSeasonsAdapter()
+                isNestedScrollingEnabled = false
                 viewModel.seasonsIndex.observe(this@BangumiFragment, Observer {
                     lm.scrollToPositionWithOffset(it!!, 0)
                 })

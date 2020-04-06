@@ -12,7 +12,7 @@
      -->
     <gradient
         android:startColor="#00FFFFFF"
-        android:endColor="#F2F2F2"
+        android:endColor="?android:windowBackground"
         android:angle="0"
         />
 

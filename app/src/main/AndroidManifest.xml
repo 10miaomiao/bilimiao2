@@ -6,7 +6,25 @@
     <!-- 往SDCard写入数据权限 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <!-- 往SDCard读取数据权限 -->
-     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- 您从百度网站获取的APP KEY，根据实际您的APP申请的APP_KEY进行修改 -->
+    <meta-data android:name="BaiduMobAd_STAT_ID" android:value="ddd50be117" />
+    <!-- 渠道商编号 -->
+    <meta-data android:name="BaiduMobAd_CHANNEL" android:value="Coolapk" />
+    <!-- 是否开启错误日志统计，默认为false -->
+    <meta-data android:name="BaiduMobAd_EXCEPTION_LOG" android:value="true" />
+    <!-- 日志仅在wifi网络下发送，默认为false -->
+    <meta-data android:name="BaiduMobAd_ONLY_WIFI" android:value="false" />
+    <!-- 是否获取基站位置信息 ,默认为true -->
+    <meta-data android:name="BaiduMobAd_CELL_LOCATION" android:value="false" />
+    <!-- 是否获取GPS位置信息，默认为true -->
+    <meta-data android:name="BaiduMobAd_GPS_LOCATION" android:value="false" />
+    <!-- 是否获取WIFI位置信息，默认为true -->
+    <meta-data android:name="BaiduMobAd_WIFI_LOCATION" android:value="false" />
 
     <application
         android:name=".Bilimiao"
@@ -24,11 +42,14 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity android:name=".ui.cover.CoverActivity"
             android:theme="@style/TranslucentTheme"
-            android:label="查看b站封面">
+            android:label="@string/view_cover">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -44,8 +65,13 @@
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden">
-
         </activity>
+
+        <activity android:name=".ui.shortcut.RankShortcutActivity"
+            android:theme="@style/AppTheme"/>
+        <activity android:name=".ui.shortcut.SearchShortcutActivity"
+            android:theme="@style/AppTheme"/>
+
 
         <service android:name="cn.a10miaomiao.player.PlayerService"
             android:exported="true"/>

@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.mySpannableTextView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
+import com.a10miaomiao.bilimiao.ui.user.UserFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
 import org.jetbrains.anko.*
@@ -58,7 +59,7 @@ class VideoInfoDetailsFragment : Fragment() {
                     textSize = 16f
                     ellipsize = TextUtils.TruncateAt.END
                     maxLines = 2
-                    textColorResource = R.color.colorForeground
+                    textColor = config.foregroundColor
                     observeInfo {
                         text = it!!.title
                     }
@@ -77,14 +78,14 @@ class VideoInfoDetailsFragment : Fragment() {
                     }
 
                     imageView {
-                        imageTintList = ColorStateList.valueOf(config.blackAlpha45)
+                        imageTintList = ColorStateList.valueOf(config.foregroundAlpha45Color)
                         setImageResource(R.drawable.ic_info_views)
                     }.lparams(dip(14), dip(14)) {
                         gravity = Gravity.CENTER
                     }
                     textView {
                         textSize = 12f
-                        textColor = config.blackAlpha45
+                        textColor = config.foregroundAlpha45Color
                         observeInfo {
                             text = NumberUtil.converString(it!!.stat.view)
                         }
@@ -94,14 +95,14 @@ class VideoInfoDetailsFragment : Fragment() {
                     }
 
                     imageView {
-                        imageTintList = ColorStateList.valueOf(config.blackAlpha45)
+                        imageTintList = ColorStateList.valueOf(config.foregroundAlpha45Color)
                         setImageResource(R.drawable.ic_info_danmakus)
                     }.lparams(dip(14), dip(14)) {
                         gravity = Gravity.CENTER
                     }
                     textView {
                         textSize = 12f
-                        textColor = config.blackAlpha45
+                        textColor = config.foregroundAlpha45Color
                         observeInfo {
                             text = NumberUtil.converString(it!!.stat.danmaku)
                         }
@@ -112,7 +113,7 @@ class VideoInfoDetailsFragment : Fragment() {
 
                     textView {
                         textSize = 12f
-                        textColor = config.blackAlpha45
+                        textColor = config.foregroundAlpha45Color
                         observeInfo {
                             text = NumberUtil.converCTime(it!!.pubdate)
                         }
@@ -190,7 +191,8 @@ class VideoInfoDetailsFragment : Fragment() {
                         width = matchParent
                     }
                     setOnClickListener {
-                        startFragment(UpperInfoFragment.newInstance(viewModel.info.value!!.owner))
+                        val owner = viewModel.info.value!!.owner
+                        startFragment(UserFragment.newInstance(owner.mid))
                     }
 
                     rcImageView {
@@ -209,7 +211,7 @@ class VideoInfoDetailsFragment : Fragment() {
                             leftMargin = dip(8)
                         }
                         textView {
-                            textColor = config.black80
+                            textColor = config.foregroundColor
                             observeInfo {
                                 text = it!!.owner.name
                             }
@@ -252,7 +254,7 @@ class VideoInfoDetailsFragment : Fragment() {
                         textView {
                             ellipsize = TextUtils.TruncateAt.END
                             maxLines = 2
-                            textColorResource = R.color.colorForeground
+                            textColor = config.foregroundColor
                             binding.bind { item -> text = item.title }
                         }.lparams(matchParent, matchParent) {
                             weight = 1f
@@ -268,7 +270,7 @@ class VideoInfoDetailsFragment : Fragment() {
                             }
                             textView {
                                 textSize = 12f
-                                textColorResource = R.color.black_alpha_45
+                                textColor = config.foregroundAlpha45Color
                                 binding.bind { item ->
                                     text = if (item.owner == null) {
                                         ""
@@ -289,7 +291,7 @@ class VideoInfoDetailsFragment : Fragment() {
                             }
                             textView {
                                 textSize = 12f
-                                textColorResource = R.color.black_alpha_45
+                                textColor = config.foregroundAlpha45Color
                                 binding.bind { item -> text = NumberUtil.converString(item.stat.view) }
                             }
                             space().lparams(width = dip(10))
@@ -301,7 +303,7 @@ class VideoInfoDetailsFragment : Fragment() {
                             }
                             textView {
                                 textSize = 12f
-                                textColorResource = R.color.black_alpha_45
+                                textColor = config.foregroundAlpha45Color
                                 binding.bind { item -> text = NumberUtil.converString(item.stat.danmaku) }
                             }
                         }

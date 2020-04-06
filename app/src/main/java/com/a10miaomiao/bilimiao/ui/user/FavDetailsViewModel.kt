@@ -12,7 +12,7 @@ import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class UserFavViewModel(
+class FavDetailsViewModel(
         val context: Context,
         val id: Long
 ) : ViewModel() {

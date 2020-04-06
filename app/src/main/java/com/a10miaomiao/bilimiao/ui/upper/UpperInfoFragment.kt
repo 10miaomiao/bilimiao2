@@ -132,7 +132,7 @@ class UpperInfoFragment : SwipeBackFragment() {
         textView {
             text = viewModel.owner.name
             textSize = 16f
-            textColorResource = R.color.colorWhite
+            textColor = Color.WHITE
 
             appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
                 visibility = if (Math.abs(verticalOffset) - appBarLayout.totalScrollRange > dip(-60)) {
@@ -161,7 +161,7 @@ class UpperInfoFragment : SwipeBackFragment() {
      * Up主头部信息
      */
     private fun ViewManager.createUpperInfo() = frameLayout {
-        backgroundColorResource = R.color.colorWhite
+        backgroundColor = config.blockBackgroundColor
 
         imageView {
             id = 0

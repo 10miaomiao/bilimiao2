@@ -52,7 +52,7 @@ class SearchResultFragment : Fragment() {
             verticalLayout {
                 // 顶部横条
                 linearLayout {
-                    backgroundColor = Color.WHITE
+                    backgroundColor = config.blockBackgroundColor
                     padding = dip(5)
                     gravity = Gravity.CENTER_VERTICAL
                     textView {
@@ -74,7 +74,7 @@ class SearchResultFragment : Fragment() {
                     })
                     setOnRefreshListener { viewModel.refreshList() }
                     recyclerView {
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                         createAdapter()
                     }
                 }
@@ -82,7 +82,7 @@ class SearchResultFragment : Fragment() {
 
             // 测边
             navigationView {
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
                 verticalLayout {
                     renderLeft("排序：", viewModel.rankOrdersNameList, viewModel.rankOrdersIndex)
                     renderLeft("时长：", viewModel.durationNameList, viewModel.durationIndex)
@@ -133,10 +133,10 @@ class SearchResultFragment : Fragment() {
                             textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                             binding.bindIndexed { item, index ->
                                 text = item
-                                textColorResource = if (index == i.value) {
-                                    config.themeColorResource
+                                textColor= if (index == i.value) {
+                                    config.themeColor
                                 } else {
-                                    R.color.text_black
+                                    config.foregroundAlpha45Color
                                 }
                             }
                         }
@@ -173,7 +173,7 @@ class SearchResultFragment : Fragment() {
                     textView {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -189,7 +189,7 @@ class SearchResultFragment : Fragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = item.author }
                         }
                     }
@@ -204,7 +204,7 @@ class SearchResultFragment : Fragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.play) }
                         }
                         space().lparams(width = dip(10))
@@ -216,7 +216,7 @@ class SearchResultFragment : Fragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.danmaku) }
                         }
                     }

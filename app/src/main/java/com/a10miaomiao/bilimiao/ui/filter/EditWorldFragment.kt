@@ -96,10 +96,10 @@ class EditWorldFragment : SwipeBackFragment() {
                     }
 
                     frameLayout {
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                         textView("确定") {
                             padding = config.dividerSize
-                            textColorResource = attr(R.attr.colorPrimary)
+                            textColorResource = config.themeColorResource
                             selectableItemBackground()
                             gravity = Gravity.CENTER
                             setOnClickListener{ setKeyword() }

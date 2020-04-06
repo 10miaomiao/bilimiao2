@@ -108,7 +108,7 @@ class LoginFragment : SwipeBackFragment() {
                 height = matchParent
             }
             applyRecursively(ViewStyle.roundRect(dip(5)))
-            backgroundColor = Color.WHITE
+            backgroundColor = config.blockBackgroundColor
             verticalPadding = dip(15)
             horizontalPadding = dip(10)
 

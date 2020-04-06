@@ -54,13 +54,14 @@ class RankCategoryDetailsFragment : Fragment() {
     private fun render() = UI {
         verticalLayout {
             lparams(matchParent, matchParent)
+            backgroundColor = config.windowBackgroundColor
 
             linearLayout {
                 lparams(width = matchParent) {
                     bottomMargin = dip(5)
                 }
                 padding = dip(5)
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
 
                 info.filter.forEachWithIndex { i1, filter ->
                     dropMenuView {
@@ -88,7 +89,7 @@ class RankCategoryDetailsFragment : Fragment() {
 //                viewModel.bind(viewModel::loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.loadData() }
                 recyclerView {
-                    backgroundColor = Color.WHITE
+                    backgroundColor = config.blockBackgroundColor
                     if (info.type == ConstantUtil.VIDEO)
                         createVideoAdapter()
                     else if (info.type == ConstantUtil.BANGUMI)
@@ -129,7 +130,7 @@ class RankCategoryDetailsFragment : Fragment() {
                     textView {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -145,13 +146,13 @@ class RankCategoryDetailsFragment : Fragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = item.author }
                         }
                     }
                     textView {
                         textSize = 12f
-                        textColorResource = R.color.black_alpha_45
+                        textColor = config.foregroundAlpha45Color
                         binding.bind { item -> text = "综合评分：${item.pts}" }
                     }
                 }.lparams(width = matchParent, height = matchParent)
@@ -195,7 +196,7 @@ class RankCategoryDetailsFragment : Fragment() {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
                         textSize = 16f
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -203,7 +204,7 @@ class RankCategoryDetailsFragment : Fragment() {
 
                     textView {
                         textSize = 14f
-                        textColorResource = R.color.black_alpha_45
+                        textColor = config.foregroundAlpha45Color
                         binding.bind { item ->
                             text = item.new_ep.index_show
                         }
@@ -213,7 +214,7 @@ class RankCategoryDetailsFragment : Fragment() {
 
                     textView {
                         textSize = 14f
-                        textColorResource = R.color.black_alpha_45
+                        textColor = config.foregroundAlpha45Color
                         binding.bind { item -> text = "综合评分：${item.pts}" }
                     }
 

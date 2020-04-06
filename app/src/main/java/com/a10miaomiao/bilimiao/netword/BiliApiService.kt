@@ -60,10 +60,11 @@ object BiliApiService {
      */
     fun getLiveInfo(aid: String): String {
         var url = "https://live.bilibili.com/AppRoom/index?_device=android&access_key=&appkey=${ApiHelper.appKey_Android}&build=434000&buld=434000&jumpFrom=24000&mobi_app=android&platform=android&room_id=$aid&scale=xxhdpi"
-        //var url = "http://bangumi.bilibili.com/api/season_v3?_device=android&_ulv=10000&access_key=&appkey=${ApiHelper.appKey_Android}&build=411005&platform=android&season_id=$aid&ts=${ApiHelper.GetTimeSpen()}&type=bangumi"
         url += "&sign=" + ApiHelper.getAndroidSign(url)
         return url
     }
+    fun getRoomInfo(id: String) = createUrl("https://api.live.bilibili.com/room/v1/Room/get_info",
+            "id" to id)
 
     /**
      * 获取音频信息
@@ -151,7 +152,7 @@ object BiliApiService {
             "https://app.bilibili.com/x/v2/search/type?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3710&device=phone&mobi_app=iphone&platform=ios&type=2&keyword=$keyword&pn=$pageNum&ps=$pageSize"
 
     /**
-     * 直播
+     * dili
      */
     fun getSearchDili(keyword: String, pageNum: Int, pageSize: Int) =
             "https://10miaomiao.cn/miao/bilimiao/search/bangumi?keyword=$keyword&pn=$pageNum&ps=$pageSize&v=0"
@@ -169,10 +170,16 @@ object BiliApiService {
     fun getKeyWord(keyword: String) =
             "https://s.search.bilibili.com/main/suggest?suggest_type=accurate&sub_type=tag&main_ver=v1&term=$keyword"
 
+    fun getSpace(id: String) = biliApp("x/v2/space",
+            "vmid" to id)
+
     /**
      * 收藏夹列表
      */
     fun gatMedialist() = biliApi("medialist/gateway/base/space")
+
+    fun gatMedialist(up_mid: Long) = biliApi("medialist/gateway/base/space",
+        "up_mid" to up_mid.toString())
 
     /**
      * 收藏夹列表详情
@@ -187,6 +194,27 @@ object BiliApiService {
             "pn" to pn.toString(),
             "ps" to ps.toString()
     )
+
+    /**
+     * 收藏番剧
+     */
+    fun getFollowBangumi(
+            pn: Int,
+            ps: Int
+    )  = biliApi("pgc/app/follow/bangumi",
+            "pn" to pn.toString(),
+            "ps" to ps.toString()
+    )
+
+    fun getFollowBangumi(
+            vmid: Long,
+            pn: Int,
+            ps: Int
+    ) = biliApp("x/v2/space/bangumi",
+            "vmid" to vmid.toString(),
+            "pn" to pn.toString(),
+            "ps" to ps.toString())
+
 
     fun oss() = createUrl("https://passport.bilibili.com/api/login/sso",
             "gourl" to "https://account.bilibili.com/account/home")

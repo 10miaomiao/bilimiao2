@@ -1,35 +1,40 @@
 package com.a10miaomiao.bilimiao.ui.cover
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Outline
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.support.constraint.motion.MotionLayout
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.PopupMenu
-import android.util.Log
 import android.view.View
+import android.view.ViewOutlineProvider
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.ui.video.VideoInfoViewModel
 import com.a10miaomiao.bilimiao.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.utils.FileUtil
+import com.a10miaomiao.bilimiao.utils.ThemeUtil
 import com.a10miaomiao.bilimiao.utils.newViewModelFactory
 import kotlinx.android.synthetic.main.activity_cover.*
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.toast
+import java.io.File
+import java.io.FileOutputStream
 
 
 class CoverActivity : AppCompatActivity() {
+
+    private val path = Environment.getExternalStorageDirectory().path + "/BiliMiao/b站封面/"
 
     companion object {
         fun launch(context: Context, id: String, type: String) {
@@ -87,11 +92,20 @@ class CoverActivity : AppCompatActivity() {
             }
         })
         // 设置圆角
-        ViewStyle.roundRect(dip(5))(mMainContainerLl)
-
-        mColseIv.setOnClickListener {
-            mMotionLayout.transitionToStart()
+        val roundCorner = dip(36)
+        mMainContainerLl.clipToOutline = true // 开启裁剪
+        mMainContainerLl.outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(view: View, outline: Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height + roundCorner,
+                        roundCorner.toFloat())
+            }
         }
+        ViewStyle.roundRect(dip(24))(mBtnBox1)
+        ViewStyle.roundRect(dip(24))(mBtnBox2)
+        ViewStyle.roundRect(dip(10))(mCoverIv)
+//        mColseIv.setOnClickListener {
+//            mMotionLayout.transitionToStart()
+//        }
         mMoreIv.setOnClickListener {
             val popupMenu = PopupMenu(this, it)
             popupMenu.inflate(R.menu.cover)
@@ -131,14 +145,43 @@ class CoverActivity : AppCompatActivity() {
                 toast("图片未加载")
                 return
             }
-            var filePath = FileUtil("b站封面", this)
-                    .saveJPG(bitmap, fileName)
-                    .fileName
-            toast("图片已保存至 $filePath")
+            // 判断文件夹是否已经创建
+            File(path).let {
+                if (!it.exists()) {
+                    it.mkdirs()
+                }
+            }
+            // 保存图片文件
+            File("$path$fileName.jpg").let {
+                it.writeBitmap(bitmap)
+                toast("图片已保存至 ${it.path}")
+                notifyPhoto(it)
+            }
         } catch (e: Exception) {
             toast("保存失败")
         }
     }
+
+    /**
+     * 通知相册
+     */
+    private fun notifyPhoto(file: File) {
+        val intent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+        val uri = Uri.fromFile(file)
+        intent.data = uri
+        sendBroadcast(intent)
+    }
+
+    /**
+     * 保存图片
+     */
+    private fun File.writeBitmap(data: Bitmap) {
+        val fOut = FileOutputStream(this)
+        data.compress(Bitmap.CompressFormat.JPEG, 100, fOut)
+        fOut.flush()
+        fOut.close()
+    }
+
 
     //动态获取sd卡权限
     private fun requestPermissions(): Boolean {

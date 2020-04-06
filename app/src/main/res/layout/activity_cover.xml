@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.motion.MotionLayout
-    android:id="@+id/mMotionLayout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.motion.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mMotionLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     app:layoutDescription="@xml/cover_scene">
 
     <View
@@ -24,41 +23,45 @@
             android:id="@+id/mMainContainerLl"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorBackground"
+            android:background="#fff"
             android:orientation="vertical"
-            android:layout_margin="10dp">
+            android:paddingHorizontal="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:background="#FFF"
-                android:gravity="center">
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingTop="20dp">
 
-                <ImageView
-                    android:id="@+id/mColseIv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="10dp"
-                    android:src="@drawable/ic_close_grey_24dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"/>
+                <!--<ImageView-->
+                <!--android:id="@+id/mColseIv"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginRight="10dp"-->
+                <!--android:src="@drawable/ic_close_grey_24dp"-->
+                <!--android:background="?attr/selectableItemBackgroundBorderless"/>-->
 
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="查看封面 · "
                     android:gravity="start"
-                    android:paddingVertical="10dp"/>
+                    android:text="查看封面 · "
+                    android:textColor="#000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/mIDTv"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="查看封面 · AV10071"
                     android:gravity="start"
-                    android:paddingVertical="10dp"/>
+                    android:text="AV10071"
+                    android:textColor="#000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -70,29 +73,28 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:gravity="start"
+                    android:orientation="vertical"
                     android:paddingVertical="5dp">
 
                     <ImageView
                         android:id="@+id/mCoverIv"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="200dp"
                         android:padding="10dp"
                         android:scaleType="fitCenter"
-                        android:background="#fff"/>
+                        android:layout_gravity="center"/>
 
                     <TextView
                         android:id="@+id/mTitleTv"
                         android:layout_width="match_parent"
                         android:layout_height="64dp"
                         android:gravity="center"
+                        android:maxLines="2"
                         android:paddingHorizontal="10dp"
                         android:paddingBottom="10dp"
                         android:text=""
-                        android:textSize="16sp"
-                        android:background="#fff"
-                        android:maxLines="2"/>
+                        android:textSize="16sp" />
 
                 </LinearLayout>
 
@@ -108,53 +110,63 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginBottom="20dp"
+                android:background="#FFF"
                 android:gravity="center"
-                android:background="#FFF">
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:id="@+id/mSaveCoverLl"
+                <FrameLayout
+                    android:id="@+id/mBtnBox1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:paddingVertical="5dp"
-                    android:background="?attr/selectableItemBackground">
+                    android:background="#f5f5f5">
 
-                    <TextView
-                        android:id="@+id/mSaveCoverTv"
+                    <LinearLayout
+                        android:id="@+id/mSaveCoverLl"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="保存封面"
-                        android:gravity="center" />
+                        android:layout_height="48dp"
+                        android:background="?selectableItemBackground"
+                        android:gravity="center"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:textSize="10sp"
-                        android:id="@+id/mPermissionTv"
+                        <TextView
+                            android:id="@+id/mSaveCoverTv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="保存封面" />
+                        <TextView
+                            android:id="@+id/mPermissionTv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="请给予存储权限( •̀ ω •́ )✧"
+                            android:textSize="8sp" />
+                    </LinearLayout>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/mBtnBox2"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="#f5f5f5"
+                    android:layout_marginLeft="10dp">
+
+                    <ImageView
+                        android:id="@+id/mMoreIv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="请给予存储权限( •̀ ω •́ )✧" />
+                        android:padding="12dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_more_vert_grey_24dp"
+                        android:layout_gravity="center"/>
 
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/mMoreIv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingHorizontal="10dp"
-                    android:src="@drawable/ic_more_vert_grey_24dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"/>
+                </FrameLayout>
 
             </LinearLayout>
 
         </LinearLayout>
     </FrameLayout>
-
-
-
 
 
 </android.support.constraint.motion.MotionLayout>

@@ -13,8 +13,7 @@
             android:id="@+id/mAppBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:fitsSystemWindows="true">
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/mToolbarLayout"
@@ -75,7 +74,7 @@
                     android:layout_height="?attr/actionBarSize"
                     app:contentInsetStartWithNavigation="0dp"
                     app:layout_collapseMode="pin"
-                    app:popupTheme="@style/AppTheme.PopupOverlay">
+                    >
 
 
                     <TextView
@@ -83,7 +82,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:textColor="@color/colorWhite"
+                        android:textColor="#FFFFFF"
                         android:textSize="@dimen/default_medium_text_size" />
 
                     <!--自定义带图片的立即播放按钮-->
@@ -114,10 +113,10 @@
                 android:id="@+id/mTabLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorWhite"
+                android:background="?attr/blockBackground"
                 app:tabIndicatorColor="?attr/colorPrimary"
                 app:tabSelectedTextColor="?attr/colorPrimary"
-                app:tabTextColor="@color/colorForeground" />
+                app:tabTextColor="?attr/foregroundColor" />
 
         </android.support.design.widget.AppBarLayout>
 

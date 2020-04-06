@@ -64,7 +64,7 @@ class UpperInfoViewModel(val owner: Owner) : ViewModel() {
      * 加载频道数据
      */
     private fun loadChannelData() {
-        MiaoHttp.getJson<ResultListInfo<UpperChannel>>( BiliApiService.getUpperChanne(owner.mid))
+        MiaoHttp.getJson<ResultListInfo<UpperChannel>>(BiliApiService.getUpperChanne(owner.mid))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ res ->

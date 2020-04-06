@@ -70,7 +70,7 @@ class RankFragment : Fragment() {
 
     private fun render() = UI {
         verticalLayout {
-            backgroundColor = config.background
+            backgroundColor = config.windowBackgroundColor
             headerView {
                 title("排行榜")
                 navigationIcon(R.drawable.ic_menu_white_24dp)

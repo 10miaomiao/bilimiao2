@@ -3,12 +3,20 @@
     <color name="colorPrimary">#FA7199</color>
     <color name="colorPrimaryDark">#FA7199</color>
     <color name="colorAccent">#FA7199</color>
-    <color name="colorForeground">#000000</color>
-    <color name="colorWhite">#FFF</color>
-    <color name="colorBackground">#f2f2f2</color>
+
+    <color name="foregroundColor">#000000</color>
+    <color name="windowBackgroundColor">#f2f2f2</color>
+    <color name="blockBackgroundColor">#ffffff</color>
+    <color name="lineColor">#e6e6e6</color>
+
+    <color name="darkForegroundColor">#ffffff</color>
+    <color name="darkWindowBackgroundColor">#2b2b2b</color>
+    <color name="darkBlockBackgroundColor">#373737</color>
+    <color name="darkLineColor">#2c2c2c</color>
 
     <color name="gray_light">#dcdcdc</color>
     <color name="bangumi_badge_gary">#668B8B8C</color>
+
     <color name="black_alpha_45">#71000000</color>
     <color name="black_alpha_30">#48000000</color>
     <color name="black_alpha_60">#4f000000</color>
@@ -16,7 +24,9 @@
     <color name="gray_20">#B3B3B3</color>
     <color name="gray_80">#BEBBB4</color>
     <color name="gray_light_30">#E5E5E5</color>
+
     <color name="black_80">#222222</color>
+    <color name="white_80">#DDDDDD</color>
 
     <color name="gainsboro">#ebe8eb</color>
     <color name="title_color">#212121</color>

@@ -2,6 +2,8 @@ package com.a10miaomiao.bilimiao.ui.login
 
 import android.arch.lifecycle.ViewModel
 import android.content.Context
+import com.a10miaomiao.bilimiao.Bilimiao
+import com.a10miaomiao.bilimiao.entity.LoginInfo
 import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.LoginHelper
 import com.a10miaomiao.bilimiao.ui.MainActivity
@@ -10,6 +12,8 @@ import com.a10miaomiao.miaoandriod.MiaoLiveData
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.jetbrains.anko.alert
+import org.jetbrains.anko.indeterminateProgressDialog
+import org.jetbrains.anko.progressDialog
 import org.jetbrains.anko.toast
 
 class LoginViewModel(
@@ -37,15 +41,14 @@ class LoginViewModel(
             alert("请输入验证码")
             return
         }
+        val progressDialog = context.indeterminateProgressDialog("登陆中")
         LoginHelper.login(-username, -password, -captcha)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
+                .subscribe ({
                     val (code, data, message) = it
                     if (code == 0) {
-                        val (access_token, refresh_token) = data
-                        LoginHelper.saveToken(context, access_token, refresh_token)
-                        authInfo(access_token)
+                        authInfo(data)
                     } else if (code == -105) {
                         alert(if (-isCaptcha) "验证码不正确" else "请输入验证码")
                         captcha set ""
@@ -54,18 +57,23 @@ class LoginViewModel(
                     } else {
                         alert(message)
                     }
-                    DebugMiao.log(it)
-                }
+                }, {
+                    alert("网络错误")
+                }, {
+                    progressDialog.hide()
+                })
     }
 
-    fun authInfo(access_token: String) {
-        LoginHelper.authInfo(access_token)
+    fun authInfo(loginInfo: LoginInfo) {
+        val progressDialog = context.indeterminateProgressDialog("获取信息中")
+        val accessToken = loginInfo.token_info.access_token
+        LoginHelper.authInfo(accessToken)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
+                .subscribe ({
                     val (code, data, message) = it
                     if (code == 0) {
-                        LoginHelper.saveUserInfo(context, data)
+                        Bilimiao.app.saveAuthInfo(loginInfo)
                         userStore.setUserInfo(data)
                         MainActivity.of(context)
                                 .pop()
@@ -75,11 +83,16 @@ class LoginViewModel(
                             negativeButton("确定") { }
                         }.show()
                     }
-                }
+                }, {
+                    alert("网络错误")
+                }, {
+                    progressDialog.hide()
+                })
     }
 
     private fun alert(_title: String) {
         context.alert {
+
             title = _title
             negativeButton("确定") { }
         }.show()

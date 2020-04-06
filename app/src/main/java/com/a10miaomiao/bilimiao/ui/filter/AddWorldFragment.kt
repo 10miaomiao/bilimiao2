@@ -98,7 +98,7 @@ class AddWorldFragment : SwipeBackFragment() {
                     }
 
                     frameLayout {
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                         textView("确定") {
                             padding = config.dividerSize
                             textColorResource = attr(R.attr.colorPrimary)

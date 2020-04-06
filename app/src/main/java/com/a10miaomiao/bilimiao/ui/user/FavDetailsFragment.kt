@@ -2,7 +2,6 @@ package com.a10miaomiao.bilimiao.ui.user
 
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
@@ -12,12 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.store.UserStore
-import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
-import com.a10miaomiao.bilimiao.ui.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -27,11 +23,11 @@ import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
 
-class UserFavFragment : SwipeBackFragment() {
+class FavDetailsFragment : SwipeBackFragment() {
 
     companion object {
-        fun newInstance(id: Long, title: String): UserFavFragment {
-            val fragment = UserFavFragment()
+        fun newInstance(id: Long, title: String): FavDetailsFragment {
+            val fragment = FavDetailsFragment()
             val bundle = Bundle()
             bundle.putLong("id", id)
             bundle.putString("title", title)
@@ -42,10 +38,10 @@ class UserFavFragment : SwipeBackFragment() {
 
     private val id by lazy { arguments!!.getLong("id") }
     private val title by lazy { arguments!!.getString("title") }
-    private lateinit var viewModel: UserFavViewModel
+    private lateinit var viewModel: FavDetailsViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = getViewModel { UserFavViewModel(context!!, id) }
+        viewModel = getViewModel { FavDetailsViewModel(context!!, id) }
         return attachToSwipeBack(createUI().view)
     }
 
@@ -63,7 +59,7 @@ class UserFavFragment : SwipeBackFragment() {
                 (+viewModel.loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
-                    backgroundColor = Color.WHITE
+                    backgroundColor = config.blockBackgroundColor
                     createAdapter()
                 }
             }
@@ -89,7 +85,7 @@ class UserFavFragment : SwipeBackFragment() {
                     textView {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -105,7 +101,7 @@ class UserFavFragment : SwipeBackFragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = item.upper.name }
                         }
                     }
@@ -120,7 +116,7 @@ class UserFavFragment : SwipeBackFragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.cnt_info.play) }
                         }
                         space().lparams(width = dip(10))
@@ -132,7 +128,7 @@ class UserFavFragment : SwipeBackFragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.cnt_info.danmaku) }
                         }
                     }

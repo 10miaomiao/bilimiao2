@@ -19,7 +19,7 @@
             android:padding="@dimen/default_general_margin"
             android:layout_marginRight="10dp"
             android:src="@drawable/bili_player_back_button"
-            android:tint="@color/colorWhite"
+            android:tint="@android:color/white"
             android:background="?attr/selectableItemBackgroundBorderless"/>
 
         <TextView
@@ -118,7 +118,7 @@
                     android:id="@+id/mCurrentTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorWhite"
+                    android:textColor="@android:color/white"
                     android:textSize="@dimen/default_tiny_text_size"
                     android:textStyle="bold" />
 
@@ -129,7 +129,7 @@
                     android:layout_marginLeft="1dp"
                     android:layout_marginRight="1dp"
                     android:text="/"
-                    android:textColor="@color/colorWhite"
+                    android:textColor="@android:color/white"
                     android:textSize="@dimen/default_tiny_text_size" />
 
 
@@ -137,7 +137,7 @@
                     android:id="@+id/mEndTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorWhite"
+                    android:textColor="@android:color/white"
                     android:textSize="@dimen/default_tiny_text_size"
                     android:textStyle="bold" />
 
@@ -163,7 +163,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="弹幕开"
-                    android:textColor="@color/colorWhite"
+                    android:textColor="@android:color/white"
                     android:textSize="@dimen/default_tiny_text_size" />
 
             </LinearLayout>
@@ -187,7 +187,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="清晰度"
-                    android:textColor="@color/colorWhite"
+                    android:textColor="@android:color/white"
                     android:textSize="@dimen/default_tiny_text_size" />
             </LinearLayout>
 

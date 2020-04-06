@@ -10,6 +10,7 @@
         <SwitchPreference
             android:defaultValue="false"
             android:key="is_bili_player"
+            android:summary="奇迹和魔法都是存在的"
             android:summaryOff=""
             android:summaryOn=""
             android:title="使用外部播放器" />
@@ -23,26 +24,21 @@
             android:entryValues="@array/fragment_animator_entry_values"
             android:defaultValue="vertical"/>
 
-        <SwitchPreference
-            android:key="player_background"
-            android:summary="遇到困难时，不要停下来."
-            android:title="后台播放"
-            android:defaultValue="true"/>
-
         <Preference
             android:key="theme"
             android:summary="库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
             android:title="切换主题" />
 
         <Preference
-            android:enabled="false"
-            android:key="p"
-            android:title="播放设置" />
+            android:key="video"
+            android:title="播放设置"
+            android:summary="咖啡拿铁,咖啡摩卡,卡布奇诺!"/>
 
         <Preference
             android:enabled="false"
             android:key="d"
-            android:title="弹幕设置" />
+            android:title="弹幕设置"
+            android:summary="相信的心就是你的魔法"/>
 
 
     </PreferenceCategory>
@@ -55,7 +51,7 @@
             android:title="关于"></Preference>
         <Preference
             android:key="donate"
-            android:summary="开发者想买内存条"
+            android:summary="你我命中注定，无可代替"
             android:title="捐助" />
 
         <Preference

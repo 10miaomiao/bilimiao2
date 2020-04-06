@@ -6,12 +6,41 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="blockBackground">@color/blockBackgroundColor</item>
+        <item name="foregroundColor">@color/foregroundColor</item>
+        <item name="lineColor">@color/lineColor</item>
     </style>
 
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <style name="AppDarkTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:dialogTheme">@style/ThemeOverlay.AppCompat.Dialog</item>
+
+        <item name="blockBackground">@color/darkBlockBackgroundColor</item>
+        <item name="foregroundColor">@color/darkForegroundColor</item>
+        <item name="lineColor">@color/darkLineColor</item>
+        
+        <item name="android:alertDialogTheme">@style/AppDarkThemeDialogAlert</item>
+    </style>
+
+    <style name="AppDarkThemeDialogAlert" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+    </style>
+
+    <style name="AppDarkTheme.NoActionBar" parent="AppDarkTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
 
     <!--透明activity-->
     <style name="TranslucentTheme" parent="AppTheme.NoActionBar">
@@ -41,10 +70,20 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/white</item>
+    </style>
+
     <!--pupupWindow向左弹出-->
     <style name="popwindow_anim_left">
         <item name="android:windowEnterAnimation">@anim/popshow_operation_anim_left</item>
         <item name="android:windowExitAnimation">@anim/pophidden_operation_anim_left</item>
+    </style>
+
+    <style name="alpha_animation" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/alpha_in</item>
+        <item name="android:windowExitAnimation">@anim/alpha_out</item>
     </style>
 
 </resources>

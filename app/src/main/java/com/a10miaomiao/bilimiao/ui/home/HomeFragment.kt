@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.Toolbar
 import android.view.*
@@ -50,7 +51,7 @@ class HomeFragment : Fragment() {
         val observeTime = timeSettingStore.observe()
 
         verticalLayout {
-            backgroundColor = config.background
+            backgroundColor = config.windowBackgroundColor
             headerView {
                 viewModel.title.observe()(::title)
                 navigationIcon(R.drawable.ic_menu_white_24dp)
@@ -69,7 +70,7 @@ class HomeFragment : Fragment() {
                     // 分区列表
                     recyclerView {
                         isNestedScrollingEnabled = false
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                     }.lparams {
                         width = matchParent
                         topMargin = config.dividerSize
@@ -98,7 +99,7 @@ class HomeFragment : Fragment() {
                     // 时间线时间显示
                     linearLayout {
                         selectableItemBackground()
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                         padding = config.dividerSize
                         textView {
                             observeTime {
@@ -116,7 +117,7 @@ class HomeFragment : Fragment() {
                     // 广告通知
                     linearLayout {
                         visibility = View.GONE
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                         padding = config.dividerSize
 
                         val observeAdInfo = viewModel.adInfo.observeNotNull()
@@ -142,6 +143,17 @@ class HomeFragment : Fragment() {
                     }.lparams {
                         width = matchParent
                         topMargin = config.dividerSize
+                    }
+
+                    button("测试") {
+                        setOnClickListener {
+                            val behavior = MainActivity.of(context!!).haederBehavior
+                            if (behavior.isShow()) {
+                                behavior.hide()
+                            } else {
+                                behavior.show()
+                            }
+                        }
                     }
                 }
             }

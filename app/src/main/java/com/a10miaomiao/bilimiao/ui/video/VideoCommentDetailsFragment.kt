@@ -11,17 +11,19 @@ import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.entity.comment.ReplyBean
 import com.a10miaomiao.bilimiao.ui.MainActivity
-import com.a10miaomiao.bilimiao.ui.commponents.CommentItemView
 import com.a10miaomiao.bilimiao.ui.commponents.bottomSheetHeaderView
 import com.a10miaomiao.bilimiao.ui.commponents.commentItemView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
+import com.a10miaomiao.bilimiao.ui.user.UserFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import com.a10miaomiao.miaoandriod.adapter.miao
+import com.a10miaomiao.miaoandriod.v
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
@@ -49,13 +51,17 @@ class VideoCommentDetailsFragment : Fragment() {
         return createUI().view
     }
 
+    val upperClick = { mid: Long ->
+        startFragment(UserFragment.newInstance(mid))
+        MainActivity.of(activity!!).hideBottomSheet()
+    }
+
     private fun createUI() = UI {
         verticalLayout {
             bottomSheetHeaderView("查看评论", View.OnClickListener {
                 MainActivity.of(context)
                         .hideBottomSheet()
             })
-
 
             nestedScrollView {
                 setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -70,32 +76,33 @@ class VideoCommentDetailsFragment : Fragment() {
     }
 
     private fun ViewManager.createBody() = verticalLayout {
-        commentItemView {
-            backgroundColorResource = R.color.colorWhite
-            data = CommentItemView.CommentItemModel(
-                    uname = reply.member.uname
-                    , avatar = reply.member.avatar
-                    , time = NumberUtil.converCTime(reply.ctime)
-                    , floor = reply.floor
-                    , content = reply.content.message
-                    , like = reply.like
-                    , count = reply.count
-                    , textIsSelectable = true
-            )
-            onUpperClick = {
-                val member = reply.member
-                startFragment(UpperInfoFragment.newInstance(
-                        Owner(
-                                face = member.avatar,
-                                name = member.uname,
-                                mid = member.mid.toLong()
-                        )
-                ))
-                MainActivity.of(context)
-                        .hideBottomSheet()
+        commentItemView(
+                mid = reply.member.mid.toLong().v(),
+                uname = reply.member.uname.v(),
+                avatar = reply.member.avatar.v(),
+                time = NumberUtil.converCTime(reply.ctime).v(),
+                floor = reply.floor.v(),
+                content = reply.content.message.v(),
+                like = reply.like.v(),
+                count = reply.count.v(),
+                onUpperClick = {
+                    val member = reply.member
+                    startFragment(UpperInfoFragment.newInstance(
+                            Owner(
+                                    face = member.avatar,
+                                    name = member.uname,
+                                    mid = member.mid.toLong()
+                            )
+                    ))
+                    MainActivity.of(context)
+                            .hideBottomSheet()
+                }
+        ).apply {
+            backgroundColor = config.blockBackgroundColor
+
+            lparams(matchParent, matchParent) {
+                topMargin = dip(10)
             }
-        }.lparams(matchParent, matchParent) {
-            topMargin = dip(10)
         }
 
         if (reply.count > 0) {
@@ -104,7 +111,7 @@ class VideoCommentDetailsFragment : Fragment() {
             }
 
             recyclerView {
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
                 createAdapter()
                 isNestedScrollingEnabled = false
                 layoutManager = LinearLayoutManager(context)
@@ -132,34 +139,17 @@ class VideoCommentDetailsFragment : Fragment() {
 
     private fun RecyclerView.createAdapter() = miao(viewModel.list) {
         itemView { b ->
-            commentItemView {
-                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-                b.bind { item ->
-                    data = CommentItemView.CommentItemModel(
-                            uname = item.member.uname
-                            , avatar = item.member.avatar
-                            , time = NumberUtil.converCTime(item.ctime)
-                            , floor = item.floor
-                            , content = item.content.message
-                            , like = item.like
-                            , count = item.count
-                            , textIsSelectable = true
-                    )
-                    onUpperClick = {
-                        val member = item.member
-                        startFragment(UpperInfoFragment.newInstance(
-                                Owner(
-                                        face = member.avatar,
-                                        name = member.uname,
-                                        mid = member.mid.toLong()
-                                )
-                        ))
-                        MainActivity.of(context)
-                                .hideBottomSheet()
-                    }
-                }
-
-            }
+            commentItemView(
+                    mid = b.itemValue { member.mid.toLong() },
+                    uname = b.itemValue { member.uname },
+                    avatar = b.itemValue { member.avatar },
+                    time = b.itemValue { NumberUtil.converCTime(ctime) },
+                    floor = b.itemValue { floor },
+                    content = b.itemValue { content.message },
+                    like = b.itemValue { like },
+                    count = b.itemValue { count },
+                    onUpperClick = upperClick
+            )
         }
         onItemClick { item, position ->
 

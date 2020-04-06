@@ -7,6 +7,7 @@ import android.service.quicksettings.Tile
 import android.view.*
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.utils.selectableItemBackground
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
@@ -29,7 +30,7 @@ class AboutFragment : SwipeBackFragment() {
 
     private fun createUI() = UI {
         verticalLayout {
-            backgroundColorResource = R.color.colorBackground
+            backgroundColor = config.windowBackgroundColor
             headerView {
                 title("关于")
                 navigationIcon(R.drawable.ic_arrow_back_white_24dp)
@@ -50,7 +51,7 @@ class AboutFragment : SwipeBackFragment() {
                             bottomMargin = dip(2)
                         }
                         textView("bilimiao 2.0") {
-                            textColorResource = R.color.colorForeground
+                            textColor = config.foregroundColor
                             textSize = 16f
                         }.lparams(wrapContent, wrapContent)
                     }.lparams {
@@ -97,7 +98,7 @@ class AboutFragment : SwipeBackFragment() {
 
     private fun _LinearLayout.createLine() {
         view {
-            backgroundColorResource = R.color.line_bg
+            backgroundColor = config.lineColor
         }.lparams {
             width = matchParent
             height = 2
@@ -106,7 +107,7 @@ class AboutFragment : SwipeBackFragment() {
 
     private fun ViewManager.createItem(title: String, subTitle: String, onClickListener: ((View) -> Unit)? = null) {
         frameLayout {
-            backgroundColorResource = R.color.colorWhite
+            backgroundColor = config.blockBackgroundColor
 
             linearLayout {
                 horizontalPadding = dip(10)
@@ -118,7 +119,7 @@ class AboutFragment : SwipeBackFragment() {
                 textView {
                     text = title
                     textSize = 16f
-                    textColorResource = R.color.colorForeground
+                    textColor = config.foregroundColor
                 }
 
                 textView {

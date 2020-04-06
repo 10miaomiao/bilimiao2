@@ -65,9 +65,14 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
             notifyDataSetChanged()
         }
 
+    var maxCount: Int = -1 // 最大数量，-1为无限
+
     override fun getItemCount() =
             if (!isShowStateView) {
-                getHeadersCount() + getFootersCount() + getRealItemCount()
+                if (maxCount == -1)
+                    getHeadersCount() + getFootersCount() + getRealItemCount()
+                else
+                    maxCount
             } else {
                 1
             }

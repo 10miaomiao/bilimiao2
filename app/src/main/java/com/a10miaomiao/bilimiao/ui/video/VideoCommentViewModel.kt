@@ -54,6 +54,7 @@ class VideoCommentViewModel(val id: String) : ViewModel() {
                         loadState.value = LoadMoreView.State.NOMORE
                     }
                 }, { e ->
+                    e.printStackTrace()
                     loadState.value = LoadMoreView.State.FAIL
                     loading.value = false
                 })

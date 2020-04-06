@@ -206,6 +206,7 @@ class PlayerFragment : Fragment() {
             //            setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f)
 //            isDuplicateMergingEnabled = false
             setScrollSpeedFactor(2.0f)
+
 //            setScaleTextSize(0.8f)
 //            setMaximumLines(maxLinesPair)
 //            preventOverlapping(overlappingEnablePair)

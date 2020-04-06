@@ -8,9 +8,12 @@ object NumberUtil {
         if (num < 10000) {
             return num.toString()
         }
-        val unit = "万"
-        val newNum = num / 10000.0
-
+        var unit = "万"
+        var newNum = num / 10000.0
+        if (num > 9999_9999){
+            unit = "亿"
+            newNum = num / 10000_0000.0
+        }
         val numStr = String.format("%." + 1 + "f", newNum)
         return numStr + unit
     }

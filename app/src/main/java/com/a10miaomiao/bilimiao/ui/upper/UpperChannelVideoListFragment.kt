@@ -64,7 +64,7 @@ class UpperChannelVideoListFragment : SwipeBackFragment() {
                 })
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
-                    backgroundColor = Color.WHITE
+                    backgroundColor = config.blockBackgroundColor
                     createAdapter()
                 }
             }
@@ -90,7 +90,7 @@ class UpperChannelVideoListFragment : SwipeBackFragment() {
                     textView {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -106,7 +106,7 @@ class UpperChannelVideoListFragment : SwipeBackFragment() {
 //                        }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converCTime(item.pubdate) }
                         }
                     }
@@ -121,7 +121,7 @@ class UpperChannelVideoListFragment : SwipeBackFragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.stat.view) }
                         }
                         space().lparams(width = dip(10))
@@ -133,7 +133,7 @@ class UpperChannelVideoListFragment : SwipeBackFragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.stat.danmaku) }
                         }
                     }

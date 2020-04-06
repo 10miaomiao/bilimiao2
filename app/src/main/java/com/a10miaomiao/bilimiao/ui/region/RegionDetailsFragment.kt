@@ -77,8 +77,10 @@ class RegionDetailsFragment : Fragment() {
         }
 
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
+
             linearLayout {
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
                 padding = dip(5)
                 gravity = Gravity.CENTER_VERTICAL
                 textView {
@@ -106,7 +108,7 @@ class RegionDetailsFragment : Fragment() {
                 (+viewModel.loading){ isRefreshing = it }
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
-                    backgroundColor = Color.WHITE
+                    backgroundColor = config.blockBackgroundColor
                     mAdapter = createAdapter()
                 }
             }
@@ -134,7 +136,7 @@ class RegionDetailsFragment : Fragment() {
                     textView {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -150,7 +152,7 @@ class RegionDetailsFragment : Fragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = item.author }
                         }
                     }
@@ -165,7 +167,7 @@ class RegionDetailsFragment : Fragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.play) }
                         }
                         space().lparams(width = dip(10))
@@ -177,7 +179,7 @@ class RegionDetailsFragment : Fragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.video_review) }
                         }
                     }
@@ -189,6 +191,7 @@ class RegionDetailsFragment : Fragment() {
             }
         }
         onItemClick { item, position ->
+
             startFragment(VideoInfoFragment.newInstance(item.id))
         }
         addFootView {

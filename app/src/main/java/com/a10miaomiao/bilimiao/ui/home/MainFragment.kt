@@ -2,42 +2,47 @@ package com.a10miaomiao.bilimiao.ui.home
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.support.annotation.IdRes
 import android.support.design.widget.NavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.widget.DrawerLayout
-import android.view.*
-import android.widget.ImageView
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.login.LoginFragment
-import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.bilimiao.utils.RxBus
-import com.bumptech.glide.Glide
-import me.yokeyword.fragmentation.SupportFragment
-import org.jetbrains.anko.support.v4.toast
+import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.setting.AboutFragment
 import com.a10miaomiao.bilimiao.ui.setting.SettingFragment
 import com.a10miaomiao.bilimiao.ui.theme.ThemeFragment
 import com.a10miaomiao.bilimiao.ui.user.UserFragment
+import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.network
 import com.a10miaomiao.bilimiao.utils.startFragment
+import com.bumptech.glide.Glide
+import me.yokeyword.fragmentation.SupportFragment
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.navigationView
 import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.drawerLayout
+import org.jetbrains.anko.support.v4.toast
 
 
 class MainFragment : SupportFragment() {
     private val CONTAINER_ID = 233333
 
-    val homeFragment = HomeFragment()
-    val rankFragment = RankFragment()
-    val dowmloadFragment = DowmloadFragment()
-    val filterFragment = FilterFragment()
+    private val homeFragment = HomeFragment()
+    private val rankFragment = RankFragment()
+    private val dowmloadFragment = DowmloadFragment()
+    private val filterFragment = FilterFragment()
     private var mDrawerLayout: DrawerLayout? = null
     private lateinit var viewModel: MainViewModel
     private lateinit var userStore: UserStore
@@ -50,7 +55,24 @@ class MainFragment : SupportFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        initArgument()
         initView()
+    }
+
+    private fun initArgument() {
+        val extras = arguments ?: Bundle()
+        if (extras.containsKey(ConstantUtil.FROM_SHORTCUT)
+                && extras.getBoolean(ConstantUtil.FROM_SHORTCUT)
+                && extras.containsKey(ConstantUtil.SHORTCUT_NAME)) {
+            when (extras.getString(ConstantUtil.SHORTCUT_NAME)) {
+                ConstantUtil.SHORTCUT_SEARCH -> {
+                    startFragment(SearchFragment.newInstance())
+                }
+                ConstantUtil.SHORTCUT_RANK -> {
+                    viewModel.checkedMenuItemId set R.id.nav_rank
+                }
+            }
+        }
     }
 
     fun openDrawer() {
@@ -59,9 +81,21 @@ class MainFragment : SupportFragment() {
 
     private fun initView() {
         if (viewModel.currentFragment == null) {
-            switchFragment(homeFragment)
+            switchFragment(getFragment(-viewModel.checkedMenuItemId))
         } else {
             switchFragment(viewModel.currentFragment!!)
+        }
+        val observerMemu = +viewModel.checkedMenuItemId
+        observerMemu { switchFragment(getFragment(it)) }
+    }
+
+    private fun getFragment(@IdRes itemId: Int): Fragment {
+        return when (itemId) {
+            R.id.nav_home -> homeFragment
+            R.id.nav_rank -> rankFragment
+            R.id.nav_dowmload -> dowmloadFragment
+            R.id.nav_filter -> filterFragment
+            else -> homeFragment
         }
     }
 
@@ -108,21 +142,11 @@ class MainFragment : SupportFragment() {
 
     private val navigationItemSelectedListener = NavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
-            R.id.nav_home -> {
-                switchFragment(homeFragment)
-                viewModel.checkedMenuItemId = item.itemId
-            }
-            R.id.nav_rank -> {
-                switchFragment(rankFragment)
-                viewModel.checkedMenuItemId = item.itemId
-            }
-            R.id.nav_dowmload -> {
-                switchFragment(dowmloadFragment)
-                viewModel.checkedMenuItemId = item.itemId
-            }
+            R.id.nav_home,
+            R.id.nav_rank,
+            R.id.nav_dowmload,
             R.id.nav_filter -> {
-                switchFragment(filterFragment)
-                viewModel.checkedMenuItemId = item.itemId
+                viewModel.checkedMenuItemId set item.itemId
             }
             //------------------------
             R.id.nav_theme -> {
@@ -171,7 +195,7 @@ class MainFragment : SupportFragment() {
                     observerNotNullUser {
                         text = it.name
                     }
-                }.lparams{
+                }.lparams {
                     topMargin = dip(5)
                 }
 
@@ -183,9 +207,9 @@ class MainFragment : SupportFragment() {
                     }
                 }
                 setOnClickListener {
-                    startFragment(UserFragment())
+                    startFragment(UserFragment.newInstance(userStore.user!!.mid))
                 }
-            }.lparams{
+            }.lparams {
                 width = matchParent
                 height = wrapContent
                 gravity = Gravity.BOTTOM
@@ -205,20 +229,20 @@ class MainFragment : SupportFragment() {
             let { mDrawerLayout = it }
             frameLayout {
                 id = CONTAINER_ID
-                backgroundColorResource = R.color.colorBackground
+                backgroundColor = config.windowBackgroundColor
             }.lparams(matchParent, matchParent)
 
             val navigation = {
                 navigationView {
                     inflateMenu(R.menu.activity_main_drawer)
-                    setCheckedItem(viewModel.checkedMenuItemId ?: R.id.nav_home)
+                    setCheckedItem(-viewModel.checkedMenuItemId)
                     setNavigationItemSelectedListener(navigationItemSelectedListener)
                     addHeaderView(renderHeader().view)
                 }.lparams {
                     width = wrapContent
                     height = matchParent
                     gravity = Gravity.START
-                    backgroundColorResource = R.color.colorWhite
+                    backgroundColor = config.blockBackgroundColor
                 }
             }
 
@@ -232,5 +256,6 @@ class MainFragment : SupportFragment() {
             navigation()
         }
     }
+
 
 }

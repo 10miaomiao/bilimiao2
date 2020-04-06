@@ -8,8 +8,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 37
-        versionName "2.0 咕咕咕版0.6"
+        versionCode 39
+        versionName "2.0 咕咕咕版0.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -47,8 +47,10 @@ dependencies {
     implementation "org.jetbrains.anko:anko-appcompat-v7:$anko_version"
     implementation "org.jetbrains.anko:anko-design:$anko_version"
     implementation "org.jetbrains.anko:anko-recyclerview-v7:$anko_version"
+    implementation "org.jetbrains.anko:anko-constraint-layout:$anko_version"
 
     implementation "com.github.infotech-group:android-drawable-dsl:0.3.0"
+
 
     //rxjava,rxandroid,gson,glide,okhttp
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
@@ -75,6 +77,8 @@ dependencies {
 
     implementation project(':miaoandriod')
     implementation project(':player')
-    implementation project(':dragging_sheet')
     implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
+
+    // 百度统计
+    implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
 }

@@ -7,27 +7,40 @@
     android:layout_height="match_parent"
     android:id="@+id/rootLayout">
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/rootContainer"
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorBackground"
-        android:fitsSystemWindows="false">
+        app:layout_behavior="com.a10miaomiao.bilimiao.ui.commponents.behavior.ContainerBehavior">>
 
-    </FrameLayout>
+        <FrameLayout
+            android:id="@+id/masterContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="false">
+        </FrameLayout>
 
-    <!--<fragment-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:name="com.a10miaomiao.bilimiao.ui.home.MainFragment"/>-->
+        <!--<View-->
+            <!--android:id="@+id/dividingLine"-->
+            <!--android:layout_width="1dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_toEndOf="@+id/masterContainer"-->
+            <!--android:background="?attr/colorPrimary"/>-->
 
-    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--android:id="@+id/rightContainer"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:fitsSystemWindows="false">-->
+        <!--<FrameLayout-->
+            <!--android:id="@+id/container"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_toEndOf="@+id/dividingLine"-->
+            <!--android:background="@color/colorBackground"-->
+            <!--android:fitsSystemWindows="false">-->
 
-    <!--</FrameLayout>-->
+        <!--</FrameLayout>-->
+
+
+    </RelativeLayout>
+
+
 
     <View
         android:id="@+id/shadeView"
@@ -52,19 +65,51 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
-            android:background="@color/colorBackground">
+            android:background="?android:windowBackground">
 
         </FrameLayout>
 
 
     </RelativeLayout>
 
-    <!--<cn.a10miaomiao.dragging_sheet.YouTuDraggingView-->
-        <!--android:id="@+id/mYouTuDraggingView"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="bottom"-->
-        <!--android:orientation="vertical"-->
-        <!--android:visibility="invisible"/>-->
+    <LinearLayout
+        android:id="@+id/haeder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/blue"
+        android:orientation="vertical"
+        app:layout_behavior="com.a10miaomiao.bilimiao.ui.commponents.behavior.HeaderBehavior"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2333333"
+            android:textSize="40sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2333333"
+            android:textSize="40sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2333333"
+            android:textSize="40sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2333333"
+            android:textSize="40sp"
+            android:textColor="@android:color/white"/>
+
+    </LinearLayout>
+
 
 </android.support.design.widget.CoordinatorLayout>

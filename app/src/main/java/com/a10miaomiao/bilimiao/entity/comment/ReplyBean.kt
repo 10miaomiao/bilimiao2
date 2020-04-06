@@ -11,7 +11,7 @@ data class ReplyBean(
         val content: Content,
         val count: Int,
         val ctime: Long,
-        val dialog: Int,
+        val dialog: Long,
         val dialog_str: String,
         val fansgrade: Int,
         val floor: Int,
@@ -19,13 +19,13 @@ data class ReplyBean(
         val member: Member,
         val mid: Int,
         val oid: String, //--
-        val parent: Int,
+        val parent: Long,
         val parent_str: String,
-        val rcount: Int,
+        val rcount: Long,
         val replies: ArrayList<ReplyBean>,
-        val root: Int,
+        val root: Long,
         val root_str: String,
-        val rpid: Int,
+        val rpid: Long,
         val rpid_str: String, //--
         val state: Int,
         val type: Int

@@ -8,6 +8,11 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="view_cover">查看b站封面</string>
+
+    <string name="search_name">搜索</string>
+    <string name="rank_name">排行榜</string>
+
     <string-array name="month_display">
         <item>1</item>
         <item>2</item>
@@ -72,5 +77,9 @@
         <item>vertical</item>
         <item>horizontal</item>
     </string-array>
+
+    <string name="me">My</string>
+
+
 
 </resources>

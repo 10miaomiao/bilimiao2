@@ -38,6 +38,10 @@ class UpperVideoListFragment : SwipeBackFragment() {
             fragment.arguments = bundle
             return fragment
         }
+
+        fun newInstance(id: Long, name: String) = newInstance(Owner(
+                "", id, name
+        ))
     }
 
     val owner by lazy { arguments!!.getParcelable<Owner>("owner") }
@@ -65,7 +69,7 @@ class UpperVideoListFragment : SwipeBackFragment() {
                 })
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
-                    backgroundColor = Color.WHITE
+                    backgroundColor = config.blockBackgroundColor
                     createAdapter()
                 }
             }
@@ -91,7 +95,7 @@ class UpperVideoListFragment : SwipeBackFragment() {
                     textView {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -107,7 +111,7 @@ class UpperVideoListFragment : SwipeBackFragment() {
 //                        }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converCTime(item.created) }
                         }
                     }
@@ -122,7 +126,7 @@ class UpperVideoListFragment : SwipeBackFragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.play) }
                         }
                         space().lparams(width = dip(10))
@@ -134,7 +138,7 @@ class UpperVideoListFragment : SwipeBackFragment() {
                         }
                         textView {
                             textSize = 12f
-                            textColorResource = R.color.black_alpha_45
+                            textColor = config.foregroundAlpha45Color
                             binding.bind { item -> text = NumberUtil.converString(item.video_review) }
                         }
                     }

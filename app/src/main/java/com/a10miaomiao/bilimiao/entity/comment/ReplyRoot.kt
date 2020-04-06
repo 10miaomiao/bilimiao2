@@ -21,7 +21,7 @@ data class ReplyRoot(
         val replies: List<ReplyBean>,
         val root: Int,
         val root_str: String,
-        val rpid: Int,
+        val rpid: Long,
         val rpid_str: String,
         val state: Int,
         val type: Int

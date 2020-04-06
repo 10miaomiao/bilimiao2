@@ -15,6 +15,7 @@ import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.SimpleTarget
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.jetbrains.anko.toast
 import kotlin.math.acos
 
 class CoverViewModel(val activity: Activity, val type: String, val id: String) : ViewModel() {
@@ -29,7 +30,7 @@ class CoverViewModel(val activity: Activity, val type: String, val id: String) :
     }
 
     private fun loadData() {
-        when (type){
+        when (type) {
             "AV" -> loadAvData()
             "SS" -> loadSsData()
             "EP" -> loadEpData()
@@ -42,7 +43,6 @@ class CoverViewModel(val activity: Activity, val type: String, val id: String) :
     // 普通视频
     private fun loadAvData() {
         val url = BiliApiService.getVideoInfo(id)
-        DebugMiao.log(url)
         MiaoHttp.getJson<ResultInfo<VideoInfo>>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -75,10 +75,10 @@ class CoverViewModel(val activity: Activity, val type: String, val id: String) :
                         val data = res.result
 
                         val ep = data.episodes.find { it.id == id }
-                        if (ep == null){
+                        if (ep == null) {
                             title.value = data.title
                             loadCover(data.cover)
-                        }else{
+                        } else {
                             title.value = ep.long_title
                             loadCover(ep.cover)
                         }
@@ -92,17 +92,31 @@ class CoverViewModel(val activity: Activity, val type: String, val id: String) :
 
     // 直播间
     private fun loadRoomData() {
-        val url = BiliApiService.getLiveInfo(id)
+        val url = BiliApiService.getRoomInfo(id)
         MiaoHttp.getJson<ResultInfo<Room>>(url)
+                .flatMap{
+                    // 曲线救国，获取直播间信息接口没有封面信息了，但个人页面有
+                    // 所以先取得直播间up主的uid
+                    val uid = it.data.uid
+                    val url = BiliApiService.getSpace(uid.toString())
+                    MiaoHttp.getJson<ResultInfo<SpaceInfo>>(url)
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ r ->
-                    val data = r.data
-                    title.value = data.title
-                    loadCover(data.cover)
+                    val (code, data, msg) = r
+                    val liveInfo = data.live
+                    if (code == 0) {
+                        title.value = liveInfo.title
+                        loadCover(liveInfo.cover)
+                    } else {
+                        activity.toast(msg)
+                    }
                 }, { e ->
                     e.printStackTrace()
                 })
+        val url2 = BiliApiService.getRoomInfo(id)
+        DebugMiao.log(url2)
     }
 
     // 专栏

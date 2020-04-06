@@ -134,7 +134,7 @@ class FilterUpperFragment : SwipeBackFragment() {
             }
 
             linearLayout {
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
                 gravity = Gravity.CENTER_VERTICAL
 
                 textView {

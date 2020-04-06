@@ -13,19 +13,19 @@ class ThemeViewModel(
 ) : ViewModel() {
 
     val list = arrayListOf(
-            ThemeItem("哔哩粉", context.resources.getColor(R.color.pink), R.style.PinkTheme),
-            ThemeItem("姨妈红", context.resources.getColor(R.color.red), R.style.RedTheme),
-            ThemeItem("咸蛋黄", context.resources.getColor(R.color.yellow), R.style.YellowTheme),
-            ThemeItem("早苗绿", context.resources.getColor(R.color.green), R.style.GreenTheme),
-            ThemeItem("胖次蓝", context.resources.getColor(R.color.blue), R.style.BlueTheme),
-            ThemeItem("基佬紫", context.resources.getColor(R.color.purple), R.style.PurpleTheme)
+            ThemeItem("哔哩粉", context.resources.getColor(R.color.pink), "PinkTheme"),
+            ThemeItem("姨妈红", context.resources.getColor(R.color.red), "RedTheme"),
+            ThemeItem("咸蛋黄", context.resources.getColor(R.color.yellow), "YellowTheme"),
+            ThemeItem("早苗绿", context.resources.getColor(R.color.green), "GreenTheme"),
+            ThemeItem("胖次蓝", context.resources.getColor(R.color.blue), "BlueTheme"),
+            ThemeItem("基佬紫", context.resources.getColor(R.color.purple), "PurpleTheme")
     )
-    val selected = MainActivity.of(context).themeUtil.theme
 
+    val selected = MainActivity.of(context).themeUtil.theme
     data class ThemeItem(
             var name: String,
             var color: Int,
-            var theme: Int
+            var theme: String
     )
 
 }

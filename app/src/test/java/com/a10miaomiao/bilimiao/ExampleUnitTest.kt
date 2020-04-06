@@ -1,9 +1,11 @@
 package com.a10miaomiao.bilimiao
 
+import android.util.Base64
 import com.a10miaomiao.bilimiao.netword.BiliApiService
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
 
 /**
  * Example local unit test, which will execute on the development machine (host).

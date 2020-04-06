@@ -54,8 +54,8 @@
                 android:id="@+id/mTabLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:tabIndicatorColor="@color/colorWhite"
-                app:tabSelectedTextColor="@color/colorWhite"
+                app:tabIndicatorColor="@android:color/white"
+                app:tabSelectedTextColor="@android:color/white"
                 app:tabTextColor="@color/white_alpha_45" />
 
         </android.support.design.widget.AppBarLayout>
@@ -80,7 +80,7 @@
         android:id="@+id/search_box_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorWhite"
+        android:background="?attr/blockBackground"
         android:orientation="vertical">
 
 
@@ -118,7 +118,7 @@
                         android:imeOptions="actionSearch"
                         android:padding="6dp"
                         android:singleLine="true"
-                        android:textColor="@color/colorWhite"
+                        android:textColor="@android:color/white"
                         android:textColorHint="@color/white_alpha_45"
                         android:textCursorDrawable="@drawable/white_cursor"
                         android:textSize="14sp" />
@@ -168,7 +168,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="删除全部"
-                android:textColor="@color/gray"/>
+                android:alpha="0.75"/>
 
         </LinearLayout>
 

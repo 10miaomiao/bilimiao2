@@ -40,7 +40,7 @@ class BangumiResultFragment : Fragment() {
             })
             setOnRefreshListener { viewModel.refreshList() }
             recyclerView {
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
                 createAdapter()
             }
         }
@@ -68,7 +68,7 @@ class BangumiResultFragment : Fragment() {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
                         textSize = 16f
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         weight = 1f
@@ -76,7 +76,7 @@ class BangumiResultFragment : Fragment() {
 
                     textView {
                         textSize = 14f
-                        textColorResource = R.color.black_alpha_45
+                        textColor = config.foregroundAlpha45Color
                         binding.bind { item ->
                             text = if (item.finish == 1)//是否完结
                                 "${item.newest_season}，${item.total_count}话全"
@@ -89,7 +89,7 @@ class BangumiResultFragment : Fragment() {
 
                     textView {
                         textSize = 14f
-                        textColorResource = R.color.black_alpha_45
+                        textColor = config.foregroundAlpha45Color
                         binding.bind { item -> text = item.cat_desc }
                     }
 

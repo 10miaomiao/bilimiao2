@@ -18,6 +18,13 @@ import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 public class PlayerService extends Service {
 
+    public static final String ACTION_CREATED = "cn.a10miaomiao.player.action.CREATED";
+    private static PlayerService mPlayerService;
+
+    public static PlayerService getInstance() {
+        return mPlayerService;
+    }
+
 
     private static final String TAG = PlayerService.class.getSimpleName();
 
@@ -38,7 +45,11 @@ public class PlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mPlayerService = this;
         playerBinder = new PlayerBinder(this);
+
+        Intent intent = new Intent(ACTION_CREATED);
+        sendBroadcast(intent);
     }
 
     @Nullable
@@ -49,7 +60,9 @@ public class PlayerService extends Service {
 
     public void setVideoPlayerView(VideoPlayerView videoPlayerView) {
         this.videoPlayerView = videoPlayerView;
-        videoPlayerView.setPlayerService(this);
+        if (videoPlayerView != null){
+            videoPlayerView.setPlayerService(this);
+        }
     }
 
 //    public void setVideoPath(String path) {
@@ -213,4 +226,9 @@ public class PlayerService extends Service {
         videoPlayerView.seekToFlag = false;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mPlayerService = null;
+    }
 }

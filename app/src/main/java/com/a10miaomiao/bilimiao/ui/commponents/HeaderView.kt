@@ -41,4 +41,10 @@ class HeaderView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     fun navigationOnClick(listener: (v: View) -> Unit) {
         mToolbar.setNavigationOnClickListener(listener)
     }
+
+    fun addMenu(title: CharSequence)= mToolbar.menu.add(title)
+
+    fun setOnMenuItemClickListener(listener: Toolbar.OnMenuItemClickListener){
+        mToolbar.setOnMenuItemClickListener(listener)
+    }
 }

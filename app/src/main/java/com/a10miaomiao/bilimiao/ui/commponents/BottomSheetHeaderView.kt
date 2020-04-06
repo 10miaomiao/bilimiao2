@@ -4,6 +4,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.utils.selectableItemBackgroundBorderless
 import org.jetbrains.anko.*
@@ -12,7 +13,7 @@ fun ViewManager.bottomSheetHeaderView(
         title: String,
         onClickListener: View.OnClickListener
 ) = linearLayout {
-    backgroundColorResource = R.color.colorWhite
+    backgroundColor = config.blockBackgroundColor
     gravity = Gravity.CENTER_VERTICAL
 
     imageView {

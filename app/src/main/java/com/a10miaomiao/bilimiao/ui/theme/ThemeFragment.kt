@@ -9,8 +9,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.home.HomeViewModel
@@ -38,8 +42,22 @@ class ThemeFragment : SwipeBackFragment() {
         return attachToSwipeBack(view)
     }
 
+    private val itemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        override fun onNothingSelected(p0: AdapterView<*>?) {
+
+        }
+
+        override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+            themeUtil.setNight(p2)
+        }
+    }
+
+
     private fun render() = UI {
+        val selected = themeUtil.theme
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
+
             headerView {
                 title("切换主题")
                 navigationIcon(R.drawable.ic_arrow_back_white_24dp)
@@ -48,7 +66,26 @@ class ThemeFragment : SwipeBackFragment() {
                 }
             }
 
+            linearLayout {
+                verticalPadding = dip(10)
+                textView("夜间模式：").lparams{
+                    leftMargin = dip(20)
+                }
+                spinner {
+                    val mAdapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_item
+                            , arrayOf("跟随系统", "关闭", "打开"))
+                    mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    adapter = mAdapter
+
+                    setSelection(themeUtil.getNight())
+                    onItemSelectedListener = itemSelectedListener
+                }
+            }
+
             recyclerView {
+                applyRecursively(ViewStyle.roundRect(dip(5)))
+                backgroundColor = config.blockBackgroundColor
+
                 layoutManager = LinearLayoutManager(context)
                 miao(viewModel.list) {
                     itemView { b ->
@@ -80,7 +117,7 @@ class ThemeFragment : SwipeBackFragment() {
                                         textColor = item.color
                                     } else {
                                         text = "使用"
-                                        textColor = context.resources.getColor(R.color.text_black)
+                                        textColor = config.foregroundAlpha45Color
                                     }
                                 }
                             }.lparams { rightMargin = dip(15) }
@@ -90,9 +127,9 @@ class ThemeFragment : SwipeBackFragment() {
                     onItemClick { item, position ->
                         themeUtil.setTheme(item.theme)
                     }
-                    viewModel.selected.observe(owner, Observer { notifyDataSetChanged() })
+                    selected.observe(owner, Observer { notifyDataSetChanged() })
                 }
-            }
+            }.lparams(matchParent, matchParent)
 
         }
     }

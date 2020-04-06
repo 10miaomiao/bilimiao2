@@ -50,7 +50,7 @@
             android:id="@+id/mCurrentTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorWhite"
+            android:textColor="@android:color/white"
             android:textSize="@dimen/default_tiny_text_size"
             android:textStyle="bold" />
 
@@ -61,7 +61,7 @@
             android:layout_marginLeft="1dp"
             android:layout_marginRight="1dp"
             android:text="/"
-            android:textColor="@color/colorWhite"
+            android:textColor="@android:color/white"
             android:textSize="@dimen/default_tiny_text_size" />
 
 
@@ -69,7 +69,7 @@
             android:id="@+id/mEndTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorWhite"
+            android:textColor="@android:color/white"
             android:textSize="@dimen/default_tiny_text_size"
             android:textStyle="bold" />
 

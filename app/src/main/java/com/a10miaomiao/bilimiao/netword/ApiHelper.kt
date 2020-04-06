@@ -2,14 +2,12 @@ package com.a10miaomiao.bilimiao.netword
 
 import android.net.Uri
 import com.a10miaomiao.bilimiao.Bilimiao
+import com.a10miaomiao.bilimiao.entity.LoginInfo
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import java.io.UnsupportedEncodingException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.ArrayList
-import java.util.Collections
 import java.util.Date
-import java.util.List
 
 /**
  * Created by 10喵喵 on 2017/4/9.
@@ -77,7 +75,7 @@ object ApiHelper {
     }
 
     fun getSing(params: Map<String, String>, secret: String): String {
-        val list = params.map { "${it.key}=${it.value}" }.toMutableList()
+        val list = params.map { "${it.key}=${Uri.encode(it.value)}" }.toMutableList()
         list.sort()
         return with(StringBuilder()) {
             list.forEach { item ->
@@ -103,11 +101,8 @@ object ApiHelper {
     }
 
     fun addAccessKeyAndMidToParams(params: MutableMap<String, String>){
-        val context = Bilimiao.app
-        val accessKey = LoginHelper.readAccessToken(context)
-        if(accessKey != "")
-            params["access_key"] = accessKey
-        LoginHelper.readUserInfo(context)?.let {
+        Bilimiao.app.loginInfo?.token_info?.let{
+            params["access_key"] = it.access_token
             params["mid"] = it.mid.toString()
         }
     }

@@ -1,17 +1,22 @@
 package com.a10miaomiao.bilimiao.ui
 
+import android.app.UiModeManager
 import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.Fragment
-import android.view.Gravity
-import android.view.View
+import android.support.v7.app.AppCompatDelegate
+import android.support.v7.view.ActionMode
+import android.view.*
 import com.a10miaomiao.bilimiao.R
 import kotlinx.android.synthetic.main.activity_main.*
 import com.a10miaomiao.bilimiao.ui.home.MainFragment
@@ -19,23 +24,35 @@ import me.yokeyword.fragmentation.SupportActivity
 import me.yokeyword.fragmentation.SupportFragment
 import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.FragmentAnimator
-import android.view.WindowInsets
+import android.widget.RelativeLayout
+import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.entity.Dm
 import com.a10miaomiao.bilimiao.netword.LoginHelper
 import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.UserStore
+import com.a10miaomiao.bilimiao.ui.commponents.behavior.HeaderBehavior
+import com.a10miaomiao.bilimiao.ui.home.RankFragment
+import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
+import com.baidu.mobstat.StatService
 import me.yokeyword.fragmentation.ISupportFragment
 import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
+import org.jetbrains.anko.*
 
 
 class MainActivity : SupportActivity() {
 
     var windowInsets: WindowInsets? = null
+
     val behavior by lazy {
         BottomSheetBehavior.from(bottomSheet)
     }
+    val haederBehavior by lazy {
+        HeaderBehavior.from(haeder)
+    }
+
     var bottomSheetFragment: Fragment? = null
 
     val timeSettingStore by lazy { TimeSettingStore(this) }
@@ -47,15 +64,26 @@ class MainActivity : SupportActivity() {
         super.onCreate(savedInstanceState)
         themeUtil.init()
         setContentView(R.layout.activity_main)
+        updateLayout(configuration)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             windowInsets = rootLayout.rootWindowInsets
+            rootLayout.setOnApplyWindowInsetsListener { v, insets ->
+                windowInsets = insets
+                insets
+            }
         }
         initBottomSheet()
+
         if (findFragment(MainFragment::class.java) == null) {
-            loadRootFragment(R.id.rootContainer, MainFragment())
+            loadRootFragment(R.id.masterContainer, MainFragment().apply {
+                arguments = intent.extras ?: Bundle()
+            })
+//            loadRootFragment(R.id.container, BlankFragment())
         }
-//        loadRootFragment(R.id.rightContainer, SearchFragment())
-        LoginHelper.oss()
+
+        // 百度统计
+        StatService.start(this)
+//        themeUtil.observeTheme(this, Observer { dividingLine.backgroundColor = config.themeColor })
     }
 
     override fun start(toFragment: ISupportFragment?) {
@@ -87,7 +115,6 @@ class MainActivity : SupportActivity() {
         } else {
             super.start(toFragment)
         }
-
     }
 
     override fun onBackPressedSupport() {
@@ -104,6 +131,36 @@ class MainActivity : SupportActivity() {
             "horizontal" -> DefaultHorizontalAnimator()
             else -> super.onCreateFragmentAnimator()
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        DebugMiao.log(newConfig.screenWidthDp) // 大于640dp开启双栏
+//        updateLayout(newConfig)
+//        themeUtil.init()
+//        recreate()
+
+//        delegate.setLocalNightMode(themeUtil.getNight())
+//        delegate.setLocalNightMode(2)
+//        if (newConfig.uiMode != themeUtil.getNight()){
+//            AppCompatDelegate.setDefaultNightMode(themeUtil.getNight())
+//        }
+
+    }
+
+    /**
+     * 更新布局，宽度大于640dp开启双栏
+     */
+    private fun updateLayout(config: Configuration) {
+//        val masterContainerLP = masterContainer.layoutParams as RelativeLayout.LayoutParams
+//        val containerLP = container.layoutParams as RelativeLayout.LayoutParams
+//        if (config.screenWidthDp < 640) {
+//            masterContainerLP.width = matchParent
+//            containerLP.removeRule(RelativeLayout.END_OF)
+//        } else {
+//            masterContainerLP.width = dip(320)
+//            containerLP.addRule(RelativeLayout.END_OF, R.id.dividingLine)
+//        }
     }
 
     fun openDrawer() {

@@ -3,6 +3,9 @@ package com.a10miaomiao.bilimiao.netword
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
+import android.net.Uri
+import com.a10miaomiao.bilimiao.Bilimiao
+import com.a10miaomiao.bilimiao.entity.LoginInfo
 import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.entity.UserInfo
 import com.a10miaomiao.bilimiao.utils.DebugMiao
@@ -12,10 +15,8 @@ import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import okhttp3.Cookie
-import okhttp3.CookieJar
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
+import okhttp3.*
+import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -56,18 +57,25 @@ object LoginHelper {
             val encrypt = RSAUtil.decryptByPublicKey(hash + password, key)
             val params = mutableMapOf(
                     "appkey" to ApiHelper.APP_KEY_NEW,
-                    "password" to encrypt.replace("\n", ""),
+                    "build" to "5390000",
+                    "mobi_app" to "android",
+                    "platform" to "android",
+                    "ts" to ApiHelper.getTimeSpen().toString(),
+                    "password" to encrypt.replace("\n", "") ,
                     "username" to username
             )
             if (captcha.isNotEmpty()) {
                 params["captcha"] = captcha
             }
-            var url = BASE_URL + "api/oauth2/login?" + ApiHelper.urlencode(params)
-            url += "&sign=" + ApiHelper.getNewSign(url)
-            DebugMiao.log(url)
+            val url = BASE_URL + "api/v3/oauth2/login"
+            params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET_NEW)
+            val bodyStr = ApiHelper.urlencode(params)
+            DebugMiao.log(bodyStr)
             MiaoHttp.postJson<ResultInfo<LoginInfo>>(url) {
                 client = okHttpClient
                 headers = HEADERS
+                body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded")
+                    , bodyStr)
             }
         }
     }
@@ -86,35 +94,6 @@ object LoginHelper {
         return MiaoHttp.getJson(url)
     }
 
-    /**
-     * 保存token
-     */
-    fun saveToken(context: Context, access_token: String, refresh_token: String) {
-        SettingUtil.putString(context, "access_token", access_token)
-        SettingUtil.putString(context, "refresh_token", refresh_token)
-    }
-
-    fun readAccessToken(context: Context): String {
-        return SettingUtil.getString(context, "access_token", "")
-    }
-
-    fun readRefreshToken(context: Context): String {
-        return SettingUtil.getString(context, "refresh_token", "")
-    }
-
-    fun saveUserInfo(context: Context, info: UserInfo) {
-        val json = Gson().toJson(info)
-        SettingUtil.putString(context, "user_info", json)
-    }
-
-    fun readUserInfo(context: Context): UserInfo? {
-        val str = SettingUtil.getString(context, "user_info", "")
-        return try {
-            Gson().fromJson(str, UserInfo::class.java)
-        } catch (e: Exception) {
-            null
-        }
-    }
 
     fun getCaptchaImage(url: String) = MiaoHttp.get(url, {
         val bytes = it.body()!!.bytes()
@@ -122,18 +101,6 @@ object LoginHelper {
     }, {
         client = okHttpClient
     })
-
-    fun oss() {
-        val url = BiliApiService.oss()
-        DebugMiao.log(url)
-        MiaoHttp.getString(url) {
-            client = okHttpClient
-        }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    DebugMiao.log(it)
-                }
-    }
 
 
     /**
@@ -144,7 +111,6 @@ object LoginHelper {
 
         override fun saveFromResponse(httpUrl: HttpUrl, cookiesList: List<Cookie>) {
             val host = httpUrl.host()
-            DebugMiao.log("saveFromResponse:" + host)
             cookiesList.forEach {
                 DebugMiao.log(it.name() + "=" + it.value())
             }
@@ -156,7 +122,6 @@ object LoginHelper {
 
         override fun loadForRequest(httpUrl: HttpUrl): List<Cookie> {
             val host = httpUrl.host()
-            DebugMiao.log("loadForRequest:" + host)
             return cookiesMap[host] ?: ArrayList()
         }
     }
@@ -164,11 +129,6 @@ object LoginHelper {
     data class KeyInfo(
             var hash: String,
             var key: String
-    )
-
-    data class LoginInfo(
-            var access_token: String,
-            var refresh_token: String
     )
 
 }

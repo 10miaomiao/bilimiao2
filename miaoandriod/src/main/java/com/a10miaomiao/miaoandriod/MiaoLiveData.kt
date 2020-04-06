@@ -1,9 +1,8 @@
 package com.a10miaomiao.miaoandriod
 
 import android.arch.lifecycle.*
-
-typealias MiaoObserver<T> = LifecycleOwner.(observer: (t: T) -> Unit) -> Unit
-typealias MiaoObserverAll = LifecycleOwner.(observer: () -> Unit) -> Unit
+import com.a10miaomiao.miaoandriod.adapter.MiaoList
+import java.util.ArrayList
 
 open class MiaoLiveData<T>(private var _value: T) : LiveData<T>() {
 
@@ -48,6 +47,37 @@ open class MiaoLiveData<T>(private var _value: T) : LiveData<T>() {
     inline operator fun unaryPlus() = observe()
     operator fun unaryMinus() = _value
     operator fun invoke() = _value
+
+    fun v(): LifecycleOwner.() -> ValueManager<T> = {
+        { f ->
+            if (lifecycle.currentState != Lifecycle.State.DESTROYED)
+                f(_value)
+            observe(this, Observer { newValue ->
+                f(_value)
+            })
+        }
+    }
+
+    fun <R> v(getValue: T.(T) -> R): LifecycleOwner.() -> ValueManager<R> = {
+        { f ->
+            if (lifecycle.currentState != Lifecycle.State.DESTROYED)
+                f(getValue(_value, _value))
+            observe(this, Observer { newValue ->
+                f(getValue(_value, _value))
+            })
+        }
+    }
+
+    fun <R> miaoList(getList: T.(T) -> List<R>?): LifecycleOwner.() -> MiaoList<R> = {
+        val list = MiaoList<R>()
+        list.addAll(getList(_value, _value) ?: ArrayList())
+        observe(this, Observer {
+            list.clear()
+            list.addAll(getList(_value, _value) ?: ArrayList())
+        })
+        list
+    }
+
 
 }
 

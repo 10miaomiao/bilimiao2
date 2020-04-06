@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
+import com.a10miaomiao.bilimiao.ui.user.UserFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
@@ -42,7 +43,7 @@ class UpperResultFragment : Fragment() {
             })
             setOnRefreshListener { viewModel.refreshList() }
             recyclerView {
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
                 createAdapter()
             }
         }
@@ -70,7 +71,7 @@ class UpperResultFragment : Fragment() {
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
                         textSize = 16f
-                        textColorResource = R.color.colorForeground
+                        textColor = config.foregroundColor
                         binding.bind { item -> text = item.title }
                     }.lparams(matchParent, matchParent) {
                         bottomMargin = dip(5)
@@ -78,7 +79,7 @@ class UpperResultFragment : Fragment() {
 
                     textView {
                         textSize = 14f
-                        textColorResource = R.color.black_alpha_45
+                        textColor = config.foregroundAlpha45Color
                         binding.bind { item ->
                             text = "粉丝：${NumberUtil.converString(item.fans)}   视频数：${NumberUtil.converString(item.archives)}"
                         }
@@ -88,7 +89,7 @@ class UpperResultFragment : Fragment() {
 
                     textView {
                         textSize = 14f
-                        textColorResource = R.color.black_alpha_45
+                        textColor = config.foregroundAlpha45Color
                         binding.bind { item -> text = item.sign }
                     }
 
@@ -96,13 +97,7 @@ class UpperResultFragment : Fragment() {
             }
         }
         onItemClick { item, position ->
-            startFragment(UpperInfoFragment.newInstance(
-                    Owner(
-                            face = item.cover
-                            , name = item.title
-                            , mid = item.param.toLong()
-                    )
-            ))
+            startFragment(UserFragment.newInstance(item.param.toLong()))
 //                    IntentHandlerUtil.openWithPlayer(activity!!, IntentHandlerUtil.TYPE_VIDEO, item.id)
         }
         addFootView {

@@ -4,7 +4,9 @@ import android.graphics.Color
 import android.graphics.Outline
 import android.view.View
 import android.view.ViewOutlineProvider
+import com.a10miaomiao.bilimiao.R
 import org.jetbrains.anko.backgroundColor
+import org.jetbrains.anko.backgroundColorResource
 import org.jetbrains.anko.padding
 
 
@@ -12,7 +14,7 @@ object ViewStyle {
     val block
         get() = { v: View ->
             v.run {
-                backgroundColor = Color.WHITE
+                backgroundColor = config.blockBackgroundColor
                 padding = config.dividerSize
             }
         }

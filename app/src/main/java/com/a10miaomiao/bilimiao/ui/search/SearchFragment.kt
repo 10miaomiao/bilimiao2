@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.config.config
 import kotlinx.android.synthetic.main.fragment_search.*
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 import com.a10miaomiao.bilimiao.ui.widget.flow.FlowAdapter
@@ -199,10 +200,12 @@ class SearchFragment : SwipeBackFragment() {
 
     override fun onBackPressedSupport(): Boolean {
         if (viewModel.canGoBack) {
+            pop()
+        } else {
             viewModel.showSearchBox.value = false
-            return true
+            viewModel.canGoBack = true
         }
-        return super.onBackPressedSupport()
+        return true
     }
 
     private inner class MyAdapter(dataList: List<String>) : FlowAdapter<String>(dataList) {
@@ -212,7 +215,7 @@ class SearchFragment : SwipeBackFragment() {
         override fun getView(position: Int, parent: FlowLayout) = parent.context!!.UI {
             frameLayout {
                 applyRecursively(ViewStyle.roundRect(dip(5)))
-                backgroundColorResource = R.color.colorBackground
+                backgroundColor = config.windowBackgroundColor
                 textView {
                     text = getItem(position)
                     padding = dip(5)

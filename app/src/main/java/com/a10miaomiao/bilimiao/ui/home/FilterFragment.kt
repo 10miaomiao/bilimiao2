@@ -51,6 +51,7 @@ class FilterFragment : Fragment() {
 
     private fun render() = UI {
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
             headerView {
                 title("屏蔽设置")
                 navigationIcon(R.drawable.ic_menu_white_24dp)
@@ -170,7 +171,7 @@ class FilterFragment : Fragment() {
         override fun getView(position: Int, parent: FlowLayout) = parent.context!!.UI {
             frameLayout {
                 applyRecursively(ViewStyle.roundRect(dip(5)))
-                backgroundColorResource = R.color.colorBackground
+                backgroundColor = config.windowBackgroundColor
                 textView {
                     text = getItem(position)
                     padding = dip(5)

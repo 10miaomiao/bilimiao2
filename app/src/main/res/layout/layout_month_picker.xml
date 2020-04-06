@@ -21,6 +21,7 @@
         app:npv_DividerColor="?attr/colorPrimary"
         app:npv_TextColorSelected="?attr/colorPrimary"
         app:npv_TextColorHint="?attr/colorPrimary"
+        app:npv_TextColorNormal="?attr/foregroundColor"
         app:npv_HintText="年"/>
 
     <com.a10miaomiao.bilimiao.ui.widget.PickerView
@@ -40,6 +41,7 @@
         app:npv_DividerColor="?attr/colorPrimary"
         app:npv_TextColorSelected="?attr/colorPrimary"
         app:npv_TextColorHint="?attr/colorPrimary"
+        app:npv_TextColorNormal="?attr/foregroundColor"
         app:npv_HintText="月"/>
 
 </LinearLayout>

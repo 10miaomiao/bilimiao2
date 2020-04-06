@@ -2,6 +2,7 @@ package com.a10miaomiao.miaoandriod.adapter
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import com.a10miaomiao.miaoandriod.ValueManager
 
 
 /**
@@ -15,6 +16,11 @@ class MiaoViewHolder<T>(val parentView: View, val binding: Binding<T>? = null) :
         binding?.updateView(item, index)
     }
 
+
+    fun <T, R> createValueManager(binding: MiaoViewHolder.Binding<R>, getValue: (R) -> T): ValueManager<T> {
+        return { f -> binding.bind { item -> f(getValue(item)) } }
+    }
+
     class Binding<T>(val mAdapter: MiaoRecyclerViewAdapter<T>) {
 
         var fns = ArrayList<(item: T, index: Int) -> Unit>()
@@ -25,6 +31,10 @@ class MiaoViewHolder<T>(val parentView: View, val binding: Binding<T>? = null) :
 
         fun bind(fn: ((item: T) -> Unit)) {
             bindIndexed { item, index -> fn(item) }
+        }
+
+        fun <R> itemValue(getValue: T.() -> R): ValueManager<R> = { f ->
+            bind { item -> f(getValue(item)) }
         }
 
         fun View.bindClick(fn: ((item: T, index: Int) -> Unit)) {

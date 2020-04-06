@@ -26,12 +26,8 @@ import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.nestedScrollView
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Context.CLIPBOARD_SERVICE
-import android.support.v4.content.ContextCompat.getSystemService
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.ui.user.UserFragment
 
 
 class VideoCommentFragment : Fragment() {
@@ -55,6 +51,10 @@ class VideoCommentFragment : Fragment() {
         return createUI().view
     }
 
+    val upperClick = { mid: Long ->
+        startFragment(UserFragment.newInstance(mid))
+    }
+
     private fun createUI() = UI {
         swipeRefreshLayout {
             setColorSchemeResources(config.themeColorResource)
@@ -75,7 +75,7 @@ class VideoCommentFragment : Fragment() {
                         margin = dip(10)
                     }
                     recyclerView {
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                         createAdapter(viewModel.hotList)
                         isNestedScrollingEnabled = false
                         layoutManager = LinearLayoutManager(context)
@@ -86,7 +86,7 @@ class VideoCommentFragment : Fragment() {
                         margin = dip(10)
                     }
                     recyclerView {
-                        backgroundColor = Color.WHITE
+                        backgroundColor = config.blockBackgroundColor
                         createAdapter(viewModel.list)
                         isNestedScrollingEnabled = false
                         layoutManager = LinearLayoutManager(context)
@@ -106,31 +106,17 @@ class VideoCommentFragment : Fragment() {
 
     private fun RecyclerView.createAdapter(list: MiaoList<ReplyBean>) = miao(list) {
         itemView { b ->
-            commentItemView {
-                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-                b.bind { item ->
-                    data = CommentItemView.CommentItemModel(
-                            uname = item.member.uname
-                            , avatar = item.member.avatar
-                            , time = NumberUtil.converCTime(item.ctime)
-                            , floor = item.floor
-                            , content = item.content.message
-                            , like = item.like
-                            , count = item.count
-                    )
-                    onUpperClick = {
-                        val member = item.member
-                        startFragment(UpperInfoFragment.newInstance(
-                                Owner(
-                                        face = member.avatar,
-                                        name = member.uname,
-                                        mid = member.mid.toLong()
-                                )
-                        ))
-                    }
-                }
-
-            }
+            commentItemView(
+                    mid = b.itemValue { member.mid.toLong() },
+                    uname = b.itemValue { member.uname },
+                    avatar = b.itemValue { member.avatar },
+                    time = b.itemValue { NumberUtil.converCTime(ctime) },
+                    floor = b.itemValue { floor },
+                    content = b.itemValue { content.message },
+                    like = b.itemValue { like },
+                    count = b.itemValue { count },
+                    onUpperClick = upperClick
+            )
         }
 
         onItemClick { item, position ->

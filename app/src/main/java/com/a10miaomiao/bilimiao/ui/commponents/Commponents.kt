@@ -48,10 +48,10 @@ inline fun ViewManager.mySpannableTextView(theme: Int = 0, init: (@AnkoViewDslMa
     return ankoView({ ctx: Context -> MySpannableTextView(ctx) }, theme, init)
 }
 
-inline fun ViewManager.commentItemView(theme: Int = 0): CommentItemView = commentItemView(theme) {}
-inline fun ViewManager.commentItemView(theme: Int = 0, init: (@AnkoViewDslMarker CommentItemView).() -> Unit): CommentItemView {
-    return ankoView({ ctx: Context -> CommentItemView(ctx) }, theme, init)
-}
+//inline fun ViewManager.commentItemView(theme: Int = 0): CommentItemView = commentItemView(theme) {}
+//inline fun ViewManager.commentItemView(theme: Int = 0, init: (@AnkoViewDslMarker CommentItemView).() -> Unit): CommentItemView {
+//    return ankoView({ ctx: Context -> CommentItemView(ctx) }, theme, init)
+//}
 
 inline fun ViewManager.flowLayout(theme: Int = 0): FlowLayout = flowLayout(theme) {}
 inline fun ViewManager.flowLayout(theme: Int = 0, init: (@AnkoViewDslMarker FlowLayout).() -> Unit): FlowLayout {
