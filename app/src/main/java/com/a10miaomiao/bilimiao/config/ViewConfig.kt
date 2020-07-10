@@ -19,7 +19,7 @@ class ViewConfig(val context: Context) {
     val themeColorResource get() = context.attr(android.R.attr.colorPrimary)
     val themeColor get() = context.resources.getColor(themeColorResource)
 
-    val windowBackgroundResource get() = context.attr(android.R.attr.windowBackground)
+    val windowBackgroundResource get() = context.attr(R.attr.defaultBackgroundColor)
     val windowBackgroundColor get() = context.resources.getColor(windowBackgroundResource)
 
     val blockBackgroundResource get() = context.attr(R.attr.blockBackground)

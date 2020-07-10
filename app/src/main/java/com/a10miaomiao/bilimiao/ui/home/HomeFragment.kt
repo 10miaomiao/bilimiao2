@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.cover.CoverActivity
@@ -47,7 +48,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun render() = UI {
-        val timeSettingStore = MainActivity.of(context!!).timeSettingStore
+        val timeSettingStore = Store.from(context!!).timeSettingStore
         val observeTime = timeSettingStore.observe()
 
         verticalLayout {
@@ -145,16 +146,16 @@ class HomeFragment : Fragment() {
                         topMargin = config.dividerSize
                     }
 
-                    button("测试") {
-                        setOnClickListener {
-                            val behavior = MainActivity.of(context!!).haederBehavior
-                            if (behavior.isShow()) {
-                                behavior.hide()
-                            } else {
-                                behavior.show()
-                            }
-                        }
-                    }
+//                    button("测试") {
+//                        setOnClickListener {
+//                            val behavior = MainActivity.of(context!!).videoPlayerDelegate.haederBehavior
+//                            if (behavior.isShow()) {
+//                                behavior.hide()
+//                            } else {
+//                                behavior.show()
+//                            }
+//                        }
+//                    }
                 }
             }
         }

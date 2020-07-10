@@ -1,6 +1,6 @@
 package com.a10miaomiao.bilimiao.netword
 
-import com.a10miaomiao.bilimiao.entity.RegionTypeDetailsInfo
+import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -10,9 +10,14 @@ import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
 class MiaoHttp(var url: String?) {
+    private val cookieManager = CookieManager.getInstance()
+
     var client = OkHttpClient()
     val requestBuilder = Request.Builder()
-    var headers = mapOf<String, String>()
+    var headers = mapOf<String, String>(
+            "referer" to "https://www.bilibili.com/",
+            "cookie" to (cookieManager.getCookie(url) ?: "")
+    )
     var body: RequestBody = FormBody.Builder().build()
 
     fun get(): Response {
@@ -27,7 +32,9 @@ class MiaoHttp(var url: String?) {
 
     fun post(): Response {
         for (key in headers.keys) {
-            requestBuilder.addHeader(key, headers[key])
+            if (headers[key]?.isNotEmpty() == true) {
+                requestBuilder.addHeader(key, headers[key])
+            }
         }
         val request = requestBuilder.post(body)
                 .url(url)
@@ -52,7 +59,7 @@ class MiaoHttp(var url: String?) {
                 }
 
         inline fun <reified T> getJson(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, gsonConverterFactory<T>(object : TypeToken<T>() {}.type), init)
-        inline fun getString(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, { it.body()!!.string() }, init)
+        inline fun getString(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, { it.body().toString() }, init)
 
         fun <T> post(url: String? = null
                      , converterFactory: (response: Response) -> T
@@ -78,4 +85,8 @@ class MiaoHttp(var url: String?) {
             Gson().fromJson(json_str, type)
         }
     }
+}
+
+private fun OkHttpClient.cookieJar(cookieJar: CookieJar) {
+
 }

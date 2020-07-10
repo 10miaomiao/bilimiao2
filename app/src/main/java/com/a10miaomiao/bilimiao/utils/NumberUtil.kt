@@ -22,7 +22,7 @@ object NumberUtil {
         try {
             return converString(Integer.valueOf(num))
         } catch (e: NumberFormatException) {
-            return "--"
+            return num
         }
 
     }

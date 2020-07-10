@@ -20,6 +20,7 @@ class Bilimiao : Application() {
 
     var loginInfo: LoginInfo? = null
         private set
+
     private val key = "Message Word"
 
     companion object {
@@ -51,7 +52,7 @@ class Bilimiao : Application() {
         val cipher = AESUtil.encrypt(jsonStr, secretKey)
         val file = File(filesDir.path + "/auth")
         file.writeBytes(cipher)
-        setCookie(loginInfo.cookie_info)
+        loginInfo.cookie_info?.let { setCookie(it) }
     }
 
     fun readAuthInfo(): LoginInfo? {
@@ -76,6 +77,7 @@ class Bilimiao : Application() {
         cookieManager.removeSessionCookies(null)//移除
         cookieManager.removeAllCookies(null)
         cookieManager.flush()
+        this.loginInfo = null
     }
 
 

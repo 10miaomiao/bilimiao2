@@ -7,7 +7,7 @@ data class BangumiEpisode(
         val aid: Int,
         val badge: String,
         val badge_type: Int,
-        val cid: Int,
+        val cid: String,
         val cover: String,
         val duration: Int,
         val ep_id: String,
@@ -27,7 +27,7 @@ data class BangumiEpisode(
             parcel.readInt(),
             parcel.readString(),
             parcel.readInt(),
-            parcel.readInt(),
+            parcel.readString(),
             parcel.readString(),
             parcel.readInt(),
             parcel.readString(),
@@ -48,7 +48,7 @@ data class BangumiEpisode(
         parcel.writeInt(aid)
         parcel.writeString(badge)
         parcel.writeInt(badge_type)
-        parcel.writeInt(cid)
+        parcel.writeString(cid)
         parcel.writeString(cover)
         parcel.writeInt(duration)
         parcel.writeString(ep_id)

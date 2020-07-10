@@ -43,7 +43,8 @@
         <android.support.v4.view.ViewPager
             android:id="@+id/mViewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:background="?defaultBackgroundColor"/>
     </android.support.v4.widget.NestedScrollView>
 
 </android.support.design.widget.CoordinatorLayout>

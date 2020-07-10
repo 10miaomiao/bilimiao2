@@ -28,9 +28,10 @@ import org.jetbrains.anko.support.v4.nestedScrollView
 import org.jetbrains.anko.support.v4.swipeRefreshLayout
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.user.UserFragment
+import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 
 
-class VideoCommentFragment : Fragment() {
+class VideoCommentFragment : SwipeBackFragment() {
 
     companion object {
         fun newInstance(id: String): VideoCommentFragment {
@@ -46,9 +47,9 @@ class VideoCommentFragment : Fragment() {
     lateinit var viewModel: VideoCommentViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoCommentViewModel(id) })
+        viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoCommentViewModel(context!!, id) })
                 .get(VideoCommentViewModel::class.java)
-        return createUI().view
+        return attachToSwipeBack(createUI().view)
     }
 
     val upperClick = { mid: Long ->
@@ -56,50 +57,58 @@ class VideoCommentFragment : Fragment() {
     }
 
     private fun createUI() = UI {
-        swipeRefreshLayout {
-            setColorSchemeResources(config.themeColorResource)
-            viewModel.loading.observe(owner, Observer {
-                isRefreshing = it!!
-            })
-            setOnRefreshListener { viewModel.refreshList() }
-
-            nestedScrollView {
-                setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-                    if (scrollY == (v.getChildAt(0).measuredHeight - v.measuredHeight)) {
-                        viewModel.loadData()
-                    }
+        verticalLayout {
+            backgroundColor = config.windowBackgroundColor
+            headerView {
+                navigationIcon(R.drawable.ic_arrow_back_white_24dp)
+                navigationOnClick { pop() }
+                title("评论列表")
+            }
+            swipeRefreshLayout {
+                setColorSchemeResources(config.themeColorResource)
+                viewModel.loading.observe(owner, Observer {
+                    isRefreshing = it!!
                 })
+                setOnRefreshListener { viewModel.refreshList() }
 
-                verticalLayout {
-                    textView("热门评论").lparams {
-                        margin = dip(10)
-                    }
-                    recyclerView {
-                        backgroundColor = config.blockBackgroundColor
-                        createAdapter(viewModel.hotList)
-                        isNestedScrollingEnabled = false
-                        layoutManager = LinearLayoutManager(context)
-                    }
+                nestedScrollView {
+                    setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+                        if (scrollY == (v.getChildAt(0).measuredHeight - v.measuredHeight)) {
+                            viewModel.loadData()
+                        }
+                    })
+
+                    verticalLayout {
+                        textView("热门评论").lparams {
+                            margin = dip(10)
+                        }
+                        recyclerView {
+                            backgroundColor = config.blockBackgroundColor
+                            createAdapter(viewModel.hotList)
+                            isNestedScrollingEnabled = false
+                            layoutManager = LinearLayoutManager(context)
+                        }
 
 
-                    textView("全部评论").lparams {
-                        margin = dip(10)
-                    }
-                    recyclerView {
-                        backgroundColor = config.blockBackgroundColor
-                        createAdapter(viewModel.list)
-                        isNestedScrollingEnabled = false
-                        layoutManager = LinearLayoutManager(context)
-                    }
+                        textView("全部评论").lparams {
+                            margin = dip(10)
+                        }
+                        recyclerView {
+                            backgroundColor = config.blockBackgroundColor
+                            createAdapter(viewModel.list)
+                            isNestedScrollingEnabled = false
+                            layoutManager = LinearLayoutManager(context)
+                        }
 
-                    loadMoreView {
-                        layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-                        viewModel.loadState.observe(this@VideoCommentFragment, Observer {
-                            state = it!!
-                        })
+                        loadMoreView {
+                            layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+                            viewModel.loadState.observe(this@VideoCommentFragment, Observer {
+                                state = it!!
+                            })
+                        }
                     }
                 }
-            }
+            }.lparams(width = matchParent, height = matchParent)
         }
 
     }

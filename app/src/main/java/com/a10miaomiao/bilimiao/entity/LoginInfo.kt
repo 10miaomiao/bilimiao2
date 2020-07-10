@@ -1,8 +1,8 @@
 package com.a10miaomiao.bilimiao.entity
 
 data class LoginInfo(
-        val cookie_info: CookieInfo,
-        val sso: List<String>,
+        val cookie_info: CookieInfo?,
+        val sso: List<String>?,
         val status: Int,
         val token_info: TokenInfo
 ){

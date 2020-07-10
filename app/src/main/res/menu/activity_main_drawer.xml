@@ -20,6 +20,19 @@
             />
     </group>
 
+    <group
+        android:id="@+id/group_user"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_history"
+            android:title="历史记录"
+            android:icon="@drawable/ic_history_black_24dp" />
+        <item
+            android:id="@+id/nav_favourite"
+            android:title="我的收藏"
+            android:icon="@drawable/ic_star_black_24dp"/>
+    </group>
+
     <group android:id="@+id/down"
         android:checkableBehavior="none">
         <item android:id="@+id/nav_theme"

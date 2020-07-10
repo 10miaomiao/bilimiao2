@@ -6,5 +6,5 @@ data class Audio(
         var uname: String,
         var author: String,
         var title: String,
-        var cover: String
+        var cover_url: String
 )

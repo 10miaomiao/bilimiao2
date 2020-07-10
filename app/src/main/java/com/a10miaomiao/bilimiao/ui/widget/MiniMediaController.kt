@@ -1,12 +1,13 @@
 package com.a10miaomiao.bilimiao.ui.widget
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import cn.a10miaomiao.player.MyMediaController
-import cn.a10miaomiao.player.MyMediaController.generateTime
 import cn.a10miaomiao.player.callback.MediaController
 import cn.a10miaomiao.player.callback.MediaPlayerListener
 import com.a10miaomiao.bilimiao.R
@@ -32,7 +33,8 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
 
     private fun initView() {
         View.inflate(context, R.layout.layout_mini_media_controller, this)
-        mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
+        mToolbar.setNavigationIcon(R.drawable.ic_close_white_24dp)
+        mToolbar.inflateMenu(R.menu.mini_player_toolbar)
         mPauseButton.setOnClickListener(this)
     }
 
@@ -87,6 +89,10 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
         mZoomIv.setOnClickListener(onClickListener)
     }
 
+    fun setOnMenuItemClickListener(onMenuItemClickListener: Toolbar.OnMenuItemClickListener) {
+        mToolbar.setOnMenuItemClickListener(onMenuItemClickListener)
+    }
+
     /**
      * 设置播放进度
      */
@@ -131,6 +137,14 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
                 mPauseButton.setImageResource(cn.a10miaomiao.player.R.drawable.bili_player_play_can_play)
             }
         }
+    }
+
+    fun updateColor(color: Int){
+        val draw = context.getDrawable(R.drawable.layer_progress)
+        val bounds = mSeekBar.progressDrawable.bounds
+        mSeekBar.progressDrawable = draw
+        mSeekBar.progressDrawable.bounds = bounds
+        mSeekBar.thumb.setColorFilter(color, PorterDuff.Mode.SRC_ATOP)
     }
 
 }

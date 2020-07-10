@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentActivity
 import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
@@ -104,6 +105,15 @@ inline fun <reified T : ViewModel> Fragment.getViewModel(): T {
 }
 
 inline fun <reified T : ViewModel> Fragment.getViewModel(noinline initializer: (() -> T)): T {
+    return ViewModelProviders.of(this, newViewModelFactory(initializer))
+            .get(T::class.java)
+}
+
+inline fun <reified T : ViewModel> FragmentActivity.getViewModel(): T {
+    return ViewModelProviders.of(this).get(T::class.java)
+}
+
+inline fun <reified T : ViewModel> FragmentActivity.getViewModel(noinline initializer: (() -> T)): T {
     return ViewModelProviders.of(this, newViewModelFactory(initializer))
             .get(T::class.java)
 }

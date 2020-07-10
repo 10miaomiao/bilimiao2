@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
@@ -46,7 +47,7 @@ class FilterUpperFragment : SwipeBackFragment() {
     private val UPDATE_BUTTON = "UPDATE_BUTTON"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        filterStore = MainActivity.of(context!!).filterStore
+        filterStore = Store.from(context!!).filterStore
         viewModel = ViewModelProviders.of(this, newViewModelFactory { FilterUpperViewModel(context!!) })
                 .get(FilterUpperViewModel::class.java)
         return attachToSwipeBack(render().view)

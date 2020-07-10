@@ -24,7 +24,7 @@ object LoginHelper {
 
     private const val BASE_URL = "https://passport.bilibili.com/"
     private val HEADERS = mapOf(
-            "user-agent" to "Mozilla/5.0 BiliMiao/2.0 (10miaomiao@outlook.com)"
+            "referer" to "https://www.bilibili.com/"
     )
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
@@ -93,7 +93,6 @@ object LoginHelper {
         url += "&sign=" + ApiHelper.getNewSign(url)
         return MiaoHttp.getJson(url)
     }
-
 
     fun getCaptchaImage(url: String) = MiaoHttp.get(url, {
         val bytes = it.body()!!.bytes()

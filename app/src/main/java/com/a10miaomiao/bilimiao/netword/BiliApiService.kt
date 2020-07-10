@@ -42,7 +42,13 @@ object BiliApiService {
             "aid" to aid,
             "autoplay" to "0",
             "qn" to "32")
-
+    /**
+     * 获取视频信息
+     */
+    fun getVideoInfoByBvid(bvid: String) = biliApp("x/v2/view",
+            "bvid" to bvid,
+            "autoplay" to "0",
+            "qn" to "32")
     /**
      * 获取番剧信息
      */
@@ -54,6 +60,7 @@ object BiliApiService {
      */
     fun getSeasonEpisodeInfo(id: String) = biliApi("pgc/view/app/season",
             "ep_id" to id)
+
 
     /**
      * 获取直播信息
@@ -69,7 +76,9 @@ object BiliApiService {
     /**
      * 获取音频信息
      */
-    fun getAudioInfo(aid: String) = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid=$aid"
+    fun getAudioInfo(id: String) = biliApi("audio/music-service-c/songs/playing"
+            , "song_id" to id
+    )
 
     /**
      * 获取专栏信息
@@ -215,7 +224,16 @@ object BiliApiService {
             "pn" to pn.toString(),
             "ps" to ps.toString())
 
+    /**
+     * 历史记录
+     */
+    fun getHistory(
+            pn: Int,
+            ps: Int
+    ) = biliApi("x/v2/history",
+            "pn" to pn.toString(),
+            "ps" to ps.toString()
+    )
 
-    fun oss() = createUrl("https://passport.bilibili.com/api/login/sso",
-            "gourl" to "https://account.bilibili.com/account/home")
+
 }

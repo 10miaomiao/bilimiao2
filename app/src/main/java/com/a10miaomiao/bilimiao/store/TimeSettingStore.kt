@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.store
 
+import android.arch.lifecycle.ViewModel
 import android.content.Context
 import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
@@ -10,7 +11,7 @@ import java.util.*
 
 class TimeSettingStore(
         val context: Context
-) {
+): ViewModel() {
     val timeFrom = MiaoLiveData(read(ConstantUtil.TIME_FROM))
     val timeTo = MiaoLiveData(read(ConstantUtil.TIME_TO))
 

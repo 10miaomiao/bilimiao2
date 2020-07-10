@@ -22,9 +22,14 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.ThemeUtil
 import com.a10miaomiao.bilimiao.utils.newViewModelFactory
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_cover.*
 import org.jetbrains.anko.dip
 import org.jetbrains.anko.toast
@@ -54,10 +59,8 @@ class CoverActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cover)
         initArgument()
-        fileName = type + id
-        mIDTv.text = type + id
-        mPermissionTv.text = "文件名：$fileName.jpg"
         initView()
+        initTextView()
         initViewModel()
         requestPermissions()
     }
@@ -69,12 +72,41 @@ class CoverActivity : AppCompatActivity() {
             val urlInfo = BiliUrlMatcher.findIDByUrl(text)
             type = urlInfo[0].toUpperCase()
             id = urlInfo[1]
+            if (type == "未知类型") {
+                val textList = text.split(" ")
+                if (textList.size > 1) {
+                    val url = textList[textList.size - 1]
+                    if (url.indexOf("https://") == 0
+                            || url.indexOf("http://") == 0) {
+                        resolveUrl(url)
+                    }
+                }
+            }
         } else if (extras.containsKey("id") && extras.containsKey("type")) {
             type = extras.getString("type").toUpperCase()
             id = extras.getString("id")
         } else {
             id = "未知"
         }
+    }
+
+    /**
+     * 解析短链接出长链接，然后再正则匹配出类型和id
+     */
+    private fun resolveUrl(url: String) {
+        Observable.create<String> {
+            val res = MiaoHttp(url).get()
+            it.onNext(res.request().url().toString())
+            it.onComplete()
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+            val urlInfo = BiliUrlMatcher.findIDByUrl(it)
+            type = urlInfo[0].toUpperCase()
+            id = urlInfo[1]
+            initTextView()
+            viewModel?.setConfig(type, id)
+        }, {
+            // 不用处理
+        })
     }
 
     private fun initView() {
@@ -117,6 +149,12 @@ class CoverActivity : AppCompatActivity() {
                 saveImage()
             }
         }
+    }
+
+    private fun initTextView() {
+        fileName = type + id
+        mIDTv.text = type + id
+        mPermissionTv.text = "文件名：$fileName.jpg"
     }
 
     private fun initViewModel() {

@@ -22,6 +22,7 @@ import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.nestedScrollView
 import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.inputmethod.EditorInfo
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 
 
@@ -41,7 +42,7 @@ class AddWorldFragment : SwipeBackFragment() {
     lateinit var filterStore: FilterStore
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        filterStore = MainActivity.of(context!!).filterStore
+        filterStore = Store.from(context!!).filterStore
         return attachToSwipeBack(render().view)
     }
 

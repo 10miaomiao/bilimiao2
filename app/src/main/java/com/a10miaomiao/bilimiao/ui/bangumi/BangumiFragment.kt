@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.SeasonEpisode
 import com.a10miaomiao.bilimiao.entity.bangumi.Bangumi
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.player.PlayerActivity
 import com.a10miaomiao.bilimiao.ui.region.RegionDetailsFragment
@@ -49,6 +50,7 @@ class BangumiFragment : SwipeBackFragment() {
     }
 
     val sid by lazy { arguments!!.getString("sid") }
+    private val playerStore by lazy { Store.from(context!!).playerStore }
     lateinit var viewModel: BangumiViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -64,6 +66,7 @@ class BangumiFragment : SwipeBackFragment() {
 
     private fun createUI() = UI {
         coordinatorLayout {
+            backgroundColor = config.windowBackgroundColor
             appBarLayout {
                 collapsingToolbarLayout {
                     setContentScrimResource(attr(R.attr.colorPrimary))
@@ -350,6 +353,10 @@ class BangumiFragment : SwipeBackFragment() {
      * 分P列表
      */
     private fun RecyclerView.createPagesAdapter() = miao(viewModel.episodes) {
+        val observePlayer = playerStore.observe()
+        observePlayer {
+            notifyDataSetChanged()
+        }
         itemView { b ->
             verticalLayout {
                 backgroundResource = R.drawable.shape_corner
@@ -361,15 +368,14 @@ class BangumiFragment : SwipeBackFragment() {
                 verticalPadding = dip(10)
                 gravity = Gravity.LEFT
 
-                textView {
+                val indexTextView = textView {
                     textColorResource = R.color.text_black
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                    b.bind { item -> text = "第${item.index}集" }
                 }.lparams {
                     bottomMargin = dip(5)
                 }
 
-                textView {
+                val titleTextView = textView {
                     textColorResource = R.color.text_black
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                     maxWidth = dip(120)
@@ -378,12 +384,31 @@ class BangumiFragment : SwipeBackFragment() {
                     ellipsize = TextUtils.TruncateAt.END
                     gravity = Gravity.LEFT
                     textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
-                    b.bind { item -> text = item.index_title }
                 }.lparams()
+
+                b.bind { item ->
+                    indexTextView.text = "第${item.index}集"
+                    titleTextView.text = item.index_title
+                    if (item.cid == playerStore.info.cid){
+                        isEnabled = false
+                        indexTextView.textColorResource = config.themeColorResource
+                        titleTextView.textColorResource = config.themeColorResource
+                    }else{
+                        isEnabled = true
+                        indexTextView.textColorResource = R.color.text_black
+                        titleTextView.textColorResource = R.color.text_black
+                    }
+                }
             }
         }
         onItemClick { item, position ->
-            PlayerActivity.playBangumi(context, item.section_id, item.ep_id, item.cid.toString(), item.index_title)
+            //            PlayerActivity.playBangumi(context, item.section_id, item.ep_id, item.cid.toString(), item.index_title)
+            MainActivity.of(context!!).videoPlayerDelegate.playBangumi(
+                    item.section_id,
+                    item.ep_id,
+                    item.cid.toString(),
+                    item.index_title
+            )
         }
     }
 

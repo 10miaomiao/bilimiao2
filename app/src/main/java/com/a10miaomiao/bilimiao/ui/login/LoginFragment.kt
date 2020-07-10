@@ -11,14 +11,18 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.EditText
 import android.widget.ImageView
+import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.netword.LoginHelper
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.rank.RankCategoryDetailsViewModel
+import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.getViewModel
 import com.a10miaomiao.bilimiao.utils.newViewModelFactory
+import com.a10miaomiao.bilimiao.utils.startFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_video_info.view.*
@@ -36,6 +40,14 @@ class LoginFragment : SwipeBackFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = getViewModel { LoginViewModel(context!!) }
         return attachToSwipeBack(render().view)
+    }
+
+    override fun onSupportVisible() {
+        super.onSupportVisible()
+        val loginInfo = Bilimiao.app.loginInfo
+        if (loginInfo != null){
+            viewModel.authInfo(loginInfo)
+        }
     }
 
     private fun EditText.onTextChanged(event: (text: String) -> Unit) {
@@ -111,6 +123,7 @@ class LoginFragment : SwipeBackFragment() {
             backgroundColor = config.blockBackgroundColor
             verticalPadding = dip(15)
             horizontalPadding = dip(10)
+            gravity = Gravity.CENTER_HORIZONTAL
 
             textInputLayout {
                 editText {
@@ -174,6 +187,15 @@ class LoginFragment : SwipeBackFragment() {
 
             button("登录") {
                 setOnClickListener { viewModel.login() }
+            }
+
+            textView("网页登录"){
+                textColor = config.themeColor
+                setOnClickListener {
+                    startFragment(H5LoginFragment.newInstance())
+                }
+            }.lparams {
+                verticalMargin = dip(10)
             }
 
         }

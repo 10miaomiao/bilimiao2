@@ -6,7 +6,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Page(
-    val cid: Long,
+    val cid: String,
     val dimension: Dimension,
 //    val dm: Dm,
     val dmlink: String,
@@ -14,7 +14,7 @@ data class Page(
     val from: String,
     val metas: List<Meta>,
     val page: Int,
-    val part: String,
+    var part: String,
     val vid: String,
     val weblink: String
 ): Parcelable

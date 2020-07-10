@@ -8,8 +8,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 39
-        versionName "2.0 咕咕咕版0.7"
+        versionCode 40
+        versionName "2.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -73,6 +73,7 @@ dependencies {
 
     // 其它
     implementation 'com.google.android:flexbox:1.0.0'
+    implementation 'com.github.MZCretin:ExpandableTextView:v1.6.1'
 //    implementation 'com.ksxkq:materialpreference:1.0.5'
 
     implementation project(':miaoandriod')

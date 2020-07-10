@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.bangumi.BangumiEpisode
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.bottomSheetHeaderView
@@ -42,6 +43,8 @@ class EpisodesFragment : Fragment() {
 
     private fun createUI() = UI {
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
+
             bottomSheetHeaderView("剧集列表", View.OnClickListener {
                 MainActivity.of(context)
                         .hideBottomSheet()
@@ -76,11 +79,17 @@ class EpisodesFragment : Fragment() {
                                 gravity = Gravity.LEFT
                                 textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
                                 b.bind { item -> text = item.index_title }
-                            }.lparams ()
+                            }.lparams()
                         }
                     }
                     onItemClick { item, position ->
-                        PlayerActivity.playBangumi(context, item.section_id, item.ep_id, item.cid.toString(), item.index_title)
+                        MainActivity.of(context!!).videoPlayerDelegate.playBangumi(
+                                item.section_id,
+                                item.ep_id,
+                                item.cid.toString(),
+                                item.index_title
+                        )
+
                     }
                 }
             }

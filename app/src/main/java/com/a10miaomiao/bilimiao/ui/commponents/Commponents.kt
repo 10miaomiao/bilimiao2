@@ -6,6 +6,7 @@ import android.view.ViewManager
 import android.widget.LinearLayout
 import com.a10miaomiao.bilimiao.ui.widget.MySpannableTextView
 import com.a10miaomiao.bilimiao.ui.widget.flow.FlowLayout
+import com.ctetin.expandabletextviewlibrary.ExpandableTextView
 import org.jetbrains.anko.AnkoViewDslMarker
 import org.jetbrains.anko._LinearLayout
 import org.jetbrains.anko.custom.ankoView
@@ -56,5 +57,10 @@ inline fun ViewManager.mySpannableTextView(theme: Int = 0, init: (@AnkoViewDslMa
 inline fun ViewManager.flowLayout(theme: Int = 0): FlowLayout = flowLayout(theme) {}
 inline fun ViewManager.flowLayout(theme: Int = 0, init: (@AnkoViewDslMarker FlowLayout).() -> Unit): FlowLayout {
     return ankoView({ ctx: Context -> FlowLayout(ctx) }, theme, init)
+}
+
+inline fun ViewManager.expandableTextView(theme: Int = 0): ExpandableTextView = expandableTextView(theme) {}
+inline fun ViewManager.expandableTextView(theme: Int = 0, init: (@AnkoViewDslMarker ExpandableTextView).() -> Unit): ExpandableTextView {
+    return ankoView({ ctx: Context -> ExpandableTextView(ctx) }, theme, init)
 }
 

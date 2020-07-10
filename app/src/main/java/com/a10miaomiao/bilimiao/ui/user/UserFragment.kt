@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.bangumi.BangumiFragment
@@ -56,8 +57,8 @@ class UserFragment : SwipeBackFragment() {
     private lateinit var filterStore: FilterStore
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        userStore = MainActivity.of(context!!).userStore
-        filterStore = MainActivity.of(context!!).filterStore
+        userStore = Store.from(context!!).userStore
+        filterStore = Store.from(context!!).filterStore
         viewModel = getViewModel { UserViewModel(context!!, vmid) }
         viewModel.noLike set !filterStore.filterUpper(vmid)
         return attachToSwipeBack(createUI().view)

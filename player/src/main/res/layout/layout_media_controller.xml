@@ -10,7 +10,8 @@
         android:orientation="horizontal"
         android:background="#99000000"
         android:gravity="center_vertical"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:clipToPadding="false">
 
         <ImageView
             android:id="@+id/mBackIV"

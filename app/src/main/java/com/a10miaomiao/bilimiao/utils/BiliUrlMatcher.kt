@@ -18,7 +18,6 @@ object BiliUrlMatcher {
      *
      */
     fun findIDByUrl(text: String): Array<String> {
-        DebugMiao.log(text)
         var a = ""
         a = matchingID(text, ".*://www.bilibili.com/video/av(\\d+)")
         if (a != "") {
@@ -52,18 +51,39 @@ object BiliUrlMatcher {
         if (a != "") {
             return arrayOf("ROOM", a)
         }
+        a = matchingID(text, ".*://www.bilibili.com/video/BV([a-zA-Z0-9]+)")
+        if (a != "") {
+            return arrayOf("BV", a)
+        }
+        a = matchingID(text, ".*://m.bilibili.com/playlist/pl\\d+\\?bvid=BV([a-zA-Z0-9]+)")
+        if (a != "") {
+            return arrayOf("BV", a)
+        }
+        a = matchingID(text, ".*://space.bilibili.com/(\\d+)")
+        if (a != "") {
+            return arrayOf("UID", a)
+        }
         return arrayOf("未知类型", a)
     }
+
+
 
     /**
      * 用正则获取视频id
      */
     fun matchingID(text: String, regex: String): String {
+//        regex.toRegex().find(text).
         val compile = Pattern.compile(regex)
         val matcher = compile.matcher(text)
         if (matcher.find())
             return matcher.group(1)//提取匹配到的结果
         return ""
+    }
+
+    fun customString(content: String): String{
+        var result = "[aA][vV](\\d+)".toRegex().replace(content, "[$0](https://www.bilibili.com/video/av$1)")
+        result = "BV([a-zA-Z0-9]+)".toRegex().replace(result, "[$0](https://www.bilibili.com/video/BV$1)")
+        return result
     }
 
 

@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.ui.rank.RankCategoryFragment
 import com.a10miaomiao.bilimiao.ui.region.RegionDetailsViewModel
 import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
+import com.a10miaomiao.bilimiao.ui.web.WebFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.bumptech.glide.Glide
@@ -50,6 +51,8 @@ class RankFragment : Fragment() {
     private fun handleItemClick(item: BiliMiaoRank, position: Int) {
         if (item.type == ConstantUtil.BANGUMI || item.type == ConstantUtil.VIDEO) {
             startFragment(RankCategoryFragment.newInstance(item))
+        } else if(item.type == ConstantUtil.WEB){
+            startFragment(WebFragment.newInstance(item.url))
         } else {
             alert {
                 title = "请更新版本后查看"

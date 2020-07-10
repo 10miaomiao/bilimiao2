@@ -123,12 +123,12 @@ class PlayerFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        isMini = VideoInfoFragment.instance.isMiniPlayer.value!!
-        VideoInfoFragment.instance.isMiniPlayer.observe(this, Observer {
-            isMini = it!!
-            mPlayer?.setVideoLayout()
-            setPlayerMediaController()
-        })
+//        isMini = VideoInfoFragment.instance.isMiniPlayer.value!!
+//        VideoInfoFragment.instance.isMiniPlayer.observe(this, Observer {
+//            isMini = it!!
+//            mPlayer?.setVideoLayout()
+//            setPlayerMediaController()
+//        })
         initController()
         val serviceIntent = Intent(context, PlayerService::class.java)
         context!!.startService(serviceIntent)
@@ -155,7 +155,7 @@ class PlayerFragment : Fragment() {
             }
         }
         mController.setVideoBackEvent {
-            VideoInfoFragment.instance.isMiniPlayer.value = true
+//            VideoInfoFragment.instance.isMiniPlayer.value = true
         }
         mController.setQualityEvent {
             val popupWindow = QualityPopupWindow(context!!, mController)
@@ -181,7 +181,7 @@ class PlayerFragment : Fragment() {
         mMiniController.setMediaPlayer(mPlayer)
         mMiniController.setBackOnClick(View.OnClickListener { MainActivity.of(context!!).pop() })
         mMiniController.setZoomOnClick(View.OnClickListener {
-            VideoInfoFragment.instance.isMiniPlayer.value = false
+//            VideoInfoFragment.instance.isMiniPlayer.value = false
         })
     }
 
@@ -557,6 +557,5 @@ class PlayerFragment : Fragment() {
             mPlayer.setMediaController(mController)
             mMiniController.visibility = View.GONE
         }
-
     }
 }

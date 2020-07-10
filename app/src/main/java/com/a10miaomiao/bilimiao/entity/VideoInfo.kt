@@ -1,14 +1,15 @@
 package com.a10miaomiao.bilimiao.entity
 
 data class VideoInfo(
-        val aid: Double,
+        val aid: Long,
         val attribute: Int,
+        val bvid: String,
         val cid: Long,
         val cm_config: CmConfig,
         val cms: List<Cm>,
         val copyright: Int,
         val ctime: Double,
-        val desc: String,
+        var desc: String,
         val dimension: Dimension,
         val dislike_reasons: List<DislikeReason>,
         val dm_seg: Int,
@@ -29,5 +30,6 @@ data class VideoInfo(
         val tid: Int,
         val title: String,
         val tname: String,
-        val videos: Int
+        val videos: Int,
+        val view_at: Long? // 历史记录的观看时间
 )

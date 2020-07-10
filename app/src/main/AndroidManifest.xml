@@ -11,32 +11,35 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <!-- 您从百度网站获取的APP KEY，根据实际您的APP申请的APP_KEY进行修改 -->
-    <meta-data android:name="BaiduMobAd_STAT_ID" android:value="ddd50be117" />
-    <!-- 渠道商编号 -->
-    <meta-data android:name="BaiduMobAd_CHANNEL" android:value="Coolapk" />
-    <!-- 是否开启错误日志统计，默认为false -->
-    <meta-data android:name="BaiduMobAd_EXCEPTION_LOG" android:value="true" />
-    <!-- 日志仅在wifi网络下发送，默认为false -->
-    <meta-data android:name="BaiduMobAd_ONLY_WIFI" android:value="false" />
-    <!-- 是否获取基站位置信息 ,默认为true -->
-    <meta-data android:name="BaiduMobAd_CELL_LOCATION" android:value="false" />
-    <!-- 是否获取GPS位置信息，默认为true -->
-    <meta-data android:name="BaiduMobAd_GPS_LOCATION" android:value="false" />
-    <!-- 是否获取WIFI位置信息，默认为true -->
-    <meta-data android:name="BaiduMobAd_WIFI_LOCATION" android:value="false" />
 
     <application
         android:name=".Bilimiao"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/bilimiao"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- 您从百度网站获取的APP KEY，根据实际您的APP申请的APP_KEY进行修改 -->
+        <meta-data android:name="BaiduMobAd_STAT_ID" android:value="ddd50be117" />
+        <!-- 渠道商编号 -->
+        <meta-data android:name="BaiduMobAd_CHANNEL" android:value="Coolapk" />
+        <!-- 是否开启错误日志统计，默认为false -->
+        <meta-data android:name="BaiduMobAd_EXCEPTION_LOG" android:value="true" />
+        <!-- 日志仅在wifi网络下发送，默认为false -->
+        <meta-data android:name="BaiduMobAd_ONLY_WIFI" android:value="false" />
+        <!-- 是否获取基站位置信息 ,默认为true -->
+        <meta-data android:name="BaiduMobAd_CELL_LOCATION" android:value="false" />
+        <!-- 是否获取GPS位置信息，默认为true -->
+        <meta-data android:name="BaiduMobAd_GPS_LOCATION" android:value="false" />
+        <!-- 是否获取WIFI位置信息，默认为true -->
+        <meta-data android:name="BaiduMobAd_WIFI_LOCATION" android:value="false" />
+
         <activity android:name=".ui.MainActivity"
-            android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -62,7 +65,7 @@
             android:exported="false"
             android:label="@string/app_name"
             android:launchMode="singleTop"
-            android:screenOrientation="landscape"
+            android:screenOrientation="fullSensor"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden">
         </activity>

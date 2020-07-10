@@ -1,45 +1,38 @@
 package com.a10miaomiao.bilimiao.ui
 
-import android.app.UiModeManager
 import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.Observer
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
-import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatDelegate
-import android.support.v7.view.ActionMode
-import android.view.*
+import android.view.View
+import android.view.WindowInsets
 import com.a10miaomiao.bilimiao.R
-import kotlinx.android.synthetic.main.activity_main.*
+import com.a10miaomiao.bilimiao.delegate.VideoPlayerDelegate
+import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.home.MainFragment
-import me.yokeyword.fragmentation.SupportActivity
-import me.yokeyword.fragmentation.SupportFragment
-import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
-import me.yokeyword.fragmentation.anim.FragmentAnimator
-import android.widget.RelativeLayout
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.entity.Dm
-import com.a10miaomiao.bilimiao.netword.LoginHelper
-import com.a10miaomiao.bilimiao.store.FilterStore
-import com.a10miaomiao.bilimiao.store.TimeSettingStore
-import com.a10miaomiao.bilimiao.store.UserStore
-import com.a10miaomiao.bilimiao.ui.commponents.behavior.HeaderBehavior
-import com.a10miaomiao.bilimiao.ui.home.RankFragment
-import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.utils.*
+import com.a10miaomiao.bilimiao.utils.ConstantUtil
+import com.a10miaomiao.bilimiao.utils.DebugMiao
+import com.a10miaomiao.bilimiao.utils.ThemeUtil
+import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
 import com.baidu.mobstat.StatService
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_main.*
 import me.yokeyword.fragmentation.ISupportFragment
+import me.yokeyword.fragmentation.SupportActivity
+import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
-import org.jetbrains.anko.*
+import me.yokeyword.fragmentation.anim.FragmentAnimator
+import org.jetbrains.anko.configuration
 
 
 class MainActivity : SupportActivity() {
@@ -49,19 +42,16 @@ class MainActivity : SupportActivity() {
     val behavior by lazy {
         BottomSheetBehavior.from(bottomSheet)
     }
-    val haederBehavior by lazy {
-        HeaderBehavior.from(haeder)
-    }
 
     var bottomSheetFragment: Fragment? = null
 
-    val timeSettingStore by lazy { TimeSettingStore(this) }
-    val filterStore by lazy { FilterStore(this) }
-    val userStore by lazy { UserStore(this) }
     val themeUtil by lazy { ThemeUtil(this) }
+    val videoPlayerDelegate  by lazy { VideoPlayerDelegate(this)}
+    val store = Store(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DebugMiao.log("onCreate")
         themeUtil.init()
         setContentView(R.layout.activity_main)
         updateLayout(configuration)
@@ -73,7 +63,6 @@ class MainActivity : SupportActivity() {
             }
         }
         initBottomSheet()
-
         if (findFragment(MainFragment::class.java) == null) {
             loadRootFragment(R.id.masterContainer, MainFragment().apply {
                 arguments = intent.extras ?: Bundle()
@@ -82,8 +71,20 @@ class MainActivity : SupportActivity() {
         }
 
         // 百度统计
+        StatService.setAuthorizedState(this, false)
         StatService.start(this)
+
 //        themeUtil.observeTheme(this, Observer { dividingLine.backgroundColor = config.themeColor })
+        videoPlayerDelegate.onCreate(savedInstanceState)
+
+//        MiaoHttp.getString("https://b23.tv/qhyO1O")
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe ({
+//                    DebugMiao.log(it)
+//                }, {
+//                    it.printStackTrace()
+//                })
     }
 
     override fun start(toFragment: ISupportFragment?) {
@@ -111,17 +112,22 @@ class MainActivity : SupportActivity() {
                 }
                 return
             }
-            super.start(toFragment, SupportFragment.SINGLETASK)
+            super.start(toFragment)
         } else {
             super.start(toFragment)
         }
     }
 
     override fun onBackPressedSupport() {
-        if (behavior.state == BottomSheetBehavior.STATE_HIDDEN)
-            super.onBackPressedSupport()
-        else
+        // 上滑菜单未关闭则先关闭上滑菜单
+        if (behavior.state != BottomSheetBehavior.STATE_HIDDEN) {
             hideBottomSheet()
+            return
+        }
+        if (videoPlayerDelegate.onBackPressed()) {
+            return
+        }
+        super.onBackPressedSupport()
     }
 
     override fun onCreateFragmentAnimator(): FragmentAnimator {
@@ -216,6 +222,47 @@ class MainActivity : SupportActivity() {
     }
 
     fun dynamicTheme(owner: LifecycleOwner, builder: () -> View) = themeUtil.dynamicTheme(owner, builder)
+
+    override fun onResume() {
+        super.onResume()
+        DebugMiao.log("onResume")
+        videoPlayerDelegate.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        DebugMiao.log("onPause")
+        videoPlayerDelegate.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        DebugMiao.log("onDestroy")
+        videoPlayerDelegate.onDestroy()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        DebugMiao.log("onStart")
+        videoPlayerDelegate.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        DebugMiao.log("onStop")
+        videoPlayerDelegate.onStop()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        videoPlayerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
+
+        } else {
+
+        }
+    }
+
 
     companion object {
         fun of(context: Context): MainActivity {

@@ -18,6 +18,7 @@ import android.webkit.WebViewClient
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
@@ -97,7 +98,7 @@ class UserFollowFragment : SwipeBackFragment() {
     }
 
     private fun createUI() = UI {
-        val userStore = MainActivity.of(context!!).userStore
+        val userStore = Store.from(context!!).userStore
         verticalLayout {
             headerView {
                 if (userStore.isSelf(mid)) {

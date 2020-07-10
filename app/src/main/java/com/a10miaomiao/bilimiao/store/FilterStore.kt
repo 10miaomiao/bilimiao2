@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.store
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.ViewModel
 import android.content.Context
 import com.a10miaomiao.bilimiao.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.db.FilterWordDB
@@ -10,7 +11,7 @@ import java.util.regex.Pattern
 
 class FilterStore(
         val context: Context
-) {
+): ViewModel() {
 
     private val filterWordDB = FilterWordDB(context)
     private val _filterWordList = MutableLiveData<ArrayList<String>>()

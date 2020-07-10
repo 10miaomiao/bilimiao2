@@ -15,11 +15,14 @@ object ConstantUtil {
 
     const val VIDEO = "video" // 普通视频
     const val BANGUMI = "bangumi" // 番剧
+    const val WEB = "web" // 网页
 
     const val REGION = "REGION"
     const val INFO = "INFO"
     const val TID = "TID"
     const val ID = "ID"
+    const val TYPE = "TYPE"
+    const val URL = "URL"
 
     const val FROM_SHORTCUT = "fromShortcut"
     const val SHORTCUT_NAME = "shortcutName"

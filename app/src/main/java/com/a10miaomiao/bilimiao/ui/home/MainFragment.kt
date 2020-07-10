@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.login.LoginFragment
@@ -23,6 +24,8 @@ import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.setting.AboutFragment
 import com.a10miaomiao.bilimiao.ui.setting.SettingFragment
 import com.a10miaomiao.bilimiao.ui.theme.ThemeFragment
+import com.a10miaomiao.bilimiao.ui.user.FavFragment
+import com.a10miaomiao.bilimiao.ui.user.HistoryFragment
 import com.a10miaomiao.bilimiao.ui.user.UserFragment
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.network
@@ -48,7 +51,7 @@ class MainFragment : SupportFragment() {
     private lateinit var userStore: UserStore
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        userStore = MainActivity.of(context!!).userStore
+        userStore = Store.from(context!!).userStore
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         return render().view
     }
@@ -130,12 +133,23 @@ class MainFragment : SupportFragment() {
             switchFragment(homeFragment)
             return true
         }
+        val playerDelegate = MainActivity.of(context!!).videoPlayerDelegate
+        val haederBehavior = playerDelegate.haederBehavior
         val time = System.currentTimeMillis()
         if (time - lastBackTime < 2000) {
+            if (haederBehavior.isShow()) {
+                playerDelegate.stopPlay()
+                haederBehavior.hide()
+                return true
+            }
             return super.onBackPressedSupport()
         } else {
             lastBackTime = time
-            toast("再按一次退出")
+            if (haederBehavior.isShow()) {
+                toast("再按一次退出播放")
+            } else {
+                toast("再按一次退出Bilimiao")
+            }
             return true
         }
     }
@@ -147,6 +161,19 @@ class MainFragment : SupportFragment() {
             R.id.nav_dowmload,
             R.id.nav_filter -> {
                 viewModel.checkedMenuItemId set item.itemId
+            }
+            //------------------------
+            R.id.nav_history -> {
+                startFragment(HistoryFragment.newInstance())
+            }
+            R.id.nav_favourite -> {
+                val user = userStore.user
+                if (user == null){
+                    toast("请先登录")
+                    startFragment(LoginFragment())
+                }else{
+                    startFragment(FavFragment.newInstance(user.mid))
+                }
             }
             //------------------------
             R.id.nav_theme -> {
@@ -225,6 +252,7 @@ class MainFragment : SupportFragment() {
     }
 
     private fun render() = UI {
+        val observerUser = userStore.observer
         drawerLayout {
             let { mDrawerLayout = it }
             frameLayout {
@@ -238,6 +266,10 @@ class MainFragment : SupportFragment() {
                     setCheckedItem(-viewModel.checkedMenuItemId)
                     setNavigationItemSelectedListener(navigationItemSelectedListener)
                     addHeaderView(renderHeader().view)
+                    observerUser {
+                        menu.setGroupVisible(R.id.group_user, it != null)
+                    }
+                    backgroundColor = config.blockBackgroundColor
                 }.lparams {
                     width = wrapContent
                     height = matchParent

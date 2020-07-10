@@ -5,6 +5,7 @@ import android.content.Context
 import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.bilimiao.utils.DebugMiao
@@ -29,7 +30,7 @@ class FavViewModel(
     }
 
     fun loadData() {
-        val userStore = MainActivity.of(context).userStore
+        val userStore = Store.from(context).userStore
         val url = if (userStore.isSelf(mid)) BiliApiService.gatMedialist()
             else  BiliApiService.gatMedialist(mid)
         loading set true

@@ -17,6 +17,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Owner
 import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.utils.*
@@ -50,7 +51,7 @@ class UpperInfoFragment : SwipeBackFragment() {
     lateinit var filterStore: FilterStore
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        filterStore = MainActivity.of(context!!).filterStore
+        filterStore = Store.from(context!!).filterStore
         viewModel = ViewModelProviders.of(this, newViewModelFactory { UpperInfoViewModel(owner) })
                 .get(UpperInfoViewModel::class.java)
         return attachToSwipeBack(createUI().view)

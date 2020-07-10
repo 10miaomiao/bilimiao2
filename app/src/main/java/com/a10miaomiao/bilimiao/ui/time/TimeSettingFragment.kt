@@ -53,6 +53,8 @@ class TimeSettingFragment : SwipeBackFragment() {
 
     private fun render() = UI {
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
+
             headerView {
                 title("时间线设置")
                 navigationIcon(R.drawable.ic_arrow_back_white_24dp)

@@ -76,7 +76,7 @@ class HomeViewModel(
                         adInfo set r.data
                     }
                 }, { e ->
-
+                    e.printStackTrace()
                 })
     }
 

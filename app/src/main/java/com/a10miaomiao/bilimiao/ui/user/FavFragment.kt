@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.mediaItemView
@@ -41,7 +42,7 @@ class FavFragment : SwipeBackFragment() {
     }
 
     private fun createUI() = UI {
-        val userStore = MainActivity.of(context!!).userStore
+        val userStore = Store.from(context!!).userStore
         verticalLayout {
             lparams(matchParent, matchParent)
             headerView {

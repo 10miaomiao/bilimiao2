@@ -10,6 +10,7 @@ import com.a10miaomiao.bilimiao.entity.BiliMiaoRank
 import com.a10miaomiao.bilimiao.entity.VideoRankInfo
 import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.DebugMiao
@@ -50,7 +51,7 @@ class RankCategoryDetailsViewModel(
     fun loadVideoData() {
         loading set  true
         val url = createUrl()
-        val filterStore = MainActivity.of(context).filterStore
+        val filterStore = Store.from(context!!).filterStore
         MiaoHttp.getJson<VideoRankInfo>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

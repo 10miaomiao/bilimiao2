@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.ui.time
 
 import android.arch.lifecycle.ViewModel
 import android.content.Context
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.model.DateModel
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
@@ -13,7 +14,7 @@ class TimeSettingViewModel(
         val context: Context
 ) : ViewModel() {
 
-    var timeSettingStore = MainActivity.of(context).timeSettingStore
+    var timeSettingStore = Store.from(context).timeSettingStore
     var spinnerSelected = MiaoLiveData(0)
     var timeFrom = MiaoLiveData(timeSettingStore.timeFrom())
     var timeTo = MiaoLiveData(timeSettingStore.timeTo())

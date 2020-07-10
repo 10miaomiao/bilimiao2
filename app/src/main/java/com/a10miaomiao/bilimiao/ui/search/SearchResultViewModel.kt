@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.entity.SearchData
 import com.a10miaomiao.bilimiao.entity.SearchItems
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
@@ -71,7 +72,7 @@ class SearchResultViewModel(
 
     fun loadData() {
         loading.value = true
-        val filterStore = MainActivity.of(context).filterStore
+        val filterStore = Store.from(context).filterStore
         var totalCount = 0 // 屏蔽前数量
         MiaoHttp.getJson<ResultInfo<SearchData<SearchItems>>>(getUrl())
                 .subscribeOn(Schedulers.io())

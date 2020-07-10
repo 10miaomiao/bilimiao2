@@ -6,6 +6,7 @@ import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.entity.LoginInfo
 import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.LoginHelper
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.miaoandriod.MiaoLiveData
@@ -20,7 +21,7 @@ class LoginViewModel(
         val context: Context
 ) : ViewModel() {
 
-    val userStore = MainActivity.of(context).userStore
+    val userStore = Store.from(context).userStore
     val username = MiaoLiveData("")
     val password = MiaoLiveData("")
     val captcha = MiaoLiveData("")

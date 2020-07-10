@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.ui.video
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.content.Context
 import com.a10miaomiao.bilimiao.entity.ResultInfo
 import com.a10miaomiao.bilimiao.entity.comment.ReplyBean
 import com.a10miaomiao.bilimiao.entity.comment.VideoComment
@@ -13,8 +14,12 @@ import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.jetbrains.anko.toast
 
-class VideoCommentViewModel(val id: String) : ViewModel() {
+class VideoCommentViewModel(
+        val context: Context,
+        val id: String
+) : ViewModel() {
 
     private var minid = 0
     private val pageSize = 20
@@ -43,15 +48,19 @@ class VideoCommentViewModel(val id: String) : ViewModel() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe({ r ->
-                    if (minid == 0) {
-                        hotList.clear()
-                        hotList.addAll(r.data.hots)
-                    }
-                    minid = r.data.cursor.min_id
-                    list.addAll(r.data.replies)
-                    loading.value = false
-                    if (r.data.replies.size < pageSize){
-                        loadState.value = LoadMoreView.State.NOMORE
+                    if (r.code == 0){
+                        if (minid == 0) {
+                            hotList.clear()
+                            hotList.addAll(r.data.hots)
+                        }
+                        minid = r.data.cursor.min_id
+                        list.addAll(r.data.replies)
+                        loading.value = false
+                        if (r.data.replies.size < pageSize){
+                            loadState.value = LoadMoreView.State.NOMORE
+                        }
+                    }else{
+                        context.toast(r.message)
                     }
                 }, { e ->
                     e.printStackTrace()

@@ -8,6 +8,7 @@ import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.util.AttributeSet
 import android.view.View
+import com.a10miaomiao.bilimiao.utils.DebugMiao
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.concurrent.TimeUnit
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 class HeaderBehavior : CoordinatorLayout.Behavior<View> {
 
-    companion object{
+    companion object {
         fun <V : View> from(view: V): HeaderBehavior {
             val params = view.layoutParams
             return if (params !is CoordinatorLayout.LayoutParams) {
@@ -32,9 +33,6 @@ class HeaderBehavior : CoordinatorLayout.Behavior<View> {
         }
     }
 
-    var viewRef: View? = null
-    private var top = 0
-
     constructor() {
         init()
     }
@@ -47,69 +45,38 @@ class HeaderBehavior : CoordinatorLayout.Behavior<View> {
 
     }
 
+    var viewRef: View? = null
+
+    val height: Float get() = viewRef?.measuredHeight?.toFloat() ?: 0f
+    var top = 0f
+
+//    var isFull = false // 全屏
+//        set(value) {
+//            field = value
+//            viewRef?.parent?.requestLayout()
+//        }
+
     fun show() {
         viewRef?.let {
-            it.translationY = -it.measuredHeight.toFloat()
             it.visibility = View.VISIBLE
+            top = height
             it.parent?.requestLayout()
-            it.animate().apply {
-                setListener(showAnimatorListener)
-                duration = 300
-                translationY(0f)
-            }.start()
         }
     }
 
     fun hide() {
+        DebugMiao.log("hide")
         viewRef?.let {
-//            it.translationY = -it.measuredHeight.toFloat()
-            it.animate().apply {
-                setListener(hideAnimatorListener)
-                duration = 300
-                translationY(-it.measuredHeight.toFloat())
-            }.start()
+            top = 0f
+            it.parent?.requestLayout()
         }
     }
 
     fun isShow() = viewRef?.visibility == View.VISIBLE
-
-    private val showAnimatorListener = object : AnimatorListener {
-        override fun onAnimationStart(animation: Animator) {
-
-        }
-
-        override fun onAnimationEnd(animation: Animator?) {
-
-        }
-
-        override fun onAnimationCancel(animation: Animator) {
-
-        }
-
-        override fun onAnimationRepeat(animation: Animator) {}
-    }
-
-    private val hideAnimatorListener = object : AnimatorListener {
-        override fun onAnimationStart(animation: Animator) {
-
-        }
-
-        override fun onAnimationEnd(animation: Animator?) {
-            viewRef?.visibility = View.GONE
-            viewRef?.parent?.requestLayout()
-        }
-
-        override fun onAnimationCancel(animation: Animator) {
-
-        }
-
-        override fun onAnimationRepeat(animation: Animator) {}
-    }
-
-
+            && top != 0f
 
     override fun onLayoutChild(parent: CoordinatorLayout, child: View, layoutDirection: Int): Boolean {
-        child.layout(0, top, parent.measuredWidth, top + child.measuredHeight)
+        child.layout(0, 0, parent.measuredWidth, child.measuredHeight)
         this.viewRef = child
         return true
     }

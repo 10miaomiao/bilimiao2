@@ -17,7 +17,9 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -428,13 +430,17 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
     }
 
 
-    public void setVideoLayout(){
+    public void setVideoLayout() {
         setVideoLayout(mVideoLayout);
     }
-    public void setVideoLayout(int layout) {
 
+    public void setVideoLayout(int layout) {
         LayoutParams lp = getLayoutParams();
-        Pair<Integer, Integer> res = ScreenResolution.getResolution(mContext);
+        View mViewGroup = ((View) getParent());
+        DebugLog.d("DebugMiao", "[" + mViewGroup.getMeasuredWidth() + "," + mViewGroup.getMeasuredHeight() + "]");
+        Pair<Integer, Integer> res = new Pair<>(mViewGroup.getMeasuredWidth(), mViewGroup.getMeasuredHeight());
+//        Pair<Integer, Integer> res = ScreenResolution.getResolution(mContext);
+//        DebugLog.d(TAG, "(" + res.first + "," + res.second + ")");
         int windowWidth = res.first, windowHeight = res.second;
         float windowRatio = windowWidth / (float) windowHeight;
         int sarNum = mVideoSarNum;
@@ -475,7 +481,6 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
     }
 
     private void initVideoView(Context ctx) {
-
         mContext = ctx;
         mVideoWidth = 0;
         mVideoHeight = 0;
@@ -578,7 +583,7 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
     public boolean onTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_UP) {
             if (onGestureEventsListener != null)
-                onGestureEventsListener.onUp(ev,isXScroll == 0);
+                onGestureEventsListener.onUp(ev, isXScroll == 0);
             isXScroll = -1;
         }
         return gestureDetector.onTouchEvent(ev);
@@ -676,7 +681,7 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
             for (VideoSource source : mPlayerService.mSources) {
                 mDuration += source.getLength();
             }
-            if(mDuration == 0){
+            if (mDuration == 0) {
                 mDuration = mMediaPlayer.getDuration();
             }
             return mDuration;
@@ -711,7 +716,6 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
         if (mPlayerService != null)
             mPlayerService.seekTo(msec);
     }
-
 
 
     @Override

@@ -9,6 +9,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.utils.DebugMiao
@@ -38,7 +39,7 @@ class EditWorldFragment : SwipeBackFragment() {
     private val _keyword by lazy { arguments!!.getString("keyword") }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        filterStore = MainActivity.of(context!!).filterStore
+        filterStore = Store.from(context!!).filterStore
         return attachToSwipeBack(render().view)
     }
 

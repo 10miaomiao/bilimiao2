@@ -58,6 +58,7 @@ class VideoCommentDetailsFragment : Fragment() {
 
     private fun createUI() = UI {
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
             bottomSheetHeaderView("查看评论", View.OnClickListener {
                 MainActivity.of(context)
                         .hideBottomSheet()

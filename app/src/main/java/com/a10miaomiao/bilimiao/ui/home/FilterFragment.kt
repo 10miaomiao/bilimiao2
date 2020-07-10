@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.flowLayout
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
@@ -36,7 +37,7 @@ class FilterFragment : Fragment() {
     lateinit var filterStore: FilterStore
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        filterStore = MainActivity.of(context!!).filterStore
+        filterStore = Store.from(context!!).filterStore
         return MainActivity.of(context!!).dynamicTheme(this) { render().view }
     }
 

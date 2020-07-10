@@ -7,36 +7,39 @@
     android:layout_height="match_parent"
     android:id="@+id/rootLayout">
 
+    <FrameLayout
+        android:id="@+id/headerVideoBox"
+        android:layout_width="wrap_content"
+        android:layout_height="240dp"
+        app:layout_behavior="com.a10miaomiao.bilimiao.ui.commponents.behavior.HeaderBehavior"
+        android:visibility="visible">
+        <include layout="@layout/include_palyer" />
+    </FrameLayout>
+
 
     <RelativeLayout
+        android:id="@+id/rootContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.a10miaomiao.bilimiao.ui.commponents.behavior.ContainerBehavior">>
+        app:layout_behavior="com.a10miaomiao.bilimiao.ui.commponents.behavior.ContainerBehavior">
 
         <FrameLayout
             android:id="@+id/masterContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="false">
+
         </FrameLayout>
 
-        <!--<View-->
-            <!--android:id="@+id/dividingLine"-->
-            <!--android:layout_width="1dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_toEndOf="@+id/masterContainer"-->
-            <!--android:background="?attr/colorPrimary"/>-->
-
-        <!--<FrameLayout-->
-            <!--android:id="@+id/container"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_toEndOf="@+id/dividingLine"-->
-            <!--android:background="@color/colorBackground"-->
-            <!--android:fitsSystemWindows="false">-->
-
-        <!--</FrameLayout>-->
-
+        <TextView
+            android:id="@+id/videoTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/white"
+            android:paddingHorizontal="10dp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
 
     </RelativeLayout>
 
@@ -71,45 +74,6 @@
 
 
     </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/haeder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/blue"
-        android:orientation="vertical"
-        app:layout_behavior="com.a10miaomiao.bilimiao.ui.commponents.behavior.HeaderBehavior"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2333333"
-            android:textSize="40sp"
-            android:textColor="@android:color/white"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2333333"
-            android:textSize="40sp"
-            android:textColor="@android:color/white"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2333333"
-            android:textSize="40sp"
-            android:textColor="@android:color/white"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2333333"
-            android:textSize="40sp"
-            android:textColor="@android:color/white"/>
-
-    </LinearLayout>
 
 
 </android.support.design.widget.CoordinatorLayout>

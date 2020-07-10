@@ -13,6 +13,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.Page
 import com.a10miaomiao.bilimiao.entity.bangumi.BangumiEpisode
+import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.bottomSheetHeaderView
 import com.a10miaomiao.bilimiao.ui.player.PlayerActivity
@@ -44,7 +45,10 @@ class PagesFragment : Fragment() {
     }
 
     private fun createUI() = UI {
+        val playerStore = Store.from(context!!).playerStore
+        val observePlayer = playerStore.observe()
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
             bottomSheetHeaderView("分P列表", View.OnClickListener {
                 MainActivity.of(context)
                         .hideBottomSheet()
@@ -67,7 +71,7 @@ class PagesFragment : Fragment() {
                                 maxLines = 1
                                 ellipsize = TextUtils.TruncateAt.END
                                 b.bindIndexed { item, i ->
-                                    if (index == i) {
+                                    if (item.cid == playerStore.info.cid) {
                                         this@frameLayout.isEnabled = false
                                         textColorResource = config.themeColorResource
                                     } else {
@@ -80,10 +84,12 @@ class PagesFragment : Fragment() {
                         }
                     }
                     onItemClick { item, position ->
-                        VideoInfoFragment.instance
-                                .palyVideo(item.cid.toString(), item.part, position)
-                        MainActivity.of(context)
-                                .hideBottomSheet()
+                        val mainActivity = MainActivity.of(context!!)
+                        mainActivity.videoPlayerDelegate.playVideo(aid, item.cid, item.part)
+                        mainActivity.hideBottomSheet()
+                    }
+                    observePlayer {
+                        notifyDataSetChanged()
                     }
                 }
             }

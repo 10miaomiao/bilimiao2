@@ -43,7 +43,6 @@ public class ScreenResolution
      */
     private static Pair<Integer,Integer> getRealResolutionOnOldDevice(Context ctx)
     {
-
         try
         {
             WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);

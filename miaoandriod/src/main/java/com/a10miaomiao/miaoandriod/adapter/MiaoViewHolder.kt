@@ -37,6 +37,10 @@ class MiaoViewHolder<T>(val parentView: View, val binding: Binding<T>? = null) :
             bind { item -> f(getValue(item)) }
         }
 
+        fun indexValue(): ValueManager<Int> = { f ->
+            bindIndexed { item, index -> f(index) }
+        }
+
         fun View.bindClick(fn: ((item: T, index: Int) -> Unit)) {
             bindIndexed { item, index ->
                 this.setOnClickListener {
