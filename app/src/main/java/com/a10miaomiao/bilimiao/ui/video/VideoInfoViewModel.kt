@@ -56,6 +56,7 @@ class VideoInfoViewModel(
         }else{
             BiliApiService.getVideoInfoByBvid(id)
         }
+        DebugMiao.log(url)
         val filterStore = Store.from(context).filterStore
         loading set true
         loadDataDisposable = MiaoHttp.getJson<ResultInfo<VideoInfo>>(url)

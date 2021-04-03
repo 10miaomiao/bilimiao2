@@ -63,6 +63,7 @@ class FilterWorldFragment : SwipeBackFragment() {
 
     private fun render() = UI {
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
             headerView {
                 title("屏蔽标题关键字设置")
                 navigationIcon(R.drawable.ic_arrow_back_white_24dp)

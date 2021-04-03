@@ -1,16 +1,12 @@
 package com.a10miaomiao.bilimiao.ui.commponents
 
 import android.content.Context
-import android.view.View
 import android.view.ViewManager
-import android.widget.LinearLayout
 import com.a10miaomiao.bilimiao.ui.widget.MySpannableTextView
+import com.a10miaomiao.bilimiao.ui.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.ui.widget.flow.FlowLayout
-import com.ctetin.expandabletextviewlibrary.ExpandableTextView
 import org.jetbrains.anko.AnkoViewDslMarker
-import org.jetbrains.anko._LinearLayout
 import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.internals.AnkoInternals
 
 inline fun ViewManager.headerView(theme: Int = 0): HeaderView = headerView(theme) {}
 inline fun ViewManager.headerView(theme: Int = 0, init: (@AnkoViewDslMarker HeaderView).() -> Unit): HeaderView {
@@ -63,4 +59,3 @@ inline fun ViewManager.expandableTextView(theme: Int = 0): ExpandableTextView = 
 inline fun ViewManager.expandableTextView(theme: Int = 0, init: (@AnkoViewDslMarker ExpandableTextView).() -> Unit): ExpandableTextView {
     return ankoView({ ctx: Context -> ExpandableTextView(ctx) }, theme, init)
 }
-

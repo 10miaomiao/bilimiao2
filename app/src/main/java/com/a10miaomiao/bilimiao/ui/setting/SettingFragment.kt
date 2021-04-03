@@ -120,6 +120,9 @@ class SettingFragment : SwipeBackFragment() {
                 "video" -> {
                     MainActivity.of(activity).start(VideoSettingFragment())
                 }
+                "danmaku" -> {
+                    MainActivity.of(activity).start(DanmakuSettingFragment())
+                }
                 "donate" -> {
                     val intent = Intent(Intent.ACTION_VIEW)
                     //HTTPS://QR.ALIPAY.COM/FKX07587MLQPOBBKACENE1

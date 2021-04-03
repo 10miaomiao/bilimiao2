@@ -1,5 +1,10 @@
 package com.a10miaomiao.bilimiao.utils
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import com.a10miaomiao.bilimiao.ui.MainActivity
+import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import java.util.regex.Pattern
 
 object BiliUrlMatcher {
@@ -24,6 +29,10 @@ object BiliUrlMatcher {
             return arrayOf("AV", a)
         }
         a = matchingID(text,".*://m.bilibili.com/bangumi/play/ep(\\d+).*")
+        if (a != "") {
+            return arrayOf("EP", a)
+        }
+        a = matchingID(text,".*://www.bilibili.com/bangumi/play/ep(\\d+).*")
         if (a != "") {
             return arrayOf("EP", a)
         }
@@ -84,6 +93,21 @@ object BiliUrlMatcher {
         var result = "[aA][vV](\\d+)".toRegex().replace(content, "[$0](https://www.bilibili.com/video/av$1)")
         result = "BV([a-zA-Z0-9]+)".toRegex().replace(result, "[$0](https://www.bilibili.com/video/BV$1)")
         return result
+    }
+
+    fun toLink(context: Context, link: String){
+        val urlInfo = BiliUrlMatcher.findIDByUrl(link)
+        val urlType = urlInfo[0]
+        val urlId = urlInfo[1]
+        when(urlType){
+            "AV" -> MainActivity.of(context).start(VideoInfoFragment.newInstance(urlInfo[1]))
+            "BV" -> MainActivity.of(context).start(VideoInfoFragment.newInstanceByBvid(urlInfo[1]))
+            else -> {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(link)
+                context.startActivity(intent)
+            }
+        }
     }
 
 

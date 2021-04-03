@@ -2,11 +2,13 @@ package com.a10miaomiao.bilimiao.ui.widget
 
 import android.content.Context
 import android.graphics.PorterDuff
+import android.os.Build
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.SeekBar
 import cn.a10miaomiao.player.MyMediaController
 import cn.a10miaomiao.player.callback.MediaController
 import cn.a10miaomiao.player.callback.MediaPlayerListener
@@ -17,6 +19,7 @@ import kotlinx.android.synthetic.main.layout_mini_media_controller.view.*
 class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, View.OnTouchListener {
 
     var mMediaPlayer: MediaPlayerListener? = null
+    private var mDuration = 0L
     private var mDragging = false
 
     constructor(context: Context) : super(context) {
@@ -34,8 +37,26 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
     private fun initView() {
         View.inflate(context, R.layout.layout_mini_media_controller, this)
         mToolbar.setNavigationIcon(R.drawable.ic_close_white_24dp)
-        mToolbar.inflateMenu(R.menu.mini_player_toolbar)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mToolbar.inflateMenu(R.menu.mini_player_toolbar)
+        }
         mPauseButton.setOnClickListener(this)
+
+        mSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {}
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                mDragging = true
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                mDragging = false
+                try {
+                    mMediaPlayer?.seekTo(mDuration * seekBar.progress / 1000L)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        })
     }
 
     override fun show() {
@@ -111,7 +132,7 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
             val percent = mPlayer.bufferPercentage
             mSeekBar.secondaryProgress = (percent * 10).toInt()
         }
-//        mDuration = duration
+        mDuration = duration
         mEndTime.text = MyMediaController.generateTime(duration)
         mCurrentTime.text = MyMediaController.generateTime(position)
         return position

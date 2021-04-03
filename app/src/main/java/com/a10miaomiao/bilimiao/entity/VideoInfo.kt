@@ -24,6 +24,7 @@ data class VideoInfo(
         val relates: List<Relate>,
         val req_user: ReqUser,
         val rights: Rights,
+        val staff: List<Staff>,
         val stat: Stat,
         val state: Int,
         val tag: List<Tag>,

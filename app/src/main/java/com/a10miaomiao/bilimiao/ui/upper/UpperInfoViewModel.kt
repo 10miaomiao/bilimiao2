@@ -41,13 +41,13 @@ class UpperInfoViewModel(val owner: Owner) : ViewModel() {
                 .subscribe({ res ->
                     loading.value = loading.value!! + 1
                     val data = res.data
-                    if (res.data.vlist.isNotEmpty()) {
+                    if (res.data.list.vlist.isNotEmpty()) {
                         list.add(0, UpperChannel(
                                 cid = 0,
                                 mid = 0,
                                 name = "全部投稿",
-                                count = data.count,
-                                cover = data.vlist[0].pic,
+                                count = 0,
+                                cover = res.data.list.vlist[0].pic,
 //                                archives = ArrayList<UpperArchives>(),
                                 mtime = 0,
                                 intro = "全部投稿",

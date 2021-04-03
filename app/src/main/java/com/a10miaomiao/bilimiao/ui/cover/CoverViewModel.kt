@@ -102,6 +102,7 @@ class CoverViewModel(
     // 番剧剧集
     private fun loadEpData() {
         val url = BiliApiService.getSeasonEpisodeInfo(id)
+        DebugMiao.log(url)
         loadDataDisposable?.dispose()
         loadDataDisposable = MiaoHttp.getJson<ResultInfo2<SeasonEpisode>>(url)
                 .subscribeOn(Schedulers.io())

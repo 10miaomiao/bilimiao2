@@ -39,6 +39,7 @@ object PlayurlHelper {
         ApiHelper.addAccessKeyAndMidToParams(params)
         params["sign"] = ApiHelper.getSing(params, _appSecret_VIDEO)
         var url = "https://api.bilibili.com/x/player/playurl?" + ApiHelper.urlencode(params)
+        DebugMiao.log(url)
         MiaoHttp.getJson<ResultInfo<PlayurlData>>(url) {
             headers = getVideoHeaders(avid)
         }.subscribe({ r ->
@@ -106,7 +107,8 @@ object PlayurlHelper {
             val timelength: Int,
             val video_codecid: Int,
             val durl: List<Durl>,
-            val code: Int
+            val code: Int,
+            val support_formats: List<SupportFormats>
     )
 
     data class Durl(
@@ -116,5 +118,13 @@ object PlayurlHelper {
             val size: Long,
             val url: String,
             val vhead: String
+    )
+
+    data class SupportFormats(
+            val quality: Int,
+            val format: String,
+            val new_description: String,
+            val display_desc: String,
+            val superscript: String
     )
 }

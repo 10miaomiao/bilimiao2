@@ -56,6 +56,7 @@ class FilterUpperFragment : SwipeBackFragment() {
 
     private fun render() = UI {
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
             headerView {
                 title("屏蔽Up主设置")
                 navigationIcon(R.drawable.ic_arrow_back_white_24dp)

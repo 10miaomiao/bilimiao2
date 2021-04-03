@@ -4,8 +4,10 @@ import android.animation.Animator
 import android.content.Context
 import android.support.design.widget.CoordinatorLayout
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import com.a10miaomiao.bilimiao.utils.DebugMiao
+
 
 class ContainerBehavior : CoordinatorLayout.Behavior<View> {
 
@@ -107,4 +109,19 @@ class ContainerBehavior : CoordinatorLayout.Behavior<View> {
         return false
     }
 
+    override fun onInterceptTouchEvent(parent: CoordinatorLayout, child: View, ev: MotionEvent): Boolean {
+
+        return super.onInterceptTouchEvent(parent, child, ev)
+//        return true
+    }
+
+    override fun onTouchEvent(parent: CoordinatorLayout, child: View, ev: MotionEvent): Boolean {
+
+        return super.onTouchEvent(parent, child, ev)
+    }
+
+    override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
+
+        return true
+    }
 }

@@ -2,10 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="bilimiao2/app" />
-      <module fileurl="file://$PROJECT_DIR$/bilimiao2.iml" filepath="$PROJECT_DIR$/bilimiao2.iml" group="bilimiao2" />
-      <module fileurl="file://$PROJECT_DIR$/miaoandriod/miaoandriod.iml" filepath="$PROJECT_DIR$/miaoandriod/miaoandriod.iml" group="bilimiao2/miaoandriod" />
-      <module fileurl="file://$PROJECT_DIR$/player/player.iml" filepath="$PROJECT_DIR$/player/player.iml" group="bilimiao2/player" />
+      <module fileurl="file://$PROJECT_DIR$/bilimiao2.iml" filepath="$PROJECT_DIR$/bilimiao2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bilimiao2.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bilimiao2.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/download/bilimiao2.download.iml" filepath="$PROJECT_DIR$/.idea/modules/download/bilimiao2.download.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/miaoandriod/bilimiao2.miaoandriod.iml" filepath="$PROJECT_DIR$/.idea/modules/miaoandriod/bilimiao2.miaoandriod.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/player/bilimiao2.player.iml" filepath="$PROJECT_DIR$/.idea/modules/player/bilimiao2.player.iml" />
     </modules>
   </component>
 </project>

@@ -36,7 +36,7 @@ class PicInPicHelper(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private val builder = PictureInPictureParams.Builder();
+    private val builder = PictureInPictureParams.Builder()
 
     private val actions: List<RemoteAction> @RequiresApi(Build.VERSION_CODES.O)
     get() {

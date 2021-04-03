@@ -65,6 +65,8 @@ class EditWorldFragment : SwipeBackFragment() {
 
     private fun render() = UI {
         verticalLayout {
+            backgroundColor = config.windowBackgroundColor
+
             headerView {
                 title("编辑屏蔽关键字")
                 navigationIcon(R.drawable.ic_arrow_back_white_24dp)

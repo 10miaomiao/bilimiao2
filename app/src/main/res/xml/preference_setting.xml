@@ -35,8 +35,7 @@
             android:summary="咖啡拿铁,咖啡摩卡,卡布奇诺!"/>
 
         <Preference
-            android:enabled="false"
-            android:key="d"
+            android:key="danmaku"
             android:title="弹幕设置"
             android:summary="相信的心就是你的魔法"/>
 

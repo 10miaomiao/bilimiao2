@@ -1,26 +1,31 @@
 package com.a10miaomiao.bilimiao.ui.video
 
+import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
+import cn.a10miaomiao.download.BiliVideoEntry
+import cn.a10miaomiao.download.BiliVideoPageData
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
 import com.a10miaomiao.bilimiao.ui.user.UserFragment
+import com.a10miaomiao.bilimiao.ui.widget.expandabletext.ExpandableTextView
+import com.a10miaomiao.bilimiao.ui.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.ValueManager
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.a10miaomiao.miaoandriod.v
-import com.ctetin.expandabletextviewlibrary.ExpandableTextView
-import com.ctetin.expandabletextviewlibrary.ExpandableTextView.OnLinkClickListener
-import com.ctetin.expandabletextviewlibrary.app.LinkType
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
@@ -68,10 +73,59 @@ class VideoInfoFragment : SwipeBackFragment() {
 
     private fun playVideo(cid: String, title: String) {
         val info = -viewModel.info
-        if (info != null){
+        if (info != null) {
             videoPlayer.playVideo(info.aid.toString(), cid, title)
         }
+    }
 
+    private fun downloadVideo() {
+        val info = -viewModel.info
+        if (info != null) {
+            val downloadService = MainActivity.of(context!!)
+                    .downloadDelegate
+                    .downloadService
+            val page = info.pages[0]
+            val pageData = BiliVideoPageData(
+                    cid = page.cid.toLong(),
+                    page = page.page,
+                    from = page.from,
+                    part = page.part,
+                    vid = page.vid,
+                    has_alias = false,
+                    tid = 0,
+                    width = 0,
+                    height = 0,
+                    rotate = 0,
+                    download_title = "视频已缓存完成",
+                    download_subtitle = info.title
+            )
+            val biliVideoEntry = BiliVideoEntry(
+                    media_type = 1,
+                    has_dash_audio = false,
+                    is_completed = false,
+                    total_bytes = 0,
+                    downloaded_bytes = 0,
+                    title = info.title,
+                    type_tag = "64",
+                    cover = info.pic,
+                    prefered_video_quality = 112,
+                    guessed_total_bytes = 0,
+                    total_time_milli = 0,
+                    danmaku_count = 1000,
+                    time_update_stamp = 1589831292571L,
+                    time_create_stamp = 1589831261539L,
+                    can_play_in_advance = true,
+                    interrupt_transform_temp_file = false,
+                    avid = info.aid,
+                    spid = 0,
+                    seasion_id = 0,
+                    bvid = info.bvid,
+                    owner_id = info.owner.mid,
+                    page_data = pageData
+            )
+            downloadService.createDownload(biliVideoEntry)
+            context!!.toast("创建成功")
+        }
     }
 
     private fun createUI() = UI {
@@ -85,11 +139,45 @@ class VideoInfoFragment : SwipeBackFragment() {
                 observeInfo {
                     title(it!!.bvid)
                 }
+
+                inflateMenu(R.menu.video_info)
+                onMenuItemClick(Toolbar.OnMenuItemClickListener {
+                    if (it.itemId == R.id.download) {
+                        val info = -viewModel.info
+                        if (info == null) {
+                            toast("数据未加载完成喵")
+                        } else {
+                            startFragment(CreateDownloadFragment.newInstance(
+                                    info.aid.toString(),
+                                    info.bvid,
+                                    info.title,
+                                    info.pic,
+                                    info.owner.mid,
+                                    viewModel.pages,
+                                    0
+                            ))
+                        }
+                    } else if (it.itemId == R.id.open){
+                        val id = viewModel.id
+                        try {
+                            var intent = Intent(Intent.ACTION_VIEW)
+                            var url = "bilibili://video/$id"
+                            intent.data = Uri.parse(url)
+                            startActivity(intent)
+                        } catch (e: Exception) {
+                            var intent = Intent(Intent.ACTION_VIEW)
+                            var url = "http://www.bilibili.com/video/av$id"
+                            intent.data = Uri.parse(url)
+                            startActivity(intent)
+                        }
+                    }
+                    true
+                })
             }
 
             swipeRefreshLayout {
                 setColorSchemeResources(config.themeColorResource)
-                (+viewModel.loading){ isRefreshing = it }
+                (viewModel.loading.observe()){ isRefreshing = it }
                 setOnRefreshListener { viewModel.loadData() }
 
                 recyclerView {
@@ -225,12 +313,12 @@ class VideoInfoFragment : SwipeBackFragment() {
 //            }.lparams {
 //                horizontalMargin = dip(10)
 //            }
-            include<ExpandableTextView>(R.layout.layout_expandable){
+            include<ExpandableTextView>(R.layout.layout_expandable) {
                 observeInfo {
                     setContent(it!!.desc)
                 }
-                linkClickListener = OnLinkClickListener { linkType, content, selfContent -> //根据类型去判断
-                    when (linkType){
+                linkClickListener = ExpandableTextView.OnLinkClickListener { linkType, content, selfContent -> //根据类型去判断
+                    when (linkType) {
                         LinkType.LINK_TYPE -> {
                             viewModel.toLink(content)
                         }
@@ -257,45 +345,101 @@ class VideoInfoFragment : SwipeBackFragment() {
 
     fun ViewManager.upperView() {
         val observeInfo = viewModel.info.observeNotNull()
-        // up主信息
-        linearLayout {
-            selectableItemBackground()
-            lparams {
-                margin = dip(10)
-                width = matchParent
-            }
-            setOnClickListener {
-                val owner = viewModel.info.value!!.owner
-                startFragment(UserFragment.newInstance(owner.mid))
-            }
-
-            rcImageView {
-                isCircle = true
-                observeInfo {
-                    network(it!!.owner.face)
-                }
-            }.lparams {
-                height = dip(40)
-                width = dip(40)
-            }
-
-
-            verticalLayout {
+        verticalLayout {
+            // up主信息
+            linearLayout {
+                selectableItemBackground()
                 lparams {
-                    leftMargin = dip(8)
+                    margin = dip(10)
+                    width = matchParent
                 }
-                textView {
-                    textColor = config.foregroundColor
-                    observeInfo {
-                        text = it!!.owner.name
+                setOnClickListener {
+                    val owner = viewModel.info.value!!.owner
+                    startFragment(UserFragment.newInstance(owner.mid))
+                }
+                observeInfo {
+                    visibility = if (it?.staff?.isEmpty() == false) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
                     }
                 }
-                textView {
-                    textSize = 12f
-                    textColor = config.foregroundAlpha45Color
+
+                rcImageView {
+                    isCircle = true
                     observeInfo {
-                        text = "发表于 " + NumberUtil.converCTime(it!!.pubdate)
+                        network(it!!.owner.face)
                     }
+                }.lparams {
+                    height = dip(40)
+                    width = dip(40)
+                }
+
+
+                verticalLayout {
+                    lparams {
+                        leftMargin = dip(8)
+                    }
+                    textView {
+                        textColor = config.foregroundColor
+                        observeInfo {
+                            text = it!!.owner.name
+                        }
+                    }
+                    textView {
+                        textSize = 12f
+                        textColor = config.foregroundAlpha45Color
+                        observeInfo {
+                            text = "发表于 " + NumberUtil.converCTime(it!!.pubdate)
+                        }
+                    }
+                }
+            }
+
+            recyclerView {
+                layoutManager = LinearLayoutManager(context).apply {
+                    orientation = LinearLayoutManager.HORIZONTAL
+                }
+            }.miao(viewModel.info.miaoList { it?.staff }()) {
+                itemView { b ->
+                    verticalLayout {
+                        lparams(dip(64), wrapContent)
+                        verticalPadding = dip(10)
+                        gravity = Gravity.CENTER
+                        selectableItemBackground()
+
+                        rcImageView {
+                            isCircle = true
+                            b.bind {
+                                network(it.face)
+                            }
+                        }.lparams {
+                            height = dip(40)
+                            width = dip(40)
+                        }
+
+                        textView {
+                            textColor = config.foregroundColor
+                            gravity = Gravity.CENTER
+                            maxLines = 1
+                            ellipsize = TextUtils.TruncateAt.END
+                            b.bind {
+                                text = it.name
+                            }
+                        }
+                        textView {
+                            textSize = 12f
+                            textColor = config.themeColor
+                            gravity = Gravity.CENTER
+                            maxLines = 1
+                            b.bind {
+                                text = it.title
+                            }
+                        }
+                    }
+                }
+                onItemClick { item, position ->
+                    startFragment(UserFragment.newInstance(item.mid))
                 }
             }
         }
@@ -474,7 +618,6 @@ class VideoInfoFragment : SwipeBackFragment() {
     }
 
     fun ViewManager.bottomView() = linearLayout {
-        viewModel.info.v { }
         backgroundColor = config.blockBackgroundColor
         gravity = Gravity.END
         val itemWidth = dip(60)
@@ -484,9 +627,9 @@ class VideoInfoFragment : SwipeBackFragment() {
         val info = viewModel.info
         bottomItemView(
                 info.v {
-                    if(it?.req_user?.like == null){
+                    if (it?.req_user?.like == null) {
                         R.drawable.ic_column_unlike
-                    }else{
+                    } else {
                         R.drawable.ic_column_like
                     }
                 }(),
@@ -495,9 +638,9 @@ class VideoInfoFragment : SwipeBackFragment() {
         ).lparams(weight = 1f)
         bottomItemView(
                 info.v {
-                    if(it?.req_user?.coin == null){
+                    if (it?.req_user?.coin == null) {
                         R.drawable.ic_column_uncoin
-                    }else{
+                    } else {
                         R.drawable.ic_column_coin
                     }
                 }(),
@@ -511,9 +654,9 @@ class VideoInfoFragment : SwipeBackFragment() {
         ).lparams(weight = 1f)
         bottomItemView(
                 info.v {
-                    if(it?.req_user?.favorite == null){
+                    if (it?.req_user?.favorite == null) {
                         R.drawable.ic_column_unstar
-                    }else{
+                    } else {
                         R.drawable.ic_column_star
                     }
                 }(),

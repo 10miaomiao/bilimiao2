@@ -103,11 +103,17 @@ class MainFragment : SupportFragment() {
     }
 
     private fun switchFragment(targetFragment: Fragment) {
+//        removeaAllFragment()
         val trx = childFragmentManager.beginTransaction()
         viewModel.currentFragment?.let {
-            if (it == targetFragment)
+            if (it == targetFragment) {
                 return@switchFragment
-            trx.hide(it)
+            }
+            if (it == homeFragment) {
+                trx.hide(it)
+            } else {
+                trx.remove(it)
+            }
         }
         if (!targetFragment.isAdded) {
             trx.add(CONTAINER_ID, targetFragment)

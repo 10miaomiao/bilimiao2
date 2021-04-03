@@ -78,6 +78,8 @@
 
         <service android:name="cn.a10miaomiao.player.PlayerService"
             android:exported="true"/>
+        <service android:name="cn.a10miaomiao.download.DownloadService"
+            android:exported="true"/>
     </application>
 
 </manifest>

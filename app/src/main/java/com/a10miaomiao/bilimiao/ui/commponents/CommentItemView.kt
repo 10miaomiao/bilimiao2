@@ -1,12 +1,20 @@
 package com.a10miaomiao.bilimiao.ui.commponents
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
-import android.util.AttributeSet
+import android.net.Uri
+import android.text.Spannable
 import android.view.ViewManager
-import android.widget.FrameLayout
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.entity.comment.Content
+import com.a10miaomiao.bilimiao.ui.MainActivity
+import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
+import com.a10miaomiao.bilimiao.ui.widget.expandabletext.ExpandableTextView
+import com.a10miaomiao.bilimiao.ui.widget.expandabletext.app.LinkType
+import com.a10miaomiao.bilimiao.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.utils.UrlImageSpan
 import com.a10miaomiao.bilimiao.utils.loadPic
 import com.a10miaomiao.bilimiao.utils.selectableItemBackground
 import com.a10miaomiao.miaoandriod.ValueManager
@@ -22,7 +30,7 @@ fun ViewManager.commentItemView(
         avatar: ValueManager<String>,
         time: ValueManager<String>,
         floor: ValueManager<Int>,
-        content: ValueManager<String>,
+        content: ValueManager<Content>,
         like: ValueManager<Int>,
         count: ValueManager<Int>,
         textIsSelectable: ValueManager<Boolean> = false.v(),
@@ -83,8 +91,45 @@ fun ViewManager.commentItemView(
             }
         }
 
-        textView {
-            content { text = it }
+        include<ExpandableTextView>(R.layout.layout_expandable) {
+            content {
+                if (text.isNotEmpty()) {
+                    return@content
+                }
+                setContent(BiliUrlMatcher.customString(it.message))
+//                // 遍历表情
+                setNextContentListener { ssb ->
+                    val content = ssb.toString()
+                    it.emote?.values?.forEach { emote ->
+                        val textLen = emote.text.length
+                        var index = content.indexOf(emote.text)
+                        while (index != -1) {
+                            val span = UrlImageSpan(
+                                    context,
+                                    emote.url,
+                                    this
+                            )
+                            ssb.setSpan(span, index, index + textLen, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                            index = content.indexOf(emote.text, index + textLen)
+                        }
+                    }
+                }
+//                text = ss
+            }
+            linkClickListener = ExpandableTextView.OnLinkClickListener { linkType, content, selfContent -> //根据类型去判断
+                when (linkType) {
+                    LinkType.LINK_TYPE -> {
+                        BiliUrlMatcher.toLink(context, content)
+                    }
+                    LinkType.MENTION_TYPE -> {
+                        context.toast("你点击了@用户 内容是：$content")
+                    }
+                    LinkType.SELF -> {
+                        BiliUrlMatcher.toLink(context, selfContent)
+                    }
+                }
+            }
+            isNeedExpend = false
             textIsSelectable { setTextIsSelectable(it) }
             textColor = config.foregroundColor
             textSize = 14f
@@ -109,8 +154,6 @@ fun ViewManager.commentItemView(
         }.lparams {
             topMargin = dip(3)
         }
-
-
     }.lparams(matchParent, wrapContent)
 }
 

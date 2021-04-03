@@ -13,8 +13,11 @@ import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.WindowInsets
+import cn.a10miaomiao.download.DownloadService
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.delegate.DownloadDelegate
 import com.a10miaomiao.bilimiao.delegate.VideoPlayerDelegate
+import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.home.MainFragment
@@ -46,7 +49,8 @@ class MainActivity : SupportActivity() {
     var bottomSheetFragment: Fragment? = null
 
     val themeUtil by lazy { ThemeUtil(this) }
-    val videoPlayerDelegate  by lazy { VideoPlayerDelegate(this)}
+    val videoPlayerDelegate by lazy { VideoPlayerDelegate(this)}
+    val downloadDelegate by  lazy { DownloadDelegate(this) }
     val store = Store(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,6 +80,7 @@ class MainActivity : SupportActivity() {
 
 //        themeUtil.observeTheme(this, Observer { dividingLine.backgroundColor = config.themeColor })
         videoPlayerDelegate.onCreate(savedInstanceState)
+        downloadDelegate.onCreate(savedInstanceState)
 
 //        MiaoHttp.getString("https://b23.tv/qhyO1O")
 //                .subscribeOn(Schedulers.io())
@@ -85,6 +90,14 @@ class MainActivity : SupportActivity() {
 //                }, {
 //                    it.printStackTrace()
 //                })
+
+//        var intent = Intent(this, DownloadService::class.java)
+//        startService(intent)
+
+        var url = BiliApiService.getRegion()
+        DebugMiao.log("2333333333")
+        DebugMiao.log(url)
+
     }
 
     override fun start(toFragment: ISupportFragment?) {

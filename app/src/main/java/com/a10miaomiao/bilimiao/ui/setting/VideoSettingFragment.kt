@@ -11,12 +11,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.theme.ThemeFragment
 import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
+import org.jetbrains.anko.backgroundColor
 import org.jetbrains.anko.frameLayout
 import org.jetbrains.anko.matchParent
 import org.jetbrains.anko.support.v4.UI
@@ -59,6 +61,7 @@ class VideoSettingFragment : SwipeBackFragment() {
             }
             frameLayout {
                 id = ID_PREFS_FRAME
+                backgroundColor = config.blockBackgroundColor
             }.lparams(matchParent, matchParent)
         }
     }

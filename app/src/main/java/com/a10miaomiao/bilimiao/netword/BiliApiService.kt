@@ -49,6 +49,7 @@ object BiliApiService {
             "bvid" to bvid,
             "autoplay" to "0",
             "qn" to "32")
+
     /**
      * 获取番剧信息
      */
@@ -127,7 +128,7 @@ object BiliApiService {
      * 获取up主的视频列表
      */
     fun getUpperVideo(mid: Long, pageNum: Int, pageSize: Int) =
-            "https://space.bilibili.com/ajax/member/getSubmitVideos?mid=$mid&page=$pageNum&pagesize=$pageSize"
+            "https://api.bilibili.com/x/space/arc/search?mid=$mid&pn=$pageNum&ps=$pageSize&keyword=&order=pubdate"
 
     /**
      * 获取up主的频道列表
@@ -234,6 +235,8 @@ object BiliApiService {
             "pn" to pn.toString(),
             "ps" to ps.toString()
     )
+
+    fun getRegion() = biliApp("x/v2/region/index")
 
 
 }

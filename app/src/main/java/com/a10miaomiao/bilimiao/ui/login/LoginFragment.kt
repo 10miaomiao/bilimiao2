@@ -178,7 +178,7 @@ class LoginFragment : SwipeBackFragment() {
                 }
             }
 
-            textView("注：你无论怎么输，验证码都是错的"){
+            textView("注：你无论怎么输，验证码都是错的，请用网页登录"){
                 observeIsCaptcha {
                     visibility = if (it) View.VISIBLE else View.GONE
                 }

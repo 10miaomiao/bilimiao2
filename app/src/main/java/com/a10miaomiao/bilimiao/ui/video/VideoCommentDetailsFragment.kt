@@ -17,6 +17,7 @@ import com.a10miaomiao.bilimiao.entity.comment.ReplyBean
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.bottomSheetHeaderView
 import com.a10miaomiao.bilimiao.ui.commponents.commentItemView
+import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.upper.UpperInfoFragment
 import com.a10miaomiao.bilimiao.ui.user.UserFragment
@@ -24,12 +25,13 @@ import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.a10miaomiao.miaoandriod.v
+import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.nestedScrollView
 
-class VideoCommentDetailsFragment : Fragment() {
+class VideoCommentDetailsFragment : SwipeBackFragment() {
 
     companion object {
         fun newInstance(reply: ReplyBean): VideoCommentDetailsFragment {
@@ -44,25 +46,26 @@ class VideoCommentDetailsFragment : Fragment() {
     lateinit var viewModel: VideoCommentDetailsViewModel
 
     val reply by lazy { arguments!!.getParcelable<ReplyBean>("reply") }
+//    lateinit var reply: ReplyBean
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoCommentDetailsViewModel(reply) })
                 .get(VideoCommentDetailsViewModel::class.java)
-        return createUI().view
+        return attachToSwipeBack(createUI().view)
     }
 
     val upperClick = { mid: Long ->
         startFragment(UserFragment.newInstance(mid))
-        MainActivity.of(activity!!).hideBottomSheet()
     }
 
     private fun createUI() = UI {
         verticalLayout {
             backgroundColor = config.windowBackgroundColor
-            bottomSheetHeaderView("查看评论", View.OnClickListener {
-                MainActivity.of(context)
-                        .hideBottomSheet()
-            })
+            headerView {
+                navigationIcon(R.drawable.ic_arrow_back_white_24dp)
+                navigationOnClick { pop() }
+                title("评论详情")
+            }
 
             nestedScrollView {
                 setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
@@ -83,20 +86,12 @@ class VideoCommentDetailsFragment : Fragment() {
                 avatar = reply.member.avatar.v(),
                 time = NumberUtil.converCTime(reply.ctime).v(),
                 floor = reply.floor.v(),
-                content = reply.content.message.v(),
+                content = reply.content.v(),
                 like = reply.like.v(),
                 count = reply.count.v(),
                 onUpperClick = {
                     val member = reply.member
-                    startFragment(UpperInfoFragment.newInstance(
-                            Owner(
-                                    face = member.avatar,
-                                    name = member.uname,
-                                    mid = member.mid.toLong()
-                            )
-                    ))
-                    MainActivity.of(context)
-                            .hideBottomSheet()
+                    upperClick(member.mid.toLong())
                 }
         ).apply {
             backgroundColor = config.blockBackgroundColor
@@ -146,7 +141,7 @@ class VideoCommentDetailsFragment : Fragment() {
                     avatar = b.itemValue { member.avatar },
                     time = b.itemValue { NumberUtil.converCTime(ctime) },
                     floor = b.itemValue { floor },
-                    content = b.itemValue { content.message },
+                    content = b.itemValue { content },
                     like = b.itemValue { like },
                     count = b.itemValue { count },
                     onUpperClick = upperClick

@@ -54,6 +54,7 @@ class MyBangumiFragment : SwipeBackFragment() {
                 (+viewModel.loading) { isRefreshing = it }
                 setOnRefreshListener { viewModel.refreshList() }
                 recyclerView {
+                    backgroundColor = config.blockBackgroundColor
                     miao(viewModel.list) {
                         layoutManager(LinearLayoutManager(context))
                         itemView { b ->

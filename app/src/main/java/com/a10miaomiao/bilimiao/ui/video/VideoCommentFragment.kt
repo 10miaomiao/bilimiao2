@@ -121,7 +121,7 @@ class VideoCommentFragment : SwipeBackFragment() {
                     avatar = b.itemValue { member.avatar },
                     time = b.itemValue { NumberUtil.converCTime(ctime) },
                     floor = b.itemValue { floor },
-                    content = b.itemValue { content.message },
+                    content = b.itemValue { content },
                     like = b.itemValue { like },
                     count = b.itemValue { count },
                     onUpperClick = upperClick
@@ -130,8 +130,7 @@ class VideoCommentFragment : SwipeBackFragment() {
 
         onItemClick { item, position ->
             val fragment = VideoCommentDetailsFragment.newInstance(item)
-            MainActivity.of(context)
-                    .showBottomSheet(fragment)
+            startFragment(fragment)
         }
     }
 

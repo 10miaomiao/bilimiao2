@@ -15,6 +15,8 @@ object ConstantUtil {
 
     const val VIDEO = "video" // 普通视频
     const val BANGUMI = "bangumi" // 番剧
+    const val LOCAL_VIDEO = "local_video" // 本地视频
+    const val LOCAL_BANGUMI = "local_bangumi" // 本地番剧
     const val WEB = "web" // 网页
 
     const val REGION = "REGION"
@@ -28,4 +30,6 @@ object ConstantUtil {
     const val SHORTCUT_NAME = "shortcutName"
     const val SHORTCUT_SEARCH = "search"
     const val SHORTCUT_RANK = "rank"
+
+    const val ACTION_UPDATE_DOWNLOAD = "action_update_download"
 }

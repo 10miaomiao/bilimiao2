@@ -5,10 +5,7 @@ import android.app.PictureInPictureParams
 import android.app.RemoteAction
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -29,6 +26,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import cn.a10miaomiao.download.BiliVideoEntry
+import cn.a10miaomiao.download.DownloadFlieHelper
 import cn.a10miaomiao.player.*
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
@@ -58,12 +57,14 @@ import okhttp3.FormBody
 import org.jetbrains.anko.dip
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.InputStream
 import java.util.concurrent.TimeUnit
 
 
 class VideoPlayerDelegate(
         private var activity: AppCompatActivity
-) {
+) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val TAG = VideoPlayerDelegate::class.simpleName
 
     // 播放器
@@ -88,11 +89,12 @@ class VideoPlayerDelegate(
     private var epid = ""
     private var sid = ""
     private var title = ""
+    private var localEntry: BiliVideoEntry? = null
 
     private var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
 
     // 播放器信息
-    private val sources = ArrayList<VideoSource>()
+    private var sources = ArrayList<VideoSource>()
     private var acceptDescription = listOf<String>()
     private var acceptQuality = listOf<Int>()
     private var lastPosition = 0L //记录播放位置
@@ -129,7 +131,7 @@ class VideoPlayerDelegate(
     private val mVideoTitleText = activity.videoTitleText
     private val mSizeWatcher = activity.mSizeWatcher
 
-    private val mPicInPicHelper = PicInPicHelper(activity, mPlayer)
+    private var mPicInPicHelper: PicInPicHelper? = null
 
     val isMiniPlayer = MutableLiveData<Boolean>()
 
@@ -142,6 +144,9 @@ class VideoPlayerDelegate(
         val serviceIntent = Intent(activity, PlayerService::class.java)
         activity.startService(serviceIntent)
         activity.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mPicInPicHelper = PicInPicHelper(activity, mPlayer)
+        }
     }
 
     /**
@@ -184,7 +189,7 @@ class VideoPlayerDelegate(
         mMiniController.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener {
             when (it.itemId) {
                 R.id.mini_window -> {
-                    mPicInPicHelper.enterPictureInPictureMode()
+                    mPicInPicHelper?.enterPictureInPictureMode()
                 }
             }
             true
@@ -212,19 +217,14 @@ class VideoPlayerDelegate(
                     rootContainer.visibility = View.VISIBLE
                     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     setSystemUIVisible(true)
-
-                    danmakuContext?.setMaximumLines(mapOf(
-                            BaseDanmaku.TYPE_SCROLL_RL to 5
-                    ))
                 } else {
                     headerVideoBox.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
                     rootContainer.visibility = View.GONE
                     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                     setSystemUIVisible(false)
-
-                    danmakuContext?.setMaximumLines(mapOf())
                 }
             }
+            initDanmakuContext()
             mPlayer?.setVideoLayout()
         })
         isMiniPlayer.value = true
@@ -235,24 +235,40 @@ class VideoPlayerDelegate(
      */
     private fun initDanmaku() {
         showText("初始化弹幕引擎")
-        //配置弹幕库
         mDanmaku.enableDanmakuDrawingCache(true)
+        danmakuContext = DanmakuContext.create()
+        initDanmakuContext()
+    }
+
+    private fun initDanmakuContext() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        var scaleTextSize = prefs.getString("danmaku_fontsize", "1").toFloatOrNull() ?: 1f
         //设置最大显示行数
-//        val maxLinesPair = mapOf(
-//                BaseDanmaku.TYPE_SCROLL_RL to 5
-//        )
+        var maxLinesPair = mapOf<Int, Int>()
         //设置是否禁止重叠
         val overlappingEnablePair = mapOf(
                 BaseDanmaku.TYPE_SCROLL_RL to true,
                 BaseDanmaku.TYPE_FIX_TOP to true
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && activity.isInPictureInPictureMode) {
+            scaleTextSize *= 0.6f
+            maxLinesPair = mapOf(
+                    BaseDanmaku.TYPE_SCROLL_RL to 4,
+                    BaseDanmaku.TYPE_FIX_TOP to 2,
+                    BaseDanmaku.TYPE_FIX_BOTTOM to 0
+            )
+        } else if (isMiniPlayer.value === true) {
+            maxLinesPair = mapOf(
+                    BaseDanmaku.TYPE_SCROLL_RL to 5
+            )
+        }
         //设置弹幕样式
-        danmakuContext = DanmakuContext.create().apply {
-            //            setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f)
+        danmakuContext?.apply {
+//            setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f)
 //            isDuplicateMergingEnabled = false
 //            setScrollSpeedFactor(2.0f)
-//            setScaleTextSize(0.8f)
-//            setMaximumLines(maxLinesPair)
+            setScaleTextSize(scaleTextSize)
+            setMaximumLines(maxLinesPair)
 //            preventOverlapping(overlappingEnablePair)
         }
 
@@ -272,6 +288,12 @@ class VideoPlayerDelegate(
         mPlayer.setOnGestureEventsListener(onGestureEventsListener)
         playerService.setUserAgent("Bilibili Freedoooooom/MarkII")
         playerService.setVideoPlayerView(mPlayer)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if ("danmaku" in key ?: "") {
+            initDanmakuContext()
+        }
     }
 
     fun playBangumi(sid: String, epid: String, cid: String, title: String) {
@@ -298,6 +320,20 @@ class VideoPlayerDelegate(
         loadDanmaku()
         playerStore.setVideoPlayerInfo(aid, cid, title)
         historyReport()
+    }
+
+    fun playLocalVideo(biliVideo: BiliVideoEntry) {
+        stopPlay()
+        haederBehavior.show()
+        this.localEntry = biliVideo
+        this.type = ConstantUtil.LOCAL_VIDEO
+        this.aid = biliVideo.avid.toString()
+        this.cid = biliVideo.page_data.cid.toString()
+        this.title = biliVideo.title
+        mVideoTitleText.text = "正在播放：${biliVideo.title}"
+        loadDanmaku()
+        playerStore.setVideoPlayerInfo(aid, cid, title)
+//        historyReport()
     }
 
     /**
@@ -333,16 +369,14 @@ class VideoPlayerDelegate(
     private fun loadDanmaku() {
         mController.setTitle(title)
         showText("装载弹幕资源")
-        val url = BiliApiService.getDanmakuList(cid)
-        MiaoHttp.get(url, {
-            val stream = ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
+        getBiliDanmukuStream().map {
             val loader = DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_BILI)
-            loader.load(stream)
+            loader.load(it)
             val parser = BiliDanmukuParser()
             val dataSource = loader.dataSource
             parser.load(dataSource)
             parser
-        }).apply {
+        }.apply {
             subscribeOn(Schedulers.io())
             observeOn(AndroidSchedulers.mainThread())
             loadDanmakuDisposable = subscribe({ parser ->
@@ -356,33 +390,92 @@ class VideoPlayerDelegate(
         }
     }
 
+    private fun getBiliDanmukuStream(): Observable<InputStream> {
+        val url = BiliApiService.getDanmakuList(cid)
+        if (type === ConstantUtil.LOCAL_VIDEO) {
+            return Observable.create {
+                val localEntry = this.localEntry
+                if (localEntry == null) {
+                    it.onError(Exception("ERROR: NOT FILE"))
+                } else {
+                    val pageDir = DownloadFlieHelper.getDownloadFileDir(activity, localEntry)
+                    val danmakuXMLFile = File(pageDir, "danmaku.xml")
+                    it.onNext(danmakuXMLFile.inputStream())
+                    it.onComplete()
+                }
+            }
+        }
+        return MiaoHttp.get(url, {
+            ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
+        })
+    }
+
     /**
      * 加载视频播放地址
      */
     private fun loadPlayurl() {
         showText("读取播放地址")
-        val observer = if (type == ConstantUtil.VIDEO)
-            PlayurlHelper.getVideoPalyUrl(aid, cid, quality)
+        val observer = if (type == ConstantUtil.VIDEO || type == ConstantUtil.BANGUMI)
+            getNetwordSources()
         else
-            PlayurlHelper.getBangumiUrl(epid, cid, quality)
+            getLocalSources()
         loadPlayurlDisposable = observer.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    sources.clear()
-                    for (durl in it.durl) {
-                        sources += VideoSource().apply {
-                            uri = Uri.parse(durl.url.replace("https://", "http://")) // 简单粗暴
-                            length = durl.length
-                            size = durl.size
-                        }
-                    }
-                    acceptDescription = it.accept_description
-                    acceptQuality = it.accept_quality
-                    quality = it.quality
+                    sources = it
                     startPlay()
                 }, {
                     showText(it.message ?: "网络错误")
                 })
+    }
+
+    private fun getNetwordSources(): Observable<ArrayList<VideoSource>> {
+        val observer = if (type == ConstantUtil.VIDEO)
+            PlayurlHelper.getVideoPalyUrl(aid, cid, quality)
+        else
+            PlayurlHelper.getBangumiUrl(epid, cid, quality)
+        return observer.map {
+            acceptDescription = it.accept_description
+            acceptQuality = it.accept_quality
+            quality = it.quality
+            ArrayList<VideoSource>().apply {
+                for (durl in it.durl) {
+                    this += VideoSource().apply {
+                        uri = Uri.parse(durl.url.replace("https://", "http://")) // 简单粗暴
+                        length = durl.length
+                        size = durl.size
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getLocalSources(): Observable<ArrayList<VideoSource>> {
+        return Observable.create {
+            val localEntry = this.localEntry
+            if (localEntry == null) {
+                it.onError(Exception("ERROR: NOT FILE"))
+            } else {
+                val videoDir = DownloadFlieHelper.getVideoPageFileDir(activity, localEntry)
+                val pageData = DownloadFlieHelper.getVideoPage(activity, localEntry)
+                val videoFlie = File(
+                    videoDir, "0" + "." + pageData.format
+                )
+                val sources = arrayListOf(
+                        VideoSource().apply {
+                            uri = Uri.fromFile(videoFlie)
+                            length = pageData.segment_list[0].duration
+                            size = pageData.segment_list[0].bytes
+                        }
+                )
+
+                acceptDescription = listOf("本地")
+                acceptQuality = listOf(pageData.quality)
+                quality = pageData.quality
+                it.onNext(sources)
+                it.onComplete()
+            }
+        }
     }
 
     fun startPlay() {
@@ -403,9 +496,9 @@ class VideoPlayerDelegate(
                     mController.updatePausePlay()
                     mMiniController.setProgress()
                     mMiniController.updatePausePlay()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-                        if (activity.isInPictureInPictureMode){
-                            mPicInPicHelper.updatePictureInPictureActions()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        if (activity.isInPictureInPictureMode) {
+                            mPicInPicHelper?.updatePictureInPictureActions()
                         }
                     }
                 }
@@ -488,7 +581,7 @@ class VideoPlayerDelegate(
         }
 
         override fun updateTimer(timer: DanmakuTimer) {
-//                            timer.update(mPlayer.currentPosition)
+            timer.update(mPlayer.currentPosition)
         }
     }
 
@@ -681,44 +774,19 @@ class VideoPlayerDelegate(
         }
     }
 
-    /**
-     * 进入画中画
-     */
-    private fun enterPicInPic() {
-
-    }
-
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?) {
-        mPicInPicHelper.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        mPicInPicHelper?.onPictureInPictureModeChanged(isInPictureInPictureMode)
         if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
             // 隐藏视频控制器
             mMiniController.visibility = View.GONE
             // 视频组件全屏
             activity.headerVideoBox.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
             // 调整弹幕样式，调小字体，限制行数
-            danmakuContext?.apply {
-                setMaximumLines(mapOf(
-                        BaseDanmaku.TYPE_SCROLL_RL to 4,
-                        BaseDanmaku.TYPE_FIX_TOP to 2,
-                        BaseDanmaku.TYPE_FIX_BOTTOM to 0
-                ))
-                setScaleTextSize(0.6f)
-            }
+            initDanmakuContext()
         } else {
             activity.headerVideoBox.layoutParams.height = activity.dip(240)
-            danmakuContext?.apply {
-                setMaximumLines(mapOf(
-                        BaseDanmaku.TYPE_SCROLL_RL to 5
-                ))
-                setScaleTextSize(1f)
-            }
+            initDanmakuContext()
         }
-    }
-
-    enum class PlayerStatus {
-        Mini, // 迷你
-        Full, // 全屏
-        PIP, // 画中画
     }
 
 }

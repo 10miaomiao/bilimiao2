@@ -78,8 +78,26 @@
         <item>horizontal</item>
     </string-array>
 
+    <string-array name="danmaku_fontsize">
+        <item>比小更小</item>
+        <item>小</item>
+        <item>正常</item>
+        <item>大</item>
+        <item>比大更大</item>
+    </string-array>
+    <string-array name="danmaku_fontsize_values">
+        <item>0.5</item>
+        <item>0.75</item>
+        <item>1</item>
+        <item>1.5</item>
+        <item>2</item>
+    </string-array>
+
     <string name="me">My</string>
 
+    <string name="social_contract">收起</string>
+    <string name="social_expend">展开</string>
+    <string name="social_text_target">网页链接</string>
 
 
 </resources>

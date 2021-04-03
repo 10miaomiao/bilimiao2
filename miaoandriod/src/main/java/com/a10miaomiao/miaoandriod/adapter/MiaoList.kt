@@ -37,10 +37,17 @@ class MiaoList<E> : ArrayList<E>(){
     }
 
     override fun remove(element: E): Boolean {
-        var r =  super.remove(element)
+        var r = super.remove(element)
         updateView?.invoke()
         return r
     }
+
+    override fun removeAt(index: Int): E {
+        var r = super.removeAt(index)
+        updateView?.invoke()
+        return r
+    }
+
 
     override fun clear() {
         super.clear()

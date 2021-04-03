@@ -59,7 +59,7 @@ class MiaoHttp(var url: String?) {
                 }
 
         inline fun <reified T> getJson(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, gsonConverterFactory<T>(object : TypeToken<T>() {}.type), init)
-        inline fun getString(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, { it.body().toString() }, init)
+        inline fun getString(url: String? = null, noinline init: (MiaoHttp.() -> Unit)? = null) = get(url, { it.body()!!.string() }, init)
 
         fun <T> post(url: String? = null
                      , converterFactory: (response: Response) -> T

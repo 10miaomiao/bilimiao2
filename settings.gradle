@@ -1,1 +1,2 @@
 include ':app', ':miaoandriod', ':player'
+include ':download'
