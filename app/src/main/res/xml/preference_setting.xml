@@ -15,6 +15,14 @@
             android:summaryOn=""
             android:title="使用外部播放器" />
 
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="is_best_region"
+            android:summary="你知道雪为什么是白色的吗？"
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="使用旧版分区" />
+
         <ListPreference
             android:dialogTitle="请选择动画效果"
             android:key="fragment_animator"
@@ -50,7 +58,7 @@
             android:title="关于"></Preference>
         <Preference
             android:key="donate"
-            android:summary="你我命中注定，无可代替"
+            android:summary="我在这里哦。"
             android:title="捐助" />
 
         <Preference

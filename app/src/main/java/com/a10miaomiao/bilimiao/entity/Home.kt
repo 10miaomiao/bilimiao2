@@ -17,7 +17,8 @@ class Home {
     data class Region(
             var tid: Int,
             var reid: Int,
-            var icon: Int,
+            var icon: Int?,
+            var logo: String?,
             var name: String,
             var uri: String,
             var type: Int,

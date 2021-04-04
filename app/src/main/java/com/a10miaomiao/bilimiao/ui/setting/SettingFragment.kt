@@ -102,7 +102,6 @@ class SettingFragment : SwipeBackFragment() {
         private fun showVersion() {
             val version = activity!!.packageManager.getPackageInfo(activity!!.packageName, 0).versionName
             about.summary = "版本：$version"
-            donate.summary = "你我命中注定，无可代替（〃｀ 3′〃）"
             help.summary = "世界太大，只能不停寻找"
         }
 

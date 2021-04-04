@@ -1,34 +1,36 @@
 package com.a10miaomiao.bilimiao.ui.home
 
-import android.arch.lifecycle.ViewModelProviders
-import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.Toolbar
-import android.view.*
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ImageSpan
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.delegate.DownloadDelegate
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
-import com.a10miaomiao.bilimiao.ui.cover.CoverActivity
 import com.a10miaomiao.bilimiao.ui.region.RegionFragment
 import com.a10miaomiao.bilimiao.ui.search.SearchFragment
 import com.a10miaomiao.bilimiao.ui.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.adapter.miao
-import com.a10miaomiao.miaoandriod.mergeMiaoObserver
 import com.bumptech.glide.Glide
+import me.yokeyword.fragmentation.SupportFragment
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
 import org.jetbrains.anko.support.v4.UI
 import org.jetbrains.anko.support.v4.nestedScrollView
 
 
-class HomeFragment : Fragment() {
+class HomeFragment : SupportFragment() {
 
     lateinit var viewModel: HomeViewModel
 
@@ -45,6 +47,11 @@ class HomeFragment : Fragment() {
             }
         }
         true
+    }
+
+    override fun onSupportVisible() {
+        super.onSupportVisible()
+        viewModel.loadRegionData()
     }
 
     private fun render() = UI {
@@ -82,10 +89,18 @@ class HomeFragment : Fragment() {
                             verticalPadding = dip(10)
                             imageView {
                                 miao.bind { item ->
-                                    Glide.with(context)
-                                            .load(item.icon)
-                                            .override(dip(24), dip(24))
-                                            .into(this)
+                                    if (item.icon != null) {
+                                        Glide.with(context)
+                                                .load(item.icon)
+                                                .override(dip(24), dip(24))
+                                                .into(this)
+                                    }
+                                    if (item.logo != null) {
+                                        Glide.with(context)
+                                                .loadPic(item.logo!!)
+                                                .override(dip(24), dip(24))
+                                                .into(this)
+                                    }
                                 }
                             }.lparams(dip(24), dip(24))
                             textView {
@@ -155,6 +170,17 @@ class HomeFragment : Fragment() {
 //                                behavior.show()
 //                            }
 //                        }
+//                    }
+//                    textView {
+//                        val ss = SpannableString("bilibili哈哈哈")
+//                        //用这个drawable对象代替字符串easy
+//                        val span = UrlImageSpan(
+//                                context,
+//                                "https://i0.hdslb.com/bfs/archive/622017dd4b0140432962d3ce0c6db99d77d2e937.png",
+//                                this
+//                        )
+//                        ss.setSpan(span, 0, "bilibili".length, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+//                        append(ss)
 //                    }
                 }
             }

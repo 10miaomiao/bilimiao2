@@ -24,6 +24,12 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
 import android.os.Build
+import android.preference.PreferenceManager
+import cn.a10miaomiao.download.FileUtil
+import com.a10miaomiao.bilimiao.entity.ResultListInfo
+import com.a10miaomiao.bilimiao.netword.BiliApiService
+import com.a10miaomiao.bilimiao.utils.DebugMiao
+import java.io.File
 
 
 class HomeViewModel(
@@ -33,27 +39,59 @@ class HomeViewModel(
     var title = MiaoLiveData("时光姬")
     var adInfo = MiaoLiveData<MiaoAdInfo.DataBean?>(null)
     var region = MiaoList<Home.Region>()
+    var isBestRegion = false
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    // 判断是否选择了使用 外部播放器
 
     init {
-        loadRegionData()
         randomTitle()
         loadAdData()
     }
 
 
-    private fun loadRegionData() {
+    fun loadRegionData() {
+        val isBestRegionNow = prefs.getBoolean("is_best_region", false)
+        if (region.size > 0 && isBestRegion == isBestRegionNow) {
+            return
+        }
+        isBestRegion = isBestRegionNow
         // 加载分区列表
-        Observable.just(readAssetsJson())
+        Observable.just(readRegionJson())
                 .map { Gson().fromJson(it, Home.RegionData::class.java) }
                 .map { it.data }
                 .doOnNext { it.forEachWithIndex(::regionIcon) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    region.clear()
                     region.addAll(it)
                 }, {
                     context.toast("读取分区列表遇到错误")
                 })
+
+        // 从网络读取最新版本的分区列表
+        if (!isBestRegion) {
+            MiaoHttp.getJson<ResultListInfo<Home.Region>>(BiliApiService.getRegion())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        if (it.code == 0) {
+                            val regionList =  it.data.filter {  it.children != null && it.children.isNotEmpty() }
+                            region.clear()
+                            region.addAll(regionList)
+                            // 保存到本地
+                            writeRegionJson(
+                                    Home.RegionData(
+                                            data = regionList
+                                    )
+                            )
+                        } else {
+                            context.toast(it.msg)
+                        }
+                    }, {
+                        context.toast("读取分区列表遇到错误")
+                    })
+        }
     }
 
     /**
@@ -93,10 +131,13 @@ class HomeViewModel(
     /**
      * 读取assets下的json数据
      */
-    private fun readAssetsJson(): String? {
-        val assetManager = context.assets
+    private fun readRegionJson(): String? {
         try {
-            val inputStream = assetManager.open("region.json")
+            val inputStream = if (isBestRegion || !File(context.filesDir, "region.json").exists()) {
+                context.assets.open("region.json")
+            } else {
+                context.openFileInput("region.json")
+            }
             val br = BufferedReader(InputStreamReader(inputStream))
             val stringBuilder = StringBuilder()
             var str: String? = br.readLine()
@@ -108,6 +149,17 @@ class HomeViewModel(
         } catch (e: IOException) {
             e.printStackTrace()
             return null
+        }
+    }
+
+    private fun writeRegionJson (region: Home.RegionData) {
+        try {
+            val jsonStr = Gson().toJson(region)
+            val outputStream = context.openFileOutput("region.json", Context.MODE_PRIVATE);
+            outputStream.write(jsonStr.toByteArray());
+            outputStream.close();
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
     }
 
@@ -126,20 +178,15 @@ class HomeViewModel(
      * 分区图标
      */
     private fun regionIcon(index: Int, item: Home.Region) {
-        item.icon = intArrayOf(
-                R.drawable.ic_region_fj, R.drawable.ic_region_fj_domestic, R.drawable.ic_region_dh,
-                R.drawable.ic_region_yy, R.drawable.ic_region_wd, R.drawable.ic_region_yx,
-                R.drawable.ic_region_kj, R.drawable.ic_region_sh, R.drawable.ic_region_gc,
-                R.drawable.ic_region_ss, R.drawable.ic_region_ad, R.drawable.ic_region_yl,
-                R.drawable.ic_region_ys, R.drawable.ic_region_dy, R.drawable.ic_region_dsj
-        )[index]
-//        item.icon = intArrayOf(
-//                R.drawable.ic_category_t13, R.drawable.ic_category_t167, R.drawable.ic_category_t1,
-//                R.drawable.ic_category_t3, R.drawable.ic_category_t129, R.drawable.ic_category_t4,
-//                R.drawable.ic_category_t36, R.drawable.ic_category_t160, R.drawable.ic_category_t119,
-//                R.drawable.ic_category_t155, R.drawable.ic_category_t165, R.drawable.ic_category_t5,
-//                R.drawable.ic_category_t181, R.drawable.ic_category_t23, R.drawable.ic_category_t11
-//        )[index]
+        if (item.logo == null) {
+            item.icon = intArrayOf(
+                    R.drawable.ic_region_fj, R.drawable.ic_region_fj_domestic, R.drawable.ic_region_dh,
+                    R.drawable.ic_region_yy, R.drawable.ic_region_wd, R.drawable.ic_region_yx,
+                    R.drawable.ic_region_kj, R.drawable.ic_region_sh, R.drawable.ic_region_gc,
+                    R.drawable.ic_region_ss, R.drawable.ic_region_ad, R.drawable.ic_region_yl,
+                    R.drawable.ic_region_ys, R.drawable.ic_region_dy, R.drawable.ic_region_dsj
+            )[index]
+        }
     }
 
 }
