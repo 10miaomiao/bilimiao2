@@ -199,6 +199,22 @@ class DownloadService : Service(), DownloadManager.Callback {
         }
     }
 
+    fun delectDownload (biliVideo: BiliVideoEntry) {
+        curDownload?.let {
+            if (biliVideo.avid == it.avid && biliVideo.page_data.cid == it.page_data.cid) {
+                stopDownload()
+            }
+        }
+        val downloadDir = File(getDownloadPath(), biliVideo.avid.toString())
+        if (downloadDir.exists()) {
+            val pageDir = File(downloadDir, biliVideo.page_data.page.toString())
+            if (pageDir.exists()) {
+                pageDir.delete()
+            }
+        }
+
+    }
+
     private fun nextDownload() {
         downloadList.find {
             it.downloaded_bytes == 0L

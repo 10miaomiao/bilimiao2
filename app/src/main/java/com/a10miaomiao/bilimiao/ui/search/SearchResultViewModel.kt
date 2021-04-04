@@ -4,19 +4,25 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.content.Context
+import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
-import com.a10miaomiao.bilimiao.entity.Archive
-import com.a10miaomiao.bilimiao.entity.ResultInfo
-import com.a10miaomiao.bilimiao.entity.SearchData
-import com.a10miaomiao.bilimiao.entity.SearchItems
+import com.a10miaomiao.bilimiao.entity.*
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
+import com.google.gson.Gson
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.jetbrains.anko.collections.forEachWithIndex
+import org.jetbrains.anko.toast
+import java.io.BufferedReader
+import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
 
 class SearchResultViewModel(
         val context: Context,
@@ -29,15 +35,11 @@ class SearchResultViewModel(
 
     val rankOrdersNameList = arrayListOf("默认", "相关度", "新发布", "播放多", "弹幕多", "评论多", "收藏多")
     val durationNameList = arrayListOf("全部", "0-10分钟", "10-30分钟", "30-60分钟", "60分钟+")
-    val regionNameList = arrayListOf("全站", "番剧", "国创", "动画"
-            , "音乐", "舞蹈", "游戏", "科技"
-            , "生活", "鬼畜", "时尚", "广告"
-            , "娱乐", "电影", "电视剧")
+    val regionNameList = MiaoList<String>().apply {
+        add("全站")
+    }
     val rankOrdersValueList = arrayListOf("default", "ranklevel", "pubdate", "click", "dm", "scores", "stow")
-    val regionValueList = arrayListOf(0, 13, 167, 1,
-            3, 129, 4, 36,
-            160, 119, 155, 165,
-            5, 23, 11)
+    val regionValueList = arrayListOf(0)
     val rankOrdersIndex = MutableLiveData<Int>()
     val durationIndex = MutableLiveData<Int>()
     val regionIndex = MutableLiveData<Int>()
@@ -60,6 +62,7 @@ class SearchResultViewModel(
         regionIndex.value = 0
         updateFilter()
         loadData()
+        loadRegion()
     }
 
     fun updateFilter() {
@@ -68,6 +71,28 @@ class SearchResultViewModel(
             filterName.value = text
             refreshList()
         }
+    }
+
+    private fun loadRegion() {
+        Observable.just(readRegionJson())
+                .map { Gson().fromJson(it, Home.RegionData::class.java) }
+                .map { it.data }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    regionNameList.clear()
+                    regionNameList.add("全站")
+                    regionNameList.addAll(
+                            it.map { it.name }
+                    )
+                    regionValueList.clear()
+                    regionValueList.add(0)
+                    regionValueList.addAll(
+                            it.map { it.tid }
+                    )
+                }, {
+                    context.toast("读取分区信息遇到错误")
+                })
     }
 
     fun loadData() {
@@ -116,6 +141,33 @@ class SearchResultViewModel(
         list.clear()
         loadState.value = LoadMoreView.State.LOADING
         loadData()
+    }
+
+    /**
+     * 读取assets下的json数据
+     */
+
+    private fun readRegionJson(): String? {
+        try {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val isBestRegion = prefs.getBoolean("is_best_region", false)
+            val inputStream = if (isBestRegion || !File(context.filesDir, "region.json").exists()) {
+                context.assets.open("region.json")
+            } else {
+                context.openFileInput("region.json")
+            }
+            val br = BufferedReader(InputStreamReader(inputStream))
+            val stringBuilder = StringBuilder()
+            var str: String? = br.readLine()
+            while (str != null) {
+                stringBuilder.append(str)
+                str = br.readLine()
+            }
+            return stringBuilder.toString()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
     }
 
 }
