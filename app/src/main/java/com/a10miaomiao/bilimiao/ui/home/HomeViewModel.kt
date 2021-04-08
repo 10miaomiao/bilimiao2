@@ -1,35 +1,36 @@
 package com.a10miaomiao.bilimiao.ui.home
 
-import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.preference.PreferenceManager
+import android.support.v7.app.AlertDialog
+import android.view.View
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.entity.Home
 import com.a10miaomiao.bilimiao.entity.MiaoAdInfo
+import com.a10miaomiao.bilimiao.entity.ResultListInfo
+import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.utils.DebugMiao
+import com.a10miaomiao.bilimiao.utils.SettingUtil
 import com.a10miaomiao.miaoandriod.MiaoLiveData
 import com.a10miaomiao.miaoandriod.adapter.MiaoList
 import com.google.gson.Gson
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.collections.forEachWithIndex
 import org.jetbrains.anko.toast
 import java.io.BufferedReader
+import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
-import android.os.Build
-import android.preference.PreferenceManager
-import cn.a10miaomiao.download.FileUtil
-import com.a10miaomiao.bilimiao.entity.ResultListInfo
-import com.a10miaomiao.bilimiao.netword.BiliApiService
-import com.a10miaomiao.bilimiao.utils.DebugMiao
-import java.io.File
 
 
 class HomeViewModel(
@@ -37,7 +38,7 @@ class HomeViewModel(
 ) : ViewModel() {
 
     var title = MiaoLiveData("时光姬")
-    var adInfo = MiaoLiveData<MiaoAdInfo.DataBean?>(null)
+    var adInfo = MiaoLiveData<MiaoAdInfo.AdBean?>(null)
     var region = MiaoList<Home.Region>()
     var isBestRegion = false
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -76,7 +77,7 @@ class HomeViewModel(
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
                         if (it.code == 0) {
-                            val regionList =  it.data.filter {  it.children != null && it.children.isNotEmpty() }
+                            val regionList = it.data.filter { it.children != null && it.children.isNotEmpty() }
                             region.clear()
                             region.addAll(regionList)
                             // 保存到本地
@@ -105,17 +106,55 @@ class HomeViewModel(
         } else {
             info.versionCode.toLong()
         }
-        val url = "https://10miaomiao.cn/miao/bilimiao/ad?v=$longVersionCode"
+        val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$longVersionCode"
         MiaoHttp.getJson<MiaoAdInfo>(url)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ r ->
                     if (r.code == 0) {
-                        adInfo set r.data
+                        adInfo set r.data.ad
+                        showUpdateDialog(r.data.version, longVersionCode)
                     }
                 }, { e ->
                     e.printStackTrace()
                 })
+    }
+
+
+    fun showUpdateDialog(version: MiaoAdInfo.VersionBean, curVersionCode: Long) {
+        // 当前版本大于等于最新版本不提示更新
+        if (curVersionCode >= version.versionCode) {
+            return
+        }
+        // 最新版已记录为不更新版本并且当前大于等于最低版本，不提示更新
+        val noUpdateVersionCode = SettingUtil.getLong(context,"no_update_version_code", 0L)
+        if (version.versionCode === noUpdateVersionCode && curVersionCode >= version.miniVersionCode) {
+            return
+        }
+        val dialog = AlertDialog.Builder(context).apply {
+            setTitle("有新版本：" + version.versionName)
+            setMessage(version.content)
+            setPositiveButton("去更新", null)
+            if (curVersionCode >= version.miniVersionCode) {
+                setNegativeButton("取消", null)
+                setNeutralButton("不再提醒此版本") { dialog, which ->
+                    SettingUtil.putLong(context,"no_update_version_code", version.versionCode)
+                }
+            } else {
+                // 小于最低版本，必须更新，对话框不能关闭
+                setCancelable(false)
+            }
+        }.create()
+        dialog.show()
+        // 手动设置按钮点击事件，可阻止对话框自动关闭
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            var intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(version.url)
+            context.startActivity(intent)
+            if (curVersionCode >= version.miniVersionCode) {
+                dialog.dismiss()
+            }
+        }
     }
 
     /**
@@ -152,7 +191,7 @@ class HomeViewModel(
         }
     }
 
-    private fun writeRegionJson (region: Home.RegionData) {
+    private fun writeRegionJson(region: Home.RegionData) {
         try {
             val jsonStr = Gson().toJson(region)
             val outputStream = context.openFileOutput("region.json", Context.MODE_PRIVATE);

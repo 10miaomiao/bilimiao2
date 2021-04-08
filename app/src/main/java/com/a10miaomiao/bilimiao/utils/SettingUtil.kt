@@ -24,6 +24,13 @@ object SettingUtil{
         editor.apply()
         //Log.d("value", value.toString())
     }
+    fun putLong(context: Context, key: String, value: Long) {
+        val sp = context.getSharedPreferences(ConstantUtil.APP_NAME, Context.MODE_PRIVATE)
+        val editor = sp.edit()
+        editor.putLong(key, value)
+        editor.apply()
+        //Log.d("value", value.toString())
+    }
     fun getString(context: Context, key: String, defValue: String): String {
         val sp = context.getSharedPreferences(ConstantUtil.APP_NAME, Context.MODE_PRIVATE)
         return sp.getString(key, defValue)
@@ -36,5 +43,10 @@ object SettingUtil{
     fun getBoolean(context: Context, key: String, defValue: Boolean): Boolean {
         val sp = context.getSharedPreferences(ConstantUtil.APP_NAME, Context.MODE_PRIVATE)
         return sp.getBoolean(key, defValue)
+    }
+
+    fun getLong(context: Context, key: String, defValue: Long): Long {
+        val sp = context.getSharedPreferences(ConstantUtil.APP_NAME, Context.MODE_PRIVATE)
+        return sp.getLong(key, defValue)
     }
 }

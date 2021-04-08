@@ -209,10 +209,16 @@ class DownloadService : Service(), DownloadManager.Callback {
         if (downloadDir.exists()) {
             val pageDir = File(downloadDir, biliVideo.page_data.page.toString())
             if (pageDir.exists()) {
-                pageDir.delete()
+                pageDir.deleteRecursively()
+            }
+            if (downloadDir.listFiles().size === 0) {
+                downloadDir.delete()
             }
         }
-
+        val index = downloadList.indexOfFirst {
+            biliVideo.avid == it.avid && biliVideo.page_data.cid == it.page_data.cid
+        }
+        downloadList.removeAt(index)
     }
 
     private fun nextDownload() {
