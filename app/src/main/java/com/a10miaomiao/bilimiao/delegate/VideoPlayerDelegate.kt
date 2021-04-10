@@ -1,27 +1,19 @@
 package com.a10miaomiao.bilimiao.delegate
 
-import android.app.PendingIntent
-import android.app.PictureInPictureParams
-import android.app.RemoteAction
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import android.content.*
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.preference.PreferenceManager
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.util.Rational
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +52,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 
 class VideoPlayerDelegate(
@@ -153,6 +146,14 @@ class VideoPlayerDelegate(
      * 初始化控制器
      */
     private fun initController() {
+        mRoot.setOnClickListener {
+            val mediaController = mPlayer.mediaController
+            if (mediaController.isShowing) {
+                mediaController.hide()
+            } else {
+                mediaController.show()
+            }
+        }
         mController.setTitle(title)
         mController.setMediaPlayer(mPlayer)
         mController.setVisibilityChangedEvent(::setSystemUIVisible)
@@ -459,7 +460,7 @@ class VideoPlayerDelegate(
                 val videoDir = DownloadFlieHelper.getVideoPageFileDir(activity, localEntry)
                 val pageData = DownloadFlieHelper.getVideoPage(activity, localEntry)
                 val videoFlie = File(
-                    videoDir, "0" + "." + pageData.format
+                        videoDir, "0" + "." + pageData.format
                 )
                 val sources = arrayListOf(
                         VideoSource().apply {
@@ -581,7 +582,9 @@ class VideoPlayerDelegate(
         }
 
         override fun updateTimer(timer: DanmakuTimer) {
-            timer.update(mPlayer.currentPosition)
+            if (abs(timer.currMillisecond - mPlayer.currentPosition) > 500L) {
+                timer.update(mPlayer.currentPosition)
+            }
         }
     }
 

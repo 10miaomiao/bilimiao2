@@ -520,12 +520,15 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
         }
     }
 
-
     public void setMediaController(MediaController controller) {
         if (mMediaController != null)
             mMediaController.hide();
         mMediaController = controller;
         attachMediaController();
+    }
+
+    public MediaController getMediaController () {
+        return mMediaController;
     }
 
     public void setMediaBufferingIndicator(View mediaBufferingIndicator) {
