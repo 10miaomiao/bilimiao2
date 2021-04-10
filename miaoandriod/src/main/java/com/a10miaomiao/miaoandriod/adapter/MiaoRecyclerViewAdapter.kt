@@ -40,6 +40,7 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
     private val mFootViews = SparseArrayCompat<View>()
 
     var onClickListener: ((item: T, position: Int) -> Unit)? = null
+    var onLongClickListener: ((item: T, position: Int) -> Boolean)? = null
     var updataListener: ((holder: MiaoViewHolder<T>, item: T) -> Unit)? = null
     var onScrollStateChangedListener: ((rv: RecyclerView?, newState: Int) -> Unit)? = null
     var onScrolledListener: ((rv: RecyclerView?, dx: Int, dy: Int) -> Unit)? = null
@@ -89,8 +90,15 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
         holder.index = position - getHeadersCount()
         val item = itemsSource[holder.index]
         holder.updateView(item)
-        holder.parentView.setOnClickListener {
-            onClickListener?.invoke(item, holder.index)
+        onClickListener?.let { onClick ->
+            holder.parentView.setOnClickListener {
+                onClick(item, holder.index)
+            }
+        }
+        onLongClickListener?.let { onLongClick ->
+            holder.parentView.setOnLongClickListener {
+                onLongClick(item, holder.index)
+            }
         }
     }
 
@@ -126,6 +134,11 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
 
     fun onItemClick(listener: ((item: T, position: Int) -> Unit)): MiaoRecyclerViewAdapter<T> {
         onClickListener = listener
+        return this
+    }
+
+    fun onItemLongClick(listener: ((item: T, position: Int) -> Boolean)): MiaoRecyclerViewAdapter<T> {
+        onLongClickListener = listener
         return this
     }
 

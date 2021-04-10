@@ -146,6 +146,21 @@ class DowmloadFragment : Fragment() {
                         }
                         downloadService.startDownload(item)
                     }
+                    onItemLongClick { item, position ->
+                        alert {
+                            title = "确定删除？"
+                            message = "删除\"${item.title}\"?"
+                            positiveButton("确定") {
+                                downloadDelegate.downloadService.delectDownload(item)
+                                notifyDataSetChanged()
+                                toast("已删除")
+                            }
+                            negativeButton("取消") {
+
+                            }
+                        }.show()
+                        true
+                    }
                     (downloadDelegate.curDownload.observe()) {
                         val curVideo = downloadDelegate.curVideo
                         val index = downloadDelegate.downloadList.indexOfFirst {
