@@ -99,14 +99,23 @@ object BiliApiService {
     /**
      * 视频评论
      */
-    fun getCommentList(aid: String, minid: Int, pageSize: Int): String {
+    fun getCommentList(aid: String, sort: Int, pageNum: Int, pageSize: Int): String {
         // https://api.bilibili.com/x/v2/reply/cursor?appkey=1d8b6e7d45233436&build=5340000&max_id=218&mobi_app=android&oid=36286263&plat=2&platform=android&size=20&sort=0&ts=1543072948&type=1&sign=53df67ea7816a2bf644b49075bb1406e
         // https://api.bilibili.com/x/v2/reply/cursor?appkey=1d8b6e7d45233436&build=5340000&mobi_app=android&oid=36417189&plat=2&platform=android&size=20&sort=1543073266199&ts=1543072187&type=1&sign=49da459239fa0c249b95f322525b8636
-        var url = "https://api.bilibili.com/x/v2/reply/cursor?appkey=1d8b6e7d45233436&build=5340000&mobi_app=android&oid=$aid&plat=2&platform=android&size=$pageSize&sort=0&ts=${ApiHelper.getTimeSpen()}&type=1"
-        if (minid > 1)
-            url += "&max_id=" + (minid - 1)
-        url += "&sign=" + ApiHelper.getNewSign(url)
-        return url
+//        var url = "https://api.bilibili.com/x/v2/reply?appkey=1d8b6e7d45233436&build=5340000&mobi_app=android&oid=$aid&plat=2&platform=android&size=$pageSize&sort=2&ts=${ApiHelper.getTimeSpen()}&type=1"
+//        if (minid > 1)
+//            url += "&max_id=" + (minid - 1)
+//        url += "&sign=" + ApiHelper.getNewSign(url)
+        return biliApi(
+            "x/v2/reply",
+            "oid" to aid,
+            "plat" to "2",
+            "sort" to sort.toString(),
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+            "type" to "1"
+        )
+//        return url
     }
 
     /**

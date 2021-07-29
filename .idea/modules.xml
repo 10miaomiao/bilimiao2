@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/bilimiao2.iml" filepath="$PROJECT_DIR$/bilimiao2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bilimiao2.iml" filepath="$PROJECT_DIR$/.idea/modules/bilimiao2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bilimiao2.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bilimiao2.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/download/bilimiao2.download.iml" filepath="$PROJECT_DIR$/.idea/modules/download/bilimiao2.download.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/miaoandriod/bilimiao2.miaoandriod.iml" filepath="$PROJECT_DIR$/.idea/modules/miaoandriod/bilimiao2.miaoandriod.iml" />

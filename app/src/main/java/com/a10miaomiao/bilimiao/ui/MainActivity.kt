@@ -55,7 +55,6 @@ class MainActivity : SupportActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DebugMiao.log("onCreate")
         themeUtil.init()
         setContentView(R.layout.activity_main)
         updateLayout(configuration)
@@ -93,11 +92,6 @@ class MainActivity : SupportActivity() {
 
 //        var intent = Intent(this, DownloadService::class.java)
 //        startService(intent)
-
-        var url = BiliApiService.getRegion()
-        DebugMiao.log("2333333333")
-        DebugMiao.log(url)
-
     }
 
     override fun start(toFragment: ISupportFragment?) {

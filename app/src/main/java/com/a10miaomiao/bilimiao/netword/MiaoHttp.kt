@@ -86,7 +86,3 @@ class MiaoHttp(var url: String?) {
         }
     }
 }
-
-private fun OkHttpClient.cookieJar(cookieJar: CookieJar) {
-
-}

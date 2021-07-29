@@ -4,7 +4,7 @@ data class VideoComment(
         val assist: Int,
         val blacklist: Int,
         val config: Config,
-        val cursor: Cursor,
+        val page: Page,
         val hots: List<ReplyBean>,
         val notice: Any,
         val replies: List<ReplyBean>,

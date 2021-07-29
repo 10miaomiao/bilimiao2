@@ -60,7 +60,7 @@ class VideoPlayerDelegate(
 ) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val TAG = VideoPlayerDelegate::class.simpleName
 
-    // 播放器
+    // 播放器player_background
     lateinit var playerService: PlayerService
     private val mConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -140,6 +140,8 @@ class VideoPlayerDelegate(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mPicInPicHelper = PicInPicHelper(activity, mPlayer)
         }
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        quality = prefs.getInt("player_quality", 64)
     }
 
     /**
@@ -541,6 +543,8 @@ class VideoPlayerDelegate(
     private fun changedQuality(value: String, position: Int) {
         quality = acceptQuality[position]
         loadPlayurl()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        prefs.edit().putInt("player_quality", quality).apply()
     }
 
     private val onInfoListener = IMediaPlayer.OnInfoListener { mp, what, extra ->
@@ -790,6 +794,13 @@ class VideoPlayerDelegate(
             activity.headerVideoBox.layoutParams.height = activity.dip(240)
             initDanmakuContext()
         }
+    }
+
+    /**
+     * 是否为当前aid
+     */
+    fun isAid (aid: String): Boolean {
+        return this.aid == aid
     }
 
 }

@@ -108,9 +108,9 @@ class VideoCommentDetailsFragment : SwipeBackFragment() {
 
             recyclerView {
                 backgroundColor = config.blockBackgroundColor
-                createAdapter()
                 isNestedScrollingEnabled = false
                 layoutManager = LinearLayoutManager(context)
+                createAdapter()
             }
 
             loadMoreView {

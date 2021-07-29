@@ -93,7 +93,7 @@ fun ViewManager.commentItemView(
 
         include<ExpandableTextView>(R.layout.layout_expandable) {
             content {
-                if (text.isNotEmpty()) {
+                if (text.isNotBlank()) {
                     return@content
                 }
                 setContent(BiliUrlMatcher.customString(it.message))

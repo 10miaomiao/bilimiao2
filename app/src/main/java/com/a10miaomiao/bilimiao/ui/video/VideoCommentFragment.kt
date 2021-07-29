@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.widget.NestedScrollView
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,9 +47,15 @@ class VideoCommentFragment : SwipeBackFragment() {
     val id by lazy { arguments!!.getString(ConstantUtil.ID) }
     lateinit var viewModel: VideoCommentViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProviders.of(this, newViewModelFactory { VideoCommentViewModel(context!!, id) })
-                .get(VideoCommentViewModel::class.java)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        viewModel = ViewModelProviders.of(
+            this,
+            newViewModelFactory { VideoCommentViewModel(context!!, id) })
+            .get(VideoCommentViewModel::class.java)
         return attachToSwipeBack(createUI().view)
     }
 
@@ -71,42 +78,11 @@ class VideoCommentFragment : SwipeBackFragment() {
                 })
                 setOnRefreshListener { viewModel.refreshList() }
 
-                nestedScrollView {
-                    setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-                        if (scrollY == (v.getChildAt(0).measuredHeight - v.measuredHeight)) {
-                            viewModel.loadData()
-                        }
-                    })
-
-                    verticalLayout {
-                        textView("热门评论").lparams {
-                            margin = dip(10)
-                        }
-                        recyclerView {
-                            backgroundColor = config.blockBackgroundColor
-                            createAdapter(viewModel.hotList)
-                            isNestedScrollingEnabled = false
-                            layoutManager = LinearLayoutManager(context)
-                        }
-
-
-                        textView("全部评论").lparams {
-                            margin = dip(10)
-                        }
-                        recyclerView {
-                            backgroundColor = config.blockBackgroundColor
-                            createAdapter(viewModel.list)
-                            isNestedScrollingEnabled = false
-                            layoutManager = LinearLayoutManager(context)
-                        }
-
-                        loadMoreView {
-                            layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-                            viewModel.loadState.observe(this@VideoCommentFragment, Observer {
-                                state = it!!
-                            })
-                        }
-                    }
+                recyclerView {
+                    backgroundColor = config.blockBackgroundColor
+                    isNestedScrollingEnabled = false
+                    layoutManager = LinearLayoutManager(context)
+                    createAdapter(viewModel.list)
                 }
             }.lparams(width = matchParent, height = matchParent)
         }
@@ -114,23 +90,72 @@ class VideoCommentFragment : SwipeBackFragment() {
     }
 
     private fun RecyclerView.createAdapter(list: MiaoList<ReplyBean>) = miao(list) {
-        itemView { b ->
-            commentItemView(
-                    mid = b.itemValue { member.mid.toLong() },
-                    uname = b.itemValue { member.uname },
-                    avatar = b.itemValue { member.avatar },
-                    time = b.itemValue { NumberUtil.converCTime(ctime) },
-                    floor = b.itemValue { floor },
-                    content = b.itemValue { content },
-                    like = b.itemValue { like },
-                    count = b.itemValue { count },
-                    onUpperClick = upperClick
-            )
+        addHeaderView {
+            linearLayout {
+                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+                padding = dip(10)
+                backgroundColor = config.windowBackgroundColor
+                gravity = Gravity.CENTER_VERTICAL
+
+                textView {
+                    (viewModel.pageInfo.observe()){
+                        text = if (it.acount != 0) {
+                            "${it.acount}条评论"
+                        } else {
+                            "全部评论"
+                        }
+                    }
+                }.lparams {
+                    weight = 1f
+                }
+                dropMenuView {
+                    text = "热门评论"
+                    ico = R.drawable.ic_arrow_drop_down_24dp
+                    popupMenu.inflate(R.menu.comment_order)
+                    onMenuItemClick {
+                        viewModel.sortOrder = when (it.itemId) {
+                            R.id.order_new -> 1
+                            R.id.order_hot -> 2
+                            else -> 2
+                        }
+                        viewModel.refreshList()
+//                        val rankOrder = getRankOrder(it.itemId)
+//                        if (rankOrder != viewModel.rankOrder) {
+//                            viewModel.rankOrder = rankOrder
+//                            viewModel.refreshList()
+//                        }
+                    }
+                }
+            }
         }
 
+        itemView { b ->
+            commentItemView(
+                mid = b.itemValue { member.mid.toLong() },
+                uname = b.itemValue { member.uname },
+                avatar = b.itemValue { member.avatar },
+                time = b.itemValue { NumberUtil.converCTime(ctime) },
+                floor = b.itemValue { floor },
+                content = b.itemValue { content },
+                like = b.itemValue { like },
+                count = b.itemValue { count },
+                onUpperClick = upperClick
+            )
+        }
         onItemClick { item, position ->
             val fragment = VideoCommentDetailsFragment.newInstance(item)
             startFragment(fragment)
+        }
+        addFootView {
+            loadMoreView {
+                layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+                viewModel.loadState.observe(this@VideoCommentFragment, Observer {
+                    state = it!!
+                })
+            }
+        }
+        onLoadMore {
+            viewModel.loadData()
         }
     }
 

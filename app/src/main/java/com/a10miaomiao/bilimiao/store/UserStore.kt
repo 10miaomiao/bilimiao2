@@ -69,8 +69,6 @@ class UserStore(
                     .observeOn(AndroidSchedulers.mainThread())
         }?.subscribe({
             if (it.code == 0) {
-                DebugMiao.log("获取成功2")
-                DebugMiao.log(it)
                 _user set it.data
                 seveUserInfo(it.data)
             } else {

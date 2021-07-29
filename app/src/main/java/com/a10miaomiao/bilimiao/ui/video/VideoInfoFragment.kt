@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
@@ -125,6 +126,18 @@ class VideoInfoFragment : SwipeBackFragment() {
             )
             downloadService.createDownload(biliVideoEntry)
             context!!.toast("创建成功")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        if (prefs.getBoolean("player_auto_stop", true)) {
+            val info = -viewModel.info
+            if (videoPlayer.isAid(info?.aid.toString())) {
+                videoPlayer.haederBehavior.hide()
+                videoPlayer.stopPlay()
+            }
         }
     }
 

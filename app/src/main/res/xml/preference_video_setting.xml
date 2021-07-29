@@ -7,4 +7,10 @@
         android:title="后台播放"
         android:defaultValue="true"/>
 
+    <SwitchPreference
+        android:key="player_auto_stop"
+        android:summary="呐呐呐呐呐呐呐呐呐"
+        android:title="关闭详情页时同时关闭播放"
+        android:defaultValue="true"/>
+
 </PreferenceScreen>

@@ -51,6 +51,7 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
         }
 
     private var previousTotal = 0
+    private var previousLoadingTime = System.currentTimeMillis()
     private var loading = true
     private var currentPage = 1
 
@@ -189,25 +190,22 @@ open class MiaoRecyclerViewAdapter<T>(var mRecyclerView: RecyclerView? = null) :
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 onScrolledListener?.invoke(recyclerView, dx, dy)
-                if (dy === 0) {
+                if (dy === 0 && mLinearLayoutManager.itemCount == 0) {
                     return
                 }
-
-                val visibleItemCount = recyclerView.childCount
                 val totalItemCount = mLinearLayoutManager.itemCount
                 val lastCompletelyVisiableItemPosition = mLinearLayoutManager.findLastCompletelyVisibleItemPosition()
-
+                val now = System.currentTimeMillis()
                 if (loading) {
-                    if (totalItemCount > previousTotal) {
+                    if (totalItemCount > previousTotal || now - previousLoadingTime > 9999) {
                         loading = false
-                        previousTotal = totalItemCount
                     }
                 }
-
-                if (!loading && visibleItemCount > 0 &&
-                        lastCompletelyVisiableItemPosition >= totalItemCount - 1) {
-                    onLoadMoreListener?.invoke()
+                if (!loading && lastCompletelyVisiableItemPosition >= totalItemCount - 2) {
                     loading = true
+                    previousTotal = totalItemCount
+                    previousLoadingTime = now
+                    onLoadMoreListener?.invoke()
                 }
             }
         })
