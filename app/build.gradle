@@ -8,8 +8,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 42
-        versionName "2.0.3"
+        versionCode 44
+        versionName "2.0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -49,8 +49,6 @@ dependencies {
     implementation "org.jetbrains.anko:anko-recyclerview-v7:$anko_version"
     implementation "org.jetbrains.anko:anko-constraint-layout:$anko_version"
 
-    implementation "com.github.infotech-group:android-drawable-dsl:0.3.0"
-
 
     //rxjava,rxandroid,gson,glide,okhttp
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
@@ -73,8 +71,6 @@ dependencies {
 
     // 其它
     implementation 'com.google.android:flexbox:1.0.0'
-//    implementation 'com.github.MZCretin:ExpandableTextView:v1.6.1'
-//    implementation 'com.ksxkq:materialpreference:1.0.5'
 
     implementation project(':miaoandriod')
     implementation project(':player')

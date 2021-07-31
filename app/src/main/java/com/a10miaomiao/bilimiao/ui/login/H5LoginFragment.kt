@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.utils.BilibiliRouter
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.miaoandriod.MiaoLiveData
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
@@ -47,8 +48,8 @@ class H5LoginFragment : SwipeBackFragment() {
         return attachToSwipeBack(createUI().view)
     }
 
-
     private val mWebViewClient = object : WebViewClient() {
+
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             var url = request.url.toString()
             if (url.contains("access_key=") && url.contains("mid=")) {
@@ -94,6 +95,7 @@ class H5LoginFragment : SwipeBackFragment() {
                             DebugMiao.log(result)
                             val json = JSONObject(result)
                             if (json.getInt("code") == 0) {
+                                // https://passport.bilibili.com/login/appSuccess?api=http%3A%2F%2Flink.acg.tv%2Fforum.php&appkey=27eb53fc9058f8c3&sign=67ec798004373253d60114caaad89a8c&mhash=1ef1f2f0a48c2d0bb35951d9b7948e17&confirm=1
                                 view.loadUrl(json.getJSONObject("data").getString("confirm_uri"))
                             } else {
                                 context?.toast("登录失败，请重试");
@@ -114,6 +116,8 @@ class H5LoginFragment : SwipeBackFragment() {
                 view.loadUrl(js)
             }
         }
+
+
     }
 
     private val mWebChromeClient = object : WebChromeClient() {
@@ -149,7 +153,7 @@ class H5LoginFragment : SwipeBackFragment() {
                 }.lparams(matchParent, matchParent)
 
                 progressBar {
-                    (+loading) { visibility = if (it) View.VISIBLE else View.GONE }
+                    (loading.observe()) { visibility = if (it) View.VISIBLE else View.GONE }
                 }.lparams {
                     width = dip(64)
                     height = dip(64)

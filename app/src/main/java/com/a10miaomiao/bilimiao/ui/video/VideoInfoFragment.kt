@@ -16,6 +16,7 @@ import cn.a10miaomiao.download.BiliVideoPageData
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.netword.BiliApiService
+import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
@@ -27,6 +28,9 @@ import com.a10miaomiao.bilimiao.utils.*
 import com.a10miaomiao.miaoandriod.ValueManager
 import com.a10miaomiao.miaoandriod.adapter.miao
 import com.a10miaomiao.miaoandriod.v
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import me.yokeyword.fragmentation_swipeback.SwipeBackFragment
 import org.jetbrains.anko.*
 import org.jetbrains.anko.recyclerview.v7.recyclerView
@@ -647,7 +651,7 @@ class VideoInfoFragment : SwipeBackFragment() {
                     }
                 }(),
                 info.v { NumberUtil.converString(it?.stat?.like?.toString() ?: "点赞") }(),
-                click
+                viewModel.columnLikeClick
         ).lparams(weight = 1f)
         bottomItemView(
                 info.v {
@@ -658,7 +662,7 @@ class VideoInfoFragment : SwipeBackFragment() {
                     }
                 }(),
                 info.v { NumberUtil.converString(it?.stat?.coin?.toString() ?: "投币") }(),
-                click
+                viewModel.columnCoinClick
         ).lparams(weight = 1f)
         bottomItemView(
                 R.drawable.ic_column_share.v(),

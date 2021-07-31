@@ -36,6 +36,7 @@ import me.yokeyword.fragmentation.anim.DefaultHorizontalAnimator
 import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
 import me.yokeyword.fragmentation.anim.FragmentAnimator
 import org.jetbrains.anko.configuration
+import org.jetbrains.anko.matchParent
 
 
 class MainActivity : SupportActivity() {
@@ -216,12 +217,19 @@ class MainActivity : SupportActivity() {
                     View.VISIBLE
     }
 
-    fun showBottomSheet(fragment: Fragment) {
+    fun showBottomSheet(
+        fragment: Fragment,
+        peekHeight: Int = -1,
+        height: Int = matchParent,
+        state: Int = BottomSheetBehavior.STATE_COLLAPSED
+    ) {
+        bottomSheettContainer.layoutParams.height = height
+        behavior.peekHeight = peekHeight
         supportFragmentManager.beginTransaction()
                 .replace(R.id.bottomSheettContainer, fragment)
                 .commit()
         bottomSheetFragment = fragment
-        behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        behavior.state = state
     }
 
     fun hideBottomSheet() {
@@ -232,31 +240,26 @@ class MainActivity : SupportActivity() {
 
     override fun onResume() {
         super.onResume()
-        DebugMiao.log("onResume")
         videoPlayerDelegate.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        DebugMiao.log("onPause")
         videoPlayerDelegate.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        DebugMiao.log("onDestroy")
         videoPlayerDelegate.onDestroy()
     }
 
     override fun onStart() {
         super.onStart()
-        DebugMiao.log("onStart")
         videoPlayerDelegate.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        DebugMiao.log("onStop")
         videoPlayerDelegate.onStop()
     }
 

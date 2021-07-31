@@ -5,14 +5,14 @@ import android.arch.lifecycle.ViewModel
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.support.design.widget.BottomSheetBehavior
 import android.view.View
-import com.a10miaomiao.bilimiao.entity.Page
-import com.a10miaomiao.bilimiao.entity.Relate
-import com.a10miaomiao.bilimiao.entity.ResultInfo
-import com.a10miaomiao.bilimiao.entity.VideoInfo
+import com.a10miaomiao.bilimiao.entity.*
 import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
+import com.a10miaomiao.bilimiao.netword.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.netword.api.VideoApi
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
@@ -25,6 +25,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.RequestBody
+import org.jetbrains.anko.dip
 import org.jetbrains.anko.toast
 import java.net.URL
 
@@ -43,6 +44,8 @@ class VideoInfoViewModel(
 
     val state = MutableLiveData<String>()
 
+    val coinNum = MiaoLiveData(1)
+
     private var loadDataDisposable: Disposable? = null
 
     init {
@@ -56,7 +59,6 @@ class VideoInfoViewModel(
         }else{
             BiliApiService.getVideoInfoByBvid(id)
         }
-        DebugMiao.log(url)
         val filterStore = Store.from(context).filterStore
         loading set true
         loadDataDisposable = MiaoHttp.getJson<ResultInfo<VideoInfo>>(url)
@@ -100,6 +102,26 @@ class VideoInfoViewModel(
         pages.clear()
     }
 
+    fun confirmCoin() {
+        VideoApi().coin(id, -coinNum)
+            .rxCall()
+            .map { it.gson<MessageInfo>() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ r ->
+                if (r.code == 0) {
+                    info.value?.stat?.run{ coin += -coinNum }
+                    info.value?.req_user?.run{ coin = -coinNum }
+                    info set -info
+                    context.toast("感谢投币")
+                } else {
+                    context.toast(r.message)
+                }
+            }, { e ->
+                context.toast(e.toString())
+            })
+    }
+
     /**
      * 分享按钮点击事件
      */
@@ -122,27 +144,36 @@ class VideoInfoViewModel(
      * 点赞按钮点击事件
      */
     val columnLikeClick = View.OnClickListener {
-        val url = "https://app.bilibili.com/x/v2/view/like"
-        val params = ApiHelper.createParams(
-                "aid" to id,
-                "dislike" to "0",
-                "from" to "7",
-                "like" to "0"
-        )
-        DebugMiao.log(url)
-        MiaoHttp.postString(url) {
-            body = RequestBody.create(
-                    MediaType.parse("application/x-www-form-urlencoded"),
-                    ApiHelper.urlencode(params)
-            )
-        }.subscribeOn(Schedulers.io())
+        info.value?.req_user?.let { reqUser ->
+            VideoApi().like(id, reqUser.dislike ?: 0, reqUser.like ?: 0)
+                .rxCall()
+                .map { it.gson<MessageInfo>() }
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ r ->
-                    DebugMiao.log(r)
+                    if (r.code == 0) {
+                        if (reqUser.like == 1) {
+                            reqUser.like = null
+                            info.value?.stat?.run{ like-- }
+                        } else {
+                            reqUser.like = 1
+                            reqUser.dislike = null
+                            info.value?.stat?.run{ like++ }
+                        }
+                        info set -info
+                    } else {
+                        context.toast(r.message)
+                    }
                 }, { e ->
-                    DebugMiao.log(e)
+                    context.toast(e.toString())
                 })
+        }
+    }
 
+    val columnCoinClick = View.OnClickListener {
+        CoinFragment.newInstance(this).show(
+            MainActivity.of(context).supportFragmentManager
+        )
     }
 
     /**
@@ -156,7 +187,6 @@ class VideoInfoViewModel(
         }
         MainActivity.of(context).start(VideoCommentFragment.newInstance(videoInfo.aid.toString()))
     }
-
 
     override fun onCleared() {
         super.onCleared()

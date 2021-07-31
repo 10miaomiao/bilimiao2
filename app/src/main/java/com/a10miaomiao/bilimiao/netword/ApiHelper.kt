@@ -13,18 +13,9 @@ import java.util.Date
  * Created by 10喵喵 on 2017/4/9.
  */
 object ApiHelper {
-    val appKey_IOS = "4ebafd7c4951b366";
     val appKey_Android = "c1b107428d337928";
-    val appkey_DONTNOT = "85eb6835b0a1034e";//e5b8ba95cab6104100be35739304c23a
-
-    val _appSecret_Wp = "ba3a4e554e9a6e15dc4d1d70c2b154e3";//Wp
-    val _appSecret_IOS = "8cb98205e9b2ad3669aad0fce12a4c13";//Ios
     val _appSecret_Android = "ea85624dfcf12d7cc7b2b3a94fac1f2c";//Android
-    val _appSecret_DONTNOT = "2ad42749773c441109bdc0191257a664";
-    val _appSecret_Android2 = "jr3fcr8w7qey8wb0ty5bofurg2cmad8x";
-    val _appSecret_VIP = "jr3fcr8w7qey8wb0ty5bofurg2cmad8x";
 
-    // Get from bilibili android client
     val APP_KEY_NEW = "1d8b6e7d45233436"
     val APP_SECRET_NEW = "560c52ccd288fed045859ed18bffd973"
 
