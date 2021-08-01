@@ -2,14 +2,10 @@ package com.a10miaomiao.bilimiao.netword
 
 import android.util.Log
 import android.webkit.CookieManager
-import com.a10miaomiao.bilimiao.entity.LoginInfo
-import com.a10miaomiao.bilimiao.entity.ResultInfo
-import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import okhttp3.*
-import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
 class MiaoHttp(var url: String? = null) {

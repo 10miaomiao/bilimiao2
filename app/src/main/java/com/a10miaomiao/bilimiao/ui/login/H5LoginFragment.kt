@@ -6,10 +6,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
@@ -48,34 +45,37 @@ class H5LoginFragment : SwipeBackFragment() {
         return attachToSwipeBack(createUI().view)
     }
 
+    private fun resolveUrl(url: String) {
+        try {
+            val accessKey = "access_key=(.*?)&".toRegex().find(url)!!.groupValues[1]
+            val mid = "mid=(.*?)&".toRegex().find(url)!!.groupValues[1]
+            val loginInfo = LoginInfo(
+                token_info = LoginInfo.TokenInfo(
+                    access_token = accessKey,
+                    mid = mid.toLong(),
+                    expires_in = 7200,
+                    refresh_token = ""
+                ),
+                status = 0,
+                sso = null,
+                cookie_info = null
+            )
+            Bilimiao.app.saveAuthInfo(loginInfo)
+            pop()
+        } catch (e: Exception) {
+            DebugMiao.log("获取登录参数时，发生错误")
+            e.printStackTrace()
+        }
+    }
+
     private val mWebViewClient = object : WebViewClient() {
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             var url = request.url.toString()
             if (url.contains("access_key=") && url.contains("mid=")) {
-                try {
-                    val accessKey = "access_key=(.*?)&".toRegex().find(url)!!.groupValues[1]
-                    val mid = "mid=(.*?)&".toRegex().find(url)!!.groupValues[1]
-                    val loginInfo = LoginInfo(
-                            token_info = LoginInfo.TokenInfo(
-                                    access_token = accessKey,
-                                    mid = mid.toLong(),
-                                    expires_in = 7200,
-                                    refresh_token = ""
-                            ),
-                            status = 0,
-                            sso = null,
-                            cookie_info = null
-                    )
-                    Bilimiao.app.saveAuthInfo(loginInfo)
-                    pop()
-                    return false
-                } catch (e: Exception) {
-                    DebugMiao.log("获取登录参数时，发生错误")
-                    e.printStackTrace()
-                }
+                resolveUrl(url)
+                return false
             }
-
             return BilibiliRouter.gotoUrl(context!!, url)
         }
 
@@ -117,6 +117,18 @@ class H5LoginFragment : SwipeBackFragment() {
             }
         }
 
+        override fun onReceivedError(
+            view: WebView?,
+            request: WebResourceRequest?,
+            error: WebResourceError?
+        ) {
+            super.onReceivedError(view, request, error)
+            request?.url?.toString()?.let { url ->
+                if (url.contains("access_key=") && url.contains("mid=")) {
+                    resolveUrl(url)
+                }
+            }
+        }
 
     }
 
