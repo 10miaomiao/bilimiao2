@@ -637,10 +637,6 @@ class VideoInfoFragment : SwipeBackFragment() {
     fun ViewManager.bottomView() = linearLayout {
         backgroundColor = config.blockBackgroundColor
         gravity = Gravity.END
-        val itemWidth = dip(60)
-        val click = View.OnClickListener {
-            toast("施工中")
-        }
         val info = viewModel.info
         bottomItemView(
                 info.v {
@@ -678,7 +674,7 @@ class VideoInfoFragment : SwipeBackFragment() {
                     }
                 }(),
                 info.v { NumberUtil.converString(it?.stat?.favorite?.toString() ?: "收藏") }(),
-                click
+                viewModel.columnFavClick
         ).lparams(weight = 1f)
         bottomItemView(
                 R.drawable.ic_column_comm.v(),

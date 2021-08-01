@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.ui.commponents
 
+import android.arch.lifecycle.LifecycleOwner
 import android.content.Context
 import android.view.ViewManager
 import com.a10miaomiao.bilimiao.ui.widget.MySpannableTextView
@@ -35,9 +36,9 @@ inline fun ViewManager.loadMoreView(theme: Int = 0, init: (@AnkoViewDslMarker Lo
     return ankoView({ ctx: Context -> LoadMoreView(ctx) }, theme, init)
 }
 
-inline fun ViewManager.dropMenuView(theme: Int = 0): DropMenuView = dropMenuView(theme) {}
-inline fun ViewManager.dropMenuView(theme: Int = 0, init: (@AnkoViewDslMarker DropMenuView).() -> Unit): DropMenuView {
-    return ankoView({ ctx: Context -> DropMenuView(ctx) }, theme, init)
+inline fun ViewManager.dropMenuView(owner: LifecycleOwner, theme: Int = 0): DropMenuView = dropMenuView(owner, theme) {}
+inline fun ViewManager.dropMenuView(owner: LifecycleOwner, theme: Int = 0, init: (@AnkoViewDslMarker DropMenuView).() -> Unit): DropMenuView {
+    return ankoView({ ctx: Context -> DropMenuView(ctx, owner) }, theme, init)
 }
 
 inline fun ViewManager.mySpannableTextView(theme: Int = 0): MySpannableTextView = mySpannableTextView(theme) {}

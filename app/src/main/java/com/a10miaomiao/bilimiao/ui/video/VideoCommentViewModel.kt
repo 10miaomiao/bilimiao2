@@ -36,7 +36,7 @@ class VideoCommentViewModel(
         0, 0, 0, 0
     ))
 
-    var sortOrder = 1
+    var sortOrder = 2
 
     init {
         loadData()

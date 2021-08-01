@@ -5,7 +5,7 @@ data class Stat(
         var coin: Int,
         val danmaku: String,
         val dislike: Int,
-        val favorite: Int,
+        var favorite: Int,
         val his_rank: Int,
         var like: Int,
         val now_rank: Int,

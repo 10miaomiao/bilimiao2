@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.ui.commponents.LoadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.headerView
 import com.a10miaomiao.bilimiao.ui.commponents.loadMoreView
 import com.a10miaomiao.bilimiao.ui.commponents.rcImageView
@@ -151,7 +152,9 @@ class FavDetailsFragment : SwipeBackFragment() {
             }
         }
         onLoadMore {
-            viewModel.pageNum++
+            if (-viewModel.loadState == LoadMoreView.State.NOMORE) {
+                return@onLoadMore
+            }
             viewModel.loadData()
         }
     }

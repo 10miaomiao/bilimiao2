@@ -29,13 +29,13 @@ class CreateDownloadFragment : SwipeBackFragment() {
 
     companion object {
         fun newInstance(
-                aid: String,
-                bvid: String,
-                title: String,
-                cover: String,
-                mid: Long,
-                pages: ArrayList<Page>,
-                index: Int
+            aid: String,
+            bvid: String,
+            title: String,
+            cover: String,
+            mid: Long,
+            pages: ArrayList<Page>,
+            index: Int
         ): CreateDownloadFragment {
             val fragment = CreateDownloadFragment()
             val bundle = Bundle()
@@ -62,8 +62,23 @@ class CreateDownloadFragment : SwipeBackFragment() {
     lateinit var downloadDelegate: DownloadDelegate
     lateinit var viewModel: CreateDownloadViewModel
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = getViewModel { CreateDownloadViewModel(context!!, aid, bvid, title, cover, mid, pages, index) }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        viewModel = getViewModel {
+            CreateDownloadViewModel(
+                context!!,
+                aid,
+                bvid,
+                title,
+                cover,
+                mid,
+                pages,
+                index
+            )
+        }
         downloadDelegate = MainActivity.of(context!!).downloadDelegate
         return attachToSwipeBack(createUI().view)
     }
@@ -88,7 +103,7 @@ class CreateDownloadFragment : SwipeBackFragment() {
                 }.lparams {
                     rightMargin = dip(5)
                 }
-                dropMenuView {
+                dropMenuView(owner) {
                     text = "清晰度"
                     ico = R.drawable.ic_arrow_drop_down_24dp
 
@@ -135,17 +150,20 @@ class CreateDownloadFragment : SwipeBackFragment() {
                                     }
                                     if (index != -1) {
                                         this@frameLayout.isEnabled = false
-                                        this@frameLayout.backgroundResource = R.drawable.shape_corner_pressed
+                                        this@frameLayout.backgroundResource =
+                                            R.drawable.shape_corner_pressed
                                         textColor = config.lineColor
                                         return@bindIndexed
                                     }
                                     this@frameLayout.isEnabled = true
                                     val selected = viewModel.selectedList.indexOf(item.cid) != -1
                                     if (selected) {
-                                        this@frameLayout.backgroundResource = R.drawable.shape_corner_pressed
+                                        this@frameLayout.backgroundResource =
+                                            R.drawable.shape_corner_pressed
                                         textColorResource = config.themeColorResource
                                     } else {
-                                        this@frameLayout.backgroundResource = R.drawable.shape_corner_default
+                                        this@frameLayout.backgroundResource =
+                                            R.drawable.shape_corner_default
                                         textColorResource = R.color.text_black
                                     }
                                 }

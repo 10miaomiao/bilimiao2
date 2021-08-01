@@ -64,7 +64,7 @@ class RankCategoryDetailsFragment : Fragment() {
                 backgroundColor = config.blockBackgroundColor
 
                 info.filter.forEachWithIndex { i1, filter ->
-                    dropMenuView {
+                    dropMenuView (owner) {
                         layoutParams = LinearLayout.LayoutParams(wrapContent, wrapContent).apply {
                             leftMargin = dip(10)
                         }

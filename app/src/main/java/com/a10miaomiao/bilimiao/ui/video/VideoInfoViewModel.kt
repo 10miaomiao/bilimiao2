@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.netword.ApiHelper
 import com.a10miaomiao.bilimiao.netword.BiliApiService
 import com.a10miaomiao.bilimiao.netword.MiaoHttp
 import com.a10miaomiao.bilimiao.netword.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.netword.api.FavoriteApi
 import com.a10miaomiao.bilimiao.netword.api.VideoApi
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
@@ -44,9 +45,16 @@ class VideoInfoViewModel(
 
     val state = MutableLiveData<String>()
 
+    // 投币数量
     val coinNum = MiaoLiveData(1)
 
+    // 收藏夹列表
+    val favoriteCreatedList = MiaoList<MediaListInfo>()
+    val favoriteLoading = MiaoLiveData(false)
+    val favoriteSelectedMap = HashMap<Long, Boolean>()
+
     private var loadDataDisposable: Disposable? = null
+    private var favoriteDisposable: Disposable? = null
 
     init {
         loadData()
@@ -96,6 +104,30 @@ class VideoInfoViewModel(
                 })
     }
 
+    fun loadFavoriteCreatedList () {
+        if (-favoriteLoading || favoriteCreatedList.isNotEmpty()) {
+            return
+        }
+        favoriteLoading set true
+        favoriteDisposable = FavoriteApi().getCreated(id)
+            .rxCall()
+            .map { it.gson<ResultInfo<ListCount<MediaListInfo>>>() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ r ->
+                if (r.code == 0) {
+                    favoriteCreatedList.clear()
+                    favoriteCreatedList.addAll(r.data.list)
+                } else {
+                    context.toast(r.message)
+                }
+                favoriteLoading set false
+            }, { e ->
+                context.toast(e.toString())
+                favoriteLoading set false
+            })
+    }
+
     fun clear() {
         info set null
         relates.clear()
@@ -120,6 +152,43 @@ class VideoInfoViewModel(
             }, { e ->
                 context.toast(e.toString())
             })
+    }
+
+    fun addFavorite () {
+        val favIds = favoriteCreatedList
+            .filter { it.fav_state == 1 }
+            .map { it.id.toString() }
+        val addIds = favoriteCreatedList
+            .filter { it.fav_state != 1 && (favoriteSelectedMap[it.id] ?: false) }
+            .map { it.id.toString() }
+        val delIds = favoriteCreatedList
+            .filter { it.fav_state == 1 && !(favoriteSelectedMap[it.id] ?: true) }
+            .map { it.id.toString() }
+        FavoriteApi().deal(id, addIds, delIds)
+            .rxCall()
+            .map { it.gson<MessageInfo>() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ r ->
+                if (r.code == 0) {
+                    if (favIds.size - delIds.size + addIds.size == 0) {
+                        info.value?.stat?.run{ favorite -= 1 }
+                        info.value?.req_user?.run{ favorite = null }
+                    } else {
+                        info.value?.req_user?.run{ favorite = 1 }
+                        if (favIds.isEmpty()) {
+                            info.value?.stat?.run{ favorite += 1 }
+                        }
+                    }
+                    favoriteCreatedList.clear()
+                    info set -info
+                } else {
+                    context.toast(r.message)
+                }
+            }, { e ->
+                context.toast(e.toString())
+            })
+        MainActivity.of(context).hideBottomSheet()
     }
 
     /**
@@ -176,6 +245,12 @@ class VideoInfoViewModel(
         )
     }
 
+    val columnFavClick = View.OnClickListener {
+        MainActivity.of(context).showBottomSheet(
+            AddFavoriteFragment.newInstance(this)
+        )
+    }
+
     /**
      * 评论按钮点击事件
      */
@@ -191,6 +266,7 @@ class VideoInfoViewModel(
     override fun onCleared() {
         super.onCleared()
         loadDataDisposable?.dispose()
+        favoriteDisposable?.dispose()
     }
 
     fun toLink(link: String){

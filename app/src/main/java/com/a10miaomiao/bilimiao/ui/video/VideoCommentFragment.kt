@@ -108,22 +108,17 @@ class VideoCommentFragment : SwipeBackFragment() {
                 }.lparams {
                     weight = 1f
                 }
-                dropMenuView {
+                dropMenuView(this@VideoCommentFragment) {
                     text = "热门评论"
                     ico = R.drawable.ic_arrow_drop_down_24dp
                     popupMenu.inflate(R.menu.comment_order)
                     onMenuItemClick {
                         viewModel.sortOrder = when (it.itemId) {
-                            R.id.order_new -> 1
+                            R.id.order_new -> 0
                             R.id.order_hot -> 2
                             else -> 2
                         }
                         viewModel.refreshList()
-//                        val rankOrder = getRankOrder(it.itemId)
-//                        if (rankOrder != viewModel.rankOrder) {
-//                            viewModel.rankOrder = rankOrder
-//                            viewModel.refreshList()
-//                        }
                     }
                 }
             }

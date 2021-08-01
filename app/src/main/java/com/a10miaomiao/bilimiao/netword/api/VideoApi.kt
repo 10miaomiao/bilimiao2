@@ -70,6 +70,6 @@ class VideoApi {
         )
     }
 
-    
+
 
 }

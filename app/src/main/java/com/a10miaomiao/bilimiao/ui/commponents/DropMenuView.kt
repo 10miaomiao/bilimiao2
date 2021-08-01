@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.ui.commponents
 
+import android.arch.lifecycle.LifecycleOwner
 import android.content.Context
 import android.support.v7.widget.PopupMenu
 import android.view.Gravity
@@ -14,7 +15,7 @@ import org.jetbrains.anko.imageView
 import org.jetbrains.anko.linearLayout
 import org.jetbrains.anko.textView
 
-class DropMenuView(context: Context) : MiaoView(context) {
+class DropMenuView(context: Context, val owner: LifecycleOwner) : FrameLayout(context) {
 
     private val _text = MiaoLiveData("")
     var text
@@ -54,11 +55,11 @@ class DropMenuView(context: Context) : MiaoView(context) {
                 popupMenu.show()
             }
             textView {
-                (+_text){ text = it }
+                (+_text)(this@DropMenuView.owner) { text = it }
             }
             imageView {
                 selectableItemBackgroundBorderless()
-                (+_ico){ setImageResource(it) }
+                (+_ico)(this@DropMenuView.owner){ setImageResource(it) }
             }
         }
     }

@@ -45,8 +45,12 @@ class RegionDetailsFragment : Fragment() {
     lateinit var viewModel: RegionDetailsViewModel
     var mAdapter: MiaoRecyclerViewAdapter<RegionTypeDetailsInfo.Result>? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        viewModel = getViewModel{ RegionDetailsViewModel(context!!, tid) }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        viewModel = getViewModel { RegionDetailsViewModel(context!!, tid) }
         return render().view
     }
 
@@ -90,7 +94,7 @@ class RegionDetailsFragment : Fragment() {
                         startFragment(TimeSettingFragment())
                     }
                 }.lparams(width = matchParent, weight = 1f)
-                dropMenuView {
+                dropMenuView(owner) {
                     text = "播放量"
                     ico = R.drawable.ic_arrow_drop_down_24dp
                     popupMenu.inflate(R.menu.rank_order)
@@ -180,7 +184,9 @@ class RegionDetailsFragment : Fragment() {
                         textView {
                             textSize = 12f
                             textColor = config.foregroundAlpha45Color
-                            binding.bind { item -> text = NumberUtil.converString(item.video_review) }
+                            binding.bind { item ->
+                                text = NumberUtil.converString(item.video_review)
+                            }
                         }
                     }
 

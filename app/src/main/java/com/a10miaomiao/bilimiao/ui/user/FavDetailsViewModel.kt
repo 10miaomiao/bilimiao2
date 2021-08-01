@@ -28,6 +28,9 @@ class FavDetailsViewModel(
     }
 
     fun loadData() {
+        if (-loading) {
+            return
+        }
         val url = BiliApiService.gatMedialistDetail(
                 id, pageNum, pageSize
         )
@@ -37,6 +40,7 @@ class FavDetailsViewModel(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     if (it.code == 0) {
+                        pageNum++
                         list.addAll(it.data.medias)
                         if (it.data.medias.size < pageSize) {
                             loadState set LoadMoreView.State.NOMORE
