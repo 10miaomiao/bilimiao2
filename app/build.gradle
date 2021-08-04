@@ -11,6 +11,7 @@ android {
         versionCode 44
         versionName "2.0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        flavorDimensions "default"
     }
     buildTypes {
         release {
@@ -26,6 +27,28 @@ android {
     }
     androidExtensions {
         experimental = true
+    }
+    productFlavors{
+        coolapk {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "Coolapk"
+            ]
+        }
+        github {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "Github"
+            ]
+        }
+        gitee {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "Gitee"
+            ]
+        }
+        miao {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "10miaomiao"
+            ]
+        }
     }
 }
 

@@ -587,7 +587,9 @@ class VideoPlayerDelegate(
 
         override fun updateTimer(timer: DanmakuTimer) {
             if (abs(timer.currMillisecond - mPlayer.currentPosition) > 500L) {
-                timer.update(mPlayer.currentPosition)
+                mDanmaku.post {
+                    timer.update(mPlayer.currentPosition)
+                }
             }
         }
     }
@@ -772,12 +774,23 @@ class VideoPlayerDelegate(
     }
 
     private fun setSystemUIVisible(show: Boolean) {
-        val uiFlags = if (show) View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        else View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        if (isMiniPlayer.value == false) {
-            activity.window.decorView.systemUiVisibility = uiFlags or 0x00001000 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        val uiFlags = (if (show) {
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         } else {
-            activity.window.decorView.systemUiVisibility = uiFlags or 0x00001000
+            View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        }) or 0x00001000
+        if (isMiniPlayer.value == false) {
+            activity.window.decorView.systemUiVisibility = uiFlags or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        } else {
+            activity.window.decorView.systemUiVisibility = uiFlags
+        }
+        // 控制按钮不被刘海遮住
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            MainActivity.of(activity).windowInsets?.let {
+                mController.post {
+                    mController.setDisplayCutout(it.displayCutout)
+                }
+            }
         }
     }
 

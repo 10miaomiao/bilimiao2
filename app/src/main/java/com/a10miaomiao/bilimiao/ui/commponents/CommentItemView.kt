@@ -9,6 +9,7 @@ import android.view.ViewManager
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.entity.comment.Content
+import com.a10miaomiao.bilimiao.entity.comment.Emote
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.ui.widget.expandabletext.ExpandableTextView
@@ -97,24 +98,29 @@ fun ViewManager.commentItemView(
                     return@content
                 }
                 setContent(BiliUrlMatcher.customString(it.message))
-//                // 遍历表情
-                setNextContentListener { ssb ->
-                    val content = ssb.toString()
-                    it.emote?.values?.forEach { emote ->
+                tag = it.emote
+//                text = it.message
+            }
+            // 遍历表情
+            setNextContentListener { ssb ->
+                val content = ssb.toString()
+                var emote = tag
+                if (emote is Map<*, *>) {
+                    emote = emote as Map<String, Emote>
+                    emote?.values?.forEach { emote ->
                         val textLen = emote.text.length
                         var index = content.indexOf(emote.text)
                         while (index != -1) {
                             val span = UrlImageSpan(
-                                    context,
-                                    emote.url,
-                                    this
+                                context,
+                                emote.url,
+                                this
                             )
                             ssb.setSpan(span, index, index + textLen, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                             index = content.indexOf(emote.text, index + textLen)
                         }
                     }
                 }
-//                text = ss
             }
             linkClickListener = ExpandableTextView.OnLinkClickListener { linkType, content, selfContent -> //根据类型去判断
                 when (linkType) {
@@ -130,7 +136,7 @@ fun ViewManager.commentItemView(
                 }
             }
             isNeedExpend = false
-            textIsSelectable { setTextIsSelectable(it) }
+//            textIsSelectable { setTextIsSelectable(it) }
             textColor = config.foregroundColor
             textSize = 14f
         }.lparams {

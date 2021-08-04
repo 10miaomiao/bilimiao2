@@ -29,8 +29,10 @@ class UserBangumiViewModel(
     }
 
     fun loadData() {
+        if (-loading) {
+            return
+        }
         val url = BiliApiService.getFollowBangumi(vmid, pn, ps)
-        DebugMiao.log(url)
         loading set true
         MiaoHttp.getJson<ResultInfo<DataInfo>>(url)
                 .subscribeOn(Schedulers.io())

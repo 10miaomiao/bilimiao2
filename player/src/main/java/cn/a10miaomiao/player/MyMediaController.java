@@ -4,15 +4,20 @@ import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.DisplayCutout;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -340,6 +345,42 @@ public class MyMediaController extends FrameLayout implements MediaController
         mProgress.setProgressDrawable(draw);
         mProgress.getProgressDrawable().setBounds(bounds);
         mProgress.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    public void setDisplayCutout(DisplayCutout displayCutout) {
+        if (displayCutout == null || displayCutout.getBoundingRects() == null) {
+            return;
+        }
+        int left = displayCutout.getSafeInsetLeft();
+        int right = displayCutout.getSafeInsetRight();
+        int bottom = displayCutout.getSafeInsetBottom();
+        mHeaderLayout.setPadding(
+                left,
+                mHeaderLayout.getPaddingTop(),
+                right,
+                0
+        );
+        mMediaMontrollerControls.setPadding(
+                left,
+                mMediaMontrollerControls.getPaddingTop(),
+                right,
+                bottom
+        );
+        RelativeLayout.LayoutParams openLockLeftIVLayoutParams = ((RelativeLayout.LayoutParams)mOpenLockLeftIV.getLayoutParams());
+        openLockLeftIVLayoutParams.setMargins(
+                left,
+                openLockLeftIVLayoutParams.topMargin,
+                openLockLeftIVLayoutParams.rightMargin,
+                openLockLeftIVLayoutParams.bottomMargin
+        );
+        RelativeLayout.LayoutParams openLockRightIVParams = ((RelativeLayout.LayoutParams)mOpenLockRightIV.getLayoutParams());
+        openLockRightIVParams.setMargins(
+                left,
+                openLockRightIVParams.topMargin,
+                openLockRightIVParams.rightMargin,
+                openLockRightIVParams.bottomMargin
+        );
     }
 
 }

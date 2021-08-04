@@ -7,21 +7,21 @@
         android:id="@+id/mHeaderLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="#99000000"
-        android:gravity="center_vertical"
+        android:clipToPadding="false"
         android:fitsSystemWindows="true"
-        android:clipToPadding="false">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/mBackIV"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:padding="@dimen/default_general_margin"
             android:layout_marginRight="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="@dimen/default_general_margin"
             android:src="@drawable/bili_player_back_button"
-            android:tint="@android:color/white"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:tint="@android:color/white" />
 
         <TextView
             android:id="@+id/mTitleTV"
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/default_medium_text_size"/>
+            android:textSize="@dimen/default_medium_text_size" />
 
     </LinearLayout>
 

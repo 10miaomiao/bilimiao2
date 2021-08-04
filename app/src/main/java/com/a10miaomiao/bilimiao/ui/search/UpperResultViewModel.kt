@@ -25,7 +25,7 @@ class UpperResultViewModel(val fragment: Fragment) : ViewModel() {
     val pageSize = 10
 
     init {
-        loading.value = true
+        loading.value = false
         loadState.value = LoadMoreView.State.LOADING
         SearchFragment.keyword.observe(fragment, Observer {
             if (keyword != it!!) {
@@ -37,6 +37,9 @@ class UpperResultViewModel(val fragment: Fragment) : ViewModel() {
     }
 
     fun loadData() {
+        if (loading.value == true) {
+            return
+        }
         val url = BiliApiService.getSearchUpper(keyword, pageNum, pageSize)
         loading.value = true
         MiaoHttp.getJson<ResultInfo<SearchListData<SearchUpperItems>>>(url)

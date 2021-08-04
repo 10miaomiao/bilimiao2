@@ -48,7 +48,7 @@ class RegionDetailsViewModel(
     fun loadData() {
         if (list.size >= pageNum * pageSize)
             return
-        if (loadState == LoadMoreView.State.NOMORE) {
+        if (loadState == LoadMoreView.State.NOMORE || -loading) {
             return
         }
         loading set true

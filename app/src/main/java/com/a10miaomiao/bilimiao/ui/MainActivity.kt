@@ -37,6 +37,8 @@ import me.yokeyword.fragmentation.anim.DefaultVerticalAnimator
 import me.yokeyword.fragmentation.anim.FragmentAnimator
 import org.jetbrains.anko.configuration
 import org.jetbrains.anko.matchParent
+import android.support.annotation.RequiresApi
+import android.view.WindowManager
 
 
 class MainActivity : SupportActivity() {
@@ -82,17 +84,9 @@ class MainActivity : SupportActivity() {
         videoPlayerDelegate.onCreate(savedInstanceState)
         downloadDelegate.onCreate(savedInstanceState)
 
-//        MiaoHttp.getString("https://b23.tv/qhyO1O")
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe ({
-//                    DebugMiao.log(it)
-//                }, {
-//                    it.printStackTrace()
-//                })
-
-//        var intent = Intent(this, DownloadService::class.java)
-//        startService(intent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            fullScreenUseStatus()
+        }
     }
 
     override fun start(toFragment: ISupportFragment?) {
@@ -237,6 +231,16 @@ class MainActivity : SupportActivity() {
     }
 
     fun dynamicTheme(owner: LifecycleOwner, builder: () -> View) = themeUtil.dynamicTheme(owner, builder)
+
+    @RequiresApi(api = 28)
+    fun fullScreenUseStatus() {
+//        if (isNotchScreen(activity.getWindow())) {
+            val attributes = window.attributes
+            attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.attributes = attributes
+//        }
+    }
 
     override fun onResume() {
         super.onResume()

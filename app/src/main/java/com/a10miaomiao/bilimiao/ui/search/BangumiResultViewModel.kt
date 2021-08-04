@@ -22,7 +22,7 @@ class BangumiResultViewModel(val fragment: Fragment) : ViewModel() {
     val pageSize = 10
 
     init {
-        loading.value = true
+        loading.value = false
         loadState.value = LoadMoreView.State.LOADING
         SearchFragment.keyword.observe(fragment, Observer {
             if (keyword != it!!) {
@@ -34,6 +34,9 @@ class BangumiResultViewModel(val fragment: Fragment) : ViewModel() {
     }
 
     fun loadData() {
+        if (loading.value == true) {
+            return
+        }
         val url = BiliApiService.getSearchBangumi(keyword, pageNum, pageSize)
         loading.value = true
         MiaoHttp.getJson<ResultInfo<SearchListData<SearchBangumiItems>>>(url)

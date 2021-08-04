@@ -331,6 +331,7 @@ public class ExpandableTextView extends AppCompatTextView {
         this.mEndExpandContent = endExpendContent;
     }
 
+    private boolean b = true;
     /**
      * 设置内容
      *
@@ -338,8 +339,10 @@ public class ExpandableTextView extends AppCompatTextView {
      */
     public void setContent(final String content) {
         mContent = content;
-        if (isAttached)
+        if (isAttached || b) {
+            b = false;
             doSetContent();
+        }
     }
 
     /**

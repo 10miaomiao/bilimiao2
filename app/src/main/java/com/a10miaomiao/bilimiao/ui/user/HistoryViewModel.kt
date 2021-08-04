@@ -37,9 +37,10 @@ class HistoryViewModel(
     fun loadData() {
         if (list.size >= pageNum * pageSize)
             return
-        if (loadState == LoadMoreView.State.NOMORE) {
+        if (loadState == LoadMoreView.State.NOMORE || -loading) {
             return
         }
+        loading set true
         val url = BiliApiService.getHistory(pageNum, pageSize)
         loadDataDisposable = MiaoHttp.getJson<ResultInfo<List<VideoInfo>>>(url)
                 .subscribeOn(Schedulers.io())

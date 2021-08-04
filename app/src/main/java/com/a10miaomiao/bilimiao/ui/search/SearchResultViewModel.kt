@@ -56,6 +56,7 @@ class SearchResultViewModel(
                 refreshList()
             }
         })
+        loading.value = false
         loadState.value = LoadMoreView.State.LOADING
         rankOrdersIndex.value = 0
         durationIndex.value = 0

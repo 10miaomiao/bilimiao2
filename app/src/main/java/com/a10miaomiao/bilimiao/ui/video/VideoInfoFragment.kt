@@ -136,7 +136,7 @@ class VideoInfoFragment : SwipeBackFragment() {
     override fun onDestroy() {
         super.onDestroy()
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        if (prefs.getBoolean("player_auto_stop", true)) {
+        if (prefs.getBoolean("player_auto_stop", false)) {
             val info = -viewModel.info
             if (videoPlayer.isAid(info?.aid.toString())) {
                 videoPlayer.haederBehavior.hide()
@@ -154,7 +154,7 @@ class VideoInfoFragment : SwipeBackFragment() {
                 navigationOnClick { pop() }
                 title("视频详情")
                 observeInfo {
-                    title(it!!.bvid)
+                    title("${it!!.bvid} / AV${it.aid}")
                 }
 
                 inflateMenu(R.menu.video_info)

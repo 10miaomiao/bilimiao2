@@ -32,6 +32,9 @@ class FavViewModel(
     }
 
     fun loadData() {
+        if (-loading) {
+            return
+        }
         val userStore = Store.from(context).userStore
         val url = if (userStore.isSelf(mid)) BiliApiService.gatMedialist()
             else  BiliApiService.gatMedialist(mid)
