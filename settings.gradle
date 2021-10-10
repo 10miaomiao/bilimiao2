@@ -1,2 +1,14 @@
-include ':app', ':miaoandriod', ':player'
-include ':download'
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() // Warning: this repository is going to shut down soon
+    }
+}
+rootProject.name = "bilimiao"
+include ':app'
+include ':app2'
+include ':miao-binding'
+include ':miao-binding-android'
+include ':bilimiao-comm'

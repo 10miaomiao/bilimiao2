@@ -1,105 +1,45 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
 
 android {
-    compileSdkVersion 28
+    compileSdk 30
+    buildToolsVersion "30.0.3"
+
     defaultConfig {
         applicationId "com.a10miaomiao.bilimiao"
-        minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 44
-        versionName "2.0.5"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        flavorDimensions "default"
+        minSdk 21
+        targetSdk 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    lintOptions {
-        checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
-        // but continue the build even when errors are found:
-        abortOnError false
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
-    androidExtensions {
-        experimental = true
-    }
-    productFlavors{
-        coolapk {
-            manifestPlaceholders = [
-                    APP_CHANNEL_VALUE: "Coolapk"
-            ]
-        }
-        github {
-            manifestPlaceholders = [
-                    APP_CHANNEL_VALUE: "Github"
-            ]
-        }
-        gitee {
-            manifestPlaceholders = [
-                    APP_CHANNEL_VALUE: "Gitee"
-            ]
-        }
-        miao {
-            manifestPlaceholders = [
-                    APP_CHANNEL_VALUE: "10miaomiao"
-            ]
-        }
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support:support-v4:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:2.0.0-alpha1'
-//    implementation 'com.android.support:preference-v7:28.0.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    //anko
-    implementation "org.jetbrains.anko:anko-commons:$anko_version"
-    implementation "org.jetbrains.anko:anko-sdk15:$anko_version"
-    // So here it's 15 too
-    implementation "org.jetbrains.anko:anko-appcompat-v7:$anko_version"
-    implementation "org.jetbrains.anko:anko-design:$anko_version"
-    implementation "org.jetbrains.anko:anko-recyclerview-v7:$anko_version"
-    implementation "org.jetbrains.anko:anko-constraint-layout:$anko_version"
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-
-    //rxjava,rxandroid,gson,glide,okhttp
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
-    implementation 'io.reactivex.rxjava2:rxjava:2.0.2'
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.github.bumptech.glide:glide:3.7.0'
-    implementation 'jp.wasabeef:glide-transformations:2.0.1' // 配合glide使用，此项目用于高斯模糊
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
-
-    //fragment导航及管理
-    implementation 'me.yokeyword:fragmentation:1.3.5'
-    implementation 'me.yokeyword:fragmentation-swipeback:1.3.5'
-    implementation 'android.arch.lifecycle:extensions:1.1.1'
-
-    // 弹幕引擎
-    implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
-    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
-    implementation 'com.github.ctiao:ndkbitmap-armv5:0.9.12'
-    implementation 'com.github.ctiao:ndkbitmap-x86:0.9.12'
-
-    // 其它
-    implementation 'com.google.android:flexbox:1.0.0'
-
-    implementation project(':miaoandriod')
-    implementation project(':player')
-    implementation project(':download')
-    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
-
-    // 百度统计
-    implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
+    implementation project(':app2')
 }

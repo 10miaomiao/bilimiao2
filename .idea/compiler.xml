@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="11" />
+    <bytecodeTargetLevel target="1.7">
+      <module name="bilimiao.app" target="11" />
+      <module name="bilimiao.app2" target="11" />
+      <module name="bilimiao.bilimiao-comm" target="11" />
+      <module name="bilimiao.miao-binding-android" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="false" android:state_pressed="false" android:state_enabled="true" android:drawable="@drawable/shape_corner_default" />
-    <item android:state_focused="false" android:state_pressed="true" android:state_enabled="true"  android:drawable="@drawable/shape_corner_pressed" />
-    <item android:state_focused="false" android:state_enabled="false" android:drawable="@drawable/shape_corner_pressed" />
-</selector>
