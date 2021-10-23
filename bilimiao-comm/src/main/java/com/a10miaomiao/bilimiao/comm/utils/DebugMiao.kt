@@ -14,9 +14,6 @@ object DebugMiao {
     }
 
     fun log(vararg str: Any?) {
-        if (str.size == 1) {
-            return
-        }
         var message = StringBuilder(str[0].getString()).apply {
             for (i in 1 until str.size) {
                 append(" , " + str[i].getString())

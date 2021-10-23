@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bilimiao">
         <activity
-            android:name="com.a10miaomiao.bilimiao2.MainActivity"
+            android:name=".MainActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
             android:exported="true">
             <intent-filter>

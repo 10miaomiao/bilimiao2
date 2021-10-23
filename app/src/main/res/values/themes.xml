@@ -17,5 +17,23 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+
+        <item name="blockBackground">@color/blockBackgroundColor</item>
+        <item name="foregroundColor">@color/foregroundColor</item>
+        <item name="lineColor">@color/lineColor</item>
+        <item name="defaultBackgroundColor">@color/windowBackgroundColor</item>
+
+        <item name="android:windowBackground">@drawable/splash_default</item>
     </style>
+
+<!--    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">-->
+<!--        <item name="colorPrimary">@color/colorPrimary</item>-->
+<!--        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+<!--        <item name="colorAccent">@color/colorAccent</item>-->
+<!--    </style>-->
+<!--    <style name="AppTheme.NoActionBar" parent="AppTheme">-->
+<!--        <item name="windowActionBar">false</item>-->
+<!--        <item name="windowNoTitle">true</item>-->
+<!--    </style>-->
+
 </resources>

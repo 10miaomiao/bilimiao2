@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/bili_33_1" android:duration="100"></item>
+    <item android:drawable="@drawable/bili_33_3" android:duration="100"></item>
+    <item android:drawable="@drawable/bili_33_5" android:duration="100"></item>
+    <item android:drawable="@drawable/bili_33_7" android:duration="100"></item>
+    <item android:drawable="@drawable/bili_33_9" android:duration="100"></item>
+</animation-list>

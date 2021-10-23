@@ -88,11 +88,24 @@ class MiaoBinding {
 //        return this
 //    }
 
-    inline fun <T> start (block: () -> T): T {
+    inline fun <T> start (type: Int, block: () -> T): T {
+        if (type == INIT) {
+            clearBindingList()
+        }
         counter = 0
         Bind.binding = this
         val result = block()
         Bind.binding = null
         return result
+    }
+
+    @PublishedApi internal fun clearBindingList () {
+        bindingList.clear()
+    }
+
+
+    companion object {
+        const val INIT = 0
+        const val UPDATE = 1
     }
 }

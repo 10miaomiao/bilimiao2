@@ -6,6 +6,7 @@
       <module name="bilimiao.app2" target="11" />
       <module name="bilimiao.bilimiao-comm" target="11" />
       <module name="bilimiao.miao-binding-android" target="11" />
+      <module name="bilimiao.player" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

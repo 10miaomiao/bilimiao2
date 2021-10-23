@@ -8,7 +8,8 @@ dependencyResolutionManagement {
 }
 rootProject.name = "bilimiao"
 include ':app'
-include ':app2'
 include ':miao-binding'
 include ':miao-binding-android'
 include ':bilimiao-comm'
+include ':player'
+//include ':download'
