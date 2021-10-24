@@ -15,6 +15,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -48,7 +49,6 @@ class MainFragment : Fragment(), DIAware {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        DebugMiao.log("MainFragment.onCreateView")
         return ui.root
     }
 
@@ -60,7 +60,7 @@ class MainFragment : Fragment(), DIAware {
 
             views {
                 +imageView {
-                    _netword(item.logo)
+                    _network(item.logo)
                 }..lParams(dip(24), dip(24))
 
                 +textView {
@@ -68,8 +68,6 @@ class MainFragment : Fragment(), DIAware {
                     gravity = Gravity.CENTER
                 }
             }
-
-
         }
     }
 
@@ -89,7 +87,7 @@ class MainFragment : Fragment(), DIAware {
 
             views {
                 +recyclerView {
-                    layoutManager = GridLayoutManager(activity, 5)
+                    layoutManager = GridAutofitLayoutManager(requireContext(), dip(100))
                     isNestedScrollingEnabled = false
                     backgroundColor = config.blockBackgroundColor
                     apply(ViewStyle.roundRect(dip(10)))
@@ -97,8 +95,9 @@ class MainFragment : Fragment(), DIAware {
                     _miaoAdapter(
                         viewModel.regions,
                         regionItemUi,
-                        onItemClick = regionItemClick
-                    )
+                    ) {
+                        setOnItemClickListener(regionItemClick)
+                    }
                 }..lParams {
                     width = matchParent
 //                    topMargin = config.dividerSize

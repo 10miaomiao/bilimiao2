@@ -11,8 +11,7 @@ import com.chad.library.adapter.base.listener.OnItemClickListener
 fun <T> RecyclerView._miaoAdapter(
     items: MutableList<T>? = null,
     itemUi: MiaoBindingItemUi<T>,
-    adapterRef: ((adapter: MiaoBindingAdapter<T>) -> Unit)? = null,
-    onItemClick: OnItemClickListener? = null
+    adapterInit: (MiaoBindingAdapter<T>.() -> Unit)? = null,
 ) {
     val mAdapter = miaoMemo(itemUi) {
         object : MiaoBindingAdapter<T>(
@@ -21,8 +20,7 @@ fun <T> RecyclerView._miaoAdapter(
         ) {}
     }
     miaoEffect(null, {
-        adapterRef?.invoke(mAdapter)
-        onItemClick?.let { mAdapter.setOnItemClickListener(it) }
+        adapterInit?.invoke(mAdapter)
         this@_miaoAdapter.adapter = mAdapter
     }) {
         mAdapter.setList(items)

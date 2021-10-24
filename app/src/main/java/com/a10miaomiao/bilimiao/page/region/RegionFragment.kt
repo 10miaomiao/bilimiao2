@@ -25,10 +25,7 @@ class RegionFragment : Fragment(), DIAware {
         bindSingleton { this@RegionFragment }
     }
 
-    private val viewModel by diViewModel<MainViewModel>(di)
-
-    val region by lazy { requireArguments().getParcelable<RegionInfo>(MainNavGraph.args.region)!! }
-    val fragments = ArrayList<Fragment>(0)
+    private val viewModel by diViewModel<RegionViewModel>(di)
 
     private lateinit var mViewPager: ViewPager
     private lateinit var mTabLayout: TabLayout
@@ -47,15 +44,17 @@ class RegionFragment : Fragment(), DIAware {
     }
 
     private fun initView() {
-//        initToolbar()
-        val titles = region.children.map {
-            fragments.add(RegionDetailsFragment.newInstance(it.tid))
-            it.name
-        }
         val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
-            override fun getItem(p0: Int) = fragments[p0]
-            override fun getCount() = fragments.size
-            override fun getPageTitle(position: Int) = titles[position]
+            override fun getItem(p0: Int): Fragment {
+                var fragment = viewModel.fragments[p0]
+                if (fragment == null) {
+                    val tid = viewModel.region.children[p0].tid
+                    fragment = RegionDetailsFragment.newInstance(tid)
+                }
+                return fragment
+            }
+            override fun getCount() = viewModel.region.children.size
+            override fun getPageTitle(position: Int) = viewModel.region.children[position].name
         }
         mViewPager.adapter = mAdapter
         mTabLayout.setTabsFromPagerAdapter(mAdapter)

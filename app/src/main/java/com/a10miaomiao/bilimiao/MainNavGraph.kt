@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import kotlin.reflect.KClass
 
 
@@ -28,14 +29,26 @@ object MainNavGraph {
                 type = NavType.ParcelableType(RegionInfo::class.java)
             }
         }
+        val videoInfo = f<VideoInfoFragment> {
+            argument(args.avid) {
+                type = NavType.StringType
+            }
+            argument(args.bvid) {
+                type = NavType.StringType
+            }
+        }
     }
 
     object action {
         val id = id_counter++
         val home_to_region = dest.home to dest.region
+
+        val region_to_videoInfo = dest.region to dest.videoInfo
     }
 
     object args {
+        const val avid = "avid"
+        const val bvid = "bvid"
         const val region = "region"
     }
 

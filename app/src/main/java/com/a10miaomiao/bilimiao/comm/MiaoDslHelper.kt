@@ -9,6 +9,8 @@ import android.widget.ImageView
 import android.widget.ScrollView
 import androidx.annotation.IdRes
 import androidx.core.widget.NestedScrollView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.miao.binding.exception.BindingOnlySetException
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
 import com.bumptech.glide.Glide
@@ -30,7 +32,7 @@ fun RequestManager.loadImageUrl(value: String): RequestBuilder<Drawable> {
     return load(url)
 }
 
-fun ImageView._netword(
+fun ImageView._network(
     url: String?
 ) = miaoEffect(url) {
     if (url != null) {
@@ -44,6 +46,11 @@ fun ImageView._netword(
     }
 }
 
+var SwipeRefreshLayout._isRefreshing: Boolean
+    get() { throw BindingOnlySetException() }
+    set(value) = miaoEffect(value) {
+        isRefreshing = value
+    }
 
 fun Context.attr(resid: Int): Int {
     val typedValue = TypedValue()

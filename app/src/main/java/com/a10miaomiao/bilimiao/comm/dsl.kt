@@ -40,12 +40,17 @@ fun Context.miaoUi (block: MiaoUI.() -> View): MiaoUI {
     }
 }
 
+
 inline fun Fragment.miaoUi(noinline block: MiaoUI.() -> View): MiaoUI {
     return object : MiaoUI() {
         override val ctx: Context get() = requireContext()
         override val root = block()
     }
 }
+
+//inline fun MiaoUI.miaoCommponent(noinline block: MiaoUI.() -> View): View {
+//
+//}
 
 fun <T : ViewModel> newViewModelFactory(initializer: (() -> T)): ViewModelProvider.Factory {
     return object : ViewModelProvider.Factory {

@@ -1,10 +1,13 @@
 package com.a10miaomiao.bilimiao.comm
 
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.annotation.StyleRes
 import androidx.core.widget.NestedScrollView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -20,6 +23,27 @@ inline fun View.wrapInNestedScrollView(
     return view({ NestedScrollView(it) }, id) {
         add(this@wrapInNestedScrollView, lParams(width = matchParent, height = height))
     }.apply(initView)
+}
+
+inline fun View.wrapInSwipeRefreshLayout(
+    @IdRes id: Int = View.NO_ID,
+    height: Int = matchParent,
+    initView: SwipeRefreshLayout.() -> Unit = {}
+): SwipeRefreshLayout {
+    return view({ SwipeRefreshLayout(it) }, id) {
+        add(
+            this@wrapInSwipeRefreshLayout,
+            ViewGroup.LayoutParams(matchParent, height)
+        )
+    }.apply(initView)
+}
+
+inline fun View.progressBar(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: ProgressBar.() -> Unit = {}
+): ProgressBar {
+    return view({ ProgressBar(it) }, id).apply(initView)
 }
 
 inline fun View.viewPager(
