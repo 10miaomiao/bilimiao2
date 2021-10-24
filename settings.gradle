@@ -1,2 +1,5 @@
-include ':app', ':miaoandriod', ':player'
+include ':app'
+include ':miaoandriod'
+include ':ijkplayer-java'
+include ':player'
 include ':download'
