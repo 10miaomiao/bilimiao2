@@ -78,4 +78,52 @@
             android:textSize="16sp"/>
     </FrameLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:background="@color/black_80"
+        android:id="@+id/mErrorLayout"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/mErrorTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="播放器出现错误"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:layout_marginBottom="20dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/mErrorTryPlayTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="重试"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="16sp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginRight="40dp"/>
+
+            <TextView
+                android:id="@+id/mErrorClosePlayTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="取消"
+                android:textColor="@color/white_80"
+                android:textSize="16sp"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
 </FrameLayout>

@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -17,13 +15,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import cn.a10miaomiao.player.callback.MediaPlayerListener;
 import cn.a10miaomiao.player.callback.MediaController;
@@ -35,7 +27,6 @@ import tv.danmaku.ijk.media.player.IMediaPlayer.OnInfoListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnVideoSizeChangedListener;
-import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 /**
@@ -232,9 +223,7 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
                 if (mOnErrorListener.onError(mMediaPlayer, framework_err,
                         impl_err))
                     return true;
-            }
-
-            if (getWindowToken() != null) {
+            } else if (getWindowToken() != null) {
                 int message = framework_err == IMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK ?
                         R.string.video_error_text_invalid_progressive_playback : R.string.video_error_text_unknown;
 

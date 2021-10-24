@@ -123,6 +123,10 @@ class VideoPlayerDelegate(
     private val mMiniController = activity.mMiniController
     private val mVideoTitleText = activity.videoTitleText
     private val mSizeWatcher = activity.mSizeWatcher
+    private val mErrorLayout = activity.mErrorLayout
+    private val mErrorTv = activity.mErrorTv
+    private val mErrorTryPlayTv = activity.mErrorTryPlayTv
+    private val mErrorClosePlayTv = activity.mErrorClosePlayTv
 
     private var mPicInPicHelper: PicInPicHelper? = null
 
@@ -148,6 +152,14 @@ class VideoPlayerDelegate(
      * 初始化控制器
      */
     private fun initController() {
+        mErrorTryPlayTv.setOnClickListener {
+            loadDanmaku()
+            hideError()
+        }
+        mErrorClosePlayTv.setOnClickListener {
+            haederBehavior.hide()
+            stopPlay()
+        }
         mRoot.setOnClickListener {
             val mediaController = mPlayer.mediaController
             if (mediaController.isShowing) {
@@ -289,6 +301,7 @@ class VideoPlayerDelegate(
         mPlayer.setOnCompletionListener(onCompletionListener)
         mPlayer.setOnControllerEventsListener(onControllerEventsListener)
         mPlayer.setOnGestureEventsListener(onGestureEventsListener)
+        mPlayer.setOnErrorListener(onErrorListener)
         playerService.setUserAgent("Bilibili Freedoooooom/MarkII")
         playerService.setVideoPlayerView(mPlayer)
     }
@@ -370,6 +383,7 @@ class VideoPlayerDelegate(
      * 加载弹幕
      */
     private fun loadDanmaku() {
+        hideError()
         mController.setTitle(title)
         showText("装载弹幕资源")
         getBiliDanmukuStream().map {
@@ -428,7 +442,7 @@ class VideoPlayerDelegate(
                     sources = it
                     startPlay()
                 }, {
-                    showText(it.message ?: "网络错误")
+                    showError(it.message ?: "无法连接到御坂网络")
                 })
     }
 
@@ -444,7 +458,7 @@ class VideoPlayerDelegate(
             ArrayList<VideoSource>().apply {
                 for (durl in it.durl) {
                     this += VideoSource().apply {
-                        uri = Uri.parse(durl.url.replace("https://", "http://")) // 简单粗暴
+                        uri = Uri.parse(durl.url)
                         length = durl.length
                         size = durl.size
                     }
@@ -567,6 +581,16 @@ class VideoPlayerDelegate(
         true
     }
 
+    private val onErrorListener = IMediaPlayer.OnErrorListener { iMediaPlayer, framework_err, impl_err ->
+        val message = if (framework_err == IMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK) {
+            cn.a10miaomiao.player.R.string.video_error_text_invalid_progressive_playback
+        } else {
+            cn.a10miaomiao.player.R.string.video_error_text_unknown
+        }
+        showError(activity.resources.getString(message))
+        true
+    }
+
     /**
      * 弹幕加载回调
      */
@@ -586,10 +610,8 @@ class VideoPlayerDelegate(
         }
 
         override fun updateTimer(timer: DanmakuTimer) {
-            if (abs(timer.currMillisecond - mPlayer.currentPosition) > 500L) {
-                mDanmaku.post {
-                    timer.update(mPlayer.currentPosition)
-                }
+            if (abs(timer.currMillisecond - mPlayer.currentPosition) > 2000L) {
+                mDanmaku.start(mPlayer.currentPosition)
             }
         }
     }
@@ -708,6 +730,15 @@ class VideoPlayerDelegate(
 
     private fun hideProgressText() {
         mProgressLayout.visibility = View.GONE
+    }
+
+    private fun showError(message: String) {
+        mErrorLayout.visibility = View.VISIBLE
+        mErrorTv.text = message
+    }
+
+    private fun hideError() {
+        mErrorLayout.visibility = View.GONE
     }
 
     fun onBackPressed(): Boolean {
