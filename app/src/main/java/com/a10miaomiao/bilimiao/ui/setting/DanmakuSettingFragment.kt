@@ -1,9 +1,12 @@
 package com.a10miaomiao.bilimiao.ui.setting
 
 import android.arch.lifecycle.Observer
-import android.content.SharedPreferences
+import android.content.*
 import android.os.Bundle
+import android.preference.Preference
+import android.preference.PreferenceManager
 import android.preference.PreferenceScreen
+import android.preference.SwitchPreference
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +24,11 @@ import org.jetbrains.anko.verticalLayout
 
 class DanmakuSettingFragment : SwipeBackFragment() {
 
-    private val ID_PREFS_FRAME = 234324
+    companion object {
+        const val UPDATE_ACTION = "com.a10miaomiao.bilimiao.ui.setting.DanmakuSettingFragment.UPDATE"
+    }
+
+    private val ID_PREFS_FRAME = 3
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = MainActivity.of(context!!).dynamicTheme(this) { createUI().view }
@@ -45,6 +52,7 @@ class DanmakuSettingFragment : SwipeBackFragment() {
                 .commit()
     }
 
+
     private fun createUI() = UI {
         verticalLayout {
             headerView {
@@ -61,31 +69,51 @@ class DanmakuSettingFragment : SwipeBackFragment() {
         }
     }
 
-    class PreferenceFragment : android.preference.PreferenceFragment() {
+    class PreferenceFragment : android.preference.PreferenceFragment(),
+        SharedPreferences.OnSharedPreferenceChangeListener {
+
+        val danmakuShow by lazy {
+            findPreference("danmaku_show") as SwitchPreference
+        }
+
+        private val mBroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                update(context)
+            }
+        }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.preference_danmaku_setting)
+            preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+            val intentFilter = IntentFilter()
+            intentFilter.addAction(UPDATE_ACTION)
+            activity.registerReceiver(mBroadcastReceiver, intentFilter)
         }
 
-        override fun onResume() {
-            preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(
-                    MainActivity.of(activity).videoPlayerDelegate
-            )
-            super.onResume()
-        }
-
-        override fun onPause() {
-            preferenceManager.sharedPreferences.unregisterOnSharedPreferenceChangeListener(
-                    MainActivity.of(activity).videoPlayerDelegate
-            )
-            super.onPause()
+        override fun onDestroy() {
+            super.onDestroy()
+            activity.unregisterReceiver(mBroadcastReceiver)
+            preferenceManager.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
         }
 
         override fun onPreferenceTreeClick(preferenceScreen: PreferenceScreen?, preference: android.preference.Preference?): Boolean {
             return false
         }
 
+        fun update(context: Context) {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            danmakuShow.isChecked = prefs.getBoolean("danmaku_show", true)
+        }
+
+        override fun onSharedPreferenceChanged(sp: SharedPreferences?, key: String) {
+            if ("danmaku" in key) {
+                MainActivity.of(activity).videoPlayerDelegate.updateDanmukuSetting()
+            }
+        }
+
     }
+
+
 
 }

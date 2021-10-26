@@ -2,9 +2,9 @@ package com.a10miaomiao.bilimiao.ui.widget
 
 import android.content.Context
 import android.graphics.PorterDuff
-import android.os.Build
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
@@ -14,6 +14,7 @@ import cn.a10miaomiao.player.callback.MediaController
 import cn.a10miaomiao.player.callback.MediaPlayerListener
 import com.a10miaomiao.bilimiao.R
 import kotlinx.android.synthetic.main.layout_mini_media_controller.view.*
+import kotlin.reflect.KFunction1
 
 
 class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, View.OnTouchListener {
@@ -37,9 +38,7 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
     private fun initView() {
         View.inflate(context, R.layout.layout_mini_media_controller, this)
         mToolbar.setNavigationIcon(R.drawable.ic_close_white_24dp)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mToolbar.inflateMenu(R.menu.mini_player_toolbar)
-        }
+        mToolbar.inflateMenu(R.menu.mini_player_toolbar)
         mPauseButton.setOnClickListener(this)
 
         mSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -110,7 +109,7 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
         mZoomIv.setOnClickListener(onClickListener)
     }
 
-    fun setOnMenuItemClickListener(onMenuItemClickListener: Toolbar.OnMenuItemClickListener) {
+    fun setOnMenuItemClickListener(onMenuItemClickListener: KFunction1<MenuItem, Boolean>) {
         mToolbar.setOnMenuItemClickListener(onMenuItemClickListener)
     }
 

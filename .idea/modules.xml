@@ -3,8 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bilimiao2.iml" filepath="$PROJECT_DIR$/.idea/modules/bilimiao2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/DanmakuFlameMaster/bilimiao2.DanmakuFlameMaster.iml" filepath="$PROJECT_DIR$/.idea/modules/DanmakuFlameMaster/bilimiao2.DanmakuFlameMaster.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bilimiao2.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bilimiao2.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/download/bilimiao2.download.iml" filepath="$PROJECT_DIR$/.idea/modules/download/bilimiao2.download.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ijkplayer-java/bilimiao2.ijkplayer-java.iml" filepath="$PROJECT_DIR$/.idea/modules/ijkplayer-java/bilimiao2.ijkplayer-java.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/miaoandriod/bilimiao2.miaoandriod.iml" filepath="$PROJECT_DIR$/.idea/modules/miaoandriod/bilimiao2.miaoandriod.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/player/bilimiao2.player.iml" filepath="$PROJECT_DIR$/.idea/modules/player/bilimiao2.player.iml" />
     </modules>

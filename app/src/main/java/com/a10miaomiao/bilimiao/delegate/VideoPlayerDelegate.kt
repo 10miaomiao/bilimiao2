@@ -8,16 +8,10 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.media.AudioManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.IBinder
+import android.os.*
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import cn.a10miaomiao.download.BiliVideoEntry
 import cn.a10miaomiao.download.DownloadFlieHelper
 import cn.a10miaomiao.player.*
@@ -31,6 +25,8 @@ import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.ui.MainActivity
 import com.a10miaomiao.bilimiao.ui.commponents.behavior.HeaderBehavior
 import com.a10miaomiao.bilimiao.ui.player.QualityPopupWindow
+import com.a10miaomiao.bilimiao.ui.setting.DanmakuSettingFragment
+import com.a10miaomiao.bilimiao.ui.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.utils.ConstantUtil
 import com.a10miaomiao.bilimiao.utils.DebugMiao
 import com.a10miaomiao.bilimiao.utils.getStatusBarHeight
@@ -52,12 +48,11 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 
 class VideoPlayerDelegate(
         private var activity: AppCompatActivity
-) : SharedPreferences.OnSharedPreferenceChangeListener {
+) {
     private val TAG = VideoPlayerDelegate::class.simpleName
 
     // 播放器player_background
@@ -93,6 +88,16 @@ class VideoPlayerDelegate(
     private var lastPosition = 0L //记录播放位置
 
     private var danmakuContext: DanmakuContext? = null
+    private var danmakuTime = object : DanmakuTimer() {
+        private var lastTime = 0L
+        override fun currMillisecond(): Long {
+            return mPlayer.currentPosition
+        }
+        override fun update(curr: Long): Long {
+            lastInterval = curr - lastTime
+            return lastInterval
+        }
+    }
     private var disposable: Disposable? = null
 
     private val width by lazy {
@@ -177,6 +182,10 @@ class VideoPlayerDelegate(
             } else {
                 mDanmaku.hide()
             }
+            val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+            prefs.edit().putBoolean("danmaku_show", it).apply()
+            val intent = Intent(DanmakuSettingFragment.UPDATE_ACTION)
+            activity.sendBroadcast(intent)
         }
         mController.setVideoBackEvent {
             isMiniPlayer.value = true
@@ -201,14 +210,10 @@ class VideoPlayerDelegate(
         mMiniController.setPadding(0, statusBarHeight, 0, 0)
         mVideoTitleText.layoutParams.height = statusBarHeight
 
-        mMiniController.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.mini_window -> {
-                    mPicInPicHelper?.enterPictureInPictureMode()
-                }
-            }
-            true
-        })
+        // 展开菜单
+        mController.inflateMore(R.menu.mini_player_toolbar)
+        mController.setOnMoreMenuItemClickListener(this::onMenuItemClick)
+        mMiniController.setOnMenuItemClickListener(this::onMenuItemClick)
 
         mSizeWatcher.onSizeChangedListener = {
             mPlayer.post { mPlayer.requestLayout() }
@@ -258,6 +263,11 @@ class VideoPlayerDelegate(
     private fun initDanmakuContext() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         var scaleTextSize = prefs.getString("danmaku_fontsize", "1").toFloatOrNull() ?: 1f
+        val danmakuShow = prefs.getBoolean("danmaku_show", true)
+        val danmakuR2LShow = prefs.getBoolean("danmaku_r2l_show", true)
+        val danmakuFTShow = prefs.getBoolean("danmaku_ft_show", true)
+        val danmakuFBShow = prefs.getBoolean("danmaku_fb_show", true)
+        val danmakuSpecialShow = prefs.getBoolean("danmaku_special_show", true)
         //设置最大显示行数
         var maxLinesPair = mapOf<Int, Int>()
         //设置是否禁止重叠
@@ -279,14 +289,23 @@ class VideoPlayerDelegate(
         }
         //设置弹幕样式
         danmakuContext?.apply {
+            ftDanmakuVisibility = danmakuFTShow
+            fbDanmakuVisibility = danmakuFBShow
+            r2LDanmakuVisibility = danmakuR2LShow
+            specialDanmakuVisibility = danmakuSpecialShow
 //            setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f)
 //            isDuplicateMergingEnabled = false
-//            setScrollSpeedFactor(2.0f)
+            setScrollSpeedFactor(1.5f)
             setScaleTextSize(scaleTextSize)
             setMaximumLines(maxLinesPair)
 //            preventOverlapping(overlappingEnablePair)
         }
-
+        mController.setDanmakuShow(danmakuShow)
+        if (danmakuShow) {
+            mDanmaku.show()
+        } else {
+            mDanmaku.hide()
+        }
     }
 
     /**
@@ -306,10 +325,36 @@ class VideoPlayerDelegate(
         playerService.setVideoPlayerView(mPlayer)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if ("danmaku" in key ?: "") {
-            initDanmakuContext()
+    private fun onMenuItemClick(menuItem: MenuItem): Boolean {
+        if (isMiniPlayer.value == false) {
+            isMiniPlayer.value = true
         }
+        when (menuItem.itemId) {
+            R.id.mini_window -> {
+                mPicInPicHelper?.enterPictureInPictureMode()
+            }
+            R.id.video_setting -> {
+                val mainActivity = MainActivity.of(activity)
+                if (mainActivity.topFragment !is VideoSettingFragment) {
+                    mainActivity.start(
+                        VideoSettingFragment()
+                    )
+                }
+            }
+            R.id.danmuku_setting -> {
+                val mainActivity = MainActivity.of(activity)
+                if (mainActivity.topFragment !is DanmakuSettingFragment) {
+                    mainActivity.start(
+                        DanmakuSettingFragment()
+                    )
+                }
+            }
+        }
+        return true
+    }
+
+    fun updateDanmukuSetting() {
+        initDanmakuContext()
     }
 
     fun playBangumi(sid: String, epid: String, cid: String, title: String) {
@@ -386,10 +431,15 @@ class VideoPlayerDelegate(
         hideError()
         mController.setTitle(title)
         showText("装载弹幕资源")
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        val isDanmakuTimeSync = prefs.getBoolean("danmaku_time_sync", false)
         getBiliDanmukuStream().map {
             val loader = DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_BILI)
             loader.load(it)
             val parser = BiliDanmukuParser()
+            if (isDanmakuTimeSync) {
+                parser.timer = danmakuTime
+            }
             val dataSource = loader.dataSource
             parser.load(dataSource)
             parser
@@ -518,6 +568,7 @@ class VideoPlayerDelegate(
                             mPicInPicHelper?.updatePictureInPictureActions()
                         }
                     }
+//                    syncTimer()
                 }
         historyDisposable = Observable.interval(10, TimeUnit.SECONDS)
                 .subscribe {
@@ -565,8 +616,6 @@ class VideoPlayerDelegate(
         if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_START) {
             if (mDanmaku != null && mDanmaku.isPrepared) {
                 mDanmaku.pause()
-//                if (mBufferingIndicator != null)
-//                    mBufferingIndicator.setVisibility(View.VISIBLE);
             }
             showText("缓冲中")
         } else if (what == IMediaPlayer.MEDIA_INFO_BUFFERING_END) {
@@ -575,9 +624,9 @@ class VideoPlayerDelegate(
                 mDanmaku.start(mPlayer.currentPosition)
             }
             hideProgressText()
-//            if (mBufferingIndicator != null)
-//                mBufferingIndicator.setVisibility(View.GONE);
+//
         }
+//        mHandler.sendEmptyMessageDelayed(SYNC,200);
         true
     }
 
@@ -610,9 +659,6 @@ class VideoPlayerDelegate(
         }
 
         override fun updateTimer(timer: DanmakuTimer) {
-            if (abs(timer.currMillisecond - mPlayer.currentPosition) > 2000L) {
-                mDanmaku.start(mPlayer.currentPosition)
-            }
         }
     }
 
@@ -652,6 +698,7 @@ class VideoPlayerDelegate(
         override fun OnVideoResume() {
             if (mDanmaku != null && mDanmaku.isPaused()) {
                 mDanmaku.resume()
+//                mHandler.sendEmptyMessageDelayed(SYNC,200);
             }
         }
     }

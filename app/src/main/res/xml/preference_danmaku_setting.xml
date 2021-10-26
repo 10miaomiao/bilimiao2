@@ -1,14 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <PreferenceCategory android:title="显示">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="danmaku_show"
+            android:summary=""
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="弹幕显示" />
 
-    <ListPreference
-        android:dialogTitle="选择你的尺寸"
-        android:key="danmaku_fontsize"
-        android:summary="想要多大的"
-        android:title="字体大小"
-        android:entries="@array/danmaku_fontsize"
-        android:entryValues="@array/danmaku_fontsize_values"
-        android:defaultValue="1"/>
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="danmaku_r2l_show"
+            android:summary=""
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="滚动弹幕显示" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="danmaku_ft_show"
+            android:summary=""
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="顶部幕显示" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="danmaku_fb_show"
+            android:summary=""
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="底部弹幕显示" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="danmaku_special_show"
+            android:summary=""
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="高级弹幕显示" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="字体">
+        <ListPreference
+            android:dialogTitle="选择你的尺寸"
+            android:key="danmaku_fontsize"
+            android:summary="想要多大的"
+            android:title="字体大小"
+            android:entries="@array/danmaku_fontsize"
+            android:entryValues="@array/danmaku_fontsize_values"
+            android:defaultValue="1"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="高级">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="danmaku_time_sync"
+            android:summary="如果弹幕抖动厉害可以关掉，修改后重新播放视频生效"
+            android:summaryOff=""
+            android:summaryOn=""
+            android:title="弹幕时间校准" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

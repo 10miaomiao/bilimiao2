@@ -1,5 +1,6 @@
 include ':app'
 include ':miaoandriod'
 include ':ijkplayer-java'
+include ':DanmakuFlameMaster'
 include ':player'
 include ':download'

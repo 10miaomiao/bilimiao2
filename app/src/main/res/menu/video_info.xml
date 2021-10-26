@@ -12,4 +12,10 @@
         android:title="用b站客户端打开"
         />
 
+    <item
+        android:id="@+id/openBybrowser"
+        android:title="用浏览器打开打开"
+        />
+
+
 </menu>

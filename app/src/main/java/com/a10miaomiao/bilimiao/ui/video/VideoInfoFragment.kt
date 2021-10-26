@@ -187,6 +187,12 @@ class VideoInfoFragment : SwipeBackFragment() {
                             intent.data = Uri.parse(url)
                             startActivity(intent)
                         }
+                    } else if (it.itemId == R.id.openBybrowser) {
+                        val id = viewModel.id
+                        var intent = Intent(Intent.ACTION_VIEW)
+                        var url = "http://www.bilibili.com/video/av$id"
+                        intent.data = Uri.parse(url)
+                        startActivity(intent)
                     }
                     true
                 })

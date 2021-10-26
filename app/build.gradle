@@ -8,8 +8,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 44
-        versionName "2.0.5"
+        versionCode 46
+        versionName "2.0.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         flavorDimensions "default"
     }
@@ -87,10 +87,11 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
 
     // 弹幕引擎
-    implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
-    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
-    implementation 'com.github.ctiao:ndkbitmap-armv5:0.9.12'
-    implementation 'com.github.ctiao:ndkbitmap-x86:0.9.12'
+    implementation project(':DanmakuFlameMaster')
+//    implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
+//    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
+//    implementation 'com.github.ctiao:ndkbitmap-armv5:0.9.21'
+//    implementation 'com.github.ctiao:ndkbitmap-x86:0.9.21'
 
     // 其它
     implementation 'com.google.android:flexbox:1.0.0'

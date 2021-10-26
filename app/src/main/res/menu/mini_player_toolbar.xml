@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="小窗播放"
-        android:id="@+id/mini_window" />
+    <item android:title="播放设置"
+        android:id="@+id/video_setting" />
+
+    <item android:title="弹幕设置"
+        android:id="@+id/danmuku_setting" />
 
 </menu>

@@ -3,13 +3,21 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_arrow_back_white_24dp.xml" value="0.28489583333333335" />
         <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_baseline_link_24.xml" value="0.15989583333333332" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/layout/include_palyer.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/layout/layout_expandable.xml" value="0.14375" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/layout/layout_toolbar.xml" value="0.18070652173913043" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/menu-v26/mini_player_toolbar.xml" value="1.3464285714285715" />
         <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/menu/comment_order.xml" value="0.17135416666666667" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/menu/mini_player_toolbar.xml" value="0.26875" />
         <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/menu/rank_order.xml" value="0.17135416666666667" />
-        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/xml/preference_danmaku_setting.xml" value="0.15" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/menu/video_info.xml" value="0.26875" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/xml/preference_danmaku_setting.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/xml/preference_setting.xml" value="0.15" />
         <entry key="..\:/AndroidStudioProjects/bilimiao2/app/src/main/res/xml/preference_video_setting.xml" value="0.15" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/player/src/main/res/drawable/ic_baseline_more_horiz_white_24.xml" value="0.28489583333333335" />
+        <entry key="..\:/AndroidStudioProjects/bilimiao2/player/src/main/res/layout/layout_media_controller.xml" value="0.16666666666666666" />
       </map>
     </option>
   </component>

@@ -26,7 +26,7 @@ import org.jetbrains.anko.verticalLayout
 
 class VideoSettingFragment : SwipeBackFragment() {
 
-    private val ID_PREFS_FRAME = 234324
+    private val ID_PREFS_FRAME = 2
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = MainActivity.of(context!!).dynamicTheme(this) { createUI().view }
