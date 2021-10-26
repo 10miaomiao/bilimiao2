@@ -29,7 +29,15 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/default_medium_text_size" />
+            android:textSize="@dimen/default_medium_text_size"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/mMoreIv"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_baseline_more_horiz_white_24"
+            android:padding="@dimen/default_general_margin"/>
 
     </LinearLayout>
 

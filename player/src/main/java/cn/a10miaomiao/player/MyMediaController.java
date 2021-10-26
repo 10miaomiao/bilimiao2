@@ -5,9 +5,12 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v7.view.ContextThemeWrapper;
+import android.support.v7.widget.PopupMenu;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.DisplayCutout;
@@ -42,6 +45,7 @@ public class MyMediaController extends FrameLayout implements MediaController
     private LinearLayout mMediaMontrollerControls;
     private ImageView mBackIV;
     private TextView mTitleTV;
+    private ImageView mMoreIv;
     private ImageView mTvPlay;
     private ImageView mPauseButton;
     private ImageView mOpenLockLeftIV;
@@ -54,6 +58,8 @@ public class MyMediaController extends FrameLayout implements MediaController
     private ImageView mDanmakuSwitchIV;
     private LinearLayout mLockLayout;
     private LinearLayout mQualityLayout;
+
+    private PopupMenu mMorePopupMenu;
 
     private Fun2 visibilityChangedEvent;
 
@@ -77,6 +83,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         mMediaMontrollerControls = findViewById(R.id.mMediaMontrollerControls);
         mBackIV = findViewById(R.id.mBackIV);
         mTitleTV = findViewById(R.id.mTitleTV);
+        mMoreIv = findViewById(R.id.mMoreIv);
         mTvPlay = findViewById(R.id.mTvPlay);
         mPauseButton = findViewById(R.id.mPauseButton);
         mOpenLockLeftIV = findViewById(R.id.mOpenLockLeftIV);
@@ -101,17 +108,22 @@ public class MyMediaController extends FrameLayout implements MediaController
                     videoBackEvent.accept();
             }
         });
+        Context darkThemeContext = new ContextThemeWrapper(getContext(), R.style.DarkTheme);
+        mMorePopupMenu = new PopupMenu(
+                darkThemeContext,
+                mMoreIv
+        );
+        mMoreIv.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMorePopupMenu.show();
+            }
+        });
         mDanmakuSwitchLayout.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mDanmakuShow) {
-                    mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_closed);
-                    mDanmakuSwitchTV.setText("弹幕关");
-                } else {
-                    mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_open);
-                    mDanmakuSwitchTV.setText("弹幕开");
-                }
                 mDanmakuShow = !mDanmakuShow;
+                setDanmakuShow(mDanmakuShow);
                 if (danmakuSwitchEvent != null)
                     danmakuSwitchEvent.accept(mDanmakuShow);
             }
@@ -166,6 +178,14 @@ public class MyMediaController extends FrameLayout implements MediaController
         updatePausePlay();
         mHeaderLayout.setOnTouchListener(this);
         mMediaMontrollerControls.setOnTouchListener(this);
+    }
+
+    public void inflateMore (@MenuRes int menuRes) {
+        mMorePopupMenu.inflate(menuRes);
+    }
+
+    public void setOnMoreMenuItemClickListener(@Nullable PopupMenu.OnMenuItemClickListener listener) {
+        mMorePopupMenu.setOnMenuItemClickListener(listener);
     }
 
     public void lock() {
@@ -241,6 +261,17 @@ public class MyMediaController extends FrameLayout implements MediaController
 
     public void setVisibilityChangedEvent(Fun2 visibilityChangedEvent) {
         this.visibilityChangedEvent = visibilityChangedEvent;
+    }
+
+    public void setDanmakuShow(boolean show) {
+        if (show) {
+            mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_open);
+            mDanmakuSwitchTV.setText("弹幕开");
+        } else {
+            mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_closed);
+            mDanmakuSwitchTV.setText("弹幕关");
+        }
+        mDanmakuShow = show;
     }
 
     @Override
