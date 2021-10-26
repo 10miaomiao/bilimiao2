@@ -89,9 +89,9 @@ dependencies {
     // 弹幕引擎
     implementation project(':DanmakuFlameMaster')
 //    implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
-//    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
-//    implementation 'com.github.ctiao:ndkbitmap-armv5:0.9.21'
-//    implementation 'com.github.ctiao:ndkbitmap-x86:0.9.21'
+    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
+    implementation 'com.github.ctiao:ndkbitmap-armv5:0.9.21'
+    implementation 'com.github.ctiao:ndkbitmap-x86:0.9.21'
 
     // 其它
     implementation 'com.google.android:flexbox:1.0.0'
@@ -99,7 +99,7 @@ dependencies {
     implementation project(':miaoandriod')
     implementation project(':player')
     implementation project(':download')
-    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
+    implementation project(':ijkplayer-java')
 
     // 百度统计
     implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
