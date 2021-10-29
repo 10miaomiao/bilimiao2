@@ -94,9 +94,6 @@ fun ViewManager.commentItemView(
 
         include<ExpandableTextView>(R.layout.layout_expandable) {
             content {
-                if (text.isNotBlank()) {
-                    return@content
-                }
                 setContent(BiliUrlMatcher.customString(it.message))
                 tag = it.emote
 //                text = it.message
