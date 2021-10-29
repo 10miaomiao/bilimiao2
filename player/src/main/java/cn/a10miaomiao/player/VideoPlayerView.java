@@ -53,19 +53,19 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
 
     public static final int STATE_PREPARING = 1;
 
-    private static final int STATE_PREPARED = 2;
+    public static final int STATE_PREPARED = 2;
 
-    private static final int STATE_PLAYING = 3;
+    public static final int STATE_PLAYING = 3;
 
-    private static final int STATE_PAUSED = 4;
+    public static final int STATE_PAUSED = 4;
 
-    private static final int STATE_PLAYBACK_COMPLETED = 5;
+    public static final int STATE_PLAYBACK_COMPLETED = 5;
 
-    private static final int STATE_SUSPEND = 6;
+    public static final int STATE_SUSPEND = 6;
 
-    private static final int STATE_RESUME = 7;
+    public static final int STATE_RESUME = 7;
 
-    private static final int STATE_SUSPEND_UNSUPPORTED = 8;
+    public static final int STATE_SUSPEND_UNSUPPORTED = 8;
 
     private Uri mUri;
 
@@ -73,9 +73,9 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
 
     private String mUserAgent;
 
-    int mCurrentState = STATE_IDLE;
+    public int mCurrentState = STATE_IDLE;
 
-    int mTargetState = STATE_IDLE;
+    public int mTargetState = STATE_IDLE;
 
     private int mVideoLayout = VIDEO_LAYOUT_SCALE;
 
@@ -695,12 +695,12 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
         return 0;
     }
 
-    //    @Override
-//    public void seekTo2(long msec){
-//        if (mSources == null)
-//            return;
-//
-//    }
+    @Override
+    public int getState() {
+        return mCurrentState;
+    }
+
+
     boolean seekToFlag = false;
 
     @Override

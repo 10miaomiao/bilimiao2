@@ -112,9 +112,13 @@ class VideoPlayerDelegate(
     val haederBehavior by lazy {
         HeaderBehavior.from(activity.headerVideoBox)
     }
+    private val userStore by lazy {
+        Store.from(activity).userStore
+    }
     private val playerStore by lazy {
         Store.from(activity).playerStore
     }
+
 
     // 组件
     private val mRoot = activity.mRoot
@@ -158,8 +162,7 @@ class VideoPlayerDelegate(
      */
     private fun initController() {
         mErrorTryPlayTv.setOnClickListener {
-            loadDanmaku()
-            hideError()
+            restartPlay(mPlayer.currentPosition)
         }
         mErrorClosePlayTv.setOnClickListener {
             haederBehavior.hide()
@@ -197,6 +200,9 @@ class VideoPlayerDelegate(
             popupWindow.onCheckItemPositionChanged = this::changedQuality
             popupWindow.show()
         }
+
+        mController.setRestartPlayEvent(this::restartPlay)
+        mMiniController.restartPlayEvent = this::restartPlay
 
         mMiniController.setMediaPlayer(mPlayer)
         mMiniController.setBackOnClick(View.OnClickListener {
@@ -452,7 +458,10 @@ class VideoPlayerDelegate(
                 mDanmaku.enableDanmakuDrawingCache(false)
                 mDanmaku.setCallback(onDrawHandlerCallback)
             }, {
-                showText("装载弹幕失败")
+                it.printStackTrace()
+                activity.runOnUiThread {
+                    showText("装载弹幕失败")
+                }
             })
         }
     }
@@ -545,14 +554,24 @@ class VideoPlayerDelegate(
         }
     }
 
+    fun restartPlay (position: Long) {
+        lastPosition = position
+        if (mPlayer != null && mPlayer.isDrawingCacheEnabled) {
+            mPlayer.destroyDrawingCache()
+        }
+        mDanmaku?.release()
+        playerService.release(false)
+        loadDanmaku()
+        hideError()
+    }
+
     fun startPlay() {
         hideProgressText()
-        lastPosition = mPlayer?.currentPosition ?: 0
         playerService.setVideoURI(sources, if (type == ConstantUtil.VIDEO) mapOf(
                 "Referer" to "https://www.bilibili.com/video/av$aid",
                 "User-Agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
         ) else mapOf())
-        if (lastPosition != 0L) {
+        if (lastPosition != 0L && lastPosition < mPlayer.duration) {
             mPlayer.seekTo(lastPosition)
         }
 //        historyReport()
@@ -568,12 +587,14 @@ class VideoPlayerDelegate(
                             mPicInPicHelper?.updatePictureInPictureActions()
                         }
                     }
-//                    syncTimer()
                 }
-        historyDisposable = Observable.interval(10, TimeUnit.SECONDS)
+        historyDisposable?.dispose()
+        if (userStore.user != null) {
+            historyDisposable = Observable.interval(10, TimeUnit.SECONDS)
                 .subscribe {
                     historyReport()
                 }
+        }
     }
 
     fun stopPlay() {
@@ -731,6 +752,11 @@ class VideoPlayerDelegate(
         override fun onXScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float): Boolean {
             mController.setDragging(true)
             current -= (distanceX * 100).toLong()
+            if (current > mPlayer.duration) {
+                current = mPlayer.duration
+            } else if (current < 0) {
+                current = 0
+            }
             showCenterText(MyMediaController.generateTime(current))
             mController.setProgress(current)
             return false
@@ -824,6 +850,7 @@ class VideoPlayerDelegate(
         if (mPlayer != null) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             if (!prefs.getBoolean("player_background", true)) {
+                lastPosition = mPlayer.currentPosition
                 mPlayer.pause()
             }
         }

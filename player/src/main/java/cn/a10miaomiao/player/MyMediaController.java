@@ -36,7 +36,7 @@ public class MyMediaController extends FrameLayout implements MediaController
     private boolean mDragging;
     private long mDuration = 0L;
     private boolean mDanmakuShow = true;
-    private Fun2 danmakuSwitchEvent;
+    private Fun2<Boolean> danmakuSwitchEvent;
     private Fun videoBackEvent;
     private Fun qualityEvent;
     private boolean isLocked = false;
@@ -61,7 +61,8 @@ public class MyMediaController extends FrameLayout implements MediaController
 
     private PopupMenu mMorePopupMenu;
 
-    private Fun2 visibilityChangedEvent;
+    private Fun2<Long> restartPlayEvent;
+    private Fun2<Boolean> visibilityChangedEvent;
 
     public MyMediaController(@NonNull Context context) {
         super(context);
@@ -166,8 +167,16 @@ public class MyMediaController extends FrameLayout implements MediaController
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mDragging = false;
                 try {
-                    if (mPlayer != null)
-                        mPlayer.seekTo(mDuration * seekBar.getProgress() / 1000L);
+                    if (mPlayer != null) {
+                        int state = mPlayer.getState();
+                        if (state == VideoPlayerView.STATE_PLAYBACK_COMPLETED) {
+                            if (restartPlayEvent != null) {
+                                restartPlayEvent.accept(Long.valueOf(seekBar.getProgress()));
+                            }
+                        } else {
+                            mPlayer.seekTo(mDuration * seekBar.getProgress() / 1000L);
+                        }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -247,7 +256,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         mTitleTV.setText(title);
     }
 
-    public void setDanmakuSwitchEvent(Fun2 danmakuSwitchEvent) {
+    public void setDanmakuSwitchEvent(Fun2<Boolean> danmakuSwitchEvent) {
         this.danmakuSwitchEvent = danmakuSwitchEvent;
     }
 
@@ -259,7 +268,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         this.qualityEvent = qualityEvent;
     }
 
-    public void setVisibilityChangedEvent(Fun2 visibilityChangedEvent) {
+    public void setVisibilityChangedEvent(Fun2<Boolean> visibilityChangedEvent) {
         this.visibilityChangedEvent = visibilityChangedEvent;
     }
 
@@ -283,9 +292,15 @@ public class MyMediaController extends FrameLayout implements MediaController
             mPauseButton.setImageResource(R.drawable.bili_player_play_can_play);
             mTvPlay.setImageResource(R.drawable.ic_tv_play);
         } else {
-            mPlayer.start();
-            mPauseButton.setImageResource(R.drawable.bili_player_play_can_pause);
-            mTvPlay.setImageResource(R.drawable.ic_tv_stop);
+            if (mPlayer.getState() == VideoPlayerView.STATE_PLAYBACK_COMPLETED) {
+                if (restartPlayEvent != null) {
+                    restartPlayEvent.accept(0L);
+                }
+            } else {
+                mPlayer.start();
+                mPauseButton.setImageResource(R.drawable.bili_player_play_can_pause);
+                mTvPlay.setImageResource(R.drawable.ic_tv_stop);
+            }
         }
     }
 
@@ -356,14 +371,18 @@ public class MyMediaController extends FrameLayout implements MediaController
         return true;
     }
 
+    public void setRestartPlayEvent(Fun2<Long> restartPlayEvent) {
+        this.restartPlayEvent = restartPlayEvent;
+    }
+
     @FunctionalInterface
     public interface Fun {
         void accept();
     }
 
     @FunctionalInterface
-    public interface Fun2 {
-        void accept(boolean b);
+    public interface Fun2<T> {
+        void accept(T b);
     }
 
     public void setHeaderLayoutPadding(int left, int top, int right, int bottom) {

@@ -56,6 +56,10 @@ class DownloadDelegate(
         activity.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
     }
 
+    fun onDestroy() {
+        activity.unbindService(mConnection)
+    }
+
     fun getPlayUrl(entry: BiliVideoEntry): Observable<BiliVideoPlayUrlEntry> {
         val pageData = entry.page_data
         val playerCodecConfigList = listOf(

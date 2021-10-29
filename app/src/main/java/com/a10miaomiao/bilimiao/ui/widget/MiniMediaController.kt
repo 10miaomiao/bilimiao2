@@ -10,9 +10,11 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import cn.a10miaomiao.player.MyMediaController
+import cn.a10miaomiao.player.VideoPlayerView
 import cn.a10miaomiao.player.callback.MediaController
 import cn.a10miaomiao.player.callback.MediaPlayerListener
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.utils.DebugMiao
 import kotlinx.android.synthetic.main.layout_mini_media_controller.view.*
 import kotlin.reflect.KFunction1
 
@@ -20,6 +22,8 @@ import kotlin.reflect.KFunction1
 class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, View.OnTouchListener {
 
     var mMediaPlayer: MediaPlayerListener? = null
+    var restartPlayEvent: ((Long) -> Unit)? = null
+
     private var mDuration = 0L
     private var mDragging = false
 
@@ -50,7 +54,12 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 mDragging = false
                 try {
-                    mMediaPlayer?.seekTo(mDuration * seekBar.progress / 1000L)
+                    val state = mMediaPlayer?.state ?: VideoPlayerView.STATE_IDLE
+                    if (state == VideoPlayerView.STATE_PLAYBACK_COMPLETED) {
+                        restartPlayEvent?.invoke(seekBar.progress.toLong())
+                    } else {
+                        mMediaPlayer?.seekTo(mDuration * seekBar.progress / 1000L)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -92,8 +101,12 @@ class MiniMediaController : FrameLayout, MediaController, View.OnClickListener, 
             mPlayer.pause()
             mPauseButton.setImageResource(cn.a10miaomiao.player.R.drawable.bili_player_play_can_play)
         } else {
-            mPlayer.start()
-            mPauseButton.setImageResource(cn.a10miaomiao.player.R.drawable.bili_player_play_can_pause)
+            if (mPlayer.state == VideoPlayerView.STATE_PLAYBACK_COMPLETED) {
+                restartPlayEvent?.invoke(0L)
+            } else {
+                mPlayer.start()
+                mPauseButton.setImageResource(cn.a10miaomiao.player.R.drawable.bili_player_play_can_pause)
+            }
         }
     }
 

@@ -208,7 +208,7 @@ public class PlayerService extends Service {
         int i = 0;
         long length = mSources.get(i).getLength(); //视频长度
         long beforeLength = 0;
-        while (msec > length) {
+        while (msec > length && i < mSources.size() - 1) {
             i++;
             beforeLength = length;
             length += mSources.get(i).getLength();

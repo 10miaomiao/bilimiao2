@@ -255,6 +255,7 @@ class MainActivity : SupportActivity() {
     override fun onDestroy() {
         super.onDestroy()
         videoPlayerDelegate.onDestroy()
+        downloadDelegate.onDestroy()
     }
 
     override fun onStart() {

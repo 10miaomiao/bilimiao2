@@ -25,4 +25,6 @@ public interface MediaPlayerListener
     long getBufferPercentage();
 
     boolean canPause();
+
+    int getState();
 }
