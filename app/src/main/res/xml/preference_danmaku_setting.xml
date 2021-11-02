@@ -55,6 +55,17 @@
             android:defaultValue="1"/>
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="速度">
+        <ListPreference
+            android:dialogTitle="选择你的速度"
+            android:key="danmaku_speed"
+            android:summary="想要更快吗"
+            android:title="速度大小"
+            android:entries="@array/danmaku_speed"
+            android:entryValues="@array/danmaku_speed_values"
+            android:defaultValue="1"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="高级">
         <SwitchPreference
             android:defaultValue="true"

@@ -93,6 +93,21 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="danmaku_speed">
+        <item>比慢更慢</item>
+        <item>慢</item>
+        <item>正常</item>
+        <item>快</item>
+        <item>比快更快</item>
+    </string-array>
+    <string-array name="danmaku_speed_values">
+        <item>2</item>
+        <item>1.5</item>
+        <item>1</item>
+        <item>0.75</item>
+        <item>0.5</item>
+    </string-array>
+
     <string name="me">My</string>
 
     <string name="social_contract">收起</string>

@@ -427,7 +427,8 @@ class VideoInfoFragment : SwipeBackFragment() {
                 itemView { b ->
                     verticalLayout {
                         lparams(dip(64), wrapContent)
-                        verticalPadding = dip(10)
+                        topPadding = dip(10)
+                        bottomPadding = dip(5)
                         gravity = Gravity.CENTER
                         selectableItemBackground()
 
@@ -464,6 +465,22 @@ class VideoInfoFragment : SwipeBackFragment() {
                 onItemClick { item, position ->
                     startFragment(UserFragment.newInstance(item.mid))
                 }
+            }
+
+            textView {
+                textSize = 12f
+                textColor = config.foregroundAlpha45Color
+                observeInfo {
+                    text = "发表于 " + NumberUtil.converCTime(it!!.pubdate)
+                    visibility = if (it?.staff?.isEmpty() == false) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                }
+            }.lparams {
+                leftMargin = dip(8)
+                bottomMargin = dip(10)
             }
         }
     }

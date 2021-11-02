@@ -91,7 +91,15 @@ class VideoPlayerDelegate(
     private var danmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
         override fun currMillisecond(): Long {
-            return mPlayer.currentPosition
+            val currentPosition = mPlayer.currentPosition
+            if (
+                currentPosition < lastTime
+                && lastTime - currentPosition < 500
+            ) {
+                return lastTime
+            }
+            lastTime = currentPosition
+            return currentPosition
         }
         override fun update(curr: Long): Long {
             lastInterval = curr - lastTime
@@ -269,6 +277,7 @@ class VideoPlayerDelegate(
     private fun initDanmakuContext() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         var scaleTextSize = prefs.getString("danmaku_fontsize", "1").toFloatOrNull() ?: 1f
+        val danmakuSpeed = prefs.getString("danmaku_speed", "1").toFloatOrNull() ?: 1f
         val danmakuShow = prefs.getBoolean("danmaku_show", true)
         val danmakuR2LShow = prefs.getBoolean("danmaku_r2l_show", true)
         val danmakuFTShow = prefs.getBoolean("danmaku_ft_show", true)
@@ -286,7 +295,7 @@ class VideoPlayerDelegate(
             maxLinesPair = mapOf(
                     BaseDanmaku.TYPE_SCROLL_RL to 4,
                     BaseDanmaku.TYPE_FIX_TOP to 2,
-                    BaseDanmaku.TYPE_FIX_BOTTOM to 0
+                    BaseDanmaku.TYPE_FIX_BOTTOM to 2
             )
         } else if (isMiniPlayer.value === true) {
             maxLinesPair = mapOf(
@@ -301,7 +310,7 @@ class VideoPlayerDelegate(
             specialDanmakuVisibility = danmakuSpecialShow
 //            setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f)
 //            isDuplicateMergingEnabled = false
-            setScrollSpeedFactor(1.5f)
+            setScrollSpeedFactor(danmakuSpeed)
             setScaleTextSize(scaleTextSize)
             setMaximumLines(maxLinesPair)
 //            preventOverlapping(overlappingEnablePair)
@@ -438,7 +447,7 @@ class VideoPlayerDelegate(
         mController.setTitle(title)
         showText("装载弹幕资源")
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        val isDanmakuTimeSync = prefs.getBoolean("danmaku_time_sync", false)
+        val isDanmakuTimeSync = prefs.getBoolean("danmaku_time_sync", true)
         getBiliDanmukuStream().map {
             val loader = DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_BILI)
             loader.load(it)
