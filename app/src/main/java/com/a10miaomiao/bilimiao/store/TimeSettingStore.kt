@@ -38,7 +38,7 @@ class TimeSettingStore(
         SettingUtil.putInt(context, ConstantUtil.TIME_TYPE, timeType)
     }
 
-    fun observe() = mergeMiaoObserver(+timeFrom, +timeTo)
+    fun observe() = +timeTo
 
     val value get() = timeFrom().getValue("-") + " 至 " + timeTo().getValue("-")
     val timeFromValue get() = timeFrom().getValue()
