@@ -94,8 +94,8 @@ fun ViewManager.commentItemView(
 
         include<ExpandableTextView>(R.layout.layout_expandable) {
             content {
-                setContent(BiliUrlMatcher.customString(it.message))
                 tag = it.emote
+                setContent(BiliUrlMatcher.customString(it.message))
 //                text = it.message
             }
             // 遍历表情
