@@ -37,7 +37,10 @@ object NumberUtil {
         return "$min:$s"
     }
 
-    fun converCTime(ctime: Long): String {
+    fun converCTime(ctime: Long?): String {
+        if (ctime == null) {
+            return ""
+        }
         val date = Date(ctime * 1000)
         val now = Calendar.getInstance().timeInMillis
         val deltime = (now - date.time) / 1000

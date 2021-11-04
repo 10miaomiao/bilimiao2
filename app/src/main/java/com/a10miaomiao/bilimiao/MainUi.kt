@@ -43,28 +43,20 @@ inline fun ViewGroup.add(vararg views: Pair<View, ViewGroup.LayoutParams>) {
 }
 
 //inline infix fun View.
-
+@OptIn(InternalSplittiesApi::class)
 class MainUi(override val ctx: Context) : Ui {
 
-    @InternalSplittiesApi
     val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
         backgroundColor = 0xFFF2F2F2L.toInt()
     }
 
 
-    @InternalSplittiesApi
-    val mAppBar = view<AppBarView> {
-        prop = AppBarView.PropInfo(
-            title = "标题",
-            navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp)
-        )
-    }
+    val mAppBar = view<AppBarView>{ }
 
     val mPlayerLayout = frameLayout {
         backgroundColor = Color.BLACK
     }
 
-    @InternalSplittiesApi
     override val root = view<ScaffoldView>() {
         orientation = resources.configuration.orientation
         backgroundColor = 0xFFF2F2F2L.toInt()

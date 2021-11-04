@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.page.MainViewModel
+import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -20,10 +21,7 @@ import splitties.views.dsl.core.*
 
 class RegionFragment : Fragment(), DIAware {
 
-    override val di: DI by DI.lazy {
-        bindSingleton { ui }
-        bindSingleton { this@RegionFragment }
-    }
+    override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<RegionViewModel>(di)
 
@@ -41,7 +39,11 @@ class RegionFragment : Fragment(), DIAware {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
+        requireActivity().getAppBarView().setProp {
+            title = "分区详情"
+        }
     }
+
 
     private fun initView() {
         val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {

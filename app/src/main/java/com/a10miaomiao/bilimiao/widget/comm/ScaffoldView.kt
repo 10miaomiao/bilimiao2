@@ -17,15 +17,15 @@ class ScaffoldView @JvmOverloads constructor(
 ) : CoordinatorLayout(context, attrs, defStyleAttr) {
 
     companion object {
-        const val HORIZONTAL = 2
-        const val VERTICAL = 1
+        const val HORIZONTAL = 2 // 横屏
+        const val VERTICAL = 1 // 竖屏
     }
 
-    var orientation = com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.Companion.VERTICAL
+    var orientation = VERTICAL
         set(value) {
             if (field != value) {
                 field = value
-                this.appBar?.orientation = -(orientation - 2)
+                this.appBar?.orientation = orientation
                 requestLayout()
             }
         }
@@ -126,7 +126,7 @@ class ScaffoldView @JvmOverloads constructor(
             when (val behavior = params.behavior) {
                 is AppBarBehavior -> {
                     if (child is AppBarView) {
-                        child.orientation = -(orientation - 2)
+                        child.orientation = orientation
                         this.appBar = child
                         this.appBarBehavior = behavior
                     }

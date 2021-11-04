@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.comm.recycler
 import android.view.View
 import cn.a10miaomiao.miao.binding.MiaoBinding
 import com.a10miaomiao.bilimiao.comm.MiaoUI
+import java.lang.Exception
 
 abstract class MiaoBindingItemUi<T> : MiaoUI() {
 
@@ -18,8 +19,12 @@ abstract class MiaoBindingItemUi<T> : MiaoUI() {
     abstract fun createView (item: T, index: Int): View
 
     fun update(binding: MiaoBinding, item: T, index: Int) {
-        binding.start(MiaoBinding.UPDATE) {
-            createView(item, 0)
+        try {
+            binding.start(MiaoBinding.UPDATE) {
+                createView(item, 0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

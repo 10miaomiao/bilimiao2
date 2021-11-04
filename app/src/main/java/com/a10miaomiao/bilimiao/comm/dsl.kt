@@ -4,10 +4,14 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.createViewModelLazy
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelLazy
 import androidx.lifecycle.ViewModelProvider
 import org.kodein.di.*
+import org.kodein.di.android.subDI
+import org.kodein.di.android.x.closestDI
 import org.kodein.type.*
 import kotlin.reflect.KClass
 
@@ -66,18 +70,6 @@ fun <VM : ViewModel> Fragment.diViewModel(
 ): Lazy<VM> {
     return createViewModelLazy(vmClass, { this.viewModelStore }) {
         newViewModelFactory<VM> {
-//            val constructor = vmClass.java.declaredConstructors[0] as Constructor<VM>
-
-//            val params = arrayListOf<Any>()
-//            val paramTypes = constructor.parameterTypes
-//            params.clear()
-//            for (type in paramTypes) {
-//                if (type == di::class.java) {
-//                    params.add(di)
-//                }
-//            }
-
-//            constructor!!.newInstance(*params.toArray())
             val constructor = vmClass.java.getDeclaredConstructor(
                 DI::class.java
             )
@@ -89,3 +81,30 @@ fun <VM : ViewModel> Fragment.diViewModel(
 inline fun <reified VM : ViewModel> Fragment.diViewModel(
     di: DI,
 ): Lazy<VM> = diViewModel(VM::class, di)
+
+fun <VM : ViewModel> FragmentActivity.diViewModel(
+    vmClass: KClass<VM>,
+    di: DI,
+): Lazy<VM> {
+    return ViewModelLazy(vmClass, { this.viewModelStore }) {
+        newViewModelFactory<VM> {
+            val constructor = vmClass.java.getDeclaredConstructor(
+                DI::class.java
+            )
+            constructor.newInstance(di)
+        }
+    }
+}
+inline fun <reified VM : ViewModel> FragmentActivity.diViewModel(
+    di: DI,
+): Lazy<VM> = diViewModel(VM::class, di)
+
+
+fun Fragment.lazyUiDi(
+    ui: () -> MiaoBindingUi,
+    init: (DI.MainBuilder.() -> Unit)? = null
+) = subDI(closestDI()) {
+    bindSingleton { ui() }
+    bindSingleton { this@lazyUiDi }
+    init?.invoke(this)
+}

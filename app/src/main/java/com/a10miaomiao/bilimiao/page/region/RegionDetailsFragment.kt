@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
+import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -51,10 +52,7 @@ class RegionDetailsFragment : Fragment(), DIAware {
         }
     }
 
-    override val di: DI by DI.lazy {
-        bindSingleton { ui }
-        bindSingleton { this@RegionDetailsFragment }
-    }
+    override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<RegionDetailsViewModel>(di)
 
@@ -73,115 +71,27 @@ class RegionDetailsFragment : Fragment(), DIAware {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
         val args = bundleOf(
-            MainNavGraph.args.avid to item.id
+            MainNavGraph.args.id to item.id
         )
         Navigation.findNavController(view)
             .navigate(MainNavGraph.action.region_to_videoInfo, args)
     }
 
-    private val handleScroll = object : RecyclerView.OnScrollListener () {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-        }
-    }
-
     val itemUi = miaoBindingItemUi<RegionTypeDetailsInfo> { item, index ->
-        horizontalLayout {
-            layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-            setBackgroundResource(config.selectableItemBackground)
-            padding = dip(5)
-
-            views {
-                // 封面
-                +rcImageView {
-                    radius = dip(5)
-                    _network(item.pic)
-                }..lParams {
-                    width = dip(140)
-                    height = dip(85)
-                    rightMargin = dip(5)
-                }
-
-                +verticalLayout {
-
-                    views {
-                        // 标题
-                        +textView {
-                            ellipsize = TextUtils.TruncateAt.END
-                            maxLines = 2
-                            setTextColor(config.foregroundColor)
-                            _text = item.title
-                        }..lParams(matchParent, matchParent) {
-                            weight = 1f
-                        }
-
-                        // UP主
-                        +horizontalLayout {
-                            gravity = Gravity.CENTER_VERTICAL
-
-                            views {
-                                +imageView {
-                                    imageResource = R.drawable.icon_up
-                                    apply(ViewStyle.roundRect(dip(5)))
-                                }..lParams {
-                                    width = dip(16)
-                                    rightMargin = dip(3)
-                                }
-
-                                +textView {
-                                    textSize = 12f
-                                    setTextColor(config.foregroundAlpha45Color)
-                                    _text = item.author
-                                }
-                            }
-                        }
-
-                        // 播放量，弹幕数量
-                        +horizontalLayout {
-                            gravity = Gravity.CENTER_VERTICAL
-
-                            views {
-                                +imageView {
-                                    imageResource = R.drawable.ic_play_circle_outline_black_24dp
-                                }..lParams {
-                                    width = dip(16)
-                                    rightMargin = dip(3)
-                                }
-                                +textView {
-                                    textSize = 12f
-                                    setTextColor(config.foregroundAlpha45Color)
-                                    _text = NumberUtil.converString(item.play)
-                                }
-                                +space()..lParams(width = dip(10))
-                                +imageView {
-                                    imageResource = R.drawable.ic_subtitles_black_24dp
-                                }..lParams {
-                                    width = dip(16)
-                                    rightMargin = dip(3)
-                                }
-                                +textView {
-                                    textSize = 12f
-                                    setTextColor(config.foregroundAlpha45Color)
-                                    _text = NumberUtil.converString(item.video_review)
-                                }
-                            }
-                        }
-
-                    }
-
-                }..lParams(width = matchParent, height = matchParent)
-
-            }
-
-
-        }
+        videoItem (
+            title = item.title,
+            pic = item.pic,
+            upperName = item.author,
+            playNum = item.play,
+            damukuNum = item.video_review,
+        )
     }
 
     val ui = miaoBindingUi {
         verticalLayout {
             views {
                 +recyclerView {
-                    backgroundColor = config.blockBackgroundColor
+                    backgroundColor = config.windowBackgroundColor
                     layoutManager = GridAutofitLayoutManager(context, dip(300))
 
                     val footerView = listStateView(

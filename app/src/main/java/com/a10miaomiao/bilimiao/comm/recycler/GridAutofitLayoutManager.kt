@@ -47,7 +47,7 @@ class GridAutofitLayoutManager : GridLayoutManager {
         heightSpec: Int
     ) {
         super.onMeasure(recycler, state, widthSpec, heightSpec)
-        if (oldWidthSpec !== widthSpec) {
+        if (oldWidthSpec != widthSpec) {
             mColumnWidthChanged = true
             oldWidthSpec = widthSpec
         }

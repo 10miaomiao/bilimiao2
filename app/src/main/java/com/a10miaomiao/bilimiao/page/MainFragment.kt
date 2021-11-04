@@ -5,44 +5,42 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.MainNavGraph
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.bumptech.glide.Glide
-import com.chad.library.adapter.base.BaseQuickAdapter
+import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
-import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.padding
 import splitties.views.verticalPadding
-import kotlin.contracts.ExperimentalContracts
 
 
 class MainFragment : Fragment(), DIAware {
 
-    override val di: DI by DI.lazy {
-        bindSingleton { ui }
-        bindSingleton { this@MainFragment }
-    }
+    override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<MainViewModel>(di)
+
+    private val windowStore by instance<WindowStore>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,6 +49,17 @@ class MainFragment : Fragment(), DIAware {
     ): View {
         return ui.root
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        lifecycle.coroutineScope.launch {
+            windowStore.connectUi(ui)
+        }
+        requireActivity().getAppBarView().setProp {
+            title = "bilimiao"
+        }
+    }
+
 
     val regionItemUi = miaoBindingItemUi<RegionInfo> { item, index ->
         verticalLayout {
@@ -80,7 +89,10 @@ class MainFragment : Fragment(), DIAware {
     }
 
     val ui = miaoBindingUi {
+        val contentInsets = windowStore.state.contentInsets
         verticalLayout {
+            _topPadding = contentInsets.top
+
             layoutParams = lParams(matchParent, matchParent)
             backgroundColor = config.windowBackgroundColor
             padding = config.pagePadding
@@ -155,10 +167,6 @@ class MainFragment : Fragment(), DIAware {
 
 
         }.wrapInNestedScrollView (height = ViewGroup.LayoutParams.MATCH_PARENT)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
     }
 
 }

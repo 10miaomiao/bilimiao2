@@ -7,6 +7,10 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
+import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
+import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarVerticalUi
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -18,7 +22,10 @@ class AppBarView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
 
-    var orientation = LinearLayout.VERTICAL
+    var canBack = false
+    var onBackClick: View.OnClickListener? = null
+
+    var orientation = ScaffoldView.VERTICAL
         set(value) {
             if (field != value) {
                 field = value
@@ -28,13 +35,13 @@ class AppBarView @JvmOverloads constructor(
             }
         }
 
-    var prop: PropInfo? = null
+    private var prop: PropInfo? = null
         set(value) {
             field = value
             updateProp()
         }
 
-    var mUi = createUi()
+    private var mUi = createUi()
 
     init {
         backgroundColor = Color.WHITE
@@ -43,11 +50,11 @@ class AppBarView @JvmOverloads constructor(
     }
 
 
-    fun createUi (): ChildUi {
-        return if (orientation == com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.Companion.HORIZONTAL) {
-            HorizontalUi(context)
+    fun createUi (): AppBarUi {
+        return if (orientation == ScaffoldView.HORIZONTAL) {
+            AppBarHorizontalUi(context)
         } else {
-            VerticalUi(context)
+            AppBarVerticalUi(context)
         }
     }
 
@@ -59,98 +66,42 @@ class AppBarView @JvmOverloads constructor(
         })
     }
 
+    fun cleanProp() {
+        this.prop = newProp()
+    }
+
+    fun setProp(block: PropInfo.() -> Unit) {
+        val prop = newProp()
+        prop.block()
+        this.prop = prop
+    }
+
+    private fun newProp (): PropInfo {
+        val prop = PropInfo()
+        if (canBack) {
+            prop.onNavigationClick = onBackClick
+            prop.navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp)
+        }
+        return prop
+    }
+
     private fun updateProp () {
         prop?.let {
             mUi.setProp(prop)
         }
     }
 
-    interface ChildUi : Ui  {
-        fun setProp(prop: PropInfo?)
-    }
-
-    class VerticalUi(override val ctx: Context) : ChildUi {
-
-        val mNavigationIcon = imageView {
-
-        }
-
-        val mNavigationIconLayout = frameLayout {
-            padding = dip(10)
-            addView(mNavigationIcon, lParams {
-                width = dip(24)
-                height = dip(24)
-            })
-        }
-
-        val mTitle = textView {
-
-        }
-
-        val mTitleLayout = frameLayout {
-            padding = dip(10)
-            topPadding = 0
-            addView(mTitle, lParams {
-                width = matchParent
-                height = wrapContent
-            })
-        }
-
-        override val root = verticalLayout {
-            addView(mNavigationIconLayout, lParams {
-                width = matchParent
-                height = wrapContent
-            })
-            addView(mTitleLayout, lParams {
-                width = matchParent
-                height = wrapContent
-            })
-        }
-
-        override fun setProp(prop: PropInfo?) {
-            mNavigationIconLayout.visibility = View.GONE
-            mTitleLayout.visibility = View.GONE
-            if (prop != null) {
-                if (prop.navigationIcon != null) {
-                    mNavigationIconLayout.visibility = View.VISIBLE
-                    mNavigationIcon.imageDrawable = prop.navigationIcon
-                }
-                if (prop.title != null) {
-                    mTitleLayout.visibility = View.VISIBLE
-                    mTitle.text = prop.title ?: ""
-                }
-
-            }
-        }
-    }
-
-    class HorizontalUi(override val ctx: Context) : ChildUi {
-        val mTitle = textView {
-
-        }
-
-        override val root = horizontalLayout {
-            addView(mTitle)
-        }
-
-        override fun setProp(prop: PropInfo?) {
-            if (prop == null) {
-                mTitle.text = ""
-            } else {
-                mTitle.text = prop.title ?: ""
-            }
-        }
-    }
-
-    data class MenuInfo (
+    class MenuInfo (
+        var key: Int? = null,
         var title: String? = null,
         var icon: Drawable? = null,
     )
 
-    data class PropInfo (
+    class PropInfo (
         var title: String? = null,
         var navigationIcon: Drawable? = null,
         var menus: List<MenuInfo>? = null,
+        var onNavigationClick: View.OnClickListener? = null
     )
 
 }

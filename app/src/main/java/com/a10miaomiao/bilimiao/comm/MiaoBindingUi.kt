@@ -7,6 +7,7 @@ import android.os.Message
 import android.text.method.TextKeyListener.clear
 import android.view.View
 import cn.a10miaomiao.miao.binding.MiaoBinding
+import java.lang.Exception
 
 abstract class MiaoBindingUi() : MiaoUI() {
 
@@ -63,8 +64,12 @@ abstract class MiaoBindingUi() : MiaoUI() {
         }
 
         private fun updateUi() {
-            binding.start(MiaoBinding.UPDATE) {
-                createView()
+            try {
+                binding.start(MiaoBinding.UPDATE) {
+                    createView()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

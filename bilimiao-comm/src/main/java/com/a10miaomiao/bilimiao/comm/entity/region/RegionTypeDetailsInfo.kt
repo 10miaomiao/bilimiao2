@@ -17,6 +17,6 @@ data class RegionTypeDetailsInfo(
     var pic: String,
     var play: String,
     var title: String,
-    var video_review: Int,
+    var video_review: String,
     var duration: Int,
 )

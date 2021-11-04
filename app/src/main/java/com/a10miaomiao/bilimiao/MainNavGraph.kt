@@ -30,11 +30,13 @@ object MainNavGraph {
             }
         }
         val videoInfo = f<VideoInfoFragment> {
-            argument(args.avid) {
+            argument(args.type) {
                 type = NavType.StringType
+                defaultValue = "AV"
             }
-            argument(args.bvid) {
+            argument(args.id) {
                 type = NavType.StringType
+                nullable = false
             }
         }
     }
@@ -44,11 +46,13 @@ object MainNavGraph {
         val home_to_region = dest.home to dest.region
 
         val region_to_videoInfo = dest.region to dest.videoInfo
+
+        val videoInfo_to_videoInfo = dest.videoInfo to dest.videoInfo
     }
 
     object args {
-        const val avid = "avid"
-        const val bvid = "bvid"
+        const val type = "type"
+        const val id = "id"
         const val region = "region"
     }
 
