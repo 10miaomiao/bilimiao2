@@ -21,6 +21,8 @@ class ScaffoldView @JvmOverloads constructor(
         const val VERTICAL = 1 // 竖屏
     }
 
+    var onPlayerChanged: ((show: Boolean) -> Unit)? = null
+
     var orientation = VERTICAL
         set(value) {
             if (field != value) {
@@ -35,14 +37,21 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 requestLayout()
+                onPlayerChanged?.invoke(field)
+            }
+        }
+    var fullScreenPlayer = false
+        set(value) {
+            if (field != value) {
+                field = value
+                requestLayout()
             }
         }
 
-
     var appBarHeight = dip(64)
     var appBarWidth = dip(100)
-    var playerHeight = 0
-    var playerWidth = 0
+    var playerHeight = -3
+    var playerWidth = -3
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null
@@ -157,5 +166,7 @@ class ScaffoldView @JvmOverloads constructor(
     class LayoutParams(width: Int, height: Int) : CoordinatorLayout.LayoutParams(width, height) {
 
     }
+
+
 
 }

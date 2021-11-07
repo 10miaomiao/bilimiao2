@@ -3,15 +3,18 @@ package com.a10miaomiao.bilimiao.page.video
 import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.*
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
+import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +29,8 @@ class VideoInfoViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
+
+    private val playerStore by instance<PlayerStore>()
 
     val type by lazy { fragment.requireArguments().getString(MainNavGraph.args.type, "AV") }
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
@@ -49,11 +54,11 @@ class VideoInfoViewModel(
 //    val favoriteSelectedMap = HashMap<Long, Boolean>()
 
 
-    init {
-
-    }
 
     init {
+        viewModelScope.launch {
+            playerStore.connectUi(ui)
+        }
         loadData()
     }
 

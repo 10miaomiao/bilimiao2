@@ -26,7 +26,7 @@ class WindowStore(override val di: DI) :
 
     fun setContentInsets (left: Int, top: Int, right: Int, bottom: Int) {
         this.setState {
-            windowInsets = Insets.of(left, top, right, bottom)
+            contentInsets = Insets.of(left, top, right, bottom)
         }
     }
 

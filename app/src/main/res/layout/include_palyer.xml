@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    android:id="@+id/mRoot">
+
+    <com.a10miaomiao.bilimiao.widget.player.SizeWatcherView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/mSizeWatcher"/>
+
+    <cn.a10miaomiao.player.VideoPlayerView
+        android:id="@+id/mPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <master.flame.danmaku.ui.widget.DanmakuView
+        android:id="@+id/mDanmaku"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <cn.a10miaomiao.player.MyMediaController
+        android:id="@+id/mController"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </cn.a10miaomiao.player.MyMediaController>
+
+    <com.a10miaomiao.bilimiao.widget.player.MiniMediaController
+        android:id="@+id/mMiniController"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </com.a10miaomiao.bilimiao.widget.player.MiniMediaController>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:id="@+id/mProgressLayout">
+
+        <ProgressBar
+            android:id="@+id/mProgressBar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:indeterminateTint="?attr/colorPrimary" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:id="@+id/mText"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mCenterLayout"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:background="#99000000"
+        android:padding="8dp"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/mCenterTv"
+            android:text="音量：50%"
+            android:textColor="#ffffff"
+            android:textSize="16sp"/>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:background="@color/black_80"
+        android:id="@+id/mErrorLayout"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/mErrorTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="播放器出现错误"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:layout_marginBottom="20dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/mErrorTryPlayTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="重试"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="16sp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginRight="40dp"/>
+
+            <TextView
+                android:id="@+id/mErrorClosePlayTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="取消"
+                android:textColor="@color/white_80"
+                android:textSize="16sp"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+</FrameLayout>

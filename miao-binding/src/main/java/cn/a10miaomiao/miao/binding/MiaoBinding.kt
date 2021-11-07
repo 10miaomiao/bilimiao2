@@ -5,93 +5,76 @@ class MiaoBinding {
 
     class BindingData(
         val target: Any,
-        var state: Any?
+        var state: Any?,
     )
 
-    private val bindingList = arrayListOf<BindingData>()
+    class RefData<T>(
+        var value: T
+    )
 
-    @PublishedApi internal fun <V> next (value: Any?, view: V): V? {
+    @PublishedApi internal var renderType = INIT
+    private val bindingList = mutableListOf<BindingData>()
+    private var persist = false
+
+    private inline fun <T> _next (value: Any?, initialBindingData: () -> BindingData): T? {
         val curCounter = counter
         counter++
         return if (bindingList.size > curCounter) {
-            if (bindingList[curCounter].state == value) {
+            if (persist) {
+                persist = false
+                if (bindingList[curCounter].state == value) {
+                    null
+                } else {
+                    bindingList[curCounter].state = value
+                    bindingList[curCounter].target as T
+                }
+            } else if (renderType == INIT) {
+                val bindingData = initialBindingData()
+                bindingList[curCounter] = bindingData
+                bindingData.target as T
+            } else if (bindingList[curCounter].state == value) {
                 null
             } else {
                 bindingList[curCounter].state = value
-                bindingList[curCounter].target as V
+                bindingList[curCounter].target as T
             }
         } else {
-            bindingList.add(
-                BindingData(
-                    view as Any,
-                    value
-                )
+            val bindingData = initialBindingData()
+            bindingList.add(bindingData)
+            bindingData.target as T
+        }
+    }
+
+    @PublishedApi internal fun <T> next (value: Any?, target: T): T? {
+        return _next(value) {
+            BindingData(
+                target as Any,
+                value
             )
-            view
         }
     }
 
     @PublishedApi internal fun <V> next (value: Any?, initialTarget: () -> V): V? {
-        val curCounter = counter
-        counter++
-        return if (bindingList.size > curCounter) {
-            if (bindingList[curCounter].state == value) {
-                null
-            } else {
-                bindingList[curCounter].state = value
-                bindingList[curCounter].target as V
-            }
-        } else {
+        return _next(value) {
             val target = initialTarget()
-            bindingList.add(
-                BindingData(
-                    target as Any,
-                    value
-                )
+            BindingData(
+                target as Any,
+                value
             )
-            target
         }
     }
-
-//    @PublishedApi internal fun <V> next (initial: () -> V): V? {
-//        val curCounter = counter
-//        counter++
-//        return if (bindingList.size > curCounter) {
-//            bindingList[curCounter].target as V
-//        } else {
-//            val v = initial.invoke()
-//            bindingList.add(
-//                BindingData(
-//                    v as Any,
-//                    null
-//                )
-//            )
-//            v
-//        }
-//    }
 
     fun cur (): BindingData {
         val curCounter = counter - 1
         return bindingList[curCounter]
     }
 
-//    fun <T, V> setCur(state: T, target: V) {
-//        val curCounter = counter - 1
-//        bindingList[curCounter] = BindingData(
-//            target,
-//            state
-//        )
-//    }
-
-//    inline fun <V> V.bind(binding: MiaoTarget<V>.() -> Unit): V {
-//        MiaoTarget(this, this@MiaoBinding).binding()
-//        return this
-//    }
+    fun persist () {
+        this.persist = true
+    }
 
     inline fun <T> start (type: Int, block: () -> T): T {
-        if (type == INIT) {
-            clearBindingList()
-        }
+        renderType = type
         counter = 0
         Bind.binding = this
         val result = block()

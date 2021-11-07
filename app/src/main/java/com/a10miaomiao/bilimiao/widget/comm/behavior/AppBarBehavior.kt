@@ -14,7 +14,7 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
     var showPlayer = false
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        contentHeight = context.dip(64)
+        contentHeight = context.dip(58)
         contentWidth = context.dip(120)
         init()
     }
@@ -30,9 +30,11 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
         val widht = contentWidth + child.paddingLeft
         if (parent is ScaffoldView) {
             val orientation = parent.orientation
-            if (orientation == com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.HORIZONTAL) {
+            if (parent.fullScreenPlayer) {
+                child.layout(0, 0, 0, 0)
+            } else if (orientation == ScaffoldView.HORIZONTAL) {
                 child.layout(0, 0, widht, parent.measuredHeight)
-            } else if (orientation == com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.VERTICAL) {
+            } else if (orientation == ScaffoldView.VERTICAL) {
                 child.layout(0, parent.measuredHeight - height, parent.measuredWidth, parent.measuredHeight)
             }
             if (parent.appBarHeight != height

@@ -13,15 +13,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.widget._text
+import cn.a10miaomiao.miao.binding.miaoEffect
+import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
-import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainViewModel
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
-import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -43,6 +44,7 @@ class RegionDetailsFragment : Fragment(), DIAware {
 
     companion object {
         const val TID = "tid"
+        var count = 1
         fun newInstance(tid: Int): RegionDetailsFragment {
             val fragment = RegionDetailsFragment()
             val bundle = Bundle()
@@ -92,7 +94,9 @@ class RegionDetailsFragment : Fragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    layoutManager = GridAutofitLayoutManager(context, dip(300))
+                    _miaoLayoutManage(
+                        GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
+                    )
 
                     val footerView = listStateView(
                         when {
@@ -109,6 +113,7 @@ class RegionDetailsFragment : Fragment(), DIAware {
                         items = viewModel.list.data,
                         itemUi = itemUi,
                     ) {
+                        stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                         setOnItemClickListener(handleItemClick)
                         loadMoreModule.setOnLoadMoreListener {
                             viewModel.loadMode()

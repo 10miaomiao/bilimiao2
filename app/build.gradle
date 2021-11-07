@@ -67,6 +67,17 @@ dependencies {
     implementation project(':miao-binding')
     implementation project(':miao-binding-android')
 
+    // 弹幕引擎
+    implementation project(':DanmakuFlameMaster')
+//    implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
+    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
+    implementation 'com.github.ctiao:ndkbitmap-armv5:0.9.21'
+    implementation 'com.github.ctiao:ndkbitmap-x86:0.9.21'
+
+    // ijpplayer
+    implementation project(':ijkplayer-java')
+    implementation project(':player')
+
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

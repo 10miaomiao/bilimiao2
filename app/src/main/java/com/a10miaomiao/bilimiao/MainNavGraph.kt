@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
+import com.a10miaomiao.bilimiao.template.TemplateFragment
 import kotlin.reflect.KClass
 
 

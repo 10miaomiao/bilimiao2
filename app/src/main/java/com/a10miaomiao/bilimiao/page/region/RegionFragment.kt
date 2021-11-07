@@ -7,23 +7,32 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.coroutineScope
 import androidx.viewpager.widget.ViewPager
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.page.MainViewModel
+import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
+import org.kodein.di.instance
+import splitties.dimensions.dip
 import splitties.views.dsl.core.*
+import splitties.views.topPadding
 
 class RegionFragment : Fragment(), DIAware {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<RegionViewModel>(di)
+
+    private val windowStore by instance<WindowStore>()
 
     private lateinit var mViewPager: ViewPager
     private lateinit var mTabLayout: TabLayout
@@ -38,10 +47,13 @@ class RegionFragment : Fragment(), DIAware {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
-        requireActivity().getAppBarView().setProp {
-            title = "分区详情"
+        lifecycle.coroutineScope.launch {
+            windowStore.connectUi(ui)
         }
+        getAppBarView().setProp {
+            title = "时光姬-" + viewModel.region.name
+        }
+        initView()
     }
 
 
@@ -66,9 +78,11 @@ class RegionFragment : Fragment(), DIAware {
 
     @SuppressLint("ResourceType")
     val ui = miaoBindingUi {
+        val contentInsets = windowStore.state.contentInsets
         verticalLayout {
             views {
                 +tabLayout(234) {
+                    _topPadding = contentInsets.top
                     mTabLayout = this
                 }..lParams(matchParent, wrapContent)
                 +viewPager(233) {

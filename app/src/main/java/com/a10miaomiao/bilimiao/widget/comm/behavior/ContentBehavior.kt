@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 
@@ -37,7 +38,11 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 playerWidth = parent.playerWidth
                 playerHeight = parent.playerHeight
             }
-            if (orientation == ScaffoldView.HORIZONTAL) {
+            if (parent.fullScreenPlayer) {
+                height = 0
+                width = 0
+                child.layout(0, 0, 0, 0)
+            } else if (orientation == ScaffoldView.HORIZONTAL) {
                 child.layout(parent.appBarWidth, 0, parent.measuredWidth - playerWidth, parent.measuredHeight)
                 height = parent.measuredHeight
                 width = parent.measuredWidth - parent.appBarWidth - playerWidth

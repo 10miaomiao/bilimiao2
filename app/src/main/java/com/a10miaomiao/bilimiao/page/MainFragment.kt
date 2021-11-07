@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation.findNavController
+import cn.a10miaomiao.miao.binding.android.view._topMargin
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -19,11 +20,15 @@ import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
@@ -55,7 +60,7 @@ class MainFragment : Fragment(), DIAware {
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
-        requireActivity().getAppBarView().setProp {
+        getAppBarView().setProp {
             title = "bilimiao"
         }
     }
@@ -91,8 +96,6 @@ class MainFragment : Fragment(), DIAware {
     val ui = miaoBindingUi {
         val contentInsets = windowStore.state.contentInsets
         verticalLayout {
-            _topPadding = contentInsets.top
-
             layoutParams = lParams(matchParent, matchParent)
             backgroundColor = config.windowBackgroundColor
             padding = config.pagePadding
@@ -112,7 +115,7 @@ class MainFragment : Fragment(), DIAware {
                     }
                 }..lParams {
                     width = matchParent
-//                    topMargin = config.dividerSize
+                    _topMargin = contentInsets.top
                 }
             }
 

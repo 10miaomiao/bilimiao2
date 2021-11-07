@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -16,13 +15,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import cn.a10miaomiao.player.callback.MediaPlayerListener;
 import cn.a10miaomiao.player.callback.MediaController;
@@ -34,7 +27,6 @@ import tv.danmaku.ijk.media.player.IMediaPlayer.OnInfoListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnPreparedListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnSeekCompleteListener;
 import tv.danmaku.ijk.media.player.IMediaPlayer.OnVideoSizeChangedListener;
-import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.pragma.DebugLog;
 
 /**
@@ -61,19 +53,19 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
 
     public static final int STATE_PREPARING = 1;
 
-    private static final int STATE_PREPARED = 2;
+    public static final int STATE_PREPARED = 2;
 
-    private static final int STATE_PLAYING = 3;
+    public static final int STATE_PLAYING = 3;
 
-    private static final int STATE_PAUSED = 4;
+    public static final int STATE_PAUSED = 4;
 
-    private static final int STATE_PLAYBACK_COMPLETED = 5;
+    public static final int STATE_PLAYBACK_COMPLETED = 5;
 
-    private static final int STATE_SUSPEND = 6;
+    public static final int STATE_SUSPEND = 6;
 
-    private static final int STATE_RESUME = 7;
+    public static final int STATE_RESUME = 7;
 
-    private static final int STATE_SUSPEND_UNSUPPORTED = 8;
+    public static final int STATE_SUSPEND_UNSUPPORTED = 8;
 
     private Uri mUri;
 
@@ -81,9 +73,9 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
 
     private String mUserAgent;
 
-    int mCurrentState = STATE_IDLE;
+    public int mCurrentState = STATE_IDLE;
 
-    int mTargetState = STATE_IDLE;
+    public int mTargetState = STATE_IDLE;
 
     private int mVideoLayout = VIDEO_LAYOUT_SCALE;
 
@@ -231,9 +223,7 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
                 if (mOnErrorListener.onError(mMediaPlayer, framework_err,
                         impl_err))
                     return true;
-            }
-
-            if (getWindowToken() != null) {
+            } else if (getWindowToken() != null) {
                 int message = framework_err == IMediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK ?
                         R.string.video_error_text_invalid_progressive_playback : R.string.video_error_text_unknown;
 
@@ -705,12 +695,12 @@ public class VideoPlayerView extends SurfaceView implements MediaPlayerListener 
         return 0;
     }
 
-    //    @Override
-//    public void seekTo2(long msec){
-//        if (mSources == null)
-//            return;
-//
-//    }
+    @Override
+    public int getState() {
+        return mCurrentState;
+    }
+
+
     boolean seekToFlag = false;
 
     @Override

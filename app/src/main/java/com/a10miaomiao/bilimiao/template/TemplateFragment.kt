@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
+import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.comm.*
 import org.kodein.di.*
+import splitties.dimensions.dip
 import splitties.views.dsl.core.*
 
 class TemplateFragment : Fragment(), DIAware {

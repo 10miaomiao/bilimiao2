@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import splitties.dimensions.dip
 
@@ -29,18 +30,27 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
             val orientation = parent.orientation
             var height = 0
             var width = 0
-            if (orientation == com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.HORIZONTAL) {
+            if (parent.fullScreenPlayer) {
                 height = parent.measuredHeight
-                width = contentWidth + child.paddingRight
-                child.layout(parent.measuredWidth - width, 0, parent.measuredWidth, height);
-            } else if (orientation == com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.VERTICAL) {
-                height = contentHeight + child.paddingTop
                 width = parent.measuredWidth
-                child.layout(0, 0, width, height);
+                DebugMiao.log("onLayoutChild", height, width)
+                child.layout(0, 0, width, height)
+            } else {
+                DebugMiao.log("onLayoutChild3", height, width)
+                if (orientation == ScaffoldView.HORIZONTAL) {
+                    height = parent.measuredHeight
+                    width = contentWidth + child.paddingRight
+                    child.layout(parent.measuredWidth - width, 0, parent.measuredWidth, height);
+                } else if (orientation == ScaffoldView.VERTICAL) {
+                    height = contentHeight + child.paddingTop
+                    width = parent.measuredWidth
+                    child.layout(0, 0, width, height);
+                }
             }
             if (child.layoutParams.height != height || child.layoutParams.width != width) {
                 child.layoutParams.height = height
                 child.layoutParams.width = width
+                DebugMiao.log("onLayoutChild2", height, width)
                 child.requestLayout()
             }
             if (parent.playerHeight != height || parent.playerWidth != width) {

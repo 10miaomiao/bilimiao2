@@ -12,12 +12,14 @@ import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import splitties.dimensions.dip
 import splitties.toast.toast
 
 class RegionDetailsViewModel(
@@ -32,6 +34,8 @@ class RegionDetailsViewModel(
     var rankOrder = "click"  //排行依据
     var triggered = false
     var list = PaginationInfo<RegionTypeDetailsInfo>()
+
+    val layoutManager by lazy { GridAutofitLayoutManager(context, context.dip(300))}
 
 //    val filterStore = Store.from(context).filterStore
 //    val timeSettingStore = Store.from(context).timeSettingStore

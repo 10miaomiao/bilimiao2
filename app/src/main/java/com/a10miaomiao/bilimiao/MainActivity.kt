@@ -4,27 +4,30 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.os.Debug
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.createGraph
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.*
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.android.subDI
 import org.kodein.di.bindSingleton
-import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
-import splitties.views.bottomPadding
 
 
 class MainActivity
@@ -37,16 +40,23 @@ class MainActivity
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
         bindSingleton { windowStore }
+        bindSingleton { playerStore }
+        bindSingleton { playerDelegate }
     }
 
     private val windowStore: WindowStore by diViewModel(di)
+    private val playerStore: PlayerStore by diViewModel(di)
 
-    lateinit var navController: NavController
+    private val playerDelegate by lazy { PlayerDelegate(this, di) }
+
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ui = MainUi(this)
         setContentView(ui.root)
+        playerDelegate.onCreate(savedInstanceState)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ui.root.rootWindowInsets?.let {
                 setWindowInsets(it)
@@ -54,6 +64,9 @@ class MainActivity
             ui.root.setOnApplyWindowInsetsListener { v, insets ->
                 setWindowInsets(insets)
                 insets
+            }
+            ui.root.onPlayerChanged = {
+                setWindowInsets(ui.root.rootWindowInsets)
             }
         }
 
@@ -89,7 +102,7 @@ class MainActivity
         val top = insets.systemWindowInsetTop
         val right = insets.stableInsetRight
         val bottom = insets.systemWindowInsetBottom
-        windowStore.setContentInsets(
+        windowStore.setWindowInsets(
             left, top, right, bottom,
         )
         val showPlayer = ui.root.showPlayer
@@ -123,6 +136,42 @@ class MainActivity
         attributes.layoutInDisplayCutoutMode =
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         window.attributes = attributes
+    }
+
+    override fun onResume() {
+        super.onResume()
+        playerDelegate.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        playerDelegate.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        playerDelegate.onDestroy()
+//        downloadDelegate.onDestroy()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        playerDelegate.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        playerDelegate.onStop()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        playerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
+
+        } else {
+
+        }
     }
 
     @InternalSplittiesApi

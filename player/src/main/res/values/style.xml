@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--popupwidow的背景颜色-->
+    <style name="DarkTheme" parent="ThemeOverlay.AppCompat.Dark">
+    </style>
+
+    <!--popupwidow的背景颜色-->
+    <style name="MyPopupMenu" >
+        <item name="android:background">@android:color/black</item>
+        <item name="android:popupBackground">@android:color/black</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <!--popupwindow的文字样式-->
+    <style name="MyTextAppearance">
+
+    </style>
+</resources>

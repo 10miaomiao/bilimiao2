@@ -3,6 +3,7 @@ package cn.a10miaomiao.player;
 import android.app.Service;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.NonNull;
@@ -30,8 +31,9 @@ public class PlayerService extends Service {
     private static final String TAG = PlayerService.class.getSimpleName();
 
     private PlayerBinder playerBinder;
-    private IMediaPlayer mMediaPlayer = null;
+    private IjkMediaPlayer mMediaPlayer = null;
     private VideoPlayerView videoPlayerView;
+    private float speed = 1f;
 
     List<VideoSource> mSources;
     Map<String, String> mHeaders;
@@ -40,7 +42,7 @@ public class PlayerService extends Service {
     /**
      * 多段视频
      */
-    private List<IMediaPlayer> mediaPlayers = null;
+    private List<IjkMediaPlayer> mediaPlayers = null;
     int index = 0;
 
     @Override
@@ -140,7 +142,7 @@ public class PlayerService extends Service {
      * @return
      * @throws IOException
      */
-    private IMediaPlayer initPlayer(@NonNull Uri uri) throws IOException {
+    private IjkMediaPlayer initPlayer(@NonNull Uri uri) throws IOException {
         IjkMediaPlayer ijkMediaPlayer = null;
 
         ijkMediaPlayer = new IjkMediaPlayer();
@@ -209,7 +211,7 @@ public class PlayerService extends Service {
         int i = 0;
         long length = mSources.get(i).getLength(); //视频长度
         long beforeLength = 0;
-        while (msec > length) {
+        while (msec > length && i < mSources.size() - 1) {
             i++;
             beforeLength = length;
             length += mSources.get(i).getLength();
@@ -225,6 +227,18 @@ public class PlayerService extends Service {
             videoPlayerView.mSeekWhenPrepared = msec;
         }
         videoPlayerView.seekToFlag = false;
+    }
+
+    public void setSpeed (float speed) {
+        this.speed = speed;
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setSpeed(speed);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "soundtouch", 0);
+            }else{
+                mMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "soundtouch", 1);
+            }
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.network
 
+import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
 import com.a10miaomiao.bilimiao.comm.apis.RegionAPI
 import com.a10miaomiao.bilimiao.comm.apis.VideoAPI
 
@@ -23,6 +24,7 @@ object BiliApiService {
 
     val regionAPI = RegionAPI()
     val videoAPI = VideoAPI()
+    val playerAPI = PlayerAPI()
 
 
 }

@@ -12,45 +12,64 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.core.view.marginRight
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._isEnabled
 import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
+import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.store.PlayerStore
+import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.a10miaomiao.bilimiao.widget._setContent
+import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.a10miaomiao.bilimiao.widget.expandableTextView
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.FlowCollector
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import kotlin.properties.Delegates
 
 class VideoInfoFragment: Fragment(), DIAware {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<VideoInfoViewModel>(di)
+
+    private val windowStore by instance<WindowStore>()
+
+    private val playerStore by instance<PlayerStore>()
+
+    private val playerDelegate by instance<PlayerDelegate>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,8 +79,32 @@ class VideoInfoFragment: Fragment(), DIAware {
         return ui.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+//        lifecycle.coroutineScope.launch {
+//            windowStore.connectUi(ui)
+//            playerStore.connectUi(ui)
+//
+//            withContext(Dispatchers.IO){
+//                while (isActive) {
+//                    DebugMiao.log("isActive", isActive)
+//                    delay(1000)
+//                }
+//            }
+//        }
+    }
+
+    private fun playVideo(cid: String, title: String) {
+        val info = viewModel.info
+        if (info != null) {
+            playerDelegate.playVideo(info.aid.toString(), cid, title)
+        }
+    }
+
+    private val handlePageItemClick = OnItemClickListener { adapter, view, position ->
+        val item = viewModel.pages[position]
+        playVideo(item.cid, item.part)
     }
 
     private val handleRelateItemClick = OnItemClickListener { adapter, view, position ->
@@ -84,7 +127,9 @@ class VideoInfoFragment: Fragment(), DIAware {
                 height = matchParent
                 rightMargin = dip(5)
             }
+            val enabled = playerStore.state.info.cid != item.cid
             setBackgroundResource(R.drawable.shape_corner)
+            _isEnabled = enabled
 
             views {
                 +textView {
@@ -98,13 +143,10 @@ class VideoInfoFragment: Fragment(), DIAware {
                     gravity = Gravity.LEFT
                     ellipsize = TextUtils.TruncateAt.END
                     textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
-                    val enabled = false
-//                    val enabled = playerStore.info.cid == it
-                    _isEnabled = enabled
                     _textColorResource = if (enabled) {
-                        config.themeColorResource
-                    } else {
                         R.color.text_black
+                    } else {
+                        config.themeColorResource
                     }
                     _text = item.part
                 }..lParams {
@@ -123,13 +165,13 @@ class VideoInfoFragment: Fragment(), DIAware {
                         +recyclerView {
                             val lm = LinearLayoutManager(context)
                             lm.orientation = LinearLayoutManager.HORIZONTAL
-                            layoutManager = lm
+                            _miaoLayoutManage(lm)
 
                             _miaoAdapter(
                                 items = viewModel.pages,
                                 itemUi = pageItemUi,
                             ) {
-//                        setOnItemClickListener(handleItemClick)
+                                setOnItemClickListener(handlePageItemClick)
                             }
                         }..lParams {
                             width = matchParent
@@ -234,7 +276,7 @@ class VideoInfoFragment: Fragment(), DIAware {
                                 +textView {
                                     textSize = 12f
                                     setTextColor(config.foregroundAlpha45Color)
-                                    text = "发表于 " + NumberUtil.converCTime(viewModel.info?.pubdate)
+                                    _text = "发表于 " + NumberUtil.converCTime(viewModel.info?.pubdate)
                                 }
                             }
 
@@ -249,16 +291,18 @@ class VideoInfoFragment: Fragment(), DIAware {
                 // 多个up主信息
                 +recyclerView {
                     _show = isMutableUpper
-                    layoutManager = LinearLayoutManager(context).apply {
-                        orientation = LinearLayoutManager.HORIZONTAL
-                    }
+                    _miaoLayoutManage(
+                        LinearLayoutManager(context).apply {
+                            orientation = LinearLayoutManager.HORIZONTAL
+                        }
+                    )
                     _miaoAdapter(
                         itemUi = upperItemUi,
                         items = viewModel.staffs
                     )
                 }
 
-                textView {
+                +textView {
                     _show = isMutableUpper
                     textSize = 12f
                     setTextColor(config.foregroundAlpha45Color)
@@ -273,8 +317,10 @@ class VideoInfoFragment: Fragment(), DIAware {
 
     fun MiaoUI.headerView(): View {
         val videoInfo = viewModel.info
+        val contentInsets = windowStore.state.contentInsets
         return verticalLayout {
             padding = dip(10)
+            _topPadding = dip(10) + contentInsets.top
 
             views {
                 +horizontalLayout {
@@ -402,11 +448,21 @@ class VideoInfoFragment: Fragment(), DIAware {
     }
 
     val ui = miaoBindingUi {
+        // 监听info改变，修改页面标题
+        miaoEffect(viewModel.info) {
+            getAppBarView().setProp {
+                title = it?.let {
+                    "${it.bvid} /\nAV${it.aid}"
+                } ?: "视频详情"
+            }
+        }
         verticalLayout {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    layoutManager = GridAutofitLayoutManager(context, dip(300))
+                    _miaoLayoutManage(
+                        GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
+                    )
 
                     val haderView = headerView()
                     haderView..lParams(matchParent, wrapContent)

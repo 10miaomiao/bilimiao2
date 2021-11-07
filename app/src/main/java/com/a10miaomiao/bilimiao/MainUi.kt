@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.fragment.app.FragmentContainerView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
@@ -53,9 +54,7 @@ class MainUi(override val ctx: Context) : Ui {
 
     val mAppBar = view<AppBarView>{ }
 
-    val mPlayerLayout = frameLayout {
-        backgroundColor = Color.BLACK
-    }
+    val mPlayerLayout = inflate<FrameLayout>(R.layout.include_palyer)
 
     override val root = view<ScaffoldView>() {
         orientation = resources.configuration.orientation

@@ -71,7 +71,7 @@ class AppBarView @JvmOverloads constructor(
     }
 
     fun setProp(block: PropInfo.() -> Unit) {
-        val prop = newProp()
+        val prop = this.prop?.run{ copy() } ?: newProp()
         prop.block()
         this.prop = prop
     }
@@ -91,13 +91,13 @@ class AppBarView @JvmOverloads constructor(
         }
     }
 
-    class MenuInfo (
+    data class MenuInfo (
         var key: Int? = null,
         var title: String? = null,
         var icon: Drawable? = null,
     )
 
-    class PropInfo (
+    data class PropInfo (
         var title: String? = null,
         var navigationIcon: Drawable? = null,
         var menus: List<MenuInfo>? = null,
