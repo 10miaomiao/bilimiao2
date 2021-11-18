@@ -33,10 +33,8 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
             if (parent.fullScreenPlayer) {
                 height = parent.measuredHeight
                 width = parent.measuredWidth
-                DebugMiao.log("onLayoutChild", height, width)
                 child.layout(0, 0, width, height)
             } else {
-                DebugMiao.log("onLayoutChild3", height, width)
                 if (orientation == ScaffoldView.HORIZONTAL) {
                     height = parent.measuredHeight
                     width = contentWidth + child.paddingRight
@@ -50,7 +48,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
             if (child.layoutParams.height != height || child.layoutParams.width != width) {
                 child.layoutParams.height = height
                 child.layoutParams.width = width
-                DebugMiao.log("onLayoutChild2", height, width)
                 child.requestLayout()
             }
             if (parent.playerHeight != height || parent.playerWidth != width) {

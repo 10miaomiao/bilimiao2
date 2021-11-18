@@ -9,8 +9,10 @@ import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.views.dsl.core.wrapContent
+import splitties.views.dsl.material.hidden
 
 class ScaffoldView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -61,6 +63,9 @@ class ScaffoldView @JvmOverloads constructor(
 
     var player: View? = null
     var playerBehavior: PlayerBehavior? = null
+
+    var bottomSheet: View? = null
+    var bottomSheetBehavior: BottomSheetBehavior<View>? = null
 
     lateinit var mDragHelper: ViewDragHelper
 
@@ -130,6 +135,7 @@ class ScaffoldView @JvmOverloads constructor(
         mDragHelper.setEdgeTrackingEnabled(ViewDragHelper.EDGE_TOP);
     }
 
+
     override fun addView(child: View?, params: ViewGroup.LayoutParams?) {
         if (params is LayoutParams) {
             when (val behavior = params.behavior) {
@@ -148,6 +154,10 @@ class ScaffoldView @JvmOverloads constructor(
                     this.player = child
                     this.playerBehavior = behavior
                 }
+                is BottomSheetBehavior -> {
+                    this.bottomSheet = child
+                    this.bottomSheetBehavior = behavior
+                }
             }
         }
         super.addView(child, params)
@@ -160,13 +170,11 @@ class ScaffoldView @JvmOverloads constructor(
         initParams: LayoutParams.() -> Unit = {}
     ): LayoutParams {
 //        contract { callsInPlace(initParams, InvocationKind.EXACTLY_ONCE) }
-        return com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.LayoutParams(width, height).apply(initParams)
+        return LayoutParams(width, height).apply(initParams)
     }
 
     class LayoutParams(width: Int, height: Int) : CoordinatorLayout.LayoutParams(width, height) {
 
     }
-
-
 
 }

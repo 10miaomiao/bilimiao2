@@ -113,9 +113,6 @@ class PlayerDelegate(
     }
 
     val scaffoldApp = activity.getScaffoldView()
-//    val haederBehavior by lazy {
-//        HeaderBehavior.from(activity.headerVideoBox)
-//    }
 
 //    private val userStore by lazy {
 //        Store.from(activity).userStore
@@ -244,7 +241,6 @@ class PlayerDelegate(
 //                activity.mProgressBar.indeterminateTintList = ColorStateList.valueOf(themeColor)
 //            })
 
-        // TODO: 大小屏切换适配
         isMiniPlayer.observe(activity, Observer {
             setPlayerMediaController(it!!)
             activity.apply {
@@ -882,13 +878,13 @@ class PlayerDelegate(
         } else {
             activity.window.decorView.systemUiVisibility = uiFlags
         }
-        // TODO: 控制按钮不被刘海遮住
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//            MainActivity.of(activity).windowInsets?.let {
-//                mController.post {
-//                    mController.setDisplayCutout(it.displayCutout)
-//                }
-//            }
+            scaffoldApp.rootWindowInsets?.let {
+                mController.post {
+                    mController.setDisplayCutout(it.displayCutout)
+                }
+            }
         }
     }
 
@@ -909,13 +905,6 @@ class PlayerDelegate(
 //            activity.headerVideoBox.layoutParams.height = activity.dip(240)
 //            initDanmakuContext()
 //        }
-    }
-
-    /**
-     * 是否为当前aid
-     */
-    fun isAid(aid: String): Boolean {
-        return this.plalerSource.aid == aid
     }
 
 }

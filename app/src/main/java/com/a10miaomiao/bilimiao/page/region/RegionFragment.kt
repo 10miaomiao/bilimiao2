@@ -7,12 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.coroutineScope
 import androidx.viewpager.widget.ViewPager
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.page.MainViewModel
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
@@ -26,7 +31,7 @@ import splitties.dimensions.dip
 import splitties.views.dsl.core.*
 import splitties.views.topPadding
 
-class RegionFragment : Fragment(), DIAware {
+class RegionFragment : Fragment(), DIAware , MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
@@ -36,6 +41,10 @@ class RegionFragment : Fragment(), DIAware {
 
     private lateinit var mViewPager: ViewPager
     private lateinit var mTabLayout: TabLayout
+
+    override val pageConfig = myPageConfig {
+        title = "时光姬-" + viewModel.region.name
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,9 +58,6 @@ class RegionFragment : Fragment(), DIAware {
         super.onViewCreated(view, savedInstanceState)
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
-        }
-        getAppBarView().setProp {
-            title = "时光姬-" + viewModel.region.name
         }
         initView()
     }

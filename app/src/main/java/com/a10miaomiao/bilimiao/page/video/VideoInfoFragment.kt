@@ -29,6 +29,9 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -59,7 +62,7 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.properties.Delegates
 
-class VideoInfoFragment: Fragment(), DIAware {
+class VideoInfoFragment: Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
@@ -70,6 +73,13 @@ class VideoInfoFragment: Fragment(), DIAware {
     private val playerStore by instance<PlayerStore>()
 
     private val playerDelegate by instance<PlayerDelegate>()
+
+    override val pageConfig = myPageConfig {
+        val info = viewModel.info
+        title = info?.let {
+            "${it.bvid} /\nAV${it.aid}"
+        } ?: "视频详情"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,17 +92,9 @@ class VideoInfoFragment: Fragment(), DIAware {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        lifecycle.coroutineScope.launch {
-//            windowStore.connectUi(ui)
-//            playerStore.connectUi(ui)
-//
-//            withContext(Dispatchers.IO){
-//                while (isActive) {
-//                    DebugMiao.log("isActive", isActive)
-//                    delay(1000)
-//                }
-//            }
-//        }
+        lifecycle.coroutineScope.launch {
+            windowStore.connectUi(ui)
+        }
     }
 
     private fun playVideo(cid: String, title: String) {
@@ -450,11 +452,7 @@ class VideoInfoFragment: Fragment(), DIAware {
     val ui = miaoBindingUi {
         // 监听info改变，修改页面标题
         miaoEffect(viewModel.info) {
-            getAppBarView().setProp {
-                title = it?.let {
-                    "${it.bvid} /\nAV${it.aid}"
-                } ?: "视频详情"
-            }
+            pageConfig.notifyConfigChanged()
         }
         verticalLayout {
             views {

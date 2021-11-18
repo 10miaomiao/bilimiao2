@@ -15,8 +15,12 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -26,7 +30,9 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
+import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
@@ -39,7 +45,11 @@ import splitties.views.padding
 import splitties.views.verticalPadding
 
 
-class MainFragment : Fragment(), DIAware {
+class MainFragment : Fragment(), DIAware, MyPage {
+
+    override val pageConfig = myPageConfig {
+        title = "bilimiao2"
+    }
 
     override val di: DI by lazyUiDi(ui = { ui })
 
@@ -59,9 +69,6 @@ class MainFragment : Fragment(), DIAware {
         super.onViewCreated(view, savedInstanceState)
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
-        }
-        getAppBarView().setProp {
-            title = "bilimiao"
         }
     }
 
@@ -116,6 +123,23 @@ class MainFragment : Fragment(), DIAware {
                 }..lParams {
                     width = matchParent
                     _topMargin = contentInsets.top
+                }
+
+                +button {
+                    text = "测试"
+                    setOnClickListener {
+                        val app = requireActivity().getScaffoldView()
+                        val bottomSheetBehavior = app.bottomSheetBehavior
+//                        behavior.peekHeight = peekHeight
+//                        supportFragmentManager.beginTransaction()
+//                            .replace(R.id.bottomSheettContainer, fragment)
+//                            .commit()
+//                        bottomSheetFragment = fragment
+                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED //设置为展开状态
+                        bottomSheetBehavior?.skipCollapsed = true
+                        DebugMiao.log(bottomSheetBehavior?.state)
+                    }
                 }
             }
 
