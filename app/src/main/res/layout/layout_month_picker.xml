@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:gravity="center"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.a10miaomiao.bilimiao.widget.picker.PickerView
+        android:id="@+id/mYearPicker"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:npv_ItemPaddingHorizontal="5dp"
+        app:npv_ItemPaddingVertical="5dp"
+        app:npv_ShowCount="3"
+        app:npv_RespondChangeOnDetached="false"
+        app:npv_TextSizeNormal="16sp"
+        app:npv_TextSizeSelected="20sp"
+        app:npv_WrapSelectorWheel="true"
+        app:npv_DividerColor="?attr/colorPrimary"
+        app:npv_TextColorSelected="?attr/colorPrimary"
+        app:npv_TextColorHint="?attr/colorPrimary"
+        app:npv_TextColorNormal="?attr/foregroundColor"
+        app:npv_HintText="年"/>
+
+    <com.a10miaomiao.bilimiao.widget.picker.PickerView
+        android:layout_marginLeft="10dp"
+        android:id="@+id/mMonthPicker"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:npv_ItemPaddingHorizontal="5dp"
+        app:npv_ItemPaddingVertical="5dp"
+        app:npv_ShowCount="3"
+        app:npv_RespondChangeOnDetached="false"
+        app:npv_TextSizeNormal="16sp"
+        app:npv_TextSizeSelected="20sp"
+        app:npv_WrapSelectorWheel="true"
+        app:npv_TextArray="@array/month_display"
+        app:npv_DividerColor="?attr/colorPrimary"
+        app:npv_TextColorSelected="?attr/colorPrimary"
+        app:npv_TextColorHint="?attr/colorPrimary"
+        app:npv_TextColorNormal="?attr/foregroundColor"
+        app:npv_HintText="月"/>
+
+</LinearLayout>

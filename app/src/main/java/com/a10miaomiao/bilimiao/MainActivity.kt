@@ -24,6 +24,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.PlayerStore
+import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -42,6 +43,7 @@ import splitties.views.dsl.material.hidden
 class MainActivity
     : AppCompatActivity(),
     DIAware,
+    NavController.OnDestinationChangedListener,
     FragmentOnAttachListener,
     FragmentManager.OnBackStackChangedListener {
 
@@ -51,11 +53,13 @@ class MainActivity
         bindSingleton { this@MainActivity }
         bindSingleton { windowStore }
         bindSingleton { playerStore }
+        bindSingleton { timeSettingStore }
         bindSingleton { playerDelegate }
     }
 
     private val windowStore: WindowStore by diViewModel(di)
     private val playerStore: PlayerStore by diViewModel(di)
+    private val timeSettingStore: TimeSettingStore by diViewModel(di)
 
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
 
@@ -88,11 +92,12 @@ class MainActivity
         navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-        MainNavGraph.createGraph(navController)
-
+        MainNavGraph.createGraph(navController, MainNavGraph.dest.home)
+        navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
         navHostFragment.childFragmentManager.addOnBackStackChangedListener(this)
 
+        timeSettingStore.initState()
 
         ui.mAppBar.onBackClick = this.onBackClick
         initBottomSheet()
@@ -100,20 +105,31 @@ class MainActivity
     }
 
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
-        navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
-        onBackStackChanged()
+        if (fragment is MyPage) {
+            val config = fragment.pageConfig
+            config.setConfig = this::setMyPageConfig
+        }
     }
 
     override fun onBackStackChanged() {
-        val childFragmentManager = navHostFragment.childFragmentManager
-        ui.mAppBar.canBack = childFragmentManager.backStackEntryCount > 0
+//        val childFragmentManager = navHostFragment.childFragmentManager
+//        ui.mAppBar.canBack = childFragmentManager.backStackEntryCount > 0
+//        ui.mAppBar.cleanProp()
+//        val primaryNavigationFragment = childFragmentManager.primaryNavigationFragment
+//        if (primaryNavigationFragment is MyPage) {
+//            val config = primaryNavigationFragment.pageConfig
+//            config.setConfig = this::setMyPageConfig
+//            config.notifyConfigChanged()
+//        }
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        ui.mAppBar.canBack = destination.id != MainNavGraph.dest.home
         ui.mAppBar.cleanProp()
-        val primaryNavigationFragment = childFragmentManager.primaryNavigationFragment
-        if (primaryNavigationFragment is MyPage) {
-            val config = primaryNavigationFragment.pageConfig
-            config.setConfig = this::setMyPageConfig
-            config.notifyConfigChanged()
-        }
     }
 
     private fun setMyPageConfig(config: MyPageConfigInfo) {
@@ -254,4 +270,5 @@ class MainActivity
         }
         super.onBackPressed()
     }
+
 }

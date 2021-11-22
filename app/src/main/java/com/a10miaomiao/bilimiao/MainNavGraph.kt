@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
+import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import kotlin.reflect.KClass
@@ -25,6 +26,9 @@ object MainNavGraph {
     object dest {
         val id = id_counter++
         val home = f<MainFragment>()
+        val timeSetting = f<TimeSettingFragment>() {
+            deepLink("bilimiao://time/setting")
+        }
         val region = f<RegionFragment> {
             argument(args.region) {
                 type = NavType.ParcelableType(RegionInfo::class.java)
@@ -66,8 +70,8 @@ object MainNavGraph {
         }
     }
 
-    fun createGraph(navController: NavController) {
-        navController.graph = navController.createGraph(id, dest.home) {
+    fun createGraph(navController: NavController, startDestination: Int) {
+        navController.graph = navController.createGraph(id, startDestination) {
             val id = dest.id + action.id
             idToFragment.values.forEach { fd ->
                 destination(

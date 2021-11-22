@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.page
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation.findNavController
@@ -72,6 +74,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    val handleTimeSettingClick = View.OnClickListener {
+        val nav = findNavController(it)
+        nav.navigate(Uri.parse("bilimiao://time/setting"))
+    }
 
     val regionItemUi = miaoBindingItemUi<RegionInfo> { item, index ->
         verticalLayout {
@@ -100,19 +106,43 @@ class MainFragment : Fragment(), DIAware, MyPage {
         nav.navigate(MainNavGraph.action.home_to_region, args)
     }
 
-    val ui = miaoBindingUi {
-        val contentInsets = windowStore.state.contentInsets
-        verticalLayout {
-            layoutParams = lParams(matchParent, matchParent)
-            backgroundColor = config.windowBackgroundColor
-            padding = config.pagePadding
+    fun MiaoUI.timeView(): View {
+        return verticalLayout {
+            backgroundColor = config.blockBackgroundColor
+            apply(ViewStyle.roundRect(dip(10)))
 
             views {
+                +textView {
+                    _text = viewModel.title
+                    textSize = 18f
+                    setTextColor(config.foregroundColor)
+                }..lParams {
+                    horizontalMargin = dip(10)
+                    topMargin = dip(10)
+                    bottomMargin = dip(5)
+                }
+                +horizontalLayout {
+                    views {
+                        +textView {
+                            _text = "当前时间线：" + viewModel.getTimeText()
+                        }
+                        +textView {
+                            setTextColor(config.themeColor)
+                            setBackgroundResource(config.selectableItemBackgroundBorderless)
+                            setOnClickListener(handleTimeSettingClick)
+                            text = "去设置>"
+                        }..lParams {
+                            leftMargin = dip(5)
+                        }
+                    }
+                }..lParams {
+                    horizontalMargin = dip(10)
+                    bottomMargin = dip(5)
+                }
+
                 +recyclerView {
-                    layoutManager = GridAutofitLayoutManager(requireContext(), dip(100))
+                    layoutManager = GridAutofitLayoutManager(requireContext(), dip(80))
                     isNestedScrollingEnabled = false
-                    backgroundColor = config.blockBackgroundColor
-                    apply(ViewStyle.roundRect(dip(10)))
 
                     _miaoAdapter(
                         viewModel.regions,
@@ -122,44 +152,41 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     }
                 }..lParams {
                     width = matchParent
+                }
+            }
+        }
+    }
+
+    val ui = miaoBindingUi {
+        val contentInsets = windowStore.state.contentInsets
+
+        verticalLayout {
+            layoutParams = lParams(matchParent, matchParent)
+            backgroundColor = config.windowBackgroundColor
+            padding = config.pagePadding
+
+            views {
+                +timeView()..lParams {
+                    width = matchParent
                     _topMargin = contentInsets.top
                 }
 
-                +button {
-                    text = "测试"
-                    setOnClickListener {
-                        val app = requireActivity().getScaffoldView()
-                        val bottomSheetBehavior = app.bottomSheetBehavior
-//                        behavior.peekHeight = peekHeight
-//                        supportFragmentManager.beginTransaction()
-//                            .replace(R.id.bottomSheettContainer, fragment)
-//                            .commit()
-//                        bottomSheetFragment = fragment
-                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED //设置为展开状态
-                        bottomSheetBehavior?.skipCollapsed = true
-                        DebugMiao.log(bottomSheetBehavior?.state)
-                    }
-                }
+//                +button {
+//                    text = "测试"
+//                    setOnClickListener {
+////                        val app = requireActivity().getScaffoldView()
+////                        val bottomSheetBehavior = app.bottomSheetBehavior
+//////                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+////                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED //设置为展开状态
+////                        bottomSheetBehavior?.skipCollapsed = true
+////                        DebugMiao.log(bottomSheetBehavior?.state)
+//                        val nav = findNavController(it)
+//                        nav.navigate(Uri.parse("bilimiao://time/setting"))
+//
+//                    }
+//                }
             }
 
-                // 时间线时间显示
-//                linearLayout {
-//                    selectableItemBackground()
-//                    backgroundColor = config.blockBackgroundColor
-//                    padding = config.dividerSize
-//                    textView {
-//                        observeTime {
-//                            text = "当前时间线：" + timeSettingStore.value
-//                        }
-//                    }
-//                    setOnClickListener {
-//                        startFragment(TimeSettingFragment())
-//                    }
-//                }.lparams {
-//                    width = matchParent
-//                    topMargin = config.dividerSize
-//                }
 
                 // 广告通知
 //                linearLayout {

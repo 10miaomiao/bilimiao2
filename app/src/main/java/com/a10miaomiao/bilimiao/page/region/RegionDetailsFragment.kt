@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,11 +29,14 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import kotlinx.coroutines.flow.collect
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -58,12 +62,28 @@ class RegionDetailsFragment : Fragment(), DIAware {
 
     private val viewModel by diViewModel<RegionDetailsViewModel>(di)
 
+    private val timeSettingStore: TimeSettingStore by di.instance()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         return ui.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycle.coroutineScope.launchWhenResumed {
+            timeSettingStore.stateFlow.collect {
+                if (
+                    viewModel.timeFrom.diff(it.timeFrom)
+                    || viewModel.timeTo.diff(it.timeTo)
+                ) {
+                    viewModel.refreshList()
+                }
+            }
+        }
     }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {

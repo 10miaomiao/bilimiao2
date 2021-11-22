@@ -14,6 +14,8 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.widget.picker.DateModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -29,18 +31,22 @@ class RegionDetailsViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
+    val timeSettingStore: TimeSettingStore by instance()
+
+    var timeFrom = DateModel()
+    var timeTo = DateModel()
 
     val rid by lazy { fragment.requireArguments().getInt(RegionDetailsFragment.TID) }
     var rankOrder = "click"  //排行依据
     var triggered = false
     var list = PaginationInfo<RegionTypeDetailsInfo>()
 
-    val layoutManager by lazy { GridAutofitLayoutManager(context, context.dip(300))}
-
 //    val filterStore = Store.from(context).filterStore
-//    val timeSettingStore = Store.from(context).timeSettingStore
 
     init {
+        val timeSettingState = timeSettingStore.state
+        timeFrom = timeSettingState.timeFrom
+        timeTo = timeSettingState.timeTo
         loadData()
     }
 
@@ -51,14 +57,15 @@ class RegionDetailsViewModel(
             ui.setState {
                 list.loading = true
             }
+
             val res = BiliApiService.regionAPI
                 .regionVideoList(
                     rid = rid,
                     rankOrder = rankOrder,
                     pageNum = pageNum,
                     pageSize = list.pageSize,
-                    timeFrom = "20211016",
-                    timeTo = "20211023"
+                    timeFrom = timeFrom.getValue(),
+                    timeTo = timeTo.getValue(),
                 )
                 .call()
                 .gson<ResultListInfo2<RegionTypeDetailsInfo>>()
