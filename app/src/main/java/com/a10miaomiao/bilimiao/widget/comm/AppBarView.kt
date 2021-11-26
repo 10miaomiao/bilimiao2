@@ -4,9 +4,11 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.view.Menu
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.core.view.forEach
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
@@ -24,6 +26,7 @@ class AppBarView @JvmOverloads constructor(
 
     var canBack = false
     var onBackClick: View.OnClickListener? = null
+    var onMenuItemClick: ((MenuItemView) -> Unit)? = null
 
     var orientation = ScaffoldView.VERTICAL
         set(value) {
@@ -41,6 +44,12 @@ class AppBarView @JvmOverloads constructor(
             updateProp()
         }
 
+    private val menuItemClick = OnClickListener { view ->
+        (view as? MenuItemView)?.let {
+            onMenuItemClick?.invoke(it)
+        }
+    }
+
     private var mUi = createUi()
 
     init {
@@ -54,7 +63,7 @@ class AppBarView @JvmOverloads constructor(
         return if (orientation == ScaffoldView.HORIZONTAL) {
             AppBarHorizontalUi(context)
         } else {
-            AppBarVerticalUi(context)
+            AppBarVerticalUi(context, menuItemClick)
         }
     }
 
@@ -71,7 +80,7 @@ class AppBarView @JvmOverloads constructor(
     }
 
     fun setProp(block: PropInfo.() -> Unit) {
-        val prop = this.prop?.run{ copy() } ?: newProp()
+        val prop = newProp()
         prop.block()
         this.prop = prop
     }
@@ -91,17 +100,12 @@ class AppBarView @JvmOverloads constructor(
         }
     }
 
-    data class MenuInfo (
-        var key: Int? = null,
-        var title: String? = null,
-        var icon: Drawable? = null,
-    )
 
-    data class PropInfo (
+    class PropInfo (
         var title: String? = null,
         var navigationIcon: Drawable? = null,
-        var menus: List<MenuInfo>? = null,
-        var onNavigationClick: View.OnClickListener? = null
+        var menus: List<MenuItemView.MenuItemPropInfo>? = null,
+        var onNavigationClick: View.OnClickListener? = null,
     )
 
 }

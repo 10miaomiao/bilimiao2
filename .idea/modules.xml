@@ -3,8 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bilimiao.iml" filepath="$PROJECT_DIR$/.idea/modules/bilimiao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/DanmakuFlameMaster/bilimiao.DanmakuFlameMaster.iml" filepath="$PROJECT_DIR$/.idea/modules/DanmakuFlameMaster/bilimiao.DanmakuFlameMaster.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bilimiao.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bilimiao.app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bilimiao-comm/bilimiao.bilimiao-comm.iml" filepath="$PROJECT_DIR$/.idea/modules/bilimiao-comm/bilimiao.bilimiao-comm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ijkplayer-java/bilimiao.ijkplayer-java.iml" filepath="$PROJECT_DIR$/.idea/modules/ijkplayer-java/bilimiao.ijkplayer-java.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/miao-binding/bilimiao.miao-binding.iml" filepath="$PROJECT_DIR$/.idea/modules/miao-binding/bilimiao.miao-binding.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/miao-binding-android/bilimiao.miao-binding-android.iml" filepath="$PROJECT_DIR$/.idea/modules/miao-binding-android/bilimiao.miao-binding-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/player/bilimiao.player.iml" filepath="$PROJECT_DIR$/.idea/modules/player/bilimiao.player.iml" />

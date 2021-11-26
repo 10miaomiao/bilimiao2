@@ -12,6 +12,7 @@ import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation.findNavController
+import androidx.navigation.findNavController
 import cn.a10miaomiao.miao.binding.android.view._topMargin
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 
@@ -22,6 +23,7 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -31,6 +33,7 @@ import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -50,7 +53,12 @@ import splitties.views.verticalPadding
 class MainFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
-        title = "bilimiao2"
+        title = "bilimiao"
+        menus = listOf(
+            myMenuItem {
+                title = "更多"
+            }
+        )
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
@@ -171,20 +179,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     _topMargin = contentInsets.top
                 }
 
-//                +button {
-//                    text = "测试"
-//                    setOnClickListener {
-////                        val app = requireActivity().getScaffoldView()
-////                        val bottomSheetBehavior = app.bottomSheetBehavior
-//////                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-////                        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED //设置为展开状态
-////                        bottomSheetBehavior?.skipCollapsed = true
-////                        DebugMiao.log(bottomSheetBehavior?.state)
-//                        val nav = findNavController(it)
-//                        nav.navigate(Uri.parse("bilimiao://time/setting"))
-//
-//                    }
-//                }
+                +button {
+                    text = "测试"
+                    setOnClickListener {
+                        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+                        nav.navigate(Uri.parse("bilimiao://time/setting"))
+                    }
+                }
             }
 
 

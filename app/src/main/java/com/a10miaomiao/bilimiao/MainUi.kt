@@ -33,6 +33,10 @@ class MainUi(override val ctx: Context) : Ui {
         backgroundColor = 0xFFF2F2F2L.toInt()
     }
 
+    val mBottomSheetView = inflate<FragmentContainerView>(R.layout.bottom_sheet_fragment) {
+        backgroundColor = 0xFFF2F2F2L.toInt()
+    }
+
     val mAppBar = view<AppBarView>{ }
 
     val mPlayerLayout = inflate<FrameLayout>(R.layout.include_palyer)
@@ -40,11 +44,7 @@ class MainUi(override val ctx: Context) : Ui {
     val mBottomSheetLayout = frameLayout {
         elevation = dip(4).toFloat()
 
-        addView(frameLayout {
-            id = bottomSheetViewID
-            backgroundColor = config.windowBackgroundColor
-        }, lParams {
-
+        addView(mBottomSheetView, lParams {
             width = matchParent
             height = dip(500)
             gravity = Gravity.BOTTOM

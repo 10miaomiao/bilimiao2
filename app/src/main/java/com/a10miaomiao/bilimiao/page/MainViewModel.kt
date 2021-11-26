@@ -104,7 +104,13 @@ class MainViewModel(
                     regions = regionList.toMutableList()
                 }
                 // 保存到本地
-                writeRegionJson(res)
+                writeRegionJson(
+                    ResultListInfo(
+                        code = 0,
+                        data = regionList,
+                        msg = "",
+                    )
+                )
             } else {
                 context.toast(res.msg)
             }

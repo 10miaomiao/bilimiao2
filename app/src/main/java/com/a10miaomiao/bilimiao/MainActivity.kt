@@ -16,9 +16,11 @@ import androidx.fragment.app.FragmentOnAttachListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
@@ -44,8 +46,7 @@ class MainActivity
     : AppCompatActivity(),
     DIAware,
     NavController.OnDestinationChangedListener,
-    FragmentOnAttachListener,
-    FragmentManager.OnBackStackChangedListener {
+    FragmentOnAttachListener {
 
     lateinit var ui: MainUi
 
@@ -62,6 +63,7 @@ class MainActivity
     private val timeSettingStore: TimeSettingStore by diViewModel(di)
 
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
+    private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
 
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
@@ -71,6 +73,7 @@ class MainActivity
         ui = MainUi(this)
         setContentView(ui.root)
         playerDelegate.onCreate(savedInstanceState)
+        bottomSheetDelegate.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ui.root.rootWindowInsets?.let {
@@ -95,13 +98,16 @@ class MainActivity
         MainNavGraph.createGraph(navController, MainNavGraph.dest.home)
         navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
-        navHostFragment.childFragmentManager.addOnBackStackChangedListener(this)
 
         timeSettingStore.initState()
 
         ui.mAppBar.onBackClick = this.onBackClick
-        initBottomSheet()
-//        ui.root.bottomSheetBehavior?.hidden = true
+        ui.mAppBar.onMenuItemClick = {
+            val fragment = navHostFragment.childFragmentManager.primaryNavigationFragment
+            if (fragment is MyPage) {
+                fragment.onMenuItemClick(it)
+            }
+        }
     }
 
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
@@ -109,18 +115,6 @@ class MainActivity
             val config = fragment.pageConfig
             config.setConfig = this::setMyPageConfig
         }
-    }
-
-    override fun onBackStackChanged() {
-//        val childFragmentManager = navHostFragment.childFragmentManager
-//        ui.mAppBar.canBack = childFragmentManager.backStackEntryCount > 0
-//        ui.mAppBar.cleanProp()
-//        val primaryNavigationFragment = childFragmentManager.primaryNavigationFragment
-//        if (primaryNavigationFragment is MyPage) {
-//            val config = primaryNavigationFragment.pageConfig
-//            config.setConfig = this::setMyPageConfig
-//            config.notifyConfigChanged()
-//        }
     }
 
     override fun onDestinationChanged(
@@ -135,6 +129,7 @@ class MainActivity
     private fun setMyPageConfig(config: MyPageConfigInfo) {
         ui.mAppBar.setProp {
             title = config.title
+            menus = config.menus
         }
     }
 
@@ -225,44 +220,8 @@ class MainActivity
         ui.root.orientation = newConfig.orientation
     }
 
-    private fun initBottomSheet() {
-        ui.root.bottomSheetBehavior?.let { behavior ->
-            behavior.isHideable = true
-            behavior.isFitToContents = false
-            behavior.state = BottomSheetBehavior.STATE_HIDDEN
-            behavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onSlide(p0: View, p1: Float) {
-
-//                    if (p1 < 0) {
-//                        shadeView.alpha = (p1 + 1) * 0.6f
-//                    } else {
-//                        shadeView.alpha = 0.6f
-//                    }
-                }
-
-                override fun onStateChanged(p0: View, p1: Int) {
-
-//                    if (p1 == BottomSheetBehavior.STATE_HIDDEN) {
-//                        shadeView.visibility = View.GONE
-//                        bottomSheetFragment?.let {
-//                            supportFragmentManager.beginTransaction()
-//                                .remove(it)
-//                                .commit()
-//                            bottomSheetFragment = null
-//                        }
-//                    } else {
-//                        shadeView.visibility = View.VISIBLE
-//                    }
-                }
-            })
-        }
-    }
-
     override fun onBackPressed() {
-        // 上滑菜单未关闭则先关闭上滑菜单
-        val behavior = ui.root.bottomSheetBehavior
-        if (behavior?.state != BottomSheetBehavior.STATE_HIDDEN) {
-            behavior?.state =  BottomSheetBehavior.STATE_HIDDEN
+        if (bottomSheetDelegate.onBackPressed()) {
             return
         }
         if (playerDelegate.onBackPressed()) {

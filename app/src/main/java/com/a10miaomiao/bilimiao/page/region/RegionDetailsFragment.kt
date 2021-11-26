@@ -80,6 +80,8 @@ class RegionDetailsFragment : Fragment(), DIAware {
                     viewModel.timeFrom.diff(it.timeFrom)
                     || viewModel.timeTo.diff(it.timeTo)
                 ) {
+                    viewModel.timeFrom = it.timeFrom
+                    viewModel.timeTo = it.timeTo
                     viewModel.refreshList()
                 }
             }

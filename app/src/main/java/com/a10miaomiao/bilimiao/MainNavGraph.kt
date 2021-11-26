@@ -26,6 +26,7 @@ object MainNavGraph {
     object dest {
         val id = id_counter++
         val home = f<MainFragment>()
+        val template = f<TemplateFragment>()
         val timeSetting = f<TimeSettingFragment>() {
             deepLink("bilimiao://time/setting")
         }

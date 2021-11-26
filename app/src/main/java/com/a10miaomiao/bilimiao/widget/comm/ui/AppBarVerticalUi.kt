@@ -4,14 +4,21 @@ import android.content.Context
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.core.view.get
 import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
+import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import splitties.dimensions.dip
 import splitties.views.dsl.core.*
+import splitties.views.endPadding
 import splitties.views.imageDrawable
 import splitties.views.padding
 
-class AppBarVerticalUi(override val ctx: Context) : AppBarUi {
+class AppBarVerticalUi(
+    override val ctx: Context,
+    val menuItemClick: View.OnClickListener,
+) : AppBarUi {
     val mTitle = textView {
         gravity = Gravity.CENTER
         textSize = 12f
@@ -29,10 +36,20 @@ class AppBarVerticalUi(override val ctx: Context) : AppBarUi {
         })
     }
 
+    val mNavigationMemuLayout = horizontalLayout {
+        gravity = Gravity.END
+        endPadding = dip(10)
+    }
+
     val mNavigationLayout = horizontalLayout {
         addView(mNavigationIconLayout, lParams {
             width = wrapContent
             height = wrapContent
+        })
+        addView(mNavigationMemuLayout, lParams {
+            width = matchParent
+            height = matchParent
+            weight = 1f
         })
     }
 
@@ -45,7 +62,7 @@ class AppBarVerticalUi(override val ctx: Context) : AppBarUi {
         addView(mNavigationLayout, lParams {
             topMargin = dip(15)
             width = matchParent
-            height = matchParent
+            height = dip(44)
         })
     }
 
@@ -61,6 +78,36 @@ class AppBarVerticalUi(override val ctx: Context) : AppBarUi {
                 mNavigationIcon.setOnClickListener(prop.onNavigationClick)
             }
             mTitle.text = (prop.title ?: "").replace("\n", " ")
+
+            val menus = prop.menus
+            if (menus == null) {
+                mNavigationMemuLayout.removeAllViews()
+            } else {
+                mNavigationMemuLayout.apply {
+                    menus.reversed().forEachIndexed { index, menu ->
+                        var menuItemView: MenuItemView
+                        if (index >= childCount) {
+                            menuItemView = MenuItemView(ctx)
+                            menuItemView.orientation = LinearLayout.VERTICAL
+                            menuItemView.minimumWidth = dip(60)
+                            menuItemView.setOnClickListener(menuItemClick)
+                            addView(menuItemView, lParams {
+                                width = wrapContent
+                                height = matchParent
+                            })
+                        } else {
+                            menuItemView = getChildAt(index) as MenuItemView
+                        }
+                        menuItemView.prop = menu
+                    }
+                    if (childCount > menus.size) {
+                        removeViews(
+                            menus.size,
+                            childCount - menus.size
+                        )
+                    }
+                }
+            }
         }
     }
 }
