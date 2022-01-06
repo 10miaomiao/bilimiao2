@@ -79,11 +79,14 @@ class RegionDetailsFragment : Fragment(), DIAware {
                 if (
                     viewModel.timeFrom.diff(it.timeFrom)
                     || viewModel.timeTo.diff(it.timeTo)
+                    || viewModel.rankOrder != it.rankOrder
                 ) {
                     viewModel.timeFrom = it.timeFrom
                     viewModel.timeTo = it.timeTo
+                    viewModel.rankOrder = it.rankOrder
                     viewModel.refreshList()
                 }
+
             }
         }
     }

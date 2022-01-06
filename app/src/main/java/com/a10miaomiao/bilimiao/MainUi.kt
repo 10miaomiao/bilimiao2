@@ -59,7 +59,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             })
             addView(bottomSheetTitleView, lParams {
                 width = matchParent
-                height = dip(30)
+                height = config.bottomSheetTitleHeight
             })
         }, lParams {
             width = matchParent

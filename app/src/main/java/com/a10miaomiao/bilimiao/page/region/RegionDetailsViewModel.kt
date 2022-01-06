@@ -47,6 +47,7 @@ class RegionDetailsViewModel(
         val timeSettingState = timeSettingStore.state
         timeFrom = timeSettingState.timeFrom
         timeTo = timeSettingState.timeTo
+        rankOrder = timeSettingState.rankOrder
         loadData()
     }
 

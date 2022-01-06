@@ -34,6 +34,7 @@ import splitties.views.dsl.appcompat.switch
 import splitties.views.dsl.core.*
 import splitties.views.padding
 import splitties.views.textColorResource
+import splitties.views.topPadding
 
 class TimeSettingFragment : Fragment(), DIAware, MyPage {
 
@@ -52,6 +53,7 @@ class TimeSettingFragment : Fragment(), DIAware, MyPage {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        ui.parentView = container
         return ui.root
     }
 
@@ -194,7 +196,14 @@ class TimeSettingFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        val contentInsets = windowStore.getContentInsets(parentView)
         verticalLayout {
+            setPadding(
+                contentInsets.left,
+                contentInsets.top,
+                contentInsets.right,
+                contentInsets.bottom,
+            )
             views {
                 +horizontalLayout {
                     apply(ViewStyle.block)
@@ -218,9 +227,7 @@ class TimeSettingFragment : Fragment(), DIAware, MyPage {
                         }..lParams(width = wrapContent)
                     }
 
-                }..lParams(width = matchParent) {
-                    topMargin = config.dividerSize
-                }
+                }..lParams(width = matchParent)
 
                 +verticalLayout {
                     apply(ViewStyle.block)

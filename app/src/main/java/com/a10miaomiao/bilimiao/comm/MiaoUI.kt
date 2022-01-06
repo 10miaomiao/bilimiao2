@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
 import splitties.views.dsl.core.Ui
 
 abstract class MiaoUI : Ui {
@@ -11,7 +12,7 @@ abstract class MiaoUI : Ui {
         @PublishedApi internal var isRecordViews = false
     }
 
-
+    var parentView: View? = null
 
     class ViewsInfo(
         private val viewGroup: ViewGroup,

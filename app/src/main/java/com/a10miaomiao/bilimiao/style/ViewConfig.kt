@@ -7,10 +7,13 @@ import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.attr
 import splitties.dimensions.dip
+import splitties.views.dsl.core.matchParent
 
 class ViewConfig(val context: Context) {
     val containerWidth = context.dip(900)
     val pagePadding get() = context.dip(10)
+    val bottomSheetTitleHeight = context.dip(30)
+
     val dividerSize get() = context.dip(10)
     val regionIconSize get() = context.dip(24)
 

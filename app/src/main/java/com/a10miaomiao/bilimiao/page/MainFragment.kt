@@ -169,12 +169,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
-        val contentInsets = windowStore.state.contentInsets
+        val contentInsets = windowStore.getContentInsets(parentView)
 
         verticalLayout {
             layoutParams = lParams(matchParent, matchParent)
             backgroundColor = config.windowBackgroundColor
             padding = config.pagePadding
+
 
             views {
                 +timeView()..lParams {

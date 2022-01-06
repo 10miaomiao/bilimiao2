@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -144,6 +145,9 @@ class MainActivity
         val bottom = insets.systemWindowInsetBottom
         windowStore.setWindowInsets(
             left, top, right, bottom,
+        )
+        windowStore.setBottomSheetContentInsets(
+            0, config.bottomSheetTitleHeight, 0, bottom
         )
         ui.mBottomSheetLayout.setPadding(left, top, right, 0)
         val showPlayer = ui.root.showPlayer

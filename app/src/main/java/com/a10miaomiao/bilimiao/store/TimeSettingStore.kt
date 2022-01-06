@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.Bilimiao
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.store.base.BaseStore
 import com.a10miaomiao.bilimiao.widget.picker.DateModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,7 @@ class TimeSettingStore(override val di: DI) :
     data class State (
         var timeFrom: DateModel,
         var timeTo: DateModel,
+        var rankOrder: String = "click"
     )
 
     override val stateFlow = MutableStateFlow(State(
@@ -41,6 +43,17 @@ class TimeSettingStore(override val di: DI) :
             read(TIME_FROM),
             read(TIME_TO)
         )
+    }
+
+    fun getRankOrderText(): String {
+        return when (state.rankOrder) {
+            "click" -> "播放数"
+            "scores" -> "评论数"
+            "stow" -> "收藏数"
+            "coin" -> "硬币数"
+            "dm" -> "弹幕数"
+            else -> "播放数"
+        }
     }
 
     fun read(type: String): DateModel {

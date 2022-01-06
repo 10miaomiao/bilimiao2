@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.LiveData
@@ -60,7 +62,7 @@ class RegionFragment : Fragment(), DIAware , MyPage {
             myMenuItem {
                 key = 0
                 iconResource = R.drawable.ic_baseline_filter_list_grey_24
-                title = "排序"
+                title = timeSettingStore.getRankOrderText()
             },
             myMenuItem {
                 key = 1
@@ -73,11 +75,28 @@ class RegionFragment : Fragment(), DIAware , MyPage {
     override fun onMenuItemClick(view: MenuItemView) {
         super.onMenuItemClick(view)
         when (view.prop.key) {
+            0 -> {
+                val pm = RankOrderPopupMenu(
+                    activity = requireActivity(),
+                    anchor = view,
+                    checkedValue = timeSettingStore.state.rankOrder
+                )
+                pm.setOnMenuItemClickListener(handleMenuItemClickListener)
+                pm.show()
+            }
             1 -> {
                 val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://time/setting"))
             }
         }
+    }
+
+    private val handleMenuItemClickListener = PopupMenu.OnMenuItemClickListener {
+        it.isChecked = true
+        timeSettingStore.setState {
+            rankOrder = arrayOf("click", "scores", "stow", "coin", "dm")[it.itemId]
+        }
+        false
     }
 
     override fun onCreateView(
@@ -93,7 +112,6 @@ class RegionFragment : Fragment(), DIAware , MyPage {
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
             timeSettingStore.stateFlow.collect {
-
                 pageConfig.notifyConfigChanged()
             }
         }
