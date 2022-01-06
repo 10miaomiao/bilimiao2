@@ -56,6 +56,7 @@ class BottomSheetDelegate(
                         if (navBottomSheetController.currentDestination?.id != MainNavGraph.dest.template) {
                             navBottomSheetController.popBackStack(MainNavGraph.dest.template, false)
                         }
+                        ui.bottomSheetMaskView.visibility = View.GONE
                     } else {
                         ui.bottomSheetMaskView.visibility = View.VISIBLE
                     }
@@ -63,6 +64,9 @@ class BottomSheetDelegate(
             })
         }
 
+        ui.bottomSheetMaskView.setOnClickListener {
+            ui.bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+        }
 
     }
 

@@ -61,7 +61,7 @@ class AppBarView @JvmOverloads constructor(
 
     fun createUi (): AppBarUi {
         return if (orientation == ScaffoldView.HORIZONTAL) {
-            AppBarHorizontalUi(context)
+            AppBarHorizontalUi(context, menuItemClick)
         } else {
             AppBarVerticalUi(context, menuItemClick)
         }

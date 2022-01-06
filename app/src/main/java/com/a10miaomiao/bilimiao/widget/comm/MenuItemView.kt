@@ -10,8 +10,10 @@ import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.core.view.marginTop
 import com.a10miaomiao.bilimiao.config.config
+import org.kodein.di.android.di
 import splitties.dimensions.dip
 import splitties.views.dsl.core.*
+import splitties.views.rightPadding
 
 class MenuItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -26,8 +28,8 @@ class MenuItemView @JvmOverloads constructor(
 
     init {
         gravity = Gravity.CENTER
-        setBackgroundResource(context.config.selectableItemBackgroundBorderless)
         addView(ui.icon, lParams {
+            horizontalMargin = dip(5)
             height = dip(20)
             width =  dip(20)
         })
@@ -54,7 +56,11 @@ class MenuItemView @JvmOverloads constructor(
         if (subTitle == null) {
             ui.subTitle.visibility = View.GONE
         } else {
-            ui.subTitle.text = subTitle.replace("\n", " ")
+            ui.subTitle.text = if (orientation == HORIZONTAL) {
+                subTitle
+            } else {
+                subTitle.replace("\n", " ")
+            }
         }
     }
 

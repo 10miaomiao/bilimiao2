@@ -86,7 +86,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
     }
 
     val handleTimeSettingClick = View.OnClickListener {
-        val nav = findNavController(it)
+        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
         nav.navigate(Uri.parse("bilimiao://time/setting"))
     }
 
@@ -182,13 +182,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     _topMargin = contentInsets.top
                 }
 
-                +button {
-                    text = "测试"
-                    setOnClickListener {
-                        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-                        nav.navigate(Uri.parse("bilimiao://time/setting"))
-                    }
-                }
+//                +button {
+//                    text = "测试"
+//                    setOnClickListener {
+//                        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+//                        nav.navigate(Uri.parse("bilimiao://time/setting"))
+//                    }
+//                }
             }
 
 
