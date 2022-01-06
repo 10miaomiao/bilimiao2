@@ -145,6 +145,7 @@ class MainActivity
         windowStore.setWindowInsets(
             left, top, right, bottom,
         )
+        ui.mBottomSheetLayout.setPadding(left, top, right, 0)
         val showPlayer = ui.root.showPlayer
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
             windowStore.setContentInsets(

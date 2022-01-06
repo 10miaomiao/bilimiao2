@@ -9,6 +9,7 @@ import com.a10miaomiao.bilimiao.comm.attr
 import splitties.dimensions.dip
 
 class ViewConfig(val context: Context) {
+    val containerWidth = context.dip(900)
     val pagePadding get() = context.dip(10)
     val dividerSize get() = context.dip(10)
     val regionIconSize get() = context.dip(24)

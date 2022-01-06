@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.IdRes
@@ -18,10 +19,11 @@ import kotlin.contracts.contract
 inline fun View.wrapInNestedScrollView(
     @IdRes id: Int = View.NO_ID,
     height: Int = wrapContent,
+    gravity: Int = FrameLayout.LayoutParams.UNSPECIFIED_GRAVITY,
     initView: NestedScrollView.() -> Unit = {}
 ): NestedScrollView {
     return view({ NestedScrollView(it) }, id) {
-        add(this@wrapInNestedScrollView, lParams(width = matchParent, height = height))
+        add(this@wrapInNestedScrollView, lParams(matchParent, height, gravity))
     }.apply(initView)
 }
 
@@ -31,7 +33,7 @@ inline fun View.wrapInSwipeRefreshLayout(
     initView: SwipeRefreshLayout.() -> Unit = {}
 ): SwipeRefreshLayout {
     return view({ SwipeRefreshLayout(it) }, id) {
-        add(
+        addView(
             this@wrapInSwipeRefreshLayout,
             ViewGroup.LayoutParams(matchParent, height)
         )

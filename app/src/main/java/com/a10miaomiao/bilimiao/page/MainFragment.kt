@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.marginBottom
@@ -36,6 +37,7 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -46,6 +48,7 @@ import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.gravityCenter
 import splitties.views.padding
 import splitties.views.verticalPadding
 
@@ -221,7 +224,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
 //                }
 
 
-        }.wrapInNestedScrollView (height = ViewGroup.LayoutParams.MATCH_PARENT)
+        }.wrapInLimitedFrameLayout {
+            maxWidth = config.containerWidth
+        }.wrapInNestedScrollView (
+            height = ViewGroup.LayoutParams.MATCH_PARENT,
+            gravity = Gravity.CENTER_HORIZONTAL,
+        )
     }
+
 
 }

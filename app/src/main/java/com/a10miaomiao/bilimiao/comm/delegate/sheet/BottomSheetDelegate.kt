@@ -12,11 +12,13 @@ import androidx.navigation.fragment.NavHostFragment
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.MainUi
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class BottomSheetDelegate(
     private val activity: AppCompatActivity,
-    private val ui: MainUi,
+    private val ui: BottomSheetUi,
 ): NavController.OnDestinationChangedListener, FragmentOnAttachListener {
 
     private val TAG = BottomSheetDelegate::class.simpleName
@@ -36,17 +38,17 @@ class BottomSheetDelegate(
         navBottomSheetController.addOnDestinationChangedListener(this)
         navBottomSheetFragment.childFragmentManager.addFragmentOnAttachListener(this)
 
-        ui.root.bottomSheetBehavior?.let { behavior ->
+        ui.bottomSheetBehavior?.let { behavior ->
             behavior.isHideable = true
             behavior.isFitToContents = false
             behavior.state = BottomSheetBehavior.STATE_HIDDEN
             behavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(p0: View, p1: Float) {
-//                    if (p1 < 0) {
-//                        shadeView.alpha = (p1 + 1) * 0.6f
-//                    } else {
-//                        shadeView.alpha = 0.6f
-//                    }
+                    if (p1 < 0) {
+                        ui.bottomSheetMaskView.alpha = (p1 + 1) * 0.6f
+                    } else {
+                        ui.bottomSheetMaskView.alpha = 0.6f
+                    }
                 }
 
                 override fun onStateChanged(p0: View, p1: Int) {
@@ -55,7 +57,7 @@ class BottomSheetDelegate(
                             navBottomSheetController.popBackStack(MainNavGraph.dest.template, false)
                         }
                     } else {
-//                        shadeView.visibility = View.VISIBLE
+                        ui.bottomSheetMaskView.visibility = View.VISIBLE
                     }
                 }
             })
@@ -69,7 +71,8 @@ class BottomSheetDelegate(
         destination: NavDestination,
         arguments: Bundle?
     ) {
-        val behavior = ui.root.bottomSheetBehavior
+        ui.bottomSheetTitleView.text = ""
+        val behavior = ui.bottomSheetBehavior
         if (destination.id == MainNavGraph.dest.template) {
             if (behavior?.state != BottomSheetBehavior.STATE_HIDDEN) {
                 behavior?.state = BottomSheetBehavior.STATE_HIDDEN
@@ -84,12 +87,20 @@ class BottomSheetDelegate(
     }
 
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
-
+        if (fragment is MyPage) {
+            val config = fragment.pageConfig
+            config.setConfig = this::setMyPageConfig
+        }
     }
+
+    private fun setMyPageConfig(config: MyPageConfigInfo) {
+        ui.bottomSheetTitleView.text = config.title
+    }
+
 
     fun onBackPressed(): Boolean {
         // 上滑菜单未关闭则先关闭上滑菜单
-        val behavior = ui.root.bottomSheetBehavior
+        val behavior = ui.bottomSheetBehavior
         if (behavior?.state != BottomSheetBehavior.STATE_HIDDEN) {
             if (navBottomSheetController.currentDestination?.id == MainNavGraph.dest.template) {
                 behavior?.state =  BottomSheetBehavior.STATE_HIDDEN
