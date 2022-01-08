@@ -23,6 +23,7 @@ class AppBarVerticalUi(
     val mTitle = textView {
         gravity = Gravity.CENTER
         textSize = 12f
+        setTextColor(config.foregroundAlpha45Color)
     }
 
     val mNavigationIcon = imageView {

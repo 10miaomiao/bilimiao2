@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.page
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.marginBottom
@@ -14,6 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topMargin
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 
@@ -38,6 +42,8 @@ import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.FIT_CENTER
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -45,12 +51,9 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
-import splitties.views.backgroundColor
+import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.gravityCenter
-import splitties.views.padding
-import splitties.views.verticalPadding
 
 
 class MainFragment : Fragment(), DIAware, MyPage {
@@ -90,6 +93,15 @@ class MainFragment : Fragment(), DIAware, MyPage {
         nav.navigate(Uri.parse("bilimiao://time/setting"))
     }
 
+    val handleAdClick = View.OnClickListener {
+        viewModel.adInfo?.let {
+            //普通链接 调用浏览器
+            var intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(it.link.url)
+            requireActivity().startActivity(intent)
+        }
+    }
+
     val regionItemUi = miaoBindingItemUi<RegionInfo> { item, index ->
         verticalLayout {
             setBackgroundResource(config.selectableItemBackground)
@@ -104,6 +116,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 +textView {
                     _text = item.name
                     gravity = Gravity.CENTER
+                    setTextColor(config.foregroundAlpha45Color)
                 }
             }
         }
@@ -136,6 +149,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     views {
                         +textView {
                             _text = "当前时间线：" + viewModel.getTimeText()
+                            setTextColor(config.foregroundAlpha45Color)
                         }
                         +textView {
                             setTextColor(config.themeColor)
@@ -168,19 +182,119 @@ class MainFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    fun MiaoUI.adView(): View {
+        return horizontalLayout {
+            backgroundColor = config.blockBackgroundColor
+            apply(ViewStyle.roundRect(dip(10)))
+            padding = config.dividerSize
+
+            val adInfo = viewModel.adInfo
+            _show = adInfo?.isShow == true
+
+            views {
+                +textView {
+                    _text = adInfo?.title ?: ""
+                    setTextColor(config.foregroundAlpha45Color)
+                }..lParams {
+                    width = matchParent
+                    weight = 1f
+                }
+
+                +textView {
+                    setBackgroundResource(config.selectableItemBackgroundBorderless)
+                    textColorResource = config.themeColorResource
+                    _text = adInfo?.link?.text ?: ""
+                    setOnClickListener(handleAdClick)
+                }
+            }
+        }
+    }
+
+    fun MiaoUI.headerView(): View {
+        return frameLayout {
+            backgroundColor = config.blockBackgroundColor
+            apply(ViewStyle.roundRect(dip(10)))
+
+            views {
+                // 背景图片
+                +imageView {
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+                    imageResource = R.drawable.home_header_img
+                }..lParams(matchParent, matchParent)
+
+                // 应用信息
+                +horizontalLayout {
+                    padding = dip(10)
+
+                    views {
+                        +imageView {
+                            Glide.with(context)
+                                .load(R.mipmap.ic_launcher)
+                                .circleCrop()
+                                .into(this)
+                        }..lParams {
+                            height = dip(50)
+                            width = dip(50)
+                            rightMargin = dip(10)
+                        }
+
+                        +verticalLayout {
+                            gravity = Gravity.CENTER_VERTICAL
+
+                            views {
+                                +textView {
+                                    text = "bilimiao"
+                                    setTextColor(config.foregroundColor)
+                                    textSize = 16f
+                                }..lParams {
+                                    width = matchParent
+                                }
+
+                                +textView {
+                                    text = "不知道写什么好"
+                                    setTextColor(config.foregroundAlpha45Color)
+                                }..lParams {
+                                    width = matchParent
+                                }
+                            }
+                        }..lParams {
+                            height = matchParent
+                            width = matchParent
+                        }
+                    }
+                }..lParams {
+                    width = matchParent
+                    height = wrapContent
+                    gravity = Gravity.BOTTOM
+                }
+            }
+
+        }
+    }
+
     val ui = miaoBindingUi {
         val contentInsets = windowStore.getContentInsets(parentView)
 
         verticalLayout {
             layoutParams = lParams(matchParent, matchParent)
             backgroundColor = config.windowBackgroundColor
-            padding = config.pagePadding
-
+            horizontalPadding = config.pagePadding
+            _topPadding = contentInsets.top + config.pagePadding
+            _bottomPadding = contentInsets.bottom
 
             views {
+                +headerView()..lParams {
+                    width = matchParent
+                    height = dip(150)
+                    bottomMargin = config.dividerSize
+                }
+                +adView()..lParams {
+                    width = matchParent
+                    bottomMargin = config.dividerSize
+                }
                 +timeView()..lParams {
                     width = matchParent
-                    _topMargin = contentInsets.top
+                    bottomMargin = config.dividerSize
                 }
 
 //                +button {
@@ -191,39 +305,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
 //                    }
 //                }
             }
-
-
-                // 广告通知
-//                linearLayout {
-//                    visibility = View.GONE
-//                    backgroundColor = config.blockBackgroundColor
-//                    padding = config.dividerSize
-//
-//                    val observeAdInfo = viewModel.adInfo.observeNotNull()
-//
-//                    observeAdInfo {
-//                        visibility = if (it?.isShow == true) View.VISIBLE else View.GONE
-//                    }
-//
-//                    textView {
-//                        observeAdInfo { text = it!!.title }
-//                    }.lparams {
-//                        width = matchParent
-//                        weight = 1f
-//                    }
-//
-//                    textView {
-//                        selectableItemBackgroundBorderless()
-//                        textColorResource = attr(android.R.attr.colorAccent)
-//                        observeAdInfo { text = it!!.link.text }
-//                    }
-//
-//                    setOnClickListener { viewModel.openAd() }
-//                }.lparams {
-//                    width = matchParent
-//                    topMargin = config.dividerSize
-//                }
-
 
         }.wrapInLimitedFrameLayout {
             maxWidth = config.containerWidth

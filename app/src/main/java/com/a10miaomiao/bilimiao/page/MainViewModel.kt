@@ -9,6 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
@@ -17,11 +18,14 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -43,7 +47,7 @@ class MainViewModel(
     val timeSettingStore: TimeSettingStore by instance()
 
     var title = "时光姬"
-//    var adInfo = MiaoLiveData<MiaoAdInfo.AdBean?>(null)
+    var adInfo: MiaoAdInfo.AdBean? = null
     var regions = mutableListOf<RegionInfo>()
     var isBestRegion = false
     var prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -51,7 +55,7 @@ class MainViewModel(
 
     init {
         randomTitle()
-//        loadAdData()
+        loadAdData()
         loadRegionData()
         viewModelScope.launch {
             timeSettingStore.connectUi(ui)
@@ -157,63 +161,68 @@ class MainViewModel(
     /**
      * 加载广告信息
      */
-    private fun loadAdData() {
-//        val manager = context.packageManager
-//        val info = manager.getPackageInfo(context.packageName, 0)
-//        val longVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//            info.longVersionCode
-//        } else {
-//            info.versionCode.toLong()
-//        }
-//        val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$longVersionCode"
-//        MiaoHttp.getJson<MiaoAdInfo>(url)
-//            .subscribeOn(Schedulers.io())
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe({ r ->
-//                if (r.code == 0) {
-//                    adInfo set r.data.ad
-//                    showUpdateDialog(r.data.version, longVersionCode)
-//                }
-//            }, { e ->
-//                e.printStackTrace()
-//            })
+    private fun loadAdData() = viewModelScope.launch(Dispatchers.IO){
+        try {
+            val manager = context.packageManager
+            val info = manager.getPackageInfo(context.packageName, 0)
+            val longVersionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                info.longVersionCode
+            } else {
+                info.versionCode.toLong()
+            }
+            val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$longVersionCode"
+            val res = MiaoHttp.request(url).call().gson<MiaoAdInfo>()
+            if (res.code == 0) {
+                ui.setState {
+                    adInfo = res.data.ad
+                }
+                withContext(Dispatchers.Main) {
+                    showUpdateDialog(res.data.version, longVersionCode)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-//    fun showUpdateDialog(version: MiaoAdInfo.VersionBean, curVersionCode: Long) {
-//        // 当前版本大于等于最新版本不提示更新
-//        if (curVersionCode >= version.versionCode) {
-//            return
-//        }
-//        // 最新版已记录为不更新版本并且当前大于等于最低版本，不提示更新
-//        val noUpdateVersionCode = SettingUtil.getLong(context,"no_update_version_code", 0L)
-//        if (version.versionCode === noUpdateVersionCode && curVersionCode >= version.miniVersionCode) {
-//            return
-//        }
-//        val dialog = AlertDialog.Builder(context).apply {
-//            setTitle("有新版本：" + version.versionName)
-//            setMessage(version.content)
-//            setPositiveButton("去更新", null)
-//            if (curVersionCode >= version.miniVersionCode) {
-//                setNegativeButton("取消", null)
-//                setNeutralButton("不再提醒此版本") { dialog, which ->
-//                    SettingUtil.putLong(context,"no_update_version_code", version.versionCode)
-//                }
-//            } else {
-//                // 小于最低版本，必须更新，对话框不能关闭
-//                setCancelable(false)
-//            }
-//        }.create()
-//        dialog.show()
-//        // 手动设置按钮点击事件，可阻止对话框自动关闭
-//        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-//            var intent = Intent(Intent.ACTION_VIEW)
-//            intent.data = Uri.parse(version.url)
-//            context.startActivity(intent)
-//            if (curVersionCode >= version.miniVersionCode) {
-//                dialog.dismiss()
-//            }
-//        }
-//    }
+    fun showUpdateDialog(version: MiaoAdInfo.VersionBean, curVersionCode: Long) {
+        // 当前版本大于等于最新版本不提示更新
+        if (curVersionCode >= version.versionCode) {
+            return
+        }
+        // 最新版已记录为不更新版本并且当前大于等于最低版本，不提示更新
+        val sp = context.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
+        val noUpdateVersionCode = sp.getLong("no_update_version_code", 0L)
+        if (version.versionCode === noUpdateVersionCode && curVersionCode >= version.miniVersionCode) {
+            return
+        }
+        val dialog = AlertDialog.Builder(context).apply {
+            setTitle("有新版本：" + version.versionName)
+            setMessage(version.content)
+            setPositiveButton("去更新", null)
+            if (curVersionCode >= version.miniVersionCode) {
+                setNegativeButton("取消", null)
+                setNeutralButton("不再提醒此版本") { dialog, which ->
+                    sp.edit()
+                        .putLong("no_update_version_code", version.versionCode)
+                        .apply()
+                }
+            } else {
+                // 小于最低版本，必须更新，对话框不能关闭
+                setCancelable(false)
+            }
+        }.create()
+        dialog.show()
+        // 手动设置按钮点击事件，可阻止对话框自动关闭
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            var intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(version.url)
+            context.startActivity(intent)
+            if (curVersionCode >= version.miniVersionCode) {
+                dialog.dismiss()
+            }
+        }
+    }
 
     /**
      * 随机标题

@@ -13,6 +13,8 @@ import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.*
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
@@ -75,7 +77,7 @@ class VideoInfoViewModel(
                 .gson<ResultInfo<VideoInfo>>()
             if (res.code == 0) {
                 val data = res.data
-//                data.desc = BiliUrlMatcher.customString(data.desc)
+                data.desc = BiliUrlMatcher.customString(data.desc)
                 val relatesData = data.relates ?: listOf()
                 val staffData = data.staff ?: listOf()
  //                val relatesData = data.relates.filter {

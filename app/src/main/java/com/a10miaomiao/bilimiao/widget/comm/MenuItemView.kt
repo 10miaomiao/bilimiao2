@@ -79,11 +79,13 @@ class MenuItemView @JvmOverloads constructor(
         val title = textView {
             textSize = 12f
             gravity = Gravity.CENTER
+            setTextColor(config.foregroundAlpha45Color)
         }
 
         val subTitle = textView {
             textSize = 10f
             gravity = Gravity.CENTER
+            setTextColor(config.foregroundAlpha45Color)
         }
 
         override val root = verticalLayout {

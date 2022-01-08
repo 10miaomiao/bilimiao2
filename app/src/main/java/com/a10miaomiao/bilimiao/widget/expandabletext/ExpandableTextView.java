@@ -26,6 +26,7 @@ import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -271,18 +272,18 @@ public class ExpandableTextView extends AppCompatTextView {
             if (TextUtils.isEmpty(mContractString)) {
                 mContractString = TEXT_CONTRACT;
             }
-            mExpandTextColor = a.getColor(R.styleable.ExpandableTextView_ep_expand_color,
-                    Color.parseColor("#999999"));
-            mEndExpandTextColor = a.getColor(R.styleable.ExpandableTextView_ep_expand_color,
-                    Color.parseColor("#999999"));
-            mContractTextColor = a.getColor(R.styleable.ExpandableTextView_ep_contract_color,
-                    Color.parseColor("#999999"));
-            mLinkTextColor = a.getColor(R.styleable.ExpandableTextView_ep_link_color,
-                    Color.parseColor("#FF6200"));
-            mSelfTextColor = a.getColor(R.styleable.ExpandableTextView_ep_self_color,
-                    Color.parseColor("#FF6200"));
-            mMentionTextColor = a.getColor(R.styleable.ExpandableTextView_ep_mention_color,
-                    Color.parseColor("#FF6200"));
+
+            TypedValue defaultColorTypedValue = new TypedValue();
+            context.getTheme().resolveAttribute(android.R.attr.colorPrimary, defaultColorTypedValue, true);
+            int defaultColor = context.getResources().getColor(defaultColorTypedValue.resourceId);
+
+            mExpandTextColor = a.getColor(R.styleable.ExpandableTextView_ep_expand_color, defaultColor);
+            mEndExpandTextColor = a.getColor(R.styleable.ExpandableTextView_ep_expand_color, defaultColor);
+            mContractTextColor = a.getColor(R.styleable.ExpandableTextView_ep_contract_color, defaultColor);
+
+            mLinkTextColor = a.getColor(R.styleable.ExpandableTextView_ep_link_color, defaultColor);
+            mSelfTextColor = a.getColor(R.styleable.ExpandableTextView_ep_self_color, defaultColor);
+            mMentionTextColor = a.getColor(R.styleable.ExpandableTextView_ep_mention_color, defaultColor);
             int resId = a.getResourceId(R.styleable.ExpandableTextView_ep_link_res, R.drawable.ic_baseline_link_24);
             mLinkDrawable = getResources().getDrawable(resId);
             currentLines = mLimitLines;
@@ -670,7 +671,7 @@ public class ExpandableTextView extends AppCompatTextView {
             @Override
             public void onClick(View widget) {
                 if (linkClickListener != null)
-                    linkClickListener.onLinkClickListener(LinkType.SELF, data.getSelfAim(), data.getSelfContent());
+                    linkClickListener.onLinkClickListener(ExpandableTextView.this, LinkType.SELF, data.getSelfAim(), data.getSelfContent());
             }
 
             @Override
@@ -694,7 +695,7 @@ public class ExpandableTextView extends AppCompatTextView {
             @Override
             public void onClick(View widget) {
                 if (linkClickListener != null)
-                    linkClickListener.onLinkClickListener(LinkType.MENTION_TYPE, data.getUrl(), null);
+                    linkClickListener.onLinkClickListener(ExpandableTextView.this, LinkType.MENTION_TYPE, data.getUrl(), null);
             }
 
             @Override
@@ -717,7 +718,7 @@ public class ExpandableTextView extends AppCompatTextView {
             @Override
             public void onClick(View widget) {
                 if (linkClickListener != null) {
-                    linkClickListener.onLinkClickListener(LinkType.LINK_TYPE, data.getUrl(), null);
+                    linkClickListener.onLinkClickListener(ExpandableTextView.this, LinkType.LINK_TYPE, data.getUrl(), null);
                 } else {
                     //如果没有设置监听 则调用默认的打开浏览器显示连接
                     Intent intent = new Intent();
@@ -1031,7 +1032,7 @@ public class ExpandableTextView extends AppCompatTextView {
     }
 
     public interface OnLinkClickListener {
-        void onLinkClickListener(LinkType type, String content, String selfContent);
+        void onLinkClickListener(ExpandableTextView view, LinkType type, String content, String selfContent);
     }
 
     public interface OnGetLineCountListener {
@@ -1194,6 +1195,14 @@ public class ExpandableTextView extends AppCompatTextView {
 
     public boolean isNeedAlwaysShowRight() {
         return mNeedAlwaysShowRight;
+    }
+
+    public void setMaxLine(int num) {
+        this.mLimitLines = num;
+    }
+
+    public void setNeedConvertUrl(boolean needConvertUrl) {
+        this.mNeedConvertUrl = needConvertUrl;
     }
 
     public void setNeedAlwaysShowRight(boolean mNeedAlwaysShowRight) {

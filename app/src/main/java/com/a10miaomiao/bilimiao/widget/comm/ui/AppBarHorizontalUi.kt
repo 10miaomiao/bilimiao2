@@ -33,6 +33,7 @@ class AppBarHorizontalUi(
 
     val mTitle = textView {
         gravity = Gravity.CENTER
+        setTextColor(config.foregroundAlpha45Color)
     }
 
     val mTitleLayout = frameLayout {

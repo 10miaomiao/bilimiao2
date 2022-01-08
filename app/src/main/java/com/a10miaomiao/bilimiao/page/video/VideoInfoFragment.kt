@@ -1,6 +1,8 @@
 package com.a10miaomiao.bilimiao.page.video
 
+import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Gravity
@@ -36,6 +38,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -48,6 +51,8 @@ import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.a10miaomiao.bilimiao.widget._setContent
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.a10miaomiao.bilimiao.widget.expandableTextView
+import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
+import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.*
@@ -104,6 +109,33 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         }
     }
 
+    private fun toUrlLink (view: View, url: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(
+            if ("://" in url) {
+                url
+            } else {
+                "http://$url"
+            }
+        )
+        requireActivity().startActivity(intent)
+    }
+
+    private fun toSelfLink (view: View, url: String) {
+        val urlInfo = BiliUrlMatcher.findIDByUrl(url)
+        val urlType = urlInfo[0]
+        val args = bundleOf(
+            MainNavGraph.args.id to urlInfo[1]
+        )
+        when(urlType){
+            "AV", "BV" -> {
+                args.putString(MainNavGraph.args.type, urlType)
+                Navigation.findNavController(view)
+                    .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
+            }
+        }
+    }
+
     private val handlePageItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.pages[position]
         playVideo(item.cid, item.part)
@@ -120,6 +152,20 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
         viewModel.loadData()
+    }
+
+    private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
+        when (linkType) {
+            LinkType.LINK_TYPE -> {
+                toUrlLink(view, content)
+            }
+            LinkType.MENTION_TYPE -> {
+//                toast("你点击了@用户 内容是：$content")
+            }
+            LinkType.SELF -> {
+                toSelfLink(view, selfContent)
+            }
+        }
     }
 
     val pageItemUi = miaoBindingItemUi<VideoPageInfo> { item, index ->
@@ -415,20 +461,16 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 }
 
                 +expandableTextView {
+                    setLineSpacing(dip(4).toFloat(), 1.0f)
+                    textSize = 14f
+                    setMaxLine(2)
+                    isNeedContract = true
+                    isNeedExpend = true
+                    setNeedMention(false)
+                    isNeedSelf = true
+                    setNeedConvertUrl(false)
                     _setContent(viewModel.info?.desc ?: "")
-//                    linkClickListener = ExpandableTextView.OnLinkClickListener { linkType, content, selfContent -> //根据类型去判断
-//                        when (linkType) {
-//                            LinkType.LINK_TYPE -> {
-//                                viewModel.toLink(content)
-//                            }
-//                            LinkType.MENTION_TYPE -> {
-//                                toast("你点击了@用户 内容是：$content")
-//                            }
-//                            LinkType.SELF -> {
-//                                viewModel.toLink(selfContent)
-//                            }
-//                        }
-//                    }
+                    linkClickListener = handleLinkClickListener
                 }..lParams {
                     width = matchParent
                     height = wrapContent
