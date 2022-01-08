@@ -60,7 +60,7 @@ inline fun Fragment.miaoUi(noinline block: MiaoUI.() -> View): MiaoUI {
 
 fun <T : ViewModel> newViewModelFactory(initializer: (() -> T)): ViewModelProvider.Factory {
     return object : ViewModelProvider.Factory {
-        override fun <R : ViewModel?> create(modelClass: Class<R>): R {
+        override fun <R : ViewModel> create(modelClass: Class<R>): R {
             return initializer.invoke() as R
         }
     }

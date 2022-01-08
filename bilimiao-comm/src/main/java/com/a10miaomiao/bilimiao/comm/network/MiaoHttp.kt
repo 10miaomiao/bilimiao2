@@ -62,7 +62,7 @@ class MiaoHttp(var url: String? = null) {
 //    }
 
     companion object {
-        fun request(url: String? = null, init: (MiaoHttp.() -> Unit)? = null) = MiaoHttp().apply {
+        fun request(url: String? = null, init: (MiaoHttp.() -> Unit)? = null) = MiaoHttp(url).apply {
             init?.invoke(this)
         }
 

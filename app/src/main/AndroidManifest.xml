@@ -30,6 +30,16 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="cn.a10miaomiao.bilimiao.cover.CoverActivity"
+            android:theme="@style/Theme.TranslucentTheme"
+            android:label="@string/view_cover">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
         <service android:name="cn.a10miaomiao.player.PlayerService"
             android:exported="true"/>
     </application>
