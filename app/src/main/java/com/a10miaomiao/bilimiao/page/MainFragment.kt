@@ -36,6 +36,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.region.RankOrderPopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
@@ -62,9 +63,20 @@ class MainFragment : Fragment(), DIAware, MyPage {
         title = "bilimiao"
         menus = listOf(
             myMenuItem {
-                title = "更多"
+                key = 0
+                title = "设置"
             }
         )
+    }
+
+    override fun onMenuItemClick(view: MenuItemView) {
+        super.onMenuItemClick(view)
+        when (view.prop.key) {
+            0 -> {
+                val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                nav.navigate(MainNavGraph.action.home_to_setting)
+            }
+        }
     }
 
     override val di: DI by lazyUiDi(ui = { ui })

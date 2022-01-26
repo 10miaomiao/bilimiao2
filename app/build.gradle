@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    compileSdk 30
+    compileSdk 31
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.a10miaomiao.bilimiao"
         minSdk 21
-        targetSdk 30
+        targetSdk 31
         versionCode 50
         versionName "2.1.0"
 
@@ -55,6 +55,9 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     api "androidx.navigation:navigation-fragment-ktx:$nav_version"
+
+    implementation 'de.maxr1998:modernandroidpreferences:2.2.0'
+
 
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.4'
 

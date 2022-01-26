@@ -3,10 +3,6 @@
     package="com.a10miaomiao.bilimiao">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- 往SDCard写入数据权限 -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <!-- 往SDCard读取数据权限 -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -32,7 +28,8 @@
 
         <activity android:name="cn.a10miaomiao.bilimiao.cover.CoverActivity"
             android:theme="@style/Theme.TranslucentTheme"
-            android:label="@string/view_cover">
+            android:label="@string/view_cover"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />

@@ -13,7 +13,11 @@ import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
+import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
+import com.a10miaomiao.bilimiao.widget.setting.AboutFragment
+import com.a10miaomiao.bilimiao.widget.setting.DanmakuSettingFragment
+import com.a10miaomiao.bilimiao.widget.setting.VideoSettingFragment
 import kotlin.reflect.KClass
 
 
@@ -29,6 +33,18 @@ object MainNavGraph {
         val template = f<TemplateFragment>()
         val timeSetting = f<TimeSettingFragment>() {
             deepLink("bilimiao://time/setting")
+        }
+        val setting = f<SettingFragment>() {
+            deepLink("bilimiao://setting")
+        }
+        val danmakuSetting = f<DanmakuSettingFragment>() {
+            deepLink("bilimiao://setting/danmaku")
+        }
+        val videoSetting = f<VideoSettingFragment>() {
+            deepLink("bilimiao://setting/video")
+        }
+        val about = f<AboutFragment>() {
+            deepLink("bilimiao://about")
         }
         val region = f<RegionFragment> {
             argument(args.region) {
@@ -50,6 +66,11 @@ object MainNavGraph {
     object action {
         val id = id_counter++
         val home_to_region = dest.home to dest.region
+        val home_to_setting = dest.home to dest.setting
+
+        val setting_to_videoSetting = dest.setting to dest.videoSetting
+        val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
+        val setting_to_about = dest.setting to dest.about
 
         val region_to_videoInfo = dest.region to dest.videoInfo
 
