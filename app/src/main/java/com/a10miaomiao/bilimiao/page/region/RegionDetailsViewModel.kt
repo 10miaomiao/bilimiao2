@@ -96,7 +96,7 @@ class RegionDetailsViewModel(
                 throw Exception(res.msg)
             }
         } catch (e: Exception) {
-            DebugMiao.loge(e)
+            e.printStackTrace()
             ui.setState {
                 list.fail = true
             }

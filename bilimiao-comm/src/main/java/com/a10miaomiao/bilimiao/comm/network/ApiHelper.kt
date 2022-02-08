@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.network
 
 import android.net.Uri
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import java.io.UnsupportedEncodingException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -89,10 +90,10 @@ object ApiHelper {
     }
 
     fun addAccessKeyAndMidToParams(params: MutableMap<String, String>){
-//        Bilimiao.app.loginInfo?.token_info?.let{
-//            params["access_key"] = it.access_token
-//            params["mid"] = it.mid.toString()
-//        }
+        BilimiaoCommApp.commApp.loginInfo?.token_info?.let{
+            params["access_key"] = it.access_token
+            params["mid"] = it.mid.toString()
+        }
     }
 
     fun createParams(vararg pairs: Pair<String, String>): MutableMap<String, String>{

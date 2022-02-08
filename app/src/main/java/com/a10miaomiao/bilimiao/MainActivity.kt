@@ -28,6 +28,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -55,12 +56,14 @@ class MainActivity
         bindSingleton { this@MainActivity }
         bindSingleton { windowStore }
         bindSingleton { playerStore }
+        bindSingleton { userStore }
         bindSingleton { timeSettingStore }
         bindSingleton { playerDelegate }
     }
 
     private val windowStore: WindowStore by diViewModel(di)
     private val playerStore: PlayerStore by diViewModel(di)
+    private val userStore: UserStore by diViewModel(di)
     private val timeSettingStore: TimeSettingStore by diViewModel(di)
 
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
@@ -109,6 +112,8 @@ class MainActivity
                 fragment.onMenuItemClick(it)
             }
         }
+
+        userStore.init(this)
     }
 
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {

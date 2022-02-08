@@ -22,6 +22,7 @@ import cn.a10miaomiao.miao.binding.android.view._topMargin
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 
 import cn.a10miaomiao.miao.binding.android.widget._text
+import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
@@ -38,6 +39,7 @@ import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.region.RankOrderPopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
+import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
@@ -85,6 +87,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     private val windowStore by instance<WindowStore>()
 
+    private val userStore by instance<UserStore>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -97,7 +101,16 @@ class MainFragment : Fragment(), DIAware, MyPage {
         super.onViewCreated(view, savedInstanceState)
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
+            userStore.connectUi(ui)
         }
+    }
+
+    val handleHeaderLongClick = View.OnLongClickListener{
+//        if (userStore.user != null)
+//            return@setOnLongClickListener false
+        val nav = findNavController(it)
+        nav.navigate(MainNavGraph.action.home_to_h5Login)
+        true
     }
 
     val handleTimeSettingClick = View.OnClickListener {
@@ -226,6 +239,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
         return frameLayout {
             backgroundColor = config.blockBackgroundColor
             apply(ViewStyle.roundRect(dip(10)))
+            setOnLongClickListener(handleHeaderLongClick)
 
             views {
                 // 背景图片
@@ -234,16 +248,27 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     imageResource = R.drawable.home_header_img
                 }..lParams(matchParent, matchParent)
 
+                val userInfo = userStore.state.info
                 // 应用信息
                 +horizontalLayout {
                     padding = dip(10)
 
                     views {
                         +imageView {
-                            Glide.with(context)
-                                .load(R.mipmap.ic_launcher)
-                                .circleCrop()
-                                .into(this)
+                            miaoEffect(userInfo) {
+                                if (it == null) {
+                                    Glide.with(context)
+                                        .load(R.mipmap.ic_launcher)
+                                        .circleCrop()
+                                        .into(this)
+                                } else {
+                                    Glide.with(context)
+                                        .load(it.face)
+                                        .circleCrop()
+                                        .into(this)
+                                }
+                            }
+
                         }..lParams {
                             height = dip(50)
                             width = dip(50)
@@ -255,7 +280,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
                             views {
                                 +textView {
-                                    text = "bilimiao"
+                                    _text = userInfo?.name ?: "bilimiao"
                                     setTextColor(config.foregroundColor)
                                     textSize = 16f
                                 }..lParams {
@@ -263,7 +288,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                                 }
 
                                 +textView {
-                                    text = "不知道写什么好"
+                                    text = userInfo?.sign ?: "不知道写什么好"
                                     setTextColor(config.foregroundAlpha45Color)
                                 }..lParams {
                                     width = matchParent

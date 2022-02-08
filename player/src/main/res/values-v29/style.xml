@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DarkTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:forceDarkAllowed">true</item>
+        <!--        <item name="android:textColorPrimary">@android:color/white</item>-->
+        <!--        <item name="android:textColorSecondary">@android:color/black</item>-->
+    </style>
+</resources>

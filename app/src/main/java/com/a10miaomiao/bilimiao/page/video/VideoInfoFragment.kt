@@ -481,7 +481,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         }
     }
 
-    val relateItemUi = miaoBindingItemUi <VideoRelateInfo> { item, index ->
+    val relateItemUi = miaoBindingItemUi<VideoRelateInfo> { item, index ->
         videoItem(
             title = item.title,
             pic = item.pic,

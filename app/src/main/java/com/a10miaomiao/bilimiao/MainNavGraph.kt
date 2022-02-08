@@ -1,23 +1,20 @@
 package com.a10miaomiao.bilimiao
 
-import android.os.Parcelable
 import androidx.fragment.app.Fragment
 import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
-import androidx.navigation.fragment.fragment
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.MainFragment
-import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
+import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
-import com.a10miaomiao.bilimiao.widget.setting.AboutFragment
-import com.a10miaomiao.bilimiao.widget.setting.DanmakuSettingFragment
-import com.a10miaomiao.bilimiao.widget.setting.VideoSettingFragment
+import com.a10miaomiao.bilimiao.page.setting.AboutFragment
+import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import kotlin.reflect.KClass
 
 
@@ -61,12 +58,15 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val h5Login = f<H5LoginFragment> {
+        }
     }
 
     object action {
         val id = id_counter++
         val home_to_region = dest.home to dest.region
         val home_to_setting = dest.home to dest.setting
+        val home_to_h5Login = dest.home to dest.h5Login
 
         val setting_to_videoSetting = dest.setting to dest.videoSetting
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting

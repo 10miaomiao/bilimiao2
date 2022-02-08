@@ -25,6 +25,10 @@ import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import java.io.File
 import java.io.FileOutputStream
+import android.provider.MediaStore
+
+import android.content.ContentValues
+import java.io.OutputStream
 
 
 class CoverActivity : AppCompatActivity() {
@@ -61,7 +65,7 @@ class CoverActivity : AppCompatActivity() {
         initViewModel()
         initArgument()
         initView()
-        requestPermissions()
+//        requestPermissions()
     }
 
     private fun initArgument() {
@@ -136,9 +140,9 @@ class CoverActivity : AppCompatActivity() {
             popupMenu.show()
         }
         mSaveCoverLl.setOnClickListener {
-            if (requestPermissions()) { //判断有没有存储权限
+//            if (requestPermissions()) { //判断有没有存储权限
                 saveImage()
-            }
+//            }
         }
     }
 
@@ -178,6 +182,12 @@ class CoverActivity : AppCompatActivity() {
                 toast("图片未加载")
                 return
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val fileName = "${viewModel.fileName.value ?: "未命名"}.jpg"
+                saveSignImage(fileName, bitmap)
+                toast("已保存至系统相册，文件名:${fileName}")
+                return
+            }
             // 判断文件夹是否已经创建
             File(path).let {
                 if (!it.exists()) {
@@ -195,14 +205,6 @@ class CoverActivity : AppCompatActivity() {
             e.printStackTrace()
             toast("保存失败")
         }
-    }
-
-    private fun toast(msg: String) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun dip(value: Int): Int {
-        return (value * resources.displayMetrics.density).toInt()
     }
 
     /**
@@ -225,6 +227,49 @@ class CoverActivity : AppCompatActivity() {
         fOut.close()
     }
 
+    //将文件保存到公共的媒体文件夹
+    //这里的filepath不是绝对路径，而是某个媒体文件夹下的子路径，和沙盒子文件夹类似
+    //这里的filename单纯的指文件名，不包含路径
+    fun saveSignImage(fileName: String, bitmap: Bitmap) {
+        try {
+            //设置保存参数到ContentValues中
+            val contentValues = ContentValues()
+            //设置文件名
+            contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+
+            //android Q中不再使用DATA字段，而用RELATIVE_PATH代替
+            //RELATIVE_PATH是相对路径不是绝对路径
+            //DCIM是系统文件夹，关于系统文件夹可以到系统自带的文件管理器中查看，不可以写没存在的名字
+            contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/BilimiaoCover")
+            //contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Music/signImage");
+            //设置文件类型
+            contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/JPEG")
+            //执行insert操作，向系统文件夹中添加文件
+            //EXTERNAL_CONTENT_URI代表外部存储器，该值不变
+            val uri =
+                contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            if (uri != null) {
+                //若生成了uri，则表示该文件添加成功
+                //使用流将内容写入该uri中即可
+                val outputStream = contentResolver.openOutputStream(uri)
+                if (outputStream != null) {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+                    outputStream.flush()
+                    outputStream.close()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun toast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun dip(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
+    }
 
     //动态获取sd卡权限
     private fun requestPermissions(): Boolean {

@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.setting
+package com.a10miaomiao.bilimiao.page.setting
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,9 +7,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
-import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -17,7 +20,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.screen
 import de.Maxr1998.modernpreferences.helpers.switch
@@ -28,7 +30,6 @@ import org.kodein.di.instance
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.recyclerview.recyclerView
 
 class VideoSettingFragment : Fragment(), DIAware, MyPage {
@@ -57,7 +58,13 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        val insets = windowStore.getContentInsets(parentView)
         frameLayout {
+            _leftPadding = insets.left
+            _topPadding = insets.top
+            _rightPadding = insets.right
+            _bottomPadding = insets.bottom
+
             views {
                 +recyclerView {
                     _miaoLayoutManage(LinearLayoutManager(requireContext()))

@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.setting
+package com.a10miaomiao.bilimiao.page.setting
 
 import android.content.Intent
 import android.net.Uri
@@ -10,6 +10,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -108,7 +112,13 @@ class AboutFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        val insets = windowStore.getContentInsets(parentView)
         verticalLayout {
+            _leftPadding = insets.left
+            _topPadding = insets.top
+            _rightPadding = insets.right
+            _bottomPadding = insets.bottom
+
             views {
                 +verticalLayout {
                     gravity = Gravity.CENTER

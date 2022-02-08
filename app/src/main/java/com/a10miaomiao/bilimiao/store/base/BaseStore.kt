@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.store.base
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -15,6 +16,9 @@ interface BaseStore<T> : DIAware {
     val state: T get() = stateFlow.value
 
     fun copyState(): T
+
+    open fun init(context: Context) {
+    }
 
     suspend fun connectUi (ui: MiaoBindingUi) {
         stateFlow.collect(object : FlowCollector<T> {

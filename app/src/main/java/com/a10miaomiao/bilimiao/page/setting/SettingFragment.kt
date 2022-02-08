@@ -11,6 +11,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
@@ -59,7 +63,12 @@ class SettingFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        val insets = windowStore.getContentInsets(parentView)
         frameLayout {
+            _leftPadding = insets.left
+            _topPadding = insets.top
+            _rightPadding = insets.right
+            _bottomPadding = insets.bottom
             views {
                 +recyclerView {
                     _miaoLayoutManage(LinearLayoutManager(requireContext()))

@@ -110,9 +110,8 @@ public class MyMediaController extends FrameLayout implements MediaController
                     videoBackEvent.accept();
             }
         });
-        Context darkThemeContext = new ContextThemeWrapper(getContext(), R.style.DarkTheme);
         mMorePopupMenu = new PopupMenu(
-                darkThemeContext,
+                getContext(),
                 mMoreIv
         );
         mMoreIv.setOnClickListener(new OnClickListener() {

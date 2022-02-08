@@ -21,8 +21,8 @@
 21
 22    <uses-sdk
 23        android:minSdkVersion="9"
-23-->D:\MyCode\bilimiao2\DanmakuFlameMaster\src\main\AndroidManifest.xml
+23-->D:\MyCode\AndroidStudioProjects\bilimiao2\DanmakuFlameMaster\src\main\AndroidManifest.xml
 24        android:targetSdkVersion="30" />
-24-->D:\MyCode\bilimiao2\DanmakuFlameMaster\src\main\AndroidManifest.xml
+24-->D:\MyCode\AndroidStudioProjects\bilimiao2\DanmakuFlameMaster\src\main\AndroidManifest.xml
 25
 26</manifest>

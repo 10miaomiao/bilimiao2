@@ -20,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.MiniMediaController
@@ -192,8 +193,8 @@ class PlayerDelegate(
             }
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             prefs.edit().putBoolean("danmaku_show", it).apply()
-//            val intent = Intent(DanmakuSettingFragment.UPDATE_ACTION)
-//            activity.sendBroadcast(intent)
+            val intent = Intent(DanmakuSettingFragment.UPDATE_ACTION)
+            activity.sendBroadcast(intent)
         }
         mController.setVideoBackEvent {
             isMiniPlayer.value = true
@@ -337,28 +338,17 @@ class PlayerDelegate(
     }
 
     private fun onMenuItemClick(menuItem: MenuItem): Boolean {
-        if (isMiniPlayer.value == false) {
-            isMiniPlayer.value = true
-        }
         when (menuItem.itemId) {
             R.id.mini_window -> {
                 mPicInPicHelper?.enterPictureInPictureMode()
             }
             R.id.video_setting -> {
-//                val mainActivity = MainActivity.of(activity)
-//                if (mainActivity.topFragment !is VideoSettingFragment) {
-//                    mainActivity.start(
-//                        VideoSettingFragment()
-//                    )
-//                }
+                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                nav.navigate(Uri.parse("bilimiao://setting/video"))
             }
             R.id.danmuku_setting -> {
-//                val mainActivity = MainActivity.of(activity)
-//                if (mainActivity.topFragment !is DanmakuSettingFragment) {
-//                    mainActivity.start(
-//                        DanmakuSettingFragment()
-//                    )
-//                }
+                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                nav.navigate(Uri.parse("bilimiao://setting/danmaku"))
             }
         }
         return true

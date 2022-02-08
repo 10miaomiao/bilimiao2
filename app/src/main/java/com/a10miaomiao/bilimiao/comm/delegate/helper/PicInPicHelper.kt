@@ -46,7 +46,7 @@ class PicInPicHelper(
                     activity,
                     REQUEST_TYPE_PAUSE,
                     Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PAUSE),
-                    0
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )
             )
         }else{
@@ -58,7 +58,7 @@ class PicInPicHelper(
                     activity,
                     REQUEST_TYPE_PLAY,
                     Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY),
-                    0
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )
             )
         }
