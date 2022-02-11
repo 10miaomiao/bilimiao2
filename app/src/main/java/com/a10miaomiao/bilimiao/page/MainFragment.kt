@@ -105,12 +105,25 @@ class MainFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    val handleHeaderClick = View.OnClickListener{
+        val userInfo = userStore.state.info
+        if (userInfo != null) {
+            val nav = findNavController(it)
+            val args = bundleOf(
+                MainNavGraph.args.id to userInfo.mid.toString()
+            )
+            nav.navigate(MainNavGraph.action.home_to_user, args)
+        }
+    }
+
     val handleHeaderLongClick = View.OnLongClickListener{
-//        if (userStore.user != null)
-//            return@setOnLongClickListener false
-        val nav = findNavController(it)
-        nav.navigate(MainNavGraph.action.home_to_h5Login)
-        true
+        if (userStore.state.info == null) {
+            val nav = findNavController(it)
+            nav.navigate(MainNavGraph.action.home_to_h5Login)
+            true
+        } else {
+            false
+        }
     }
 
     val handleTimeSettingClick = View.OnClickListener {
@@ -239,6 +252,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
         return frameLayout {
             backgroundColor = config.blockBackgroundColor
             apply(ViewStyle.roundRect(dip(10)))
+            setOnClickListener(handleHeaderClick)
             setOnLongClickListener(handleHeaderLongClick)
 
             views {
@@ -263,12 +277,11 @@ class MainFragment : Fragment(), DIAware, MyPage {
                                         .into(this)
                                 } else {
                                     Glide.with(context)
-                                        .load(it.face)
+                                        .loadImageUrl(it.face)
                                         .circleCrop()
                                         .into(this)
                                 }
                             }
-
                         }..lParams {
                             height = dip(50)
                             width = dip(50)
@@ -285,10 +298,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
                                     textSize = 16f
                                 }..lParams {
                                     width = matchParent
+                                    bottomMargin = dip(5)
                                 }
 
                                 +textView {
-                                    text = userInfo?.sign ?: "不知道写什么好"
+                                    _text = userInfo?.run {
+                                        "B币:${bcoin}     硬币:${coin}     UID:${mid}"
+                                    } ?: "不知道写什么好，长按试试(o゜▽゜)o☆"
                                     setTextColor(config.foregroundAlpha45Color)
                                 }..lParams {
                                     width = matchParent

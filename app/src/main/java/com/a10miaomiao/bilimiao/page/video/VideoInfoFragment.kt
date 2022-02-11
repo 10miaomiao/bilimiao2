@@ -485,9 +485,9 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         videoItem(
             title = item.title,
             pic = item.pic,
-            upperName = item.owner.name,
-            playNum = item.stat.view,
-            damukuNum = item.stat.danmaku
+            upperName = item.owner?.name,
+            playNum = item.stat?.view,
+            damukuNum = item.stat?.danmaku
         )
     }
 

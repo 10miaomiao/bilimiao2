@@ -19,11 +19,11 @@ import splitties.views.imageResource
 import splitties.views.padding
 
 fun MiaoUI.videoItem (
-    title: String = "",
-    pic: String = "",
-    upperName: String = "",
-    playNum: String = "",
-    damukuNum: String = "",
+    title: String? = null,
+    pic: String? = null,
+    upperName: String? = null,
+    playNum: String? = null,
+    damukuNum: String? = null,
 ): View {
     return horizontalLayout {
         layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
@@ -49,7 +49,7 @@ fun MiaoUI.videoItem (
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
                         setTextColor(config.foregroundColor)
-                        _text = title
+                        _text = title ?: ""
                     }..lParams(matchParent, matchParent) {
                         weight = 1f
                     }
@@ -70,7 +70,7 @@ fun MiaoUI.videoItem (
                             +textView {
                                 textSize = 12f
                                 setTextColor(config.foregroundAlpha45Color)
-                                _text = upperName
+                                _text = upperName ?: ""
                             }
                         }
                     }
@@ -89,7 +89,7 @@ fun MiaoUI.videoItem (
                             +textView {
                                 textSize = 12f
                                 setTextColor(config.foregroundAlpha45Color)
-                                _text = NumberUtil.converString(playNum)
+                                _text = NumberUtil.converString(playNum ?: "")
                             }
                             +space()..lParams(width = dip(10))
                             +imageView {
@@ -101,7 +101,7 @@ fun MiaoUI.videoItem (
                             +textView {
                                 textSize = 12f
                                 setTextColor(config.foregroundAlpha45Color)
-                                _text = NumberUtil.converString(damukuNum)
+                                _text = NumberUtil.converString(damukuNum ?: "")
                             }
                         }
                     }

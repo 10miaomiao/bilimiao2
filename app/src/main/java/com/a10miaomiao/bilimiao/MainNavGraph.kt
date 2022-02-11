@@ -5,6 +5,7 @@ import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
@@ -15,6 +16,7 @@ import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.setting.AboutFragment
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
+import com.a10miaomiao.bilimiao.page.user.UserFragment
 import kotlin.reflect.KClass
 
 
@@ -60,6 +62,13 @@ object MainNavGraph {
         }
         val h5Login = f<H5LoginFragment> {
         }
+
+        val user = f<UserFragment> {
+            argument(args.type) {
+                type = NavType.StringType
+                defaultValue = "AV"
+            }
+        }
     }
 
     object action {
@@ -67,6 +76,7 @@ object MainNavGraph {
         val home_to_region = dest.home to dest.region
         val home_to_setting = dest.home to dest.setting
         val home_to_h5Login = dest.home to dest.h5Login
+        val home_to_user = dest.home to dest.user
 
         val setting_to_videoSetting = dest.setting to dest.videoSetting
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
@@ -75,6 +85,8 @@ object MainNavGraph {
         val region_to_videoInfo = dest.region to dest.videoInfo
 
         val videoInfo_to_videoInfo = dest.videoInfo to dest.videoInfo
+
+        val user_to_videoInfo = dest.user to dest.videoInfo
     }
 
     object args {

@@ -91,6 +91,6 @@ class UserStore(override val di: DI) :
         }
     }
 
-    fun isSelf(mid: Long) = state.info?.mid == mid
+    fun isSelf(mid: String) = state.info?.mid == mid.toLong()
 
 }

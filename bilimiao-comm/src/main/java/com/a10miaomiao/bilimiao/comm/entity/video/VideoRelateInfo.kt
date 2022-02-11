@@ -9,13 +9,13 @@ data class VideoRelateInfo (
     val duration: Int,
     val goto: String,
     val is_ad_loc: Boolean,
-    val owner: VideoOwnerInfo,
+    val owner: VideoOwnerInfo?,
     val `param`: String,
     val pic: String,
     val request_id: String,
     val src_id: Int,
-    val stat: VideoStatInfo,
+    val stat: VideoStatInfo?,
     val title: String,
     val trackid: String,
-    val uri: String
-    )
+    val uri: String,
+)
