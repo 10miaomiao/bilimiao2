@@ -1,10 +1,8 @@
 package com.a10miaomiao.bilimiao
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.os.Debug
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -13,35 +11,25 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
+import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.*
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
-import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
-import splitties.views.dsl.material.hidden
 
 
 class MainActivity
@@ -59,6 +47,7 @@ class MainActivity
         bindSingleton { userStore }
         bindSingleton { timeSettingStore }
         bindSingleton { playerDelegate }
+        bindSingleton { statusBarHelper }
     }
 
     private val windowStore: WindowStore by diViewModel(di)
@@ -68,6 +57,7 @@ class MainActivity
 
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
+    private val statusBarHelper by lazy { StatusBarHelper(this) }
 
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
@@ -88,6 +78,7 @@ class MainActivity
                 insets
             }
             ui.root.onPlayerChanged = {
+                statusBarHelper.isLightStatusBar = !it
                 setWindowInsets(ui.root.rootWindowInsets)
             }
         }

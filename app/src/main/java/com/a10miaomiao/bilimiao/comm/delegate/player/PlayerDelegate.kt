@@ -17,33 +17,29 @@ import androidx.navigation.findNavController
 import cn.a10miaomiao.player.*
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
+import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.store.PlayerStore
+import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.MiniMediaController
 import com.a10miaomiao.bilimiao.widget.player.SizeWatcherView
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.flow.onEach
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.ui.widget.DanmakuView
-import okhttp3.FormBody
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import java.io.ByteArrayInputStream
-import java.io.File
 import java.io.InputStream
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.concurrent.timerTask
 
@@ -87,7 +83,7 @@ class PlayerDelegate(
             val currentPosition = mPlayer.currentPosition
             if (
                 currentPosition < lastTime
-                && lastTime - currentPosition < 500
+                && lastTime - currentPosition < 1000
             ) {
                 return lastTime
             }
@@ -115,11 +111,11 @@ class PlayerDelegate(
 
     val scaffoldApp = activity.getScaffoldView()
 
-//    private val userStore by lazy {
-//        Store.from(activity).userStore
-//    }
 
     private val playerStore by instance<PlayerStore>()
+    private val userStore by instance<UserStore>()
+
+    private val statusBarHelper by instance<StatusBarHelper>()
 
     // 组件
     private val mRoot = activity.findViewById<View>(R.id.mRoot)
@@ -252,7 +248,6 @@ class PlayerDelegate(
                 } else {
                     scaffoldApp.fullScreenPlayer = true
                     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    setSystemUIVisible(false)
                 }
             }
             initDanmakuContext()
@@ -366,7 +361,6 @@ class PlayerDelegate(
         )
 //        mVideoTitleText.text = "正在播放：${title}"
         loadDanmaku()
-//        playerStore.setBangumiPlayerInfo(sid, epid, cid, title)
         playerStore.setPlayerInfo(plalerSource)
     }
 
@@ -378,7 +372,6 @@ class PlayerDelegate(
         )
 //        mVideoTitleText.text = "正在播放：${title}"
         loadDanmaku()
-//        playerStore.setVideoPlayerInfo(aid, cid, title)
         playerStore.setPlayerInfo(plalerSource)
         historyReport()
     }
@@ -857,18 +850,8 @@ class PlayerDelegate(
     }
 
     private fun setSystemUIVisible(show: Boolean) {
-        val uiFlags = (if (show) {
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        } else {
-            View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        }) or 0x00001000
-        if (isMiniPlayer.value == false) {
-            activity.window.decorView.systemUiVisibility =
-                uiFlags or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        } else {
-            activity.window.decorView.systemUiVisibility = uiFlags
-        }
-
+        statusBarHelper.isShowStatus = show
+        statusBarHelper.isShowNavigation = isMiniPlayer.value == true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             scaffoldApp.rootWindowInsets?.let {
                 mController.post {
@@ -883,18 +866,18 @@ class PlayerDelegate(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
     ) {
-//        mPicInPicHelper?.onPictureInPictureModeChanged(isInPictureInPictureMode)
-//        if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
-//            // 隐藏视频控制器
-//            mMiniController.visibility = View.GONE
-//            // 视频组件全屏
-//            activity.headerVideoBox.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-//            // 调整弹幕样式，调小字体，限制行数
-//            initDanmakuContext()
-//        } else {
-//            activity.headerVideoBox.layoutParams.height = activity.dip(240)
-//            initDanmakuContext()
-//        }
+        mPicInPicHelper?.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
+            // 隐藏视频控制器
+            mMiniController.visibility = View.GONE
+            // 视频组件全屏
+            scaffoldApp.fullScreenPlayer = true
+            // 调整弹幕样式，调小字体，限制行数
+            initDanmakuContext()
+        } else {
+            scaffoldApp.fullScreenPlayer = false
+            initDanmakuContext()
+        }
     }
 
 }
