@@ -15,10 +15,12 @@ class GridAutofitLayoutManager : GridLayoutManager {
             field = value
             mColumnWidthChanged = true
         }
+    var maxLine = -1
 
-    constructor(context: Context, columnWidth: Int)
+    constructor(context: Context, columnWidth: Int, maxLine: Int = -1)
             : super(context, 1) {
         this.columnWidth = columnWidth
+        this.maxLine = maxLine
     }
 
     constructor(context: Context, columnWidth: Int, orientation: Int, reverseLayout: Boolean)

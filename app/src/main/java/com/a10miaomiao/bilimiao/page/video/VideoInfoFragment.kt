@@ -16,6 +16,7 @@ import androidx.core.view.marginRight
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._isEnabled
@@ -33,6 +34,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -45,10 +47,12 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.region.RankOrderPopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.a10miaomiao.bilimiao.widget._setContent
+import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.a10miaomiao.bilimiao.widget.expandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
@@ -84,6 +88,30 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         title = info?.let {
             "${it.bvid} /\nAV${it.aid}"
         } ?: "视频详情"
+        menus = listOf(
+            myMenuItem {
+                key = 0
+                iconResource = R.drawable.ic_column_comm
+                title = NumberUtil.converString(info?.stat?.reply?.toString() ?: "评论")
+            },
+        )
+    }
+
+    override fun onMenuItemClick(view: MenuItemView) {
+        super.onMenuItemClick(view)
+        when (view.prop.key) {
+            0 -> {
+                val info = viewModel.info
+                if (info != null) {
+                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                    val args = bundleOf(
+                        MainNavGraph.args.id to info.aid.toString()
+                    )
+                    nav.navigate(MainNavGraph.action.videoInfo_to_videoCommentList, args)
+                }
+
+            }
+        }
     }
 
     override fun onCreateView(
@@ -109,18 +137,6 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         }
     }
 
-    private fun toUrlLink (view: View, url: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(
-            if ("://" in url) {
-                url
-            } else {
-                "http://$url"
-            }
-        )
-        requireActivity().startActivity(intent)
-    }
-
     private fun toSelfLink (view: View, url: String) {
         val urlInfo = BiliUrlMatcher.findIDByUrl(url)
         val urlType = urlInfo[0]
@@ -131,9 +147,28 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
             "AV", "BV" -> {
                 args.putString(MainNavGraph.args.type, urlType)
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
+                    .navigate(MainNavGraph.action.videoCommentList_to_videoInfo, args)
             }
         }
+    }
+
+    private fun toUser(view: View, mid: String) {
+        val args = bundleOf(
+            MainNavGraph.args.id to mid
+        )
+        Navigation.findNavController(view)
+            .navigate(MainNavGraph.action.videoInfo_to_user, args)
+    }
+
+    private val handleUpperClick = View.OnClickListener {
+        viewModel.info?.let { info ->
+            toUser(it, info.owner.mid)
+        }
+    }
+
+    private val handleUpperItemClick = OnItemClickListener { adapter, view, position ->
+        val item = viewModel.staffs[position]
+        toUser(view, item.mid)
     }
 
     private val handlePageItemClick = OnItemClickListener { adapter, view, position ->
@@ -157,7 +192,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
         when (linkType) {
             LinkType.LINK_TYPE -> {
-                toUrlLink(view, content)
+                BiliUrlMatcher.toUrlLink(view, content)
             }
             LinkType.MENTION_TYPE -> {
 //                toast("你点击了@用户 内容是：$content")
@@ -300,9 +335,8 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
             views {
                 // 单个up主信息
                 +horizontalLayout {
-                    setBackgroundColor(config.selectableItemBackground)
-                    setOnClickListener {
-                    }
+                    setBackgroundResource(config.selectableItemBackground)
+                    setOnClickListener(handleUpperClick)
                     _show = !isMutableUpper
 
                     views {
@@ -347,7 +381,9 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                     _miaoAdapter(
                         itemUi = upperItemUi,
                         items = viewModel.staffs
-                    )
+                    ) {
+                        setOnItemClickListener(handleUpperItemClick)
+                    }
                 }
 
                 +textView {

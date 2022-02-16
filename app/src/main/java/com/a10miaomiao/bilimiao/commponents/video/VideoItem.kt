@@ -4,6 +4,7 @@ import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoUI
@@ -22,6 +23,7 @@ fun MiaoUI.videoItem (
     title: String? = null,
     pic: String? = null,
     upperName: String? = null,
+    createdTime: Long? = null,
     playNum: String? = null,
     damukuNum: String? = null,
 ): View {
@@ -57,6 +59,7 @@ fun MiaoUI.videoItem (
                     // UP主
                     +horizontalLayout {
                         gravity = Gravity.CENTER_VERTICAL
+                        _show = upperName != null
 
                         views {
                             +imageView {
@@ -71,6 +74,21 @@ fun MiaoUI.videoItem (
                                 textSize = 12f
                                 setTextColor(config.foregroundAlpha45Color)
                                 _text = upperName ?: ""
+                            }
+                        }
+                    }
+
+                    // 上传时间
+                    +horizontalLayout {
+                        gravity = Gravity.CENTER_VERTICAL
+                        _show = createdTime != null
+
+                        views {
+
+                            +textView {
+                                textSize = 12f
+                                setTextColor(config.foregroundAlpha45Color)
+                                _text = NumberUtil.converCTime(createdTime)
                             }
                         }
                     }

@@ -42,6 +42,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
+import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
@@ -77,6 +78,41 @@ class UserFragment  : Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleMoreClick = View.OnClickListener {
+        val info = viewModel.dataInfo
+        if (info == null) {
+            toast("操作失败，信息未加载完成")
+        } else {
+            when (it.tag) {
+                "archive" -> {
+                    val args = bundleOf(
+                        MainNavGraph.args.id to viewModel.id,
+                        MainNavGraph.args.name to info.card.name
+                    )
+                    Navigation.findNavController(it)
+                        .navigate(MainNavGraph.action.user_to_userArchiveList, args)
+                }
+                "season" -> {
+
+                }
+                "favourite" -> {
+                    val args = bundleOf(
+                        MainNavGraph.args.id to viewModel.id,
+                        MainNavGraph.args.name to info.card.name
+                    )
+                    Navigation.findNavController(it)
+                        .navigate(MainNavGraph.action.user_to_userFavouriteList, args)
+                }
+                "attention" -> {
+
+                }
+                "fans" -> {
+
+                }
+            }
+        }
+    }
+
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.data[position]
         if (item != null) {
@@ -88,6 +124,14 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                     Navigation.findNavController(view)
                         .navigate(MainNavGraph.action.user_to_videoInfo, args)
                 }
+                is SpaceInfo.FavouriteItem -> {
+                    val args = bundleOf(
+                        MainNavGraph.args.id to item.media_id,
+                        MainNavGraph.args.id to item.name
+                    )
+                    Navigation.findNavController(view)
+                        .navigate(MainNavGraph.action.user_to_userFavouriteDetail, args)
+                }
             }
         }
     }
@@ -95,15 +139,16 @@ class UserFragment  : Fragment(), DIAware, MyPage {
     fun MiaoUI.userNavView(
         title: String,
         number: Int,
-        onClick: View.OnClickListener? = null,
+        tag: String? = null,
         isShow: Boolean = true
     ): View {
         return verticalLayout {
             gravity = Gravity.CENTER
             padding = dip(10)
             setBackgroundResource(config.selectableItemBackground)
+            setTag(tag)
             _show = isShow
-            onClick?.let { setOnClickListener(it) }
+            setOnClickListener(handleMoreClick)
 
             views {
                 +textView {
@@ -197,25 +242,30 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                         +userNavView(
                             title = "投稿",
                             number = userInfo?.archive?.count ?: 0,
+                            tag = "archive",
                             isShow = userInfo?.tab?.archive == true
                         )..lParams { weight = 1f }
                         +userNavView(
                             title = "追番",
+                            tag = "season",
                             number = userInfo?.season?.count ?: 0,
                             isShow = userInfo?.tab?.bangumi == true
                         )..lParams { weight = 1f }
                         +userNavView(
                             title = "收藏",
+                            tag = "favourite",
                             number = userInfo?.favourite?.count ?: 0,
                             isShow = userInfo?.tab?.favorite == true
                         )..lParams { weight = 1f }
                         +userNavView(
                             title = "关注",
                             number = userInfo?.card?.attention ?: 0,
+                            tag = "attention",
                         )..lParams { weight = 1f }
                         +userNavView(
                             title = "粉丝",
                             number = userInfo?.card?.fans ?: 0,
+                            tag = "fans",
                         )..lParams { weight = 1f }
                     }
                 }..lParams(matchParent, wrapContent)
@@ -225,12 +275,11 @@ class UserFragment  : Fragment(), DIAware, MyPage {
 
     private fun MiaoUI.mediaTitleView(
         title: String,
-        moreClick: View.OnClickListener? = null,
+        tag: String? = null,
         isShow: Boolean = true,
     ): View {
         return horizontalLayout {
-            horizontalPadding = dip(10)
-            verticalPadding = dip(5)
+            padding = dip(5)
             gravity = Gravity.CENTER_VERTICAL
             _show = isShow
 
@@ -243,15 +292,18 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                     height = wrapContent
                     width = matchParent
                 }
-                if (moreClick != null) {
-                    +textView {
-                        text = "更多 >"
-                        setTextColor(config.themeColor)
-                        textSize = 14f
-                        setBackgroundResource(config.selectableItemBackgroundBorderless)
-                        setOnClickListener(moreClick)
-                    }
+
+                +textView {
+                    text = "更多 >"
+                    setTextColor(config.themeColor)
+                    textSize = 14f
+                    setBackgroundResource(config.selectableItemBackgroundBorderless)
+                    setTag(tag)
+                    setOnClickListener(handleMoreClick)
+
+                    _show = tag != null
                 }
+
             }
         }
     }
@@ -306,12 +358,15 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                 +mediaTitleView(
                     title = "${subject}的投稿",
                     isShow = isShow,
-                )
+                    tag = "archive",
+                )..lParams(matchParent, wrapContent) {
+                    _topMargin = config.dividerSize
+                }
                 +recyclerView {
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
-                        GridAutofitLayoutManager(requireContext(), requireContext().dip(140))
+                        GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
                     )
                     val itemUi = miaoMemo(null) {
                         miaoBindingItemUi<SpaceInfo.ArchiveItem> { item, _ ->
@@ -331,12 +386,14 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                 +mediaTitleView(
                     title = "${subject}的频道",
                     isShow = isShow,
-                )
+                )..lParams(matchParent, wrapContent) {
+                    _topMargin = config.dividerSize
+                }
                 +recyclerView {
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
-                        GridAutofitLayoutManager(requireContext(), requireContext().dip(140))
+                        GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
                     )
                     val itemUi = miaoMemo(null) {
                         miaoBindingItemUi<UpperChannelInfo> { item, _ ->
@@ -360,7 +417,10 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                 +mediaTitleView(
                     title = "${subject}的追番",
                     isShow = isShow,
-                )
+                    tag = "season",
+                )..lParams(matchParent, wrapContent) {
+                    _topMargin = config.dividerSize
+                }
                 +recyclerView {
                     _show = isShow
                     isNestedScrollingEnabled = false
@@ -388,12 +448,15 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                 +mediaTitleView(
                     title = "${subject}的收藏",
                     isShow = isShow,
-                )
+                    tag = "favourite",
+                )..lParams(matchParent, wrapContent) {
+                    _topMargin = config.dividerSize
+                }
                 +recyclerView {
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
-                        GridAutofitLayoutManager(requireContext(), requireContext().dip(140))
+                        GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
                     )
                     val itemUi = miaoMemo(null) {
                         miaoBindingItemUi<SpaceInfo.FavouriteItem> { item, _ ->
@@ -419,12 +482,14 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                 +mediaTitleView(
                     title = "${subject}推荐的",
                     isShow = isShow,
-                )
+                )..lParams(matchParent, wrapContent) {
+                    _topMargin = config.dividerSize
+                }
                 +recyclerView {
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
-                        GridAutofitLayoutManager(requireContext(), requireContext().dip(140))
+                        GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
                     )
                     val itemUi = miaoMemo(null) {
                         miaoBindingItemUi<SpaceInfo.ArchiveItem> { item, _ ->

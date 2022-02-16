@@ -4,7 +4,12 @@ import android.util.Log
 import android.webkit.CookieManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.isActive
 import okhttp3.*
+import java.io.IOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class MiaoHttp(var url: String? = null) {
     private val TAG = "MiaoHttp"
@@ -18,7 +23,7 @@ class MiaoHttp(var url: String? = null) {
     var body: RequestBody? = null
     var formBody: Map<String, String>? = null
 
-    fun call(): Response {
+    private fun buildRequest(): Request {
         for (key in headers.keys) {
             requestBuilder.addHeader(key, headers[key])
         }
@@ -35,10 +40,29 @@ class MiaoHttp(var url: String? = null) {
             Log.d(TAG, "BODY = $it")
         }
         Log.d(TAG, "------END-$method------")
-        val request = requestBuilder.method(method, body)
+        val req = requestBuilder.method(method, body)
             .url(url)
             .build()
-        return client.newCall(request).execute()
+        return req
+    }
+
+    fun call(): Response {
+        val req = buildRequest()
+        return client.newCall(req).execute()
+    }
+
+    suspend fun awaitCall(): Response{
+        return suspendCoroutine { continuation ->
+            val req = buildRequest()
+            client.newCall(req).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    continuation.resumeWithException(e)
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    continuation.resume(response)
+                }
+            })
+        }
     }
 
     fun get(): Response {

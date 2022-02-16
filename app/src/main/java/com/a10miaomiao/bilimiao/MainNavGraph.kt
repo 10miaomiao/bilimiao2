@@ -6,6 +6,7 @@ import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
@@ -16,7 +17,12 @@ import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.setting.AboutFragment
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
+import com.a10miaomiao.bilimiao.page.user.UserArchiveListFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
+import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
+import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
+import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailFragment
+import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import kotlin.reflect.KClass
 
 
@@ -60,6 +66,19 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val videoCommentList = f<VideoCommentListFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+        val videoCommentDetail = f<VideoCommentDetailFragment> {
+            argument(args.reply) {
+                type = NavType.ParcelableType(VideoCommentReplyInfo::class.java)
+                nullable = false
+            }
+        }
+
         val h5Login = f<H5LoginFragment> {
         }
 
@@ -67,6 +86,36 @@ object MainNavGraph {
             argument(args.type) {
                 type = NavType.StringType
                 defaultValue = "AV"
+            }
+        }
+        val userArchiveList = f<UserArchiveListFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.name) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+        val userFavouriteList = f<UserFavouriteListFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.name) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+        val userFavouriteDetail = f<UserFavouriteDetailFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.name) {
+                type = NavType.StringType
+                nullable = false
             }
         }
     }
@@ -85,14 +134,34 @@ object MainNavGraph {
         val region_to_videoInfo = dest.region to dest.videoInfo
 
         val videoInfo_to_videoInfo = dest.videoInfo to dest.videoInfo
+        val videoInfo_to_user = dest.videoInfo to dest.user
+        val videoInfo_to_videoCommentList = dest.videoInfo to dest.videoCommentList
+
+        val videoCommentList_to_user = dest.videoCommentList to dest.user
+        val videoCommentList_to_videoInfo = dest.videoCommentList to dest.videoInfo
+        val videoCommentList_to_videoCommentDetail = dest.videoCommentList to dest.videoCommentDetail
+
+        val videoCommentDetail_to_user = dest.videoCommentDetail to dest.user
+        val videoCommentDetail_to_videoInfo = dest.videoCommentDetail to dest.videoInfo
 
         val user_to_videoInfo = dest.user to dest.videoInfo
+        val user_to_userArchiveList = dest.user to dest.userArchiveList
+        val user_to_userFavouriteList = dest.user to dest.userFavouriteList
+        val user_to_userFavouriteDetail = dest.user to dest.userFavouriteDetail
+
+        val userArchiveList_to_videoInfo = dest.userArchiveList to dest.videoInfo
+
+        val userFavouriteList_to_userFavouriteDetail = dest.userFavouriteList to dest.userFavouriteDetail
+
+        val userFavouriteDetail_to_videoInfo = dest.userFavouriteDetail to dest.videoInfo
     }
 
     object args {
         const val type = "type"
         const val id = "id"
+        const val name = "name"
         const val region = "region"
+        const val reply = "reply"
     }
 
     private val defaultNavOptionsBuilder: NavOptionsBuilder.() -> Unit = {

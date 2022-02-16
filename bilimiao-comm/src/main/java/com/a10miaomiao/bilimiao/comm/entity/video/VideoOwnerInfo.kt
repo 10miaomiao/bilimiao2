@@ -6,6 +6,6 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class VideoOwnerInfo(
     val face: String,
-    val mid: Long,
+    val mid: String,
     val name: String
 ) : Parcelable

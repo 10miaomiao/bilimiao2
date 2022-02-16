@@ -100,7 +100,7 @@ class MainViewModel(
         try {
             val res = BiliApiService.regionAPI
                 .regions()
-                .call()
+                .awaitCall()
                 .gson<ResultListInfo<RegionInfo>>()
             if (res.code == 0) {
                 val regionList = res.data.filter { it.children != null && it.children.isNotEmpty() }

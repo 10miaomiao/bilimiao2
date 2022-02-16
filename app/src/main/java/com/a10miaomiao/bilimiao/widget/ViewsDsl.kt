@@ -21,6 +21,14 @@ inline fun View.rcImageView(
     return view({ RCImageView(it) }, id).apply(initView)
 }
 
+inline fun Ui.expandableTextView(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: ExpandableTextView.() -> Unit = {}
+): ExpandableTextView {
+    return view({ ExpandableTextView(it) }, id).apply(initView)
+}
+
 inline fun View.expandableTextView(
     @IdRes id: Int = View.NO_ID,
     @StyleRes theme: Int = NO_THEME,

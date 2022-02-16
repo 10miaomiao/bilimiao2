@@ -43,14 +43,7 @@ fun MiaoUI.mediaItemView (
                             .into(this)
                     }
                 }
-                _network(cover)
-//                cover {
-//                    if (it != null && !it.isEmpty()) com.bumptech.glide.Glide.with(context)
-//                        .loadPic(it)
-//                        .bitmapTransform(BlurTransformation(context, 14, 6)) // 高斯模糊
-//                        .into(this)
-//                }
-            }
+            }..lParams(matchParent, dip(100))
 
             +verticalLayout {
 
@@ -58,10 +51,13 @@ fun MiaoUI.mediaItemView (
 
                 views {
                     +textView {
+                        setTextColor(Color.WHITE)
                         paint.isFakeBoldText = true
                         gravity = Gravity.CENTER
                         textSize = 16f
                         _text = title
+                    }..lParams {
+                        bottomMargin = dip(5)
                     }
                     +textView {
                         setTextColor(Color.WHITE)

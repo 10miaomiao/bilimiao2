@@ -51,7 +51,7 @@ class UserViewModel(
             ui.setState {
                 loading = true
             }
-            val res = UserApi().space(id).call().gson<ResultInfo<SpaceInfo>>()
+            val res = UserApi().space(id).awaitCall().gson<ResultInfo<SpaceInfo>>()
             if (res.code == 0) {
                 ui.setState {
                     dataInfo = res.data
@@ -61,7 +61,7 @@ class UserViewModel(
                     context.toast(res.message)
                 }
             }
-            val res2 = UserApi().upperChanne(id).call().gson<ResultListInfo<UpperChannelInfo>>()
+            val res2 = UserApi().upperChanne(id).awaitCall().gson<ResultListInfo<UpperChannelInfo>>()
             if (res.code == 0) {
                 ui.setState {
                     channelList = res2.data

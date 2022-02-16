@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.utils
 
+import android.content.Intent
+import android.net.Uri
+import android.view.View
 import java.util.regex.Pattern
 
 object BiliUrlMatcher {
@@ -90,6 +93,17 @@ object BiliUrlMatcher {
         return result
     }
 
+    fun toUrlLink (view: View, url: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(
+            if ("://" in url) {
+                url
+            } else {
+                "http://$url"
+            }
+        )
+        view.context.startActivity(intent)
+    }
 //    fun toLink(context: Context, link: String){
 //        val urlInfo = BiliUrlMatcher.findIDByUrl(link)
 //        val urlType = urlInfo[0]
