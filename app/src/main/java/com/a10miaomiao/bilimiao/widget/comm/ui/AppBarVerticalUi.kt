@@ -57,6 +57,7 @@ class AppBarVerticalUi(
 
     override val root = frameLayout {
         layoutParams = ViewGroup.LayoutParams(matchParent, matchParent)
+
         addView(mTitle, lParams {
             width = matchParent
             height = wrapContent

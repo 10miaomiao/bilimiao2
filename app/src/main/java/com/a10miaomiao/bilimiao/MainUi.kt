@@ -36,16 +36,20 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         backgroundColor = 0xFFF2F2F2L.toInt()
     }
 
-    val mAppBar = view<AppBarView>{ }
+    val mAppBar = view<AppBarView>{
+        elevation = dip(20).toFloat()
+    }
 
-    val mPlayerLayout = inflate<FrameLayout>(R.layout.include_palyer)
+    val mPlayerLayout = inflate<FrameLayout>(R.layout.include_palyer) {
+        elevation = dip(20).toFloat()
+    }
 
     override var bottomSheetTitleView = textView {
         gravity = Gravity.CENTER
     }
 
     val mBottomSheetLayout = frameLayout {
-        elevation = dip(4).toFloat()
+        elevation = dip(20).toFloat()
 
         addView(limitedFrameLayout {
             maxHeight = dip(500)
@@ -72,6 +76,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
     override var bottomSheetMaskView = view<View> {
         setBackgroundResource(R.color.black)
+        elevation = dip(20).toFloat()
         alpha = 0f
         visibility = View.GONE
     }

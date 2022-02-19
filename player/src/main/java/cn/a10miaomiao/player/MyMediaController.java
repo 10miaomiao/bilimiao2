@@ -39,7 +39,7 @@ public class MyMediaController extends FrameLayout implements MediaController
     private boolean mDanmakuShow = true;
     private Fun2<Boolean> danmakuSwitchEvent;
     private Fun videoBackEvent;
-    private Fun qualityEvent;
+    private View.OnClickListener qualityEvent;
     private boolean isLocked = false;
 
     private LinearLayout mHeaderLayout;
@@ -133,8 +133,7 @@ public class MyMediaController extends FrameLayout implements MediaController
             @Override
             public void onClick(View v) {
                 if (qualityEvent != null){
-                    hide();
-                    qualityEvent.accept();
+                    qualityEvent.onClick(v);
                 }
             }
         });
@@ -264,7 +263,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         this.videoBackEvent = videoBackEvent;
     }
 
-    public void setQualityEvent(Fun qualityEvent) {
+    public void setQualityEvent(View.OnClickListener qualityEvent) {
         this.qualityEvent = qualityEvent;
     }
 

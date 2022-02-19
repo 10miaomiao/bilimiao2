@@ -10,6 +10,7 @@ import android.preference.PreferenceManager
 import android.view.*
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -166,7 +167,6 @@ class PlayerDelegate(
             restartPlay(mPlayer.currentPosition)
         }
         mErrorClosePlayTv.setOnClickListener {
-//            haederBehavior.hide()
             scaffoldApp.showPlayer = false
             stopPlay()
         }
@@ -196,11 +196,14 @@ class PlayerDelegate(
             isMiniPlayer.value = true
         }
         mController.setQualityEvent {
-//            val popupWindow = QualityPopupWindow(activity, mController)
-//            popupWindow.setData(acceptDescription)
-//            popupWindow.checkItemPosition = acceptQuality.indexOf(quality)
-//            popupWindow.onCheckItemPositionChanged = this::changedQuality
-//            popupWindow.show()
+            val popup = QualityPopupMenu(
+                activity = activity,
+                anchor = it,
+                list = acceptDescription,
+                value = acceptDescription[acceptQuality.indexOf(quality)]
+            )
+            popup.setOnMenuItemClickListener(this.handleChangedQuality)
+            popup.show()
         }
 
         mController.setRestartPlayEvent(this::restartPlay)
@@ -597,11 +600,13 @@ class PlayerDelegate(
         timer.cancel()
     }
 
-    private fun changedQuality(value: String, position: Int) {
+    private val handleChangedQuality = PopupMenu.OnMenuItemClickListener {
+        val position = it.itemId
         quality = acceptQuality[position]
         loadPlayurl()
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         prefs.edit().putInt("player_quality", quality).apply()
+        false
     }
 
     private val onInfoListener = IMediaPlayer.OnInfoListener { mp, what, extra ->
