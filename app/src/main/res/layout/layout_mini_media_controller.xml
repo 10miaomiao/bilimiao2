@@ -9,10 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:contentInsetStartWithNavigation="0dp"
-        app:popupTheme="@style/ThemeOverlay.AppCompat">
-<!--        app:theme="@style/ToolbarTheme"-->
-<!--        app:titleTextAppearance="@style/ToolBar.TitleText">-->
-
+        android:theme="@style/ThemeOverlay_Toolbar">
     </androidx.appcompat.widget.Toolbar>
 
 

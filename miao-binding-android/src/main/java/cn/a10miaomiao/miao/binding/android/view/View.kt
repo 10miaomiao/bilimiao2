@@ -24,4 +24,10 @@ inline var View._isEnabled: Boolean
         isEnabled = it
     }
 
+inline var View._tag: Any
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(value) = miaoEffect(value) {
+        tag = it
+    }
+
 

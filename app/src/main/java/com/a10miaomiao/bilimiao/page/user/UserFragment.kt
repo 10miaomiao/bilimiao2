@@ -8,6 +8,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -20,10 +21,7 @@ import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
-import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
-import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
-import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -50,7 +48,7 @@ import splitties.views.horizontalPadding
 import splitties.views.padding
 import splitties.views.verticalPadding
 
-class UserFragment  : Fragment(), DIAware, MyPage {
+class UserFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         val info = viewModel.dataInfo
@@ -342,13 +340,21 @@ class UserFragment  : Fragment(), DIAware, MyPage {
             pageConfig.notifyConfigChanged()
         }
         val contentInsets = windowStore.getContentInsets(parentView)
-        verticalLayout {
+        recyclerView {
             _topPadding = contentInsets.top + config.pagePadding
             _bottomPadding = contentInsets.bottom + config.pagePadding
             _leftPadding = contentInsets.left + config.pagePadding
             _rightPadding = contentInsets.right + config.pagePadding
 
-            views {
+            _miaoLayoutManage(
+                LinearLayoutManager(requireContext())
+            )
+            val itemUi = miaoMemo(null) {
+                miaoBindingItemUi<Any> { item, _ -> View(ctx) }
+            }
+            val mAdapter = _miaoAdapter(null, itemUi)
+
+            headerViews(mAdapter) {
                 +userCardView()
 
                 val subject = if(viewModel.isSelf) "我" else "Ta"
@@ -503,24 +509,40 @@ class UserFragment  : Fragment(), DIAware, MyPage {
                         setOnItemClickListener(handleItemClick)
                     }
                 }..lParams(matchParent, wrapContent)
-
             }
         }.wrapInLimitedFrameLayout {
             maxWidth = config.containerWidth
-        }.wrapInNestedScrollView(
-            height = ViewGroup.LayoutParams.MATCH_PARENT,
-            gravity = Gravity.CENTER_HORIZONTAL,
-        ) {
-//            miaoEffect(null) {
-//                DebugMiao.log("viewModel.scrollY", viewModel.scrollY)
-//                scrollTo(0, viewModel.scrollY)
-//                setOnScrollChangeListener(viewModel.handleScrollChange)
-//            }
         }.wrapInSwipeRefreshLayout {
             setColorSchemeResources(config.themeColorResource)
             setOnRefreshListener { viewModel.loadData() }
             _isRefreshing = viewModel.loading
         }
+//        verticalLayout {
+//            _topPadding = contentInsets.top + config.pagePadding
+//            _bottomPadding = contentInsets.bottom + config.pagePadding
+//            _leftPadding = contentInsets.left + config.pagePadding
+//            _rightPadding = contentInsets.right + config.pagePadding
+//
+//            views {
+//
+//
+//            }
+//        }.wrapInLimitedFrameLayout {
+//            maxWidth = config.containerWidth
+//        }.wrapInNestedScrollView(
+//            height = ViewGroup.LayoutParams.MATCH_PARENT,
+//            gravity = Gravity.CENTER_HORIZONTAL,
+//        ) {
+////            miaoEffect(null) {
+////                DebugMiao.log("viewModel.scrollY", viewModel.scrollY)
+////                scrollTo(0, viewModel.scrollY)
+////                setOnScrollChangeListener(viewModel.handleScrollChange)
+////            }
+//        }.wrapInSwipeRefreshLayout {
+//            setColorSchemeResources(config.themeColorResource)
+//            setOnRefreshListener { viewModel.loadData() }
+//            _isRefreshing = viewModel.loading
+//        }
     }
 
 }

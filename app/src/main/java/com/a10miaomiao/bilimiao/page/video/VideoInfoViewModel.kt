@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.*
@@ -20,9 +21,11 @@ import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import splitties.toast.toast
 
 class VideoInfoViewModel(
     override val di: DI,
@@ -115,6 +118,121 @@ class VideoInfoViewModel(
             }
         } finally {
             ui.setState { loading = false }
+        }
+    }
+
+    fun requestLike() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val curInfo = info ?: return@launch
+            val res = BiliApiService.videoAPI
+                    .like(
+                        aid = curInfo.aid,
+                        dislike = curInfo.req_user.dislike ?: 0,
+                        like = curInfo.req_user.like ?: 0,
+                    )
+                    .awaitCall()
+                    .gson<MessageInfo>()
+            if (res.code == 0) {
+                ui.setState {
+                    val reqUser = curInfo.req_user.copy()
+                    val stat = curInfo.stat.copy()
+                    if (reqUser.like == 1) {
+                        reqUser.like = null
+                        stat.like--
+                    } else {
+                        reqUser.like = 1
+                        reqUser.dislike = null
+                        stat.like++
+                    }
+                    curInfo.req_user = reqUser
+                    curInfo.stat = stat
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    context.toast(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                context.toast(e.toString())
+            }
+        }
+    }
+
+    fun requestCoin(coinNum: Int) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val curInfo = info ?: return@launch
+            val res = BiliApiService.videoAPI
+                .coin(curInfo.aid, coinNum)
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.code == 0) {
+                ui.setState {
+                    val reqUser = curInfo.req_user.copy()
+                    val stat = curInfo.stat.copy()
+                    stat.coin += coinNum
+                    reqUser.coin = coinNum
+                    curInfo.req_user = reqUser
+                    curInfo.stat = stat
+                }
+                withContext(Dispatchers.Main) {
+                    context.toast("感谢投币")
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    context.toast(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                context.toast(e.toString())
+            }
+        }
+    }
+
+    fun requestFavorite (
+        favIds: List<String>,
+        addIds: List<String>,
+        delIds: List<String>,
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val curInfo = info ?: return@launch
+        try {
+            val res = BiliApiService.videoAPI
+                .favoriteDeal(
+                    aid = curInfo.aid,
+                    addIds = addIds,
+                    delIds = delIds,
+                )
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.code == 0) {
+                ui.setState {
+                    val reqUser = curInfo.req_user.copy()
+                    val stat = curInfo.stat.copy()
+                    if (favIds.size - delIds.size + addIds.size == 0) {
+                        stat.favorite--
+                        reqUser.favorite = null
+                    } else {
+                        if (favIds.isEmpty()) {
+                            stat.favorite++
+                        }
+                        reqUser.favorite = 1
+                    }
+                    curInfo.req_user = reqUser
+                    curInfo.stat = stat
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    context.toast(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                context.toast(e.toString())
+            }
         }
     }
 

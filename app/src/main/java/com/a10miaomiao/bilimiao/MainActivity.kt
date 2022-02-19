@@ -89,6 +89,7 @@ class MainActivity
 
         navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+
         navController = navHostFragment.navController
         MainNavGraph.createGraph(navController, MainNavGraph.dest.home)
         navController.addOnDestinationChangedListener(this)

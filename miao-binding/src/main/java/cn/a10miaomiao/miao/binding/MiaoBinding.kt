@@ -22,7 +22,7 @@ class MiaoBinding {
         return if (bindingList.size > curCounter) {
             if (persist) {
                 persist = false
-                if (bindingList[curCounter].state == value) {
+                if (eqValue(bindingList[curCounter].state, value)) {
                     null
                 } else {
                     bindingList[curCounter].state = value
@@ -32,7 +32,7 @@ class MiaoBinding {
                 val bindingData = initialBindingData()
                 bindingList[curCounter] = bindingData
                 bindingData.target as T
-            } else if (bindingList[curCounter].state == value) {
+            } else if (eqValue(bindingList[curCounter].state, value)) {
                 null
             } else {
                 bindingList[curCounter].state = value
@@ -43,6 +43,21 @@ class MiaoBinding {
             bindingList.add(bindingData)
             bindingData.target as T
         }
+    }
+
+    private fun <T> eqValue(oldValue: T?, newValue: T?): Boolean {
+        if (oldValue is List<*> && newValue is List<*>) {
+            if (oldValue.size != newValue.size) {
+                return false
+            }
+            for (i in 0 until oldValue.size) {
+                if (oldValue[i] != newValue[i]) {
+                    return false
+                }
+            }
+            return true
+        }
+        return oldValue == newValue
     }
 
     @PublishedApi internal fun <T> next (value: Any?, target: T): T? {

@@ -247,7 +247,7 @@ class PlayerDelegate(
                     setSystemUIVisible(true)
                 } else {
                     scaffoldApp.fullScreenPlayer = true
-                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 }
             }
             initDanmakuContext()
@@ -861,7 +861,7 @@ class PlayerDelegate(
         }
     }
 
-    // TODO: 画中画适配
+
     fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
@@ -870,6 +870,7 @@ class PlayerDelegate(
         if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
             // 隐藏视频控制器
             mMiniController.visibility = View.GONE
+            mController.visibility = View.GONE
             // 视频组件全屏
             scaffoldApp.fullScreenPlayer = true
             // 调整弹幕样式，调小字体，限制行数

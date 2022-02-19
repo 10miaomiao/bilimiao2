@@ -15,8 +15,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.marginRight
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
+import androidx.navigation.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._isEnabled
@@ -49,6 +48,7 @@ import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.region.RankOrderPopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
+import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.a10miaomiao.bilimiao.widget._setContent
@@ -66,6 +66,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
+import splitties.toast.toast
 import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
@@ -79,6 +80,8 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
 
     private val windowStore by instance<WindowStore>()
 
+    private val userStore by instance<UserStore>()
+
     private val playerStore by instance<PlayerStore>()
 
     private val playerDelegate by instance<PlayerDelegate>()
@@ -91,25 +94,107 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         menus = listOf(
             myMenuItem {
                 key = 0
+                iconResource = R.drawable.ic_more_vert_grey_24dp
+                title = "更多"
+            },
+            myMenuItem {
+                key = 1
                 iconResource = R.drawable.ic_column_comm
                 title = NumberUtil.converString(info?.stat?.reply?.toString() ?: "评论")
+            },
+            myMenuItem {
+                key = 2
+                iconResource = R.drawable.ic_column_share
+                title = NumberUtil.converString(info?.stat?.share?.toString() ?: "分享")
+            },
+            myMenuItem {
+                key = 3
+                iconResource = if (info?.req_user?.favorite == null) {
+                    R.drawable.ic_column_unstar
+                } else {
+                    R.drawable.ic_column_star
+                }
+                title = NumberUtil.converString(info?.stat?.favorite?.toString() ?: "收藏")
+            },
+            myMenuItem {
+                key = 4
+                iconResource = if (info?.req_user?.coin == null) {
+                    R.drawable.ic_column_uncoin
+                } else {
+                    R.drawable.ic_column_coin
+                }
+                title = NumberUtil.converString(info?.stat?.coin?.toString() ?: "投币")
+            },
+            myMenuItem {
+                key = 5
+                iconResource = if (info?.req_user?.like == null) {
+                    R.drawable.ic_column_unlike
+                } else {
+                    R.drawable.ic_column_like
+                }
+                title = NumberUtil.converString(info?.stat?.like?.toString() ?: "点赞")
             },
         )
     }
 
     override fun onMenuItemClick(view: MenuItemView) {
         super.onMenuItemClick(view)
+        val info = viewModel.info
+        if (!userStore.isLogin() && (view.prop.key ?: 0) >= 3) {
+            toast("请先登录")
+            return
+        }
         when (view.prop.key) {
             0 -> {
-                val info = viewModel.info
+                // 更多
+            }
+            1 -> {
+                // 评论
                 if (info != null) {
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = bundleOf(
-                        MainNavGraph.args.id to info.aid.toString()
+                        MainNavGraph.args.id to info.aid
                     )
                     nav.navigate(MainNavGraph.action.videoInfo_to_videoCommentList, args)
                 }
-
+            }
+            2 -> {
+                // 分享
+                if (info == null) {
+                    toast("视频信息未加载完成，请稍后再试")
+                    return
+                }
+                var shareIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, "bilibili视频分享")
+                    putExtra(Intent.EXTRA_TEXT, "${info.title} https://www.bilibili.com/video/${info.bvid}")
+                }
+                requireActivity().startActivity(Intent.createChooser(shareIntent, "分享"))
+            }
+            3 -> {
+                // 收藏
+                if (info != null) {
+                    val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+                    val args = bundleOf(
+                        MainNavGraph.args.id to info.aid
+                    )
+                    nav.navigate(MainNavGraph.action.global_to_videoAddFavorite, args)
+                }
+            }
+            4 -> {
+                // 投币
+                if (info != null) {
+                    val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+                    val args = bundleOf(
+                        MainNavGraph.args.num to if (info.copyright == 2) { 1 } else { 2 }
+                    )
+                    nav.navigate(MainNavGraph.action.global_to_videoCoin, args)
+                }
+            }
+            5 -> {
+                // 点赞
+                viewModel.requestLike()
             }
         }
     }
@@ -128,6 +213,14 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
+    }
+
+    fun confirmCoin(num: Int) {
+        viewModel.requestCoin(num)
+    }
+
+    fun confirmFavorite(favIds: List<String>, addIds: List<String>, delIds: List<String>) {
+        viewModel.requestFavorite(favIds, addIds, delIds)
     }
 
     private fun playVideo(cid: String, title: String) {
@@ -149,6 +242,9 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 Navigation.findNavController(view)
                     .navigate(MainNavGraph.action.videoCommentList_to_videoInfo, args)
             }
+            else -> {
+                BiliUrlMatcher.toUrlLink(view, url)
+            }
         }
     }
 
@@ -166,6 +262,17 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleMorePageClick = View.OnClickListener {
+        viewModel.info?.let { info ->
+            val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+            val args = bundleOf(
+                MainNavGraph.args.id to info.aid,
+                MainNavGraph.args.pages to viewModel.pages,
+            )
+            nav.navigate(MainNavGraph.action.global_to_videoPages, args)
+        }
+    }
+
     private val handleUpperItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.staffs[position]
         toUser(view, item.mid)
@@ -178,11 +285,15 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
 
     private val handleRelateItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.relates[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.aid
-        )
-        Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
+        if (item.goto == "av") {
+            val args = bundleOf(
+                MainNavGraph.args.id to item.aid
+            )
+            Navigation.findNavController(view)
+                .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
+        } else {
+            BiliUrlMatcher.toUrlLink(view, item.uri)
+        }
     }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
@@ -279,6 +390,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 +imageView {
                     setImageResource(R.drawable.ic_navigate_next_black_24dp)
                     setBackgroundResource(config.selectableItemBackgroundBorderless)
+                    setOnClickListener(handleMorePageClick)
 //                    setOnClickListener {
 //                        val fragment = PagesFragment.newInstance(viewModel.id, viewModel.pages, 0)
 //                        MainActivity.of(context)
@@ -528,8 +640,9 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        val info = viewModel.info
         // 监听info改变，修改页面标题
-        miaoEffect(viewModel.info) {
+        miaoEffect(listOf(info, info?.req_user, info?.staff)) {
             pageConfig.notifyConfigChanged()
         }
         verticalLayout {

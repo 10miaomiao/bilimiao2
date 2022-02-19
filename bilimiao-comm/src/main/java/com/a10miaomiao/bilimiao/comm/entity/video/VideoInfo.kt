@@ -1,7 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.video
 
 data class VideoInfo(
-    val aid: Long,
+    val aid: String,
     val attribute: Int,
     val bvid: String,
     val cid: Long,
@@ -22,10 +22,10 @@ data class VideoInfo(
     val pic: String,
     val pubdate: Long,
     val relates: List<VideoRelateInfo>?,
-//    val req_user: ReqUser,
+    var req_user: VideoReqUserInfo,
     val rights: VideoRelateInfo,
     val staff: List<VideoStaffInfo>?,
-    val stat: VideoStatInfo,
+    var stat: VideoStatInfo,
     val state: Int,
     val tag: List<VideoTagInfo>,
     val tid: Int,

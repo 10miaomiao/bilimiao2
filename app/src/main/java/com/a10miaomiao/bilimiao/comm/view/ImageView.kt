@@ -8,6 +8,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import splitties.views.imageDrawable
 
 
 fun RequestManager.loadPic(value: String): RequestBuilder<Drawable> {
@@ -19,6 +20,10 @@ fun RequestManager.loadPic(value: String): RequestBuilder<Drawable> {
 }
 
 fun ImageView.network(url: String) = miaoEffect(url) {
+    if (url == null || url.isBlank()) {
+        imageDrawable = null
+        return
+    }
     Glide.with(context)
         .loadPic(url)
         .centerCrop()

@@ -7,6 +7,7 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
@@ -21,6 +22,9 @@ import com.a10miaomiao.bilimiao.page.user.UserArchiveListFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
+import com.a10miaomiao.bilimiao.page.video.VideoAddFavoriteFragment
+import com.a10miaomiao.bilimiao.page.video.VideoCoinFragment
+import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import kotlin.reflect.KClass
@@ -29,11 +33,13 @@ import kotlin.reflect.KClass
 object MainNavGraph {
     // Counter for id's. First ID will be 1.
     private var id_counter = 1
+    private val globalActionList = arrayListOf<FragmentAction>()
     private val idToFragment = hashMapOf<Int, FragmentDest>()
     private var id = id_counter++
 
     object dest {
         val id = id_counter++
+        val global = id_counter++
         val home = f<MainFragment>()
         val template = f<TemplateFragment>()
         val timeSetting = f<TimeSettingFragment>() {
@@ -66,6 +72,31 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val videoPages = f<VideoPagesFragment> {
+            deepLink("bilimiao://video/pages")
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.pages) {
+                type = NavType.ParcelableType(VideoPageInfo::class.java)
+                nullable = false
+            }
+            argument(args.index) {
+                type = NavType.IntType
+                nullable = false
+            }
+        }
+        val videoCoin = f<VideoCoinFragment> {
+            argument(args.num) {
+                type = NavType.IntType
+                defaultValue = 1
+            }
+        }
+        val videoAddFavorite = f<VideoAddFavoriteFragment> {
+
+        }
+
         val videoCommentList = f<VideoCommentListFragment> {
             argument(args.id) {
                 type = NavType.StringType
@@ -122,6 +153,10 @@ object MainNavGraph {
 
     object action {
         val id = id_counter++
+        val global_to_videoPages = dest.global to dest.videoPages
+        val global_to_videoCoin = dest.global to dest.videoCoin
+        val global_to_videoAddFavorite = dest.global to dest.videoAddFavorite
+
         val home_to_region = dest.home to dest.region
         val home_to_setting = dest.home to dest.setting
         val home_to_h5Login = dest.home to dest.h5Login
@@ -160,6 +195,9 @@ object MainNavGraph {
         const val type = "type"
         const val id = "id"
         const val name = "name"
+        const val num = "num"
+        const val pages = "pages"
+        const val index = "index"
         const val region = "region"
         const val reply = "reply"
     }
@@ -193,6 +231,12 @@ object MainNavGraph {
                     }
                 )
             }
+            globalActionList.forEach { fa ->
+                action(fa.id) {
+                    destinationId = fa.destinationId
+                    navOptions(fa.optionsBuilder)
+                }
+            }
         }
     }
 
@@ -225,7 +269,8 @@ object MainNavGraph {
         val fa = FragmentAction(
             id, fragmentId, destinationId, optionsBuilder
         )
-        idToFragment[fragmentId]!!.actionList!!.add(fa)
+        val actionList = idToFragment[fragmentId]?.actionList ?: globalActionList
+        actionList.add(fa)
         return id
     }
 

@@ -93,4 +93,6 @@ class UserStore(override val di: DI) :
 
     fun isSelf(mid: String) = state.info?.mid == mid.toLong()
 
+    fun isLogin() = state.info != null
+
 }

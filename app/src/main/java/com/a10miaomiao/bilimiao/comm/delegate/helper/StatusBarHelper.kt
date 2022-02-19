@@ -30,7 +30,7 @@ class StatusBarHelper(
             View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
         uiFlags = uiFlags or 0x00001000
-        if (isShowStatus) {
+        if (!isShowNavigation) {
             uiFlags = uiFlags or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
         if (isLightStatusBar) {

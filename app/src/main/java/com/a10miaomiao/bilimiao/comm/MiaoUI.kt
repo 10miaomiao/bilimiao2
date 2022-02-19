@@ -14,11 +14,11 @@ abstract class MiaoUI : Ui {
 
     var parentView: View? = null
 
-    class ViewsInfo(
+    open class ViewsInfo(
         private val viewGroup: ViewGroup,
         private val isRecord: Boolean,
     ) {
-        private val views = arrayListOf<View>()
+        val views = arrayListOf<View>()
 
         operator fun View.unaryPlus(): View {
             if (isRecord) {
@@ -33,7 +33,7 @@ abstract class MiaoUI : Ui {
             }
         }
 
-        fun bindViews() {
+        open fun bindViews() {
             views.forEach {
                 viewGroup.addView(it)
             }

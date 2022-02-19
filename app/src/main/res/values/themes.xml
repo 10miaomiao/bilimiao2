@@ -45,5 +45,14 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <style name="ThemeOverlay_Toolbar" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <!-- color used by the toolbar title -->
+        <item name="android:textColorPrimary">@color/white</item>
+        <!-- color used by navigation icon and overflow icon -->
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSurface">@color/white</item>
+
+    </style>
+
 
 </resources>
