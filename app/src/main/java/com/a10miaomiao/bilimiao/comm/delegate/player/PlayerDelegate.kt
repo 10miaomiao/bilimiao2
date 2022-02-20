@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.UserStore
@@ -394,29 +395,32 @@ class PlayerDelegate(
     /**
      * 记录历史进度
      */
-    fun historyReport() {
-        if (plalerSource.type != PlayerSourceInfo.VIDEO) {
-            return
+    fun historyReport() = playerCoroutineScope.launch {
+        if (!userStore.isLogin()) {
+            return@launch
         }
-        val url = "https://api.bilibili.com/x/v2/history/report"
-        val realtimeProgress = (mPlayer.currentPosition / 1000).toString()  // 秒数
-        val params = ApiHelper.createParams(
-            "aid" to plalerSource.aid,
-            "cid" to plalerSource.cid,
-            "progress" to realtimeProgress,
-            "realtime" to realtimeProgress,
-            "type" to "3"
-        )
-        // TODO: 历史记录网络请求
-//        MiaoHttp.postString(url) {
-//            body = FormBody.Builder().apply {
-//                params.keys.forEach { add(it, params[it]) }
-//            }.build()
-//        }.subscribeOn(Schedulers.io())
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe {
-//                DebugMiao.log(it)
-//            }
+        if (plalerSource.type != PlayerSourceInfo.VIDEO) {
+            return@launch
+        }
+        if (plalerSource.aid.isBlank() || plalerSource.cid.isBlank()) {
+            return@launch
+        }
+        try {
+            val realtimeProgress = (mPlayer.currentPosition / 1000).toString()  // 秒数
+            val res = MiaoHttp.request {
+                url = "https://api.bilibili.com/x/v2/history/report"
+                formBody = ApiHelper.createParams(
+                    "aid" to plalerSource.aid,
+                    "cid" to plalerSource.cid,
+                    "progress" to realtimeProgress,
+                    "realtime" to realtimeProgress,
+                    "type" to "3"
+                )
+                method = "POST"
+            }.awaitCall()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -574,18 +578,11 @@ class PlayerDelegate(
                 }
             }
         }, 0, 200)
-
-        // TODO: 判断用户是否登录，是否开启历史记录
-//        historyDisposable?.dispose()
-//        if (userStore.user != null) {
-//            historyDisposable = Observable.interval(10, TimeUnit.SECONDS)
-//                .subscribe {
-//                    historyReport()
-//                }
-//        }
+        historyReport()
     }
 
     fun stopPlay() {
+        historyReport()
 //        mVideoTitleText.text = ""
         if (mPlayer != null && mPlayer.isDrawingCacheEnabled) {
             mPlayer.destroyDrawingCache()
@@ -689,6 +686,7 @@ class PlayerDelegate(
         override fun onVideoPause() {
             if (mDanmaku != null && mDanmaku.isPrepared()) {
                 mDanmaku.pause()
+                historyReport()
             }
         }
 
@@ -803,11 +801,11 @@ class PlayerDelegate(
 
 
     fun onResume() {
-
+        historyReport()
     }
 
     fun onPause() {
-
+        historyReport()
     }
 
     fun onStart() {

@@ -341,10 +341,8 @@ class UserFragment : Fragment(), DIAware, MyPage {
         }
         val contentInsets = windowStore.getContentInsets(parentView)
         recyclerView {
-            _topPadding = contentInsets.top + config.pagePadding
-            _bottomPadding = contentInsets.bottom + config.pagePadding
-            _leftPadding = contentInsets.left + config.pagePadding
-            _rightPadding = contentInsets.right + config.pagePadding
+            _leftPadding = contentInsets.left
+            _rightPadding = contentInsets.right
 
             _miaoLayoutManage(
                 LinearLayoutManager(requireContext())
@@ -355,7 +353,10 @@ class UserFragment : Fragment(), DIAware, MyPage {
             val mAdapter = _miaoAdapter(null, itemUi)
 
             headerViews(mAdapter) {
-                +userCardView()
+                +userCardView()..lParams(matchParent, wrapContent) {
+                    horizontalMargin = config.pagePadding
+                    _topMargin = contentInsets.top + config.pagePadding
+                }
 
                 val subject = if(viewModel.isSelf) "我" else "Ta"
 
@@ -366,9 +367,11 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     isShow = isShow,
                     tag = "archive",
                 )..lParams(matchParent, wrapContent) {
+                    horizontalMargin = config.pagePadding
                     _topMargin = config.dividerSize
                 }
                 +recyclerView {
+                    horizontalPadding = config.pagePadding
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
@@ -393,9 +396,11 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     title = "${subject}的频道",
                     isShow = isShow,
                 )..lParams(matchParent, wrapContent) {
+                    horizontalMargin = config.pagePadding
                     _topMargin = config.dividerSize
                 }
                 +recyclerView {
+                    horizontalPadding = config.pagePadding
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
@@ -425,9 +430,11 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     isShow = isShow,
                     tag = "season",
                 )..lParams(matchParent, wrapContent) {
+                    horizontalMargin = config.pagePadding
                     _topMargin = config.dividerSize
                 }
                 +recyclerView {
+                    horizontalPadding = config.pagePadding
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
@@ -456,9 +463,11 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     isShow = isShow,
                     tag = "favourite",
                 )..lParams(matchParent, wrapContent) {
+                    horizontalMargin = config.pagePadding
                     _topMargin = config.dividerSize
                 }
                 +recyclerView {
+                    horizontalPadding = config.pagePadding
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
@@ -489,9 +498,11 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     title = "${subject}推荐的",
                     isShow = isShow,
                 )..lParams(matchParent, wrapContent) {
+                    horizontalMargin = config.pagePadding
                     _topMargin = config.dividerSize
                 }
                 +recyclerView {
+                    horizontalPadding = config.pagePadding
                     _show = isShow
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
@@ -508,7 +519,9 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     ){
                         setOnItemClickListener(handleItemClick)
                     }
-                }..lParams(matchParent, wrapContent)
+                }..lParams(matchParent, wrapContent) {
+                    _bottomPadding = contentInsets.bottom + config.pagePadding
+                }
             }
         }.wrapInLimitedFrameLayout {
             maxWidth = config.containerWidth
@@ -517,32 +530,6 @@ class UserFragment : Fragment(), DIAware, MyPage {
             setOnRefreshListener { viewModel.loadData() }
             _isRefreshing = viewModel.loading
         }
-//        verticalLayout {
-//            _topPadding = contentInsets.top + config.pagePadding
-//            _bottomPadding = contentInsets.bottom + config.pagePadding
-//            _leftPadding = contentInsets.left + config.pagePadding
-//            _rightPadding = contentInsets.right + config.pagePadding
-//
-//            views {
-//
-//
-//            }
-//        }.wrapInLimitedFrameLayout {
-//            maxWidth = config.containerWidth
-//        }.wrapInNestedScrollView(
-//            height = ViewGroup.LayoutParams.MATCH_PARENT,
-//            gravity = Gravity.CENTER_HORIZONTAL,
-//        ) {
-////            miaoEffect(null) {
-////                DebugMiao.log("viewModel.scrollY", viewModel.scrollY)
-////                scrollTo(0, viewModel.scrollY)
-////                setOnScrollChangeListener(viewModel.handleScrollChange)
-////            }
-//        }.wrapInSwipeRefreshLayout {
-//            setColorSchemeResources(config.themeColorResource)
-//            setOnRefreshListener { viewModel.loadData() }
-//            _isRefreshing = viewModel.loading
-//        }
     }
 
 }

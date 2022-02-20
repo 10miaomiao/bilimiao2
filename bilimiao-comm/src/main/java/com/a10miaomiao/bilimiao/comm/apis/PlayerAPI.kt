@@ -38,20 +38,6 @@ class PlayerAPI {
         } else {
             throw Exception(res.message)
         }
-//        MiaoHttp.getJson<ResultInfo<PlayurlData>>(url) {
-//            headers = getVideoHeaders(avid)
-//        }.subscribe({ r ->
-//            if (r.code == 0) {
-//                it.onNext(r.data)
-//                it.onComplete()
-//            } else {
-//                it.onError(Throwable(r.message))
-//            }
-//            DebugMiao.log(r)
-//        }, { e ->
-//            e.printStackTrace()
-//            it.onError(Throwable("读取播放地址失败"))
-//        })
     }
 
     /**
@@ -83,19 +69,6 @@ class PlayerAPI {
         } else {
             throw Exception(res.message)
         }
-//        MiaoHttp.getJson<PlayurlData>(url)
-//            .subscribe({ r ->
-//                if (r.code == 0) {
-//                    it.onNext(r)
-//                    it.onComplete()
-//                } else {
-//                    it.onError(Throwable(r.message))
-//                }
-//                DebugMiao.log(r)
-//            }, { e ->
-//                e.printStackTrace()
-//                it.onError(Throwable("读取播放地址失败"))
-//            })
     }
 
     fun getDanmakuList(cid: String): MiaoHttp {

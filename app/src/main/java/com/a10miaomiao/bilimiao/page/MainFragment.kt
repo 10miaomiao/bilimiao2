@@ -7,18 +7,14 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._show
-import cn.a10miaomiao.miao.binding.android.view._topMargin
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -28,29 +24,19 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.region.RankOrderPopupMenu
-import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
-import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
-import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.FIT_CENTER
 import com.chad.library.adapter.base.listener.OnItemClickListener
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
@@ -67,7 +53,23 @@ class MainFragment : Fragment(), DIAware, MyPage {
             myMenuItem {
                 key = 0
                 title = "设置"
-            }
+                iconResource = R.drawable.ic_baseline_settings_grey_24
+            },
+            myMenuItem {
+                key = 1
+                title = "历史"
+                iconResource = R.drawable.ic_history_gray_24dp
+            },
+            myMenuItem {
+                key = 2
+                title = "下载"
+                iconResource = R.drawable.ic_arrow_downward_gray_24dp
+            },
+            myMenuItem {
+                key = 3
+                title = "搜索"
+                iconResource = R.drawable.ic_search_gray
+            },
         )
     }
 
