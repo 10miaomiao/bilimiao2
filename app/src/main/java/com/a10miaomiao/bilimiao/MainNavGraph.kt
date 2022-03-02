@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.setting.AboutFragment
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
+import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.page.user.UserArchiveListFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
@@ -119,6 +120,8 @@ object MainNavGraph {
                 defaultValue = "AV"
             }
         }
+        val history = f<HistoryFragment> {
+        }
         val userArchiveList = f<UserArchiveListFragment> {
             argument(args.id) {
                 type = NavType.StringType
@@ -161,6 +164,7 @@ object MainNavGraph {
         val home_to_setting = dest.home to dest.setting
         val home_to_h5Login = dest.home to dest.h5Login
         val home_to_user = dest.home to dest.user
+        val home_to_history = dest.home to dest.history
 
         val setting_to_videoSetting = dest.setting to dest.videoSetting
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
@@ -189,6 +193,8 @@ object MainNavGraph {
         val userFavouriteList_to_userFavouriteDetail = dest.userFavouriteList to dest.userFavouriteDetail
 
         val userFavouriteDetail_to_videoInfo = dest.userFavouriteDetail to dest.videoInfo
+
+        val history_to_videoInfo = dest.history to dest.videoInfo
     }
 
     object args {

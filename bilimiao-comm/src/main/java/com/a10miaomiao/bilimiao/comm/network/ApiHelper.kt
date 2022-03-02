@@ -63,40 +63,41 @@ object ApiHelper {
         }
     }
 
-    fun getSing(params: Map<String, String>, secret: String): String {
-        val list = params.map { "${it.key}=${Uri.encode(it.value)}" }.toMutableList()
-        list.sort()
-        return with(StringBuilder()) {
+    fun getSing(params: Map<String, String?>, secret: String): String {
+        val paramsStr = urlencode(params, true)
+        return getMD5(paramsStr + secret)
+    }
+
+    fun urlencode(params: Map<String, String?>, isSort: Boolean = false): String {
+        val list = params.map {
+            if (it.value != null) {
+                "${it.key}=${Uri.encode(it.value)}"
+            } else {
+                ""
+            }
+        }.toMutableList()
+        if (isSort) {
+            list.sort()
+        }
+
+        return StringBuilder().apply {
             list.forEach { item ->
-                append(if (isNotEmpty()) "&" else "")
-                append(item)
+                if (item.isNotEmpty()) {
+                    append(if (isNotEmpty()) "&" else "")
+                    append(item)
+                }
             }
-            return@with getMD5(toString() + secret)
-        }
+        }.toString()
     }
 
-    fun urlencode(params: Map<String, String>): String {
-        val stringBuilder = StringBuilder()
-        var i = 0
-        params.keys.forEach { key ->
-            if (i == 0){
-                stringBuilder.append("$key=${Uri.encode(params[key])}")
-            }else{
-                stringBuilder.append("&$key=${Uri.encode(params[key])}")
-            }
-            i++
-        }
-        return stringBuilder.toString()
-    }
-
-    fun addAccessKeyAndMidToParams(params: MutableMap<String, String>){
+    fun addAccessKeyAndMidToParams(params: MutableMap<String, String?>){
         BilimiaoCommApp.commApp.loginInfo?.token_info?.let{
             params["access_key"] = it.access_token
             params["mid"] = it.mid.toString()
         }
     }
 
-    fun createParams(vararg pairs: Pair<String, String>): MutableMap<String, String>{
+    fun createParams(vararg pairs: Pair<String, String?>): MutableMap<String, String?>{
         val params = mutableMapOf(
             *pairs,
             "appkey" to APP_KEY_NEW,

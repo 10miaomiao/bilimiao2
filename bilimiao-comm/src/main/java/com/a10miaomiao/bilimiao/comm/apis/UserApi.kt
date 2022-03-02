@@ -41,6 +41,7 @@ class UserApi {
 //        )
     }
 
+
     /**
      * 收藏夹列表
      */
@@ -70,6 +71,15 @@ class UserApi {
         )
     }
 
-
+    fun videoHistory (
+        pageNum: Int,
+        pageSize: Int,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/v2/history",
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+        )
+    }
 
 }

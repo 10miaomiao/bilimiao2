@@ -23,7 +23,7 @@ fun MiaoUI.videoItem (
     title: String? = null,
     pic: String? = null,
     upperName: String? = null,
-    createdTime: Long? = null,
+    remark: String? = null,
     playNum: String? = null,
     damukuNum: String? = null,
 ): View {
@@ -78,17 +78,17 @@ fun MiaoUI.videoItem (
                         }
                     }
 
-                    // 上传时间
+                    // 备注
                     +horizontalLayout {
                         gravity = Gravity.CENTER_VERTICAL
-                        _show = createdTime != null
+                        _show = remark != null
 
                         views {
 
                             +textView {
                                 textSize = 12f
                                 setTextColor(config.foregroundAlpha45Color)
-                                _text = NumberUtil.converCTime(createdTime)
+                                _text = remark ?: ""
                             }
                         }
                     }
@@ -96,6 +96,7 @@ fun MiaoUI.videoItem (
                     // 播放量，弹幕数量
                     +horizontalLayout {
                         gravity = Gravity.CENTER_VERTICAL
+                        _show = playNum != null && damukuNum != null
 
                         views {
                             +imageView {

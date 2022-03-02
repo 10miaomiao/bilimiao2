@@ -21,7 +21,7 @@ class MiaoHttp(var url: String? = null) {
     var method = "GET"
 
     var body: RequestBody? = null
-    var formBody: Map<String, String>? = null
+    var formBody: Map<String, String?>? = null
 
     private fun buildRequest(): Request {
         for (key in headers.keys) {

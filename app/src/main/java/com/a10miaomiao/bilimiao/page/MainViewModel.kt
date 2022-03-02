@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.store.UserStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +46,7 @@ class MainViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val timeSettingStore: TimeSettingStore by instance()
+    val userStore: UserStore by instance()
 
     var title = "时光姬"
     var adInfo: MiaoAdInfo.AdBean? = null
@@ -59,6 +61,7 @@ class MainViewModel(
         loadRegionData()
         viewModelScope.launch {
             timeSettingStore.connectUi(ui)
+            userStore.connectUi(ui)
         }
     }
 

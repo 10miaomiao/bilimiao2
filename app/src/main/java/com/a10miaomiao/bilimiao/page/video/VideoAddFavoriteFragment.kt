@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
@@ -59,6 +60,7 @@ class VideoAddFavoriteFragment : Fragment(), DIAware, MyPage {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        ui.parentView = container
         return ui.root
     }
 
@@ -89,6 +91,7 @@ class VideoAddFavoriteFragment : Fragment(), DIAware, MyPage {
                 delIds = delIds,
             )
         }
+        viewModel.selectedMap.clear()
         Navigation.findNavController(view).popBackStack()
     }
 
@@ -102,7 +105,6 @@ class VideoAddFavoriteFragment : Fragment(), DIAware, MyPage {
                 }
             } != null
         ) {
-            viewModel.selectedMap.clear()
             addFavorite(it)
         } else {
             toast("请选择收藏夹")
@@ -142,8 +144,8 @@ class VideoAddFavoriteFragment : Fragment(), DIAware, MyPage {
 
                 +checkBox {
                     rightPadding = config.dividerSize
-                    _isChecked = item.fav_state == 1
                     _tag = item.id
+                    _isChecked = item.fav_state == 1
 
                     setOnCheckedChangeListener(handleCheckedChange)
                 }

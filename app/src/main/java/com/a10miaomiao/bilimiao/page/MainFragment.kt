@@ -40,6 +40,7 @@ import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
+import splitties.toast.toast
 import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
@@ -59,6 +60,11 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 key = 1
                 title = "历史"
                 iconResource = R.drawable.ic_history_gray_24dp
+                visibility = if (userStore.isLogin()) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             },
             myMenuItem {
                 key = 2
@@ -75,10 +81,16 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     override fun onMenuItemClick(view: MenuItemView) {
         super.onMenuItemClick(view)
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
         when (view.prop.key) {
             0 -> {
-                val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                 nav.navigate(MainNavGraph.action.home_to_setting)
+            }
+            1 -> {
+                nav.navigate(MainNavGraph.action.home_to_history)
+            }
+            2, 3 -> {
+                toast("重新装修中")
             }
         }
     }
@@ -103,7 +115,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
         super.onViewCreated(view, savedInstanceState)
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
-            userStore.connectUi(ui)
         }
     }
 
@@ -329,6 +340,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     val ui = miaoBindingUi {
         val contentInsets = windowStore.getContentInsets(parentView)
+
+        miaoEffect(listOf(userStore.state.info)) {
+            pageConfig.notifyConfigChanged()
+        }
 
         verticalLayout {
             layoutParams = lParams(matchParent, matchParent)

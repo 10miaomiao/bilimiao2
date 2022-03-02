@@ -68,6 +68,7 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        ui.parentView = container
         return ui.root
     }
 

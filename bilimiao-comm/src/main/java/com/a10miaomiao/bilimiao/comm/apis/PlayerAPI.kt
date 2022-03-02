@@ -19,7 +19,7 @@ class PlayerAPI {
      * 获取视频播放地址
      */
     fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 64): PlayurlData {
-        val params = mutableMapOf(
+        val params = mutableMapOf<String, String?>(
             "avid" to avid,
             "cid" to cid,
             "qn" to quality.toString(),
@@ -44,7 +44,7 @@ class PlayerAPI {
      * 获取番剧播放地址
      */
     fun getBangumiUrl(epid: String, cid: String, qn: Int = 64): PlayurlData {
-        val params = mutableMapOf(
+        val params = mutableMapOf<String, String?>(
             "aid" to epid,
             "cid" to cid,
             "fnval" to "2",

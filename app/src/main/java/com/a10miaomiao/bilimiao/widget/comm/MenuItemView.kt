@@ -40,6 +40,9 @@ class MenuItemView @JvmOverloads constructor(
     }
 
     private fun updateView () {
+        if (visibility != prop.visibility) {
+            visibility = prop.visibility
+        }
         if (prop.iconResource == null && prop.iconDrawable == null) {
             ui.icon.visibility = View.GONE
         } else if (prop.iconDrawable != null) {
@@ -71,6 +74,7 @@ class MenuItemView @JvmOverloads constructor(
         var iconDrawable: Drawable? = null,
         @DrawableRes
         var iconResource: Int? = null,
+        var visibility: Int = View.VISIBLE
     )
 
     inner class ViewUi: Ui {

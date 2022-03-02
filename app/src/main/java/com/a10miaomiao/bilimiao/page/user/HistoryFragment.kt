@@ -16,8 +16,8 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
@@ -30,6 +30,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -37,19 +38,21 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
-class UserArchiveListFragment : Fragment(), DIAware, MyPage {
+class HistoryFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
-        title = "投稿列表"
-
+        title = "历史记录"
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
 
-    private val viewModel by diViewModel<UserArchiveListViewModel>(di)
+    private val viewModel by diViewModel<HistoryViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
 
@@ -78,16 +81,15 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
             MainNavGraph.args.id to item.aid
         )
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.userArchiveList_to_videoInfo, args)
+            .navigate(MainNavGraph.action.history_to_videoInfo, args)
     }
 
-    val itemUi = miaoBindingItemUi<SubmitVideosInfo.DataBean> { item, index ->
+    val itemUi = miaoBindingItemUi<VideoInfo> { item, index ->
         videoItem (
             title = item.title,
             pic = item.pic,
-            remark = NumberUtil.converCTime(item.created),
-            playNum = item.play,
-            damukuNum = item.video_review,
+            upperName = item.owner.name,
+            remark = NumberUtil.converCTime(item.view_at ?: 0),
         )
     }
 
@@ -137,5 +139,6 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
             _isRefreshing = viewModel.triggered
         }
     }
+
 
 }
