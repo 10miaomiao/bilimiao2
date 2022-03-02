@@ -5,6 +5,32 @@
       <map>
         <entry key="..\:/AndroidStudioProjects/bilimiao3/app2/src/main/res/drawable/ic_back_24dp.xml" value="0.15833333333333333" />
         <entry key="..\:/AndroidStudioProjects/bilimiao3/app2/src/main/res/layout/container_fragment.xml" value="0.18206521739130435" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/btn_bottom_confirm_bg.xml" value="0.2805128205128205" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/button_circle_shape.xml" value="0.2805128205128205" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/dialog_background.xml" value="0.2805128205128205" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/home_header_img.xml" value="0.2805128205128205" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_arrow_downward_gray_24dp.xml" value="0.23796296296296296" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_baseline_filter_list_grey_24.xml" value="0.23796296296296296" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_baseline_link_24.xml" value="0.1" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.23796296296296296" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_baseline_settings_grey_24.xml" value="0.23796296296296296" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_history_black_24dp.xml" value="0.23796296296296296" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_history_gray_24dp.xml" value="0.23796296296296296" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2328125" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/ic_search_gray.xml" value="0.23796296296296296" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/drawable/layer_progress.xml" value="0.2805128205128205" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/layout/bottom_sheet_fragment.xml" value="0.19927536231884058" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/layout/container_fragment.xml" value="0.15" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/layout/include_palyer.xml" value="0.13069908814589665" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/layout/layout_mini_media_controller.xml" value="0.1" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2328125" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2328125" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/bilimiao-cover/src/main/res/drawable/ic_android_black_24dp.xml" value="0.2805128205128205" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/bilimiao-cover/src/main/res/drawable/ic_more_vert_grey_24dp.xml" value="0.2805128205128205" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/bilimiao-cover/src/main/res/layout/activity_cover.xml" value="0.19610507246376813" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/bilimiao-cover/src/main/res/menu/cover.xml" value="0.26875" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/bilimiao-cover/src/main/res/xml/cover_scene.xml" value="0.19610507246376813" />
+        <entry key="..\:/MyCode/AndroidStudioProjects/bilimiao2/player/src/main/res/layout/layout_media_controller.xml" value="0.13069908814589665" />
         <entry key="..\:/MyCode/bilimiao2/app/src/main/res/drawable/button_circle_shape.xml" value="0.13518518518518519" />
         <entry key="..\:/MyCode/bilimiao2/app/src/main/res/drawable/ic_access_time_gray_24dp.xml" value="0.15092592592592594" />
         <entry key="..\:/MyCode/bilimiao2/app/src/main/res/drawable/ic_arrow_back_white_24dp.xml" value="0.15092592592592594" />
