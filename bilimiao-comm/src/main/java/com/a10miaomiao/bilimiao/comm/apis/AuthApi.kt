@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import java.util.*
@@ -25,5 +26,19 @@ class AuthApi {
 //        url += "&sign=" + ApiHelper.getNewSign(url)
 //        return MiaoHttp.getJson(url)
 //    }
+
+    fun oauth2() = MiaoHttp.request {
+        url = BiliApiService.createUrl(
+            "https://passport.bilibili.com/api/oauth2/info"
+        )
+    }
+
+    fun refreshToken(refreshToken: String) = MiaoHttp.request {
+        url = "https://passport.bilibili.com/api/oauth2/refreshToken"
+        formBody = ApiHelper.createParams(
+            "refresh_token" to refreshToken
+        )
+        method = MiaoHttp.POST
+    }
 
 }

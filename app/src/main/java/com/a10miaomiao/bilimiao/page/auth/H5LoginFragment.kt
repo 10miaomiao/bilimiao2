@@ -72,14 +72,19 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
 
     private val mWebViewClient = object : WebViewClient() {
 
-        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            var url = request.url.toString()
+        override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+            DebugMiao.log("WebViewClient", url)
             if (url.contains("access_key=") && url.contains("mid=")) {
                 viewModel.resolveUrl(view, url)
                 return false
             }
 //            return BilibiliRouter.gotoUrl(context!!, url)
             return false
+        }
+
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            var url = request.url.toString()
+            return this.shouldOverrideUrlLoading(view, url)
         }
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -108,7 +113,7 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
 
         override fun onReceivedError(
             view: WebView,
-            request: WebResourceRequest?,
+            request: WebResourceRequest,
             error: WebResourceError?
         ) {
             super.onReceivedError(view, request, error)
