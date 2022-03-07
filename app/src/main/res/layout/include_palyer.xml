@@ -6,7 +6,7 @@
     android:background="#000"
     android:id="@+id/mRoot">
 
-    <com.a10miaomiao.bilimiao.ui.widget.SizeWatcherView
+    <com.a10miaomiao.bilimiao.widget.player.SizeWatcherView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mSizeWatcher"/>
@@ -29,12 +29,12 @@
 
     </cn.a10miaomiao.player.MyMediaController>
 
-    <com.a10miaomiao.bilimiao.ui.widget.MiniMediaController
+    <com.a10miaomiao.bilimiao.widget.player.MiniMediaController
         android:id="@+id/mMiniController"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </com.a10miaomiao.bilimiao.ui.widget.MiniMediaController>
+    </com.a10miaomiao.bilimiao.widget.player.MiniMediaController>
 
 
     <LinearLayout

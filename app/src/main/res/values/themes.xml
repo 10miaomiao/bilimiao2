@@ -1,0 +1,55 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Bilimiao" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/theme_color_primary</item>
+        <item name="colorPrimaryVariant">@color/theme_color_primary_dark</item>
+        <item name="colorOnPrimary">@color/theme_color_primary_trans</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/theme_color_secondary</item>
+        <item name="colorSecondaryVariant">@color/theme_color_secondary</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/white</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <!-- Customize your theme here. -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+
+        <item name="blockBackground">@color/blockBackgroundColor</item>
+        <item name="foregroundColor">@color/foregroundColor</item>
+        <item name="lineColor">@color/lineColor</item>
+        <item name="defaultBackgroundColor">@color/windowBackgroundColor</item>
+
+        <item name="android:windowBackground">@drawable/splash_default</item>
+    </style>
+
+<!--    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">-->
+<!--        <item name="colorPrimary">@color/colorPrimary</item>-->
+<!--        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+<!--        <item name="colorAccent">@color/colorAccent</item>-->
+<!--    </style>-->
+<!--    <style name="AppTheme.NoActionBar" parent="AppTheme">-->
+<!--        <item name="windowActionBar">false</item>-->
+<!--        <item name="windowNoTitle">true</item>-->
+<!--    </style>-->
+    <!--透明activity-->
+    <style name="Theme.TranslucentTheme" parent="Theme.Bilimiao">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="ThemeOverlay_Toolbar" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <!-- color used by navigation icon and overflow icon -->
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSurface">@color/white</item>
+    </style>
+
+
+</resources>

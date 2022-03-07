@@ -3,56 +3,35 @@
     package="com.a10miaomiao.bilimiao">
 
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- 往SDCard写入数据权限 -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <!-- 往SDCard读取数据权限 -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
 
     <application
         android:name=".Bilimiao"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/bilimiao"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
-        <!-- 您从百度网站获取的APP KEY，根据实际您的APP申请的APP_KEY进行修改 -->
-        <meta-data android:name="BaiduMobAd_STAT_ID" android:value="ddd50be117" />
-        <!-- 渠道商编号 -->
-        <meta-data android:name="BaiduMobAd_CHANNEL" android:value="${APP_CHANNEL_VALUE}" />
-        <!-- 是否开启错误日志统计，默认为false -->
-        <meta-data android:name="BaiduMobAd_EXCEPTION_LOG" android:value="true" />
-        <!-- 日志仅在wifi网络下发送，默认为false -->
-        <meta-data android:name="BaiduMobAd_ONLY_WIFI" android:value="false" />
-        <!-- 是否获取基站位置信息 ,默认为true -->
-        <meta-data android:name="BaiduMobAd_CELL_LOCATION" android:value="false" />
-        <!-- 是否获取GPS位置信息，默认为true -->
-        <meta-data android:name="BaiduMobAd_GPS_LOCATION" android:value="false" />
-        <!-- 是否获取WIFI位置信息，默认为true -->
-        <meta-data android:name="BaiduMobAd_WIFI_LOCATION" android:value="false" />
-
-        <activity android:name=".ui.MainActivity"
-            android:resizeableActivity="true"
+        android:theme="@style/Theme.Bilimiao"
+        android:allowNativeHeapPointerTagging="false">
+        <activity
+            android:name=".MainActivity"
             android:supportsPictureInPicture="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
         </activity>
 
-        <activity android:name=".ui.cover.CoverActivity"
-            android:theme="@style/TranslucentTheme"
-            android:label="@string/view_cover">
+        <activity android:name="cn.a10miaomiao.bilimiao.cover.CoverActivity"
+            android:theme="@style/Theme.TranslucentTheme"
+            android:label="@string/view_cover"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -60,25 +39,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.player.PlayerActivity"
-            android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:screenOrientation="fullSensor"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateAlwaysHidden">
-        </activity>
-
-        <activity android:name=".ui.shortcut.RankShortcutActivity"
-            android:theme="@style/AppTheme"/>
-        <activity android:name=".ui.shortcut.SearchShortcutActivity"
-            android:theme="@style/AppTheme"/>
-
-
         <service android:name="cn.a10miaomiao.player.PlayerService"
-            android:exported="true"/>
-        <service android:name="cn.a10miaomiao.download.DownloadService"
             android:exported="true"/>
     </application>
 

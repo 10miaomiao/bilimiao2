@@ -5,12 +5,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v7.view.ContextThemeWrapper;
-import android.support.v7.widget.PopupMenu;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.DisplayCutout;
@@ -23,6 +17,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.appcompat.widget.PopupMenu;
 
 import java.util.Locale;
 
@@ -38,7 +39,7 @@ public class MyMediaController extends FrameLayout implements MediaController
     private boolean mDanmakuShow = true;
     private Fun2<Boolean> danmakuSwitchEvent;
     private Fun videoBackEvent;
-    private Fun qualityEvent;
+    private View.OnClickListener qualityEvent;
     private boolean isLocked = false;
 
     private LinearLayout mHeaderLayout;
@@ -109,9 +110,8 @@ public class MyMediaController extends FrameLayout implements MediaController
                     videoBackEvent.accept();
             }
         });
-        Context darkThemeContext = new ContextThemeWrapper(getContext(), R.style.DarkTheme);
         mMorePopupMenu = new PopupMenu(
-                darkThemeContext,
+                getContext(),
                 mMoreIv
         );
         mMoreIv.setOnClickListener(new OnClickListener() {
@@ -133,8 +133,7 @@ public class MyMediaController extends FrameLayout implements MediaController
             @Override
             public void onClick(View v) {
                 if (qualityEvent != null){
-                    hide();
-                    qualityEvent.accept();
+                    qualityEvent.onClick(v);
                 }
             }
         });
@@ -264,7 +263,7 @@ public class MyMediaController extends FrameLayout implements MediaController
         this.videoBackEvent = videoBackEvent;
     }
 
-    public void setQualityEvent(Fun qualityEvent) {
+    public void setQualityEvent(View.OnClickListener qualityEvent) {
         this.qualityEvent = qualityEvent;
     }
 

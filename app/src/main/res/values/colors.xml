@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FA7199</color>
-    <color name="colorPrimaryDark">#FA7199</color>
-    <color name="colorAccent">#FA7199</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 
     <color name="foregroundColor">#000000</color>
     <color name="windowBackgroundColor">#f2f2f2</color>
@@ -42,6 +46,8 @@
     <color name="text_grey">#9DA0A3</color>
     <color name="divider">#e6e6e6</color>
 
+    <color name="default_shadow_color">#2a000000</color>
+    <color name="default_shadowback_color">#fff</color>
 
     <color name="theme_color_primary">#fb7299</color>
     <color name="theme_color_primary_dark">#b85671</color>

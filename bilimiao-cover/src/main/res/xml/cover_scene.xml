@@ -1,0 +1,87 @@
+<MotionScene
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ConstraintSet android:id="@+id/starting_set">
+
+        <Constraint
+            android:id="@+id/mBackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toBottomOf="parent"
+            android:alpha="0">
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/mContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="parent"/>
+
+    </ConstraintSet >
+
+    <ConstraintSet  android:id="@+id/ending_set" >
+
+        <Constraint
+            android:id="@+id/mBackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:alpha="0.6">
+            <!--<CustomAttribute-->
+            <!--app:attributeName="android:background"-->
+            <!--app:customColorValue="#66000000" />-->
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/mContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </ConstraintSet >
+
+    <ConstraintSet  android:id="@+id/end_set" >
+
+        <Constraint
+            android:id="@+id/mContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+        <Constraint
+            android:id="@+id/mBackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="#66000000">
+            <!--<CustomAttribute-->
+            <!--app:attributeName="android:background"-->
+            <!--app:customColorValue="#66000000" />-->
+        </Constraint>
+
+    </ConstraintSet >
+
+    <!--<Transition-->
+    <!--android:id="@+id/my_transition2"-->
+    <!--app:constraintSetStart="@+id/ending_set"-->
+    <!--app:constraintSetEnd="@+id/end_set"-->
+    <!--app:duration="300">-->
+    <!--<OnSwipe-->
+    <!--app:touchAnchorId="@+id/mContainer"-->
+    <!--app:dragDirection="dragUp"/>-->
+    <!--</Transition>-->
+
+    <Transition
+        android:id="@+id/my_transition"
+        app:constraintSetStart="@+id/starting_set"
+        app:constraintSetEnd="@+id/ending_set"
+        app:duration="300">
+
+        <OnSwipe
+            app:touchAnchorId="@+id/mContainer"
+            app:dragDirection="dragUp"/>
+    </Transition>
+
+
+
+</MotionScene>

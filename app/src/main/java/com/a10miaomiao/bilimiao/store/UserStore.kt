@@ -1,48 +1,56 @@
 package com.a10miaomiao.bilimiao.store
 
-import android.arch.lifecycle.ViewModel
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.Bilimiao
-import com.a10miaomiao.bilimiao.entity.UserInfo
-import com.a10miaomiao.bilimiao.netword.ApiHelper
-import com.a10miaomiao.bilimiao.netword.LoginHelper
-import com.a10miaomiao.bilimiao.netword.MiaoHttp
-import com.a10miaomiao.bilimiao.utils.DebugMiao
-import com.a10miaomiao.miaoandriod.MiaoLiveData
-import com.a10miaomiao.miaoandriod.MiaoObserver
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.apis.AuthApi
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.store.base.BaseStore
 import com.google.gson.Gson
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
-import org.jetbrains.anko.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import org.kodein.di.DI
+import org.kodein.di.instance
+import splitties.toast.toast
 import java.io.File
 
-class UserStore(
-        val context: Context
-) : ViewModel() {
+class UserStore(override val di: DI) :
+    ViewModel(), BaseStore<UserStore.State> {
 
-    private val _user = MiaoLiveData<UserInfo?>(null)
-    val user get() = _user.value
+    data class State (
+        var info: UserInfo? = null
+    )
 
-    init {
-        val userInfo = readUserInfo()
-        if (userInfo != null)
-            setUserInfo(userInfo)
+    override val stateFlow = MutableStateFlow(State())
+    override fun copyState() = state.copy()
+
+    private val activity: AppCompatActivity by instance()
+
+    override fun init(context: Context) {
+        super.init(context)
+        if (BilimiaoCommApp.commApp.loginInfo != null)  {
+            readUserInfo()
+            loadInfo()
+        }
     }
 
-    val observer = _user.observe()
-    val observeNotNull = _user.observeNotNull() as MiaoObserver<UserInfo>
-
-    private var loadInfoDisposable: Disposable? = null
-
     fun setUserInfo(userInfo: UserInfo?) {
-        _user set userInfo
+        setState {
+            info = userInfo
+        }
         seveUserInfo(userInfo)
-        loadInfo()
     }
 
     private fun seveUserInfo(userInfo: UserInfo?) {
-        val file = File(context.filesDir.path + "/user.data")
+        val file = File(activity.filesDir.path + "/user.data")
         if (userInfo != null) {
             val jsonStr = Gson().toJson(userInfo)
             file.writeText(jsonStr)
@@ -53,38 +61,38 @@ class UserStore(
 
     private fun readUserInfo(): UserInfo? {
         return try {
-            val file = File(context.filesDir.path + "/user.data")
-            val jsonStr = file.readText()
-            Gson().fromJson(jsonStr, UserInfo::class.java)
+            val file = File(activity.filesDir.path + "/user.data")
+            if (file.exists()) {
+                val jsonStr = file.readText()
+                Gson().fromJson(jsonStr, UserInfo::class.java)
+            } else {
+                null
+            }
         } catch (e: Exception) {
             null
         }
     }
 
-    private fun loadInfo() {
-        loadInfoDisposable = Bilimiao.app.loginInfo?.let { loginInfo ->
-            val accessToken = loginInfo.token_info.access_token
-            LoginHelper.authInfo(accessToken)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-        }?.subscribe({
-            if (it.code == 0) {
-                _user set it.data
-                seveUserInfo(it.data)
+    private fun loadInfo() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+//            Bilimiao.app.loginInfo?
+            val res = AuthApi().account().call().gson<ResultInfo<UserInfo>>()
+            if (res.code == 0) {
+                setState {
+                    info = res.data
+                }
+                seveUserInfo(res.data)
             } else {
-                context.toast("登录失效，请重新登录")
+                activity.toast("登录失效，请重新登录")
             }
-        }, {
-            context.toast("无法连接到御坂网络")
-            it.printStackTrace()
-        })
+        } catch (e: Exception) {
+            activity.toast("无法连接到御坂网络")
+            e.printStackTrace()
+        }
     }
 
-    fun isSelf(mid: Long) = user != null && user!!.mid == mid
+    fun isSelf(mid: String) = state.info?.mid == mid.toLong()
 
-    override fun onCleared() {
-        super.onCleared()
-        loadInfoDisposable?.dispose()
-    }
+    fun isLogin() = state.info != null
 
 }

@@ -1,49 +1,36 @@
 package com.a10miaomiao.bilimiao.store
 
-import android.arch.lifecycle.ViewModel
-import android.content.Context
-import com.a10miaomiao.bilimiao.utils.ConstantUtil
-import com.a10miaomiao.miaoandriod.MiaoLiveData
+import androidx.core.graphics.Insets
+import androidx.lifecycle.ViewModel
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.store.base.BaseStore
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.kodein.di.DI
 
-class PlayerStore(
-        val context: Context
-) : ViewModel() {
+class PlayerStore(override val di: DI) :
+    ViewModel(), BaseStore<PlayerStore.State> {
 
-    private val _info = MiaoLiveData(PlayerInfo())
+    data class State (
+        var info: PlayerSourceInfo = PlayerSourceInfo()
+    )
 
-    val info get() = -_info
+    override val stateFlow = MutableStateFlow(State())
+    override fun copyState() = state.copy()
 
-    fun observe() = _info.observe()
-
-    fun setBangumiPlayerInfo(sid: String, epid: String, cid: String, title: String) {
-        _info set PlayerInfo(
-                type = ConstantUtil.BANGUMI,
-                sid = sid,
-                epid = epid,
-                cid = cid,
-                title = title
-        )
+    fun setPlayerInfo(info: PlayerSourceInfo) {
+        DebugMiao.log("setPlayerInfo", info.cid)
+        this.setState {
+            this.info = info
+        }
     }
 
-    fun setVideoPlayerInfo(aid: String, cid: String, title: String) {
-        _info set PlayerInfo(
-                type = ConstantUtil.VIDEO,
-                aid = aid,
-                cid = cid,
-                title = title
-        )
-    }
 
     fun clearPlayerInfo() {
-        _info set PlayerInfo()
+        DebugMiao.log("clearPlayerInfo")
+        this.setState {
+            this.info = PlayerSourceInfo()
+        }
     }
 
-    data class PlayerInfo(
-            var type: String = "",
-            var aid: String = "",
-            var cid: String = "",
-            var epid: String = "",
-            var sid: String = "",
-            var title: String = ""
-    )
 }

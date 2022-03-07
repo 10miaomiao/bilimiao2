@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Theme">
+        <attr name="blockBackground" format="color" />
+        <attr name="defaultBackgroundColor" format="color" />
+        <attr name="foregroundColor" format="color" />
+        <attr name="lineColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="ExpandableTextView">
+        <attr format="integer" name="ep_max_line"/>
+        <attr format="boolean" name="ep_need_expand"/>
+        <attr format="boolean" name="ep_need_contract"/>
+        <attr format="boolean" name="ep_need_mention"/>
+        <attr format="boolean" name="ep_need_link"/>
+        <attr format="boolean" name="ep_need_animation"/>
+        <attr format="boolean" name="ep_need_always_showright"/>
+        <attr format="boolean" name="ep_need_convert_url"/>
+        <attr format="boolean" name="ep_need_self"/>
+        <attr format="string" name="ep_contract_text"/>
+        <attr format="string" name="ep_expand_text"/>
+        <attr format="color" name="ep_expand_color"/>
+        <attr format="color" name="ep_contract_color"/>
+        <attr format="color" name="ep_end_color"/>
+        <attr format="color" name="ep_link_color"/>
+        <attr format="color" name="ep_mention_color"/>
+        <attr format="color" name="ep_self_color"/>
+        <attr format="reference" name="ep_link_res"/>
+    </declare-styleable>
+</resources>

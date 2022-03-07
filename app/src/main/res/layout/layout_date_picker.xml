@@ -6,7 +6,7 @@
     android:gravity="center"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.a10miaomiao.bilimiao.ui.widget.PickerView
+    <com.a10miaomiao.bilimiao.widget.picker.PickerView
         android:id="@+id/mYearPicker"
         android:layout_width="96dp"
         android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
         app:npv_TextColorNormal="?attr/foregroundColor"
         app:npv_HintText="年"/>
 
-    <com.a10miaomiao.bilimiao.ui.widget.PickerView
+    <com.a10miaomiao.bilimiao.widget.picker.PickerView
         android:layout_marginLeft="10dp"
         android:id="@+id/mMonthPicker"
         android:layout_width="72dp"
@@ -44,7 +44,7 @@
         app:npv_TextColorNormal="?attr/foregroundColor"
         app:npv_HintText="月"/>
 
-    <com.a10miaomiao.bilimiao.ui.widget.PickerView
+    <com.a10miaomiao.bilimiao.widget.picker.PickerView
         android:layout_marginLeft="10dp"
         android:id="@+id/mDatePicker"
         android:layout_width="72dp"
