@@ -20,6 +20,7 @@ import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.page.user.UserArchiveListFragment
+import com.a10miaomiao.bilimiao.page.user.UserFollowFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
@@ -152,6 +153,20 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val userFollow = f<UserFollowFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.type) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.name) {
+                type = NavType.StringType
+                defaultValue = "Ta"
+            }
+        }
     }
 
     object action {
@@ -187,12 +202,15 @@ object MainNavGraph {
         val user_to_userArchiveList = dest.user to dest.userArchiveList
         val user_to_userFavouriteList = dest.user to dest.userFavouriteList
         val user_to_userFavouriteDetail = dest.user to dest.userFavouriteDetail
+        val user_to_userFollow = dest.user to dest.userFollow
 
         val userArchiveList_to_videoInfo = dest.userArchiveList to dest.videoInfo
 
         val userFavouriteList_to_userFavouriteDetail = dest.userFavouriteList to dest.userFavouriteDetail
 
         val userFavouriteDetail_to_videoInfo = dest.userFavouriteDetail to dest.videoInfo
+
+        val userFollow_to_user = dest.userFollow to dest.user
 
         val history_to_videoInfo = dest.history to dest.videoInfo
     }

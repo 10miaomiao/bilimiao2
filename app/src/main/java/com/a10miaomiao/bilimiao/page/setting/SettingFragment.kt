@@ -21,19 +21,28 @@ import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import de.Maxr1998.modernpreferences.Preference
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
+import splitties.toast.toast
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import java.io.BufferedReader
+import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
 
 class SettingFragment : Fragment(), DIAware, MyPage {
 
@@ -63,6 +72,48 @@ class SettingFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private fun createPreferenceClick(setting: MiaoSettingInfo): Preference.OnClickListener {
+        return Preference.OnClickListener { _, _ ->
+            val intent = Intent(Intent.ACTION_VIEW)
+            //HTTPS://QR.ALIPAY.COM/FKX07587MLQPOBBKACENE1
+            try {
+                intent.data = Uri.parse(setting.url)
+                startActivity(intent)
+            } catch (e: Exception) {
+                if (setting.backupUrl != null) {
+                    intent.data = Uri.parse(setting.backupUrl)
+                    startActivity(intent)
+                }
+            }
+            true
+        }
+    }
+
+    private fun readSettingList(): List<MiaoSettingInfo> {
+        try {
+            val file = File(requireContext().filesDir, "settingList.json")
+            if (!file.exists()) {
+                return listOf()
+            }
+            val inputStream = requireContext().openFileInput("settingList.json")
+            val br = BufferedReader(InputStreamReader(inputStream))
+            val stringBuilder = StringBuilder()
+            var str: String? = br.readLine()
+            while (str != null) {
+                stringBuilder.append(str)
+                str = br.readLine()
+            }
+            val jsonStr = stringBuilder.toString()
+            return Gson().fromJson(
+                jsonStr,
+                object : TypeToken<List<MiaoSettingInfo>>() {}.type,
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return listOf()
+        }
+    }
+
     val ui = miaoBindingUi {
         val insets = windowStore.getContentInsets(parentView)
         frameLayout {
@@ -79,13 +130,6 @@ class SettingFragment : Fragment(), DIAware, MyPage {
                     miaoEffect(null, {
                         adapter = mAdapter
                     })
-//                    _miaoAdapter()
-//
-//                    preferencesView = binding.recyclerView.apply {
-//                        layoutManager = this@BaseActivity.layoutManager
-//                        adapter = preferencesAdapter
-//                        layoutAnimation = AnimationUtils.loadLayoutAnimation(this@BaseActivity, R.anim.preference_layout_fall_down)
-//                    }
                 }..lParams(matchParent, matchParent)
             }
         }
@@ -140,6 +184,15 @@ class SettingFragment : Fragment(), DIAware, MyPage {
             }
         }
 
+        pref("filter") {
+            title = "屏蔽管理"
+            summary = "只对时光机生效"
+            onClick {
+                toast("重新装修中")
+                true
+            }
+        }
+
         categoryHeader("other") {
             title = "其它"
         }
@@ -157,35 +210,15 @@ class SettingFragment : Fragment(), DIAware, MyPage {
             }
         }
 
-        pref("donate") {
-            title = "捐助"
-            summary = "我在这里哦。"
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW)
-                //HTTPS://QR.ALIPAY.COM/FKX07587MLQPOBBKACENE1
-                try {
-                    intent.data = Uri.parse("alipayqr://platformapi/startapp?saId=10000007&qrcode=https://qr.alipay.com/FKX07587MLQPOBBKACENE1")
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    intent.data = Uri.parse("https://qr.alipay.com/FKX07587MLQPOBBKACENE1")
-                    startActivity(intent)
+        readSettingList().forEach {
+            if (it.type == "pref") {
+                pref(it.name) {
+                    title = it.title
+                    summary = it.summary
+                    clickListener = createPreferenceClick(it)
                 }
-                true
-            }
-
-        }
-
-        pref("help") {
-            title = "帮助"
-            summary = "世界太大，只能不停寻找"
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse("https://10miaomiao.cn/bilimiao/help.html")
-                startActivity(intent)
-                true
             }
         }
-
 
     }
 

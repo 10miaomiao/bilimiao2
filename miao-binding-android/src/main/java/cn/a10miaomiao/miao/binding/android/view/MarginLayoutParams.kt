@@ -5,7 +5,17 @@ import android.view.ViewGroup
 import androidx.annotation.Px
 import cn.a10miaomiao.miao.binding.miaoEffect
 
+inline var ViewGroup.MarginLayoutParams._height: Int
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(@Px value) = miaoEffect(value) {
+        height = value
+    }
 
+inline var ViewGroup.MarginLayoutParams._width: Int
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(@Px value) = miaoEffect(value) {
+        width = value
+    }
 inline var ViewGroup.MarginLayoutParams._margin: Int
     @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
     set(@Px value) = miaoEffect(value) {

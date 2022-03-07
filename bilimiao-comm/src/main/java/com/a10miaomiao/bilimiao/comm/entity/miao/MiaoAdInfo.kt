@@ -10,7 +10,8 @@ data class MiaoAdInfo (
 ){
     data class DataBean(
         var ad: AdBean,
-        var version: VersionBean
+        var version: VersionBean,
+        var settingList: List<MiaoSettingInfo>
     )
     data class AdBean(
         var isShow: Boolean,
