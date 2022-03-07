@@ -91,7 +91,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         .navigate(MainNavGraph.action.user_to_userArchiveList, args)
                 }
                 "season" -> {
-
+                    toast("重新装修中")
                 }
                 "favourite" -> {
                     val args = bundleOf(
@@ -102,10 +102,22 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         .navigate(MainNavGraph.action.user_to_userFavouriteList, args)
                 }
                 "attention" -> {
-
+                    val args = bundleOf(
+                        MainNavGraph.args.id to viewModel.id,
+                        MainNavGraph.args.name to info.card.name,
+                        MainNavGraph.args.type to "follow",
+                    )
+                    Navigation.findNavController(it)
+                        .navigate(MainNavGraph.action.user_to_userFollow, args)
                 }
                 "fans" -> {
-
+                    val args = bundleOf(
+                        MainNavGraph.args.id to viewModel.id,
+                        MainNavGraph.args.name to info.card.name,
+                        MainNavGraph.args.type to "fans",
+                    )
+                    Navigation.findNavController(it)
+                        .navigate(MainNavGraph.action.user_to_userFollow, args)
                 }
             }
         }
@@ -115,6 +127,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
         val item = adapter.data[position]
         if (item != null) {
             when (item) {
+                // 跳转视频
                 is SpaceInfo.ArchiveItem -> {
                     val args = bundleOf(
                         MainNavGraph.args.id to item.param
@@ -122,13 +135,18 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     Navigation.findNavController(view)
                         .navigate(MainNavGraph.action.user_to_videoInfo, args)
                 }
+                // 跳转收藏详情
                 is SpaceInfo.FavouriteItem -> {
                     val args = bundleOf(
-                        MainNavGraph.args.id to item.media_id,
-                        MainNavGraph.args.id to item.name
+                        MainNavGraph.args.id to item.media_id.toString(),
+                        MainNavGraph.args.name to item.name
                     )
                     Navigation.findNavController(view)
                         .navigate(MainNavGraph.action.user_to_userFavouriteDetail, args)
+                }
+                // 跳转番剧
+                is SpaceInfo.SeasonItem -> {
+                    toast("重新装修中")
                 }
             }
         }

@@ -33,7 +33,6 @@ class UserViewModel(
 
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
 
-    var scrollY = 0
     var loading = false
     var dataInfo: SpaceInfo? = null
     var channelList = listOf<UpperChannelInfo>()
@@ -77,10 +76,6 @@ class UserViewModel(
                 loading = false
             }
         }
-    }
-
-    val handleScrollChange = NestedScrollView.OnScrollChangeListener { _, x, y, ox, oy ->
-        scrollY = y
     }
 
 }
