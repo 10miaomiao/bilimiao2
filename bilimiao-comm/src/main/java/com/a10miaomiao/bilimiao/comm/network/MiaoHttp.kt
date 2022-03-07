@@ -18,7 +18,7 @@ class MiaoHttp(var url: String? = null) {
     var client = OkHttpClient()
     val requestBuilder = Request.Builder()
     var headers = mapOf<String, String>()
-    var method = "GET"
+    var method = GET
 
     var body: RequestBody? = null
     var formBody: Map<String, String?>? = null
@@ -66,12 +66,12 @@ class MiaoHttp(var url: String? = null) {
     }
 
     fun get(): Response {
-        method = "GET"
+        method = GET
         return call()
     }
 
     fun post(): Response {
-        method = "POST"
+        method = POST
         return call()
     }
 
@@ -99,6 +99,9 @@ class MiaoHttp(var url: String? = null) {
             val jsonStr = this.body()!!.string()
             return Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
         }
+
+        const val GET = "GET"
+        const val POST = "POST"
 
     }
 }

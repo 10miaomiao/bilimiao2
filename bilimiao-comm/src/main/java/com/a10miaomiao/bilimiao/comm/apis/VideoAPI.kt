@@ -44,24 +44,19 @@ class VideoAPI {
     fun commentReplyList(
         oid: String,
         rpid: String,
-        minId: String?,
+        pageNum: Int,
         pageSize: Int
     ) = MiaoHttp.request {
-        url = "https://api.bilibili.com/x/v2/reply/reply/cursor?appkey=1d8b6e7d45233436&build=5390000&channel=bilibili197&mobi_app=android&oid=$oid&plat=2&platform=android&root=$rpid&size=$pageSize&sort=0&ts=${ApiHelper.getTimeSpen()}&type=1"
-//        if (minId > 1)
-//            url += "&min_id=" + (min_id + 1)
-        url += "&sign=" + ApiHelper.getNewSign(url!!)
-//        url = BiliApiService.biliApi(
-//            "x/v2/reply/reply/cursor",
-//            "oid" to oid,
-//            "plat" to "2",
-//            "root" to rpid,
-//            "sort" to "0",
-//            "type" to "1",
-//            "min_id" to minId,
-////            "pn" to pageNum.toString(),
-//            "size" to pageSize.toString(),
-//        )
+        url = BiliApiService.biliApi(
+            "x/v2/reply/reply",
+            "oid" to oid,
+            "plat" to "2",
+            "root" to rpid,
+            "sort" to "0",
+            "type" to "1",
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+        )
     }
 
     /**
