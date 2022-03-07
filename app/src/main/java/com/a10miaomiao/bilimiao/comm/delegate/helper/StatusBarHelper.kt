@@ -39,4 +39,15 @@ class StatusBarHelper(
         activity.window.decorView.systemUiVisibility = uiFlags
     }
 
+    fun getStatusBarHeight (): Int {
+        var statusBarHeight = 0
+        //获取status_bar_height资源的ID
+        val resourceId: Int = activity.resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            //根据资源ID获取响应的尺寸值
+            statusBarHeight = activity.resources.getDimensionPixelSize(resourceId)
+        }
+        return statusBarHeight
+    }
+
 }

@@ -18,9 +18,7 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import cn.a10miaomiao.miao.binding.android.view._isEnabled
-import cn.a10miaomiao.miao.binding.android.view._show
-import cn.a10miaomiao.miao.binding.android.view._topPadding
+import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -35,10 +33,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
-import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
-import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
-import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
@@ -47,6 +42,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.region.RankOrderPopupMenu
+import com.a10miaomiao.bilimiao.page.video.comment.SortOrderPopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -69,6 +65,7 @@ import splitties.dimensions.dip
 import splitties.toast.toast
 import splitties.views.*
 import splitties.views.dsl.core.*
+import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.properties.Delegates
 
@@ -147,6 +144,12 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         when (view.prop.key) {
             0 -> {
                 // 更多
+                val pm = VideoMorePopupMenu(
+                    activity = requireActivity(),
+                    anchor = view,
+                    viewModel = viewModel
+                )
+                pm.show()
             }
             1 -> {
                 // 评论
@@ -513,11 +516,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
 
     fun MiaoUI.headerView(): View {
         val videoInfo = viewModel.info
-        val contentInsets = windowStore.state.contentInsets
         return verticalLayout {
-            padding = dip(10)
-            _topPadding = dip(10) + contentInsets.top
-
             views {
                 +horizontalLayout {
                     views {
@@ -640,6 +639,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        val contentInsets = windowStore.getContentInsets(parentView)
         val info = viewModel.info
         // 监听info改变，修改页面标题
         miaoEffect(listOf(info, info?.req_user, info?.staff)) {
@@ -648,23 +648,31 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         verticalLayout {
             views {
                 +recyclerView {
+                    _leftPadding = contentInsets.left
+                    _rightPadding = contentInsets.right
                     backgroundColor = config.windowBackgroundColor
                     _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
 
-                    val haderView = headerView()
-                    haderView..lParams(matchParent, wrapContent)
-
-                    _miaoAdapter(
+                    val mAdapter = _miaoAdapter(
                         items = viewModel.relates,
                         itemUi = relateItemUi,
                     ) {
                         setOnItemClickListener(handleRelateItemClick)
-//                        loadMoreModule.setOnLoadMoreListener {
-//                            viewModel.loadMode()
-//                        }
-                        addHeaderView(haderView)
+                    }
+
+                    headerViews(mAdapter) {
+                        +headerView().apply {
+                            horizontalPadding = config.pagePadding
+                            _topPadding = contentInsets.top + config.pagePadding
+                        }..lParams(matchParent, wrapContent)
+                    }
+                    footerViews(mAdapter) {
+                        +frameLayout {
+                        }..lParams {
+                            _height = contentInsets.bottom
+                        }
                     }
                 }.wrapInSwipeRefreshLayout {
                     setColorSchemeResources(config.themeColorResource)

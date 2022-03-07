@@ -13,9 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
-import cn.a10miaomiao.miao.binding.android.view._bottomPadding
-import cn.a10miaomiao.miao.binding.android.view._show
-import cn.a10miaomiao.miao.binding.android.view._topPadding
+import cn.a10miaomiao.miao.binding.android.view.*
 
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -348,7 +346,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
         verticalLayout {
             layoutParams = lParams(matchParent, matchParent)
             backgroundColor = config.windowBackgroundColor
-            horizontalPadding = config.pagePadding
+            _leftPadding = contentInsets.left + config.pagePadding
+            _rightPadding = contentInsets.right + config.pagePadding
             _topPadding = contentInsets.top + config.pagePadding
             _bottomPadding = contentInsets.bottom
 

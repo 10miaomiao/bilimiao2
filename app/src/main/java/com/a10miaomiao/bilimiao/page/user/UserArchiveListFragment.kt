@@ -43,7 +43,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 class UserArchiveListFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
-        title = "投稿列表"
+        title = "${viewModel.name}\n的\n投稿列表"
 
     }
 

@@ -31,6 +31,7 @@ class UserArchiveListViewModel(
     val userStore: UserStore by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    val name by lazy { fragment.requireArguments().getString(MainNavGraph.args.name) }
 
     var triggered = false
     var list = PaginationInfo<SubmitVideosInfo.DataBean>()

@@ -16,6 +16,8 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.viewpager.widget.ViewPager
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
@@ -25,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainViewModel
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -144,9 +147,13 @@ class RegionFragment : Fragment(), DIAware , MyPage {
             views {
                 +tabLayout(234) {
                     _topPadding = contentInsets.top
+                    _leftPadding = contentInsets.left
+                    _rightPadding = contentInsets.right
                     mTabLayout = this
                 }..lParams(matchParent, wrapContent)
                 +viewPager(233) {
+                    _leftPadding = contentInsets.left
+                    _rightPadding = contentInsets.right
                     mViewPager = this
                 }..lParams(matchParent, matchParent) {
                     weight = 1f

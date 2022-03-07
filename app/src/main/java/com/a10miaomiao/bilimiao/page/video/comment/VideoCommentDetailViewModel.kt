@@ -34,7 +34,7 @@ class VideoCommentDetailViewModel(
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
     val reply by lazy { fragment.requireArguments().getParcelable<VideoCommentReplyInfo>("reply")!! }
 
-    private var maxid: String? = null
+    // 0：按时间，1：按点赞数，2：按回复数
     var sortOrder = 2
 
     var triggered = false
@@ -45,7 +45,7 @@ class VideoCommentDetailViewModel(
     }
 
     private fun loadData(
-        minId: String? = null,
+        pageNum: Int = list.pageNum
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
             ui.setState {
@@ -55,24 +55,23 @@ class VideoCommentDetailViewModel(
                 .commentReplyList(
                     oid = reply.oid,
                     rpid = reply.rpid_str,
-                    minId = minId,
+                    pageNum = pageNum,
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo<VideoCommentReplyCursorInfo>>()
+                .gson<ResultInfo<VideoCommentInfo>>()
             DebugMiao.log(res)
             if (res.code == 0) {
-                val result = res.data.root.replies
+                val result = res.data.replies
                 if (result.size < list.pageSize) {
                     ui.setState { list.finished = true }
                 }
                 ui.setState {
-                    if (minId == null) {
+                    if (pageNum == 1) {
                         list.data = arrayListOf()
                     }
                     list.data.addAll(result)
                 }
-                maxid = res.data.cursor.max_id.toString()
             } else {
                 context.toast(res.message)
                 throw Exception(res.message)
@@ -95,20 +94,20 @@ class VideoCommentDetailViewModel(
     }
 
     fun loadMode () {
-        val (loading, finished) = this.list
+        val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
-            loadData(maxid.toString())
+            loadData(pageNum = pageNum + 1)
         }
     }
 
     fun refreshList() {
         ui.setState {
-            maxid = null
             list = PaginationInfo()
             triggered = true
             loadData()
         }
     }
+
 
 
 }

@@ -1,8 +1,11 @@
 package com.a10miaomiao.bilimiao
 
 import android.content.res.Configuration
+import android.graphics.Point
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -20,6 +23,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
@@ -30,6 +34,11 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import splitties.experimental.InternalSplittiesApi
+import android.R.attr.right
+import androidx.lifecycle.lifecycleScope
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MainActivity
@@ -81,6 +90,8 @@ class MainActivity
                 statusBarHelper.isLightStatusBar = !it
                 setWindowInsets(ui.root.rootWindowInsets)
             }
+        } else {
+            setWindowInsetsAndroidL()
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -106,6 +117,14 @@ class MainActivity
         }
 
         userStore.init(this)
+
+//        lifecycleScope.launch(Dispatchers.IO){
+//            val refreshToken = Bilimiao.commApp.loginInfo!!.token_info.refresh_token
+//            DebugMiao.log(Bilimiao.commApp.loginInfo)
+//            val res = BiliApiService.authApi.refreshToken(refreshToken).awaitCall()
+//            DebugMiao.log("oauth2", res.body()?.string())
+//        }
+
     }
 
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
@@ -135,11 +154,25 @@ class MainActivity
         navController.popBackStack()
     }
 
+    fun setWindowInsetsAndroidL() {
+        val rectangle = Rect()
+        val displayMetrics = DisplayMetrics()
+        window.decorView.getWindowVisibleDisplayFrame(rectangle)
+        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+        val top = statusBarHelper.getStatusBarHeight()
+        val bottom = displayMetrics.heightPixels - rectangle.bottom - rectangle.top
+        val right = displayMetrics.widthPixels - rectangle.right
+        DebugMiao.log(0, top, right, bottom)
+        setWindowInsets(0, top, right, bottom)
+    }
     fun setWindowInsets (insets: WindowInsets) {
         val left = insets.systemWindowInsetLeft
         val top = insets.systemWindowInsetTop
         val right = insets.stableInsetRight
         val bottom = insets.systemWindowInsetBottom
+        setWindowInsets(left, top, right, bottom)
+    }
+    fun setWindowInsets (left: Int, top: Int, right: Int, bottom: Int) {
         windowStore.setWindowInsets(
             left, top, right, bottom,
         )
@@ -169,7 +202,6 @@ class MainActivity
                 0, 0, right, 0
             )
         }
-
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -216,10 +248,12 @@ class MainActivity
         }
     }
 
-    @InternalSplittiesApi
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         ui.root.orientation = newConfig.orientation
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            setWindowInsetsAndroidL()
+        }
     }
 
     override fun onBackPressed() {

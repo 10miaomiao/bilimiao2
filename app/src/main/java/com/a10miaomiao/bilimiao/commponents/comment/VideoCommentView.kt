@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.commponents.comment
 import android.graphics.Color
 import android.text.Spannable
 import android.view.View
+import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
@@ -130,6 +131,7 @@ fun MiaoUI.videoCommentView(
                                 setTextColor(Color.parseColor("#99a2aa"))
                                 textSize = 12f
 
+                                _show = floor != 0
                                 _text = "#${floor}"
                             }
                         }

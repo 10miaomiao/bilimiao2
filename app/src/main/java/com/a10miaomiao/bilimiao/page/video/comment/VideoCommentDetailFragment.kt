@@ -20,9 +20,7 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
-import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
-import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
@@ -145,47 +143,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 LinearLayoutManager(requireContext())
             )
 
-            val headerView = verticalLayout {
-                _topPadding = contentInsets.top
-                backgroundColor = config.blockBackgroundColor
-                views {
-                    val reply = viewModel.reply
-                    +videoCommentView(
-                        mid = reply.member.mid,
-                        uname = reply.member.uname,
-                        avatar = reply.member.avatar,
-                        time = NumberUtil.converCTime(reply.ctime),
-                        floor = reply.floor,
-                        content = reply.content,
-                        like = reply.like,
-                        count = reply.count,
-                        onUpperClick = handleUserClick,
-                        onLinkClick = handleLinkClickListener,
-                    )..lParams(matchParent, matchParent) {
-                        topMargin = config.dividerSize
-                    }
-
-                    +textView {
-                        text = "全部回复"
-                    }..lParams {
-                        margin = config.dividerSize
-                    }
-                }
-            }
-            val footerView = listStateView(
-                when {
-                    viewModel.triggered -> ListState.NORMAL
-                    viewModel.list.loading -> ListState.LOADING
-                    viewModel.list.fail -> ListState.FAIL
-                    viewModel.list.finished -> ListState.NOMORE
-                    else -> ListState.NORMAL
-                }
-            ) {
-                _bottomPadding = contentInsets.bottom
-            }
-            footerView.layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-
-            _miaoAdapter(
+            val mAdapter = _miaoAdapter(
                 items = viewModel.list.data,
                 itemUi = itemUi,
             ) {
@@ -194,8 +152,44 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 loadMoreModule.setOnLoadMoreListener {
                     viewModel.loadMode()
                 }
-                addHeaderView(headerView)
-                addFooterView(footerView)
+            }
+
+            headerViews(mAdapter) {
+                val reply = viewModel.reply
+                +videoCommentView(
+                    mid = reply.member.mid,
+                    uname = reply.member.uname,
+                    avatar = reply.member.avatar,
+                    time = NumberUtil.converCTime(reply.ctime),
+                    floor = reply.floor,
+                    content = reply.content,
+                    like = reply.like,
+                    count = reply.count,
+                    onUpperClick = handleUserClick,
+                    onLinkClick = handleLinkClickListener,
+                ).apply {
+                    _topPadding = contentInsets.top + config.dividerSize
+                    backgroundColor = config.blockBackgroundColor
+                }..lParams(matchParent, matchParent)
+                +textView {
+                    text = "全部回复"
+                }..lParams {
+                    margin = config.dividerSize
+                }
+            }
+
+            footerViews(mAdapter) {
+                +listStateView(
+                    when {
+                        viewModel.triggered -> ListState.NORMAL
+                        viewModel.list.loading -> ListState.LOADING
+                        viewModel.list.fail -> ListState.FAIL
+                        viewModel.list.finished -> ListState.NOMORE
+                        else -> ListState.NORMAL
+                    }
+                ) {
+                    _bottomPadding = contentInsets.bottom
+                }..lParams(matchParent, wrapContent)
             }
         }.wrapInSwipeRefreshLayout {
             setColorSchemeResources(config.themeColorResource)

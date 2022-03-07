@@ -15,10 +15,24 @@ abstract class MiaoBindingUi() : MiaoUI() {
 
     @PublishedApi internal val binding = MiaoBinding()
 
+    private var cechView: View? = null
+
     override val root: View
-        get() = binding.start<View>(MiaoBinding.INIT) {
-            miao { createView() }
+        get() = if (cechView == null) {
+            binding.start<View>(MiaoBinding.INIT) {
+                miao {
+                    val view = createView()
+                    cechView = view
+                    view
+                }
+            }
+        } else {
+            binding.start(MiaoBinding.UPDATE) {
+                createView()
+            }
+            cechView!!
         }
+
 
     abstract fun createView (): View
 

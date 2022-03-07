@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
+import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.UserStore
@@ -65,7 +66,7 @@ class MainViewModel(
         }
     }
 
-    fun getTimeText (): String {
+    fun getTimeText(): String {
         val state = timeSettingStore.state
         return state.timeFrom.getValue("-") + " 至 " + state.timeTo.getValue("-")
     }
@@ -77,7 +78,7 @@ class MainViewModel(
         }
         isBestRegion = isBestRegionNow
         // 加载分区列表
-        viewModelScope.launch(Dispatchers.IO){
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val jsonStr = readRegionJson()!!
                 val result = Gson().fromJson<ResultListInfo<RegionInfo>>(
@@ -99,7 +100,7 @@ class MainViewModel(
         }
     }
 
-    fun getRegionsByNetword () = viewModelScope.launch(Dispatchers.IO){
+    fun getRegionsByNetword() = viewModelScope.launch(Dispatchers.IO) {
         try {
             val res = BiliApiService.regionAPI
                 .regions()
@@ -164,7 +165,7 @@ class MainViewModel(
     /**
      * 加载广告信息
      */
-    private fun loadAdData() = viewModelScope.launch(Dispatchers.IO){
+    private fun loadAdData() = viewModelScope.launch(Dispatchers.IO) {
         try {
             val manager = context.packageManager
             val info = manager.getPackageInfo(context.packageName, 0)
@@ -180,6 +181,7 @@ class MainViewModel(
                     adInfo = res.data.ad
                 }
                 withContext(Dispatchers.Main) {
+                    saveSettingList(res.data.settingList)
                     showUpdateDialog(res.data.version, longVersionCode)
                 }
             }
@@ -227,6 +229,17 @@ class MainViewModel(
         }
     }
 
+    fun saveSettingList(settingList: List<MiaoSettingInfo>) {
+        try {
+            val jsonStr = Gson().toJson(settingList)
+            val outputStream = context.openFileOutput("settingList.json", Context.MODE_PRIVATE);
+            outputStream.write(jsonStr.toByteArray());
+            outputStream.close();
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
     /**
      * 随机标题
      */
@@ -235,7 +248,8 @@ class MainViewModel(
         val subtitles = arrayOf("ε=ε=ε=┏(゜ロ゜;)┛", "(　o=^•ェ•)o　┏━┓", "(/▽＼)", "ヽ(✿ﾟ▽ﾟ)ノ")
         val random = Random()
         ui.setState {
-            title = titles[random.nextInt(titles.size)] + "  " + subtitles[random.nextInt(titles.size)]
+            title =
+                titles[random.nextInt(titles.size)] + "  " + subtitles[random.nextInt(titles.size)]
         }
     }
 
