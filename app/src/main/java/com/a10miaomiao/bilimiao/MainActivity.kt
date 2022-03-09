@@ -25,10 +25,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.store.PlayerStore
-import com.a10miaomiao.bilimiao.store.TimeSettingStore
-import com.a10miaomiao.bilimiao.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.*
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -37,6 +33,7 @@ import splitties.experimental.InternalSplittiesApi
 import android.R.attr.right
 import androidx.lifecycle.lifecycleScope
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.store.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -55,6 +52,7 @@ class MainActivity
         bindSingleton { playerStore }
         bindSingleton { userStore }
         bindSingleton { timeSettingStore }
+        bindSingleton { filterStore }
         bindSingleton { playerDelegate }
         bindSingleton { statusBarHelper }
     }
@@ -63,6 +61,7 @@ class MainActivity
     private val playerStore: PlayerStore by diViewModel(di)
     private val userStore: UserStore by diViewModel(di)
     private val timeSettingStore: TimeSettingStore by diViewModel(di)
+    private val filterStore: FilterStore by diViewModel(di)
 
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }

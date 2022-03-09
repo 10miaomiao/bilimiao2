@@ -188,7 +188,8 @@ class SettingFragment : Fragment(), DIAware, MyPage {
             title = "屏蔽管理"
             summary = "只对时光机生效"
             onClick {
-                toast("重新装修中")
+                val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                nav.navigate(MainNavGraph.action.setting_to_filterList)
                 true
             }
         }

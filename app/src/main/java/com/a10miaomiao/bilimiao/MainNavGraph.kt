@@ -10,6 +10,8 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
+import com.a10miaomiao.bilimiao.page.filter.FilterAddWordFragment
+import com.a10miaomiao.bilimiao.page.filter.FilterListFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
@@ -58,6 +60,12 @@ object MainNavGraph {
         }
         val about = f<AboutFragment>() {
             deepLink("bilimiao://about")
+        }
+        val filterList = f<FilterListFragment>() {
+            deepLink("bilimiao://filter/list")
+        }
+        val filterAddWord = f<FilterAddWordFragment>() {
+            deepLink("bilimiao://filter/word/add")
         }
         val region = f<RegionFragment> {
             argument(args.region) {
@@ -184,6 +192,7 @@ object MainNavGraph {
         val setting_to_videoSetting = dest.setting to dest.videoSetting
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
         val setting_to_about = dest.setting to dest.about
+        val setting_to_filterList = dest.setting to dest.filterList
 
         val region_to_videoInfo = dest.region to dest.videoInfo
 

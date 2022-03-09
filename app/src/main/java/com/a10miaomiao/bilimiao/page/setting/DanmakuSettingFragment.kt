@@ -176,6 +176,7 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage
         singleChoice("danmaku_fontsize", fontsizeSelection) {
             title = "选择你的尺寸"
             summary = "想要多大的"
+
 //            onSelectionChange {  }
         }
 
