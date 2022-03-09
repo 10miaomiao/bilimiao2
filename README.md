@@ -3,15 +3,15 @@ bilimiao2.0
 [下载体验](https://www.coolapk.com/apk/164982)
 
 ### Thanks to the open source project
-* [anko](https://github.com/Kotlin/anko)
-* [Fragmentation](https://github.com/YoKeyword/Fragmentation)
-* [RxJava](https://github.com/ReactiveX/RxJava)
-* [RxAndroid](https://github.com/ReactiveX/RxAndroid)
+* [Kodein-DI](https://github.com/Kodein-Framework/Kodein-DI)
+* [Splitties](https://github.com/LouisCAD/Splitties)
 * [okhttp](https://github.com/square/okhttp)
 * [glide](https://github.com/bumptech/glide)
-* [bilibili-sdk-go](https://github.com/WhiteBlue/bilibili-sdk-go)
+* [BaseRecyclerViewAdapterHelper](https://github.com/CymChad/BaseRecyclerViewAdapterHelper)
 * [NumberPickerView](https://github.com/Carbs0126/NumberPickerView)
 * [rclayout](https://github.com/GcsSloop/rclayout)
+* [ijkplayer](https://github.com/Bilibili/ijkplayer)
+* [DanmakuFlameMaster](https://github.com/bilibili/DanmakuFlameMaster)
 
 ### About me
 * B站 [10喵喵](https://space.bilibili.com/6789810/)
@@ -88,6 +88,11 @@ bilimiao2.0
 修正 评论特性 凸(艹皿艹 )
 修正 进度修改越界闪退问题
 修了一堆bug ︿(￣︶￣)︿
+
+* 2.1 alpha (50)
+全新 界面
+迁移 AndroidX
+适配 横屏UI（平板）
 
 ### License
  Copyright 2018 10miaomiao
