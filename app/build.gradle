@@ -12,7 +12,8 @@ android {
         minSdk 21
         targetSdk 31
         versionCode 50
-        versionName "2.1.0"
+        versionName "2.1 alpha"
+        flavorDimensions "default"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -21,6 +22,28 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors{
+        coolapk {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "Coolapk"
+            ]
+        }
+        github {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "Github"
+            ]
+        }
+        gitee {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "Gitee"
+            ]
+        }
+        miao {
+            manifestPlaceholders = [
+                    APP_CHANNEL_VALUE: "10miaomiao"
+            ]
         }
     }
     compileOptions {
@@ -81,6 +104,9 @@ dependencies {
     // ijpplayer
     implementation project(':ijkplayer-java')
     implementation project(':player')
+
+    // 百度统计
+    implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

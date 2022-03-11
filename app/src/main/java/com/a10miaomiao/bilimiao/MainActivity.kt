@@ -32,8 +32,10 @@ import org.kodein.di.bindSingleton
 import splitties.experimental.InternalSplittiesApi
 import android.R.attr.right
 import androidx.lifecycle.lifecycleScope
+import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.store.*
+import com.baidu.mobstat.StatService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -55,6 +57,7 @@ class MainActivity
         bindSingleton { filterStore }
         bindSingleton { playerDelegate }
         bindSingleton { statusBarHelper }
+        bindSingleton { supportHelper }
     }
 
     private val windowStore: WindowStore by diViewModel(di)
@@ -66,6 +69,7 @@ class MainActivity
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
+    private val supportHelper by lazy { SupportHelper(this) }
 
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
@@ -123,6 +127,10 @@ class MainActivity
 //            val res = BiliApiService.authApi.refreshToken(refreshToken).awaitCall()
 //            DebugMiao.log("oauth2", res.body()?.string())
 //        }
+
+        // 百度统计
+        StatService.setAuthorizedState(this, false)
+        StatService.start(this)
 
     }
 
