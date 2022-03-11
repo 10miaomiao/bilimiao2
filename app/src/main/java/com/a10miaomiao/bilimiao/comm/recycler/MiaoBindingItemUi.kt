@@ -21,7 +21,7 @@ abstract class MiaoBindingItemUi<T> : MiaoUI() {
     fun update(binding: MiaoBinding, item: T, index: Int) {
         try {
             binding.start(MiaoBinding.UPDATE) {
-                createView(item, 0)
+                createView(item, index)
             }
         } catch (e: Exception) {
             e.printStackTrace()

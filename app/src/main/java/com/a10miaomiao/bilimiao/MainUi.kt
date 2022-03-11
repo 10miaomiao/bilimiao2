@@ -29,14 +29,15 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
     val bottomSheetViewID = 123
 
     val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
-        backgroundColor = 0xFFF2F2F2L.toInt()
+        backgroundColor = config.windowBackgroundColor
     }
 
     val mBottomSheetView = inflate<FragmentContainerView>(R.layout.bottom_sheet_fragment) {
-        backgroundColor = 0xFFF2F2F2L.toInt()
+        backgroundColor = config.windowBackgroundColor
     }
 
     val mAppBar = view<AppBarView>{
+        backgroundColor = config.blockBackgroundColor
         elevation = dip(20).toFloat()
     }
 

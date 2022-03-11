@@ -22,7 +22,7 @@
         android:topRightRadius = "0dp"/>
 
     <gradient
-        android:startColor="#00FFFFFF"
+        android:startColor="#00000000"
         android:endColor="?defaultBackgroundColor"
         android:angle="0"
         />

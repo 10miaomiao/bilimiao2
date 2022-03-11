@@ -1,16 +1,27 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.Bilimiao" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorPrimary">@color/theme_color_primary</item>
+        <item name="colorPrimaryVariant">@color/theme_color_primary_dark</item>
+        <item name="colorOnPrimary">@color/theme_color_primary_trans</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSecondary">@color/theme_color_secondary</item>
+        <item name="colorSecondaryVariant">@color/theme_color_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/black</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <!-- Customize your theme here. -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+
+        <item name="blockBackground">@color/darkBlockBackgroundColor</item>
+        <item name="foregroundColor">@color/darkForegroundColor</item>
+        <item name="lineColor">@color/darkLineColor</item>
+        <item name="defaultBackgroundColor">@color/darkWindowBackgroundColor</item>
+
+        <item name="android:windowBackground">@drawable/splash_default</item>
     </style>
 </resources>
