@@ -8,19 +8,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
+import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.lazyUiDi
-import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.views
-import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.FilterStore
@@ -40,7 +41,7 @@ import splitties.views.textColorResource
 class FilterListFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
-        title = "时光姬-屏蔽管理"
+        title = "时光姬\n-\n屏蔽管理"
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
@@ -66,12 +67,19 @@ class FilterListFragment : Fragment(), DIAware, MyPage {
     }
 
     val handleToWordClick = View.OnClickListener {
-        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-        nav.navigate(Uri.parse("bilimiao://filter/word/add"))
+        val nav = Navigation.findNavController(it)
+        nav.navigate(MainNavGraph.action.filterList_to_filterWordList)
     }
 
-    val itemUi = miaoBindingItemUi<String> { item, index ->
-        frameLayout {
+    val handleToUpperClick = View.OnClickListener {
+        val nav = Navigation.findNavController(it)
+        nav.navigate(MainNavGraph.action.filterList_to_filterUpperList)
+    }
+
+    fun MiaoUI.tagView(
+        text: String,
+    ): View {
+        return frameLayout {
             apply(ViewStyle.roundRect(dip(5)))
             backgroundColor = config.windowBackgroundColor
             layoutParams = lParams {
@@ -83,10 +91,18 @@ class FilterListFragment : Fragment(), DIAware, MyPage {
                 +textView {
                     padding = dip(5)
 
-                    _text = item
+                    _text = text
                 }
             }
         }
+    }
+
+    val wordItemUi = miaoBindingItemUi<String> { item, index ->
+        tagView(item)
+    }
+
+    val upperItemUi = miaoBindingItemUi<FilterUpperDB.Upper> { item, index ->
+        tagView(item.name)
     }
 
     val ui = miaoBindingUi {
@@ -115,7 +131,7 @@ class FilterListFragment : Fragment(), DIAware, MyPage {
                             )
                             _miaoAdapter(
                                 items = filterStore.state.filterWordList,
-                                itemUi = itemUi
+                                itemUi = wordItemUi
                             ) {
                             }
                         }..lParams {
@@ -135,6 +151,53 @@ class FilterListFragment : Fragment(), DIAware, MyPage {
                             textColorResource = config.themeColorResource
                             setBackgroundResource(config.selectableItemBackground)
                             setOnClickListener(handleToWordClick)
+                        }..lParams {
+                            gravity = Gravity.RIGHT
+                        }
+                    }
+
+                }..lParams {
+                    width = matchParent
+                    height = wrapContent
+                    verticalMargin = config.dividerSize
+                }
+
+                +verticalLayout {
+                    apply(ViewStyle.block)
+
+                    views {
+                        +textView {
+                            text = "屏蔽up主："
+                        }
+
+                        +recyclerView {
+                            isNestedScrollingEnabled = false
+                            _show = filterStore.filterWordCount != 0
+                            _miaoLayoutManage(
+                                FlowLayoutManager()
+                            )
+                            _miaoAdapter(
+                                items = filterStore.state.filterUpperList,
+                                itemUi = upperItemUi
+                            ) {
+                            }
+                        }..lParams {
+                            verticalMargin = dip(10)
+                        }
+
+                        +textView {
+                            text = "空空如也"
+                            _show = filterStore.filterUpperCount == 0
+                        }..lParams {
+                            gravity = Gravity.CENTER
+                            verticalMargin = dip(10)
+                        }
+
+                        +textView {
+                            text = "去设置"
+                            textColorResource = config.themeColorResource
+                            setBackgroundResource(config.selectableItemBackground)
+                            setOnClickListener(handleToUpperClick)
                         }..lParams {
                             gravity = Gravity.RIGHT
                         }

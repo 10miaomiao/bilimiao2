@@ -32,7 +32,7 @@ class FilterWordDB(context: Context) :
         //获取数据库对象
         val db = readableDatabase
         //查询表中的数据
-        val cursor = db.query(TABLE_NAME, null, null, null, null, null, "id desc")
+        val cursor = db.query(TABLE_NAME, null, null, null, null, null, "id asc")
         //获取name列的索引
         cursor.moveToFirst()
         while (!cursor.isAfterLast) {

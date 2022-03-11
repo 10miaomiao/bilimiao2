@@ -57,9 +57,7 @@ class MainViewModel(
 
 
     init {
-        randomTitle()
         loadAdData()
-        loadRegionData()
         viewModelScope.launch {
             timeSettingStore.connectUi(ui)
             userStore.connectUi(ui)
@@ -243,7 +241,7 @@ class MainViewModel(
     /**
      * 随机标题
      */
-    private fun randomTitle() {
+    fun randomTitle() {
         val titles = arrayOf("时光姬", "时光基", "时光姬", "时光姬")
         val subtitles = arrayOf("ε=ε=ε=┏(゜ロ゜;)┛", "(　o=^•ェ•)o　┏━┓", "(/▽＼)", "ヽ(✿ﾟ▽ﾟ)ノ")
         val random = Random()

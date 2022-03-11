@@ -7,16 +7,19 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -37,6 +40,8 @@ class FilterAddWordFragment : Fragment(), DIAware, MyPage {
     override val di: DI by lazyUiDi(ui = { ui })
 
     private val windowStore by instance<WindowStore>()
+    private val filterStore by instance<FilterStore>()
+    private val supportHelper by instance<SupportHelper>()
 
     private val ID_editText = 100
 
@@ -59,6 +64,16 @@ class FilterAddWordFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        supportHelper.showSoftInput(mEditText)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        supportHelper.hideSoftInput(mEditText)
+    }
+
     val handleEditorAction = TextView.OnEditorActionListener { v, actionId, event ->
         if (actionId == EditorInfo.IME_ACTION_UNSPECIFIED
             && event.action == KeyEvent.ACTION_DOWN) {
@@ -68,7 +83,13 @@ class FilterAddWordFragment : Fragment(), DIAware, MyPage {
         return@OnEditorActionListener false
     }
     val handleOkClick = View.OnClickListener {
-        toast(mEditText.text)
+        val keyword = mEditText.text.toString()
+        if (keyword.isEmpty()) {
+            toast("内容不能为空")
+        } else {
+            filterStore.addWord(keyword)
+            findNavController().popBackStack()
+        }
     }
 
     val ui = miaoBindingUi {

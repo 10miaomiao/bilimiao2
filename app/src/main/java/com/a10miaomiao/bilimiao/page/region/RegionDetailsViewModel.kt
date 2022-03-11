@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.widget.picker.DateModel
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ class RegionDetailsViewModel(
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
     val timeSettingStore: TimeSettingStore by instance()
+    val filterStore: FilterStore by instance()
 
     var timeFrom = DateModel()
     var timeTo = DateModel()
@@ -41,7 +43,6 @@ class RegionDetailsViewModel(
     var triggered = false
     var list = PaginationInfo<RegionTypeDetailsInfo>()
 
-//    val filterStore = Store.from(context).filterStore
 
     init {
         val timeSettingState = timeSettingStore.state
@@ -71,16 +72,16 @@ class RegionDetailsViewModel(
                 .call()
                 .gson<ResultListInfo2<RegionTypeDetailsInfo>>()
             if (res.code == 0) {
-                val result = res.result
+                var result = res.result
                 var totalCount = 0 // 屏蔽前数量
                 if (result.size < list.pageSize) {
                     ui.setState { list.finished = true }
                 }
                 totalCount = result.size
-//                result.filter {
-//                    filterStore.filterWord(it.title)
-//                            && filterStore.filterUpper(it.mid.toLong())
-//                }
+                result = result.filter {
+                    filterStore.filterWord(it.title)
+                            && filterStore.filterUpper(it.mid.toLong())
+                }
                 ui.setState {
                     if (pageNum == 1) {
                         list.data = arrayListOf()
@@ -88,9 +89,9 @@ class RegionDetailsViewModel(
                     list.data.addAll(result)
                 }
                 list.pageNum = pageNum
-//                if (list.data.size < 10 && totalCount != result.size) {
-//                    _loadData()
-//                }
+                if (list.data.size < 10 && totalCount != result.size) {
+                    _loadData(pageNum + 1)
+                }
             } else {
                 context.toast(res.msg)
                 throw Exception(res.msg)
@@ -108,8 +109,8 @@ class RegionDetailsViewModel(
         }
     }
 
-    private fun _loadData() {
-        loadData()
+    private fun _loadData(pageNum: Int = list.pageNum) {
+        loadData(pageNum)
     }
 
     fun loadMode () {

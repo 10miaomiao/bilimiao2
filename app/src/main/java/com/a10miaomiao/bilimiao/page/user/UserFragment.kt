@@ -20,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -31,6 +32,7 @@ import com.a10miaomiao.bilimiao.commponents.video.mediaItemView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
@@ -53,6 +55,29 @@ class UserFragment : Fragment(), DIAware, MyPage {
     override val pageConfig = myPageConfig {
         val info = viewModel.dataInfo
         title = info?.card?.name ?: "个人信息"
+
+        menus = listOf(
+            myMenuItem {
+                key = 0
+                iconResource = R.drawable.ic_more_vert_grey_24dp
+                title = "更多"
+            },
+        )
+    }
+
+    override fun onMenuItemClick(view: MenuItemView) {
+        super.onMenuItemClick(view)
+        when (view.prop.key) {
+            0 -> {
+                // 更多
+                val pm = UserMorePopupMenu(
+                    activity = requireActivity(),
+                    anchor = view,
+                    viewModel = viewModel
+                )
+                pm.show()
+            }
+        }
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
@@ -551,7 +576,3 @@ class UserFragment : Fragment(), DIAware, MyPage {
     }
 
 }
-
-
-
-

@@ -41,7 +41,7 @@ class FilterStore(override val di: DI) :
     fun queryFilterWord() {
         val list = filterWordDB.queryAll()
         setState {
-            filterWordList = mutableListOf("234234", "324324", "23364564234", "3gdfgdf24324", "23453453454234", "324324","234234", "324324", "23364564234", "3gdfgdf24324", "23453453454234", "324324")
+            filterWordList = list
         }
     }
 
@@ -114,6 +114,7 @@ class FilterStore(override val di: DI) :
         activity.toast("删除成功")
     }
 
+    fun filterUpper(mid: String) = filterUpper(mid.toLong())
     fun filterUpper(mid: Long): Boolean {
         state.filterUpperList.forEach {
             if (it.mid == mid)

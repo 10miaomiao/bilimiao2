@@ -10,8 +10,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
-import com.a10miaomiao.bilimiao.page.filter.FilterAddWordFragment
-import com.a10miaomiao.bilimiao.page.filter.FilterListFragment
+import com.a10miaomiao.bilimiao.page.filter.*
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
@@ -63,6 +62,15 @@ object MainNavGraph {
         }
         val filterList = f<FilterListFragment>() {
             deepLink("bilimiao://filter/list")
+        }
+        val filterUpperList = f<FilterUpperListFragment>() {
+            deepLink("bilimiao://filter/upper/list")
+        }
+        val filterWordList = f<FilterWordListFragment>() {
+            deepLink("bilimiao://filter/word/list")
+        }
+        val filterEditWorld = f<FilterEditWorldFragment>() {
+            deepLink("bilimiao://filter/word/edit/{name}")
         }
         val filterAddWord = f<FilterAddWordFragment>() {
             deepLink("bilimiao://filter/word/add")
@@ -193,6 +201,9 @@ object MainNavGraph {
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
         val setting_to_about = dest.setting to dest.about
         val setting_to_filterList = dest.setting to dest.filterList
+
+        val filterList_to_filterUpperList = dest.filterList to dest.filterUpperList
+        val filterList_to_filterWordList = dest.filterList to dest.filterWordList
 
         val region_to_videoInfo = dest.region to dest.videoInfo
 

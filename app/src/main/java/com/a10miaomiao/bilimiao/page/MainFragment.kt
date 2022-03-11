@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.view.loadPic
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.UserStore
@@ -111,6 +112,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.loadRegionData()
+        viewModel.randomTitle()
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
@@ -159,6 +162,19 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
             views {
                 +imageView {
+                    miaoEffect(listOf(item.icon, item.logo)) {
+                        if (item.icon != null) {
+                            Glide.with(context)
+                                .load(item.icon)
+                                .override(dip(24), dip(24))
+                                .into(this)
+                        } else if (item.logo != null) {
+                            Glide.with(context)
+                                .loadPic(item.logo!!)
+                                .override(dip(24), dip(24))
+                                .into(this)
+                        }
+                    }
                     _network(item.logo)
                 }..lParams(dip(24), dip(24))
 
