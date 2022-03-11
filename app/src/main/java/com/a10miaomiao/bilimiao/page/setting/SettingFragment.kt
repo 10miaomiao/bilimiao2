@@ -33,6 +33,7 @@ import com.google.gson.reflect.TypeToken
 import de.Maxr1998.modernpreferences.Preference
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
+import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
@@ -75,7 +76,6 @@ class SettingFragment : Fragment(), DIAware, MyPage {
     private fun createPreferenceClick(setting: MiaoSettingInfo): Preference.OnClickListener {
         return Preference.OnClickListener { _, _ ->
             val intent = Intent(Intent.ACTION_VIEW)
-            //HTTPS://QR.ALIPAY.COM/FKX07587MLQPOBBKACENE1
             try {
                 intent.data = Uri.parse(setting.url)
                 startActivity(intent)
@@ -146,6 +146,7 @@ class SettingFragment : Fragment(), DIAware, MyPage {
             title = "使用外部播放器"
             summary = "奇迹和魔法都是存在的"
             defaultValue = false
+            enabled = false
         }
 
         switch("is_best_region") {
@@ -154,14 +155,16 @@ class SettingFragment : Fragment(), DIAware, MyPage {
             defaultValue = false
         }
 
-//        singleChoice("fragment_animator", listOf()) {
-//            title = "请选择动画效果"
-//            summary = "每段四季，每轮星移，时光长旅，漫漫行迹..."
-//        }
+        singleChoice("fragment_animator", listOf(SelectionItem("key", "title"))) {
+            title = "请选择动画效果"
+            summary = "每段四季，每轮星移，时光长旅，漫漫行迹..."
+            enabled = false
+        }
 
         pref("theme") {
             title = "切换主题"
             summary = "库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
+            enabled = false
         }
 
         pref("video") {

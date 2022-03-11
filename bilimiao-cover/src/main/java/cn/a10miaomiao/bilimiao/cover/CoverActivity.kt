@@ -65,7 +65,10 @@ class CoverActivity : AppCompatActivity() {
         initViewModel()
         initArgument()
         initView()
-//        requestPermissions()
+        // 安卓Q以上版本保存至公共的媒体文件夹，不需要存储权限
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            requestPermissions()
+        }
     }
 
     private fun initArgument() {
@@ -140,9 +143,16 @@ class CoverActivity : AppCompatActivity() {
             popupMenu.show()
         }
         mSaveCoverLl.setOnClickListener {
-//            if (requestPermissions()) { //判断有没有存储权限
-                saveImage()
-//            }
+            val bitmap = viewModel.coverBitmap.value
+            if (bitmap == null) {
+                toast("图片未加载")
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val fileName = "${viewModel.fileName.value ?: "未命名"}.jpg"
+                saveSignImage(fileName, bitmap)
+                toast("已保存至系统相册，文件名:${fileName}")
+            } else if (requestPermissions()) { //判断有没有存储权限
+                saveImage(bitmap)
+            }
         }
     }
 
@@ -175,19 +185,8 @@ class CoverActivity : AppCompatActivity() {
     /**
      * 保存图片
      */
-    private fun saveImage() {
+    private fun saveImage(bitmap: Bitmap) {
         try {
-            val bitmap = viewModel.coverBitmap.value
-            if (bitmap == null) {
-                toast("图片未加载")
-                return
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val fileName = "${viewModel.fileName.value ?: "未命名"}.jpg"
-                saveSignImage(fileName, bitmap)
-                toast("已保存至系统相册，文件名:${fileName}")
-                return
-            }
             // 判断文件夹是否已经创建
             File(path).let {
                 if (!it.exists()) {
@@ -227,9 +226,9 @@ class CoverActivity : AppCompatActivity() {
         fOut.close()
     }
 
-    //将文件保存到公共的媒体文件夹
-    //这里的filepath不是绝对路径，而是某个媒体文件夹下的子路径，和沙盒子文件夹类似
-    //这里的filename单纯的指文件名，不包含路径
+    /**
+     * 将文件保存到公共的媒体文件夹
+     */
     fun saveSignImage(fileName: String, bitmap: Bitmap) {
         try {
             //设置保存参数到ContentValues中
