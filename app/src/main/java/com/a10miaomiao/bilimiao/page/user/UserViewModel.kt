@@ -1,12 +1,16 @@
 package com.a10miaomiao.bilimiao.page.user
 
 import android.content.Context
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -28,7 +32,7 @@ class UserViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    val context: Context by instance()
+    val activity: AppCompatActivity by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
@@ -62,7 +66,7 @@ class UserViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    context.toast(res.message)
+                    activity.toast(res.message)
                 }
             }
             val res2 = UserApi().upperChanne(id).awaitCall().gson<ResultListInfo<UpperChannelInfo>>()
@@ -73,7 +77,7 @@ class UserViewModel(
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                context.toast("网络错误")
+                activity.toast("网络错误")
             }
             e.printStackTrace()
         } finally {
@@ -90,7 +94,7 @@ class UserViewModel(
     fun filterUpperAdd () {
         val info = dataInfo
         if (info == null) {
-            context.toast("请等待信息加载完成")
+            activity.toast("请等待信息加载完成")
         } else {
             filterStore.addUpper(
                 info.card.mid.toLong(),
@@ -100,15 +104,16 @@ class UserViewModel(
     }
 
     fun logout() {
-//        alert("确定退出登录？") {
-//            negativeButton("退出登录") {
-//                Bilimiao.app.deleteAuth()
-//                userStore.setUserInfo(null)
-//                pop()
-//                toast("已退出登陆")
-//            }
-//            positiveButton("取消") { }
-//        }.show()
+        AlertDialog.Builder(activity).apply {
+            setTitle("确定退出登录，喵？")
+            setNegativeButton("确定退出") { dialog, which ->
+                userStore.logout()
+                val nav = activity.findNavController(R.id.nav_host_fragment)
+                nav.popBackStack()
+                activity.toast("已退出登录了喵")
+            }
+            setPositiveButton("取消", null)
+        }.show()
     }
 
 }

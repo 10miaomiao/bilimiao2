@@ -49,6 +49,11 @@ class UserStore(override val di: DI) :
         seveUserInfo(userInfo)
     }
 
+    fun logout () {
+        Bilimiao.commApp.deleteAuth()
+        setUserInfo(null)
+    }
+
     private fun seveUserInfo(userInfo: UserInfo?) {
         val file = File(activity.filesDir.path + "/user.data")
         if (userInfo != null) {

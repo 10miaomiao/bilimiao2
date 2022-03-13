@@ -1,5 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.entity.video
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 data class VideoRelateInfo (
     val ad_index: Int,
     val aid: String,
@@ -18,4 +22,4 @@ data class VideoRelateInfo (
     val title: String,
     val trackid: String,
     val uri: String,
-)
+) : Parcelable

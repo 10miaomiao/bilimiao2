@@ -18,7 +18,7 @@ class PlayerAPI {
     /**
      * 获取视频播放地址
      */
-    fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 64): PlayurlData {
+    suspend fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 64): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "avid" to avid,
             "cid" to cid,
@@ -32,7 +32,7 @@ class PlayerAPI {
         val res = MiaoHttp.request {
             url = "https://api.bilibili.com/x/player/playurl?" + ApiHelper.urlencode(params)
             headers = getVideoHeaders(avid)
-        }.call().gson<ResultInfo<PlayurlData>>()
+        }.awaitCall().gson<ResultInfo<PlayurlData>>()
         if (res.code == 0) {
             return res.data
         } else {
@@ -43,7 +43,7 @@ class PlayerAPI {
     /**
      * 获取番剧播放地址
      */
-    fun getBangumiUrl(epid: String, cid: String, qn: Int = 64): PlayurlData {
+    suspend fun getBangumiUrl(epid: String, cid: String, qn: Int = 64): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "aid" to epid,
             "cid" to cid,
@@ -63,7 +63,7 @@ class PlayerAPI {
         params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET_NEW)
         val res = MiaoHttp.request {
             url = "https://api.bilibili.com/pgc/player/api/playurl?" + ApiHelper.urlencode(params)
-        }.call().gson<PlayurlData>()
+        }.awaitCall().gson<PlayurlData>()
         if (res.code == 0) {
             return res
         } else {

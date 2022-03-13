@@ -1,5 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.entity.video
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 data class VideoInfo(
     val aid: String,
     val attribute: Int,
@@ -33,4 +37,4 @@ data class VideoInfo(
     val tname: String,
     val videos: Int,
     val view_at: Long? // 历史记录的观看时间
-)
+) : Parcelable

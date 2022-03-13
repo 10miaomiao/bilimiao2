@@ -1,5 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.entity.video
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 data class VideoTagInfo (
     val attribute: Int,
     val cover: String,
@@ -10,4 +14,4 @@ data class VideoTagInfo (
     val likes: Int,
     val tag_id: Double,
     val tag_name: String
-)
+) : Parcelable

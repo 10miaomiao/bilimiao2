@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.page.auth
 
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -43,6 +44,8 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
+    private val ID_webView = 101
+
     private val viewModel by diViewModel<H5LoginViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
@@ -73,11 +76,6 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
     private val mWebViewClient = object : WebViewClient() {
 
         override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-            DebugMiao.log("WebViewClient", url)
-            if (url.contains("access_key=") && url.contains("mid=")) {
-                viewModel.resolveUrl(view, url)
-                return false
-            }
 //            return BilibiliRouter.gotoUrl(context!!, url)
             return false
         }
@@ -96,7 +94,9 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         override fun onPageFinished(view: WebView, url: String) {
             super.onPageFinished(view, url)
             viewModel.updateLoading(false)
-            if (url == "https://passport.bilibili.com/ajax/miniLogin/redirect") {
+            if (url.contains("access_key=") && url.contains("mid=")) {
+                viewModel.resolveUrl(view, url)
+            } else if (url == "https://passport.bilibili.com/ajax/miniLogin/redirect") {
                 requestThird(view)
             } else if (url.contains("bilibili.com")) {
                 val js = """javascript:(function() {
@@ -141,6 +141,14 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val webView = view.findViewById<WebView>(ID_webView)
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+        webView.webViewClient = mWebViewClient
+        webView.webChromeClient = mWebChromeClient
+        webView.settings.apply {
+            javaScriptEnabled = true
+        }
+        webView.loadUrl("https://passport.bilibili.com/ajax/miniLogin/minilogin")
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
@@ -151,17 +159,9 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         frameLayout {
 
             views {
-                miaoEffect(null, {
-                    +view<WebView>() {
-                        backgroundColor = config.windowBackgroundColor
-                        webViewClient = mWebViewClient
-                        webChromeClient = mWebChromeClient
-                        settings.apply {
-                            javaScriptEnabled = true
-                        }
-                        loadUrl("https://passport.bilibili.com/ajax/miniLogin/minilogin")
-                    }
-                })
+                +view<WebView>(ID_webView) {
+                    backgroundColor = config.windowBackgroundColor
+                }
 
                 +progressBar {
                     _show = viewModel.loading

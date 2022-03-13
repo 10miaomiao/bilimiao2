@@ -6,10 +6,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
@@ -46,7 +43,7 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
-    private val viewModel by diViewModel<TemplateViewModel>(di)
+    private val ID_webView = 102
 
     private val windowStore by instance<WindowStore>()
 
@@ -63,13 +60,6 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
         savedInstanceState: Bundle?
     ): View {
         return ui.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
-        }
     }
 
     private fun updateLoading(value: Boolean) {
@@ -119,6 +109,23 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
 
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val webView = view.findViewById<WebView>(ID_webView)
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+        webView.webViewClient = mWebViewClient
+        webView.webChromeClient = mWebChromeClient
+        webView.settings.apply {
+            javaScriptEnabled = true
+        }
+        var url = ""
+//      if (night) url += "&night=1"
+        webView.loadUrl("https://space.bilibili.com/h5/follow?type=$type&mid=$mid")
+        lifecycle.coroutineScope.launch {
+            windowStore.connectUi(ui)
+        }
+    }
+
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
         val contentInsets = windowStore.getContentInsets(parentView)
@@ -130,19 +137,9 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
             _bottomPadding = contentInsets.bottom
 
             views {
-                miaoEffect(null, {
-                    +view<WebView> {
-                        backgroundColor = config.windowBackgroundColor
-                        webViewClient = mWebViewClient
-                        webChromeClient = mWebChromeClient
-                        settings.apply {
-                            javaScriptEnabled = true
-                        }
-                        var url = "https://space.bilibili.com/h5/follow?type=$type&mid=$mid"
-//                        if (night) url += "&night=1"
-                        loadUrl(url)
-                    }..lParams(matchParent, matchParent)
-                })
+                +view<WebView>(ID_webView) {
+                    backgroundColor = config.windowBackgroundColor
+                }..lParams(matchParent, matchParent)
 
                 +progressBar {
                     _show = loading

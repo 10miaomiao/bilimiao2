@@ -7,9 +7,11 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
+import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
@@ -75,6 +77,13 @@ object MainNavGraph {
         val filterAddWord = f<FilterAddWordFragment>() {
             deepLink("bilimiao://filter/word/add")
         }
+
+        val downloadVideoCreate = f<DownloadVideoCreateFragment> {
+            argument(args.video) {
+                type = NavType.ParcelableType(VideoInfo::class.java)
+            }
+        }
+
         val region = f<RegionFragment> {
             argument(args.region) {
                 type = NavType.ParcelableType(RegionInfo::class.java)
@@ -190,6 +199,7 @@ object MainNavGraph {
         val global_to_videoPages = dest.global to dest.videoPages
         val global_to_videoCoin = dest.global to dest.videoCoin
         val global_to_videoAddFavorite = dest.global to dest.videoAddFavorite
+        val global_to_downloadVideoCreate = dest.global to dest.downloadVideoCreate
 
         val home_to_region = dest.home to dest.region
         val home_to_setting = dest.home to dest.setting
@@ -242,6 +252,7 @@ object MainNavGraph {
         const val num = "num"
         const val pages = "pages"
         const val index = "index"
+        const val video = "video"
         const val region = "region"
         const val reply = "reply"
     }

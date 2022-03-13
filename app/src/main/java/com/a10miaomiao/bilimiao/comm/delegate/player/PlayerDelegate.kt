@@ -38,6 +38,7 @@ import master.flame.danmaku.ui.widget.DanmakuView
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import splitties.dimensions.dip
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -407,7 +408,7 @@ class PlayerDelegate(
         }
         try {
             val realtimeProgress = (mPlayer.currentPosition / 1000).toString()  // 秒数
-            val res = MiaoHttp.request {
+            MiaoHttp.request {
                 url = "https://api.bilibili.com/x/v2/history/report"
                 formBody = ApiHelper.createParams(
                     "aid" to plalerSource.aid,
@@ -416,7 +417,7 @@ class PlayerDelegate(
                     "realtime" to realtimeProgress,
                     "type" to "3"
                 )
-                method = "POST"
+                method = MiaoHttp.POST
             }.awaitCall()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -481,7 +482,7 @@ class PlayerDelegate(
         }
     }
 
-    private fun getNetwordSources(): ArrayList<VideoSource> {
+    private suspend fun getNetwordSources(): ArrayList<VideoSource> {
         val playurlData = if (plalerSource.type == PlayerSourceInfo.VIDEO) {
             BiliApiService.playerAPI.getVideoPalyUrl(
                 plalerSource.aid,
@@ -708,6 +709,8 @@ class PlayerDelegate(
         var screenBrightness = 0f
         var num = 0
         var current = 0L
+        var denominator = activity.dip(100f)
+
         override fun isLocked() = mController.isLocked
 
         override fun onDown(e: MotionEvent) {
@@ -716,9 +719,9 @@ class PlayerDelegate(
             volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
             screenBrightness = activity.window.attributes.screenBrightness
             num = if (isLeft) {
-                (screenBrightness * 100).toInt()
+                (screenBrightness * denominator).toInt()
             } else {
-                ((volume.toFloat() / maxVolume.toFloat()) * 100).toInt()
+                ((volume.toFloat() / maxVolume.toFloat()) * denominator).toInt()
             }
             current = mPlayer.currentPosition
         }
@@ -738,14 +741,20 @@ class PlayerDelegate(
 
         override fun onYScroll(e1: MotionEvent, e2: MotionEvent, distanceY: Float): Boolean {
             num += distanceY.toInt() / 2
-            num = if (num > 100) 100 else if (0 > num) 0 else num
+            num = if (num > denominator) {
+                denominator.toInt()
+            } else if (0 > num) {
+                0
+            } else {
+                num
+            }
             if (isLeft) {
                 val lp = activity.window.attributes
-                lp.screenBrightness = num / 100f
+                lp.screenBrightness = num / denominator
                 activity.window.attributes = lp
                 showCenterText("亮度：$num%")
             } else {
-                volume = ((num / 100f) * maxVolume).toInt()
+                volume = ((num / denominator) * maxVolume).toInt()
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0)
                 showCenterText("音量：$num%")
             }

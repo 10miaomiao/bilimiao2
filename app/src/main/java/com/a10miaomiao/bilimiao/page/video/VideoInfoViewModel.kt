@@ -50,16 +50,6 @@ class VideoInfoViewModel(
 
     var state = ""
 
-    // 投币数量
-    var coinNum = 1
-
-    // 收藏夹列表
-//    val favoriteCreatedList = MiaoList<MediaListInfo>()
-//    val favoriteLoading = MiaoLiveData(false)
-//    val favoriteSelectedMap = HashMap<Long, Boolean>()
-
-
-
     init {
         viewModelScope.launch {
             playerStore.connectUi(ui)

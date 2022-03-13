@@ -74,13 +74,13 @@ class H5LoginViewModel(
             setTitle("获取信息中")
             show()
         }
-        val nav = findNavController(view)
         try {
             val res = withContext(Dispatchers.IO) {
                 AuthApi().account().call().gson<ResultInfo<UserInfo>>()
             }
             if (res.code == 0) {
                 userStore.setUserInfo(res.data)
+                val nav = findNavController(view)
                 nav.popBackStack()
             } else {
                 alert(res.message)

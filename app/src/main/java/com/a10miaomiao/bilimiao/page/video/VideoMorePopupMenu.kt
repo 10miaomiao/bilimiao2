@@ -10,6 +10,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.os.bundleOf
+import androidx.navigation.findNavController
+import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import splitties.toast.toast
 
 class VideoMorePopupMenu (
@@ -59,10 +63,21 @@ class VideoMorePopupMenu (
                     val clip = ClipData.newPlainText(label, text)
                     clipboard.setPrimaryClip(clip)
                     activity.toast("已复制：$text")
+                } else {
+                    activity.toast("请等待信息加载完成")
                 }
             }
             4 -> {
-                activity.toast("重新装修中")
+                val info = viewModel.info
+                if (info != null) {
+                    val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                    val args = bundleOf(
+                        MainNavGraph.args.video to info
+                    )
+                    nav.navigate(MainNavGraph.action.global_to_downloadVideoCreate, args)
+                } else {
+                    activity.toast("请等待信息加载完成")
+                }
             }
         }
         return false
