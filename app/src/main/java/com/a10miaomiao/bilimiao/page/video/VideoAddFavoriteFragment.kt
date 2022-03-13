@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.CompoundButton
+import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
@@ -16,17 +17,15 @@ import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._isChecked
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
-import com.a10miaomiao.bilimiao.comm.lazyUiDi
-import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -167,10 +166,20 @@ class VideoAddFavoriteFragment : Fragment(), DIAware, MyPage {
             views {
                 +recyclerView {
                     _miaoLayoutManage(LinearLayoutManager(requireContext()))
-                    _miaoAdapter(
+                    val mAdapter = _miaoAdapter(
                         items = viewModel.list,
                         itemUi = itemUi,
                     )
+                    footerViews(mAdapter) {
+                        +progressBar {
+                            _show = viewModel.loading
+                        }..lParams {
+                            topMargin = dip(50)
+                            width = dip(64)
+                            height = dip(64)
+                            gravity = Gravity.CENTER
+                        }
+                    }
                 }..lParams(matchParent, matchParent) {
                     weight = 1f
                 }
