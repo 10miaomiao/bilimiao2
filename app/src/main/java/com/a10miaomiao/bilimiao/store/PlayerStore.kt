@@ -19,7 +19,6 @@ class PlayerStore(override val di: DI) :
     override fun copyState() = state.copy()
 
     fun setPlayerInfo(info: PlayerSourceInfo) {
-        DebugMiao.log("setPlayerInfo", info.cid)
         this.setState {
             this.info = info
         }
@@ -27,7 +26,6 @@ class PlayerStore(override val di: DI) :
 
 
     fun clearPlayerInfo() {
-        DebugMiao.log("clearPlayerInfo")
         this.setState {
             this.info = PlayerSourceInfo()
         }

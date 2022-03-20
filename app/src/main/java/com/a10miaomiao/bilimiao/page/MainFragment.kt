@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -51,27 +52,27 @@ class MainFragment : Fragment(), DIAware, MyPage {
         title = "bilimiao"
         menus = listOf(
             myMenuItem {
-                key = 0
+                key = MenuKeys.setting
                 title = "设置"
                 iconResource = R.drawable.ic_baseline_settings_grey_24
             },
             myMenuItem {
-                key = 1
+                key = MenuKeys.history
                 title = "历史"
                 iconResource = R.drawable.ic_history_gray_24dp
-                visibility = if (userStore.isLogin()) {
+                visibility = if (viewModel.userStore.isLogin()) {
                     View.VISIBLE
                 } else {
                     View.GONE
                 }
             },
             myMenuItem {
-                key = 2
+                key = MenuKeys.download
                 title = "下载"
                 iconResource = R.drawable.ic_arrow_downward_gray_24dp
             },
             myMenuItem {
-                key = 3
+                key = MenuKeys.search
                 title = "搜索"
                 iconResource = R.drawable.ic_search_gray
             },
@@ -82,13 +83,16 @@ class MainFragment : Fragment(), DIAware, MyPage {
         super.onMenuItemClick(view)
         val nav = requireActivity().findNavController(R.id.nav_host_fragment)
         when (view.prop.key) {
-            0 -> {
+            MenuKeys.setting -> {
                 nav.navigate(MainNavGraph.action.home_to_setting)
             }
-            1 -> {
+            MenuKeys.history -> {
                 nav.navigate(MainNavGraph.action.home_to_history)
             }
-            2, 3 -> {
+            MenuKeys.download -> {
+                nav.navigate(MainNavGraph.action.home_to_download)
+            }
+            MenuKeys.search -> {
                 toast("重新装修中")
             }
         }
@@ -97,10 +101,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
     override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<MainViewModel>(di)
-
-    private val windowStore by instance<WindowStore>()
-
-    private val userStore by instance<UserStore>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -114,13 +114,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
         super.onViewCreated(view, savedInstanceState)
         viewModel.loadRegionData()
         viewModel.randomTitle()
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
-        }
     }
 
     val handleHeaderClick = View.OnClickListener{
-        val userInfo = userStore.state.info
+        val userInfo = viewModel.userStore.state.info
         if (userInfo != null) {
             val nav = findNavController(it)
             val args = bundleOf(
@@ -131,7 +128,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
     }
 
     val handleHeaderLongClick = View.OnLongClickListener{
-        if (userStore.state.info == null) {
+        if (viewModel.userStore.state.info == null) {
             val nav = findNavController(it)
             nav.navigate(MainNavGraph.action.home_to_h5Login)
             true
@@ -289,7 +286,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     imageResource = R.drawable.home_header_img
                 }..lParams(matchParent, matchParent)
 
-                val userInfo = userStore.state.info
+                val userInfo = viewModel.userStore.state.info
                 // 应用信息
                 +horizontalLayout {
                     padding = dip(10)
@@ -353,9 +350,12 @@ class MainFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, viewModel.timeSettingStore)
+        connectStore(viewLifecycleOwner, viewModel.userStore)
+        val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
         val contentInsets = windowStore.getContentInsets(parentView)
 
-        miaoEffect(listOf(userStore.state.info)) {
+        miaoEffect(listOf(viewModel.userStore.state.info)) {
             pageConfig.notifyConfigChanged()
         }
 

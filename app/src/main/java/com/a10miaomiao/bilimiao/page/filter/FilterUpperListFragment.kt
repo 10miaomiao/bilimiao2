@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -46,11 +47,11 @@ class FilterUpperListFragment : Fragment(), DIAware, MyPage {
         title = "屏蔽管理\n-\nUP主"
         menus = listOf(
             myMenuItem {
-                key = 1
+                key = MenuKeys.delete
                 title = "删除已选"
             },
             myMenuItem {
-                key = 2
+                key = MenuKeys.select
                 title = if (viewModel.isSelectAll) {
                     "全不选"
                 } else {
@@ -63,10 +64,10 @@ class FilterUpperListFragment : Fragment(), DIAware, MyPage {
     override fun onMenuItemClick(view: MenuItemView) {
         super.onMenuItemClick(view)
         when(view.prop.key) {
-            1 -> {
+            MenuKeys.delete -> {
                 viewModel.deleteSelected()
             }
-            2 -> {
+            MenuKeys.select -> {
                 if (viewModel.isSelectAll) {
                     viewModel.unSelectAll()
                 } else {

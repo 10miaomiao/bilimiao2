@@ -23,10 +23,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
-import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainViewModel
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
@@ -63,12 +60,12 @@ class RegionFragment : Fragment(), DIAware , MyPage {
         title = "时光姬-" + viewModel.region.name
         menus = listOf(
             myMenuItem {
-                key = 0
+                key = MenuKeys.filter
                 iconResource = R.drawable.ic_baseline_filter_list_grey_24
                 title = timeSettingStore.getRankOrderText()
             },
             myMenuItem {
-                key = 1
+                key = MenuKeys.time
                 title = "当前时间线"
                 subTitle = viewModel.getTimeText()
             },
@@ -78,7 +75,7 @@ class RegionFragment : Fragment(), DIAware , MyPage {
     override fun onMenuItemClick(view: MenuItemView) {
         super.onMenuItemClick(view)
         when (view.prop.key) {
-            0 -> {
+            MenuKeys.filter -> {
                 val pm = RankOrderPopupMenu(
                     activity = requireActivity(),
                     anchor = view,
@@ -87,7 +84,7 @@ class RegionFragment : Fragment(), DIAware , MyPage {
                 pm.setOnMenuItemClickListener(handleMenuItemClickListener)
                 pm.show()
             }
-            1 -> {
+            MenuKeys.time -> {
                 val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://time/setting"))
             }

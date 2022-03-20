@@ -58,10 +58,6 @@ class MainViewModel(
 
     init {
         loadAdData()
-        viewModelScope.launch {
-            timeSettingStore.connectUi(ui)
-            userStore.connectUi(ui)
-        }
     }
 
     fun getTimeText(): String {

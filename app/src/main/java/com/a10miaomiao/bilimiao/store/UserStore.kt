@@ -64,12 +64,15 @@ class UserStore(override val di: DI) :
         }
     }
 
-    private fun readUserInfo(): UserInfo? {
-        return try {
+    private fun readUserInfo() {
+        try {
             val file = File(activity.filesDir.path + "/user.data")
             if (file.exists()) {
                 val jsonStr = file.readText()
-                Gson().fromJson(jsonStr, UserInfo::class.java)
+                val localInfo = Gson().fromJson(jsonStr, UserInfo::class.java)
+                setState {
+                    info = localInfo
+                }
             } else {
                 null
             }

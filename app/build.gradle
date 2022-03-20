@@ -91,6 +91,7 @@ dependencies {
 
     implementation project(':bilimiao-comm')
     implementation project(':bilimiao-cover')
+    implementation project(':download')
     implementation project(':miao-binding')
     implementation project(':miao-binding-android')
 

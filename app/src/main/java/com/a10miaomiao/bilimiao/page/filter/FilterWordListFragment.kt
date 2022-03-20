@@ -29,6 +29,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -51,16 +52,16 @@ class FilterWordListFragment : Fragment(), DIAware, MyPage {
         title = "屏蔽管理\n-\n关键字"
         menus = listOf(
             myMenuItem {
-                key = 0
+                key = MenuKeys.add
                 iconResource = R.drawable.ic_add_white_24dp
                 title = "添加"
             },
             myMenuItem {
-                key = 1
+                key = MenuKeys.delete
                 title = "删除已选"
             },
             myMenuItem {
-                key = 2
+                key = MenuKeys.select
                 title = if (viewModel.isSelectAll) {
                     "全不选"
                 } else {
@@ -73,14 +74,14 @@ class FilterWordListFragment : Fragment(), DIAware, MyPage {
     override fun onMenuItemClick(view: MenuItemView) {
         super.onMenuItemClick(view)
         when(view.prop.key) {
-            0 -> {
+            MenuKeys.add -> {
                 val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://filter/word/add"))
             }
-            1 -> {
+            MenuKeys.delete -> {
                viewModel.deleteSelected()
             }
-            2 -> {
+            MenuKeys.select -> {
                 if (viewModel.isSelectAll) {
                     viewModel.unSelectAll()
                 } else {
