@@ -5,8 +5,11 @@ import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cn.a10miaomiao.download.BiliVideoEntry
+import cn.a10miaomiao.download.BiliVideoPageData
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -25,6 +28,7 @@ class DownloadVideoCreateViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
+    val downloadDelegate: DownloadDelegate by instance()
 
     val video = fragment.requireArguments().getParcelable<VideoInfo>(MainNavGraph.args.video)!!
 
@@ -35,8 +39,6 @@ class DownloadVideoCreateViewModel(
 
     init {
         loadAcceptQuality()
-
-
     }
 
     fun loadAcceptQuality() = viewModelScope.launch(Dispatchers.IO) {
@@ -75,48 +77,57 @@ class DownloadVideoCreateViewModel(
         selectedList.clear()
     }
 
+    fun selectedItem (item: VideoPageInfo) {
+        val index = selectedList.indexOf(item.cid)
+        ui.setState {
+            if (index == -1) {
+                selectedList.add(item.cid)
+            } else {
+                selectedList.removeAt(index)
+            }
+        }
+    }
+
     private fun downloadVideo(page: VideoPageInfo) {
-//        val pageData = BiliVideoPageData(
-//            cid = page.cid.toLong(),
-//            page = page.page,
-//            from = page.from,
-//            part = page.part,
-//            vid = page.vid,
-//            has_alias = false,
-//            tid = 0,
-//            width = 0,
-//            height = 0,
-//            rotate = 0,
-//            download_title = "视频已缓存完成",
-//            download_subtitle = title
-//        )
-//        val biliVideoEntry = BiliVideoEntry(
-//            media_type = 1,
-//            has_dash_audio = false,
-//            is_completed = false,
-//            total_bytes = 0,
-//            downloaded_bytes = 0,
-//            title = title,
-//            type_tag = quality.toString(),
-//            cover = cover,
-//            prefered_video_quality = 112,
-//            guessed_total_bytes = 0,
-//            total_time_milli = 0,
-//            danmaku_count = 1000,
-//            time_update_stamp = 1589831292571L,
-//            time_create_stamp = 1589831261539L,
-//            can_play_in_advance = true,
-//            interrupt_transform_temp_file = false,
-//            avid = aid.toLong(),
-//            spid = 0,
-//            seasion_id = 0,
-//            bvid = bvid,
-//            owner_id = mid,
-//            page_data = pageData
-//        )
-//        val downloadService = MainActivity.of(context!!)
-//            .downloadDelegate
-//            .downloadService
-//        downloadService.createDownload(biliVideoEntry)
+        val pageData = BiliVideoPageData(
+            cid = page.cid.toLong(),
+            page = page.page,
+            from = page.from,
+            part = page.part,
+            vid = page.vid,
+            has_alias = false,
+            tid = 0,
+            width = 0,
+            height = 0,
+            rotate = 0,
+            download_title = "视频已缓存完成",
+            download_subtitle = video.title
+        )
+        val biliVideoEntry = BiliVideoEntry(
+            media_type = 1,
+            has_dash_audio = false,
+            is_completed = false,
+            total_bytes = 0,
+            downloaded_bytes = 0,
+            title = video.title,
+            type_tag = quality.toString(),
+            cover = video.pic,
+            prefered_video_quality = 112,
+            guessed_total_bytes = 0,
+            total_time_milli = 0,
+            danmaku_count = 1000,
+            time_update_stamp = 1589831292571L,
+            time_create_stamp = 1589831261539L,
+            can_play_in_advance = true,
+            interrupt_transform_temp_file = false,
+            avid = video.aid.toLong(),
+            spid = 0,
+            seasion_id = 0,
+            bvid = video.bvid,
+            owner_id = video.owner.mid.toLong(),
+            page_data = pageData
+        )
+        val downloadService = downloadDelegate.downloadService
+        downloadService.createDownload(biliVideoEntry)
     }
 }

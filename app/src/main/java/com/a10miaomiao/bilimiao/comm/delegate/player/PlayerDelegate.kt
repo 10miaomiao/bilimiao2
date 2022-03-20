@@ -15,6 +15,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import cn.a10miaomiao.download.BiliVideoEntry
+import cn.a10miaomiao.download.DownloadFlieHelper
 import cn.a10miaomiao.player.*
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
@@ -41,6 +43,7 @@ import org.kodein.di.instance
 import splitties.dimensions.dip
 import tv.danmaku.ijk.media.player.IMediaPlayer
 import java.io.ByteArrayInputStream
+import java.io.File
 import java.io.InputStream
 import java.util.*
 import kotlin.collections.ArrayList
@@ -144,7 +147,8 @@ class PlayerDelegate(
 
     // 加载
     private var timer = Timer()
-    private val playerCoroutineScope = activity.lifecycleScope
+    private val playerCoroutineScope = PlayerCoroutineScope()
+//private val playerCoroutineScope = activity.lifecycleScope
     private var intervalJob: Job? = null
     private var loadDanmakuJob: Job? = null
     private var loadPlayurlJob: Job? = null
@@ -365,6 +369,7 @@ class PlayerDelegate(
             sid, epid, cid, title
         )
 //        mVideoTitleText.text = "正在播放：${title}"
+        playerCoroutineScope.onStart()
         loadDanmaku()
         playerStore.setPlayerInfo(plalerSource)
     }
@@ -376,22 +381,22 @@ class PlayerDelegate(
             aid, cid, title
         )
 //        mVideoTitleText.text = "正在播放：${title}"
+        playerCoroutineScope.onStart()
         loadDanmaku()
         playerStore.setPlayerInfo(plalerSource)
         historyReport()
     }
 
-//    fun playLocalVideo(biliVideo: BiliVideoEntry) {
-//        stopPlay()
-//        haederBehavior.show()
-//        plalerSource.setBangumi(
-//            biliVideo
-//        )
-////        mVideoTitleText.text = "正在播放：${biliVideo.title}"
-//        loadDanmaku()
-//        playerStore.setVideoPlayerInfo(aid, cid, title)
-////        historyReport()
-//    }
+    fun playLocalVideo(biliVideo: BiliVideoEntry) {
+        stopPlay()
+        scaffoldApp.showPlayer = true
+        plalerSource.setLocalVideo(biliVideo)
+//        mVideoTitleText.text = "正在播放：${title}"
+        playerCoroutineScope.onStart()
+        loadDanmaku()
+        playerStore.setPlayerInfo(plalerSource)
+        historyReport()
+    }
 
     /**
      * 记录历史进度
@@ -428,12 +433,11 @@ class PlayerDelegate(
      * 加载弹幕
      */
     private fun loadDanmaku() = playerCoroutineScope.launch {
-        var isDanmakuTimeSync = true
         hideError()
         mController.setTitle(plalerSource.title)
         showText("装载弹幕资源")
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        isDanmakuTimeSync = prefs.getBoolean("danmaku_time_sync", true)
+        val isDanmakuTimeSync = prefs.getBoolean("danmaku_time_sync", true)
         try {
             val danmukuParser = withContext(Dispatchers.IO) {
                 getBiliDanmukuStream().let {
@@ -458,9 +462,9 @@ class PlayerDelegate(
         }
     }
 
-    private fun getBiliDanmukuStream(): InputStream {
+    private suspend fun getBiliDanmukuStream(): InputStream {
         return BiliApiService.playerAPI.getDanmakuList(plalerSource.cid)
-            .call().let {
+            .awaitCall().let {
                 ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
             }
     }
@@ -471,8 +475,17 @@ class PlayerDelegate(
     private fun loadPlayurl() = playerCoroutineScope.launch {
         showText("读取播放地址")
         try {
+            Exception("unknown type")
             sources = withContext(Dispatchers.IO) {
-                getNetwordSources()
+                when(plalerSource.type) {
+                    PlayerSourceInfo.BANGUMI, PlayerSourceInfo.VIDEO -> {
+                        getNetwordSources()
+                    }
+                    PlayerSourceInfo.LOCAL_VIDEO -> {
+                        getLocalSources()
+                    }
+                    else -> throw Exception("unknown type")
+                }
             }
             withContext(Dispatchers.Main) {
                 startPlay()
@@ -513,33 +526,25 @@ class PlayerDelegate(
         }
     }
 
-//    private fun getLocalSources(): Observable<ArrayList<VideoSource>> {
-//        return Observable.create {
-//            val localEntry = this.localEntry
-//            if (localEntry == null) {
-//                it.onError(Exception("ERROR: NOT FILE"))
-//            } else {
-//                val videoDir = DownloadFlieHelper.getVideoPageFileDir(activity, localEntry)
-//                val pageData = DownloadFlieHelper.getVideoPage(activity, localEntry)
-//                val videoFlie = File(
-//                    videoDir, "0" + "." + pageData.format
-//                )
-//                val sources = arrayListOf(
-//                    VideoSource().apply {
-//                        uri = Uri.fromFile(videoFlie)
-//                        length = pageData.segment_list[0].duration
-//                        size = pageData.segment_list[0].bytes
-//                    }
-//                )
-//
-//                acceptDescription = listOf("本地")
-//                acceptQuality = listOf(pageData.quality)
-//                quality = pageData.quality
-//                it.onNext(sources)
-//                it.onComplete()
-//            }
-//        }
-//    }
+    private fun getLocalSources(): ArrayList<VideoSource> {
+        val localEntry = plalerSource.localEntry ?: throw Exception("ERROR: NOT FILE")
+        val videoDir = DownloadFlieHelper.getVideoPageFileDir(activity, localEntry)
+        val pageData = DownloadFlieHelper.getVideoPage(activity, localEntry)
+        val videoFlie = File(
+            videoDir, "0" + "." + pageData.format
+        )
+        val sources = arrayListOf(
+            VideoSource().apply {
+                uri = Uri.fromFile(videoFlie)
+                length = pageData.segment_list[0].duration
+                size = pageData.segment_list[0].bytes
+            }
+        )
+        acceptDescription = listOf("本地")
+        acceptQuality = listOf(pageData.quality)
+        quality = pageData.quality
+        return sources
+    }
 
     fun restartPlay(position: Long) {
         lastPosition = position
@@ -548,6 +553,8 @@ class PlayerDelegate(
         }
         mDanmaku?.release()
         playerService.release(false)
+        playerCoroutineScope.onStop()
+        playerCoroutineScope.onStart()
         loadDanmaku()
         hideError()
     }
@@ -583,6 +590,7 @@ class PlayerDelegate(
     }
 
     fun stopPlay() {
+        playerCoroutineScope.onStop()
         historyReport()
 //        mVideoTitleText.text = ""
         if (mPlayer != null && mPlayer.isDrawingCacheEnabled) {

@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import cn.a10miaomiao.download.BiliVideoEntry
+
 class PlayerSourceInfo {
     var type = ""
     var aid = ""
@@ -7,7 +9,7 @@ class PlayerSourceInfo {
     var epid = ""
     var sid = ""
     var title = ""
-//    private var localEntry: BiliVideoEntry? = null
+    var localEntry: BiliVideoEntry? = null
 
     fun setVideo(aid: String, cid: String, title: String) {
         this.type = VIDEO
@@ -24,12 +26,12 @@ class PlayerSourceInfo {
         this.title = title
     }
 
-    fun setLocalVideo() {
-//        this.localEntry = biliVideo
+    fun setLocalVideo(biliVideo: BiliVideoEntry) {
+        this.localEntry = biliVideo
         this.type = LOCAL_VIDEO
-//        this.aid = biliVideo.avid.toString()
-//        this.cid = biliVideo.page_data.cid.toString()
-//        this.title = biliVideo.title
+        this.aid = biliVideo.avid.toString()
+        this.cid = biliVideo.page_data.cid.toString()
+        this.title = biliVideo.title
     }
 
     fun reset() {

@@ -10,12 +10,14 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import cn.a10miaomiao.miao.binding.android.view.*
+import cn.a10miaomiao.miao.binding.android.widget._isChecked
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
@@ -28,6 +30,7 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateViewModel
@@ -56,12 +59,14 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
     private val viewModel by diViewModel<DownloadVideoCreateViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
+    private val downloadDelegate by instance<DownloadDelegate>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        ui.parentView = container
         return ui.root
     }
 
@@ -72,8 +77,13 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    val handleConfirmClick = View.OnClickListener {
+        viewModel.startDownload()
+    }
+
     val handleItemClick = OnItemClickListener { adapter, view, position ->
-        requireActivity().toast("重新装修中")
+        val item = viewModel.video.pages[position]
+        viewModel.selectedItem(item)
     }
 
     val itemUi = miaoBindingItemUi<VideoPageInfo> { item, index ->
@@ -85,9 +95,18 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
                 horizontalMargin = dip(5)
                 bottomMargin = dip(10)
             }
-//            val enabled = item.cid != playerStore.state.info.cid
-//            _isEnabled = enabled
 
+            val curAid = viewModel.video.aid
+            val isCreated = downloadDelegate.downloadList.indexOfFirst {
+                curAid == it.avid.toString() && item.cid == it.page_data.cid.toString()
+            } != -1
+            val isSelected = viewModel.selectedList.indexOf(item.cid) != -1
+            _isEnabled = !isCreated
+            _backgroundResource = if (isCreated || isSelected) {
+                R.drawable.shape_corner_pressed
+            } else {
+                R.drawable.shape_corner_default
+            }
 
             views {
                 +textView {
@@ -96,37 +115,12 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
                     maxLines = 1
                     ellipsize = TextUtils.TruncateAt.END
 
-//                    _textColorResource = if (enabled) {
-//                        R.color.text_black
-//                    } else {
-//                        config.themeColorResource
-//                    }
                     _text = item.part
-
-//                    b.bindIndexed { item, i ->
-//                        text = item.part
-//                        val index = downloadDelegate.downloadList.indexOfFirst {
-//                            aid == it.avid.toString() && item.cid == it.page_data.cid.toString()
-//                        }
-//                        if (index != -1) {
-//                            this@frameLayout.isEnabled = false
-//                            this@frameLayout.backgroundResource =
-//                                R.drawable.shape_corner_pressed
-//                            textColor = config.lineColor
-//                            return@bindIndexed
-//                        }
-//                        this@frameLayout.isEnabled = true
-//                        val selected = viewModel.selectedList.indexOf(item.cid) != -1
-//                        if (selected) {
-//                            this@frameLayout.backgroundResource =
-//                                R.drawable.shape_corner_pressed
-//                            textColorResource = config.themeColorResource
-//                        } else {
-//                            this@frameLayout.backgroundResource =
-//                                R.drawable.shape_corner_default
-//                            textColorResource = R.color.text_black
-//                        }
-//                    }
+                    _textColorResource = if (isCreated || isSelected) {
+                        config.themeColorResource
+                    } else {
+                        R.color.text_black
+                    }
                 }
             }
 
@@ -198,6 +192,28 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
                     height = matchParent
                 }
 
+                +frameLayout {
+                    setBackgroundColor(config.windowBackgroundColor)
+                    apply(ViewStyle.roundRect(dip(24)))
+                    setOnClickListener(handleConfirmClick)
+
+                    views {
+                        +textView{
+                            setBackgroundResource(config.selectableItemBackground)
+                            gravity = Gravity.CENTER
+                            text = "开始下载"
+                            setTextColor(config.foregroundAlpha45Color)
+                            gravity = Gravity.CENTER
+                        }
+                    }
+
+                }..lParams {
+                    width = matchParent
+                    height = dip(48)
+                    topMargin = dip(10)
+                    bottomMargin = dip(20)
+                    horizontalMargin = dip(20)
+                }
             }
         }
     }

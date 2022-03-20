@@ -1,6 +1,7 @@
 package cn.a10miaomiao.miao.binding.android.view
 
 import android.view.View
+import androidx.annotation.DrawableRes
 import androidx.annotation.Px
 import cn.a10miaomiao.miao.binding.exception.BindingOnlySetException
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -29,5 +30,13 @@ inline var View._tag: Any
     set(value) = miaoEffect(value) {
         tag = it
     }
+
+
+inline var View._backgroundResource: Int
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(value) = miaoEffect(value) {
+        setBackgroundResource(value)
+    }
+
 
 

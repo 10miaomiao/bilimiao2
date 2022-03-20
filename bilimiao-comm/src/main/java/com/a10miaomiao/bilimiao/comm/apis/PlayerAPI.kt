@@ -18,7 +18,7 @@ class PlayerAPI {
     /**
      * 获取视频播放地址
      */
-    suspend fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 64): PlayurlData {
+    fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 64): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "avid" to avid,
             "cid" to cid,
@@ -32,7 +32,7 @@ class PlayerAPI {
         val res = MiaoHttp.request {
             url = "https://api.bilibili.com/x/player/playurl?" + ApiHelper.urlencode(params)
             headers = getVideoHeaders(avid)
-        }.awaitCall().gson<ResultInfo<PlayurlData>>()
+        }.call().gson<ResultInfo<PlayurlData>>()
         if (res.code == 0) {
             return res.data
         } else {

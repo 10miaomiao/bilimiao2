@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
+import com.a10miaomiao.bilimiao.page.download.DownloadFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
@@ -78,6 +79,8 @@ object MainNavGraph {
             deepLink("bilimiao://filter/word/add")
         }
 
+        val download = f<DownloadFragment> {
+        }
         val downloadVideoCreate = f<DownloadVideoCreateFragment> {
             argument(args.video) {
                 type = NavType.ParcelableType(VideoInfo::class.java)
@@ -206,6 +209,7 @@ object MainNavGraph {
         val home_to_h5Login = dest.home to dest.h5Login
         val home_to_user = dest.home to dest.user
         val home_to_history = dest.home to dest.history
+        val home_to_download = dest.home to dest.download
 
         val setting_to_videoSetting = dest.setting to dest.videoSetting
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting

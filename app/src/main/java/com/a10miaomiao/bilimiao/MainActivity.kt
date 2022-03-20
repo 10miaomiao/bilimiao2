@@ -32,6 +32,7 @@ import org.kodein.di.bindSingleton
 import splitties.experimental.InternalSplittiesApi
 import android.R.attr.right
 import androidx.lifecycle.lifecycleScope
+import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.store.*
@@ -52,20 +53,24 @@ class MainActivity
         bindSingleton { this@MainActivity }
         bindSingleton { windowStore }
         bindSingleton { playerStore }
+        bindSingleton { downloadStore }
         bindSingleton { userStore }
         bindSingleton { timeSettingStore }
         bindSingleton { filterStore }
         bindSingleton { playerDelegate }
+        bindSingleton { downloadDelegate }
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
     }
 
     private val windowStore: WindowStore by diViewModel(di)
     private val playerStore: PlayerStore by diViewModel(di)
+    private val downloadStore: DownloadStore by diViewModel(di)
     private val userStore: UserStore by diViewModel(di)
     private val timeSettingStore: TimeSettingStore by diViewModel(di)
     private val filterStore: FilterStore by diViewModel(di)
 
+    private val downloadDelegate by lazy { DownloadDelegate(this, di) }
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
@@ -79,6 +84,7 @@ class MainActivity
         ui = MainUi(this)
         setContentView(ui.root)
         playerDelegate.onCreate(savedInstanceState)
+        downloadDelegate.onCreate(savedInstanceState)
         bottomSheetDelegate.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -232,6 +238,7 @@ class MainActivity
     override fun onDestroy() {
         super.onDestroy()
         playerDelegate.onDestroy()
+        downloadDelegate.onDestroy()
 //        downloadDelegate.onDestroy()
     }
 

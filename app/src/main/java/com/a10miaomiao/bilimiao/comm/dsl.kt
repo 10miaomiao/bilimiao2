@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.createViewModelLazy
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelLazy
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
+import cn.a10miaomiao.miao.binding.miaoEffect
+import cn.a10miaomiao.miao.binding.miaoMemo
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.store.base.BaseStore
+import kotlinx.coroutines.launch
 import org.kodein.di.*
 import org.kodein.di.android.subDI
 import org.kodein.di.android.x.closestDI
@@ -109,4 +111,23 @@ fun Fragment.lazyUiDi(
     bindSingleton { ui() }
     bindSingleton { this@lazyUiDi }
     init?.invoke(this)
+}
+
+fun MiaoBindingUi.connectStore(owner: LifecycleOwner, store: BaseStore<*>) {
+    miaoEffect(owner) {
+        owner.lifecycleScope.launch {
+            owner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                store.connectUi(this@connectStore)
+            }
+        }
+    }
+}
+
+inline fun <reified T : BaseStore<*>> MiaoBindingUi.miaoStore(owner: LifecycleOwner, di: DI): T {
+    val store = object : DIAware {
+        override val di = di
+        val store by instance<T>()
+    }.store
+    connectStore(owner, store)
+    return store
 }

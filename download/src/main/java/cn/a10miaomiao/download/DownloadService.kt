@@ -2,9 +2,8 @@ package cn.a10miaomiao.download
 
 import android.app.Service
 import android.content.Intent
-import android.os.Environment
+import android.os.*
 import android.os.Environment.*
-import android.os.IBinder
 import android.util.Log
 import com.google.gson.Gson
 import io.reactivex.Observable
@@ -12,6 +11,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.io.InputStream
+import java.lang.Exception
 
 class DownloadService : Service(), DownloadManager.Callback {
     private val TAG = this::class.simpleName
@@ -24,8 +24,8 @@ class DownloadService : Service(), DownloadManager.Callback {
     private var downloadList = arrayListOf<BiliVideoEntry>()
     private var curDownload: BiliVideoEntry? = null
 
-    var getPlayUrl: ((entry: BiliVideoEntry) -> Observable<BiliVideoPlayUrlEntry>)? = null
-    var getDanmakuXML: ((cid: String) -> Observable<InputStream>)? = null
+    var getPlayUrl: ((entry: BiliVideoEntry) -> BiliVideoPlayUrlEntry)? = null
+    var getDanmakuXML: ((cid: String) -> InputStream)? = null
     var downloadCallback: ((entry: BiliVideoEntry, download: DownloadInfo) -> Unit)? = null
 
     override fun onBind(intent: Intent) = downloadBinder
@@ -95,30 +95,31 @@ class DownloadService : Service(), DownloadManager.Callback {
         val danmakuXMLFile = File(pageDir, "danmaku.xml")
         if (!danmakuXMLFile.exists()) {
             // 获取弹幕并下载
-            downloadCallback?.invoke(biliVideo, DownloadInfo(
-                    key = biliVideo.page_data.cid.toString(),
-                    name = biliVideo.title + biliVideo.page_data.part,
-                    url = "",
-                    status = 101
+            postDownloadInfo(DownloadInfo(
+                key = biliVideo.page_data.cid.toString(),
+                name = biliVideo.title + biliVideo.page_data.part,
+                url = "",
+                status = 101
             ))
-            getDanmakuXML?.invoke(biliVideo.page_data.cid.toString())?.apply {
-                subscribeOn(Schedulers.io())
-                observeOn(AndroidSchedulers.mainThread())
-                subscribe({
-                    val danmakuXMLFile = File(pageDir, "danmaku.xml")
-                    FileUtil.inputStreamToFile(it, danmakuXMLFile)
-                    downloadVideo(biliVideo)
-                }, {
-                    downloadCallback?.invoke(biliVideo, DownloadInfo(
-                            key = biliVideo.page_data.cid.toString(),
-                            name = biliVideo.title + biliVideo.page_data.part,
-                            url = "",
-                            status = -101
-                    ))
-                    //TODO: 下载弹幕失败后续处理
-                    it.printStackTrace()
-                })
-            }
+            Observable.create<InputStream> {
+                Log.d("RxJava2", "This msg from work thread :" + Thread.currentThread().getName());
+                val inputStream = getDanmakuXML?.invoke(biliVideo.page_data.cid.toString())!!
+                it.onNext(inputStream)
+                it.onComplete()
+            }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+                val danmakuXMLFile = File(pageDir, "danmaku.xml")
+                FileUtil.inputStreamToFile(it, danmakuXMLFile)
+                downloadVideo(biliVideo)
+            }, {
+                postDownloadInfo(DownloadInfo(
+                        key = biliVideo.page_data.cid.toString(),
+                        name = biliVideo.title + biliVideo.page_data.part,
+                        url = "",
+                        status = -101
+                ))
+                //TODO: 下载弹幕失败后续处理
+                it.printStackTrace()
+            })
         } else {
             downloadVideo(biliVideo)
         }
@@ -130,17 +131,20 @@ class DownloadService : Service(), DownloadManager.Callback {
         if (!videoDir.exists()) {
             videoDir.mkdir()
         }
-        downloadCallback?.invoke(biliVideo, DownloadInfo(
+        postDownloadInfo(
+            DownloadInfo(
                 key = biliVideo.page_data.cid.toString(),
                 name = biliVideo.title + biliVideo.page_data.part,
                 url = "",
                 status = 102
-        ))
+            )
+        )
         // 获取播放地址并下载
-        getPlayUrl?.invoke(biliVideo)?.apply {
-            subscribeOn(Schedulers.io())
-            observeOn(AndroidSchedulers.mainThread())
-            subscribe({
+        Observable.create<BiliVideoPlayUrlEntry> {
+            val playUrl = getPlayUrl?.invoke(biliVideo)!!
+            it.onNext(playUrl)
+            it.onComplete()
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
                 val videoJsonFile = File(videoDir, "index.json")
                 val videoJsonStr = Gson().toJson(it)
                 FileUtil.writeTxtFile(videoJsonFile, videoJsonStr, false)
@@ -162,9 +166,9 @@ class DownloadService : Service(), DownloadManager.Callback {
                                 videoDir, "0" + "." + it.format
                         )
                 )
-                downloadCallback?.invoke(biliVideo, info)
+                postDownloadInfo(info)
             }, {
-                downloadCallback?.invoke(biliVideo, DownloadInfo(
+               postDownloadInfo(DownloadInfo(
                         key = biliVideo.page_data.cid.toString(),
                         name = biliVideo.title + biliVideo.page_data.part,
                         url = "",
@@ -173,7 +177,6 @@ class DownloadService : Service(), DownloadManager.Callback {
                 //TODO: 获取播放地址失败后续处理
                 it.printStackTrace()
             })
-        }
     }
 
     /**
@@ -193,7 +196,7 @@ class DownloadService : Service(), DownloadManager.Callback {
             val entryJsonStr = Gson().toJson(biliVideo)
             FileUtil.writeTxtFile(entryJsonFile, entryJsonStr, false)
             downloadManager.cancel()?.let { info ->
-                downloadCallback?.invoke(biliVideo, info)
+                postDownloadInfo(info)
             }
             curDownload = null
         }
@@ -246,7 +249,7 @@ class DownloadService : Service(), DownloadManager.Callback {
         curDownload?.let {
             it.total_bytes = info.size
             it.downloaded_bytes = info.progress
-            downloadCallback?.invoke(it, info)
+            postDownloadInfo(info)
         }
 //
 //        Log.d(TAG, info.progress.toString())
@@ -267,7 +270,7 @@ class DownloadService : Service(), DownloadManager.Callback {
             val entryJsonFile = File(pageDir, "entry.json")
             val entryJsonStr = Gson().toJson(biliVideo)
             FileUtil.writeTxtFile(entryJsonFile, entryJsonStr, false)
-            downloadCallback?.invoke(biliVideo, info)
+            postDownloadInfo(info)
         }
         curDownload = null
         nextDownload()
@@ -278,10 +281,14 @@ class DownloadService : Service(), DownloadManager.Callback {
         curDownload?.let {
             it.total_bytes = info.size
             it.downloaded_bytes = info.progress
-            downloadCallback?.invoke(it, info)
+            postDownloadInfo(info)
         }
         curDownload = null
     }
 
-
+    fun postDownloadInfo (info: DownloadInfo) {
+        curDownload?.let {
+            downloadCallback?.invoke(it, info)
+        }
+    }
 }
