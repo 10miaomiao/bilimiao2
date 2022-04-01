@@ -14,7 +14,7 @@ class ViewConfig(val context: Context) {
     val pagePadding get() = context.dip(10)
     val bottomSheetTitleHeight = context.dip(30)
 
-    val dividerSize get() = context.dip(10)
+    val dividerSize get() = context.dip(8)
     val regionIconSize get() = context.dip(24)
 
     val blackAlpha45 get() = context.resources.getColor(R.color.black_alpha_45)

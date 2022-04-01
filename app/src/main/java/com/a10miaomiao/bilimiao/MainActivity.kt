@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao
 
 import android.content.res.Configuration
-import android.graphics.Point
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
@@ -11,7 +10,9 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.collection.SimpleArrayMap
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
 import androidx.navigation.NavController
@@ -29,16 +30,10 @@ import com.a10miaomiao.bilimiao.widget.comm.*
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
-import splitties.experimental.InternalSplittiesApi
-import android.R.attr.right
-import androidx.lifecycle.lifecycleScope
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.store.*
 import com.baidu.mobstat.StatService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
 class MainActivity
@@ -109,12 +104,10 @@ class MainActivity
 
         navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-
         navController = navHostFragment.navController
         MainNavGraph.createGraph(navController, MainNavGraph.dest.home)
         navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
-
         timeSettingStore.initState()
 
         ui.mAppBar.onBackClick = this.onBackClick
@@ -137,8 +130,8 @@ class MainActivity
         // 百度统计
         StatService.setAuthorizedState(this, false)
         StatService.start(this)
-
     }
+
 
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
         if (fragment is MyPage) {
@@ -156,7 +149,7 @@ class MainActivity
         ui.mAppBar.cleanProp()
     }
 
-    private fun setMyPageConfig(config: MyPageConfigInfo) {
+    fun setMyPageConfig(config: MyPageConfigInfo) {
         ui.mAppBar.setProp {
             title = config.title
             menus = config.menus
@@ -175,7 +168,6 @@ class MainActivity
         val top = statusBarHelper.getStatusBarHeight()
         val bottom = displayMetrics.heightPixels - rectangle.bottom - rectangle.top
         val right = displayMetrics.widthPixels - rectangle.right
-        DebugMiao.log(0, top, right, bottom)
         setWindowInsets(0, top, right, bottom)
     }
     fun setWindowInsets (insets: WindowInsets) {
@@ -236,10 +228,12 @@ class MainActivity
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         playerDelegate.onDestroy()
         downloadDelegate.onDestroy()
-//        downloadDelegate.onDestroy()
+        bottomSheetDelegate.onDestroy()
+        navController.removeOnDestinationChangedListener(this)
+//        navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
+        super.onDestroy()
     }
 
     override fun onStart() {

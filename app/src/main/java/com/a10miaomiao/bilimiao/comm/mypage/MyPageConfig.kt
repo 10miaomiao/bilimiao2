@@ -1,13 +1,17 @@
 package com.a10miaomiao.bilimiao.comm.mypage
 
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
+import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import java.lang.Exception
 
 class MyPageConfig(
-    private val lifecycle: Lifecycle,
+    private val fragment: Fragment,
     private val getConfigInfo: (() -> MyPageConfigInfo),
 ): LifecycleObserver {
 
@@ -16,7 +20,19 @@ class MyPageConfig(
     private val configInfo get() = getConfigInfo()
 
     init {
-        lifecycle.addObserver(this)
+        fragment.lifecycle.addObserver(this)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onStart() {
+        if (setConfig == null) {
+            // 无奈之取，activity重启后fragment自动恢复后不会经过onAttachFragment方法，setConfig为空
+            val fragmentManager = fragment.parentFragmentManager
+            val clazz = FragmentManager::class.java
+            val method = clazz.getDeclaredMethod("dispatchOnAttachFragment", Fragment::class.java)
+            method.isAccessible = true
+            method.invoke(fragmentManager, fragment)
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -25,7 +41,7 @@ class MyPageConfig(
     }
 
     fun notifyConfigChanged () {
-        if (lifecycle.currentState == Lifecycle.State.RESUMED) {
+        if (fragment.lifecycle.currentState == Lifecycle.State.RESUMED) {
             setConfig?.let {
                 it(configInfo)
             }

@@ -53,8 +53,8 @@ class RegionFragment : Fragment(), DIAware , MyPage {
 
     private val timeSettingStore: TimeSettingStore by instance()
 
-    private lateinit var mViewPager: ViewPager
-    private lateinit var mTabLayout: TabLayout
+    private val ID_viewPager = 233
+    private val ID_tabLayout = 234
 
     override val pageConfig = myPageConfig {
         title = "时光姬-" + viewModel.region.name
@@ -109,49 +109,46 @@ class RegionFragment : Fragment(), DIAware , MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
-            timeSettingStore.stateFlow.collect {
-                pageConfig.notifyConfigChanged()
-            }
-        }
-        initView()
+        initView(view)
     }
 
-    private fun initView() {
-        val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
-            override fun getItem(p0: Int): Fragment {
-                var fragment = viewModel.fragments[p0]
-                if (fragment == null) {
-                    val tid = viewModel.region.children[p0].tid
-                    fragment = RegionDetailsFragment.newInstance(tid)
+    private fun initView(view: View) {
+        val tabLayout = view.findViewById<TabLayout>(ID_tabLayout)
+        val viewPager = view.findViewById<ViewPager>(ID_viewPager)
+        if  (viewPager.adapter == null) {
+            val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
+                override fun getItem(p0: Int): Fragment {
+                    var fragment = viewModel.fragments[p0]
+                    if (fragment == null) {
+                        val tid = viewModel.region.children[p0].tid
+                        fragment = RegionDetailsFragment.newInstance(tid)
+                    }
+                    return fragment
                 }
-                return fragment
+                override fun getCount() = viewModel.region.children.size
+                override fun getPageTitle(position: Int) = viewModel.region.children[position].name
             }
-            override fun getCount() = viewModel.region.children.size
-            override fun getPageTitle(position: Int) = viewModel.region.children[position].name
+            viewPager.adapter = mAdapter
+            tabLayout.setTabsFromPagerAdapter(mAdapter)
+            tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
+            tabLayout.setupWithViewPager(viewPager)
         }
-        mViewPager.adapter = mAdapter
-        mTabLayout.setTabsFromPagerAdapter(mAdapter)
-        mTabLayout.tabMode = TabLayout.MODE_SCROLLABLE
-        mTabLayout.setupWithViewPager(mViewPager)
     }
 
     @SuppressLint("ResourceType")
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, windowStore)
         val contentInsets = windowStore.state.contentInsets
         verticalLayout {
             views {
-                +tabLayout(234) {
+                +tabLayout(ID_tabLayout) {
                     _topPadding = contentInsets.top
                     _leftPadding = contentInsets.left
                     _rightPadding = contentInsets.right
-                    mTabLayout = this
                 }..lParams(matchParent, wrapContent)
-                +viewPager(233) {
+                +viewPager(ID_viewPager) {
                     _leftPadding = contentInsets.left
                     _rightPadding = contentInsets.right
-                    mViewPager = this
                 }..lParams(matchParent, matchParent) {
                     weight = 1f
                 }

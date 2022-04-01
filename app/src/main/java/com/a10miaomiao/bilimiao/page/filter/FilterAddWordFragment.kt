@@ -127,7 +127,7 @@ class FilterAddWordFragment : Fragment(), DIAware, MyPage {
                         +textView {
                             text = "确定"
                             padding = config.dividerSize
-                            textColorResource = requireContext().attr(R.attr.colorPrimary)
+                            textColorResource = config.themeColorResource
                             setBackgroundResource(config.selectableItemBackground)
                             gravity = Gravity.CENTER
                             setOnClickListener(handleOkClick)

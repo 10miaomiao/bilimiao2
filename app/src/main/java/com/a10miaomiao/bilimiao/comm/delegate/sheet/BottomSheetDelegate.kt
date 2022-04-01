@@ -116,4 +116,9 @@ class BottomSheetDelegate(
         return false
     }
 
+    fun onDestroy () {
+        navBottomSheetController.removeOnDestinationChangedListener(this)
+        navBottomSheetFragment.childFragmentManager.removeFragmentOnAttachListener(this)
+    }
+
 }

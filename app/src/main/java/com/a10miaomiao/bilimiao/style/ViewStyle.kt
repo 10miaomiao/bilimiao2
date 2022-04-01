@@ -1,10 +1,8 @@
 package com.a10miaomiao.bilimiao.config
 
-import android.graphics.Color
 import android.graphics.Outline
 import android.view.View
 import android.view.ViewOutlineProvider
-import com.a10miaomiao.bilimiao.R
 import splitties.views.backgroundColor
 import splitties.views.padding
 

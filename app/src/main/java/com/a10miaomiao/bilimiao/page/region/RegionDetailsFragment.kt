@@ -30,6 +30,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.flow.collect
@@ -115,6 +116,8 @@ class RegionDetailsFragment : Fragment(), DIAware {
     }
 
     val ui = miaoBindingUi {
+        val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
+        val contentInsets = windowStore.getContentInsets(parentView)
         verticalLayout {
             views {
                 +recyclerView {
@@ -132,7 +135,9 @@ class RegionDetailsFragment : Fragment(), DIAware {
                             else -> ListState.NORMAL
                         }
                     )
-                    footerView..lParams(matchParent, wrapContent)
+                    footerView..lParams(matchParent, wrapContent) {
+                        bottomMargin = contentInsets.bottom
+                    }
 
                     _miaoAdapter(
                         items = viewModel.list.data,

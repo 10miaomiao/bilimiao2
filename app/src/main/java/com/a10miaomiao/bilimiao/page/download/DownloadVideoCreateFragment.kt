@@ -41,12 +41,9 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
-import splitties.views.backgroundColor
+import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.horizontalPadding
-import splitties.views.padding
-import splitties.views.verticalPadding
 
 class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
 
@@ -130,16 +127,16 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
     val ui = miaoBindingUi {
         val contentInsets = windowStore.getContentInsets(parentView)
         verticalLayout {
-            _topPadding = contentInsets.top
-            _bottomPadding = contentInsets.bottom
 
             views {
                 +horizontalLayout {
                     backgroundColor = config.blockBackgroundColor
-                    verticalPadding = config.pagePadding
+                    gravity = Gravity.CENTER_VERTICAL
+
+                    bottomPadding = config.pagePadding
+                    _topPadding = contentInsets.top + config.pagePadding
                     _leftPadding = contentInsets.left + config.pagePadding
                     _rightPadding = contentInsets.right + config.pagePadding
-                    gravity = Gravity.CENTER_VERTICAL
 
                     views {
 
@@ -193,26 +190,33 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
                 }
 
                 +frameLayout {
-                    setBackgroundColor(config.windowBackgroundColor)
-                    apply(ViewStyle.roundRect(dip(24)))
-                    setOnClickListener(handleConfirmClick)
+                    _bottomPadding = contentInsets.bottom + config.dividerSize
+                    topPadding = config.dividerSize
+                    horizontalPadding = config.pagePadding
+
+                    setBackgroundColor(config.blockBackgroundColor)
 
                     views {
-                        +textView{
-                            setBackgroundResource(config.selectableItemBackground)
-                            gravity = Gravity.CENTER
-                            text = "开始下载"
-                            setTextColor(config.foregroundAlpha45Color)
-                            gravity = Gravity.CENTER
+                        +frameLayout {
+                            setBackgroundColor(config.windowBackgroundColor)
+                            apply(ViewStyle.roundRect(dip(24)))
+                            setOnClickListener(handleConfirmClick)
+
+                            views {
+                                +textView{
+                                    setBackgroundResource(config.selectableItemBackground)
+                                    gravity = Gravity.CENTER
+                                    text = "开始下载"
+                                    setTextColor(config.foregroundAlpha45Color)
+                                    gravity = Gravity.CENTER
+                                }
+                            }
+
+                        }..lParams {
+                            width = matchParent
+                            height = dip(48)
                         }
                     }
-
-                }..lParams {
-                    width = matchParent
-                    height = dip(48)
-                    topMargin = dip(10)
-                    bottomMargin = dip(20)
-                    horizontalMargin = dip(20)
                 }
             }
         }

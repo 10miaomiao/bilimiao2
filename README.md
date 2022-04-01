@@ -9,7 +9,7 @@ bilimiao2.0
 * [glide](https://github.com/bumptech/glide)
 * [BaseRecyclerViewAdapterHelper](https://github.com/CymChad/BaseRecyclerViewAdapterHelper)
 * [NumberPickerView](https://github.com/Carbs0126/NumberPickerView)
-* [rclayout](https://github.com/GcsSloop/rclayout)
+* [ShadowLayout](https://github.com/lihangleo2/ShadowLayout)
 * [ijkplayer](https://github.com/Bilibili/ijkplayer)
 * [DanmakuFlameMaster](https://github.com/bilibili/DanmakuFlameMaster)
 

@@ -20,6 +20,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.dsl.core.*
+import splitties.views.imageResource
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -43,6 +44,8 @@ fun ImageView._network(
             .placeholder(R.drawable.bili_default_image_tv)
             .dontAnimate()
             .into(this)
+    } else {
+        this.imageResource = 0
     }
 }
 

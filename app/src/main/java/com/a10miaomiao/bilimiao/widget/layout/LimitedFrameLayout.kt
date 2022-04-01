@@ -1,10 +1,11 @@
 package com.a10miaomiao.bilimiao.widget.layout
 
 import android.content.Context
+import android.graphics.Canvas
 import android.util.AttributeSet
 import android.widget.FrameLayout
 
-class LimitedFrameLayout @JvmOverloads constructor(
+open class LimitedFrameLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
 
@@ -37,6 +38,5 @@ class LimitedFrameLayout @JvmOverloads constructor(
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
-
 
 }

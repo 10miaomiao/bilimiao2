@@ -5,7 +5,7 @@ import android.view.Menu
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 
-class RankOrderPopupMenu(
+internal class RankOrderPopupMenu(
     private val activity: Activity,
     private val anchor: View,
     private val checkedValue: String,
@@ -45,6 +45,8 @@ class RankOrderPopupMenu(
     fun show() {
         popupMenu.show()
     }
+
+
 
 //    <!--arrayOf("click", "scores", "stow", "coin", "dm")-->
 

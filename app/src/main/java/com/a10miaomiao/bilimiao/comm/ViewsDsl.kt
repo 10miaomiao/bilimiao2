@@ -11,6 +11,7 @@ import androidx.core.widget.NestedScrollView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
+import com.a10miaomiao.bilimiao.widget.shadow.ShadowLayout
 import com.google.android.material.tabs.TabLayout
 import splitties.views.dsl.core.*
 import kotlin.contracts.InvocationKind
@@ -71,5 +72,22 @@ inline fun View.tabLayout(
 ): TabLayout {
     return view({ TabLayout(it) }, id).apply(initView)
 }
+
+inline fun Ui.shadowLayout(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: ShadowLayout.() -> Unit = {}
+): ShadowLayout {
+    return view({ ShadowLayout(it) }, id).apply(initView)
+}
+
+inline fun View.shadowLayout(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: ShadowLayout.() -> Unit = {}
+): ShadowLayout {
+    return view({ ShadowLayout(it) }, id).apply(initView)
+}
+
 
 
