@@ -13,8 +13,7 @@ import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.miao.binding.android.view._isEnabled
-import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
@@ -30,11 +29,9 @@ import com.a10miaomiao.bilimiao.widget.monthPickerView
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
+import splitties.views.*
 import splitties.views.dsl.appcompat.switch
 import splitties.views.dsl.core.*
-import splitties.views.padding
-import splitties.views.textColorResource
-import splitties.views.topPadding
 
 class TimeSettingFragment : Fragment(), DIAware, MyPage {
 
@@ -198,15 +195,16 @@ class TimeSettingFragment : Fragment(), DIAware, MyPage {
     val ui = miaoBindingUi {
         val contentInsets = windowStore.getContentInsets(parentView)
         verticalLayout {
-            setPadding(
-                contentInsets.left,
-                contentInsets.top,
-                contentInsets.right,
-                contentInsets.bottom,
-            )
+            _leftPadding = contentInsets.left
+            _rightPadding = contentInsets.right
+
             views {
                 +horizontalLayout {
-                    apply(ViewStyle.block)
+                    setBackgroundResource(config.blockBackgroundResource)
+                    backgroundColor = config.blockBackgroundColor
+                    horizontalPadding = config.pagePadding
+                    bottomPadding = config.dividerSize
+                    _topPadding = contentInsets.top + config.dividerSize
 
                     views {
                         +textView {
@@ -230,7 +228,9 @@ class TimeSettingFragment : Fragment(), DIAware, MyPage {
                 }..lParams(width = matchParent)
 
                 +verticalLayout {
-                    apply(ViewStyle.block)
+                    padding = config.pagePadding
+                    apply(ViewStyle.roundRect(dip(10)))
+                    backgroundColor = config.blockBackgroundColor
 
                     views {
                         +textView {
@@ -269,34 +269,43 @@ class TimeSettingFragment : Fragment(), DIAware, MyPage {
                             topMargin = dip(5)
                         }
                     }
+                }.wrapInNestedScrollView {
+                    padding = config.pagePadding
                 }..lParams(width = matchParent) {
-                    topMargin = config.dividerSize
+                    weight = 1f
                 }
 
-                +textView {
-                    text = "确定"
-                    textColorResource = requireActivity().attr(R.attr.colorPrimary)
-                    setBackgroundResource(config.selectableItemBackground)
-                    apply(ViewStyle.block)
-                    gravity = Gravity.CENTER
+                +frameLayout {
+                    _bottomPadding = contentInsets.bottom + config.dividerSize
+                    topPadding = config.dividerSize
+                    horizontalPadding = config.pagePadding
 
-                    setOnClickListener(handleOkClick)
+                    setBackgroundColor(config.blockBackgroundColor)
 
-                    miaoEffect(viewModel.gapCount) {
-                        if (it < 0 || it > 30) {
-                            isEnabled = false
-                            textColorResource = R.color.gray
-                        } else {
-                            isEnabled = true
-                            textColorResource = requireActivity().attr(R.attr.colorPrimary)
+                    views {
+                        +frameLayout {
+                            setBackgroundColor(config.windowBackgroundColor)
+                            apply(ViewStyle.roundRect(dip(24)))
+                            setOnClickListener(handleOkClick)
+
+                            views {
+                                +textView{
+                                    setBackgroundResource(config.selectableItemBackground)
+                                    gravity = Gravity.CENTER
+                                    text = "确定"
+                                    setTextColor(config.foregroundAlpha45Color)
+                                    gravity = Gravity.CENTER
+                                }
+                            }
+
+                        }..lParams {
+                            width = matchParent
+                            height = dip(48)
                         }
                     }
-                }..lParams(width = matchParent) {
-                    verticalMargin = config.dividerSize
                 }
-
             }
-        }.wrapInNestedScrollView()
+        }
     }
 
 }

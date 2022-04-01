@@ -11,10 +11,14 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
+import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
+import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
+import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
 import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.template.SettingFragment
@@ -87,6 +91,26 @@ object MainNavGraph {
             }
         }
 
+        val searchStart = f<SearchStartFragment> {
+            argument(args.text) {
+                type = NavType.StringType
+                nullable = true
+            }
+        }
+        val searchResult = f<SearchResultFragment> {
+            argument(args.text) {
+                type = NavType.StringType
+                nullable = true
+            }
+        }
+
+        val videoRegion = f<VideoRegionFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+
         val region = f<RegionFragment> {
             argument(args.region) {
                 type = NavType.ParcelableType(RegionInfo::class.java)
@@ -136,6 +160,13 @@ object MainNavGraph {
         val videoCommentDetail = f<VideoCommentDetailFragment> {
             argument(args.reply) {
                 type = NavType.ParcelableType(VideoCommentReplyInfo::class.java)
+                nullable = false
+            }
+        }
+
+        val bangumiDetail = f<BangumiDetailFragment> {
+            argument(args.id) {
+                type = NavType.StringType
                 nullable = false
             }
         }
@@ -203,6 +234,9 @@ object MainNavGraph {
         val global_to_videoCoin = dest.global to dest.videoCoin
         val global_to_videoAddFavorite = dest.global to dest.videoAddFavorite
         val global_to_downloadVideoCreate = dest.global to dest.downloadVideoCreate
+        val global_to_searchStart = dest.global to dest.searchStart
+        val global_to_searchResult = dest.global to dest.searchResult
+        val global_to_videoRegion = dest.global to dest.videoRegion
 
         val home_to_region = dest.home to dest.region
         val home_to_setting = dest.home to dest.setting
@@ -221,6 +255,10 @@ object MainNavGraph {
 
         val region_to_videoInfo = dest.region to dest.videoInfo
 
+        val searchResult_to_videoInfo = dest.searchResult to dest.videoInfo
+        val searchResult_to_bangumiDetail = dest.searchResult to dest.bangumiDetail
+        val searchResult_to_user = dest.searchResult to dest.user
+
         val videoInfo_to_videoInfo = dest.videoInfo to dest.videoInfo
         val videoInfo_to_user = dest.videoInfo to dest.user
         val videoInfo_to_videoCommentList = dest.videoInfo to dest.videoCommentList
@@ -237,6 +275,7 @@ object MainNavGraph {
         val user_to_userFavouriteList = dest.user to dest.userFavouriteList
         val user_to_userFavouriteDetail = dest.user to dest.userFavouriteDetail
         val user_to_userFollow = dest.user to dest.userFollow
+        val user_to_bangumiDetail = dest.user to dest.bangumiDetail
 
         val userArchiveList_to_videoInfo = dest.userArchiveList to dest.videoInfo
 
@@ -253,6 +292,7 @@ object MainNavGraph {
         const val type = "type"
         const val id = "id"
         const val name = "name"
+        const val text = "text"
         const val num = "num"
         const val pages = "pages"
         const val index = "index"

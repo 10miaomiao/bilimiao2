@@ -232,7 +232,7 @@ class MainActivity
         downloadDelegate.onDestroy()
         bottomSheetDelegate.onDestroy()
         navController.removeOnDestinationChangedListener(this)
-//        navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
+        navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
         super.onDestroy()
     }
 

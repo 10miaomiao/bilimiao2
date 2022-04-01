@@ -12,6 +12,12 @@ inline var TextView._text: String
             text = it
         }
 
+inline var TextView._textColor: Int
+    get() { throw BindingOnlySetException() }
+    set(value) = miaoEffect(value) {
+        setTextColor(value)
+    }
+
 inline var TextView._textColorResource: Int
     get() { throw BindingOnlySetException() }
     set(value) = miaoEffect(value) {

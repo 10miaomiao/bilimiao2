@@ -645,41 +645,37 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         miaoEffect(listOf(info, info?.req_user, info?.staff)) {
             pageConfig.notifyConfigChanged()
         }
-        verticalLayout {
-            views {
-                +recyclerView {
-                    _leftPadding = contentInsets.left
-                    _rightPadding = contentInsets.right
-                    backgroundColor = config.windowBackgroundColor
-                    _miaoLayoutManage(
-                        GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
-                    )
+        recyclerView {
+            _leftPadding = contentInsets.left
+            _rightPadding = contentInsets.right
+            backgroundColor = config.windowBackgroundColor
+            _miaoLayoutManage(
+                GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
+            )
 
-                    val mAdapter = _miaoAdapter(
-                        items = viewModel.relates,
-                        itemUi = relateItemUi,
-                    ) {
-                        setOnItemClickListener(handleRelateItemClick)
-                    }
-
-                    headerViews(mAdapter) {
-                        +headerView().apply {
-                            horizontalPadding = config.pagePadding
-                            _topPadding = contentInsets.top + config.pagePadding
-                        }..lParams(matchParent, wrapContent)
-                    }
-                    footerViews(mAdapter) {
-                        +frameLayout {
-                        }..lParams {
-                            _height = contentInsets.bottom
-                        }
-                    }
-                }.wrapInSwipeRefreshLayout {
-                    setColorSchemeResources(config.themeColorResource)
-                    setOnRefreshListener(handleRefresh)
-                    _isRefreshing = viewModel.loading
-                }..lParams(matchParent, matchParent)
+            val mAdapter = _miaoAdapter(
+                items = viewModel.relates,
+                itemUi = relateItemUi,
+            ) {
+                setOnItemClickListener(handleRelateItemClick)
             }
+
+            headerViews(mAdapter) {
+                +headerView().apply {
+                    horizontalPadding = config.pagePadding
+                    _topPadding = contentInsets.top + config.pagePadding
+                }..lParams(matchParent, wrapContent)
+            }
+            footerViews(mAdapter) {
+                +frameLayout {
+                }..lParams {
+                    _height = contentInsets.bottom
+                }
+            }
+        }.wrapInSwipeRefreshLayout {
+            setColorSchemeResources(config.themeColorResource)
+            setOnRefreshListener(handleRefresh)
+            _isRefreshing = viewModel.loading
         }
     }
 

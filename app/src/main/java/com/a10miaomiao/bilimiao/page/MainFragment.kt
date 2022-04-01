@@ -93,7 +93,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 nav.navigate(MainNavGraph.action.home_to_download)
             }
             MenuKeys.search -> {
-                toast("重新装修中")
+                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+                bsNav.navigate(MainNavGraph.action.global_to_searchStart)
             }
         }
     }
@@ -172,7 +173,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
                                 .into(this)
                         }
                     }
-                    _network(item.logo)
                 }..lParams(dip(24), dip(24))
 
                 +textView {

@@ -10,6 +10,7 @@ object MenuKeys {
     val download = id_counter++
     val search = id_counter++
 
+    val region = id_counter++
     val filter = id_counter++
     val time = id_counter++
     val add = id_counter++

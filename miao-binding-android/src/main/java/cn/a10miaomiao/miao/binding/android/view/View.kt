@@ -31,6 +31,11 @@ inline var View._tag: Any
         tag = it
     }
 
+inline var View._backgroundColor: Int
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(value) = miaoEffect(value) {
+        setBackgroundColor(value)
+    }
 
 inline var View._backgroundResource: Int
     @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter

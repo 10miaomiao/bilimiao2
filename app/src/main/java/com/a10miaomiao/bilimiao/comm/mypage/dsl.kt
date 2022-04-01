@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 
 fun Fragment.myPageConfig (init: MyPageConfigInfo.() -> Unit): MyPageConfig {
-    return MyPageConfig (lifecycle) {
+    return MyPageConfig (this) {
         val configInfo = MyPageConfigInfo()
         init.invoke(configInfo)
         configInfo
