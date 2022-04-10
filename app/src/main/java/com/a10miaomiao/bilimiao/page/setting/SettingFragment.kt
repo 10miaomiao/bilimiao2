@@ -164,7 +164,11 @@ class SettingFragment : Fragment(), DIAware, MyPage {
         pref("theme") {
             title = "切换主题"
             summary = "库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
-            enabled = false
+            onClick {
+                val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                nav.navigate(MainNavGraph.action.setting_to_themeSetting)
+                true
+            }
         }
 
         pref("video") {

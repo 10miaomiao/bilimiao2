@@ -85,7 +85,7 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
             MainNavGraph.args.id to item.param
         )
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.searchResult_to_videoInfo, args)
+            .navigate(MainNavGraph.action.searchResult_to_bangumiDetail, args)
     }
 
     val itemUi = miaoBindingItemUi<SearchBangumiInfo> { item, index ->

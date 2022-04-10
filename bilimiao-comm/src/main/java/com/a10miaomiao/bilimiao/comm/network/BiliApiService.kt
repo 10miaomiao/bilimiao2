@@ -22,6 +22,7 @@ object BiliApiService {
 
     val regionAPI = RegionAPI()
     val videoAPI = VideoAPI()
+    val bangumiAPI = BangumiAPI()
     val searchApi = SearchApi()
     val playerAPI = PlayerAPI()
     val userApi = UserApi()

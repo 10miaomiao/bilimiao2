@@ -27,10 +27,11 @@ abstract class MiaoUI : Ui {
             return this
         }
 
-        operator fun View.rangeTo(lParams: ViewGroup.LayoutParams) {
+        operator fun View.rangeTo(lParams: ViewGroup.LayoutParams): View {
             if (isRecord) {
                 this.layoutParams = lParams
             }
+            return this
         }
 
         open fun bindViews() {

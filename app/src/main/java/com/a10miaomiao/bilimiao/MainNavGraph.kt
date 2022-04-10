@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.setting.AboutFragment
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
+import com.a10miaomiao.bilimiao.page.setting.ThemeSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.page.user.UserArchiveListFragment
@@ -60,6 +61,9 @@ object MainNavGraph {
         }
         val danmakuSetting = f<DanmakuSettingFragment>() {
             deepLink("bilimiao://setting/danmaku")
+        }
+        val themeSetting = f<ThemeSettingFragment> {
+            deepLink("bilimiao://setting/theme")
         }
         val videoSetting = f<VideoSettingFragment>() {
             deepLink("bilimiao://setting/video")
@@ -245,6 +249,7 @@ object MainNavGraph {
         val home_to_history = dest.home to dest.history
         val home_to_download = dest.home to dest.download
 
+        val setting_to_themeSetting = dest.setting to dest.themeSetting
         val setting_to_videoSetting = dest.setting to dest.videoSetting
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
         val setting_to_about = dest.setting to dest.about

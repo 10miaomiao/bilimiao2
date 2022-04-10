@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -130,6 +131,7 @@ class MainActivity
         // 百度统计
         StatService.setAuthorizedState(this, false)
         StatService.start(this)
+
     }
 
 

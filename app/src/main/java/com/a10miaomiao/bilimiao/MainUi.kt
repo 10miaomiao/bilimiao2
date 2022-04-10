@@ -19,6 +19,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
+import splitties.views.dsl.constraintlayout.bottomOfParent
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.parentId
 import splitties.views.dsl.core.*
 
 
