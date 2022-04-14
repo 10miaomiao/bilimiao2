@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao
 
 import android.app.Application
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 
 class Bilimiao: Application() {
 
@@ -16,6 +17,7 @@ class Bilimiao: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        ThemeDelegate.setNightMode(this)
         commApp.onCreate()
     }
 }

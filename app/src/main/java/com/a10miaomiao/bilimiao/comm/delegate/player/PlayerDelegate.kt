@@ -2,12 +2,14 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.*
 import android.content.pm.ActivityInfo
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.media.AudioManager
 import android.net.Uri
 import android.os.*
 import android.preference.PreferenceManager
 import android.view.*
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -21,9 +23,11 @@ import cn.a10miaomiao.player.*
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.UserStore
@@ -122,6 +126,7 @@ class PlayerDelegate(
     private val userStore by instance<UserStore>()
 
     private val statusBarHelper by instance<StatusBarHelper>()
+    private val themeDelegate by instance<ThemeDelegate>()
 
     // 组件
     private val mRoot = activity.findViewById<View>(R.id.mRoot)
@@ -133,6 +138,7 @@ class PlayerDelegate(
     private val mText = activity.findViewById<TextView>(R.id.mText)
     private val mProgressLayout = activity.findViewById<View>(R.id.mProgressLayout)
     private val mMiniController = activity.findViewById<MiniMediaController>(R.id.mMiniController)
+    private val mProgressBar = activity.findViewById<ProgressBar>(R.id.mProgressBar)
 
     //    private val mVideoTitleText = activity.findViewById<TextView>(R.id.videoTitleText)
     private val mSizeWatcher = activity.findViewById<SizeWatcherView>(R.id.mSizeWatcher)
@@ -237,15 +243,12 @@ class PlayerDelegate(
             mPlayer.setVideoLayout()
         }
 
-        // TODO: 主题改变监听
-//        MainActivity.of(activity)
-//            .themeUtil
-//            .observeTheme(activity, Observer {
-//                val themeColor = activity.config.themeColor
-//                mController.updateColor(themeColor)
-//                mMiniController.updateColor(themeColor)
-//                activity.mProgressBar.indeterminateTintList = ColorStateList.valueOf(themeColor)
-//            })
+        themeDelegate.observeTheme(activity, Observer {
+            val themeColor = activity.config.themeColor
+            mController.updateColor(themeColor)
+            mMiniController.updateColor(themeColor)
+            mProgressBar.indeterminateTintList = ColorStateList.valueOf(themeColor)
+        })
 
         isMiniPlayer.observe(activity, Observer {
             setPlayerMediaController(it!!)

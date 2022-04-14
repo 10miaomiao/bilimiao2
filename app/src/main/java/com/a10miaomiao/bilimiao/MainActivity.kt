@@ -33,6 +33,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.store.*
 import com.baidu.mobstat.StatService
 
@@ -54,6 +55,7 @@ class MainActivity
         bindSingleton { timeSettingStore }
         bindSingleton { filterStore }
         bindSingleton { playerDelegate }
+        bindSingleton { themeDelegate }
         bindSingleton { downloadDelegate }
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
@@ -66,6 +68,7 @@ class MainActivity
     private val timeSettingStore: TimeSettingStore by diViewModel(di)
     private val filterStore: FilterStore by diViewModel(di)
 
+    private val themeDelegate by lazy { ThemeDelegate(this, di) }
     private val downloadDelegate by lazy { DownloadDelegate(this, di) }
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
@@ -77,6 +80,7 @@ class MainActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        themeDelegate.onCreate(savedInstanceState)
         ui = MainUi(this)
         setContentView(ui.root)
         playerDelegate.onCreate(savedInstanceState)

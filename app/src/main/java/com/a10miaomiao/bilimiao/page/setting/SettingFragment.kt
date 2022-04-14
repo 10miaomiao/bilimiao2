@@ -21,6 +21,7 @@ import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -57,11 +58,19 @@ class SettingFragment : Fragment(), DIAware, MyPage {
 
     private val windowStore by instance<WindowStore>()
 
+    private val themeDelegate by instance<ThemeDelegate>()
+
+    private var themeId = 0
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        if (themeDelegate.getThemeResId() != themeId) {
+            ui.cleanCacheView()
+            themeId = themeDelegate.getThemeResId()
+        }
         ui.parentView = container
         return ui.root
     }

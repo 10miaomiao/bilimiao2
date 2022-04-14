@@ -5,6 +5,7 @@
         <attr name="defaultBackgroundColor" format="color" />
         <attr name="foregroundColor" format="color" />
         <attr name="lineColor" format="color" />
+        <attr name="themeName" format="string" />
     </declare-styleable>
 
     <declare-styleable name="ExpandableTextView">

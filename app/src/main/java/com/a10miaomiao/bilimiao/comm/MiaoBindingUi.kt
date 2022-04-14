@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm
 
+import android.content.res.Resources
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -7,6 +8,8 @@ import android.os.Message
 import android.text.method.TextKeyListener.clear
 import android.view.View
 import cn.a10miaomiao.miao.binding.MiaoBinding
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.config.config
 import java.lang.Exception
 
 abstract class MiaoBindingUi() : MiaoUI() {
@@ -15,26 +18,36 @@ abstract class MiaoBindingUi() : MiaoUI() {
 
     @PublishedApi internal val binding = MiaoBinding()
 
-    private var cechView: View? = null
+    private var cacheView: View? = null
+
+//    private var curThemeName: String? = null
 
     override val root: View
-        get() = if (cechView == null) {
-            binding.start<View>(MiaoBinding.INIT) {
-                miao {
-                    val view = createView()
-                    cechView = view
-                    view
+        get() {
+//            val themeName = ctx.config.themeName
+            return if (cacheView == null /*|| themeName != curThemeName*/) {
+                binding.start<View>(MiaoBinding.INIT) {
+                    miao {
+                        val view = createView()
+//                        curThemeName = themeName
+                        cacheView = view
+                        view
+                    }
                 }
+            } else {
+                binding.start(MiaoBinding.UPDATE) {
+                    createView()
+                }
+                cacheView!!
             }
-        } else {
-            binding.start(MiaoBinding.UPDATE) {
-                createView()
-            }
-            cechView!!
         }
 
 
     abstract fun createView (): View
+
+    fun cleanCacheView() {
+        cacheView = null
+    }
 
     fun setState(block: () -> Unit) {
         ioHandler.post {
@@ -87,7 +100,6 @@ abstract class MiaoBindingUi() : MiaoUI() {
             }
         }
     }
-
 
 
 }
