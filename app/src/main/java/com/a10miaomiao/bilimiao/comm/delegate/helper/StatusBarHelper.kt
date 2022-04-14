@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.delegate.helper
 
 import android.app.Activity
 import android.view.View
+import androidx.appcompat.app.AppCompatDelegate
 
 class StatusBarHelper(
     val activity: Activity,
@@ -23,7 +24,7 @@ class StatusBarHelper(
             update()
         }
 
-    private fun update () {
+    fun update () {
         var uiFlags = if (isShowStatus) {
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         } else {
@@ -33,7 +34,7 @@ class StatusBarHelper(
         if (!isShowNavigation) {
             uiFlags = uiFlags or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
-        if (isLightStatusBar) {
+        if (isLightStatusBar && AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
             uiFlags = uiFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
         activity.window.decorView.systemUiVisibility = uiFlags

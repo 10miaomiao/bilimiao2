@@ -83,7 +83,7 @@ class VideoRegionFragment : Fragment(), DIAware, MyPage {
                     isEnabled = true
                 }
             }
-            setBackgroundColor(config.blockBackgroundColor)
+            setLayoutBackground(config.blockBackgroundColor)
             setCornerRadius(dip(10))
 
             layoutParams = lParams(matchParent, wrapContent) {

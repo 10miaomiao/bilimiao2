@@ -730,7 +730,7 @@ public class ShadowLayout extends FrameLayout {
             rightShow = !attr.getBoolean(R.styleable.ShadowLayout_hl_shadowHiddenRight, false);
             bottomShow = !attr.getBoolean(R.styleable.ShadowLayout_hl_shadowHiddenBottom, false);
             topShow = !attr.getBoolean(R.styleable.ShadowLayout_hl_shadowHiddenTop, false);
-            mCornerRadius = attr.getDimension(R.styleable.ShadowLayout_hl_cornerRadius, 0);
+            mCornerRadius = attr.getDimension(R.styleable.ShadowLayout_hl_cornerRadius, dip2px(0));
             mCornerRadius_leftTop = attr.getDimension(R.styleable.ShadowLayout_hl_cornerRadius_leftTop, -1);
             mCornerRadius_leftBottom = attr.getDimension(R.styleable.ShadowLayout_hl_cornerRadius_leftBottom, -1);
             mCornerRadius_rightTop = attr.getDimension(R.styleable.ShadowLayout_hl_cornerRadius_rightTop, -1);

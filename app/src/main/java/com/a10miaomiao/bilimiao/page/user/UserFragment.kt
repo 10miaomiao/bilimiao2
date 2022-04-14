@@ -116,7 +116,18 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         .navigate(MainNavGraph.action.user_to_userArchiveList, args)
                 }
                 "season" -> {
-                    toast("重新装修中")
+                    val args = bundleOf(
+                        MainNavGraph.args.id to viewModel.id,
+                        MainNavGraph.args.name to info.card.name
+                    )
+                    if (viewModel.isSelf) {
+                        Navigation.findNavController(it)
+                            .navigate(MainNavGraph.action.user_to_myBangumi, args)
+                    } else {
+                        Navigation.findNavController(it)
+                            .navigate(MainNavGraph.action.user_to_userBangumi, args)
+                    }
+
                 }
                 "favourite" -> {
                     val args = bundleOf(
@@ -171,7 +182,11 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 }
                 // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
-                    toast("重新装修中")
+                    val args = bundleOf(
+                        MainNavGraph.args.id to item.param
+                    )
+                    Navigation.findNavController(view)
+                        .navigate(MainNavGraph.action.user_to_bangumiDetail, args)
                 }
             }
         }

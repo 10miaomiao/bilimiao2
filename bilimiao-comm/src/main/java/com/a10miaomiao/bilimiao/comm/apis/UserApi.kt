@@ -78,6 +78,30 @@ class UserApi {
         )
     }
 
+    /**
+     * 追番列表
+     */
+    fun followBangumi(
+        pageNum: Int,
+        pageSize: Int,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("pgc/app/follow/bangumi",
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString()
+        )
+    }
+    fun followBangumi(
+        vmid: String,
+        pageNum: Int,
+        pageSize: Int,
+    )  = MiaoHttp.request {
+        url = BiliApiService.biliApp("x/v2/space/bangumi",
+            "vmid" to vmid.toString(),
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+        )
+    }
+
     fun videoHistory (
         pageNum: Int,
         pageSize: Int,

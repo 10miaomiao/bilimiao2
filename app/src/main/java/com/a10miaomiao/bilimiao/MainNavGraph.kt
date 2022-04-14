@@ -5,7 +5,6 @@ import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
@@ -27,10 +26,9 @@ import com.a10miaomiao.bilimiao.page.setting.AboutFragment
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.ThemeSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
-import com.a10miaomiao.bilimiao.page.user.HistoryFragment
-import com.a10miaomiao.bilimiao.page.user.UserArchiveListFragment
-import com.a10miaomiao.bilimiao.page.user.UserFollowFragment
-import com.a10miaomiao.bilimiao.page.user.UserFragment
+import com.a10miaomiao.bilimiao.page.user.*
+import com.a10miaomiao.bilimiao.page.user.bangumi.MyBangumiFragment
+import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
 import com.a10miaomiao.bilimiao.page.video.VideoAddFavoriteFragment
@@ -196,6 +194,18 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val myBangumi = f<MyBangumiFragment> {
+        }
+        val userBangumi = f<UserBangumiFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.name) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
         val userFavouriteList = f<UserFavouriteListFragment> {
             argument(args.id) {
                 type = NavType.StringType
@@ -277,12 +287,17 @@ object MainNavGraph {
 
         val user_to_videoInfo = dest.user to dest.videoInfo
         val user_to_userArchiveList = dest.user to dest.userArchiveList
+        val user_to_userBangumi = dest.user to dest.userBangumi
+        val user_to_myBangumi = dest.user to dest.myBangumi
         val user_to_userFavouriteList = dest.user to dest.userFavouriteList
         val user_to_userFavouriteDetail = dest.user to dest.userFavouriteDetail
         val user_to_userFollow = dest.user to dest.userFollow
         val user_to_bangumiDetail = dest.user to dest.bangumiDetail
 
         val userArchiveList_to_videoInfo = dest.userArchiveList to dest.videoInfo
+
+        val userBangumi_to_bangumiDetail = dest.userBangumi to dest.bangumiDetail
+        val myBangumi_to_bangumiDetail = dest.myBangumi to dest.bangumiDetail
 
         val userFavouriteList_to_userFavouriteDetail = dest.userFavouriteList to dest.userFavouriteDetail
 
@@ -308,10 +323,10 @@ object MainNavGraph {
 
     private val defaultNavOptionsBuilder: NavOptionsBuilder.() -> Unit = {
         anim {
-            enter = R.anim.h_fragment_enter
-            exit = R.anim.h_fragment_exit
-            popEnter = R.anim.h_fragment_pop_enter
-            popExit = R.anim.h_fragment_pop_exit
+            enter = R.anim.miao_fragment_open_enter
+            exit = R.anim.miao_fragment_open_exit
+            popEnter = R.anim.miao_fragment_close_enter
+            popExit = R.anim.miao_fragment_close_exit
         }
     }
 
