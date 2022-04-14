@@ -46,22 +46,9 @@ class UserFavouriteListViewModel(
                 list.loading = true
             }
             val req = if (userStore.isSelf(id)) {
-                BiliApiService.userApi.medialist()
+                getSelfMedialist(pageNum)
             } else {
-                BiliApiService.userApi.medialist(id)
-            }
-            val res = req.awaitCall()
-                .gson<ResultInfo<List<MediaInfo>>>()
-            if (res.code == 0) {
-                val result = res.data[0].mediaListResponse.list
-                ui.setState {
-                    list.finished = true
-                    list.data.addAll(result)
-                }
-                list.pageNum = pageNum
-            } else {
-                context.toast(res.message)
-                throw Exception(res.message)
+                getOtherMedialist(pageNum)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -73,6 +60,61 @@ class UserFavouriteListViewModel(
                 list.loading = false
                 triggered = false
             }
+        }
+    }
+
+    private suspend fun getOtherMedialist(pageNum: Int) {
+        // TODO: 更新新版本的API
+        val res = BiliApiService.userApi.medialist(id).awaitCall()
+            .gson<ResultInfo<DataInfo>>()
+        if (res.code == 0) {
+            val result = res.data.favorite.items.map {
+                val cover = if (it.cover.isEmpty()) {
+                    ""
+                } else {
+                    it.cover[0].pic
+                }
+                MediaListInfo(
+                    cover = cover,
+                    intro = "${it.cur_count}个视频 ",
+                    title = it.name,
+                    cover_type = 0,
+                    ctime = 0,
+                    fav_state = 0,
+                    fid = it.fid,
+                    id = it.media_id,
+                    like_state = 0,
+                    media_count = it.cur_count,
+                    mid = it.mid,
+                    mtime = 0,
+                    state = it.state,
+                    type = 0
+                )
+            }
+            ui.setState {
+                list.finished = true
+                list.data.addAll(result)
+            }
+            list.pageNum = pageNum
+        } else {
+            context.toast(res.message)
+            throw Exception(res.message)
+        }
+    }
+
+    private suspend fun getSelfMedialist (pageNum: Int){
+        val res = BiliApiService.userApi.medialist().awaitCall()
+            .gson<ResultInfo<List<MediaInfo>>>()
+        if (res.code == 0) {
+            val result = res.data[0].mediaListResponse.list
+            ui.setState {
+                list.finished = true
+                list.data.addAll(result)
+            }
+            list.pageNum = pageNum
+        } else {
+            context.toast(res.message)
+            throw Exception(res.message)
         }
     }
 
@@ -96,5 +138,30 @@ class UserFavouriteListViewModel(
             loadData()
         }
     }
+
+    data class DataInfo(
+        val favorite: FavoriteInfo,
+    )
+
+    data class FavoriteInfo(
+        val count: Int,
+        val items: List<FavoriteItemInfo>,
+    )
+
+    data class FavoriteItemInfo(
+        val media_id: String,
+        val fid: Long,
+        val mid: Long,
+        val name: String,
+        val cur_count: Int,
+        val state: Int,
+        val cover: List<CoverInfo>,
+    )
+
+    data class CoverInfo(
+        val aid: String,
+        val pic: String,
+        val type: Int,
+    )
 
 }

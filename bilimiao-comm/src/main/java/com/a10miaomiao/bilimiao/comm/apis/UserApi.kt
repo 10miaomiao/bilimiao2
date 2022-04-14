@@ -56,9 +56,9 @@ class UserApi {
         url = BiliApiService.biliApi("medialist/gateway/base/space")
     }
     fun medialist(up_mid: String) = MiaoHttp.request {
-        url = BiliApiService.biliApi(
-            "medialist/gateway/base/space",
-            "up_mid" to up_mid
+        url = BiliApiService.biliApp(
+            "x/v2/favorite",
+            "vmid" to up_mid
         )
     }
 
@@ -71,7 +71,7 @@ class UserApi {
         pageSize: Int,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
-            "medialist/gateway/base/detail",
+            "x/v3/fav/resource/list",
             "media_id" to media_id,
             "pn" to pageNum.toString(),
             "ps" to pageSize.toString(),
