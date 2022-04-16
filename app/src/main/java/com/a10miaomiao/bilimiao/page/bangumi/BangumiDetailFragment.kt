@@ -10,7 +10,9 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view.*
@@ -18,6 +20,7 @@ import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
+import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
@@ -30,8 +33,10 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.layout.DoubleColumnAutofitLayout
+import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -56,6 +61,8 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
     private val windowStore: WindowStore by instance()
 
     private val playerDelegate: PlayerDelegate by instance()
+
+    private val playerStore: PlayerStore by instance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -89,6 +96,17 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         )
     }
 
+    private val handleMoreClick = View.OnClickListener {
+        viewModel.detailInfo?.let { info ->
+            val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+            val args = bundleOf(
+                MainNavGraph.args.id to info.season_id.toString(),
+                MainNavGraph.args.pages to viewModel.episodes,
+            )
+            nav.navigate(MainNavGraph.action.global_to_bangumiPages, args)
+        }
+    }
+
     val episodeItemUi = miaoBindingItemUi<EpisodeInfo> { item, index ->
         verticalLayout {
             setBackgroundResource(R.drawable.shape_corner)
@@ -100,38 +118,41 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
             gravity = Gravity.LEFT
 
             val isSelect = viewModel.isPlaying(item.ep_id)
+            val isEmptyTitle = item.index_title.isEmpty()
             _isEnabled = !isSelect
 
             views {
                 +textView {
                     textColorResource = R.color.text_black
-                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                    _text = "第${item.index}集"
+                    _text = if (isEmptyTitle) {
+                        item.index
+                    } else {
+                        "第${item.index}集"
+                    }
                     _textColorResource = if (isSelect) {
                         config.themeColorResource
                     } else {
                         R.color.text_black
                     }
-                }..lParams {
-                    bottomMargin = dip(5)
                 }
 
                 +textView {
                     textColorResource = R.color.text_black
                     textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-                    maxWidth = dip(200)
-                    minWidth = dip(100)
                     maxLines = 1
                     ellipsize = TextUtils.TruncateAt.END
                     gravity = Gravity.LEFT
                     textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
 
+                    _show = !isEmptyTitle
                     _text = item.index_title
                     _textColorResource = if (isSelect) {
                         config.themeColorResource
                     } else {
                         R.color.text_black
                     }
+                }..lParams(dip(120), wrapContent) {
+                    topMargin = dip(5)
                 }
             }
         }
@@ -244,13 +265,29 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
             padding = config.pagePadding
             apply(ViewStyle.roundRect(dip(10)))
             views {
-                +textView {
-                    textSize = 18f
-                    setTextColor(config.foregroundColor)
-                    text = "剧集列表"
-                }..lParams {
+                +horizontalLayout {
+                    views {
+                        +textView {
+                            textSize = 18f
+                            setTextColor(config.foregroundColor)
+                            text = "剧集列表"
+                        }..lParams {
+                            weight = 1f
+                            height = wrapContent
+                            width = matchParent
+                        }
+                        +textView {
+                            text = "更多 >"
+                            setTextColor(config.themeColor)
+                            textSize = 14f
+                            setBackgroundResource(config.selectableItemBackgroundBorderless)
+                            setOnClickListener(handleMoreClick)
+                        }
+                    }
+                }..lParams(matchParent, wrapContent) {
                     bottomMargin = config.dividerSize
                 }
+
                 +recyclerView {
                     val lm = LinearLayoutManager(context)
                     lm.orientation = LinearLayoutManager.HORIZONTAL
@@ -259,6 +296,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     _miaoAdapter(
                         items = viewModel.episodes,
                         itemUi = episodeItemUi,
+                        depsAry = arrayOf(playerStore.state.info.cid),
                     ) {
                         setOnItemClickListener(handleEpisodeItemClick)
                     }

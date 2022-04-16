@@ -35,7 +35,6 @@ class VideoInfoViewModel(
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
 
-    private val playerStore by instance<PlayerStore>()
 
     val type by lazy { fragment.requireArguments().getString(MainNavGraph.args.type, "AV") }
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
@@ -51,9 +50,6 @@ class VideoInfoViewModel(
     var state = ""
 
     init {
-        viewModelScope.launch {
-            playerStore.connectUi(ui)
-        }
         loadData()
     }
 

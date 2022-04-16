@@ -36,13 +36,13 @@ class PlayerSourceInfo {
 
     fun reset() {
         this.type = ""
-        this.sid = ""
-        this.epid = ""
+        this.aid = ""
         this.cid = ""
         this.title = ""
         this.sid = ""
         this.epid = ""
     }
+
 
     companion object {
         const val VIDEO = "video"

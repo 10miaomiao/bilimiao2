@@ -32,7 +32,13 @@ class VideoMorePopupMenu (
     }
 
     private fun Menu.initMenu() {
+        val detailInfo = viewModel.info
         add(Menu.FIRST, 0, 0, "用浏览器打开")
+        if (detailInfo != null) {
+            add(Menu.FIRST, 5, 0, "分享视频(${detailInfo.stat.share})")
+        } else {
+            add(Menu.FIRST, 5, 0, "分享视频")
+        }
         add(Menu.FIRST, 2, 0, "复制AV号")
         add(Menu.FIRST, 3, 0, "复制BV号")
         add(Menu.FIRST, 4, 0, "下载视频")
@@ -78,6 +84,21 @@ class VideoMorePopupMenu (
                 } else {
                     activity.toast("请等待信息加载完成")
                 }
+            }
+            5 -> {
+                val info = viewModel.info
+                if (info != null) {
+                    var shareIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, "bilibili视频分享")
+                        putExtra(Intent.EXTRA_TEXT, "${info.title} https://www.bilibili.com/video/${info.bvid}")
+                    }
+                    activity.startActivity(Intent.createChooser(shareIntent, "分享"))
+                } else {
+                    toast("视频信息未加载完成，请稍后再试")
+                }
+
             }
         }
         return false

@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
@@ -172,6 +173,21 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val bangumiPages = f<BangumiPagesFragment> {
+            deepLink("bilimiao://bangumi/pages")
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.pages) {
+                type = NavType.ParcelableType(VideoPageInfo::class.java)
+                nullable = false
+            }
+            argument(args.index) {
+                type = NavType.IntType
+                nullable = false
+            }
+        }
 
         val h5Login = f<H5LoginFragment> {
         }
@@ -247,6 +263,7 @@ object MainNavGraph {
         val global_to_videoPages = dest.global to dest.videoPages
         val global_to_videoCoin = dest.global to dest.videoCoin
         val global_to_videoAddFavorite = dest.global to dest.videoAddFavorite
+        val global_to_bangumiPages = dest.global to dest.bangumiPages
         val global_to_downloadVideoCreate = dest.global to dest.downloadVideoCreate
         val global_to_searchStart = dest.global to dest.searchStart
         val global_to_searchResult = dest.global to dest.searchResult

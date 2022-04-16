@@ -99,11 +99,11 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 iconResource = R.drawable.ic_column_comm
                 title = NumberUtil.converString(info?.stat?.reply?.toString() ?: "评论")
             },
-            myMenuItem {
-                key = 2
-                iconResource = R.drawable.ic_column_share
-                title = NumberUtil.converString(info?.stat?.share?.toString() ?: "分享")
-            },
+//            myMenuItem {
+//                key = 2
+//                iconResource = R.drawable.ic_column_share
+//                title = NumberUtil.converString(info?.stat?.share?.toString() ?: "分享")
+//            },
             myMenuItem {
                 key = 3
                 iconResource = if (info?.req_user?.favorite == null) {
@@ -208,14 +208,6 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         savedInstanceState: Bundle?
     ): View {
         return ui.root
-    }
-
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
-        }
     }
 
     fun confirmCoin(num: Int) {
@@ -367,6 +359,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                             _miaoAdapter(
                                 items = viewModel.pages,
                                 itemUi = pageItemUi,
+                                depsAry = arrayOf(playerStore.state.info.cid),
                             ) {
                                 setOnItemClickListener(handlePageItemClick)
                             }
@@ -523,13 +516,6 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                         +rcImageView {
                             radius = dip(5)
                             _network(videoInfo?.pic)
-//                            setOnClickListener {
-//                                val info = viewModel.info.value!!
-//                                playVideo(
-//                                    info.cid.toString(),
-//                                    info.title
-//                                )
-//                            }
                         }..lParams {
                             width = dip(150)
                             height = dip(100)
@@ -639,6 +625,8 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, windowStore)
+        connectStore(viewLifecycleOwner, playerStore)
         val contentInsets = windowStore.getContentInsets(parentView)
         val info = viewModel.info
         // 监听info改变，修改页面标题

@@ -151,6 +151,7 @@ class VideoRegionFragment : Fragment(), DIAware, MyPage {
             _miaoAdapter(
                 items = viewModel.regions,
                 itemUi = itemUi,
+                depsAry = arrayOf(viewModel.checkRegionId)
             ) {
                 setOnItemClickListener(handleItemClick)
             }

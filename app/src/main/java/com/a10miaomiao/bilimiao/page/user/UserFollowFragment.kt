@@ -43,7 +43,8 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
-    private val ID_webView = 102
+    private val ID_webView = View.generateViewId()
+    private var mWebView: WebView? = null
 
     private val windowStore by instance<WindowStore>()
 
@@ -111,23 +112,24 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val webView = view.findViewById<WebView>(ID_webView)
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
-        webView.webViewClient = mWebViewClient
-        webView.webChromeClient = mWebChromeClient
-        webView.settings.apply {
-            javaScriptEnabled = true
-        }
-        var url = ""
+        if (mWebView == null) {
+            val webView = view.findViewById<WebView>(ID_webView)
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+            webView.webViewClient = mWebViewClient
+            webView.webChromeClient = mWebChromeClient
+            webView.settings.apply {
+                javaScriptEnabled = true
+            }
+            var url = ""
 //      if (night) url += "&night=1"
-        webView.loadUrl("https://space.bilibili.com/h5/follow?type=$type&mid=$mid")
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
+            webView.loadUrl("https://space.bilibili.com/h5/follow?type=$type&mid=$mid")
+            mWebView = webView
         }
     }
 
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, windowStore)
         val contentInsets = windowStore.getContentInsets(parentView)
         frameLayout {
             setBackgroundColor(config.blockBackgroundColor)

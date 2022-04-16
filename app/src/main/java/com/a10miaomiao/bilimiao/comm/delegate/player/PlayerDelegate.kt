@@ -570,9 +570,6 @@ class PlayerDelegate(
                 "User-Agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
             ) else mapOf()
         )
-        if (lastPosition != 0L && lastPosition < mPlayer.duration) {
-            mPlayer.seekTo(lastPosition)
-        }
 
         timer.cancel()
         timer = Timer()
@@ -630,6 +627,9 @@ class PlayerDelegate(
                 mDanmaku.start(mPlayer.currentPosition)
             }
             hideProgressText()
+            if (lastPosition != 0L && lastPosition < mPlayer.duration) {
+                mPlayer.seekTo(lastPosition)
+            }
         }
         true
     }

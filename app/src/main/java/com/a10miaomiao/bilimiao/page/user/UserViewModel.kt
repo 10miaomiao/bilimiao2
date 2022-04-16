@@ -13,10 +13,13 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.store.UserStore
@@ -37,6 +40,7 @@ class UserViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
     val filterStore: FilterStore by instance()
+    private val myPage: MyPage by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
 
@@ -49,6 +53,8 @@ class UserViewModel(
     val isSelf get() = userStore.isSelf(id)
 
     val isFiltered get() = !filterStore.filterUpper(id)
+
+    val isFollow get() = dataInfo?.card?.relation?.is_follow == 1
 
     init {
         loadData()
@@ -75,6 +81,7 @@ class UserViewModel(
                     channelList = res2.data
                 }
             }
+
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
                 activity.toast("网络错误")
@@ -83,6 +90,9 @@ class UserViewModel(
         } finally {
             ui.setState {
                 loading = false
+            }
+            withContext(Dispatchers.Main) {
+                myPage.pageConfig.notifyConfigChanged()
             }
         }
     }
@@ -114,6 +124,36 @@ class UserViewModel(
             }
             setPositiveButton("取消", null)
         }.show()
+    }
+
+    fun attention() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val detailInfo = dataInfo ?: return@launch
+            val mode = if (isFollow) { 2 } else { 1 }
+            val res = BiliApiService.userApi
+                .attention(id, mode)
+                .awaitCall().gson<MessageInfo>()
+            if (res.code == 0) {
+                detailInfo.card.relation.is_follow = 2 - mode
+                withContext(Dispatchers.Main) {
+                    myPage.pageConfig.notifyConfigChanged()
+                    activity.toast(if (mode == 1) {
+                        "关注成功"
+                    } else {
+                        "已取消关注"
+                    })
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    activity.toast(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                activity.toast("网络错误")
+            }
+            e.printStackTrace()
+        }
     }
 
 }

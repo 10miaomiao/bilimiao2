@@ -148,7 +148,8 @@ class FilterUpperListFragment : Fragment(), DIAware, MyPage {
 
             val mAdapter = _miaoAdapter(
                 itemUi = itemUi,
-                items = viewModel.list
+                items = viewModel.list,
+                isForceUpdate = true,
             )
             headerViews(mAdapter) {
                 +frameLayout()..lParams {

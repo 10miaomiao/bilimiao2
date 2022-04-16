@@ -40,6 +40,7 @@ import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
@@ -62,6 +63,21 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 iconResource = R.drawable.ic_more_vert_grey_24dp
                 title = "更多"
             },
+            myMenuItem {
+                key = 1
+                visibility = if (viewModel.isSelf) {
+                    View.GONE
+                } else {
+                    View.VISIBLE
+                }
+                if (viewModel.isFollow) {
+                    iconResource = R.drawable.ic_baseline_favorite_24
+                    title = "已关注"
+                } else  {
+                    iconResource = R.drawable.ic_outline_favorite_border_24
+                    title = "关注"
+                }
+            },
         )
     }
 
@@ -77,10 +93,16 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 )
                 pm.show()
             }
+            1 -> {
+                // 关注up主
+                viewModel.attention()
+            }
         }
     }
 
-    override val di: DI by lazyUiDi(ui = { ui })
+    override val di: DI by lazyUiDi(ui = { ui }) {
+        bindSingleton<MyPage> { this@UserFragment }
+    }
 
     private val viewModel by diViewModel<UserViewModel>(di)
 
@@ -393,10 +415,6 @@ class UserFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
-        // 监听info改变，修改页面标题
-        miaoEffect(viewModel.dataInfo) {
-            pageConfig.notifyConfigChanged()
-        }
         val contentInsets = windowStore.getContentInsets(parentView)
         recyclerView {
             _leftPadding = contentInsets.left

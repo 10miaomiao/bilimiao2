@@ -70,16 +70,12 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
-            playerStore.connectUi(ui)
-        }
     }
 
     val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = pages[position]
         playerDelegate.playVideo(aid, item.cid, item.part)
-        Navigation.findNavController(view).popBackStack()
+//        Navigation.findNavController(view).popBackStack()
     }
 
     val itemUi = miaoBindingItemUi<VideoPageInfo> { item, index ->
@@ -114,6 +110,8 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, windowStore)
+        connectStore(viewLifecycleOwner, playerStore)
         val contentInsets = windowStore.getContentInsets(parentView)
 
         recyclerView {
@@ -130,6 +128,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
             _miaoAdapter(
                 items = pages,
                 itemUi = itemUi,
+                depsAry = arrayOf(playerStore.state.info.cid)
             ) {
                 setOnItemClickListener(handleItemClick)
             }

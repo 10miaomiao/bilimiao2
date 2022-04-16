@@ -180,6 +180,7 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
                     _miaoAdapter(
                         items = viewModel.video.pages.toMutableList(),
                         itemUi = itemUi,
+                        isForceUpdate = true,
                     ) {
                         setOnItemClickListener(handleItemClick)
                     }

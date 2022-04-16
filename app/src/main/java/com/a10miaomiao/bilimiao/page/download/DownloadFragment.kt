@@ -191,10 +191,12 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
             _miaoLayoutManage(
                 LinearLayoutManager(context)
             )
-            DebugMiao.log("DownloadInfo2", viewModel.downloadStore.state.curDownload)
+//            DebugMiao.log("DownloadInfo2", viewModel.downloadStore.state.curDownload)
+            val downloadState = viewModel.downloadStore.state
             _miaoAdapter(
                 items = downloadDelegate.downloadList,
-                itemUi = itemUi
+                itemUi = itemUi,
+                depsAry = arrayOf(downloadState)
             ) {
                 setOnItemClickListener(handleItemClick)
                 setOnItemLongClickListener(handleItemLongClick)

@@ -19,6 +19,8 @@ import kotlin.contracts.contract
 fun <T> RecyclerView._miaoAdapter(
     items: MutableList<T>? = null,
     itemUi: MiaoBindingItemUi<T>,
+    depsAry: Array<*> = arrayOf<Any>(),
+    isForceUpdate: Boolean = false,
     adapterInit: (MiaoBindingAdapter<T>.() -> Unit)? = null,
 ): MiaoBindingAdapter<T> {
     val mAdapter = miaoMemo(itemUi) {
@@ -27,12 +29,21 @@ fun <T> RecyclerView._miaoAdapter(
             it,
         ) {}
     }
-    miaoEffect(null, {
+    var isInit = false
+    miaoEffect(mAdapter, {
+        isInit = true
         adapterInit?.invoke(mAdapter)
         this@_miaoAdapter.adapter = mAdapter
-    }) {
-        mAdapter.setList(items)
-    }
+    })
+    miaoEffect(listOf(items?.size, *depsAry), {
+        if (!isInit) {
+            mAdapter.setList(items)
+        }
+    }, {
+        if (isForceUpdate) {
+            mAdapter.setList(items)
+        }
+    })
     return mAdapter
 }
 

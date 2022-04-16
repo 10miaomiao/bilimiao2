@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 
@@ -111,6 +112,22 @@ class UserApi {
             "pn" to pageNum.toString(),
             "ps" to pageSize.toString(),
         )
+    }
+
+    /**
+     * 关注Up主
+     */
+    fun attention(
+        mid: String,
+        mode: Int, // 1为关注，2为取消关注
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/relation/modify")
+        formBody = ApiHelper.createParams(
+            "fid" to mid,
+            "act" to mode.toString(),
+//            "re_src" to "32",
+        )
+        method = MiaoHttp.POST
     }
 
 }

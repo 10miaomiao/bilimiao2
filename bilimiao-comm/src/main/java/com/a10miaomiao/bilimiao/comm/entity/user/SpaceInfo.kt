@@ -27,9 +27,15 @@ data class SpaceInfo(
         val place: String,
         val rank: String,
         val regtime: Int,
+        val relation: RelationInfo,
         val sex: String,
         val sign: String,
         val spacesta: Int
+    )
+
+    data class RelationInfo(
+        val status: Int,
+        var is_follow: Int,
     )
 
     data class LevelInfo(
