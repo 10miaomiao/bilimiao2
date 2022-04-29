@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'kotlin-parcelize'
+    id 'com.google.protobuf' // proto
 }
 
 android {
@@ -31,6 +32,38 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    sourceSets {
+        main {
+            proto {
+                srcDir 'src/main/proto' // 模块下的proto文件夹
+                include '**/*.proto'
+            }
+        }
+    }
+}
+
+protobuf {
+    protoc { artifact = 'com.google.protobuf:protoc:3.12.0' } // 相当于proto编译器
+    plugins {
+        grpc { artifact = 'io.grpc:protoc-gen-grpc-java:1.33.0' } // Grpc单独的编译器
+
+        javalite {
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+            // 官方推荐的方法，Android 适用javalite,相较于java插件，生成的代码更轻量化
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option 'lite' }
+            }
+            task.plugins {
+                grpc { // Options added to --grpc_out
+                    option 'lite'
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -41,6 +74,10 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.8'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+
+    implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
+    implementation 'io.grpc:grpc-stub:1.33.0'
+    implementation 'javax.annotation:javax.annotation-api:1.2'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

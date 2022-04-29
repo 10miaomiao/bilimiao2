@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 
@@ -22,5 +23,38 @@ class BangumiAPI {
             "ep_id" to epId)
     }
 
+    /**
+     * 收藏番剧
+     */
+    fun followSeason(seasonId: String) = MiaoHttp.request {
+        url = BiliApiService.biliApi("pgc/view/app/season")
+        formBody = ApiHelper.createParams(
+            "season_id" to seasonId,
+        )
+        method = MiaoHttp.POST
+    }
+
+    /**
+     * 取消收藏番剧
+     */
+    fun cancelFollowSeason(seasonId: String) = MiaoHttp.request {
+        url = BiliApiService.biliApi("pgc/app/follow/del")
+        formBody = ApiHelper.createParams(
+            "season_id" to seasonId,
+        )
+        method = MiaoHttp.POST
+    }
+
+    /**
+     * 设置状态
+     */
+    fun setSeasonStatus(seasonId: String, status: Int) = MiaoHttp.request {
+        url = BiliApiService.biliApi("pgc/view/app/season")
+        formBody = ApiHelper.createParams(
+            "season_id" to seasonId,
+            "status" to status.toString(),
+        )
+        method = MiaoHttp.POST
+    }
 
 }
