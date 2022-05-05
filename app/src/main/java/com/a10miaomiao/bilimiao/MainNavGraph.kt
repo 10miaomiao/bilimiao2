@@ -260,6 +260,7 @@ object MainNavGraph {
 
     object action {
         val id = id_counter++
+        val global_to_videoInfo = dest.global to dest.videoInfo
         val global_to_videoPages = dest.global to dest.videoPages
         val global_to_videoCoin = dest.global to dest.videoCoin
         val global_to_videoAddFavorite = dest.global to dest.videoAddFavorite

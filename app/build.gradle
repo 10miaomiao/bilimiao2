@@ -89,6 +89,7 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.8'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
 
     implementation project(':bilimiao-comm')
     implementation project(':bilimiao-cover')

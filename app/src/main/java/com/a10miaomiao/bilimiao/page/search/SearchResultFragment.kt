@@ -72,8 +72,8 @@ class SearchResultFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChange
 
     private val viewModel by diViewModel<SearchResultViewModel>(di)
 
-    private val ID_viewPager = 233
-    private val ID_tabLayout = 234
+    private val ID_viewPager = View.generateViewId()
+    private val ID_tabLayout = View.generateViewId()
 
     override fun onCreateView(
         inflater: LayoutInflater,
