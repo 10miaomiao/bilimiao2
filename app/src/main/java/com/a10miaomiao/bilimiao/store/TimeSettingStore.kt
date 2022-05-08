@@ -38,6 +38,11 @@ class TimeSettingStore(override val di: DI) :
 
     override fun copyState() = state.copy()
 
+    override fun init(context: Context) {
+        super.init(context)
+        initState()
+    }
+
     fun initState () {
         setTime(
             read(TIME_FROM),

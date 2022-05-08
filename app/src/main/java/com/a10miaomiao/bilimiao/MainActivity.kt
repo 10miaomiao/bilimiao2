@@ -48,12 +48,7 @@ class MainActivity
 
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
-        bindSingleton { windowStore }
-        bindSingleton { playerStore }
-        bindSingleton { downloadStore }
-        bindSingleton { userStore }
-        bindSingleton { timeSettingStore }
-        bindSingleton { filterStore }
+        store.loadStoreModules(this)
         bindSingleton { playerDelegate }
         bindSingleton { themeDelegate }
         bindSingleton { downloadDelegate }
@@ -61,13 +56,7 @@ class MainActivity
         bindSingleton { supportHelper }
     }
 
-    private val windowStore: WindowStore by diViewModel(di)
-    private val playerStore: PlayerStore by diViewModel(di)
-    private val downloadStore: DownloadStore by diViewModel(di)
-    private val userStore: UserStore by diViewModel(di)
-    private val timeSettingStore: TimeSettingStore by diViewModel(di)
-    private val filterStore: FilterStore by diViewModel(di)
-
+    private val store by lazy { Store(this, di) }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
     private val downloadDelegate by lazy { DownloadDelegate(this, di) }
     private val playerDelegate by lazy { PlayerDelegate(this, di) }
@@ -86,6 +75,7 @@ class MainActivity
         playerDelegate.onCreate(savedInstanceState)
         downloadDelegate.onCreate(savedInstanceState)
         bottomSheetDelegate.onCreate(savedInstanceState)
+        store.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ui.root.rootWindowInsets?.let {
@@ -113,7 +103,6 @@ class MainActivity
         MainNavGraph.createGraph(navController, MainNavGraph.dest.home)
         navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
-        timeSettingStore.initState()
 
         ui.mAppBar.onBackClick = this.onBackClick
         ui.mAppBar.onMenuItemClick = {
@@ -122,8 +111,6 @@ class MainActivity
                 fragment.onMenuItemClick(it)
             }
         }
-
-        userStore.init(this)
 
 //        lifecycleScope.launch(Dispatchers.IO){
 //            val refreshToken = Bilimiao.commApp.loginInfo!!.token_info.refresh_token
@@ -135,6 +122,8 @@ class MainActivity
         // 百度统计
         StatService.setAuthorizedState(this, false)
         StatService.start(this)
+
+        navController.handleDeepLink(intent)
 
     }
 
@@ -184,6 +173,7 @@ class MainActivity
         setWindowInsets(left, top, right, bottom)
     }
     fun setWindowInsets (left: Int, top: Int, right: Int, bottom: Int) {
+        val windowStore = store.windowStore
         windowStore.setWindowInsets(
             left, top, right, bottom,
         )
@@ -237,6 +227,7 @@ class MainActivity
         playerDelegate.onDestroy()
         downloadDelegate.onDestroy()
         bottomSheetDelegate.onDestroy()
+        store.onDestroy()
         navController.removeOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
         super.onDestroy()

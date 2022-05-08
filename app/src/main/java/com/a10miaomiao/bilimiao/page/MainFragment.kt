@@ -34,6 +34,9 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.view.loadPic
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.home.HomeFragment
+import com.a10miaomiao.bilimiao.page.home.PopularFragment
+import com.a10miaomiao.bilimiao.page.home.RecommendFragment
 import com.a10miaomiao.bilimiao.page.search.SearchResultViewModel
 import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
 import com.a10miaomiao.bilimiao.store.UserStore
@@ -108,16 +111,33 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     private val viewModel by diViewModel<MainViewModel>(di)
 
+    private val themeDelegate by instance<ThemeDelegate>()
+
+    private var themeId = 0
+
     private val userStore by instance<UserStore>()
 
     private val ID_viewPager = View.generateViewId()
     private val ID_tabLayout = View.generateViewId()
+
+    private val titles = listOf("首页", "推荐", "热门")
+    private val fragments by lazy {
+        listOf<Fragment>(
+            HomeFragment.newInstance(),
+            RecommendFragment.newInstance(),
+            PopularFragment.newInstance(),
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        if (themeDelegate.getThemeResId() != themeId) {
+            ui.cleanCacheView()
+            themeId = themeDelegate.getThemeResId()
+        }
         ui.parentView = container
         return ui.root
     }
@@ -133,10 +153,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
         if  (viewPager.adapter == null) {
             val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
                 override fun getItem(p0: Int): Fragment {
-                    return viewModel.fragments[p0]
+                    return fragments[p0]
                 }
-                override fun getCount() = viewModel.fragments.size
-                override fun getPageTitle(position: Int) = viewModel.titles[position]
+                override fun getCount() = fragments.size
+                override fun getPageTitle(position: Int) = titles[position]
             }
             viewPager.adapter = mAdapter
             tabLayout.setTabsFromPagerAdapter(mAdapter)

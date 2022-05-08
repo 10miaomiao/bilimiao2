@@ -9,6 +9,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
+import com.a10miaomiao.bilimiao.page.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
@@ -52,6 +53,13 @@ object MainNavGraph {
         val global = id_counter++
         val home = f<MainFragment>()
         val template = f<TemplateFragment>()
+        val web = f<WebFragment>() {
+            deepLink("bilibili://browser/?url={url}")
+            argument(args.url) {
+                type = NavType.StringType
+                nullable = true
+            }
+        }
         val timeSetting = f<TimeSettingFragment>() {
             deepLink("bilimiao://time/setting")
         }
@@ -120,6 +128,7 @@ object MainNavGraph {
             }
         }
         val videoInfo = f<VideoInfoFragment> {
+            deepLink("bilibili://video/{id}")
             argument(args.type) {
                 type = NavType.StringType
                 defaultValue = "AV"
@@ -168,6 +177,7 @@ object MainNavGraph {
         }
 
         val bangumiDetail = f<BangumiDetailFragment> {
+            deepLink("bilibili://bangumi/season/{id}")
             argument(args.id) {
                 type = NavType.StringType
                 nullable = false
@@ -193,9 +203,11 @@ object MainNavGraph {
         }
 
         val user = f<UserFragment> {
-            argument(args.type) {
+            deepLink("bilibili://user/{id}")
+            deepLink("bilibili://space/{id}")
+            argument(args.id) {
                 type = NavType.StringType
-                defaultValue = "AV"
+                nullable = false
             }
         }
         val history = f<HistoryFragment> {
@@ -260,10 +272,13 @@ object MainNavGraph {
 
     object action {
         val id = id_counter++
+        val global_to_web = dest.global to dest.web
         val global_to_videoInfo = dest.global to dest.videoInfo
         val global_to_videoPages = dest.global to dest.videoPages
         val global_to_videoCoin = dest.global to dest.videoCoin
         val global_to_videoAddFavorite = dest.global to dest.videoAddFavorite
+        val global_to_user = dest.global to dest.user
+        val global_to_bangumiDetail = dest.global to dest.bangumiDetail
         val global_to_bangumiPages = dest.global to dest.bangumiPages
         val global_to_downloadVideoCreate = dest.global to dest.downloadVideoCreate
         val global_to_searchStart = dest.global to dest.searchStart
@@ -327,6 +342,7 @@ object MainNavGraph {
     }
 
     object args {
+        const val url = "url"
         const val type = "type"
         const val id = "id"
         const val name = "name"

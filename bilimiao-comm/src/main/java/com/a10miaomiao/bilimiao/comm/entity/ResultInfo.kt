@@ -5,4 +5,7 @@ data class ResultInfo<T>(
     val `data`: T,
     val message: String,
     val ttl: Int,
-)
+) {
+    // 响应结果是否为成功
+    val isSuccess get() = code == 0
+}

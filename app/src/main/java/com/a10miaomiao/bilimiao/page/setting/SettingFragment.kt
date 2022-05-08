@@ -1,8 +1,10 @@
 package com.a10miaomiao.bilimiao.template
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +30,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.store.RegionStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -46,7 +49,8 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 
-class SettingFragment : Fragment(), DIAware, MyPage {
+class SettingFragment : Fragment(), DIAware, MyPage
+    , SharedPreferences.OnSharedPreferenceChangeListener {
 
     override val pageConfig = myPageConfig {
         title = "设置"
@@ -57,6 +61,7 @@ class SettingFragment : Fragment(), DIAware, MyPage {
 //    private val viewModel by diViewModel<TemplateViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
+    private val regionStore by instance<RegionStore>()
 
     private val themeDelegate by instance<ThemeDelegate>()
 
@@ -77,9 +82,8 @@ class SettingFragment : Fragment(), DIAware, MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
-        }
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        prefs.registerOnSharedPreferenceChangeListener(this)
     }
 
     private fun createPreferenceClick(setting: MiaoSettingInfo): Preference.OnClickListener {
@@ -123,7 +127,22 @@ class SettingFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        prefs.unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        when (key) {
+            "is_best_region" -> {
+                regionStore.loadRegionData(requireContext())
+            }
+        }
+    }
+
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, windowStore)
         val insets = windowStore.getContentInsets(parentView)
         frameLayout {
             _leftPadding = insets.left

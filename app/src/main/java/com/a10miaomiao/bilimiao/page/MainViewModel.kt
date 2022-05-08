@@ -19,18 +19,4 @@ class MainViewModel(
     val fragment: Fragment by instance()
 
     var position = -1
-    val titles = listOf("首页", "热门")
-    val fragments by lazy {
-        listOf<Fragment>(
-            HomeFragment.newInstance(),
-            PopularFragment.newInstance(),
-        )
-    }
-
-    val curFragment get() = if (position == -1) {
-        null
-    } else {
-        fragments[position]
-    }
-
 }

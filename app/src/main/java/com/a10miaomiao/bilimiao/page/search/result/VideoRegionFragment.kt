@@ -62,7 +62,7 @@ class VideoRegionFragment : Fragment(), DIAware, MyPage {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val fragment = navHostFragment.childFragmentManager.primaryNavigationFragment
         if (fragment is SearchResultFragment) {
-            val region = viewModel.regions[position]
+            val region = viewModel.regionList[position]
             fragment.changeVideoRegion(region)
         }
         val nav = findNavController()
@@ -134,6 +134,7 @@ class VideoRegionFragment : Fragment(), DIAware, MyPage {
     }
 
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, viewModel.regionStore)
         val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
         val contentInsets = windowStore.getContentInsets(parentView)
 
@@ -149,7 +150,7 @@ class VideoRegionFragment : Fragment(), DIAware, MyPage {
             )
 
             _miaoAdapter(
-                items = viewModel.regions,
+                items = viewModel.regionList,
                 itemUi = itemUi,
                 depsAry = arrayOf(viewModel.checkRegionId)
             ) {

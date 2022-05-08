@@ -5,6 +5,6 @@ data class PaginationInfo <T>(
     var finished: Boolean = false,
     var pageNum: Int = 1,
     var pageSize: Int = 20,
-    var data: ArrayList<T> = arrayListOf(),
+    var data: MutableList<T> = mutableListOf(),
     var fail: Boolean = false,
 )

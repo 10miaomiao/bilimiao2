@@ -71,7 +71,6 @@ class HomeFragment : Fragment(), DIAware {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.loadRegionData()
         viewModel.randomTitle()
     }
 
@@ -143,9 +142,10 @@ class HomeFragment : Fragment(), DIAware {
     }
 
     val regionItemClick = OnItemClickListener { baseQuickAdapter, view, i  ->
+        val regions = viewModel.regionStore.state.regions
         val nav = Navigation.findNavController(view)
         val args = bundleOf(
-            MainNavGraph.args.region to viewModel.regions[i]
+            MainNavGraph.args.region to regions[i]
         )
         nav.navigate(MainNavGraph.action.home_to_region, args)
     }
@@ -188,9 +188,9 @@ class HomeFragment : Fragment(), DIAware {
                 +recyclerView {
                     layoutManager = GridAutofitLayoutManager(requireContext(), dip(80))
                     isNestedScrollingEnabled = false
-
+                    val regions = viewModel.regionStore.state.regions
                     _miaoAdapter(
-                        viewModel.regions,
+                        regions,
                         regionItemUi,
                     ) {
                         setOnItemClickListener(regionItemClick)
@@ -310,6 +310,7 @@ class HomeFragment : Fragment(), DIAware {
     val ui = miaoBindingUi {
         connectStore(viewLifecycleOwner, viewModel.timeSettingStore)
         connectStore(viewLifecycleOwner, viewModel.userStore)
+        connectStore(viewLifecycleOwner, viewModel.regionStore)
         val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
         val contentInsets = windowStore.getContentInsets(parentView)
 

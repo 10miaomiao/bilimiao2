@@ -36,7 +36,7 @@ class VideoInfoViewModel(
     val fragment: Fragment by instance()
 
 
-    val type by lazy { fragment.requireArguments().getString(MainNavGraph.args.type, "AV") }
+//    val type by lazy { fragment.requireArguments().getString(MainNavGraph.args.type, "AV") }
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
 
     var info: VideoInfo? = null
@@ -60,6 +60,12 @@ class VideoInfoViewModel(
                 loading = true
             }
 //            val filterStore = Store.from(context).filterStore
+            val type = if (id.indexOf("BV") == 0) {
+                "BV"
+            } else {
+                "AV"
+            }
+            DebugMiao.log("id", id)
             val res = BiliApiService.videoAPI
                 .info(id, type = type)
                 .call()

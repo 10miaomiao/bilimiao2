@@ -27,5 +27,6 @@ object BiliApiService {
     val playerAPI = PlayerAPI()
     val userApi = UserApi()
     val authApi = AuthApi()
+    val homeApi = HomeApi()
 
 }
