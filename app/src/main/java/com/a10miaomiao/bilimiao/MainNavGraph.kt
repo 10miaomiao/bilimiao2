@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
+import com.a10miaomiao.bilimiao.page.rank.RankFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
@@ -125,6 +126,15 @@ object MainNavGraph {
         val region = f<RegionFragment> {
             argument(args.region) {
                 type = NavType.ParcelableType(RegionInfo::class.java)
+            }
+        }
+
+        val rank = f<RankFragment> {
+            deepLink("bilibili://rank")
+            deepLink("bilibili://rank?type={type}")
+            argument(args.type) {
+                type = NavType.StringType
+                nullable = true
             }
         }
         val videoInfo = f<VideoInfoFragment> {

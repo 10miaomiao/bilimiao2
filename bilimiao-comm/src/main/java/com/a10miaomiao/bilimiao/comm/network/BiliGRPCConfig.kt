@@ -1,39 +1,22 @@
 package com.a10miaomiao.bilimiao.comm.network
 
+import android.os.Build
 import android.util.Base64
+import android.webkit.WebSettings
 import bilibili.metadata.MetadataOuterClass
 import bilibili.metadata.device.DeviceOuterClass
 import bilibili.metadata.fawkes.Fawkes
 import bilibili.metadata.locale.LocaleOuterClass
 import bilibili.metadata.network.NetworkOuterClass
 import bilibili.metadata.restriction.RestrictionOuterClass
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 
 object BiliGRPCConfig {
 
     /**
-     * 系统版本.
-     */
-    val osVersion = "14.6";
-
-    /**
-     * 厂商.
-     */
-    val brand = "Apple";
-
-    /**
-     * 手机系统.
-     */
-    val model = "iPhone 11";
-
-    /**
-     * 应用版本.
-     */
-    val appVersion = "6.7.0";
-
-    /**
      * 构建标识.
      */
-    val build = 6070600;
+    val build = 6710300;
 
     /**
      * 频道.
@@ -58,22 +41,17 @@ object BiliGRPCConfig {
     /**
      * 未知.
      */
-    val cronet = "1.21.0";
-
-    /**
-     * 未知.
-     */
     val buvid = "XZFD48CFF1E68E637D0DF11A562468A8DC314";
 
     /**
      * 应用类型.
      */
-    val mobileApp = "iphone";
+    val mobileApp = "android";
 
     /**
      * 移动平台.
      */
-    val platform = "iphone";
+    val platform = "android";
 
     /**
      * 产品环境.
@@ -132,9 +110,9 @@ object BiliGRPCConfig {
             .setChannel(channel)
             .setBuvid(buvid)
             .setPlatform(platform)
-            .setBrand(brand)
-            .setModel(model)
-            .setOsver(osVersion)
+            .setBrand(Build.BRAND)
+            .setModel(Build.MODEL)
+            .setOsver(Build.VERSION.RELEASE)
             .build()
         return toBase64(msg.toByteArray())
     }
@@ -176,6 +154,34 @@ object BiliGRPCConfig {
             .setSLocale(sLocale)
             .build()
         return toBase64(msg.toByteArray())
+    }
+
+    fun getSystemUserAgent(): String {
+        var userAgent = ""
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            try {
+                userAgent = WebSettings.getDefaultUserAgent(BilimiaoCommApp.commApp.app)
+            } catch (e: Exception) {
+                userAgent = System.getProperty("http.agent")
+            }
+        } else {
+            userAgent = System.getProperty("http.agent")
+        }
+        userAgent = System.getProperty("http.agent")
+        //调整编码，防止中文出错
+        val sb = StringBuffer()
+        var i = 0
+        val length = userAgent.length
+        while (i < length) {
+            val c = userAgent[i]
+            if (c <= '\u001f' || c >= '\u007f') {
+                sb.append(String.format("\\u%04x", c.toInt()))
+            } else {
+                sb.append(c)
+            }
+            i++
+        }
+        return sb.toString()
     }
 
     /**

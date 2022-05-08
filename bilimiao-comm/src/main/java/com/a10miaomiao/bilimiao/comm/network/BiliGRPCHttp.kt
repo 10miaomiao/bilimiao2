@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.network
 
+import android.os.Build
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import io.grpc.MethodDescriptor
 import okhttp3.*
 import java.io.IOException
@@ -15,12 +17,14 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
     companion object {
         const val _grpcBase = "https://grpc.biliapi.net/"
 
+        /**
+         * User-Agent: Dalvik/2.1.0 (Linux; U; Android 6.0.1; MuMu Build/V417IR) 6.71.0 os/android model/MuMu mobi_app/android build/6710300 channel/bili innerVer/6710300 osVer/6.0.1 network/2
+         */
         val userAgent = """
-            |bili-universal/62800300
-            |os/ios model/${BiliGRPCConfig.model} mobi_app/iphone
-            |osVer/${BiliGRPCConfig.osVersion}
-            |network/${BiliGRPCConfig.networkType}
-            |grpc-objc/1.32.0 grpc-c/12.0.0 (ios; cronet_http)
+            |${BiliGRPCConfig.getSystemUserAgent()} 
+            |os/android model/${Build.MODEL} mobi_app/android 
+            |build/${BiliGRPCConfig.build} channel/bili innerVer/${BiliGRPCConfig.build} 
+            |osVer/${Build.VERSION.RELEASE} network/2
         """.trimMargin().replace("\n", "")
     }
 

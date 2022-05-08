@@ -38,6 +38,7 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityCenter
+import splitties.views.verticalPadding
 
 class PopularFragment: Fragment(), DIAware {
 
@@ -96,9 +97,8 @@ class PopularFragment: Fragment(), DIAware {
         verticalLayout {
             layoutParams = ViewGroup.MarginLayoutParams(
                 dip(100), wrapContent
-            ).apply {
-                verticalMargin = config.pagePadding
-            }
+            )
+            verticalPadding = config.pagePadding
             gravity = gravityCenter
             setBackgroundResource(config.selectableItemBackground)
             views {
@@ -131,8 +131,8 @@ class PopularFragment: Fragment(), DIAware {
         val contentInsets = windowStore.getContentInsets(parentView)
 
         verticalLayout {
-//            _leftPadding = contentInsets.left + config.pagePadding
-//            _rightPadding = contentInsets.right + config.pagePadding
+            _leftPadding = contentInsets.left
+            _rightPadding = contentInsets.right
 //            _topPadding = config.pagePadding
 //            _bottomPadding = contentInsets.bottom
 
