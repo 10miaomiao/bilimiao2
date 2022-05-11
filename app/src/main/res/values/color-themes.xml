@@ -135,4 +135,11 @@
         <item name="colorSecondaryVariant">@color/purple</item>
     </style>
 
+    <style name="MaterialYouTheme" parent="Theme.Bilimiao">
+    </style>
+
+    <style name="MaterialYouTheme.DayNight" parent="Theme.DayNight.Bilimiao">
+    </style>
+
+
 </resources>

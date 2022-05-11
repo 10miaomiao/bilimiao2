@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.text.Spannable
 import android.view.View
 import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
@@ -89,7 +90,7 @@ fun MiaoUI.videoCommentView(
             // 头像
             +rcImageView {
                 isCircle = true
-                tag = mid
+                _tag = mid
                 onUpperClick?.let {
                     setOnClickListener(onUpperClick)
                 }

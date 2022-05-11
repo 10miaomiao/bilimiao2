@@ -1,24 +1,23 @@
 package com.a10miaomiao.bilimiao.comm.delegate.theme
 
+import android.app.Application
 import android.content.Context
-import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
+import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import cn.a10miaomiao.player.PlayerService
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
+import com.google.android.material.color.DynamicColors
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+
 
 class ThemeDelegate(
     private var activity: AppCompatActivity,
@@ -28,10 +27,16 @@ class ThemeDelegate(
     companion object {
         private const val KEY_THEME = "theme_name"
         private const val KEY_NIGHT = "night"
+        private const val NAME_MATERIAL_YOU_THEME = "MaterialYouTheme"
 
         fun getNightMode (context: Context): Int {
             val sp = context.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
             return sp.getInt(KEY_NIGHT, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+
+        fun getThemeName(context: Context): String {
+            val sp = context.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
+            return sp.getString(KEY_THEME, "PinkTheme")!!
         }
 
         fun setNightMode (context: Context, mode: Int = getNightMode(context)) {
@@ -63,8 +68,17 @@ class ThemeDelegate(
     )
 
     fun onCreate(savedInstanceState: Bundle?) {
-        theme.value = getThemeName()
-        activity.setTheme(getThemeResId())
+        setTheme()
+        DebugMiao.log(Build.VERSION.SDK_INT )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            themeList.add(
+                ThemeInfo(
+                    "Material You",
+                    DynamicColors.wrapContextIfAvailable(activity).config.themeColor,
+                    NAME_MATERIAL_YOU_THEME,
+                )
+            )
+        }
     }
 
     fun getThemeResId(themeName: String = getTheme()) = try {
@@ -73,23 +87,26 @@ class ThemeDelegate(
         R.style.PinkTheme
     }
 
-    private fun getThemeName(): String {
-        val sp = activity.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
-        return sp.getString(KEY_THEME, "PinkTheme")!!
-    }
-
     fun getTheme(): String {
         return theme.value!!
     }
 
+    fun setTheme() {
+        val themeName = getThemeName(activity)
+        theme.value = themeName
+        if (themeName == NAME_MATERIAL_YOU_THEME) {
+            DynamicColors.applyIfAvailable(activity)
+        } else {
+            activity.setTheme(getThemeResId(themeName))
+        }
+    }
+
     fun setTheme(newTheme: String) {
-        val themeId = getThemeResId(newTheme)
-        activity.setTheme(themeId)
-        theme.value = newTheme
         activity.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_THEME, newTheme)
             .apply()
+        setTheme()
     }
 
     fun observeTheme(owner: LifecycleOwner, observer: Observer<String>) = theme.observe(owner, observer)

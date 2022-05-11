@@ -172,7 +172,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
 
         switch("is_bili_player") {
             title = "使用外部播放器"
-            summary = "奇迹和魔法都是存在的"
+            summary = "奇迹和魔法并不存在"
             defaultValue = false
             enabled = false
         }

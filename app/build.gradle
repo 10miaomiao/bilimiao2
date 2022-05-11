@@ -58,7 +58,7 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation "com.google.android.material:material:$material_version"
     implementation 'androidx.recyclerview:recyclerview:1.2.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
@@ -93,6 +93,7 @@ dependencies {
 
     implementation project(':bilimiao-comm')
     implementation project(':bilimiao-cover')
+//    implementation project(':bilimiao-appwidget')
     implementation project(':download')
     implementation project(':miao-binding')
     implementation project(':miao-binding-android')

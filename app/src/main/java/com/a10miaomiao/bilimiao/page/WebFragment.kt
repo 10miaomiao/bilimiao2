@@ -101,44 +101,12 @@ class WebFragment : Fragment(), DIAware, MyPage {
     private val mWebViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             var url = request.url.toString()
-            var compile = Pattern.compile(".*://space.bilibili.com/(\\d+)")
-            var matcher = compile.matcher(url)
-            if (matcher.find()) {
-                val id = matcher.group(1)
-                val args = bundleOf(
-                    MainNavGraph.args.id to id,
-                )
-                Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.global_to_user, args)
-                return true
-            }
-            compile = Pattern.compile("BV([a-zA-Z0-9]{5,})")
-            matcher = compile.matcher(url)
-            if (matcher.find()) {
-                val id = matcher.group(1)
-                val args = bundleOf(
-                    MainNavGraph.args.id to "BV$id",
-                )
-                Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.global_to_videoInfo, args)
-                return true
-            }
-            compile = Pattern.compile("avid=(\\d+)")
-            matcher = compile.matcher(url)
-            if (matcher.find()) {
-                val id = matcher.group(1)
-                val args = bundleOf(
-                    MainNavGraph.args.id to id,
-                )
-                Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.global_to_videoInfo, args)
+            val re = BiliNavigation.navigationTo(view, url)
+            if (re) {
                 return true
             }
             if (url.indexOf("bilibili://") == 0) {
-                val re = BiliNavigation.navigationTo(view, url)
-                if (!re) {
-                    toast("不支持打开的链接：$url")
-                }
+                toast("不支持打开的链接：$url")
                 return true
             }
             return false

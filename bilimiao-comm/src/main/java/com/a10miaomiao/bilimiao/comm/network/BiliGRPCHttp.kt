@@ -97,11 +97,14 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
 }
 
 fun <ReqT, RespT> MethodDescriptor<ReqT, RespT>.request(
-    reqMessage: ReqT
+    reqMessage: ReqT,
+    biliGRPCHttpBuilder: (() -> Unit)? = null
 ): BiliGRPCHttp<ReqT, RespT> {
     return BiliGRPCHttp(
         this,
         reqMessage,
-    )
+    ).apply {
+        biliGRPCHttpBuilder?.invoke()
+    }
 }
 

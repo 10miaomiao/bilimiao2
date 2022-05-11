@@ -217,7 +217,7 @@ object MainNavGraph {
             deepLink("bilibili://space/{id}")
             argument(args.id) {
                 type = NavType.StringType
-                nullable = false
+                nullable = true
             }
         }
         val history = f<HistoryFragment> {
