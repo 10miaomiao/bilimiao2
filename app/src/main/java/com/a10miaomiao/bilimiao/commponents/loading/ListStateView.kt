@@ -5,7 +5,9 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.android.widget._text
+import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm.progressBar
 import com.a10miaomiao.bilimiao.comm.views
@@ -19,11 +21,22 @@ enum class ListState {
 
 fun MiaoUI.listStateView(
     state: ListState,
-    initLayout: (FrameLayout.() -> Unit)? = null
+    onFailRefreshClick: (() -> Unit)? = null,
+    initLayout: (FrameLayout.() -> Unit)? = null,
 ): View {
     return frameLayout {
         initLayout?.invoke(this)
-
+        _tag = state
+        miaoEffect(onFailRefreshClick) {
+            onFailRefreshClick?.let { refreshClick ->
+                setOnClickListener {
+                    val viewTag = tag
+                    if (viewTag is ListState && viewTag == ListState.FAIL) {
+                        refreshClick.invoke()
+                    }
+                }
+            }
+        }
         views {
             +horizontalLayout {
                 gravity = Gravity.CENTER

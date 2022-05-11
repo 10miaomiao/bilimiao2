@@ -36,6 +36,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
+import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
@@ -103,7 +104,15 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
     private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
         when (linkType) {
             LinkType.LINK_TYPE -> {
-                BiliUrlMatcher.toUrlLink(view, content)
+                val url = content
+                val re = BiliNavigation.navigationTo(view, url)
+                if (!re) {
+                    if (url.indexOf("bilibili://") == 0) {
+                        toast("不支持打开的链接：$url")
+                    } else {
+                        BiliUrlMatcher.toUrlLink(view, url)
+                    }
+                }
             }
             LinkType.MENTION_TYPE -> {
 //                toast("你点击了@用户 内容是：$content")

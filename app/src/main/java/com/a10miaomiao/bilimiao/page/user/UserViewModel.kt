@@ -42,7 +42,7 @@ class UserViewModel(
     val filterStore: FilterStore by instance()
     private val myPage: MyPage by instance()
 
-    val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    var id: String
 
     var loading = false
     var dataInfo: SpaceInfo? = null
@@ -57,7 +57,15 @@ class UserViewModel(
     val isFollow get() = dataInfo?.card?.relation?.is_follow == 1
 
     init {
-        loadData()
+        id = fragment.requireArguments().getString(MainNavGraph.args.id, "")
+        if (id.isBlank() && userStore.isLogin()) {
+            id = userStore.state.info?.mid?.toString() ?: ""
+        }
+        if (id.isBlank()) {
+            activity.toast("请先登录")
+        } else {
+            loadData()
+        }
     }
 
     fun loadData() = viewModelScope.launch(Dispatchers.IO) {

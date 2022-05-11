@@ -40,7 +40,7 @@ class DownloadService : Service(), DownloadManager.Callback {
         if (!file.exists()) {
             file.mkdir()
         }
-        return file.absolutePath
+        return file.canonicalPath
     }
 
     fun getDownloadList(): ArrayList<BiliVideoEntry> {

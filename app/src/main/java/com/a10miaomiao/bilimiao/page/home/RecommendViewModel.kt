@@ -93,8 +93,11 @@ class RecommendViewModel(
     }
 
 
-    private fun _loadData(pageNum: Long = _idx) {
-        loadData(pageNum)
+    fun tryAgainLoadData() {
+        val (loading, finished) = this.list
+        if (!finished && !loading) {
+            loadData()
+        }
     }
 
     fun loadMode () {
@@ -108,7 +111,7 @@ class RecommendViewModel(
         ui.setState {
             list = PaginationInfo()
             triggered = true
-            loadData()
+            loadData(0)
         }
     }
 }

@@ -39,7 +39,7 @@ class PopularViewModel(
     val fragment: Fragment by instance()
     val filterStore: FilterStore by instance()
 
-    private val _idx get() = if (list.data.size == 0) {
+    private val lastIdx get() = if (list.data.size == 0) {
         0
     } else {
         list.data[list.data.size - 1].base.idx
@@ -52,9 +52,8 @@ class PopularViewModel(
         loadData(0)
     }
 
-
     private fun loadData(
-        idx: Long = _idx
+        idx: Long = lastIdx
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
             ui.setState {
@@ -84,14 +83,13 @@ class PopularViewModel(
                 if (itemsList.isEmpty()) {
                      list.finished = true
                 }
+                list.loading = false
+                triggered = false
             }
         } catch (e: Exception) {
             e.printStackTrace()
             ui.setState {
                 list.fail = true
-            }
-        } finally {
-            ui.setState {
                 list.loading = false
                 triggered = false
             }
@@ -99,14 +97,17 @@ class PopularViewModel(
     }
 
 
-    private fun _loadData(pageNum: Long = _idx) {
-        loadData(pageNum)
+    fun tryAgainLoadData() {
+        val (loading, finished) = this.list
+        if (!finished && !loading) {
+            loadData()
+        }
     }
 
     fun loadMode () {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
-            loadData(_idx)
+            loadData(lastIdx)
         }
     }
 
@@ -114,7 +115,7 @@ class PopularViewModel(
         ui.setState {
             list = PaginationInfo()
             triggered = true
-            loadData()
+            loadData(0)
         }
     }
 }

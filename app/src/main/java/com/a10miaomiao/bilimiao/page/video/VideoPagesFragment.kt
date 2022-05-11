@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.page.video
 
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
@@ -81,12 +83,12 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
     val itemUi = miaoBindingItemUi<VideoPageInfo> { item, index ->
         frameLayout {
             setBackgroundResource(R.drawable.shape_corner)
-            layoutParams = lParams {
-                width = matchParent
-                height = wrapContent
-                horizontalMargin = dip(5)
+            layoutParams = ViewGroup.MarginLayoutParams(matchParent, wrapContent).apply {
                 bottomMargin = dip(10)
             }
+            horizontalPadding = dip(10)
+            verticalPadding = dip(10)
+
             val enabled = item.cid != playerStore.state.info.cid
             _isEnabled = enabled
 
@@ -116,13 +118,15 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
 
         recyclerView {
             backgroundColor = config.windowBackgroundColor
-            _topPadding = contentInsets.top
+            layoutParams = ViewGroup.MarginLayoutParams(matchParent, matchParent).apply {
+                _topMargin = contentInsets.top
+            }
             _bottomPadding = contentInsets.bottom
             _leftPadding = contentInsets.left + config.pagePadding
             _rightPadding = contentInsets.right + config.pagePadding
 
             _miaoLayoutManage(
-                GridAutofitLayoutManager(requireContext(), requireContext().dip(180))
+                LinearLayoutManager(requireContext())
             )
 
             _miaoAdapter(

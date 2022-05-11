@@ -15,6 +15,7 @@ import bilibili.app.show.v1.PopularOuterClass
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -25,6 +26,7 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -46,11 +48,19 @@ class RecommendFragment: Fragment(), DIAware {
 
     private val viewModel by diViewModel<RecommendViewModel>(di)
 
+    private val themeDelegate by instance<ThemeDelegate>()
+
+    private var themeId = 0
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        if (themeDelegate.getThemeResId() != themeId) {
+            ui.cleanCacheView()
+            themeId = themeDelegate.getThemeResId()
+        }
         ui.parentView = container
         return ui.root
     }
@@ -113,10 +123,12 @@ class RecommendFragment: Fragment(), DIAware {
                                 viewModel.list.fail -> ListState.FAIL
                                 viewModel.list.finished -> ListState.NOMORE
                                 else -> ListState.NORMAL
-                            }
+                            },
+                            viewModel::tryAgainLoadData,
                         )..lParams(matchParent, wrapContent) {
                             bottomMargin = contentInsets.bottom
                         }
+
                     }
                 }.wrapInSwipeRefreshLayout {
                     setColorSchemeResources(config.themeColorResource)

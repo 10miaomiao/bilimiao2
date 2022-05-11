@@ -144,7 +144,9 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
 
         recyclerView {
             backgroundColor = config.windowBackgroundColor
-            _topPadding = contentInsets.top
+            layoutParams = ViewGroup.MarginLayoutParams(matchParent, matchParent).apply {
+                _topMargin = contentInsets.top
+            }
             _bottomPadding = contentInsets.bottom
             _leftPadding = contentInsets.left + config.pagePadding
             _rightPadding = contentInsets.right + config.pagePadding

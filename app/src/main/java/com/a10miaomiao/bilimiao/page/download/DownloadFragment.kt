@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.page.download
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -28,6 +31,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
@@ -48,6 +52,7 @@ import splitties.dimensions.dip
 import splitties.toast.toast
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.gravityCenter
 import splitties.views.padding
 import java.text.DecimalFormat
 
@@ -82,6 +87,14 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
     @OptIn(InternalCoroutinesApi::class)
     override fun onResume() {
         super.onResume()
+    }
+
+    val handleHelpClick = View.OnClickListener {
+        val downloadPath = downloadDelegate.downloadService.getDownloadPath()
+        val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText("path", downloadPath)
+        clipboardManager.setPrimaryClip(clipData)
+        toast("下载目录路径已复制到剪切板")
     }
 
     val handleItemClick = OnItemClickListener { adapter, view, position ->
@@ -180,39 +193,44 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
         connectStore(viewLifecycleOwner, windowStore)
         connectStore(viewLifecycleOwner, downloadStore)
         val contentInsets = windowStore.getContentInsets(parentView)
-        recyclerView {
-            _topPadding = contentInsets.top
-            _bottomPadding = contentInsets.bottom
-            _leftPadding = contentInsets.left
-            _rightPadding = contentInsets.right
+        verticalLayout {
+            views {
+                +recyclerView {
+                    _leftPadding = contentInsets.left
+                    _rightPadding = contentInsets.right
 
-            // 取消闪烁
-            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-            _miaoLayoutManage(
-                LinearLayoutManager(context)
-            )
-//            DebugMiao.log("DownloadInfo2", viewModel.downloadStore.state.curDownload)
-            val downloadState = viewModel.downloadStore.state
-            _miaoAdapter(
-                items = downloadDelegate.downloadList,
-                itemUi = itemUi,
-                depsAry = arrayOf(downloadState)
-            ) {
-                setOnItemClickListener(handleItemClick)
-                setOnItemLongClickListener(handleItemLongClick)
-//                (downloadDelegate.curDownload.observe()) {
-//                    val curVideo = downloadDelegate.curVideo
-//                    val index = downloadDelegate.downloadList.indexOfFirst {
-//                        it.avid == curVideo?.avid && it.page_data.cid === curVideo?.page_data.cid
-//                    }
-//                    if (index == -1) {
-//                        notifyDataSetChanged()
-//                    } else {
-//                        notifyItemChanged(index)
-//                    }
-//                }
+                    // 取消闪烁
+                    (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+                    _miaoLayoutManage(
+                        LinearLayoutManager(context)
+                    )
+                    val downloadState = viewModel.downloadStore.state
+                    val mAdapter = _miaoAdapter(
+                        items = downloadDelegate.downloadList,
+                        itemUi = itemUi,
+                        depsAry = arrayOf(downloadState)
+                    ) {
+                        setOnItemClickListener(handleItemClick)
+                        setOnItemLongClickListener(handleItemLongClick)
+                    }
+                    headerViews(mAdapter) {
+                        +frameLayout {
+                        }..lParams(matchParent, contentInsets.top)
+                    }
+                }..lParams(matchParent, matchParent) {
+                    weight = 1f
+                }
+                +textView {
+                    padding = config.pagePadding
+                    _bottomPadding = config.pagePadding + contentInsets.bottom
+                    text = "下载的视频在哪？"
+                    gravity = gravityCenter
+                    setTextColor(config.themeColor)
+                    setOnClickListener(handleHelpClick)
+                }..lParams(matchParent, wrapContent)
             }
         }
+
     }
 
 }

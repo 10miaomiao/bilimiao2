@@ -235,7 +235,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
             "AV", "BV" -> {
                 args.putString(MainNavGraph.args.type, urlType)
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.videoCommentList_to_videoInfo, args)
+                    .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
             }
             else -> {
                 BiliUrlMatcher.toUrlLink(view, url)
@@ -287,7 +287,15 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
             Navigation.findNavController(view)
                 .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
         } else {
-            BiliUrlMatcher.toUrlLink(view, item.uri)
+            val url = item.uri
+            val re = BiliNavigation.navigationTo(view, url)
+            if (!re) {
+                if (url.indexOf("bilibili://") == 0) {
+                    toast("不支持打开的链接：$url")
+                } else {
+                    BiliUrlMatcher.toUrlLink(view, url)
+                }
+            }
         }
     }
 
@@ -298,7 +306,15 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
         when (linkType) {
             LinkType.LINK_TYPE -> {
-                BiliUrlMatcher.toUrlLink(view, content)
+                val url = content
+                val re = BiliNavigation.navigationTo(view, url)
+                if (!re) {
+                    if (url.indexOf("bilibili://") == 0) {
+                        toast("不支持打开的链接：$url")
+                    } else {
+                        BiliUrlMatcher.toUrlLink(view, url)
+                    }
+                }
             }
             LinkType.MENTION_TYPE -> {
 //                toast("你点击了@用户 内容是：$content")
