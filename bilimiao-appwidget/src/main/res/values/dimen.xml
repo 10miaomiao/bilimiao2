@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="widget_2x2_fake_width">160dp</dimen>
+    <dimen name="widget_2x2_width_and_height">110dp</dimen>
+    <dimen name="widget_4x2_height">110dp</dimen>
+    <dimen name="widget_4x2_width">300dp</dimen>
+    <dimen name="widget_4x4_height">250dp</dimen>
+    <dimen name="widget_4x4_image_width">295.2656dp</dimen>
+    <dimen name="widget_4x4_note_image_margin_bottom">10.18dp</dimen>
+    <dimen name="widget_4x4_note_image_margin_top">2.9dp</dimen>
+    <dimen name="widget_4x4_thumb_height">87.2dp</dimen>
+    <dimen name="widget_4x4_width">300dp</dimen>
+    <dimen name="widget_4x_fake_width">344.7188dp</dimen>
+
+</resources>

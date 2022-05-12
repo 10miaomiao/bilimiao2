@@ -440,7 +440,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                     ellipsize = TextUtils.TruncateAt.END
                     _text = item.name
                 }
-                textView {
+                +textView {
                     setTextColor(config.themeColor)
                     textSize = 12f
                     gravity = Gravity.CENTER
