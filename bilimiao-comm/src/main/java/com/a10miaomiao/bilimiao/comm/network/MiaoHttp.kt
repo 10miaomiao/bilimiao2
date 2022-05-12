@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.network
 
 import android.util.Log
 import android.webkit.CookieManager
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.isActive
@@ -95,8 +96,11 @@ class MiaoHttp(var url: String? = null) {
             Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
         }
 
-        inline fun <reified T> Response.gson(): T {
+        inline fun <reified T> Response.gson(isDebug: Boolean = false): T {
             val jsonStr = this.body()!!.string()
+            if (isDebug) {
+                DebugMiao.log(jsonStr)
+            }
             return Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
         }
 

@@ -27,7 +27,7 @@ class BangumiAPI {
      * 收藏番剧
      */
     fun followSeason(seasonId: String) = MiaoHttp.request {
-        url = BiliApiService.biliApi("pgc/view/app/season")
+        url = BiliApiService.biliApi("pgc/app/follow/add")
         formBody = ApiHelper.createParams(
             "season_id" to seasonId,
         )

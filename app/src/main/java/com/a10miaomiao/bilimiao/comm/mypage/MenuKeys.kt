@@ -16,4 +16,7 @@ object MenuKeys {
     val add = id_counter++
     val delete = id_counter++
     val select = id_counter++
+
+    val more = id_counter++
+    val follow = id_counter++
 }

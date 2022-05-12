@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.network
 
 import android.net.Uri
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import java.io.UnsupportedEncodingException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -11,11 +12,10 @@ import java.util.Date
  * Created by 10喵喵 on 2017/4/9.
  */
 object ApiHelper {
-    val appKey_Android = "c1b107428d337928";
-    val _appSecret_Android = "ea85624dfcf12d7cc7b2b3a94fac1f2c";//Android
 
-    val APP_KEY_NEW = "1d8b6e7d45233436"
-    val APP_SECRET_NEW = "560c52ccd288fed045859ed18bffd973"
+    val BUILD_VERSION = 5520400
+    val APP_KEY = "4409e2ce8ffd12b8";
+    val APP_SECRET = "59b43e04ad6965f34319062b478f83dd"
 
     fun getTimeSpen() = Date().time / 1000
 
@@ -32,14 +32,6 @@ object ApiHelper {
             return@with toString()
         }
         return getMD5(str + secret)
-    }
-
-    fun getAndroidSign(url: String): String {
-        return getSing(url, _appSecret_Android)
-    }
-
-    fun getNewSign(url: String): String {
-        return getSing(url, APP_SECRET_NEW)
     }
 
     fun getMD5(info: String): String {
@@ -65,13 +57,14 @@ object ApiHelper {
 
     fun getSing(params: Map<String, String?>, secret: String): String {
         val paramsStr = urlencode(params, true)
+        DebugMiao.log(paramsStr)
         return getMD5(paramsStr + secret)
     }
 
     fun urlencode(params: Map<String, String?>, isSort: Boolean = false): String {
         val list = params.map {
             if (it.value != null) {
-                "${it.key}=${Uri.encode(it.value)}"
+                "${Uri.encode(it.key)}=${Uri.encode(it.value)}"
             } else {
                 ""
             }
@@ -100,16 +93,15 @@ object ApiHelper {
     fun createParams(vararg pairs: Pair<String, String?>): MutableMap<String, String?>{
         val params = mutableMapOf(
             *pairs,
-            "appkey" to APP_KEY_NEW,
-            "build" to "5340000",
+            "appkey" to APP_KEY,
+            "build" to BUILD_VERSION.toString(),
             "mobi_app" to "android",
             "platform" to "android",
             "ts" to getTimeSpen().toString()
         )
         addAccessKeyAndMidToParams(params)
-        params["sign"] = getSing(params, APP_SECRET_NEW)
+        params["sign"] = getSing(params, APP_SECRET)
         return params
     }
-
 
 }

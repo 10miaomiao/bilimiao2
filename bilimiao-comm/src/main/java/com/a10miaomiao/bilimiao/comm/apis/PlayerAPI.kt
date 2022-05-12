@@ -54,13 +54,13 @@ class PlayerAPI {
             "season_type" to "1",
             "session" to ApiHelper.getMD5((System.currentTimeMillis() - SystemClock.currentThreadTimeMillis()).toString()),
             "track_path" to "",
-            "appkey" to ApiHelper.APP_KEY_NEW,
+            "appkey" to ApiHelper.APP_KEY,
             "device" to "android",
             "mobi_app" to "android",
             "platform" to "android"
         )
         ApiHelper.addAccessKeyAndMidToParams(params)
-        params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET_NEW)
+        params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET)
         val res = MiaoHttp.request {
             url = "https://api.bilibili.com/pgc/player/api/playurl?" + ApiHelper.urlencode(params)
         }.awaitCall().gson<PlayurlData>()

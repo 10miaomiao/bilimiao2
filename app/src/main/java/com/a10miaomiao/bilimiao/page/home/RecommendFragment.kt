@@ -18,6 +18,8 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
@@ -74,8 +76,13 @@ class RecommendFragment: Fragment(), DIAware {
         val args = bundleOf(
             MainNavGraph.args.id to item.param
         )
-        Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.global_to_videoInfo, args)
+        if (item.goto == "av") {
+            Navigation.findNavController(view)
+                .navigate(MainNavGraph.action.global_to_videoInfo, args)
+        } else {
+            DebugMiao.log(item.goto)
+            BiliUrlMatcher.toUrlLink(view, item.uri)
+        }
     }
 
     val itemUi = miaoBindingItemUi<RecommendCardInfo> { item, index ->

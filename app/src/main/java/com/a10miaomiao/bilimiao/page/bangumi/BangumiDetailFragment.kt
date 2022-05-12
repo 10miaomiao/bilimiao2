@@ -25,7 +25,9 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -33,13 +35,16 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.user.UserMorePopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.layout.DoubleColumnAutofitLayout
 import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
@@ -52,9 +57,47 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         title = "番剧详情"
+        menus = listOf(
+            myMenuItem {
+                key = MenuKeys.more
+                iconResource = R.drawable.ic_more_vert_grey_24dp
+                title = "更多"
+            },
+            myMenuItem {
+                key = MenuKeys.follow
+                if (viewModel.isFollow) {
+                    iconResource = R.drawable.ic_baseline_favorite_24
+                    title = "已追番"
+                } else  {
+                    iconResource = R.drawable.ic_outline_favorite_border_24
+                    title = "追番"
+                }
+            },
+        )
     }
 
-    override val di: DI by lazyUiDi(ui = { ui })
+    override fun onMenuItemClick(view: MenuItemView) {
+        super.onMenuItemClick(view)
+        when (view.prop.key) {
+            MenuKeys.more -> {
+                // 更多
+                val pm = BangumiMorePopupMenu(
+                    activity = requireActivity(),
+                    anchor = view,
+                    viewModel = viewModel
+                )
+                pm.show()
+            }
+            MenuKeys.follow -> {
+                // 追番
+                viewModel.followSeason()
+            }
+        }
+    }
+
+    override val di: DI by lazyUiDi(ui = { ui }) {
+        bindSingleton<MyPage> { this@BangumiDetailFragment }
+    }
 
     private val viewModel by diViewModel<BangumiDetailViewModel>(di)
 

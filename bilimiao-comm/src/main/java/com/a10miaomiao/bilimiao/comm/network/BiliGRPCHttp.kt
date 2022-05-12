@@ -89,7 +89,11 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
                     continuation.resumeWithException(e)
                 }
                 override fun onResponse(call: Call, response: Response) {
-                    continuation.resume(parseResponse(response))
+                    try {
+                        continuation.resume(parseResponse(response))
+                    } catch (e: Exception) {
+                        continuation.resumeWithException(e)
+                    }
                 }
             })
         }

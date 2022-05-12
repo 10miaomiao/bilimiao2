@@ -25,4 +25,5 @@ data class BangumiInfo (
     val stat: BangumiStatXInfo,
     val title: String,
     val total_ep: Int,
+    val user_status: BangumiUserStatusInfo,
 )
