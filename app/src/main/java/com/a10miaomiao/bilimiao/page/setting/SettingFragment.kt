@@ -199,6 +199,16 @@ class SettingFragment : Fragment(), DIAware, MyPage
             }
         }
 
+        pref("home") {
+            title = "首页设置"
+            summary = "整个宇宙将为你闪烁"
+            onClick {
+                val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                nav.navigate(MainNavGraph.action.setting_to_homeSetting)
+                true
+            }
+        }
+
         pref("video") {
             title = "播放设置"
             summary = "咖啡拿铁,咖啡摩卡,卡布奇诺!"

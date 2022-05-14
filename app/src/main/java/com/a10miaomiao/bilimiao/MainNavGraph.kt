@@ -21,14 +21,11 @@ import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
+import com.a10miaomiao.bilimiao.page.setting.*
 import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
-import com.a10miaomiao.bilimiao.page.setting.AboutFragment
-import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
-import com.a10miaomiao.bilimiao.page.setting.ThemeSettingFragment
-import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.user.*
 import com.a10miaomiao.bilimiao.page.user.bangumi.MyBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
@@ -75,6 +72,9 @@ object MainNavGraph {
         }
         val videoSetting = f<VideoSettingFragment>() {
             deepLink("bilimiao://setting/video")
+        }
+        val homeSetting = f<HomeSettingFragment>() {
+            deepLink("bilimiao://setting/home")
         }
         val about = f<AboutFragment>() {
             deepLink("bilimiao://about")
@@ -303,6 +303,7 @@ object MainNavGraph {
         val home_to_download = dest.home to dest.download
 
         val setting_to_themeSetting = dest.setting to dest.themeSetting
+        val setting_to_homeSetting = dest.setting to dest.homeSetting
         val setting_to_videoSetting = dest.setting to dest.videoSetting
         val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
         val setting_to_about = dest.setting to dest.about

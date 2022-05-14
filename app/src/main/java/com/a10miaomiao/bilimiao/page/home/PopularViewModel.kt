@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.page.home
 
 import android.content.Context
+import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -59,11 +60,13 @@ class PopularViewModel(
             ui.setState {
                 list.loading = true
             }
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val carryToken = prefs.getBoolean("home_popular_carry_token", true)
             val req = PopularOuterClass.PopularResultReq.newBuilder()
                 .setIdx(idx)
                 .build()
             val result = PopularGrpc.getIndexMethod()
-                .request(req)
+                .request(req){ needToken = carryToken }
                 .awaitCall()
             val itemsList = result.itemsList.filter {
                 it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
@@ -115,7 +118,7 @@ class PopularViewModel(
         ui.setState {
             list = PaginationInfo()
             triggered = true
-            loadData(0)
         }
+        loadData(0)
     }
 }

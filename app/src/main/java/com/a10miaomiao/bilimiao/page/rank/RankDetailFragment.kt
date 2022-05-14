@@ -1,9 +1,11 @@
 package com.a10miaomiao.bilimiao.page.rank
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
@@ -11,7 +13,10 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.show.v1.RankOuterClass
+import cn.a10miaomiao.miao.binding.android.widget._text
+import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
@@ -30,11 +35,9 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.verticalLayout
-import splitties.views.dsl.core.wrapContent
+import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.padding
 
 class RankDetailFragment : Fragment(), DIAware {
 
@@ -77,13 +80,37 @@ class RankDetailFragment : Fragment(), DIAware {
     }
 
     val itemUi = miaoBindingItemUi<RankOuterClass.Item> { item, index ->
-        videoItem (
-            title = item.title,
-            pic = item.cover,
-            upperName = item.name,
-            playNum = item.play.toString(),
-            damukuNum = item.danmaku.toString(),
-        )
+        horizontalLayout {
+            layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
+            setBackgroundResource(config.selectableItemBackground)
+            padding = dip(5)
+
+            views {
+                +textView {
+                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+                    _text = (index + 1).toString()
+                    _textColorResource =  if (index > 2) {
+                        R.color.text_black
+                    } else {
+                        config.themeColorResource
+                    }
+                }..lParams(dip(30), wrapContent) {
+                    gravity = Gravity.CENTER
+                }
+                +videoItem (
+                    title = item.title,
+                    pic = item.cover,
+                    upperName = item.name,
+                    playNum = item.play.toString(),
+                    damukuNum = item.danmaku.toString(),
+                ).apply {
+                    padding = 0
+                    setBackgroundColor(0)
+                }..lParams(matchParent, wrapContent) {
+                    weight = 1f
+                }
+            }
+        }
     }
 
     val ui = miaoBindingUi {

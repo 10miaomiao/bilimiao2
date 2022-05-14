@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.delegate.helper
 
 import android.app.Activity
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatDelegate
@@ -28,10 +29,12 @@ class StatusBarHelper(
 
     init {
         // 全透明状态栏
-        activity.window.run {
-            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            statusBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            activity.window.run {
+                addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                statusBarColor = Color.TRANSPARENT
+            }
         }
     }
 

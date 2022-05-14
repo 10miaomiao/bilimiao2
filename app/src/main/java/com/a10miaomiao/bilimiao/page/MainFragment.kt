@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.page
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -39,6 +40,7 @@ import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.RecommendFragment
 import com.a10miaomiao.bilimiao.page.search.SearchResultViewModel
 import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
+import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
@@ -53,6 +55,7 @@ import splitties.toast.toast
 import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import kotlin.reflect.KClass
 
 
 class MainFragment : Fragment(), DIAware, MyPage {
@@ -120,14 +123,16 @@ class MainFragment : Fragment(), DIAware, MyPage {
     private val ID_viewPager = View.generateViewId()
     private val ID_tabLayout = View.generateViewId()
 
-    private val titles = listOf("首页", "推荐", "热门")
-    private val fragments by lazy {
-        listOf<Fragment>(
-            HomeFragment.newInstance(),
-            RecommendFragment.newInstance(),
-            PopularFragment.newInstance(),
-        )
-    }
+    private val fragmentMap: Map<KClass<out Fragment>, Fragment> = mapOf(
+        HomeFragment::class to HomeFragment.newInstance(),
+        RecommendFragment::class to RecommendFragment.newInstance(),
+        PopularFragment::class to PopularFragment.newInstance(),
+    )
+    private val titleMap: Map<KClass<out Fragment>, String> = mapOf(
+        HomeFragment::class to "首页",
+        RecommendFragment::class to "推荐",
+        PopularFragment::class to "热门",
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -147,21 +152,32 @@ class MainFragment : Fragment(), DIAware, MyPage {
         initView(view)
     }
 
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+    }
+
     private fun initView(view: View) {
         val tabLayout = view.findViewById<TabLayout>(ID_tabLayout)
         val viewPager = view.findViewById<ViewPager>(ID_viewPager)
+        val newNavList = viewModel.readNavList()
         if  (viewPager.adapter == null) {
+            viewModel.navList = newNavList
             val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
                 override fun getItem(p0: Int): Fragment {
-                    return fragments[p0]
+                    return fragmentMap[viewModel.navList[p0]]!!
                 }
-                override fun getCount() = fragments.size
-                override fun getPageTitle(position: Int) = titles[position]
+                override fun getCount() = viewModel.navList.size
+                override fun getPageTitle(position: Int) = titleMap[viewModel.navList[position]]!!
             }
             viewPager.adapter = mAdapter
             tabLayout.setTabsFromPagerAdapter(mAdapter)
             tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
             tabLayout.setupWithViewPager(viewPager)
+        } else {
+            if (!viewModel.equalsNavList(viewModel.navList, newNavList)) {
+                viewModel.navList = newNavList
+                viewPager.adapter?.notifyDataSetChanged()
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.network
 
 import android.os.Build
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import io.grpc.MethodDescriptor
 import okhttp3.*
 import java.io.IOException
@@ -31,7 +31,13 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
 
     private val client = OkHttpClient()
 
+    var needToken = true
+
     private fun Request.Builder.addHeaders(): Request.Builder {
+        val token = BilimiaoCommApp.commApp.loginInfo?.token_info?.access_token ?: ""
+        if (needToken && token.isNotBlank()) {
+            addHeader(BiliHeaders.Authorization, BiliHeaders.Identify + " " + token)
+        }
         addHeader(BiliHeaders.UserAgent, userAgent)
         addHeader(BiliHeaders.AppKey, BiliGRPCConfig.mobileApp)
         addHeader(BiliHeaders.BiliDevice, BiliGRPCConfig.getDeviceBin())
@@ -102,13 +108,13 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
 
 fun <ReqT, RespT> MethodDescriptor<ReqT, RespT>.request(
     reqMessage: ReqT,
-    biliGRPCHttpBuilder: (() -> Unit)? = null
+    biliGRPCHttpBuilder: (BiliGRPCHttp<ReqT, RespT>.() -> Unit)? = null
 ): BiliGRPCHttp<ReqT, RespT> {
     return BiliGRPCHttp(
         this,
         reqMessage,
     ).apply {
-        biliGRPCHttpBuilder?.invoke()
+        biliGRPCHttpBuilder?.invoke(this)
     }
 }
 

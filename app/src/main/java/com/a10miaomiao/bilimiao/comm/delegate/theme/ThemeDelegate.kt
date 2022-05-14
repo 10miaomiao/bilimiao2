@@ -93,12 +93,12 @@ class ThemeDelegate(
 
     fun setTheme() {
         val themeName = getThemeName(activity)
-        theme.value = themeName
         if (themeName == NAME_MATERIAL_YOU_THEME) {
             DynamicColors.applyIfAvailable(activity)
         } else {
             activity.setTheme(getThemeResId(themeName))
         }
+        theme.value = themeName
     }
 
     fun setTheme(newTheme: String) {
