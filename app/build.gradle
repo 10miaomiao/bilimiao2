@@ -11,8 +11,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdk 21
         targetSdk 31
-        versionCode 52
-        versionName "2.1.1"
+        versionCode 53
+        versionName "2.1.2"
         flavorDimensions "default"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

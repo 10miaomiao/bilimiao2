@@ -105,6 +105,9 @@ bilimiao2.0
   下个版本再优化播放器
   (￣o￣) . z Z
 
+* 2.1.1 (52)
+  修复 修改主题后首页白屏
+
 ### License
  Copyright 2018 10miaomiao
 
