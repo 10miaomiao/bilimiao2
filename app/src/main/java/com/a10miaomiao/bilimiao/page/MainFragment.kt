@@ -138,7 +138,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
         val tabLayout = view.findViewById<TabLayout>(ID_tabLayout)
         val viewPager = view.findViewById<ViewPager2>(ID_viewPager)
         val newNavList = viewModel.readNavList()
-        if  (viewModel.navList.isEmpty()) {
+        if  (viewPager.adapter == null) {
             viewModel.navList = newNavList
             val mAdapter = object : FragmentStateAdapter(childFragmentManager, lifecycle) {
                 override fun getItemCount() = viewModel.navList.size
