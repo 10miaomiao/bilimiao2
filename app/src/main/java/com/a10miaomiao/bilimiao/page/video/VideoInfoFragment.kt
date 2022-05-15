@@ -16,6 +16,7 @@ import androidx.core.view.marginRight
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.*
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view.*
@@ -210,6 +211,15 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         return ui.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.info?.let {
+            if (it.season?.is_jump == 1) {
+                findNavController().popBackStack()
+            }
+        }
+    }
+
     fun confirmCoin(num: Int) {
         viewModel.requestCoin(num)
     }
@@ -228,8 +238,12 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private fun toSelfLink (view: View, url: String) {
         val urlInfo = BiliUrlMatcher.findIDByUrl(url)
         val urlType = urlInfo[0]
+        var urlId = urlInfo[1]
+        if (urlType == "BV") {
+            urlId = "BV$urlId"
+        }
         val args = bundleOf(
-            MainNavGraph.args.id to urlInfo[1]
+            MainNavGraph.args.id to urlId
         )
         when(urlType){
             "AV", "BV" -> {

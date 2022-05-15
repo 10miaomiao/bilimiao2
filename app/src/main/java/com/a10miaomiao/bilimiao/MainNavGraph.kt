@@ -321,6 +321,9 @@ object MainNavGraph {
         val videoInfo_to_videoInfo = dest.videoInfo to dest.videoInfo
         val videoInfo_to_user = dest.videoInfo to dest.user
         val videoInfo_to_videoCommentList = dest.videoInfo to dest.videoCommentList
+        val videoInfo_to_bangumiDetail = a(dest.videoInfo, dest.bangumiDetail) {
+//            popUpTo = dest.region
+        }
 
         val videoCommentList_to_user = dest.videoCommentList to dest.user
         val videoCommentList_to_videoInfo = dest.videoCommentList to dest.videoInfo

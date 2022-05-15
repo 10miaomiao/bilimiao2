@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.video
 
 import android.os.Parcelable
+import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonInfo
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -28,6 +29,7 @@ data class VideoInfo(
     val relates: List<VideoRelateInfo>?,
     var req_user: VideoReqUserInfo,
     val rights: VideoRelateInfo,
+    val season: SeasonInfo?,
     val staff: List<VideoStaffInfo>?,
     var stat: VideoStatInfo,
     val state: Int,

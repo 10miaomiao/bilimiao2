@@ -1,10 +1,12 @@
 package com.a10miaomiao.bilimiao.page.video
 
 import android.content.Context
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
@@ -65,7 +67,6 @@ class VideoInfoViewModel(
             } else {
                 "AV"
             }
-            DebugMiao.log("id", id)
             val res = BiliApiService.videoAPI
                 .info(id, type = type)
                 .call()
@@ -94,6 +95,9 @@ class VideoInfoViewModel(
                     pages = pagesData.toMutableList()
                     staffs = staffData.toMutableList()
                 }
+                withContext(Dispatchers.Main) {
+                    jumpSeason(data)
+                }
             } else {
                 ui.setState {
                     state = if (res.code == -403) {
@@ -110,6 +114,18 @@ class VideoInfoViewModel(
             }
         } finally {
             ui.setState { loading = false }
+        }
+    }
+
+    private fun jumpSeason(info: VideoInfo) {
+        info.season?.let {
+            if (it.is_jump == 1) {
+                val nav = fragment.findNavController()
+                val args = bundleOf(
+                    MainNavGraph.args.id to it.season_id
+                )
+                nav.navigate(MainNavGraph.action.videoInfo_to_bangumiDetail, args)
+            }
         }
     }
 
