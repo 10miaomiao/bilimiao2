@@ -94,9 +94,16 @@ bilimiao2.0
   迁移 AndroidX 
   适配 横屏UI（平板）
 
-* 2.1 beta (52)
+* 2.1 beta (51)
   减少 BUG 
   完善 功能
+
+* 2.1.1 (52)
+  船新 版本
+  适配 横屏UI（平板）
+  增加 热门和推荐功能
+  下个版本再优化播放器
+  (￣o￣) . z Z
 
 ### License
  Copyright 2018 10miaomiao

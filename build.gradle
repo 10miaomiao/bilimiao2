@@ -6,6 +6,7 @@ buildscript {
         build_tools_version = 30
         target_sdk_version = 30
 
+        material_version = "1.5.0"
         splitties_version = "3.0.0-beta06"
         nav_version = "2.3.5"
         kodein_di_version = '7.8.0'
@@ -21,7 +22,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.2'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.20'
-
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.18'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
