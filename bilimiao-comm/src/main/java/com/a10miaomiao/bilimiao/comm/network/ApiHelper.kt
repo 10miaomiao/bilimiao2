@@ -57,7 +57,6 @@ object ApiHelper {
 
     fun getSing(params: Map<String, String?>, secret: String): String {
         val paramsStr = urlencode(params, true)
-        DebugMiao.log(paramsStr)
         return getMD5(paramsStr + secret)
     }
 

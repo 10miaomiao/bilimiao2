@@ -135,7 +135,7 @@ class HomeSettingFragment : Fragment(), DIAware, MyPage
         }
 
         switch("home_popular_carry_token") {
-            title = "热门列表数据携带登录信息"
+            title = "个性化热门列表"
             summary = "修改后需手动刷新列表"
             defaultValue = true
         }

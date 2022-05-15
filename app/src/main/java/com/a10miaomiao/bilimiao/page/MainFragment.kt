@@ -1,60 +1,37 @@
 package com.a10miaomiao.bilimiao.page
 
-import android.content.Intent
-import android.net.Uri
+import android.R.id.tabs
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.coroutineScope
-import androidx.navigation.Navigation.findNavController
 import androidx.navigation.findNavController
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import cn.a10miaomiao.miao.binding.android.view.*
-
-import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
-import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
-import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.view.loadPic
-import com.a10miaomiao.bilimiao.config.ViewStyle
-import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.home.HomeFragment
 import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.RecommendFragment
-import com.a10miaomiao.bilimiao.page.search.SearchResultViewModel
-import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
-import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
-import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
-import com.bumptech.glide.Glide
-import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.material.tabs.TabLayout
-import kotlinx.coroutines.launch
+import com.google.android.material.tabs.TabLayoutMediator
 import org.kodein.di.*
-import splitties.dimensions.dip
-import splitties.toast.toast
+import splitties.experimental.InternalSplittiesApi
 import splitties.views.*
 import splitties.views.dsl.core.*
-import splitties.views.dsl.recyclerview.recyclerView
 import kotlin.reflect.KClass
 
 
@@ -158,21 +135,26 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     private fun initView(view: View) {
         val tabLayout = view.findViewById<TabLayout>(ID_tabLayout)
-        val viewPager = view.findViewById<ViewPager>(ID_viewPager)
+        val viewPager = view.findViewById<ViewPager2>(ID_viewPager)
         val newNavList = viewModel.readNavList()
-        if  (viewPager.adapter == null) {
+        if  (viewModel.navList.isEmpty()) {
             viewModel.navList = newNavList
-            val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
-                override fun getItem(p0: Int): Fragment {
-                    return fragmentMap[viewModel.navList[p0]]!!
+            val mAdapter = object : FragmentStateAdapter(childFragmentManager, lifecycle) {
+                override fun getItemCount() = viewModel.navList.size
+
+                override fun createFragment(position: Int): Fragment {
+                    return when(viewModel.navList[position]) {
+                        HomeFragment::class -> HomeFragment.newInstance()
+                        RecommendFragment::class -> RecommendFragment.newInstance()
+                        PopularFragment::class -> PopularFragment.newInstance()
+                        else -> TemplateFragment()
+                    }
                 }
-                override fun getCount() = viewModel.navList.size
-                override fun getPageTitle(position: Int) = titleMap[viewModel.navList[position]]!!
             }
             viewPager.adapter = mAdapter
-            tabLayout.setTabsFromPagerAdapter(mAdapter)
-            tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
-            tabLayout.setupWithViewPager(viewPager)
+            TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+                tab.text = titleMap[viewModel.navList[position]] ?: ""
+            }.attach()
         } else {
             if (!viewModel.equalsNavList(viewModel.navList, newNavList)) {
                 viewModel.navList = newNavList
@@ -181,6 +163,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
         val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
         val contentInsets = windowStore.getContentInsets(parentView)
@@ -193,13 +176,22 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     _topPadding = contentInsets.top
                     _leftPadding = contentInsets.left
                     _rightPadding = contentInsets.right
+                    tabMode = TabLayout.MODE_SCROLLABLE
                 }..lParams(matchParent, wrapContent)
-                +viewPager(ID_viewPager) {
+                +view<ViewPager2>(ID_viewPager) {
                     _leftPadding = contentInsets.left
                     _rightPadding = contentInsets.right
+                    offscreenPageLimit = ViewPager2.OFFSCREEN_PAGE_LIMIT_DEFAULT
+                    isSaveEnabled = false
                 }..lParams(matchParent, matchParent) {
                     weight = 1f
                 }
+//                +viewPager(ID_viewPager) {
+//                    _leftPadding = contentInsets.left
+//                    _rightPadding = contentInsets.right
+//                }..lParams(matchParent, matchParent) {
+//                    weight = 1f
+//                }
             }
         }
     }
