@@ -45,7 +45,7 @@ import splitties.views.verticalPadding
 class PopularFragment: Fragment(), DIAware {
 
     companion object {
-        fun newInstance(): PopularFragment {
+        fun newFragmentInstance(): PopularFragment {
             val fragment = PopularFragment()
             val bundle = Bundle()
             fragment.arguments = bundle

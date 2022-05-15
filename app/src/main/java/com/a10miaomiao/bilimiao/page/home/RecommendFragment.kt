@@ -38,7 +38,7 @@ import splitties.views.gravityCenter
 class RecommendFragment: Fragment(), DIAware {
 
     companion object {
-        fun newInstance(): RecommendFragment {
+        fun newFragmentInstance(): RecommendFragment {
             val fragment = RecommendFragment()
             val bundle = Bundle()
             fragment.arguments = bundle

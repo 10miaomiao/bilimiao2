@@ -40,7 +40,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 class HomeFragment : Fragment(), DIAware {
 
     companion object {
-        fun newInstance(): HomeFragment {
+        fun newFragmentInstance(): HomeFragment {
             val fragment = HomeFragment()
             val bundle = Bundle()
             fragment.arguments = bundle

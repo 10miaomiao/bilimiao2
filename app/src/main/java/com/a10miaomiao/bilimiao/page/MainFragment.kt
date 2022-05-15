@@ -33,6 +33,7 @@ import splitties.experimental.InternalSplittiesApi
 import splitties.views.*
 import splitties.views.dsl.core.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 
 
 class MainFragment : Fragment(), DIAware, MyPage {
@@ -100,10 +101,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
     private val ID_viewPager = View.generateViewId()
     private val ID_tabLayout = View.generateViewId()
 
-    private val fragmentMap: Map<KClass<out Fragment>, Fragment> = mapOf(
-        HomeFragment::class to HomeFragment.newInstance(),
-        RecommendFragment::class to RecommendFragment.newInstance(),
-        PopularFragment::class to PopularFragment.newInstance(),
+    private val fragmentMap: Map<KClass<out Fragment>, () -> Fragment> = mapOf(
+        HomeFragment::class to HomeFragment::newFragmentInstance,
+        RecommendFragment::class to RecommendFragment::newFragmentInstance,
+        PopularFragment::class to PopularFragment::newFragmentInstance,
     )
     private val titleMap: Map<KClass<out Fragment>, String> = mapOf(
         HomeFragment::class to "首页",
@@ -143,12 +144,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 override fun getItemCount() = viewModel.navList.size
 
                 override fun createFragment(position: Int): Fragment {
-                    return when(viewModel.navList[position]) {
-                        HomeFragment::class -> HomeFragment.newInstance()
-                        RecommendFragment::class -> RecommendFragment.newInstance()
-                        PopularFragment::class -> PopularFragment.newInstance()
-                        else -> TemplateFragment()
-                    }
+                    return fragmentMap[viewModel.navList[position]]?.invoke() ?: TemplateFragment()
                 }
             }
             viewPager.adapter = mAdapter
