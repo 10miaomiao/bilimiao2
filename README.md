@@ -1,6 +1,6 @@
 ## bilimiao
-bilimiao2.0 
-[下载体验](https://www.coolapk.com/apk/164982)
+bilimiao2.1 
+[下载体验](https://10miaomiao.cn/#/project/1)
 
 ### Thanks to the open source project
 * [Kodein-DI](https://github.com/Kodein-Framework/Kodein-DI)
@@ -105,7 +105,7 @@ bilimiao2.0
   下个版本再优化播放器
   (￣o￣) . z Z
 
-* 2.1.1 (52)
+* 2.1.2 (53)
   修复 修改主题后首页白屏
 
 ### License
