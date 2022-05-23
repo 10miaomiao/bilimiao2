@@ -10,6 +10,7 @@ import com.a10miaomiao.bilimiao.comm.apis.AuthApi
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.base.BaseStore
@@ -17,6 +18,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
 import splitties.toast.toast
@@ -83,18 +85,24 @@ class UserStore(override val di: DI) :
 
     private fun loadInfo() = viewModelScope.launch(Dispatchers.IO) {
         try {
-//            Bilimiao.app.loginInfo?
-            val res = AuthApi().account().call().gson<ResultInfo<UserInfo>>()
+            val res = BiliApiService.authApi
+                .account()
+                .call()
+                .gson<ResultInfo<UserInfo>>()
             if (res.code == 0) {
                 setState {
                     info = res.data
                 }
                 seveUserInfo(res.data)
             } else {
-                activity.toast("登录失效，请重新登录")
+                withContext(Dispatchers.Main) {
+                    activity.toast("登录失效，请重新登录")
+                }
             }
         } catch (e: Exception) {
-            activity.toast("无法连接到御坂网络")
+            withContext(Dispatchers.Main) {
+                activity.toast("无法连接到御坂网络")
+            }
             e.printStackTrace()
         }
     }
