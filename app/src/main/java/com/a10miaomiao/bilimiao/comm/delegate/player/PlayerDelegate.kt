@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import cn.a10miaomiao.download.BiliVideoEntry
 import cn.a10miaomiao.download.DownloadFlieHelper
@@ -57,8 +56,8 @@ import kotlin.concurrent.timerTask
 class PlayerDelegate(
     private var activity: AppCompatActivity,
     override val di: DI,
-) : DIAware {
-    private val TAG = PlayerDelegate::class.simpleName
+) : BasePlayerDelegate, DIAware {
+    private val TAG = BasePlayerDelegate::class.simpleName
 
     // 播放器player_background
     lateinit var playerService: PlayerService
@@ -154,13 +153,13 @@ class PlayerDelegate(
     // 加载
     private var timer = Timer()
     private val playerCoroutineScope = PlayerCoroutineScope()
-//private val playerCoroutineScope = activity.lifecycleScope
+    //private val playerCoroutineScope = activity.lifecycleScope
     private var intervalJob: Job? = null
     private var loadDanmakuJob: Job? = null
     private var loadPlayurlJob: Job? = null
     private var historyJob: Job? = null
 
-    fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         val serviceIntent = Intent(activity, PlayerService::class.java)
         activity.startService(serviceIntent)
         activity.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
@@ -361,11 +360,11 @@ class PlayerDelegate(
         return true
     }
 
-    fun updateDanmukuSetting() {
+    override fun updateDanmukuSetting() {
         initDanmakuContext()
     }
 
-    fun playBangumi(sid: String, epid: String, cid: String, title: String) {
+    override fun playBangumi(sid: String, epid: String, cid: String, title: String) {
         stopPlay()
         scaffoldApp.showPlayer = true
         plalerSource.setBangumi(
@@ -377,7 +376,7 @@ class PlayerDelegate(
         playerStore.setPlayerInfo(plalerSource)
     }
 
-    fun playVideo(aid: String, cid: String, title: String) {
+    override fun playVideo(aid: String, cid: String, title: String) {
         stopPlay()
         scaffoldApp.showPlayer = true
         plalerSource.setVideo(
@@ -390,7 +389,7 @@ class PlayerDelegate(
         historyReport()
     }
 
-    fun playLocalVideo(biliVideo: BiliVideoEntry) {
+    override fun playLocalVideo(biliVideo: BiliVideoEntry) {
         stopPlay()
         scaffoldApp.showPlayer = true
         plalerSource.setLocalVideo(biliVideo)
@@ -808,7 +807,7 @@ class PlayerDelegate(
         mErrorLayout.visibility = View.GONE
     }
 
-    fun onBackPressed(): Boolean {
+    override fun onBackPressed(): Boolean {
         if (mController.isLocked) {
             return true
         }
@@ -820,15 +819,15 @@ class PlayerDelegate(
     }
 
 
-    fun onResume() {
+    override fun onResume() {
         historyReport()
     }
 
-    fun onPause() {
+    override fun onPause() {
         historyReport()
     }
 
-    fun onStart() {
+    override fun onStart() {
         if (mPlayer != null) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             if (!prefs.getBoolean("player_background", true)) {
@@ -840,7 +839,7 @@ class PlayerDelegate(
         }
     }
 
-    fun onStop() {
+    override fun onStop() {
         if (mPlayer != null) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             if (!prefs.getBoolean("player_background", true)) {
@@ -853,7 +852,7 @@ class PlayerDelegate(
         }
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
         activity.unbindService(mConnection)
         stopPlay()
     }
@@ -885,7 +884,7 @@ class PlayerDelegate(
     }
 
 
-    fun onPictureInPictureModeChanged(
+    override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
     ) {

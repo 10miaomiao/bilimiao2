@@ -2,7 +2,6 @@ package com.a10miaomiao.bilimiao.page.video
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Gravity
@@ -12,9 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.bundleOf
-import androidx.core.view.marginRight
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.coroutineScope
 import androidx.navigation.*
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,41 +23,30 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.commponents.loading.ListState
-import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.region.RankOrderPopupMenu
-import com.a10miaomiao.bilimiao.page.video.comment.SortOrderPopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.a10miaomiao.bilimiao.widget._setContent
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
-import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.a10miaomiao.bilimiao.widget.expandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.FlowCollector
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
@@ -68,7 +54,6 @@ import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
-import kotlin.properties.Delegates
 
 class VideoInfoFragment: Fragment(), DIAware, MyPage {
 
@@ -82,7 +67,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
 
     private val playerStore by instance<PlayerStore>()
 
-    private val playerDelegate by instance<PlayerDelegate>()
+    private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     override val pageConfig = myPageConfig {
         val info = viewModel.info
@@ -231,7 +216,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private fun playVideo(cid: String, title: String) {
         val info = viewModel.info
         if (info != null) {
-            playerDelegate.playVideo(info.aid.toString(), cid, title)
+            basePlayerDelegate.playVideo(info.aid.toString(), cid, title)
         }
     }
 

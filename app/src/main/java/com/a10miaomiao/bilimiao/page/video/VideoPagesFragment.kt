@@ -2,15 +2,10 @@ package com.a10miaomiao.bilimiao.page.video
 
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.coroutineScope
-import androidx.navigation.Navigation
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -18,30 +13,25 @@ import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.chad.library.adapter.base.listener.OnItemClickListener
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
-import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
-import splitties.views.textColorResource
 import splitties.views.verticalPadding
 
 class VideoPagesFragment : Fragment(), DIAware, MyPage {
@@ -56,7 +46,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
 
     private val playerStore by instance<PlayerStore>()
     private val windowStore by instance<WindowStore>()
-    private val playerDelegate by instance<PlayerDelegate>()
+    private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     private val aid by lazy { requireArguments().getString(MainNavGraph.args.id)!! }
     private val pages by lazy { requireArguments().getParcelableArrayList<VideoPageInfo>(MainNavGraph.args.pages) ?: mutableListOf() }
@@ -76,7 +66,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
 
     val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = pages[position]
-        playerDelegate.playVideo(aid, item.cid, item.part)
+        basePlayerDelegate.playVideo(aid, item.cid, item.part)
 //        Navigation.findNavController(view).popBackStack()
     }
 

@@ -5,27 +5,22 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.collection.SimpleArrayMap
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
-import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.*
 import org.kodein.di.DI
@@ -33,6 +28,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.store.*
 import com.baidu.mobstat.StatService
@@ -49,7 +45,7 @@ class MainActivity
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
         store.loadStoreModules(this)
-        bindSingleton { playerDelegate }
+        bindSingleton { basePlayerDelegate }
         bindSingleton { themeDelegate }
         bindSingleton { downloadDelegate }
         bindSingleton { statusBarHelper }
@@ -59,7 +55,7 @@ class MainActivity
     private val store by lazy { Store(this, di) }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
     private val downloadDelegate by lazy { DownloadDelegate(this, di) }
-    private val playerDelegate by lazy { PlayerDelegate(this, di) }
+    private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val supportHelper by lazy { SupportHelper(this) }
@@ -72,7 +68,7 @@ class MainActivity
         themeDelegate.onCreate(savedInstanceState)
         ui = MainUi(this)
         setContentView(ui.root)
-        playerDelegate.onCreate(savedInstanceState)
+        basePlayerDelegate.onCreate(savedInstanceState)
         downloadDelegate.onCreate(savedInstanceState)
         bottomSheetDelegate.onCreate(savedInstanceState)
         store.onCreate(savedInstanceState)
@@ -215,16 +211,16 @@ class MainActivity
 
     override fun onResume() {
         super.onResume()
-        playerDelegate.onResume()
+        basePlayerDelegate.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        playerDelegate.onPause()
+        basePlayerDelegate.onPause()
     }
 
     override fun onDestroy() {
-        playerDelegate.onDestroy()
+        basePlayerDelegate.onDestroy()
         downloadDelegate.onDestroy()
         bottomSheetDelegate.onDestroy()
         store.onDestroy()
@@ -235,17 +231,17 @@ class MainActivity
 
     override fun onStart() {
         super.onStart()
-        playerDelegate.onStart()
+        basePlayerDelegate.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        playerDelegate.onStop()
+        basePlayerDelegate.onStop()
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        playerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        basePlayerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
 
         } else {
@@ -265,7 +261,7 @@ class MainActivity
         if (bottomSheetDelegate.onBackPressed()) {
             return
         }
-        if (playerDelegate.onBackPressed()) {
+        if (basePlayerDelegate.onBackPressed()) {
             return
         }
         super.onBackPressed()

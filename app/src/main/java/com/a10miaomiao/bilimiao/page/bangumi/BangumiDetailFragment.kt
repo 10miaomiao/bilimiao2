@@ -23,7 +23,7 @@ import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -35,12 +35,10 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.user.UserMorePopupMenu
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.layout.DoubleColumnAutofitLayout
-import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -49,7 +47,6 @@ import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.*
-import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
@@ -103,7 +100,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
 
     private val windowStore: WindowStore by instance()
 
-    private val playerDelegate: PlayerDelegate by instance()
+    private val basePlayerDelegate: BasePlayerDelegate by instance()
 
     private val playerStore: PlayerStore by instance()
 
@@ -131,7 +128,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
 
     private val handleEpisodeItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.episodes[position]
-        playerDelegate.playBangumi(
+        basePlayerDelegate.playBangumi(
             item.section_id,
             item.ep_id,
             item.cid.toString(),
