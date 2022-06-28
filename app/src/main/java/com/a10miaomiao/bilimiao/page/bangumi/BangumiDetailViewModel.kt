@@ -150,7 +150,7 @@ class BangumiDetailViewModel (
     }
 
     fun isPlaying (epid: String): Boolean {
-        val info = playerStore.state.info
+        val info = playerStore.state
         return info.type == PlayerSourceInfo.BANGUMI && info.epid == epid
     }
 }

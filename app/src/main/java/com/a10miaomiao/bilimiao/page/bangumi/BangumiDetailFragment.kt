@@ -24,6 +24,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -128,12 +129,13 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
 
     private val handleEpisodeItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.episodes[position]
-        basePlayerDelegate.playBangumi(
+        val playerSource = BangumiPlayerSource(
             item.section_id,
             item.ep_id,
             item.cid.toString(),
             item.index_title
         )
+        basePlayerDelegate.openPlayer(playerSource)
     }
 
     private val handleMoreClick = View.OnClickListener {
@@ -336,7 +338,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     _miaoAdapter(
                         items = viewModel.episodes,
                         itemUi = episodeItemUi,
-                        depsAry = arrayOf(playerStore.state.info.cid),
+                        depsAry = arrayOf(playerStore.state.cid),
                     ) {
                         setOnItemClickListener(handleEpisodeItemClick)
                     }

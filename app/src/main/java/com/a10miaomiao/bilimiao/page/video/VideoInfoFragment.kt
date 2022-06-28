@@ -24,6 +24,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
@@ -216,7 +217,12 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private fun playVideo(cid: String, title: String) {
         val info = viewModel.info
         if (info != null) {
-            basePlayerDelegate.playVideo(info.aid.toString(), cid, title)
+            basePlayerDelegate.openPlayer(VideoPlayerSource(
+                title = title,
+                aid = info.aid,
+                cid = cid,
+            ))
+//            basePlayerDelegate.playVideo(info.aid.toString(), cid, title)
         }
     }
 
@@ -331,7 +337,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 height = matchParent
                 rightMargin = dip(5)
             }
-            val enabled = playerStore.state.info.cid != item.cid
+            val enabled = playerStore.state.cid != item.cid
             setBackgroundResource(R.drawable.shape_corner)
             _isEnabled = enabled
 
@@ -374,7 +380,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                             _miaoAdapter(
                                 items = viewModel.pages,
                                 itemUi = pageItemUi,
-                                depsAry = arrayOf(playerStore.state.info.cid),
+                                depsAry = arrayOf(playerStore.state.cid),
                             ) {
                                 setOnItemClickListener(handlePageItemClick)
                             }

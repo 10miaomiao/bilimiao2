@@ -20,6 +20,7 @@ import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.LocalVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -88,7 +89,8 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
     val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = downloadDelegate.downloadList[position]
         if (item.is_completed) {
-            basePlayerDelegate.playLocalVideo(item)
+            val playerSorce = LocalVideoPlayerSource(requireActivity(), item)
+            basePlayerDelegate.openPlayer(playerSorce)
             return@OnItemClickListener
         }
         toast("开始下载")

@@ -5,7 +5,6 @@ plugins {
 
 android {
     compileSdk 31
-    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.a10miaomiao.bilimiao"
@@ -91,6 +90,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
 
+    // 播放器
+    implementation 'com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer:v8.3.0-release-jitpack'
+
     implementation project(':bilimiao-comm')
     implementation project(':bilimiao-cover')
 //    implementation project(':bilimiao-appwidget')
@@ -106,8 +108,8 @@ dependencies {
     implementation 'com.github.ctiao:ndkbitmap-x86:0.9.21'
 
     // ijpplayer
-    implementation project(':ijkplayer-java')
-    implementation project(':player')
+//    implementation project(':ijkplayer-java')
+//    implementation project(':player')
 
     // 百度统计
     implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'

@@ -14,6 +14,8 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -66,7 +68,10 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
 
     val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = pages[position]
-        basePlayerDelegate.playVideo(aid, item.cid, item.part)
+        val playerSource = VideoPlayerSource(
+            aid, item.cid, item.part
+        )
+        basePlayerDelegate.openPlayer(playerSource)
 //        Navigation.findNavController(view).popBackStack()
     }
 
@@ -79,7 +84,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
             horizontalPadding = dip(10)
             verticalPadding = dip(10)
 
-            val enabled = item.cid != playerStore.state.info.cid
+            val enabled = item.cid != playerStore.state.cid
             _isEnabled = enabled
 
             views {
@@ -122,7 +127,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
             _miaoAdapter(
                 items = pages,
                 itemUi = itemUi,
-                depsAry = arrayOf(playerStore.state.info.cid)
+                depsAry = arrayOf(playerStore.state.cid)
             ) {
                 setOnItemClickListener(handleItemClick)
             }

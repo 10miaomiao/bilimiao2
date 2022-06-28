@@ -18,7 +18,12 @@ class PlayerAPI {
     /**
      * 获取视频播放地址
      */
-    fun getVideoPalyUrl(avid: String, cid: String, quality: Int = 64): PlayurlData {
+    fun getVideoPalyUrl(
+        avid: String,
+        cid: String,
+        quality: Int = 64,
+        dash: Boolean = false,
+    ): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "avid" to avid,
             "cid" to cid,
@@ -27,6 +32,11 @@ class PlayerAPI {
             "otype" to "json",
             "appkey" to _appKey_VIDEO
         )
+        if (dash) {
+            params.put("fourk", "1")
+            params.put("fnver", "0")
+            params.put("fnval", "4048")
+        }
         ApiHelper.addAccessKeyAndMidToParams(params)
         params["sign"] = ApiHelper.getSing(params, _appSecret_VIDEO)
         val res = MiaoHttp.request {
@@ -43,7 +53,12 @@ class PlayerAPI {
     /**
      * 获取番剧播放地址
      */
-    suspend fun getBangumiUrl(epid: String, cid: String, qn: Int = 64): PlayurlData {
+    suspend fun getBangumiUrl(
+        epid: String,
+        cid: String,
+        qn: Int = 64,
+        dash: Boolean = false,
+    ): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "aid" to epid,
             "cid" to cid,
@@ -59,6 +74,11 @@ class PlayerAPI {
             "mobi_app" to "android",
             "platform" to "android"
         )
+        if (dash) {
+            params.put("fourk", "1")
+            params.put("fnver", "0")
+            params.put("fnval", "4048")
+        }
         ApiHelper.addAccessKeyAndMidToParams(params)
         params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET)
         val res = MiaoHttp.request {
@@ -88,9 +108,11 @@ class PlayerAPI {
         val result: String,
         val seek_param: String,
         val seek_type: String,
+        // 时长，毫秒
         val timelength: Int,
         val video_codecid: Int,
-        val durl: List<Durl>,
+        val durl: List<Durl>?,
+        val dash: Dash?,
         val code: Int,
         val support_formats: List<SupportFormats>
     )
@@ -111,4 +133,32 @@ class PlayerAPI {
         val display_desc: String,
         val superscript: String
     )
+
+    data class Dash (
+        // 时长，秒
+        val duration: Long,
+        val min_buffer_time: Double,
+        val video: List<DashItem>,
+        val audio: List<DashItem>,
+    )
+
+    data class DashItem(
+        val id: Int,
+        val bandwidth: Int,
+        val base_url: String,
+        val backup_url: List<String>,
+        val mime_type: String,
+        val codecid: Int,
+        val codecs: String,
+        val width: Int,
+        val height: Int,
+        val frame_rate: String,
+        val segment_base: SegmentBase,
+    )
+
+    data class SegmentBase(
+        val initialization: String,
+        val index_range: String,
+    )
+
 }

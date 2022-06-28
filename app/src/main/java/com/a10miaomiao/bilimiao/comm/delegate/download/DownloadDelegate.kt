@@ -8,7 +8,7 @@ import android.os.Bundle
 import android.os.IBinder
 import androidx.appcompat.app.AppCompatActivity
 import cn.a10miaomiao.download.*
-import cn.a10miaomiao.player.CompressionTools
+//import cn.a10miaomiao.player.CompressionTools
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.store.DownloadStore
@@ -75,7 +75,7 @@ class DownloadDelegate(
             entry.page_data.cid.toString(),
             entry.prefered_video_quality
         )
-        val segmentList = res.durl.map { item ->
+        val segmentList = res.durl!!.map { item ->
             Segment(
                 backup_urls = listOf(),
                 bytes = item.size,
@@ -114,7 +114,8 @@ class DownloadDelegate(
     fun getDanmakuXML(cid: String): InputStream {
         return BiliApiService.playerAPI.getDanmakuList(cid)
             .call().let {
-                ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
+                throw Exception()
+//                ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
             }
     }
 

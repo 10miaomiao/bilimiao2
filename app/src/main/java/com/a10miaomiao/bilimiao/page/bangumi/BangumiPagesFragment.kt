@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -69,18 +70,19 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
     }
 
     private fun isPlaying(epid: String): Boolean {
-        val info = playerStore.state.info
+        val info = playerStore.state
         return info.type == PlayerSourceInfo.BANGUMI && info.epid == epid
     }
 
     val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = pages[position]
-        basePlayerDelegate.playBangumi(
+        val playerSource = BangumiPlayerSource(
             item.section_id,
             item.ep_id,
             item.cid.toString(),
             item.index_title
         )
+        basePlayerDelegate.openPlayer(playerSource)
     }
 
     val itemUi = miaoBindingItemUi<EpisodeInfo> { item, index ->
@@ -151,7 +153,7 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
             _miaoAdapter(
                 items = pages,
                 itemUi = itemUi,
-                depsAry = arrayOf(playerStore.state.info.cid)
+                depsAry = arrayOf(playerStore.state.cid)
             ) {
                 setOnItemClickListener(handleItemClick)
             }

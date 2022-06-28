@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.RelativeLayout
 import androidx.fragment.app.FragmentContainerView
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
@@ -46,7 +47,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         elevation = dip(20).toFloat()
     }
 
-    val mPlayerLayout = inflate<FrameLayout>(R.layout.include_palyer) {
+    val mPlayerLayout = inflate<RelativeLayout>(R.layout.include_palyer2) {
         elevation = dip(20).toFloat()
     }
 

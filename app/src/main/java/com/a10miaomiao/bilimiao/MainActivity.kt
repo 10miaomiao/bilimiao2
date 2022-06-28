@@ -28,7 +28,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.store.*
 import com.baidu.mobstat.StatService
@@ -55,7 +55,7 @@ class MainActivity
     private val store by lazy { Store(this, di) }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
     private val downloadDelegate by lazy { DownloadDelegate(this, di) }
-    private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate(this, di) }
+    private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate2(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val supportHelper by lazy { SupportHelper(this) }
