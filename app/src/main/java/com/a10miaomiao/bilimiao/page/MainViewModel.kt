@@ -26,11 +26,13 @@ class MainViewModel(
 
     var navList = listOf<KClass<out Fragment>>()
 
+    private var curHomeSettingVersion = -1
+
     fun readNavList(): List<KClass<out Fragment>> {
-        if (!HomeSettingFragment.homeSettingChange) {
+        if (curHomeSettingVersion == HomeSettingFragment.homeSettingVersion) {
             return navList
         }
-        HomeSettingFragment.homeSettingChange = false
+        curHomeSettingVersion = HomeSettingFragment.homeSettingVersion
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val list = mutableListOf<KClass<out Fragment>>(
             HomeFragment::class

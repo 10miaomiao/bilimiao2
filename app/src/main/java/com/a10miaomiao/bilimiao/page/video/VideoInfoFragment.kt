@@ -219,6 +219,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         if (info != null) {
             basePlayerDelegate.openPlayer(VideoPlayerSource(
                 title = title,
+                coverUrl = info.pic,
                 aid = info.aid,
                 cid = cid,
             ))
@@ -266,8 +267,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         viewModel.info?.let { info ->
             val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             val args = bundleOf(
-                MainNavGraph.args.id to info.aid,
-                MainNavGraph.args.pages to viewModel.pages,
+                MainNavGraph.args.video to info
             )
             nav.navigate(MainNavGraph.action.global_to_videoPages, args)
         }
@@ -284,21 +284,23 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     }
 
     private val handleRelateItemClick = OnItemClickListener { adapter, view, position ->
-        val item = viewModel.relates[position]
-        if (item.goto == "av") {
-            val args = bundleOf(
-                MainNavGraph.args.id to item.aid
-            )
-            Navigation.findNavController(view)
-                .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
-        } else {
-            val url = item.uri
-            val re = BiliNavigation.navigationTo(view, url)
-            if (!re) {
-                if (url.indexOf("bilibili://") == 0) {
-                    toast("不支持打开的链接：$url")
-                } else {
-                    BiliUrlMatcher.toUrlLink(view, url)
+        val item = adapter.getItem(position)
+        if (item is VideoRelateInfo) {
+            if (item.goto == "av") {
+                val args = bundleOf(
+                    MainNavGraph.args.id to item.aid
+                )
+                Navigation.findNavController(view)
+                    .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
+            } else {
+                val url = item.uri
+                val re = BiliNavigation.navigationTo(view, url)
+                if (!re) {
+                    if (url.indexOf("bilibili://") == 0) {
+                        toast("不支持打开的链接：$url")
+                    } else {
+                        BiliUrlMatcher.toUrlLink(view, url)
+                    }
                 }
             }
         }

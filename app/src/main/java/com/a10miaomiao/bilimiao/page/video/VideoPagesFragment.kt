@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -50,8 +51,8 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
-    private val aid by lazy { requireArguments().getString(MainNavGraph.args.id)!! }
-    private val pages by lazy { requireArguments().getParcelableArrayList<VideoPageInfo>(MainNavGraph.args.pages) ?: mutableListOf() }
+    private val video by lazy { requireArguments().getParcelable<VideoInfo>(MainNavGraph.args.video)!! }
+    private val pages by lazy { video.pages.toMutableList() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,7 +70,10 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
     val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = pages[position]
         val playerSource = VideoPlayerSource(
-            aid, item.cid, item.part
+            aid = video.aid,
+            cid = item.cid,
+            coverUrl = video.pic,
+            title = item.part
         )
         basePlayerDelegate.openPlayer(playerSource)
 //        Navigation.findNavController(view).popBackStack()

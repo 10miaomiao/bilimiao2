@@ -150,11 +150,7 @@ object MainNavGraph {
         }
         val videoPages = f<VideoPagesFragment> {
             deepLink("bilimiao://video/pages")
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.pages) {
+            argument(args.video) {
                 type = NavType.ParcelableType(VideoPageInfo::class.java)
                 nullable = false
             }

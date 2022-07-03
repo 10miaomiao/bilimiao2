@@ -40,7 +40,7 @@ class HomeSettingFragment : Fragment(), DIAware, MyPage
     , SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
-        var homeSettingChange = true
+        var homeSettingVersion = 0
     }
 
     override val pageConfig = myPageConfig {
@@ -84,7 +84,7 @@ class HomeSettingFragment : Fragment(), DIAware, MyPage
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         if ("home" in key) {
-            homeSettingChange = true
+            homeSettingVersion++
         }
     }
 

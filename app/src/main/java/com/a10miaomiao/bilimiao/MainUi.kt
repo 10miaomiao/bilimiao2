@@ -31,7 +31,6 @@ import splitties.views.dsl.core.*
 @OptIn(InternalSplittiesApi::class)
 class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
-    val bottomSheetViewID = 123
 
     val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
         backgroundColor = config.windowBackgroundColor
@@ -47,7 +46,8 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         elevation = dip(20).toFloat()
     }
 
-    val mPlayerLayout = inflate<RelativeLayout>(R.layout.include_palyer2) {
+    val mPlayerLayout = inflate<View>(R.layout.include_palyer2) {
+        backgroundColor = 0xFF000000.toInt()
         elevation = dip(20).toFloat()
     }
 

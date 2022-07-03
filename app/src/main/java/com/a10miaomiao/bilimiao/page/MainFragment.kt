@@ -8,6 +8,7 @@ import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -18,11 +19,13 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.home.HomeFragment
 import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.RecommendFragment
@@ -34,8 +37,10 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.kodein.di.*
 import splitties.experimental.InternalSplittiesApi
+import splitties.toast.toast
 import splitties.views.*
 import splitties.views.dsl.core.*
+import java.util.*
 import kotlin.reflect.KClass
 
 
@@ -96,6 +101,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
     private val viewModel by diViewModel<MainViewModel>(di)
 
     private val themeDelegate by instance<ThemeDelegate>()
+    private val playerDelegate by instance<BasePlayerDelegate>()
 
     private var themeId = 0
 
@@ -103,6 +109,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     private val ID_viewPager = View.generateViewId()
     private val ID_tabLayout = View.generateViewId()
+
+    private var backKeyPressedTimes = 0L
 
     private val fragmentMap: Map<KClass<out Fragment>, () -> Fragment> = mapOf(
         HomeFragment::class to HomeFragment::newFragmentInstance,
@@ -132,6 +140,27 @@ class MainFragment : Fragment(), DIAware, MyPage {
         super.onViewCreated(view, savedInstanceState)
         initView(view)
 //        showPrivacyDialog()
+        requireActivity().onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val now = System.currentTimeMillis()
+                    if (playerDelegate.isPlaying()) {
+                        if (now - backKeyPressedTimes > 2000) {
+                            requireActivity().toast("再按一次退出播放")
+                            backKeyPressedTimes = now
+                        } else {
+                            playerDelegate.closePlayer()
+                        }
+                    } else {
+                        if (now - backKeyPressedTimes > 2000) {
+                            requireActivity().toast("再按一次退出bilimiao")
+                            backKeyPressedTimes = now
+                        } else {
+                            requireActivity().finish()
+                        }
+                    }
+                }
+            })
     }
 
     private fun showPrivacyDialog() {

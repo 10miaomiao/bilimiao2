@@ -50,7 +50,7 @@ data class BiliVideoEntry (
         var cover: String,
         var prefered_video_quality: Int,
         var guessed_total_bytes: Int,
-        var total_time_milli: Int,
+        var total_time_milli: Long,
         var danmaku_count: Int,
         var time_update_stamp: Long,
         var time_create_stamp: Long,

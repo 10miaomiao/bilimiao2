@@ -43,12 +43,11 @@ import java.util.regex.Pattern
 
 class WebFragment : Fragment(), DIAware, MyPage {
 
-    private var pageTitle = "加载中"
-
-    /**
-     * User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; MuMu Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36 os/android model/MuMu build/6710300 osVer/6.0.1 sdkInt/23 network/2 BiliApp/6710300 mobi_app/android channel/bili Buvid/XZB6797B5E07C2A4D64B31242957D7B1B9CDF sessionID/4bfd832a innerVer/6710300 c_locale/zh_CN s_locale/zh_CN disable_rcmd/0
-     */
-    private val userAgent = """
+    companion object {
+        /**
+         * User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; MuMu Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36 os/android model/MuMu build/6710300 osVer/6.0.1 sdkInt/23 network/2 BiliApp/6710300 mobi_app/android channel/bili Buvid/XZB6797B5E07C2A4D64B31242957D7B1B9CDF sessionID/4bfd832a innerVer/6710300 c_locale/zh_CN s_locale/zh_CN disable_rcmd/0
+         */
+        val userAgent = """
             |os/android 
             |model/${Build.MODEL} 
             |build/6710300 
@@ -61,6 +60,10 @@ class WebFragment : Fragment(), DIAware, MyPage {
             |s_locale/zh_CN 
             |disable_rcmd/0
         """.trimMargin().replace("\n", "")
+    }
+
+    private var pageTitle = "加载中"
+
 
     override val pageConfig = myPageConfig {
         title = pageTitle

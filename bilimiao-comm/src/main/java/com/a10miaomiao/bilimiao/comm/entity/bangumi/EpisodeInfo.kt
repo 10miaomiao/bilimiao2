@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class EpisodeInfo(
-    val aid: Int,
+    val aid: String,
     val badge: String,
     val badge_type: Int,
     val cid: Int,

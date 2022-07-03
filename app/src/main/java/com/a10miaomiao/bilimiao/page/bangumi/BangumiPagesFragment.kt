@@ -77,10 +77,12 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
     val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = pages[position]
         val playerSource = BangumiPlayerSource(
-            item.section_id,
-            item.ep_id,
-            item.cid.toString(),
-            item.index_title
+            sid = item.section_id,
+            epid = item.ep_id,
+            aid = item.aid,
+            cid = item.cid.toString(),
+            title = item.index_title,
+            coverUrl = item.cover,
         )
         basePlayerDelegate.openPlayer(playerSource)
     }

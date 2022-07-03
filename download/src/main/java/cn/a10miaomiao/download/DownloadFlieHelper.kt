@@ -20,9 +20,12 @@ object DownloadFlieHelper {
         if (!downloadDir.exists()) {
             downloadDir.mkdir()
         }
-        val pageDir = File(downloadDir, biliVideo.page_data.page.toString())
+        var pageDir = File(downloadDir, biliVideo.page_data.page.toString())
         if (!pageDir.exists()) {
-            pageDir.mkdir()
+            pageDir = File(downloadDir, "c_" + biliVideo.page_data.cid.toString())
+            if (!pageDir.exists()) {
+                pageDir.mkdir()
+            }
         }
         return pageDir
     }

@@ -3,12 +3,11 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import cn.a10miaomiao.download.BiliVideoEntry
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
-import com.a10miaomiao.bilimiao.comm.delegate.player.model.LocalVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.google.android.exoplayer2.source.MediaSource
@@ -38,8 +37,11 @@ class PlayerDelegate2(
     val DEFAULT_REFERER = "https://www.bilibili.com/"
     val DEFAULT_USER_AGENT = "Bilibili Freedoooooom/MarkII"
 
-    private val scaffoldApp by lazy { activity.getScaffoldView() }
-    private val views by lazy { PlayerViews(activity) }
+    val views by lazy { PlayerViews(activity) }
+    val controller by lazy {
+        PlayerController(activity, this, di)
+    }
+    val scaffoldApp by lazy { activity.getScaffoldView() }
 
     private val playerStore by instance<PlayerStore>()
 
@@ -59,6 +61,7 @@ class PlayerDelegate2(
 //        PlayerFactory.setPlayManager(MyIjkPlayerManager::class.java)
         PlayerFactory.setPlayManager(Exo2PlayerManager::class.java) //EXO模式
         ExoSourceManager.setExoMediaSourceInterceptListener(this)
+        controller.initController()
     }
 
     override fun onResume() {
@@ -82,6 +85,10 @@ class PlayerDelegate2(
     }
 
     override fun onBackPressed(): Boolean {
+        if (scaffoldApp.fullScreenPlayer) {
+            controller.smallScreen()
+            return true
+        }
         return false
     }
 
@@ -131,14 +138,30 @@ class PlayerDelegate2(
         return header
     }
 
+    private fun historyReport() {
+        playerCoroutineScope.launch(Dispatchers.IO) {
+            playerSource?.historyReport(views.videoPlayer.currentPositionWhenPlaying / 1000)
+        }
+    }
+
+    private fun setThumbImageView (coverUrl: String) {
+        views.videoPlayer.thumbImageView = ImageView(activity).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            network(coverUrl)
+        }
+    }
+
     override fun openPlayer(source: BasePlayerSource){
         scaffoldApp.showPlayer = true
         playerCoroutineScope.onStart()
         playerSource = source
+        setThumbImageView(source.coverUrl)
         playerCoroutineScope.launch(Dispatchers.IO) {
+            val danmukuParser = source.getDanmakuParser()
             val playerUrl = source.getPlayerUrl(quality)
-            DebugMiao.log("playerUrl", playerUrl)
             withContext(Dispatchers.Main) {
+                views.videoPlayer.releaseDanmaku()
+                views.videoPlayer.danmakuParser = danmukuParser
                 val header = getDefaultRequestProperties()
                 views.videoPlayer.setUp(
                     playerUrl,
@@ -148,8 +171,21 @@ class PlayerDelegate2(
                     source.title
                 )
                 views.videoPlayer.startPlayLogic()
+                historyReport()
             }
         }
+    }
+
+    override fun closePlayer() {
+        scaffoldApp.showPlayer = false
+        playerCoroutineScope.onStop()
+        historyReport()
+        playerSource = null
+        views.videoPlayer.release()
+    }
+
+    override fun isPlaying(): Boolean {
+        return views.videoPlayer.isInPlayingState
     }
 
     override fun updateDanmukuSetting() {
