@@ -6,7 +6,7 @@ import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 interface BasePlayerSource {
     val title: String
     val coverUrl: String
-    suspend fun getPlayerUrl(quality: Int): String
+    suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo
     suspend fun getDanmakuParser(): BaseDanmakuParser? = null
     suspend fun historyReport(progress: Long) {}
 }

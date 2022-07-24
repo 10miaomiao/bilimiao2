@@ -19,15 +19,20 @@ class BangumiPlayerSource(
     override val coverUrl: String,
 ): BasePlayerSource {
 
-    override suspend fun getPlayerUrl(quality: Int): String {
+    override suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo {
         val res = BiliApiService.playerAPI
             .getBangumiUrl(epid, cid, quality, dash = true)
         val dash = res.dash
-        if (dash != null) {
-            return DashSource(quality, dash).getMDPUrl()
+        val url = if (dash != null) {
+            DashSource(quality, dash).getMDPUrl()
+        } else {
+            res.durl!![0].url
         }
-        val durl = res.durl
-        return durl!![0].url
+        val acceptDescription = res.accept_description
+        val acceptList = res.accept_quality.mapIndexed { index, i ->
+            PlayerSourceInfo.AcceptInfo(i, acceptDescription[index])
+        }
+        return PlayerSourceInfo(url, res.quality, acceptList)
     }
 
     override suspend fun getDanmakuParser(): BaseDanmakuParser? {

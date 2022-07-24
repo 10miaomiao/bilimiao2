@@ -13,4 +13,5 @@ interface BasePlayerDelegate: BaseDelegate {
     fun updateDanmukuSetting()
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?)
     fun isPlaying(): Boolean
+    fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int)
 }

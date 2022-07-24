@@ -1,10 +1,15 @@
 package com.a10miaomiao.bilimiao.widget.player
 
 import android.content.Context
+import android.opengl.Visibility
 import android.util.AttributeSet
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -16,8 +21,23 @@ import master.flame.danmaku.ui.widget.DanmakuView
 
 class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
 
+    enum class PlayerMode {
+        SMALL,
+        FULL
+    }
+
     private val mDanmakuView: DanmakuView by lazy { findViewById(R.id.danmaku_view) }
     private val mRootLayout: RelativeLayout by lazy { findViewById(R.id.root_layout) }
+    private val mBottomLayout: RelativeLayout by lazy { findViewById(R.id.layout_bottom) }
+    private val mFullModeBottomContainer: ViewGroup by lazy { findViewById(R.id.layout_full_mode_bottom) }
+    private val mButtomPlay: ImageView by lazy { findViewById(R.id.buttom_play) }
+    private val mDanmakuSwitch: ViewGroup by lazy { findViewById(R.id.danmaku_switch) }
+    private val mDanmakuSwitchIV: ImageView by lazy { findViewById(R.id.danmaku_switch_icon) }
+    private val mDanmakuSwitchTV: TextView by lazy { findViewById(R.id.danmaku_switch_text) }
+    private val mQuality: ViewGroup by lazy { findViewById(R.id.quality) }
+    private val mQualityTV: TextView by lazy { findViewById(R.id.quality_text) }
+    private val mLock: ViewGroup by lazy { findViewById(R.id.lock) }
+
     private val mDanmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
         override fun currMillisecond(): Long {
@@ -46,6 +66,16 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
         }
     }
 
+    var mode = PlayerMode.SMALL
+        set(value) {
+            field = value
+            updateMode()
+        }
+    var isShowDanmaKu = true
+        set(value) {
+            field = value
+            resolveDanmakuShow()
+        }
     var danmakuStartSeekPosition: Long = -1
     var danmakuParser: BaseDanmakuParser? = null
         set(value) {
@@ -55,6 +85,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
             field = value
         }
     var danmakuContext: DanmakuContext? = null
+    var statusBarHelper: StatusBarHelper? = null
+
+    val topContainer: ViewGroup get() = mTopContainer
+    val qualityView: View get() = mQuality
 //    private var mDanmakuContext: DanmakuContext by lazy { DanmakuContext.create() }
 
     constructor(context: Context?, fullFlag: Boolean?): super(context, fullFlag) {
@@ -74,9 +108,51 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
     }
 
     private fun initView() {
+        enlargeImageRes = R.drawable.ic_player_portrait_fullscreen
+        shrinkImageRes = R.drawable.ic_player_portrait_fullscreen
         initDanmakuContext()
+        mButtomPlay.setOnClickListener {
+            clickStartIcon()
+        }
+        mDanmakuSwitch.setOnClickListener {
+            isShowDanmaKu = !isShowDanmaKu
+            cancelDismissControlViewTimer()
+            startDismissControlViewTimer()
+        }
+        mLock.setOnClickListener {
+            lockTouchLogic()
+        }
     }
 
+    private fun updateMode() {
+        when(mode) {
+            PlayerMode.SMALL -> {
+                mFullModeBottomContainer.visibility = GONE
+                mBackButton.setImageResource(R.drawable.video_small_close)
+            }
+            PlayerMode.FULL -> {
+                mFullModeBottomContainer.visibility = VISIBLE
+                mBackButton.setImageResource(R.drawable.bili_player_back_button)
+            }
+        }
+    }
+
+    override fun setStateAndUi(state: Int) {
+        super.setStateAndUi(state)
+        val playBtnImageRes = if (state == CURRENT_STATE_PLAYING) {
+            R.drawable.bili_player_play_can_pause
+        } else {
+            R.drawable.bili_player_play_can_play
+        }
+        mButtomPlay.setImageResource(playBtnImageRes)
+    }
+
+    override fun setViewShowState(view: View, visibility: Int) {
+        super.setViewShowState(view, visibility)
+        if (mode == PlayerMode.FULL && view == mTopContainer) {
+            statusBarHelper?.isShowStatus = visibility == View.VISIBLE
+        }
+    }
 
     override fun onPrepared() {
         super.onPrepared()
@@ -157,15 +233,19 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
     private fun resolveDanmakuShow() {
         post {
             mDanmakuView.show()
-//            if (mDanmaKuShow) {
-//                if (!getDanmakuView().isShown()) getDanmakuView().show()
-//                mToogleDanmaku.setText("弹幕关")
-//            } else {
-//                if (getDanmakuView().isShown()) {
-//                    getDanmakuView().hide()
-//                }
-//                mToogleDanmaku.setText("弹幕开")
-//            }
+            if (isShowDanmaKu) {
+                if (!mDanmakuView.isShown) {
+                    mDanmakuView.show()
+                }
+                mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_open)
+                mDanmakuSwitchTV.text = "弹幕开"
+            } else {
+                if (mDanmakuView.isShown) {
+                    mDanmakuView.hide()
+                }
+                mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_closed)
+                mDanmakuSwitchTV.text = "弹幕关"
+            }
         }
     }
 
@@ -185,5 +265,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
         mDanmakuView.addDanmaku(danmaku)
     }
 
-
+    fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
+        if (mode == PlayerMode.FULL) {
+            mTopContainer.setPadding(left, top, right, 0)
+            mBottomContainer.setPadding(left, 0, right, 0)
+        } else {
+            mTopContainer.setPadding(0, 0, 0, 0)
+            mBottomContainer.setPadding(0, 0, 0, 0)
+        }
+    }
 }

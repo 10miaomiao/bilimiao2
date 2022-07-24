@@ -2,7 +2,7 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import cn.a10miaomiao.download.BiliVideoEntry
 
-class PlayerSourceInfo {
+class PlayerInfo {
     var type = ""
     var aid = ""
     var cid = ""

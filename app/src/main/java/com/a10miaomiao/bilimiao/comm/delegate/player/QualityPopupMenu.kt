@@ -4,12 +4,14 @@ import android.app.Activity
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.PlayerSourceInfo
+import kotlin.reflect.KFunction1
 
 class QualityPopupMenu(
     private val activity: Activity,
     private val anchor: View,
-    private val list: List<String>,
-    private val value: String,
+    private val list: List<PlayerSourceInfo.AcceptInfo>,
+    private val value: Int,
 ) {
     private val popupMenu = PopupMenu(activity, anchor)
 
@@ -21,15 +23,20 @@ class QualityPopupMenu(
 
     private fun Menu.initMenu() {
         list.forEachIndexed { index, item ->
-            add(Menu.FIRST, index, 0, item).apply {
-                isChecked = value == item
+            add(Menu.FIRST, index, 0, item.description).apply {
+                isChecked = value == item.quality
             }
         }
         setGroupCheckable(Menu.FIRST, true, true)
     }
 
-    fun setOnMenuItemClickListener(listener: PopupMenu.OnMenuItemClickListener) {
-        popupMenu.setOnMenuItemClickListener(listener)
+    fun setOnChangedQualityListener(changedQuality: (Int) -> Unit) {
+        popupMenu.setOnMenuItemClickListener {
+            val position = it.itemId
+            val item = list[position]
+            changedQuality(item.quality)
+            false
+        }
     }
 
     fun show() {

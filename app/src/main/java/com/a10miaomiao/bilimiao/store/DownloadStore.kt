@@ -1,19 +1,11 @@
 package com.a10miaomiao.bilimiao.store
 
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.download.BiliVideoEntry
 import cn.a10miaomiao.download.DownloadInfo
-import cn.a10miaomiao.miao.binding.MiaoBinding
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerSourceInfo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.base.BaseStore
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import org.kodein.di.DI
-import java.lang.Exception
 
 class DownloadStore(override val di: DI) :
     ViewModel(), BaseStore<DownloadStore.State> {

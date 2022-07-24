@@ -3,9 +3,11 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.store.PlayerStore
@@ -45,7 +47,9 @@ class PlayerDelegate2(
 
     private val playerStore by instance<PlayerStore>()
 
-    private var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
+    var playerSourceInfo: PlayerSourceInfo? = null
+    var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
+    private var lastPosition = 0L
     private val playerCoroutineScope = PlayerCoroutineScope()
     private var playerSource: BasePlayerSource? = null
         set(value) {
@@ -62,6 +66,9 @@ class PlayerDelegate2(
         PlayerFactory.setPlayManager(Exo2PlayerManager::class.java) //EXO模式
         ExoSourceManager.setExoMediaSourceInterceptListener(this)
         controller.initController()
+        controller.initDanmakuContext()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        quality = prefs.getInt("player_quality", 64)
     }
 
     override fun onResume() {
@@ -151,29 +158,51 @@ class PlayerDelegate2(
         }
     }
 
-    override fun openPlayer(source: BasePlayerSource){
-        scaffoldApp.showPlayer = true
-        playerCoroutineScope.onStart()
-        playerSource = source
-        setThumbImageView(source.coverUrl)
+    fun changedQuality(newQuality: Int) {
+        if (quality != newQuality) {
+            lastPosition = views.videoPlayer.currentPositionWhenPlaying
+            quality = newQuality
+            loadPlayerSource()
+            val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+            prefs.edit().putInt("player_quality", 64).apply()
+        }
+    }
+
+    private fun loadPlayerSource() {
+        val source = playerSource ?: return
         playerCoroutineScope.launch(Dispatchers.IO) {
             val danmukuParser = source.getDanmakuParser()
-            val playerUrl = source.getPlayerUrl(quality)
+            val sourceInfo = source.getPlayerUrl(quality)
+            quality = sourceInfo.quality
             withContext(Dispatchers.Main) {
                 views.videoPlayer.releaseDanmaku()
                 views.videoPlayer.danmakuParser = danmukuParser
                 val header = getDefaultRequestProperties()
                 views.videoPlayer.setUp(
-                    playerUrl,
+                    sourceInfo.url,
                     false,
                     null,
                     header,
                     source.title
                 )
                 views.videoPlayer.startPlayLogic()
+                if (lastPosition > 0L) {
+                    views.videoPlayer.seekTo(lastPosition)
+                    lastPosition = 0L
+                }
                 historyReport()
             }
+            playerSourceInfo = sourceInfo
         }
+    }
+
+    override fun openPlayer(source: BasePlayerSource){
+        lastPosition = 0L
+        scaffoldApp.showPlayer = true
+        playerCoroutineScope.onStart()
+        playerSource = source
+        setThumbImageView(source.coverUrl)
+        loadPlayerSource()
     }
 
     override fun closePlayer() {
@@ -182,13 +211,19 @@ class PlayerDelegate2(
         historyReport()
         playerSource = null
         views.videoPlayer.release()
+        lastPosition = 0L
     }
 
     override fun isPlaying(): Boolean {
         return views.videoPlayer.isInPlayingState
     }
 
+    override fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
+        views.videoPlayer.setWindowInsets(left, top, right, bottom)
+    }
+
     override fun updateDanmukuSetting() {
+        controller.initDanmakuContext()
     }
 
     override fun onPictureInPictureModeChanged(

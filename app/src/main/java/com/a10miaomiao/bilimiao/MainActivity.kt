@@ -199,6 +199,7 @@ class MainActivity
                 0, 0, right, 0
             )
         }
+        basePlayerDelegate.setWindowInsets(left, top, right, bottom)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)

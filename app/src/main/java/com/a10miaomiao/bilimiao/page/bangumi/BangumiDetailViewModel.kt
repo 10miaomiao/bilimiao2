@@ -6,13 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerSourceInfo
-import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.BangumiInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonInfo
-import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.ToastInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -151,6 +149,6 @@ class BangumiDetailViewModel (
 
     fun isPlaying (epid: String): Boolean {
         val info = playerStore.state
-        return info.type == PlayerSourceInfo.BANGUMI && info.epid == epid
+        return info.type == PlayerInfo.BANGUMI && info.epid == epid
     }
 }

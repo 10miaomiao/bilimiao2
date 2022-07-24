@@ -3,10 +3,10 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.preference.PreferenceManager
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import org.kodein.di.DI
@@ -25,6 +25,7 @@ class PlayerController(
     private val danmakuContext = DanmakuContext.create()
 
     fun initController () {
+        views.videoPlayer.statusBarHelper = statusBarHelper
         views.videoPlayer.isFullHideActionBar = true
         views.videoPlayer.backButton.setOnClickListener {
             if (scaffoldApp.fullScreenPlayer) {
@@ -41,25 +42,27 @@ class PlayerController(
                 fullScreen()
             }
         }
-        initDanmakuContext()
         views.videoPlayer.danmakuContext = danmakuContext
+        views.videoPlayer.qualityView.setOnClickListener(this::showQualityPopupMenu)
     }
 
     fun fullScreen() {
+        views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.FULL
         scaffoldApp.fullScreenPlayer = true
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        statusBarHelper.isShowStatus = false
+        statusBarHelper.isShowStatus = views.videoPlayer.topContainer.visibility == View.VISIBLE
         statusBarHelper.isShowNavigation = false
     }
 
     fun smallScreen () {
+        views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.SMALL
         scaffoldApp.fullScreenPlayer = false
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         statusBarHelper.isShowStatus = true
         statusBarHelper.isShowNavigation = true
     }
 
-    private fun initDanmakuContext() {
+    fun initDanmakuContext() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         var scaleTextSize = prefs.getString("danmaku_fontsize", "1")?.toFloatOrNull() ?: 1f
         val danmakuSpeed = prefs.getString("danmaku_speed", "1")?.toFloatOrNull() ?: 1f
@@ -101,9 +104,19 @@ class PlayerController(
             setMaximumLines(maxLinesPair)
 //            preventOverlapping(overlappingEnablePair)
         }
+        views.videoPlayer.isShowDanmaKu = danmakuShow
     }
 
-
-
+    fun showQualityPopupMenu(view: View) {
+        val sourceInfo = delegate.playerSourceInfo ?: return
+        val popup = QualityPopupMenu(
+            activity = activity,
+            anchor = view,
+            list = sourceInfo.acceptList,
+            value = delegate.quality
+        )
+        popup.setOnChangedQualityListener(delegate::changedQuality)
+        popup.show()
+    }
 
 }
