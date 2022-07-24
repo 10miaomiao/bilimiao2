@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import splitties.toast.toast
 import tv.danmaku.ijk.media.exo2.Exo2PlayerManager
 import tv.danmaku.ijk.media.exo2.ExoMediaSourceInterceptListener
 import tv.danmaku.ijk.media.exo2.ExoSourceManager
@@ -92,6 +93,9 @@ class PlayerDelegate2(
     }
 
     override fun onBackPressed(): Boolean {
+        if (views.videoPlayer.isLock) {
+            return true
+        }
         if (scaffoldApp.fullScreenPlayer) {
             controller.smallScreen()
             return true
@@ -162,18 +166,22 @@ class PlayerDelegate2(
         if (quality != newQuality) {
             lastPosition = views.videoPlayer.currentPositionWhenPlaying
             quality = newQuality
-            loadPlayerSource()
+            loadPlayerSource(
+                showQualityToast = true
+            )
+            toast("正在切换清晰度")
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-            prefs.edit().putInt("player_quality", 64).apply()
+            prefs.edit().putInt("player_quality", newQuality).apply()
         }
     }
 
-    private fun loadPlayerSource() {
+    private fun loadPlayerSource(
+        showQualityToast: Boolean = false
+    ) {
         val source = playerSource ?: return
         playerCoroutineScope.launch(Dispatchers.IO) {
             val danmukuParser = source.getDanmakuParser()
             val sourceInfo = source.getPlayerUrl(quality)
-            quality = sourceInfo.quality
             withContext(Dispatchers.Main) {
                 views.videoPlayer.releaseDanmaku()
                 views.videoPlayer.danmakuParser = danmukuParser
@@ -185,13 +193,25 @@ class PlayerDelegate2(
                     header,
                     source.title
                 )
-                views.videoPlayer.startPlayLogic()
                 if (lastPosition > 0L) {
-                    views.videoPlayer.seekTo(lastPosition)
+                    views.videoPlayer.seekOnStart = lastPosition
                     lastPosition = 0L
+                } else {
+                    views.videoPlayer.seekOnStart = 0
                 }
+                views.videoPlayer.startPlayLogic()
+
                 historyReport()
+
+                if (showQualityToast) {
+                    if (sourceInfo.quality == quality) {
+                        toast("已切换至【${sourceInfo.description}】")
+                    } else {
+                        toast("清晰度切换失败")
+                    }
+                }
             }
+            quality = sourceInfo.quality
             playerSourceInfo = sourceInfo
         }
     }

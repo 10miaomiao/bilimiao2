@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.widget.player
 
 import android.content.Context
-import android.opengl.Visibility
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +9,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -19,7 +19,7 @@ import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
 
 
-class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
+class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     enum class PlayerMode {
         SMALL,
@@ -37,12 +37,16 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
     private val mQuality: ViewGroup by lazy { findViewById(R.id.quality) }
     private val mQualityTV: TextView by lazy { findViewById(R.id.quality_text) }
     private val mLock: ViewGroup by lazy { findViewById(R.id.lock) }
+    private val mLockContainer: ViewGroup by lazy { findViewById(R.id.layout_lock_screen) }
+    private val mUnlockLeftIV: ImageView by lazy { findViewById(R.id.unlock_left) }
+    private val mUnlockRightIV: ImageView by lazy { findViewById(R.id.unlock_right) }
 
     private val mDanmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
         override fun currMillisecond(): Long {
             val currentPosition: Long = if (mCurrentState == CURRENT_STATE_PLAYING
-                || mCurrentState == CURRENT_STATE_PAUSE) {
+                || mCurrentState == CURRENT_STATE_PAUSE
+            ) {
                 try {
                     gsyVideoManager.currentPosition
                 } catch (e: Exception) {
@@ -91,15 +95,26 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
     val qualityView: View get() = mQuality
 //    private var mDanmakuContext: DanmakuContext by lazy { DanmakuContext.create() }
 
-    constructor(context: Context?, fullFlag: Boolean?): super(context, fullFlag) {
+    var isLock: Boolean = false
+        set(value) {
+            field = value
+            if (value) {
+                hideAllWidget()
+                mLockContainer.visibility = VISIBLE
+            } else {
+                mLockContainer.visibility = GONE
+            }
+        }
+
+    constructor(context: Context?, fullFlag: Boolean?) : super(context, fullFlag) {
         initView()
     }
 
-    constructor(context: Context?): super(context) {
+    constructor(context: Context?) : super(context) {
         initView()
     }
 
-    constructor(context: Context?, attrs: AttributeSet?): super(context, attrs) {
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
         initView()
     }
 
@@ -119,13 +134,16 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
             cancelDismissControlViewTimer()
             startDismissControlViewTimer()
         }
-        mLock.setOnClickListener {
-            lockTouchLogic()
-        }
+
+        val lockClickListener = OnLockClickListener()
+        mLock.setOnClickListener(lockClickListener)
+        mLockContainer.setOnClickListener(lockClickListener)
+        mUnlockLeftIV.setOnClickListener(lockClickListener)
+        mUnlockRightIV.setOnClickListener(lockClickListener)
     }
 
     private fun updateMode() {
-        when(mode) {
+        when (mode) {
             PlayerMode.SMALL -> {
                 mFullModeBottomContainer.visibility = GONE
                 mBackButton.setImageResource(R.drawable.video_small_close)
@@ -269,9 +287,55 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer  {
         if (mode == PlayerMode.FULL) {
             mTopContainer.setPadding(left, top, right, 0)
             mBottomContainer.setPadding(left, 0, right, 0)
+            mLockContainer.setPadding(left, 0, right, 0)
         } else {
             mTopContainer.setPadding(0, 0, 0, 0)
             mBottomContainer.setPadding(0, 0, 0, 0)
+            mLockContainer.setPadding(0, 0, 0, 0)
         }
     }
+
+    /**
+     * 锁定控制按钮相关
+     */
+    inner class OnLockClickListener : OnClickListener {
+
+        val isShowButton get() = mUnlockLeftIV.visibility == VISIBLE
+
+        override fun onClick(v: View) {
+            when (v.id) {
+                R.id.lock -> {
+                    isLock = true
+                    postDelayed(dismissControlTask, mDismissControlTime.toLong())
+                }
+                R.id.layout_lock_screen -> {
+                    if (isShowButton) {
+                        removeCallbacks(dismissControlTask)
+                        hideButton()
+                    } else {
+                        postDelayed(dismissControlTask, mDismissControlTime.toLong())
+                        showButton()
+                    }
+                }
+                R.id.unlock_left, R.id.unlock_right -> {
+                    removeCallbacks(dismissControlTask)
+                    isLock = false
+                }
+            }
+        }
+
+        private fun showButton() {
+            mUnlockLeftIV.visibility = VISIBLE
+            mUnlockRightIV.visibility = VISIBLE
+        }
+
+        private fun hideButton() {
+            mUnlockLeftIV.visibility = GONE
+            mUnlockRightIV.visibility = GONE
+        }
+
+        var dismissControlTask = Runnable { hideButton() }
+
+    }
+
 }

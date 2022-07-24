@@ -269,4 +269,30 @@
         android:src="@drawable/unlock"
         android:visibility="gone" />
 
+    <RelativeLayout
+        android:id="@+id/layout_lock_screen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/unlock_left"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:src="@drawable/shape_unlock" />
+
+        <ImageView
+            android:id="@+id/unlock_right"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/shape_unlock" />
+
+    </RelativeLayout>
+
 </RelativeLayout>

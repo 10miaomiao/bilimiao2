@@ -5,6 +5,9 @@ data class PlayerSourceInfo(
     val quality: Int,
     val acceptList: List<AcceptInfo>
 ) {
+
+    val description: String get() = acceptList.find { it.quality == quality }?.description ?: "未知清晰度"
+
     data class AcceptInfo(
         val quality: Int,
         val description: String,
