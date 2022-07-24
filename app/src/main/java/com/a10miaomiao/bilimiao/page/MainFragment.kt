@@ -8,6 +8,7 @@ import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Space
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -109,6 +110,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     private val ID_viewPager = View.generateViewId()
     private val ID_tabLayout = View.generateViewId()
+    private val ID_space = View.generateViewId()
 
     private var backKeyPressedTimes = 0L
 
@@ -201,7 +203,15 @@ class MainFragment : Fragment(), DIAware, MyPage {
     private fun initView(view: View) {
         val tabLayout = view.findViewById<TabLayout>(ID_tabLayout)
         val viewPager = view.findViewById<ViewPager2>(ID_viewPager)
+        val space = view.findViewById<Space>(ID_space)
         val newNavList = viewModel.readNavList()
+        if (newNavList.size > 1) {
+            space.visibility = View.GONE
+            tabLayout.visibility = View.VISIBLE
+        } else {
+            space.visibility = View.VISIBLE
+            tabLayout.visibility = View.GONE
+        }
         if  (viewPager.adapter == null) {
             viewModel.navList = newNavList
             val mAdapter = object : FragmentStateAdapter(childFragmentManager, lifecycle) {
@@ -232,6 +242,11 @@ class MainFragment : Fragment(), DIAware, MyPage {
         }
         verticalLayout {
             views {
+                +space(ID_space) {
+                    visibility = View.GONE
+                }..lParams {
+                    _height = contentInsets.top
+                }
                 +tabLayout(ID_tabLayout) {
                     _topPadding = contentInsets.top
                     _leftPadding = contentInsets.left
