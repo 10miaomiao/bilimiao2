@@ -49,7 +49,8 @@ class PlayerController(
     fun fullScreen() {
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.FULL
         scaffoldApp.fullScreenPlayer = true
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+//        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         statusBarHelper.isShowStatus = views.videoPlayer.topContainer.visibility == View.VISIBLE
         statusBarHelper.isShowNavigation = false
     }
