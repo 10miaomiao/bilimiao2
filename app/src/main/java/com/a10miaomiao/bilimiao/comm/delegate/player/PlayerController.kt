@@ -1,10 +1,15 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
+import androidx.navigation.findNavController
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -24,26 +29,27 @@ class PlayerController(
     private val views get() = delegate.views
     private val danmakuContext = DanmakuContext.create()
 
-    fun initController () {
-        views.videoPlayer.statusBarHelper = statusBarHelper
-        views.videoPlayer.isFullHideActionBar = true
-        views.videoPlayer.backButton.setOnClickListener {
+    fun initController () = views.videoPlayer.run {
+        statusBarHelper = statusBarHelper
+        isFullHideActionBar = true
+        backButton.setOnClickListener {
             if (scaffoldApp.fullScreenPlayer) {
                 smallScreen()
             } else {
                 delegate.closePlayer()
             }
         }
-        views.videoPlayer.setIsTouchWiget(true)
-        views.videoPlayer.fullscreenButton.setOnClickListener {
+        setIsTouchWiget(true)
+        fullscreenButton.setOnClickListener {
             if (scaffoldApp.fullScreenPlayer) {
                 smallScreen()
             } else {
                 fullScreen()
             }
         }
-        views.videoPlayer.danmakuContext = danmakuContext
-        views.videoPlayer.qualityView.setOnClickListener(this::showQualityPopupMenu)
+        danmakuContext = this@PlayerController.danmakuContext
+        qualityView.setOnClickListener(this@PlayerController::showQualityPopupMenu)
+        moreBtn.setOnClickListener(this@PlayerController::showMoreMenu)
     }
 
     fun fullScreen() {
@@ -120,4 +126,28 @@ class PlayerController(
         popup.show()
     }
 
+
+    fun showMoreMenu(view: View) {
+        val popupMenu = PopupMenu(activity, view)
+        popupMenu.inflate(R.menu.mini_player_toolbar)
+        popupMenu.setOnMenuItemClickListener(this::moreMenuItemClick)
+        popupMenu.show()
+    }
+
+    fun moreMenuItemClick(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.mini_window -> {
+                delegate.picInPicHelper?.enterPictureInPictureMode()
+            }
+            R.id.video_setting -> {
+                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                nav.navigate(Uri.parse("bilimiao://setting/video"))
+            }
+            R.id.danmuku_setting -> {
+                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                nav.navigate(Uri.parse("bilimiao://setting/danmaku"))
+            }
+        }
+        return true
+    }
 }

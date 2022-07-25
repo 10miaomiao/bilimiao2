@@ -28,6 +28,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     private val mDanmakuView: DanmakuView by lazy { findViewById(R.id.danmaku_view) }
     private val mRootLayout: RelativeLayout by lazy { findViewById(R.id.root_layout) }
+    private val mMoreBtn: View by lazy { findViewById(R.id.more) }
     private val mBottomLayout: RelativeLayout by lazy { findViewById(R.id.layout_bottom) }
     private val mFullModeBottomContainer: ViewGroup by lazy { findViewById(R.id.layout_full_mode_bottom) }
     private val mButtomPlay: ImageView by lazy { findViewById(R.id.buttom_play) }
@@ -93,6 +94,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     val topContainer: ViewGroup get() = mTopContainer
     val qualityView: View get() = mQuality
+    val moreBtn: View get() = mMoreBtn
 //    private var mDanmakuContext: DanmakuContext by lazy { DanmakuContext.create() }
 
     var isLock: Boolean = false
@@ -293,6 +295,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             mBottomContainer.setPadding(0, 0, 0, 0)
             mLockContainer.setPadding(0, 0, 0, 0)
         }
+    }
+
+    fun hideController() {
+        hideAllWidget()
     }
 
     /**

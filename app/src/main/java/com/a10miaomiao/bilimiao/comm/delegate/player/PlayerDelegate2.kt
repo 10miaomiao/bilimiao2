@@ -2,16 +2,20 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser
@@ -46,6 +50,9 @@ class PlayerDelegate2(
     }
     val scaffoldApp by lazy { activity.getScaffoldView() }
 
+    var picInPicHelper: PicInPicHelper? = null
+        private set
+
     private val playerStore by instance<PlayerStore>()
 
     var playerSourceInfo: PlayerSourceInfo? = null
@@ -66,10 +73,11 @@ class PlayerDelegate2(
 //        PlayerFactory.setPlayManager(MyIjkPlayerManager::class.java)
         PlayerFactory.setPlayManager(Exo2PlayerManager::class.java) //EXO模式
         ExoSourceManager.setExoMediaSourceInterceptListener(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            picInPicHelper = PicInPicHelper(activity, views.videoPlayer)
+        }
         controller.initController()
         controller.initDanmakuContext()
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        quality = prefs.getInt("player_quality", 64)
     }
 
     override fun onResume() {
@@ -82,10 +90,21 @@ class PlayerDelegate2(
 
     override fun onStart() {
         playerCoroutineScope.onStart()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        if (!prefs.getBoolean("player_background", true)
+            && !views.videoPlayer.isInPlayingState) {
+            views.videoPlayer.onVideoResume()
+        }
     }
 
     override fun onStop() {
         playerCoroutineScope.onStop()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        if (!prefs.getBoolean("player_background", true)
+            && views.videoPlayer.isInPlayingState) {
+//            lastPosition = mPlayer.currentPosition
+            views.videoPlayer.onVideoPause()
+        }
     }
 
     override fun onDestroy() {
@@ -217,6 +236,8 @@ class PlayerDelegate2(
     }
 
     override fun openPlayer(source: BasePlayerSource){
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        quality = prefs.getInt("player_quality", 64)
         lastPosition = 0L
         scaffoldApp.showPlayer = true
         playerCoroutineScope.onStart()
@@ -250,6 +271,18 @@ class PlayerDelegate2(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
     ) {
+        picInPicHelper?.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
+            // 隐藏视频控制器
+            views.videoPlayer.hideController()
+            // 视频组件全屏
+            scaffoldApp.fullScreenPlayer = true
+            // 调整弹幕样式，调小字体，限制行数
+            controller.initDanmakuContext()
+        } else {
+            scaffoldApp.fullScreenPlayer = views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
+            controller.initDanmakuContext()
+        }
     }
 
 }

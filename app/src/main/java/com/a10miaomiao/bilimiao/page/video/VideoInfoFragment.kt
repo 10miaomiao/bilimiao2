@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.page.video
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -203,6 +204,15 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
             if (it.season?.is_jump == 1) {
                 findNavController().popBackStack()
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        if (prefs.getBoolean("player_auto_stop", false)
+            && playerStore.state.aid == viewModel.id) {
+            basePlayerDelegate.closePlayer()
         }
     }
 
