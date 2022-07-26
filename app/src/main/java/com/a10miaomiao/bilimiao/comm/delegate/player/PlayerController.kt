@@ -12,6 +12,8 @@ import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
+import com.shuyu.gsyvideoplayer.listener.VideoAllCallBack
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import org.kodein.di.DI
@@ -22,7 +24,7 @@ class PlayerController(
     private var activity: AppCompatActivity,
     private val delegate: PlayerDelegate2,
     override val di: DI,
-): DIAware {
+): DIAware, VideoPlayerCallBack {
 
     private val statusBarHelper by instance<StatusBarHelper>()
     private val scaffoldApp get() = delegate.scaffoldApp
@@ -30,7 +32,8 @@ class PlayerController(
     private val danmakuContext = DanmakuContext.create()
 
     fun initController () = views.videoPlayer.run {
-        statusBarHelper = statusBarHelper
+        val that = this@PlayerController
+        statusBarHelper = that.statusBarHelper
         isFullHideActionBar = true
         backButton.setOnClickListener {
             if (scaffoldApp.fullScreenPlayer) {
@@ -47,9 +50,10 @@ class PlayerController(
                 fullScreen()
             }
         }
-        danmakuContext = this@PlayerController.danmakuContext
-        qualityView.setOnClickListener(this@PlayerController::showQualityPopupMenu)
-        moreBtn.setOnClickListener(this@PlayerController::showMoreMenu)
+        danmakuContext = that.danmakuContext
+        qualityView.setOnClickListener(that::showQualityPopupMenu)
+        moreBtn.setOnClickListener(that::showMoreMenu)
+        videoPlayerCallBack = that
     }
 
     fun fullScreen() {
@@ -149,5 +153,13 @@ class PlayerController(
             }
         }
         return true
+    }
+
+    override fun onVideoPause() {
+        delegate.picInPicHelper?.updatePictureInPictureActions()
+    }
+
+    override fun onVideoResume(isResume: Boolean) {
+        delegate.picInPicHelper?.updatePictureInPictureActions()
     }
 }

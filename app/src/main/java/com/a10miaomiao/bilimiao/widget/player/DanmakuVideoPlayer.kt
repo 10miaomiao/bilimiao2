@@ -91,11 +91,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     var danmakuContext: DanmakuContext? = null
     var statusBarHelper: StatusBarHelper? = null
+    var videoPlayerCallBack: VideoPlayerCallBack? = null
 
     val topContainer: ViewGroup get() = mTopContainer
     val qualityView: View get() = mQuality
     val moreBtn: View get() = mMoreBtn
-//    private var mDanmakuContext: DanmakuContext by lazy { DanmakuContext.create() }
 
     var isLock: Boolean = false
         set(value) {
@@ -182,11 +182,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     override fun onVideoPause() {
         super.onVideoPause()
         danmakuOnPause()
+        videoPlayerCallBack?.onVideoPause()
     }
 
     override fun onVideoResume(isResume: Boolean) {
         super.onVideoResume(isResume)
         danmakuOnResume()
+        videoPlayerCallBack?.onVideoResume(isResume)
     }
 
     override fun clickStartIcon() {
@@ -343,5 +345,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         var dismissControlTask = Runnable { hideButton() }
 
     }
+
+
 
 }

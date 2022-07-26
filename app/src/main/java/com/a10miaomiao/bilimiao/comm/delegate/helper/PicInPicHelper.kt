@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 //import cn.a10miaomiao.player.callback.MediaPlayerListener
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 
 
 class PicInPicHelper(
@@ -38,7 +39,7 @@ class PicInPicHelper(
 
     private val actions: List<RemoteAction> @RequiresApi(Build.VERSION_CODES.O)
     get() {
-        val action = if (videoPlayer.isInPlayingState){
+        val action = if (videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PLAYING){
             RemoteAction(
                 Icon.createWithResource(activity, R.drawable.bili_player_play_can_pause),
                 "暂停",
@@ -77,16 +78,12 @@ class PicInPicHelper(
             if (intent.action != ACTION_MEDIA_CONTROL) {
                 return
             }
-
-            val controlType = intent.getIntExtra(EXTRA_CONTROL_TYPE, 0);
-            when (controlType) {
+            when (intent.getIntExtra(EXTRA_CONTROL_TYPE, 0)) {
                 CONTROL_TYPE_PLAY -> {
                     videoPlayer.onVideoResume()
-                    updatePictureInPictureActions()
                 }
                 CONTROL_TYPE_PAUSE -> {
                     videoPlayer.onVideoPause()
-                    updatePictureInPictureActions()
                 }
             }
         }
