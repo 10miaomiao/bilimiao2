@@ -71,8 +71,12 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
     private fun toSelfLink (view: View, url: String) {
         val urlInfo = BiliUrlMatcher.findIDByUrl(url)
         val urlType = urlInfo[0]
+        var urlId = urlInfo[1]
+        if (urlType == "BV") {
+            urlId = "BV$urlId"
+        }
         val args = bundleOf(
-            MainNavGraph.args.id to urlInfo[1]
+            MainNavGraph.args.id to urlId
         )
         when(urlType){
             "AV", "BV" -> {
