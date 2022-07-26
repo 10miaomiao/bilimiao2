@@ -12,6 +12,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.a10miaomiao.bilimiao.widget.shadow.ShadowLayout
+import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.tabs.TabLayout
 import splitties.views.dsl.core.*
 import kotlin.contracts.InvocationKind
@@ -89,5 +90,20 @@ inline fun View.shadowLayout(
     return view({ ShadowLayout(it) }, id).apply(initView)
 }
 
+inline fun Ui.flexboxLayout(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: FlexboxLayout.() -> Unit = {}
+): FlexboxLayout {
+    return view({ FlexboxLayout(it) }, id).apply(initView)
+}
+
+inline fun View.flexboxLayout(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: FlexboxLayout.() -> Unit = {}
+): FlexboxLayout {
+    return view({ FlexboxLayout(it) }, id).apply(initView)
+}
 
 

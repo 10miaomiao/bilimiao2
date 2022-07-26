@@ -29,6 +29,9 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayout
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -165,7 +168,9 @@ class HomeFragment : Fragment(), DIAware {
                     topMargin = dip(10)
                     bottomMargin = dip(5)
                 }
-                +horizontalLayout {
+                +flexboxLayout {
+                    flexDirection = FlexDirection.ROW
+                    flexWrap = FlexWrap.WRAP
                     views {
                         +textView {
                             _text = "当前时间线：" + viewModel.getTimeText()
@@ -242,7 +247,7 @@ class HomeFragment : Fragment(), DIAware {
                 +imageView {
                     scaleType = ImageView.ScaleType.CENTER_CROP
                     imageResource = com.a10miaomiao.bilimiao.R.drawable.home_header_img
-                }..lParams(matchParent, matchParent)
+                }..lParams(matchParent, dip(150))
 
                 val userInfo = viewModel.userStore.state.info
                 // 应用信息
@@ -284,23 +289,45 @@ class HomeFragment : Fragment(), DIAware {
                                 }
 
                                 +textView {
-                                    _text = userInfo?.run {
-                                        "B币:${bcoin}     硬币:${coin}     UID:${mid}"
-                                    } ?: "不知道写什么好，长按试试(o゜▽゜)o☆"
+                                    text = "不知道写什么好，长按试试(o゜▽゜)o☆"
                                     setTextColor(config.foregroundAlpha45Color)
+                                    _show = userInfo == null
+                                }
+
+                                +flexboxLayout {
+                                    flexDirection = FlexDirection.ROW
+                                    flexWrap = FlexWrap.WRAP
+                                    _show = userInfo != null
+
+                                    views {
+                                        +textView {
+                                            _text = "B币:${userInfo?.bcoin}"
+                                            setTextColor(config.foregroundAlpha45Color)
+                                        }
+                                        +space()..lParams(dip(20))
+                                        +textView {
+                                            _text = "硬币:${userInfo?.coin}"
+                                            setTextColor(config.foregroundAlpha45Color)
+                                        }
+                                        +space()..lParams(dip(20))
+                                        +textView {
+                                            _text = "UID:${userInfo?.mid}"
+                                            setTextColor(config.foregroundAlpha45Color)
+                                        }
+                                    }
                                 }..lParams {
                                     width = matchParent
                                 }
                             }
                         }..lParams {
-                            height = matchParent
+                            height = wrapContent
                             width = matchParent
                         }
                     }
                 }..lParams {
+                    topMargin = dip(60)
                     width = matchParent
                     height = wrapContent
-                    gravity = Gravity.BOTTOM
                 }
             }
 
@@ -325,7 +352,7 @@ class HomeFragment : Fragment(), DIAware {
             views {
                 +headerView()..lParams {
                     width = matchParent
-                    height = dip(150)
+                    height = wrapContent
                     bottomMargin = config.dividerSize
                 }
                 +adView()..lParams {
