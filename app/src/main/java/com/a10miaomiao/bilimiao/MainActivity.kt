@@ -1,9 +1,11 @@
 package com.a10miaomiao.bilimiao
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowInsets
@@ -15,6 +17,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -30,6 +33,8 @@ import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.*
 import com.baidu.mobstat.StatService
 
@@ -72,7 +77,7 @@ class MainActivity
         downloadDelegate.onCreate(savedInstanceState)
         bottomSheetDelegate.onCreate(savedInstanceState)
         store.onCreate(savedInstanceState)
-
+        ui.root.showPlayer = basePlayerDelegate.isPlaying()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ui.root.rootWindowInsets?.let {
                 setWindowInsets(it)
@@ -121,6 +126,23 @@ class MainActivity
 
         navController.handleDeepLink(intent)
 
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.data?.let { uri ->
+            val navOptions = NavOptions.Builder()
+                .setEnterAnim(R.anim.miao_fragment_open_enter)
+                .setExitAnim(R.anim.miao_fragment_open_exit)
+                .setPopEnterAnim(R.anim.miao_fragment_close_enter)
+                .setPopExitAnim(R.anim.miao_fragment_close_exit)
+                .build()
+            try {
+                navController.navigate(uri, navOptions)
+                true
+            } catch (e: IllegalArgumentException) {
+            }
+        }
     }
 
 

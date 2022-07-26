@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao
 import android.content.Context
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.fragment.app.FragmentContainerView
@@ -46,9 +47,12 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         elevation = dip(20).toFloat()
     }
 
-    val mPlayerLayout = inflate<View>(R.layout.include_palyer2) {
+    val mPlayerLayout = Bilimiao.playerView?.apply{
+        (parent as? ViewGroup)?.removeAllViews()
+    } ?: inflate<View>(R.layout.include_palyer2) {
         backgroundColor = 0xFF000000.toInt()
         elevation = dip(20).toFloat()
+        Bilimiao.playerView = this
     }
 
     override var bottomSheetTitleView = textView {

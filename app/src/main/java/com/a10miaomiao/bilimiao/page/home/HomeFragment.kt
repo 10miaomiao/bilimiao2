@@ -247,7 +247,7 @@ class HomeFragment : Fragment(), DIAware {
                 +imageView {
                     scaleType = ImageView.ScaleType.CENTER_CROP
                     imageResource = com.a10miaomiao.bilimiao.R.drawable.home_header_img
-                }..lParams(matchParent, dip(150))
+                }..lParams(matchParent, dip(120))
 
                 val userInfo = viewModel.userStore.state.info
                 // 应用信息
