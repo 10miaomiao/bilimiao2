@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <size
+                android:height="50dp"
+                android:width="50dp"/>
+            <corners
+                android:radius="10dp"/>
+            <solid android:color="#99000000"/>
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/ic_lock_open_white_24dp"
+        android:height="24dp"
+        android:width="24dp"
+        android:gravity="center"></item>
+</layer-list>

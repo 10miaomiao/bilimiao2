@@ -11,7 +11,7 @@ android {
         minSdk 21
         targetSdk 31
         versionCode 53
-        versionName "2.1.2"
+        versionName "2.2.0 test1"
         flavorDimensions "default"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -45,6 +45,25 @@ android {
             ]
         }
     }
+
+    def apkFolder = new File(project.rootDir.absolutePath + "/app/release")
+    if (!apkFolder.exists()) {
+        apkFolder.mkdirs()
+    }
+    println("APK输出目录:${apkFolder.absolutePath}")
+    // 配置apk输出目录
+    applicationVariants.all { variant ->
+        def flavor = variant.productFlavors[0].name
+        def version = variant.versionName
+        if (variant.buildType.name != "debug") {
+            def outputDirectory = new File(apkFolder.absolutePath + "/" + flavor)
+            variant.packageApplicationProvider.get().outputDirectory = outputDirectory
+        }
+        variant.outputs.forEach {
+            it.outputFileName = "app-${flavor}-${version}.apk" //最终修改生成的apk文件名
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
