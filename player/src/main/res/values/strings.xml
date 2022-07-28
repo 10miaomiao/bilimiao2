@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">player</string>
-    <string name="video_error_title">无法播放此视频</string>
-    <string name="video_error_text_invalid_progressive_playback">很抱歉，此设备无法播放此视频</string>
-    <string name="video_error_text_unknown">抱歉，无法播放此视频</string>
-    <string name="video_error_button">好的</string>
-</resources>
