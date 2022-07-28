@@ -174,8 +174,7 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage
         singleChoice("danmaku_fontsize", fontsizeSelection) {
             title = "选择你的尺寸"
             summary = "想要多大的"
-
-//            onSelectionChange {  }
+            initialSelection = "1"
         }
 
         categoryHeader("speed") {
@@ -192,6 +191,7 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage
         singleChoice("danmaku_speed", speedSelection) {
             title = "选择你的车速"
             summary = "想要更快吗"
+            initialSelection = "1"
         }
 
         categoryHeader("高级") {

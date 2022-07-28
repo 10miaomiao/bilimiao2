@@ -34,6 +34,7 @@ import com.a10miaomiao.bilimiao.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
+import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.kodein.di.*
@@ -103,6 +104,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     private val themeDelegate by instance<ThemeDelegate>()
     private val playerDelegate by instance<BasePlayerDelegate>()
+    private val scaffoldApp by lazy { requireActivity().getScaffoldView() }
 
     private var themeId = 0
 
@@ -146,7 +148,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
             .addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     val now = System.currentTimeMillis()
-                    if (playerDelegate.isPlaying()) {
+                    if (scaffoldApp.showPlayer) {
                         if (now - backKeyPressedTimes > 2000) {
                             requireActivity().toast("再按一次退出播放")
                             backKeyPressedTimes = now

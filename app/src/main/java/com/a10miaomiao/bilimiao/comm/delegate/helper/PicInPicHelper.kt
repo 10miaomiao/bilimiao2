@@ -89,11 +89,9 @@ class PicInPicHelper(
         }
     }
 
-    fun enterPictureInPictureMode(){
+    fun enterPictureInPictureMode(aspectRatio: Rational){
         // 判断Android版本是否大于等于8.0
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // 设置宽高比例值，第一个参数表示分子，第二个参数表示分母
-            val aspectRatio = Rational(16, 9);
             // 设置画中画窗口的宽高比例
             builder.setAspectRatio(aspectRatio)
             builder.setActions(actions)

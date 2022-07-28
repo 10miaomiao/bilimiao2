@@ -153,20 +153,20 @@ class WebFragment : Fragment(), DIAware, MyPage {
         override fun onPageFinished(view: WebView, url: String) {
             super.onPageFinished(view, url)
             updateLoading(false)
-//            val js = """javascript:(function() {
-//                        var parent = document.getElementsByTagName('head').item(0);
-//                        var style = document.createElement('style');
-//                        style.type = 'text/css';
-//                        style.innerHTML = '#dynamic-openapp,.mini-header-container,.fixed-header-container,.v-navbar__body,#internationalHeader,.international-footer,.bili-footer,#cannot-check{display: none !important;} #app{padding-bottom: 0;}';
-//                        parent.appendChild(style);
-//                        window.java_obj.showDescription(
-//                               'theme-color',
-//                               document.querySelector('meta[name="theme-color"]').getAttribute('content')
-//                        );
-//                        window.java_obj.test.hello('from js');
-//                    })()
-//                """
-//            view.loadUrl(js)
+            val js = """javascript:(function() {
+                        var parent = document.getElementsByTagName('head').item(0);
+                        var style = document.createElement('style');
+                        style.type = 'text/css';
+                        style.innerHTML = '#dynamic-openapp, #dynamic-openapp-mask,.mini-header-container,.fixed-header-container,.v-navbar__body,#internationalHeader,.international-footer,.bili-footer,#cannot-check{display: none !important;} #app{padding-bottom: 0;}';
+                        parent.appendChild(style);
+                        window.java_obj.showDescription(
+                               'theme-color',
+                               document.querySelector('meta[name="theme-color"]').getAttribute('content')
+                        );
+                        window.java_obj.test.hello('from js');
+                    })()
+                """
+            view.loadUrl(js)
         }
     }
 
@@ -234,6 +234,44 @@ class WebFragment : Fragment(), DIAware, MyPage {
 
     inner class BiliJsBridge {
 
+        val allSupportMethod = listOf<String>(
+            "global.closeBrowser",
+            "ui.setStatusBarMode",
+//            "auth.checkBridgeEnable",
+            "auth.getUserInfo",
+//            "auth.getAccessToken",
+//            "auth.getBaseInfo",
+//            "auth.getAllBridge",
+//            "auth.getTeenable",
+//            "auth.getNetEnv",
+            "ability.openScheme",
+            "ability.currentThemeType",
+//            "view.goBack",
+//            "view.closeBrowser",
+//            "view.toast",
+//            "view.refresh",
+//            "view.setTitle",
+//            "view.isLongScreen",
+//            "route.login",
+//            "route.editUserInfo",
+//            "route.record",
+//            "route.recommend",
+//            "share.showShareWindow",
+//            "share.setShareMpcContent",
+//            "func.route",
+//            "func.share",
+//            "func.setShare",
+//            "func.childrenOn",
+//            "func.childrenOff",
+//            "func.copy",
+//            "func.cloud-editor.sync",
+//            "func.creation-center.switchTabVisible",
+//            "func.fixWindow",
+//            "func.push.status",
+//            "func.vipDraw.result",
+//            "func.report.success",
+        )
+
         @JavascriptInterface
         fun postMessage (eventString: String) {
             DebugMiao.log("postMessage", eventString)
@@ -247,15 +285,8 @@ class WebFragment : Fragment(), DIAware, MyPage {
 
                 }
                 "global.getAllSupport" -> {
-                    result = """
-                    [
-                        "global.closeBrowser",
-                        "ui.setStatusBarMode",
-                        "auth.getUserInfo",
-                        "ability.openScheme",
-                        "ability.currentThemeType",
-                    ]
-                    """.trimIndent()
+                    result = "[${allSupportMethod.joinToString(",") { "\"$it\"" }}]"
+                    DebugMiao.log(result)
                 }
                 "global.closeBrowser" -> {
                     findNavController().popBackStack()

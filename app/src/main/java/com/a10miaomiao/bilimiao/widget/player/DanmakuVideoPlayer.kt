@@ -1,15 +1,20 @@
 package com.a10miaomiao.bilimiao.widget.player
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.SeekBar
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.config.config
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -301,6 +306,17 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     fun hideController() {
         hideAllWidget()
+    }
+
+
+    fun updateThemeColor(themeColor: Int) {
+        val draw = context.getDrawable(R.drawable.layer_progress)
+        val bounds = mProgressBar.progressDrawable.bounds
+        mProgressBar.progressDrawable = draw
+        mProgressBar.progressDrawable.bounds = bounds
+        mProgressBar.thumb.setColorFilter(themeColor, PorterDuff.Mode.SRC_ATOP)
+
+        mBottomProgressBar.progressDrawable = context.getDrawable(R.drawable.shape_bottom_progress)
     }
 
     /**

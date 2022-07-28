@@ -22,7 +22,9 @@ import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.screen
+import de.Maxr1998.modernpreferences.helpers.singleChoice
 import de.Maxr1998.modernpreferences.helpers.switch
+import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -92,6 +94,18 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
             title = "关闭详情页时同时关闭播放"
             summary = "呐呐呐呐呐呐呐呐呐"
             defaultValue = false
+        }
+
+        val fullModeSelection = listOf(
+            SelectionItem(key = "SENSOR_LANDSCAPE", title = "横向全屏(自动旋转)"),
+            SelectionItem(key = "LANDSCAPE", title = "横向全屏(固定方向1)"),
+            SelectionItem(key = "REVERSE_LANDSCAPE", title = "横向全屏(固定方向2)"),
+            SelectionItem(key = "UNSPECIFIED", title = "不指定方向"),
+        )
+        singleChoice("player_full_mode", fullModeSelection) {
+            title = "全屏播放设置"
+            summary = ""
+            initialSelection = "SENSOR_LANDSCAPE"
         }
     }
 

@@ -8,11 +8,14 @@ import android.preference.PreferenceManager
 import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.view.network
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
@@ -54,6 +57,7 @@ class PlayerDelegate2(
         private set
 
     private val playerStore by instance<PlayerStore>()
+    private val themeDelegate by instance<ThemeDelegate>()
 
     var playerSourceInfo: PlayerSourceInfo? = null
     var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
@@ -78,6 +82,12 @@ class PlayerDelegate2(
         }
         controller.initController()
         controller.initDanmakuContext()
+
+        // 主题监听
+        themeDelegate.observeTheme(activity, Observer {
+            val themeColor = activity.config.themeColor
+            views.videoPlayer.updateThemeColor(themeColor)
+        })
     }
 
     override fun onResume() {

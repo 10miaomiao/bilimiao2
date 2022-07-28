@@ -4,6 +4,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager
+import android.util.Rational
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +14,6 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
-import com.shuyu.gsyvideoplayer.listener.VideoAllCallBack
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import org.kodein.di.DI
@@ -31,6 +31,11 @@ class PlayerController(
     private val views get() = delegate.views
     private val danmakuContext = DanmakuContext.create()
 
+    private fun getFullMode(): String {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        return prefs.getString("player_full_mode", "SENSOR_LANDSCAPE")!!
+    }
+
     fun initController () = views.videoPlayer.run {
         val that = this@PlayerController
         statusBarHelper = that.statusBarHelper
@@ -47,8 +52,13 @@ class PlayerController(
             if (scaffoldApp.fullScreenPlayer) {
                 smallScreen()
             } else {
-                fullScreen()
+                val fullMode = getFullMode()
+                fullScreen(fullMode)
             }
+        }
+        fullscreenButton.setOnLongClickListener {
+            showFullModeMenu(it)
+            true
         }
         danmakuContext = that.danmakuContext
         qualityView.setOnClickListener(that::showQualityPopupMenu)
@@ -56,11 +66,16 @@ class PlayerController(
         videoPlayerCallBack = that
     }
 
-    fun fullScreen() {
+    fun fullScreen(fullMode: String) {
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.FULL
         scaffoldApp.fullScreenPlayer = true
-//        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        activity.requestedOrientation = when (fullMode) {
+            "SENSOR_LANDSCAPE" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            "LANDSCAPE" -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            "REVERSE_LANDSCAPE" -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+            "UNSPECIFIED" -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
         statusBarHelper.isShowStatus = views.videoPlayer.topContainer.visibility == View.VISIBLE
         statusBarHelper.isShowNavigation = false
     }
@@ -130,18 +145,53 @@ class PlayerController(
         popup.show()
     }
 
+    fun showFullModeMenu(view: View) {
+        val popupMenu = PopupMenu(activity, view)
+        val fullMode = getFullMode()
+        val checkMenuId = when(fullMode) {
+            "SENSOR_LANDSCAPE" -> R.id.full_mode_sl
+            "LANDSCAPE" -> R.id.full_mode_l
+            "REVERSE_LANDSCAPE" -> R.id.full_mode_rl
+            "UNSPECIFIED" -> R.id.full_mode_u
+            else -> R.id.full_mode_sl
+        }
+        popupMenu.inflate(R.menu.player_full_mode)
+        popupMenu.menu.findItem(checkMenuId).isChecked = true
+        popupMenu.setOnMenuItemClickListener(this::fullModeMenuItemClick)
+        popupMenu.show()
+    }
+
+    private fun fullModeMenuItemClick(item: MenuItem): Boolean {
+        item.isChecked = true
+        val fullMode = when(item.itemId) {
+            R.id.full_mode_sl -> "SENSOR_LANDSCAPE"
+            R.id.full_mode_l -> "LANDSCAPE"
+            R.id.full_mode_rl -> "REVERSE_LANDSCAPE"
+            R.id.full_mode_u -> "UNSPECIFIED"
+            else -> "SENSOR_LANDSCAPE"
+        }
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        prefs.edit().putString("player_full_mode", fullMode).apply()
+        if (scaffoldApp.fullScreenPlayer) {
+            fullScreen(fullMode)
+        }
+        return true
+    }
 
     fun showMoreMenu(view: View) {
         val popupMenu = PopupMenu(activity, view)
-        popupMenu.inflate(R.menu.mini_player_toolbar)
+        popupMenu.inflate(R.menu.player_top_more)
         popupMenu.setOnMenuItemClickListener(this::moreMenuItemClick)
         popupMenu.show()
     }
 
-    fun moreMenuItemClick(item: MenuItem): Boolean {
+    private fun moreMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.mini_window -> {
-                delegate.picInPicHelper?.enterPictureInPictureMode()
+                // 设置宽高比例值，第一个参数表示分子，第二个参数表示分母
+                var aspectRatio = Rational(16, 9)
+                // TODO: 自适应视频画面比例
+                delegate.picInPicHelper?.enterPictureInPictureMode(aspectRatio)
             }
             R.id.video_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)

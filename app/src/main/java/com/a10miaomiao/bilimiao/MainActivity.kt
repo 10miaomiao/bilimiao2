@@ -200,6 +200,7 @@ class MainActivity
         )
         ui.mBottomSheetLayout.setPadding(left, top, right, 0)
         val showPlayer = ui.root.showPlayer
+        val fullScreenPlayer = ui.root.fullScreenPlayer
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
             windowStore.setContentInsets(
                 left, if (showPlayer) 0 else top, right, 0,
@@ -208,7 +209,7 @@ class MainActivity
                 left, 0, right, bottom
             )
             ui.mPlayerLayout.setPadding(
-                0, top, 0, 0
+                0, if (fullScreenPlayer) 0 else top, 0, 0
             )
         } else {
             windowStore.setContentInsets(
@@ -218,7 +219,7 @@ class MainActivity
                 left, top, 0, bottom
             )
             ui.mPlayerLayout.setPadding(
-                0, 0, right, 0
+                0, 0, if (fullScreenPlayer) 0 else right, 0
             )
         }
         basePlayerDelegate.setWindowInsets(left, top, right, bottom)
