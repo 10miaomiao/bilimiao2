@@ -86,7 +86,7 @@ class PlayerDelegate2(
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
             val themeColor = activity.config.themeColor
-            views.videoPlayer.updateThemeColor(themeColor)
+            views.videoPlayer.updateThemeColor(activity, themeColor)
         })
     }
 
@@ -285,12 +285,15 @@ class PlayerDelegate2(
         if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
             // 隐藏视频控制器
             views.videoPlayer.hideController()
+            //
+            views.videoPlayer.isPicInPicMode = true
             // 视频组件全屏
             scaffoldApp.fullScreenPlayer = true
             // 调整弹幕样式，调小字体，限制行数
             controller.initDanmakuContext()
         } else {
             scaffoldApp.fullScreenPlayer = views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
+            views.videoPlayer.isPicInPicMode = false
             controller.initDanmakuContext()
         }
     }

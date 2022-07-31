@@ -206,10 +206,14 @@ class PlayerController(
     }
 
     override fun onVideoPause() {
-        delegate.picInPicHelper?.updatePictureInPictureActions()
     }
 
     override fun onVideoResume(isResume: Boolean) {
-        delegate.picInPicHelper?.updatePictureInPictureActions()
+    }
+
+    override fun setStateAndUi(state: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            delegate.picInPicHelper?.updatePictureInPictureActions(state)
+        }
     }
 }

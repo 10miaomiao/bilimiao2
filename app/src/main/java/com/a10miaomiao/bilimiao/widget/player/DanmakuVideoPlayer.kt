@@ -1,19 +1,16 @@
 package com.a10miaomiao.bilimiao.widget.player
 
+import android.app.Dialog
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.PorterDuff
+import android.os.Build
 import android.util.AttributeSet
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import android.widget.SeekBar
 import android.widget.TextView
-import androidx.annotation.DrawableRes
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import master.flame.danmaku.controller.DrawHandler
@@ -31,22 +28,38 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         FULL
     }
 
+    // 弹幕组件
     private val mDanmakuView: DanmakuView by lazy { findViewById(R.id.danmaku_view) }
+    // 根布局组件
     private val mRootLayout: RelativeLayout by lazy { findViewById(R.id.root_layout) }
+    // 顶栏更多按钮
     private val mMoreBtn: View by lazy { findViewById(R.id.more) }
+    // 底栏布局
     private val mBottomLayout: RelativeLayout by lazy { findViewById(R.id.layout_bottom) }
+    // 全屏时底栏布局
     private val mFullModeBottomContainer: ViewGroup by lazy { findViewById(R.id.layout_full_mode_bottom) }
+    // 底栏播放按钮
     private val mButtomPlay: ImageView by lazy { findViewById(R.id.buttom_play) }
+    // 弹幕开关
     private val mDanmakuSwitch: ViewGroup by lazy { findViewById(R.id.danmaku_switch) }
+    // 弹幕开关图标
     private val mDanmakuSwitchIV: ImageView by lazy { findViewById(R.id.danmaku_switch_icon) }
+    // 弹幕开关文字
     private val mDanmakuSwitchTV: TextView by lazy { findViewById(R.id.danmaku_switch_text) }
+    // 清晰度
     private val mQuality: ViewGroup by lazy { findViewById(R.id.quality) }
+    // 清晰度文字
     private val mQualityTV: TextView by lazy { findViewById(R.id.quality_text) }
+    // 锁定按钮
     private val mLock: ViewGroup by lazy { findViewById(R.id.lock) }
+    // 锁定时控制容器
     private val mLockContainer: ViewGroup by lazy { findViewById(R.id.layout_lock_screen) }
+    // 左边解锁按钮
     private val mUnlockLeftIV: ImageView by lazy { findViewById(R.id.unlock_left) }
+    // 右边解锁按钮
     private val mUnlockRightIV: ImageView by lazy { findViewById(R.id.unlock_right) }
 
+    // 弹幕时间与播放器时间同步
     private val mDanmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
         override fun currMillisecond(): Long {
@@ -76,16 +89,21 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    // 当前模式
     var mode = PlayerMode.SMALL
         set(value) {
             field = value
             updateMode()
         }
+    // 是否处于画中画模式
+    var isPicInPicMode = false
+    // 是否显示当面
     var isShowDanmaKu = true
         set(value) {
             field = value
             resolveDanmakuShow()
         }
+    // 弹幕开始位置
     var danmakuStartSeekPosition: Long = -1
     var danmakuParser: BaseDanmakuParser? = null
         set(value) {
@@ -95,13 +113,18 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             field = value
         }
     var danmakuContext: DanmakuContext? = null
+
+    // 状态栏
     var statusBarHelper: StatusBarHelper? = null
+    // 播放回调
     var videoPlayerCallBack: VideoPlayerCallBack? = null
 
+    // 供外部访问
     val topContainer: ViewGroup get() = mTopContainer
     val qualityView: View get() = mQuality
     val moreBtn: View get() = mMoreBtn
 
+    // 是否处于锁定状态
     var isLock: Boolean = false
         set(value) {
             field = value
@@ -132,6 +155,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     private fun initView() {
         enlargeImageRes = R.drawable.ic_player_portrait_fullscreen
         shrinkImageRes = R.drawable.ic_player_portrait_fullscreen
+        setDialogVolumeProgressBar(context)
+        setDialogProgressBar(context)
         initDanmakuContext()
         mButtomPlay.setOnClickListener {
             clickStartIcon()
@@ -170,12 +195,19 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             R.drawable.bili_player_play_can_play
         }
         mButtomPlay.setImageResource(playBtnImageRes)
+        videoPlayerCallBack?.setStateAndUi(state)
     }
 
     override fun setViewShowState(view: View, visibility: Int) {
-        super.setViewShowState(view, visibility)
-        if (mode == PlayerMode.FULL && view == mTopContainer) {
-            statusBarHelper?.isShowStatus = visibility == View.VISIBLE
+        if (isPicInPicMode) {
+            if (view == mStartButton || view == mBottomProgressBar) {
+                view.visibility = visibility
+            }
+        } else {
+            super.setViewShowState(view, visibility)
+            if (mode == PlayerMode.FULL && view == mTopContainer) {
+                statusBarHelper?.isShowStatus = visibility == View.VISIBLE
+            }
         }
     }
 
@@ -292,6 +324,40 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mDanmakuView.addDanmaku(danmaku)
     }
 
+    override fun showBrightnessDialog(percent: Float) {
+        if (mBrightnessDialog == null) {
+            val localView = LayoutInflater.from(activityContext).inflate(
+                brightnessLayoutId, null
+            )
+            mBrightnessDialogTv = localView.findViewById(brightnessTextId)
+            mBrightnessDialog = Dialog(activityContext, R.style.video_style_dialog_progress)
+            mBrightnessDialog.setContentView(localView)
+            mBrightnessDialog.window!!.run {
+                addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+                addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+                addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                decorView.systemUiVisibility = SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            }
+            val localLayoutParams = mBrightnessDialog.window!!
+                .attributes
+            localLayoutParams.gravity = Gravity.TOP or Gravity.END
+            localLayoutParams.width = width
+            localLayoutParams.height = height
+            val location = IntArray(2)
+            getLocationOnScreen(location)
+            localLayoutParams.x = location[0]
+            localLayoutParams.y = location[1]
+            // 针对异型屏适配
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                localLayoutParams.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+            mBrightnessDialog.window!!.attributes = localLayoutParams
+        }
+        super.showBrightnessDialog(percent)
+    }
+
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
         if (mode == PlayerMode.FULL) {
             mTopContainer.setPadding(left, top, right, 0)
@@ -308,15 +374,30 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         hideAllWidget()
     }
 
+    private fun setDialogVolumeProgressBar(context: Context) {
+        val draw = context.getDrawable(R.drawable.shape_video_volume_progress)
+        setDialogVolumeProgressBar(draw)
+    }
 
-    fun updateThemeColor(themeColor: Int) {
+    private fun setDialogProgressBar(context: Context) {
+        setDialogProgressColor(context.config.themeColor, mDialogProgressNormalColor)
+        val draw = context.getDrawable(R.drawable.shape_video_dialog_progress)
+        setDialogProgressBar(draw)
+    }
+
+    fun updateThemeColor(
+        context: Context,
+        themeColor: Int,
+    ) {
         val draw = context.getDrawable(R.drawable.layer_progress)
         val bounds = mProgressBar.progressDrawable.bounds
         mProgressBar.progressDrawable = draw
         mProgressBar.progressDrawable.bounds = bounds
         mProgressBar.thumb.setColorFilter(themeColor, PorterDuff.Mode.SRC_ATOP)
-
         mBottomProgressBar.progressDrawable = context.getDrawable(R.drawable.shape_bottom_progress)
+
+        setDialogProgressBar(context)
+        setDialogVolumeProgressBar(context)
     }
 
     /**

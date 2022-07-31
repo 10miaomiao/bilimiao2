@@ -34,40 +34,8 @@ class PicInPicHelper(
         val REQUEST_TYPE_PAUSE = 2
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private val builder = PictureInPictureParams.Builder()
 
-    private val actions: List<RemoteAction> @RequiresApi(Build.VERSION_CODES.O)
-    get() {
-        val action = if (videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PLAYING){
-            RemoteAction(
-                Icon.createWithResource(activity, R.drawable.bili_player_play_can_pause),
-                "暂停",
-                "",
-                PendingIntent.getBroadcast(
-                    activity,
-                    REQUEST_TYPE_PAUSE,
-                    Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PAUSE),
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-                )
-            )
-        }else{
-            RemoteAction(
-                Icon.createWithResource(activity, R.drawable.bili_player_play_can_play),
-                "播放",
-                "",
-                PendingIntent.getBroadcast(
-                    activity,
-                    REQUEST_TYPE_PLAY,
-                    Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY),
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-                )
-            )
-        }
-        return listOf(
-            action
-        )
-    }
+    private val builder = PictureInPictureParams.Builder()
 
 
     val broadcastReceiver = object : BroadcastReceiver() {
@@ -89,28 +57,57 @@ class PicInPicHelper(
         }
     }
 
-    fun enterPictureInPictureMode(aspectRatio: Rational){
+    fun enterPictureInPictureMode(aspectRatio: Rational) {
         // 判断Android版本是否大于等于8.0
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // 设置画中画窗口的宽高比例
             builder.setAspectRatio(aspectRatio)
-            builder.setActions(actions)
+            builder.setActions(getActions(videoPlayer.currentState))
             // 进入画中画模式，注意enterPictureInPictureMode是Android8.0之后新增的方法
             activity.enterPictureInPictureMode(builder.build());
         };
     }
 
-    fun updatePictureInPictureActions(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setActions(actions)
-            activity.setPictureInPictureParams(builder.build());
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getActions(state: Int): List<RemoteAction> {
+        val action = if (state == GSYVideoPlayer.CURRENT_STATE_PLAYING) {
+            RemoteAction(
+                Icon.createWithResource(activity, R.drawable.bili_player_play_can_pause),
+                "暂停",
+                "",
+                PendingIntent.getBroadcast(
+                    activity,
+                    REQUEST_TYPE_PAUSE,
+                    Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PAUSE),
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+                )
+            )
+        } else {
+            RemoteAction(
+                Icon.createWithResource(activity, R.drawable.bili_player_play_can_play),
+                "播放",
+                "",
+                PendingIntent.getBroadcast(
+                    activity,
+                    REQUEST_TYPE_PLAY,
+                    Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, CONTROL_TYPE_PLAY),
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+                )
+            )
         }
+        return listOf(action)
     }
 
-    fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean){
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updatePictureInPictureActions(state: Int) {
+        builder.setActions(getActions(state))
+        activity.setPictureInPictureParams(builder.build());
+    }
+
+    fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         if (isInPictureInPictureMode) {
-            activity.registerReceiver(broadcastReceiver,  IntentFilter(ACTION_MEDIA_CONTROL))
-        }else{
+            activity.registerReceiver(broadcastReceiver, IntentFilter(ACTION_MEDIA_CONTROL))
+        } else {
             activity.unregisterReceiver(broadcastReceiver)
         }
 

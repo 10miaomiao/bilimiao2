@@ -10,8 +10,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdk 21
         targetSdk 31
-        versionCode 53
-        versionName "2.2.0 test1"
+        versionCode 54
+        versionName "2.2.0"
         flavorDimensions "default"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -110,7 +110,10 @@ dependencies {
     implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
 
     // 播放器
-    implementation 'com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer:v8.3.0-release-jitpack'
+    def gsyVideoPlayerVersion = "v8.3.3-release-jitpack"
+    implementation "com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${gsyVideoPlayerVersion}"
+    //是否需要ExoPlayer模式
+    implementation "com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer-exo2:${gsyVideoPlayerVersion}"
 
     implementation project(':bilimiao-comm')
     implementation project(':bilimiao-cover')
