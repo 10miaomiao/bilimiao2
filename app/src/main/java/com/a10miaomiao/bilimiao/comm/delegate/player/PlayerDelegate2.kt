@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -61,6 +60,7 @@ class PlayerDelegate2(
 
     var playerSourceInfo: PlayerSourceInfo? = null
     var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
+    var speed = 1f // 播放速度
     private var lastPosition = 0L
     private val playerCoroutineScope = PlayerCoroutineScope()
     private var playerSource: BasePlayerSource? = null
@@ -102,7 +102,8 @@ class PlayerDelegate2(
         playerCoroutineScope.onStart()
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         if (!prefs.getBoolean("player_background", true)
-            && !views.videoPlayer.isInPlayingState) {
+            && !views.videoPlayer.isInPlayingState
+        ) {
             views.videoPlayer.onVideoResume()
         }
     }
@@ -111,7 +112,8 @@ class PlayerDelegate2(
         playerCoroutineScope.onStop()
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         if (!prefs.getBoolean("player_background", true)
-            && views.videoPlayer.isInPlayingState) {
+            && views.videoPlayer.isInPlayingState
+        ) {
 //            lastPosition = mPlayer.currentPosition
             views.videoPlayer.onVideoPause()
         }
@@ -184,10 +186,21 @@ class PlayerDelegate2(
         }
     }
 
-    private fun setThumbImageView (coverUrl: String) {
+    private fun setThumbImageView(coverUrl: String) {
         views.videoPlayer.thumbImageView = ImageView(activity).apply {
             scaleType = ImageView.ScaleType.CENTER_CROP
             network(coverUrl)
+        }
+    }
+
+    fun changedSpeed(newSpeed: Float) {
+        if (speed != newSpeed) {
+            lastPosition = views.videoPlayer.currentPositionWhenPlaying
+            speed = newSpeed
+            views.videoPlayer.setSpeed(speed, true)
+            toast("正在切换播放倍速")
+            val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+            prefs.edit().putFloat("player_speed", newSpeed).apply()
         }
     }
 
@@ -245,14 +258,16 @@ class PlayerDelegate2(
         }
     }
 
-    override fun openPlayer(source: BasePlayerSource){
+    override fun openPlayer(source: BasePlayerSource) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         quality = prefs.getInt("player_quality", 64)
+        speed = prefs.getFloat("player_speed", 1f)
         lastPosition = 0L
         scaffoldApp.showPlayer = true
         playerCoroutineScope.onStart()
         playerSource = source
         setThumbImageView(source.coverUrl)
+        views.videoPlayer.setSpeed(speed, true)
         loadPlayerSource()
     }
 
@@ -292,7 +307,8 @@ class PlayerDelegate2(
             // 调整弹幕样式，调小字体，限制行数
             controller.initDanmakuContext()
         } else {
-            scaffoldApp.fullScreenPlayer = views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
+            scaffoldApp.fullScreenPlayer =
+                views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
             views.videoPlayer.isPicInPicMode = false
             controller.initDanmakuContext()
         }

@@ -92,27 +92,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:paddingHorizontal="5dp"
             android:orientation="horizontal"
+            android:paddingHorizontal="5dp"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/buttom_play"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:background="@null"
-                android:gravity="center"
-                android:src="@drawable/bili_player_play_can_play"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                />
+                android:background="@null"
+                android:gravity="center"
+                android:src="@drawable/bili_player_play_can_play" />
 
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="horizontal">
-            </FrameLayout>
+                android:orientation="horizontal"></FrameLayout>
 
             <LinearLayout
                 android:id="@+id/danmaku_switch"
@@ -125,8 +123,8 @@
                     android:id="@+id/danmaku_switch_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
-                    android:src="@drawable/bili_player_danmaku_is_open"
-                    android:layout_marginBottom="3dp"/>
+                    android:layout_marginBottom="3dp"
+                    android:src="@drawable/bili_player_danmaku_is_open" />
 
                 <TextView
                     android:id="@+id/danmaku_switch_text"
@@ -150,8 +148,9 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_player_media_quality_medium"
-                    android:layout_marginBottom="3dp"/>
+                    android:layout_marginBottom="3dp"
+                    android:src="@drawable/ic_player_media_quality_medium" />
+
                 <TextView
                     android:id="@+id/quality_text"
                     android:layout_width="wrap_content"
@@ -161,6 +160,28 @@
                     android:textSize="@dimen/default_tiny_text_size" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/play_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="34.04dp"
+                    android:layout_height="20dp"
+                    android:layout_marginBottom="3dp"
+                    android:src="@drawable/ic_player_speed" />
+
+                <TextView
+                    android:id="@+id/play_speed_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="倍速"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/default_tiny_text_size" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/lock"
@@ -173,8 +194,8 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_player_locked_2"
-                    android:layout_marginBottom="3dp"/>
+                    android:layout_marginBottom="3dp"
+                    android:src="@drawable/ic_player_locked_2" />
 
                 <TextView
                     android:layout_width="wrap_content"

@@ -24,7 +24,7 @@ class PlayerController(
     private var activity: AppCompatActivity,
     private val delegate: PlayerDelegate2,
     override val di: DI,
-): DIAware, VideoPlayerCallBack {
+) : DIAware, VideoPlayerCallBack {
 
     private val statusBarHelper by instance<StatusBarHelper>()
     private val scaffoldApp get() = delegate.scaffoldApp
@@ -36,7 +36,7 @@ class PlayerController(
         return prefs.getString("player_full_mode", "SENSOR_LANDSCAPE")!!
     }
 
-    fun initController () = views.videoPlayer.run {
+    fun initController() = views.videoPlayer.run {
         val that = this@PlayerController
         statusBarHelper = that.statusBarHelper
         isFullHideActionBar = true
@@ -62,6 +62,7 @@ class PlayerController(
         }
         danmakuContext = that.danmakuContext
         qualityView.setOnClickListener(that::showQualityPopupMenu)
+        speedView.setOnClickListener(that::showSpeedPopupMenu)
         moreBtn.setOnClickListener(that::showMoreMenu)
         videoPlayerCallBack = that
     }
@@ -80,7 +81,7 @@ class PlayerController(
         statusBarHelper.isShowNavigation = false
     }
 
-    fun smallScreen () {
+    fun smallScreen() {
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.SMALL
         scaffoldApp.fullScreenPlayer = false
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -145,10 +146,20 @@ class PlayerController(
         popup.show()
     }
 
+    fun showSpeedPopupMenu(view: View) {
+        val popup = SpeedPopupMenu(
+            activity = activity,
+            anchor = view,
+            value = delegate.speed
+        )
+        popup.setOnChangedSpeedListener(delegate::changedSpeed)
+        popup.show()
+    }
+
     fun showFullModeMenu(view: View) {
         val popupMenu = PopupMenu(activity, view)
         val fullMode = getFullMode()
-        val checkMenuId = when(fullMode) {
+        val checkMenuId = when (fullMode) {
             "SENSOR_LANDSCAPE" -> R.id.full_mode_sl
             "LANDSCAPE" -> R.id.full_mode_l
             "REVERSE_LANDSCAPE" -> R.id.full_mode_rl
@@ -163,7 +174,7 @@ class PlayerController(
 
     private fun fullModeMenuItemClick(item: MenuItem): Boolean {
         item.isChecked = true
-        val fullMode = when(item.itemId) {
+        val fullMode = when (item.itemId) {
             R.id.full_mode_sl -> "SENSOR_LANDSCAPE"
             R.id.full_mode_l -> "LANDSCAPE"
             R.id.full_mode_rl -> "REVERSE_LANDSCAPE"
