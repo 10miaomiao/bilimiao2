@@ -30,32 +30,52 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // 弹幕组件
     private val mDanmakuView: DanmakuView by lazy { findViewById(R.id.danmaku_view) }
+
     // 根布局组件
     private val mRootLayout: RelativeLayout by lazy { findViewById(R.id.root_layout) }
+
     // 顶栏更多按钮
     private val mMoreBtn: View by lazy { findViewById(R.id.more) }
+
     // 底栏布局
     private val mBottomLayout: RelativeLayout by lazy { findViewById(R.id.layout_bottom) }
+
     // 全屏时底栏布局
     private val mFullModeBottomContainer: ViewGroup by lazy { findViewById(R.id.layout_full_mode_bottom) }
+
     // 底栏播放按钮
     private val mButtomPlay: ImageView by lazy { findViewById(R.id.buttom_play) }
+
     // 弹幕开关
     private val mDanmakuSwitch: ViewGroup by lazy { findViewById(R.id.danmaku_switch) }
+
     // 弹幕开关图标
     private val mDanmakuSwitchIV: ImageView by lazy { findViewById(R.id.danmaku_switch_icon) }
+
     // 弹幕开关文字
     private val mDanmakuSwitchTV: TextView by lazy { findViewById(R.id.danmaku_switch_text) }
+
     // 清晰度
     private val mQuality: ViewGroup by lazy { findViewById(R.id.quality) }
+
     // 清晰度文字
     private val mQualityTV: TextView by lazy { findViewById(R.id.quality_text) }
+
+    // 倍速
+    private val mPlaySpeed: ViewGroup by lazy { findViewById(R.id.play_speed) }
+
+    // 倍速文字
+    private val mPlaySpeedTV: TextView by lazy { findViewById(R.id.play_speed_text) }
+
     // 锁定按钮
     private val mLock: ViewGroup by lazy { findViewById(R.id.lock) }
+
     // 锁定时控制容器
     private val mLockContainer: ViewGroup by lazy { findViewById(R.id.layout_lock_screen) }
+
     // 左边解锁按钮
     private val mUnlockLeftIV: ImageView by lazy { findViewById(R.id.unlock_left) }
+
     // 右边解锁按钮
     private val mUnlockRightIV: ImageView by lazy { findViewById(R.id.unlock_right) }
 
@@ -95,14 +115,17 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             field = value
             updateMode()
         }
+
     // 是否处于画中画模式
     var isPicInPicMode = false
+
     // 是否显示当面
     var isShowDanmaKu = true
         set(value) {
             field = value
             resolveDanmakuShow()
         }
+
     // 弹幕开始位置
     var danmakuStartSeekPosition: Long = -1
     var danmakuParser: BaseDanmakuParser? = null
@@ -116,12 +139,15 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // 状态栏
     var statusBarHelper: StatusBarHelper? = null
+
     // 播放回调
     var videoPlayerCallBack: VideoPlayerCallBack? = null
 
     // 供外部访问
     val topContainer: ViewGroup get() = mTopContainer
     val qualityView: View get() = mQuality
+    val speedView: View get() = mPlaySpeed
+    val speedTextView: View get() = mPlaySpeedTV
     val moreBtn: View get() = mMoreBtn
 
     // 是否处于锁定状态
@@ -442,7 +468,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         var dismissControlTask = Runnable { hideButton() }
 
     }
-
 
 
 }
