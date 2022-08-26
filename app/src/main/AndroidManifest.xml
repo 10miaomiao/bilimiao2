@@ -66,7 +66,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="cn.a10miaomiao.player.PlayerService"
+        <service android:name=".service.PlayerService"
             android:exported="true"/>
         <service android:name="cn.a10miaomiao.download.DownloadService"
             android:exported="true"/>

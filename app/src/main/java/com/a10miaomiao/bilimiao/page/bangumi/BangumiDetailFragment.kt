@@ -133,9 +133,11 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
             sid = item.section_id,
             epid = item.ep_id,
             aid = item.aid,
-            cid = item.cid.toString(),
-            title = item.index_title,
+            id = item.cid.toString(),
+            title = item.index_title.ifBlank { item.index },
             coverUrl = item.cover,
+            ownerId = "",
+            ownerName = viewModel.detailInfo?.season_title ?: "番剧"
         )
         basePlayerDelegate.openPlayer(playerSource)
     }
@@ -145,6 +147,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
             val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             val args = bundleOf(
                 MainNavGraph.args.id to info.season_id.toString(),
+                MainNavGraph.args.title to info.title,
                 MainNavGraph.args.pages to viewModel.episodes,
             )
             nav.navigate(MainNavGraph.action.global_to_bangumiPages, args)

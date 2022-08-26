@@ -71,9 +71,11 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
         val item = pages[position]
         val playerSource = VideoPlayerSource(
             aid = video.aid,
-            cid = item.cid,
+            id = item.cid,
             coverUrl = video.pic,
-            title = item.part
+            title = item.part,
+            ownerId = video.owner.mid,
+            ownerName = video.owner.name,
         )
         basePlayerDelegate.openPlayer(playerSource)
 //        Navigation.findNavController(view).popBackStack()

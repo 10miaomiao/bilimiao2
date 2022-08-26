@@ -11,7 +11,6 @@ class Bilimiao: Application() {
     companion object {
         const val APP_NAME = "bilimiao"
         lateinit var commApp: BilimiaoCommApp
-        var playerView: View? = null
     }
 
     init {

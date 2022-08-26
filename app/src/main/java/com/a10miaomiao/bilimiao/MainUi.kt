@@ -15,7 +15,9 @@ import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetUi
 import com.a10miaomiao.bilimiao.comm.shadowLayout
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.shadow.ShadowLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
@@ -47,12 +49,12 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         elevation = dip(20).toFloat()
     }
 
-    val mPlayerLayout = Bilimiao.playerView?.apply{
+    val mPlayerLayout = PlayerService.playerService?.videoPlayerView?.apply {
         (parent as? ViewGroup)?.removeAllViews()
-    } ?: inflate<View>(R.layout.include_palyer2) {
+    } ?: inflate<DanmakuVideoPlayer>(R.layout.include_palyer2) {
         backgroundColor = 0xFF000000.toInt()
         elevation = dip(20).toFloat()
-        Bilimiao.playerView = this
+        PlayerService.playerService?.videoPlayerView = this
     }
 
     override var bottomSheetTitleView = textView {

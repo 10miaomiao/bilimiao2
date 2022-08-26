@@ -12,8 +12,11 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
+import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import org.kodein.di.DI
@@ -24,7 +27,7 @@ class PlayerController(
     private var activity: AppCompatActivity,
     private val delegate: PlayerDelegate2,
     override val di: DI,
-) : DIAware, VideoPlayerCallBack {
+) : DIAware, VideoPlayerCallBack, GSYVideoProgressListener {
 
     private val statusBarHelper by instance<StatusBarHelper>()
     private val scaffoldApp get() = delegate.scaffoldApp
@@ -65,6 +68,7 @@ class PlayerController(
         speedView.setOnClickListener(that::showSpeedPopupMenu)
         moreBtn.setOnClickListener(that::showMoreMenu)
         videoPlayerCallBack = that
+        setGSYVideoProgressListener(that)
     }
 
     fun fullScreen(fullMode: String) {
@@ -226,5 +230,22 @@ class PlayerController(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             delegate.picInPicHelper?.updatePictureInPictureActions(state)
         }
+        PlayerService.playerService?.playerState = state
+    }
+
+    override fun onVideoClose() {
+        delegate.closePlayer()
+    }
+
+    override fun onProgress(
+        progress: Long,
+        secProgress: Long,
+        currentPosition: Long,
+        duration: Long
+    ) {
+        PlayerService.playerService?.setProgress(
+            duration,
+            currentPosition
+        )
     }
 }

@@ -231,7 +231,9 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 title = title,
                 coverUrl = info.pic,
                 aid = info.aid,
-                cid = cid,
+                id = cid,
+                ownerId = info.owner.mid,
+                ownerName = info.owner.name,
             ))
 //            basePlayerDelegate.playVideo(info.aid.toString(), cid, title)
         }

@@ -14,25 +14,30 @@ class BangumiPlayerSource(
     val sid: String,
     val epid: String,
     val aid: String,
-    val cid: String,
+    override val id: String,
     override val title: String,
     override val coverUrl: String,
+    override val ownerId: String,
+    override val ownerName: String,
 ): BasePlayerSource {
 
     override suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo {
         val res = BiliApiService.playerAPI
-            .getBangumiUrl(epid, cid, quality, dash = true)
+            .getBangumiUrl(epid, id, quality, dash = true)
         val dash = res.dash
+        var duration: Long
         val url = if (dash != null) {
+            duration = dash.duration * 1000L
             DashSource(quality, dash).getMDPUrl()
         } else {
+            duration = res.durl!![0].length * 1000L
             res.durl!![0].url
         }
         val acceptDescription = res.accept_description
         val acceptList = res.accept_quality.mapIndexed { index, i ->
             PlayerSourceInfo.AcceptInfo(i, acceptDescription[index])
         }
-        return PlayerSourceInfo(url, res.quality, acceptList)
+        return PlayerSourceInfo(url, res.quality, acceptList, duration)
     }
 
     override suspend fun getDanmakuParser(): BaseDanmakuParser? {
@@ -50,7 +55,7 @@ class BangumiPlayerSource(
     }
 
     private suspend fun getBiliDanmukuStream(): InputStream? {
-        val res = BiliApiService.playerAPI.getDanmakuList(cid)
+        val res = BiliApiService.playerAPI.getDanmakuList(id)
             .awaitCall()
         val body = res.body()
         return if (body == null) {
@@ -67,9 +72,9 @@ class BangumiPlayerSource(
                 url = "https://api.bilibili.com/x/v2/history/report"
                 formBody = ApiHelper.createParams(
                     "aid" to aid,
-                    "cid" to cid,
-                    "epid" to cid,
-                    "sid" to cid,
+                    "cid" to id,
+                    "epid" to epid,
+                    "sid" to sid,
                     "progress" to realtimeProgress,
                     "realtime" to realtimeProgress,
                     "type" to "4",

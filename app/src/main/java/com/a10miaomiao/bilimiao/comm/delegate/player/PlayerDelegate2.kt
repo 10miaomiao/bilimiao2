@@ -1,5 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -15,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
@@ -225,6 +230,13 @@ class PlayerDelegate2(
             val danmukuParser = source.getDanmakuParser()
             val sourceInfo = source.getPlayerUrl(quality)
             withContext(Dispatchers.Main) {
+                // 设置通知栏控制器
+                PlayerService?.playerService?.setPlayingInfo(
+                    source.title, 
+                    source.ownerName,
+                    source.coverUrl,
+                    sourceInfo.duration
+                )
                 views.videoPlayer.releaseDanmaku()
                 views.videoPlayer.danmakuParser = danmukuParser
                 val header = getDefaultRequestProperties()
@@ -276,8 +288,12 @@ class PlayerDelegate2(
         playerCoroutineScope.onStop()
         historyReport()
         playerSource = null
+
         views.videoPlayer.release()
         lastPosition = 0L
+
+        // 设置通知栏控制器
+        PlayerService?.playerService?.clearPlayingInfo()
     }
 
     override fun isPlaying(): Boolean {

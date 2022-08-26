@@ -21,7 +21,7 @@ package cn.a10miaomiao.download
 "avid": 21794985, // av号
 "spid": 0, // 应该跟番剧有关
 "seasion_id": 0,  // 应该跟番剧有关
-"bvid": "BV1KW411K7DY",  // 应该跟番剧有关
+"bvid": "BV1KW411K7DY",  // BV号
 "owner_id": 13628080, // 普通视频是up主的uid
 "page_data": {
     "cid": 35958126,

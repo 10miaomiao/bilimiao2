@@ -23,11 +23,12 @@ class DownloadNotify(val activity: AppCompatActivity) {
 
     fun notifyData(info: DownloadInfo) {
         val builder = NotificationCompat.Builder(activity, channelId)
-        builder.setContentTitle(info.name);
+        builder.setContentTitle(info.name)
         val subText = info.statusText
         builder.setContentText(subText)
         builder.setSmallIcon(android.R.drawable.stat_sys_download)
         builder.setProgress(info.size.toInt(), info.progress.toInt(), false)
+        builder.setOngoing(true)
         val notification = builder.build()
         manager.notify(notificationID, notification)
     }

@@ -37,7 +37,7 @@ class PlayerStore(override val di: DI) :
                 this.setState {
                     this.type = VIDEO
                     this.aid = source.aid
-                    this.cid = source.cid
+                    this.cid = source.id
                     this.title = source.title
                     this.sid = ""
                     this.epid = ""
@@ -48,7 +48,7 @@ class PlayerStore(override val di: DI) :
                 this.setState {
                     this.type = BANGUMI
                     this.aid = ""
-                    this.cid = source.cid
+                    this.cid = source.id
                     this.title = source.title
                     this.sid = source.sid
                     this.epid = source.epid

@@ -1,6 +1,9 @@
 package com.a10miaomiao.bilimiao
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Build
@@ -35,6 +38,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
 import com.baidu.mobstat.StatService
 
@@ -126,8 +130,15 @@ class MainActivity
 
         navController.handleDeepLink(intent)
 
+        val intentFilter = IntentFilter().apply {
+            addAction(PlayerService.ACTION_CREATED)
+        }
+        registerReceiver(broadcastReceiver, intentFilter)
+        if (PlayerService.playerService == null) {
+            startService(Intent(this, PlayerService::class.java))
+        }
     }
-
+    
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         intent?.data?.let { uri ->
@@ -171,6 +182,16 @@ class MainActivity
 
     val onBackClick = View.OnClickListener {
         navController.popBackStack()
+    }
+    
+    val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when(intent?.action) {
+                PlayerService.ACTION_CREATED -> {
+                    PlayerService.playerService?.videoPlayerView = ui.mPlayerLayout
+                }
+            }
+        }
     }
 
     fun setWindowInsetsAndroidL() {
@@ -250,6 +271,7 @@ class MainActivity
         store.onDestroy()
         navController.removeOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
+        unregisterReceiver(broadcastReceiver)
         super.onDestroy()
     }
 
