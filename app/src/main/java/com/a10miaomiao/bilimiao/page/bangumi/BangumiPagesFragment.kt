@@ -52,7 +52,8 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
-    private val aid by lazy { requireArguments().getString(MainNavGraph.args.id)!! }
+    private val sid by lazy { requireArguments().getString(MainNavGraph.args.id)!! }
+    private val title by lazy { requireArguments().getString(MainNavGraph.args.title)!! }
     private val pages by lazy { requireArguments().getParcelableArrayList<EpisodeInfo>(
         MainNavGraph.args.pages) ?: mutableListOf() }
 
@@ -80,9 +81,11 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
             sid = item.section_id,
             epid = item.ep_id,
             aid = item.aid,
-            cid = item.cid.toString(),
-            title = item.index_title,
+            id = item.cid.toString(),
+            title = item.index_title.ifBlank { item.index },
             coverUrl = item.cover,
+            ownerId = "",
+            ownerName = title
         )
         basePlayerDelegate.openPlayer(playerSource)
     }

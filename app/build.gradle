@@ -79,6 +79,7 @@ dependencies {
     implementation "com.google.android.material:material:$material_version"
     implementation 'androidx.recyclerview:recyclerview:1.2.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
+//    implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
     // 依赖注入
     implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_di_version"

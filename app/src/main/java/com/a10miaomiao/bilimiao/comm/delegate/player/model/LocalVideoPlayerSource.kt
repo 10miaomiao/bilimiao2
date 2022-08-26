@@ -20,13 +20,24 @@ class LocalVideoPlayerSource(
     val localEntry: BiliVideoEntry
 ): BasePlayerSource {
 
+    override val id: String
+        get() = localEntry.page_data.cid.toString()
+
     override val title: String
         get() = localEntry.title
 
     override val coverUrl: String
         get() = localEntry.cover
 
+    override val ownerId: String
+        get() = localEntry.owner_id.toString()
+
+    override val ownerName: String
+        get() = "本地视频"
+
     override suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo {
+        localEntry.owner_id
+        val duration = localEntry.total_time_milli
         val videoDir = DownloadFlieHelper.getVideoPageFileDir(activity, localEntry)
         val pageData = DownloadFlieHelper.getVideoPage(activity, localEntry)
         val videoFlie = File(
@@ -37,7 +48,8 @@ class LocalVideoPlayerSource(
         )
         if (videoFlie.exists()) {
             val url = Uri.fromFile(videoFlie).toString()
-            return PlayerSourceInfo(url, 0, acceptList)
+
+            return PlayerSourceInfo(url, 0, acceptList, duration)
         }
 
         val dashJsonFile = File(
@@ -52,9 +64,9 @@ class LocalVideoPlayerSource(
                 video = dashJsonInfo.video,
                 audio = dashJsonInfo.audio,
             )).getMDPUrl()
-            return PlayerSourceInfo(mdpUrl, 0, acceptList)
+            return PlayerSourceInfo(mdpUrl, 0, acceptList, duration)
         }
-        return PlayerSourceInfo("", -1, acceptList)
+        return PlayerSourceInfo("", -1, acceptList, duration)
     }
 
     override suspend fun getDanmakuParser(): BaseDanmakuParser? {

@@ -11,6 +11,7 @@ import cn.a10miaomiao.download.*
 //import cn.a10miaomiao.player.CompressionTools
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.store.DownloadStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -114,8 +115,7 @@ class DownloadDelegate(
     fun getDanmakuXML(cid: String): InputStream {
         return BiliApiService.playerAPI.getDanmakuList(cid)
             .call().let {
-                throw Exception()
-//                ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
+                ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
             }
     }
 

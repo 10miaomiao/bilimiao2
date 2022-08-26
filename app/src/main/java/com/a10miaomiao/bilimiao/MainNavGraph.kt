@@ -195,6 +195,10 @@ object MainNavGraph {
                 type = NavType.StringType
                 nullable = false
             }
+            argument(args.title) {
+                type = NavType.StringType
+                nullable = false
+            }
             argument(args.pages) {
                 type = NavType.ParcelableType(VideoPageInfo::class.java)
                 nullable = false
@@ -356,6 +360,7 @@ object MainNavGraph {
         const val type = "type"
         const val id = "id"
         const val name = "name"
+        const val title = "title"
         const val text = "text"
         const val num = "num"
         const val pages = "pages"

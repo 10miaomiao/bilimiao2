@@ -267,6 +267,17 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         releaseDanmaku()
     }
 
+    override fun release() {
+        onVideoPause()
+        releaseDanmaku()
+        super.release()
+
+    }
+
+    fun closeVideo() {
+        videoPlayerCallBack?.onVideoClose()
+    }
+
     fun releaseDanmaku() {
         mDanmakuView.release()
     }

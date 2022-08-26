@@ -2,6 +2,9 @@
     <string name="app_name">bilimiao</string>
     <string name="view_cover" tools:ignore="ExtraTranslation">查看b站封面</string>
 
+    <string name="playing_notification_description">播放通知提供播放暂停等操作。</string>
+    <string name="playing_notification_name">播放通知</string>
+
     <string-array name="month_display">
         <item>1</item>
         <item>2</item>
