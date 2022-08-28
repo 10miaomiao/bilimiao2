@@ -134,7 +134,7 @@ class MainActivity
             addAction(PlayerService.ACTION_CREATED)
         }
         registerReceiver(broadcastReceiver, intentFilter)
-        if (PlayerService.playerService == null) {
+        if (PlayerService.selfInstance == null) {
             startService(Intent(this, PlayerService::class.java))
         }
     }
@@ -188,7 +188,7 @@ class MainActivity
         override fun onReceive(context: Context?, intent: Intent?) {
             when(intent?.action) {
                 PlayerService.ACTION_CREATED -> {
-                    PlayerService.playerService?.videoPlayerView = ui.mPlayerLayout
+                    PlayerService.selfInstance?.videoPlayerView = ui.mPlayerLayout
                 }
             }
         }

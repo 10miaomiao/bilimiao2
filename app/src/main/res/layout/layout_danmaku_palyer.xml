@@ -161,29 +161,6 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/play_speed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:foreground="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="34.04dp"
-                    android:layout_height="20dp"
-                    android:layout_marginBottom="3dp"
-                    android:src="@drawable/ic_player_speed" />
-
-                <TextView
-                    android:id="@+id/play_speed_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="倍速"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/default_tiny_text_size" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/lock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -250,6 +227,34 @@
             android:paddingLeft="10dp"
             android:textColor="@android:color/white"
             android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/play_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginHorizontal="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/play_speed_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="倍速："
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/play_speed_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="x1.0"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/more"
