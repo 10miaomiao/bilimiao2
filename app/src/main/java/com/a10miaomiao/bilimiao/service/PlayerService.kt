@@ -17,7 +17,7 @@ class PlayerService : Service() {
 
     companion object {
         val TAG: String = PlayerService::class.java.simpleName
-        var playerService: PlayerService? = null
+        var selfInstance: PlayerService? = null
             private set
 
         const val BILIMIAO_PLAYER_PACKAGE_NAME = "com.a10miaomiao.bilimiao.player"
@@ -37,7 +37,7 @@ class PlayerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        playerService = this
+        selfInstance = this
 
         mediaSession = MediaSessionCompat(
             this,
@@ -78,7 +78,7 @@ class PlayerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        playerService = null
+        selfInstance = null
     }
 
     fun setPlayingInfo(

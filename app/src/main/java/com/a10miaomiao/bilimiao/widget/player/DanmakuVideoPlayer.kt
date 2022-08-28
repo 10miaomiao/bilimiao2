@@ -19,6 +19,7 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
+import java.text.DecimalFormat
 
 
 class DanmakuVideoPlayer : StandardGSYVideoPlayer {
@@ -64,8 +65,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // 倍速
     private val mPlaySpeed: ViewGroup by lazy { findViewById(R.id.play_speed) }
 
-    // 倍速文字
-    private val mPlaySpeedTV: TextView by lazy { findViewById(R.id.play_speed_text) }
+    // 倍速文字名称
+    private val mPlaySpeedName: TextView by lazy { findViewById(R.id.play_speed_name) }
+
+    // 倍速文字值
+    private val mPlaySpeedValue: TextView by lazy { findViewById(R.id.play_speed_value) }
 
     // 锁定按钮
     private val mLock: ViewGroup by lazy { findViewById(R.id.lock) }
@@ -147,7 +151,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     val topContainer: ViewGroup get() = mTopContainer
     val qualityView: View get() = mQuality
     val speedView: View get() = mPlaySpeed
-    val speedTextView: View get() = mPlaySpeedTV
+    val speedValueTextView: View get() = mPlaySpeedValue
     val moreBtn: View get() = mMoreBtn
 
     // 是否处于锁定状态
@@ -204,10 +208,12 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         when (mode) {
             PlayerMode.SMALL -> {
                 mFullModeBottomContainer.visibility = GONE
+                mPlaySpeedName.visibility = GONE
                 mBackButton.setImageResource(R.drawable.video_small_close)
             }
             PlayerMode.FULL -> {
                 mFullModeBottomContainer.visibility = VISIBLE
+                mPlaySpeedName.visibility = VISIBLE
                 mBackButton.setImageResource(R.drawable.bili_player_back_button)
             }
         }
@@ -393,6 +399,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             mBrightnessDialog.window!!.attributes = localLayoutParams
         }
         super.showBrightnessDialog(percent)
+    }
+
+    override fun setSpeed(speed: Float, soundTouch: Boolean) {
+        super.setSpeed(speed, soundTouch)
+        mPlaySpeedValue.text = "x$speed"
     }
 
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {

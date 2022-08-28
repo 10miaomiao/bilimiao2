@@ -49,12 +49,12 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         elevation = dip(20).toFloat()
     }
 
-    val mPlayerLayout = PlayerService.playerService?.videoPlayerView?.apply {
+    val mPlayerLayout = PlayerService.selfInstance?.videoPlayerView?.apply {
         (parent as? ViewGroup)?.removeAllViews()
     } ?: inflate<DanmakuVideoPlayer>(R.layout.include_palyer2) {
         backgroundColor = 0xFF000000.toInt()
         elevation = dip(20).toFloat()
-        PlayerService.playerService?.videoPlayerView = this
+        PlayerService.selfInstance?.videoPlayerView = this
     }
 
     override var bottomSheetTitleView = textView {

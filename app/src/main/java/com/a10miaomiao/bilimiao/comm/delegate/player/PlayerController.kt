@@ -230,7 +230,7 @@ class PlayerController(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             delegate.picInPicHelper?.updatePictureInPictureActions(state)
         }
-        PlayerService.playerService?.playerState = state
+        PlayerService.selfInstance?.playerState = state
     }
 
     override fun onVideoClose() {
@@ -243,7 +243,7 @@ class PlayerController(
         currentPosition: Long,
         duration: Long
     ) {
-        PlayerService.playerService?.setProgress(
+        PlayerService.selfInstance?.setProgress(
             duration,
             currentPosition
         )

@@ -203,7 +203,7 @@ class PlayerDelegate2(
             lastPosition = views.videoPlayer.currentPositionWhenPlaying
             speed = newSpeed
             views.videoPlayer.setSpeed(speed, true)
-            toast("正在切换播放倍速")
+            toast("已切换到${speed}倍速")
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             prefs.edit().putFloat("player_speed", newSpeed).apply()
         }
@@ -231,8 +231,8 @@ class PlayerDelegate2(
             val sourceInfo = source.getPlayerUrl(quality)
             withContext(Dispatchers.Main) {
                 // 设置通知栏控制器
-                PlayerService?.playerService?.setPlayingInfo(
-                    source.title, 
+                PlayerService?.selfInstance?.setPlayingInfo(
+                    source.title,
                     source.ownerName,
                     source.coverUrl,
                     sourceInfo.duration
@@ -281,6 +281,10 @@ class PlayerDelegate2(
         setThumbImageView(source.coverUrl)
         views.videoPlayer.setSpeed(speed, true)
         loadPlayerSource()
+        // 播放倍速提示
+        if (speed != 1f) {
+            toast("注意，当前为${speed}倍速")
+        }
     }
 
     override fun closePlayer() {
@@ -293,7 +297,7 @@ class PlayerDelegate2(
         lastPosition = 0L
 
         // 设置通知栏控制器
-        PlayerService?.playerService?.clearPlayingInfo()
+        PlayerService?.selfInstance?.clearPlayingInfo()
     }
 
     override fun isPlaying(): Boolean {
