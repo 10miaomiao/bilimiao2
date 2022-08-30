@@ -15,6 +15,10 @@ android {
         flavorDimensions "default"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters  "arm64-v8a", "armeabi-v7a", "armeabi", "x86", "x86_64"
+        }
     }
 
     buildTypes {
@@ -71,6 +75,12 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
 }
 
 dependencies {
@@ -111,7 +121,8 @@ dependencies {
     implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
 
     // 播放器
-    def gsyVideoPlayerVersion = "v8.3.3-release-jitpack"
+    def gsyVideoPlayerVersion = "v8.3.4-release-jitpack"
+//    implementation 'com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer:v8.3.4-release-jitpack'
     implementation "com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${gsyVideoPlayerVersion}"
     //是否需要ExoPlayer模式
     implementation "com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer-exo2:${gsyVideoPlayerVersion}"
