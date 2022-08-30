@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.WindowManager
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -285,6 +286,8 @@ class PlayerDelegate2(
         if (speed != 1f) {
             toast("注意，当前为${speed}倍速")
         }
+
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun closePlayer() {
@@ -298,6 +301,8 @@ class PlayerDelegate2(
 
         // 设置通知栏控制器
         PlayerService?.selfInstance?.clearPlayingInfo()
+
+        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun isPlaying(): Boolean {
