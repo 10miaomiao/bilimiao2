@@ -10,7 +10,7 @@ bilimiao2.1
 * [BaseRecyclerViewAdapterHelper](https://github.com/CymChad/BaseRecyclerViewAdapterHelper)
 * [NumberPickerView](https://github.com/Carbs0126/NumberPickerView)
 * [ShadowLayout](https://github.com/lihangleo2/ShadowLayout)
-* [ijkplayer](https://github.com/Bilibili/ijkplayer)
+* [GSYVideoPlayer](https://github.com/CarGuo/GSYVideoPlayer)
 * [DanmakuFlameMaster](https://github.com/bilibili/DanmakuFlameMaster)
 
 ### About me
