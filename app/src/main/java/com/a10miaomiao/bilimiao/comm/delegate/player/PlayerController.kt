@@ -13,6 +13,7 @@ import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
@@ -36,7 +37,7 @@ class PlayerController(
 
     private fun getFullMode(): String {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        return prefs.getString("player_full_mode", "SENSOR_LANDSCAPE")!!
+        return prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
     }
 
     fun initController() = views.videoPlayer.run {
@@ -75,10 +76,10 @@ class PlayerController(
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.FULL
         scaffoldApp.fullScreenPlayer = true
         activity.requestedOrientation = when (fullMode) {
-            "SENSOR_LANDSCAPE" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            "LANDSCAPE" -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            "REVERSE_LANDSCAPE" -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-            "UNSPECIFIED" -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            VideoSettingFragment.KEY_SENSOR_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            VideoSettingFragment.KEY_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            VideoSettingFragment.KEY_REVERSE_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+            VideoSettingFragment.KEY_UNSPECIFIED -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
         statusBarHelper.isShowStatus = views.videoPlayer.topContainer.visibility == View.VISIBLE
@@ -164,10 +165,10 @@ class PlayerController(
         val popupMenu = PopupMenu(activity, view)
         val fullMode = getFullMode()
         val checkMenuId = when (fullMode) {
-            "SENSOR_LANDSCAPE" -> R.id.full_mode_sl
-            "LANDSCAPE" -> R.id.full_mode_l
-            "REVERSE_LANDSCAPE" -> R.id.full_mode_rl
-            "UNSPECIFIED" -> R.id.full_mode_u
+            VideoSettingFragment.KEY_SENSOR_LANDSCAPE -> R.id.full_mode_sl
+            VideoSettingFragment.KEY_LANDSCAPE -> R.id.full_mode_l
+                VideoSettingFragment.KEY_REVERSE_LANDSCAPE -> R.id.full_mode_rl
+                VideoSettingFragment.KEY_UNSPECIFIED -> R.id.full_mode_u
             else -> R.id.full_mode_sl
         }
         popupMenu.inflate(R.menu.player_full_mode)
@@ -179,14 +180,14 @@ class PlayerController(
     private fun fullModeMenuItemClick(item: MenuItem): Boolean {
         item.isChecked = true
         val fullMode = when (item.itemId) {
-            R.id.full_mode_sl -> "SENSOR_LANDSCAPE"
-            R.id.full_mode_l -> "LANDSCAPE"
-            R.id.full_mode_rl -> "REVERSE_LANDSCAPE"
-            R.id.full_mode_u -> "UNSPECIFIED"
-            else -> "SENSOR_LANDSCAPE"
+            R.id.full_mode_sl -> VideoSettingFragment.KEY_SENSOR_LANDSCAPE
+            R.id.full_mode_l -> VideoSettingFragment.KEY_LANDSCAPE
+            R.id.full_mode_rl -> VideoSettingFragment.KEY_REVERSE_LANDSCAPE
+            R.id.full_mode_u -> VideoSettingFragment.KEY_UNSPECIFIED
+            else -> VideoSettingFragment.KEY_SENSOR_LANDSCAPE
         }
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        prefs.edit().putString("player_full_mode", fullMode).apply()
+        prefs.edit().putString(VideoSettingFragment.PLAYER_FULL_MODE, fullMode).apply()
         if (scaffoldApp.fullScreenPlayer) {
             fullScreen(fullMode)
         }

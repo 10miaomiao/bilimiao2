@@ -36,6 +36,18 @@ import splitties.views.dsl.recyclerview.recyclerView
 
 class VideoSettingFragment : Fragment(), DIAware, MyPage {
 
+    companion object {
+        const val PLAYER_BACKGROUND = "player_background"
+        const val PLAYER_AUTO_STOP = "player_auto_stop"
+        const val PLAYER_PLAYING_NOTIFICATION = "player_playing_notification"
+        const val PLAYER_FULL_MODE = "player_full_mode"
+
+        const val KEY_SENSOR_LANDSCAPE = "SENSOR_LANDSCAPE"
+        const val KEY_LANDSCAPE = "LANDSCAPE"
+        const val KEY_REVERSE_LANDSCAPE = "REVERSE_LANDSCAPE"
+        const val KEY_UNSPECIFIED = "UNSPECIFIED"
+    }
+
     override val pageConfig = myPageConfig {
         title = "视频设置"
     }
@@ -85,24 +97,30 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
     fun createRootScreen() = screen(context) {
         collapseIcon = true
 
-        switch("player_background") {
+        switch(PLAYER_BACKGROUND) {
             title = "后台播放"
             summary = "遇到困难时，不要停下来."
             defaultValue = true
         }
-        switch("player_auto_stop") {
+        switch(PLAYER_AUTO_STOP) {
             title = "关闭详情页时同时关闭播放"
             summary = "呐呐呐呐呐呐呐呐呐"
             defaultValue = false
         }
 
+        switch(PLAYER_PLAYING_NOTIFICATION) {
+            title = "播放时通知栏显示控制器"
+            summary = "这个家里已经没有你的位置啦！"
+            defaultValue = true
+        }
+
         val fullModeSelection = listOf(
-            SelectionItem(key = "SENSOR_LANDSCAPE", title = "横向全屏(自动旋转)"),
-            SelectionItem(key = "LANDSCAPE", title = "横向全屏(固定方向1)"),
-            SelectionItem(key = "REVERSE_LANDSCAPE", title = "横向全屏(固定方向2)"),
-            SelectionItem(key = "UNSPECIFIED", title = "不指定方向"),
+            SelectionItem(key = KEY_SENSOR_LANDSCAPE, title = "横向全屏(自动旋转)"),
+            SelectionItem(key = KEY_LANDSCAPE, title = "横向全屏(固定方向1)"),
+            SelectionItem(key = KEY_REVERSE_LANDSCAPE, title = "横向全屏(固定方向2)"),
+            SelectionItem(key = KEY_UNSPECIFIED, title = "不指定方向"),
         )
-        singleChoice("player_full_mode", fullModeSelection) {
+        singleChoice(PLAYER_FULL_MODE, fullModeSelection) {
             title = "全屏播放设置"
             summary = ""
             initialSelection = "SENSOR_LANDSCAPE"

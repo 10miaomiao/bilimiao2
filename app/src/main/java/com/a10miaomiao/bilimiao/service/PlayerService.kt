@@ -3,12 +3,14 @@ package com.a10miaomiao.bilimiao.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.media.session.MediaButtonReceiver
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
@@ -34,6 +36,7 @@ class PlayerService : Service() {
     private val playingNotification by lazy { PlayingNotification(this) }
     var mediaSession: MediaSessionCompat? = null
     private val info: PlayingInfo = PlayingInfo()
+    private var showNotification = true // 是否显示通知栏控制器
 
     override fun onCreate() {
         super.onCreate()
@@ -91,9 +94,12 @@ class PlayerService : Service() {
         info.author = author
         info.cover = cover
         info.duration = duration
-        mediaSession?.isActive = true
-        setupMediaSession()
-        playingNotification.setPlayingInfo(info)
+        showNotification = getShowNotification()
+        if (showNotification) {
+            mediaSession?.isActive = true
+            setupMediaSession()
+            playingNotification.setPlayingInfo(info)
+        }
     }
 
     fun clearPlayingInfo() {
@@ -115,7 +121,18 @@ class PlayerService : Service() {
                 playerState == GSYVideoPlayer.CURRENT_STATE_PLAYING_BUFFERING_START
     }
 
+    /**
+     * 是否显示通知栏控制器
+     */
+    private fun getShowNotification(): Boolean {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        return prefs.getBoolean(VideoSettingFragment.PLAYER_PLAYING_NOTIFICATION, true)!!
+    }
+
     private fun updatePlayerState() {
+        if (!showNotification) {
+            return
+        }
         if (!isPlaying()) {
             // 只更新暂停状态，播放状态走播放回调
             val stateBuilder = PlaybackStateCompat.Builder()
@@ -131,7 +148,7 @@ class PlayerService : Service() {
     }
 
     fun setProgress(max: Long, progress: Long) {
-        if (info.title != null) {
+        if (showNotification && info.title != null) {
             playingNotification.updateWithProgress(max, progress)
             val stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlayingNotification.MEDIA_SESSION_ACTIONS)
