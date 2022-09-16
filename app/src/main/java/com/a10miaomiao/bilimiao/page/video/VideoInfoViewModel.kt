@@ -32,7 +32,7 @@ class VideoInfoViewModel(
     val fragment: Fragment by instance()
 
 
-//    val type by lazy { fragment.requireArguments().getString(MainNavGraph.args.type, "AV") }
+    //    val type by lazy { fragment.requireArguments().getString(MainNavGraph.args.type, "AV") }
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
 
     var info: VideoInfo? = null
@@ -49,7 +49,7 @@ class VideoInfoViewModel(
         loadData()
     }
 
-    fun loadData() = viewModelScope.launch(Dispatchers.IO){
+    fun loadData() = viewModelScope.launch(Dispatchers.IO) {
         try {
             ui.setState {
                 state = ""
@@ -70,7 +70,7 @@ class VideoInfoViewModel(
                 data.desc = BiliUrlMatcher.customString(data.desc)
                 val relatesData = data.relates ?: listOf()
                 val staffData = data.staff ?: listOf()
- //                val relatesData = data.relates.filter {
+                //                val relatesData = data.relates.filter {
 //                    filterStore.filterWord(it.title)
 //                            && it.owner != null
 //                            && filterStore.filterUpper(it.owner.mid)
@@ -85,7 +85,7 @@ class VideoInfoViewModel(
                 }
                 ui.setState {
                     info = data
-                    relates = relatesData.toMutableList()
+                    relates = relatesData.filterNot { it.aid.isNullOrEmpty() }.toMutableList()
                     pages = pagesData.toMutableList()
                     staffs = staffData.toMutableList()
                 }
@@ -127,13 +127,13 @@ class VideoInfoViewModel(
         try {
             val curInfo = info ?: return@launch
             val res = BiliApiService.videoAPI
-                    .like(
-                        aid = curInfo.aid,
-                        dislike = curInfo.req_user.dislike ?: 0,
-                        like = curInfo.req_user.like ?: 0,
-                    )
-                    .awaitCall()
-                    .gson<MessageInfo>()
+                .like(
+                    aid = curInfo.aid,
+                    dislike = curInfo.req_user.dislike ?: 0,
+                    like = curInfo.req_user.like ?: 0,
+                )
+                .awaitCall()
+                .gson<MessageInfo>()
             if (res.code == 0) {
                 ui.setState {
                     val reqUser = curInfo.req_user.copy()
@@ -194,7 +194,7 @@ class VideoInfoViewModel(
         }
     }
 
-    fun requestFavorite (
+    fun requestFavorite(
         favIds: List<String>,
         addIds: List<String>,
         delIds: List<String>,
