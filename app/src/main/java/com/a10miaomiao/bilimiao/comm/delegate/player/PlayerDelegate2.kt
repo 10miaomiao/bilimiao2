@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.upstream.TransferListener
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -229,10 +230,16 @@ class PlayerDelegate2(
         val source = playerSource ?: return
         playerCoroutineScope.launch(Dispatchers.IO) {
             val danmukuParser = source.getDanmakuParser()
-            val sourceInfo = source.getPlayerUrl(quality)
+            val sourceInfo = try {
+                source.getPlayerUrl(quality)
+            } catch (e: Throwable) {
+                // 避免解析信息出错导致崩溃
+                runBlocking(Dispatchers.Main) { toast(e.message.toString()) }
+                return@launch
+            }
             withContext(Dispatchers.Main) {
                 // 设置通知栏控制器
-                PlayerService?.selfInstance?.setPlayingInfo(
+                PlayerService.selfInstance?.setPlayingInfo(
                     source.title,
                     source.ownerName,
                     source.coverUrl,
@@ -300,7 +307,7 @@ class PlayerDelegate2(
         lastPosition = 0L
 
         // 设置通知栏控制器
-        PlayerService?.selfInstance?.clearPlayingInfo()
+        PlayerService.selfInstance?.clearPlayingInfo()
 
         activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
