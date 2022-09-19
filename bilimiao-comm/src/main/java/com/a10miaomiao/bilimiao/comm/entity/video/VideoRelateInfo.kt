@@ -6,7 +6,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class VideoRelateInfo (
     val ad_index: Int,
-    val aid: String,
+    val aid: String?,
     val card_index: Int,
     val cid: Double,
     val client_ip: String,
