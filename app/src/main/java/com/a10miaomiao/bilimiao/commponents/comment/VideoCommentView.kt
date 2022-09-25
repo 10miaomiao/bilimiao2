@@ -74,6 +74,7 @@ fun MiaoUI.videoCommentView(
     uname: String,
     avatar: String,
     time: String,
+    location: String,
     floor: Int,
     content: VideoCommentReplyInfo.Content,
     like: Int,
@@ -134,6 +135,15 @@ fun MiaoUI.videoCommentView(
 
                                 _show = floor != 0
                                 _text = "#${floor}"
+                            }..lParams {
+                                rightMargin = dip(10)
+                            }
+                            +textView {
+                                setTextColor(Color.parseColor("#99a2aa"))
+                                textSize = 12f
+
+                                _show = location.isNotBlank()
+                                _text = location
                             }
                         }
                     }
