@@ -143,22 +143,24 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.getItem(position) as VideoCommentReplyInfo
-        val args = bundleOf(
-            MainNavGraph.args.reply to VideoCommentDetailArg(
-                oid = item.oid,
-                rpid = item.rpid,
-                rpid_str = item.rpid_str,
-                mid = item.member.mid,
-                uname = item.member.uname,
-                avatar = item.member.avatar,
-                ctime = item.ctime,
-                floor = item.floor,
-                content = item.content,
-                like = item.like,
-                count = item.count,
-            )
+        val reply = VideoCommentDetailArg(
+            oid = item.oid,
+            rpid = item.rpid,
+            rpid_str = item.rpid_str,
+            mid = item.member.mid,
+            uname = item.member.uname,
+            avatar = item.member.avatar,
+            ctime = item.ctime,
+            floor = item.floor,
+            location = item.reply_control.location,
+            content = item.content,
+            like = item.like,
+            count = item.count,
         )
-        DebugMiao.log(item)
+        val args = bundleOf(
+            MainNavGraph.args.reply to reply
+        )
+        DebugMiao.log(reply)
 
         Navigation.findNavController(view)
             .navigate(MainNavGraph.action.videoCommentList_to_videoCommentDetail, args)
@@ -192,6 +194,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             uname = item.member.uname,
             avatar = item.member.avatar,
             time = NumberUtil.converCTime(item.ctime),
+            location = item.reply_control.location,
             floor = item.floor,
             content =item.content,
             like = item.like,

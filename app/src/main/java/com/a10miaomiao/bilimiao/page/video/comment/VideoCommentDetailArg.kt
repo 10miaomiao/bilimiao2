@@ -15,6 +15,7 @@ data class VideoCommentDetailArg(
     val avatar: String,
     val ctime: Long,
     val floor: Int,
+    val location: String,
     val content: VideoCommentReplyInfo.Content,
     val like: Int,
     val count: Int,
