@@ -35,7 +35,6 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.dimensions.dip
 import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -170,9 +169,9 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             headerViews(mAdapter) {
                 val reply = viewModel.reply
                 +videoCommentView(
-                    mid = reply.member.mid,
-                    uname = reply.member.uname,
-                    avatar = reply.member.avatar,
+                    mid = reply.mid,
+                    uname = reply.uname,
+                    avatar = reply.avatar,
                     time = NumberUtil.converCTime(reply.ctime),
                     floor = reply.floor,
                     content = reply.content,

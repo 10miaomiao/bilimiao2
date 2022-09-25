@@ -14,7 +14,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.store.UserStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -32,7 +32,7 @@ class VideoCommentDetailViewModel(
     val userStore: UserStore by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
-    val reply by lazy { fragment.requireArguments().getParcelable<VideoCommentReplyInfo>("reply")!! }
+    val reply by lazy { fragment.requireArguments().getParcelable<VideoCommentDetailArg>("reply")!! }
 
     // 0：按时间，1：按点赞数，2：按回复数
     var sortOrder = 2
