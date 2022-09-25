@@ -15,6 +15,7 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
+import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi

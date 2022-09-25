@@ -130,4 +130,23 @@ class UserApi {
         method = MiaoHttp.POST
     }
 
+    /**
+     * 关注的up主
+     */
+    fun followings(
+        mid: String,
+        pageNum: Int = 1,
+        pageSize: Int = 30,
+        keyword: String = "",
+        order: String = "attention"
+    ) = MiaoHttp.request {
+            url = BiliApiService.biliApi("x/relation/followings",
+            "vmid" to mid,
+                "pn" to pageNum.toString(),
+                "ps" to pageSize.toString(),
+                "order_type" to order,
+                "order" to "desc",
+            )
+    }
+
 }

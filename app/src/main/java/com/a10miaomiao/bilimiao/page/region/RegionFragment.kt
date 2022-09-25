@@ -4,42 +4,27 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.coroutineScope
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.viewpager.widget.ViewPager
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.MainViewModel
 import com.a10miaomiao.bilimiao.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
-import com.a10miaomiao.bilimiao.widget.comm.getAppBarView
 import com.google.android.material.tabs.TabLayout
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
-import splitties.dimensions.dip
 import splitties.views.dsl.core.*
-import splitties.views.topPadding
 
 class RegionFragment : Fragment(), DIAware , MyPage {
 
@@ -72,9 +57,9 @@ class RegionFragment : Fragment(), DIAware , MyPage {
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
-        when (view.prop.key) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
             MenuKeys.filter -> {
                 val pm = RankOrderPopupMenu(
                     activity = requireActivity(),

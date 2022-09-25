@@ -3,7 +3,7 @@ package com.a10miaomiao.bilimiao.store
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.download.BiliVideoEntry
 import cn.a10miaomiao.download.DownloadInfo
-import com.a10miaomiao.bilimiao.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 

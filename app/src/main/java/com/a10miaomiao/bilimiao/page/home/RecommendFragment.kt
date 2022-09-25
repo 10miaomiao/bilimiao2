@@ -7,12 +7,8 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.card.v1.Single
-import bilibili.app.show.v1.PopularOuterClass
-import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -33,7 +29,6 @@ import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.gravityCenter
 
 class RecommendFragment: Fragment(), DIAware {
 

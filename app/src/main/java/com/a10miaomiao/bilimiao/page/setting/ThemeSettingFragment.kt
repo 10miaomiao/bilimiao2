@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -21,7 +20,6 @@ import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware

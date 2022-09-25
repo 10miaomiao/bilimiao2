@@ -22,27 +22,20 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.page.home.HomeFragment
 import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.RecommendFragment
-import com.a10miaomiao.bilimiao.store.UserStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateFragment
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.kodein.di.*
 import splitties.experimental.InternalSplittiesApi
 import splitties.toast.toast
-import splitties.views.*
 import splitties.views.dsl.core.*
-import java.util.*
 import kotlin.reflect.KClass
 
 
@@ -79,10 +72,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
         val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-        when (view.prop.key) {
+        when (menuItem.key) {
             MenuKeys.setting -> {
                 nav.navigate(MainNavGraph.action.home_to_setting)
             }

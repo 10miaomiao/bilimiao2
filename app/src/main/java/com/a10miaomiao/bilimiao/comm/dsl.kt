@@ -1,6 +1,5 @@
 package com.a10miaomiao.bilimiao.comm
 
-import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
@@ -9,9 +8,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.createViewModelLazy
 import androidx.lifecycle.*
 import cn.a10miaomiao.miao.binding.miaoEffect
-import cn.a10miaomiao.miao.binding.miaoMemo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import org.kodein.di.android.subDI
@@ -27,7 +26,7 @@ inline fun ViewGroup.views(block: MiaoUI.ViewsInfo.() -> Unit) {
     }
 }
 
-fun Context.miaoBindingUi (block: MiaoBindingUi.() -> View): MiaoBindingUi {
+fun Context.miaoBindingUi(block: MiaoBindingUi.() -> View): MiaoBindingUi {
     return object : MiaoBindingUi() {
         override fun createView() = block()
         override val ctx: Context get() = this@miaoBindingUi
@@ -41,7 +40,7 @@ fun Fragment.miaoBindingUi(block: MiaoBindingUi.() -> View): MiaoBindingUi {
     }
 }
 
-fun Context.miaoUi (block: MiaoUI.() -> View): MiaoUI {
+fun Context.miaoUi(block: MiaoUI.() -> View): MiaoUI {
     return object : MiaoUI() {
         override val ctx: Context get() = this@miaoUi
         override val root = block()
@@ -90,15 +89,16 @@ fun <VM : ViewModel> FragmentActivity.diViewModel(
     vmClass: KClass<VM>,
     di: DI,
 ): Lazy<VM> {
-    return ViewModelLazy(vmClass, { this.viewModelStore }) {
+    return ViewModelLazy(vmClass, { this.viewModelStore }, {
         newViewModelFactory<VM> {
             val constructor = vmClass.java.getDeclaredConstructor(
                 DI::class.java
             )
             constructor.newInstance(di)
         }
-    }
+    })
 }
+
 inline fun <reified VM : ViewModel> FragmentActivity.diViewModel(
     di: DI,
 ): Lazy<VM> = diViewModel(VM::class, di)
@@ -113,6 +113,12 @@ fun Fragment.lazyUiDi(
     init?.invoke(this)
 }
 
+
+@OptIn(InternalCoroutinesApi::class)
+suspend fun <T> BaseStore<T>.connectUi (ui: MiaoBindingUi) {
+    stateFlow.collect(FlowCollector { ui.setState {  } })
+}
+
 fun MiaoBindingUi.connectStore(owner: LifecycleOwner, store: BaseStore<*>) {
     miaoEffect(owner) {
         owner.lifecycleScope.launch {
@@ -122,6 +128,7 @@ fun MiaoBindingUi.connectStore(owner: LifecycleOwner, store: BaseStore<*>) {
         }
     }
 }
+
 
 inline fun <reified T : BaseStore<*>> MiaoBindingUi.miaoStore(owner: LifecycleOwner, di: DI): T {
     val store = object : DIAware {

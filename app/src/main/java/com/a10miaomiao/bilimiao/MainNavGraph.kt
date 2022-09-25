@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
@@ -34,6 +35,7 @@ import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
 import com.a10miaomiao.bilimiao.page.video.VideoAddFavoriteFragment
 import com.a10miaomiao.bilimiao.page.video.VideoCoinFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
+import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailArg
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import kotlin.reflect.KClass
@@ -57,6 +59,12 @@ object MainNavGraph {
                 type = NavType.StringType
                 nullable = true
             }
+        }
+        val compose = f<ComposeFragment>() {
+//            argument(args.url) {
+//                type = NavType.StringType
+//                nullable = true
+//            }
         }
         val timeSetting = f<TimeSettingFragment>() {
             deepLink("bilimiao://time/setting")
@@ -149,7 +157,7 @@ object MainNavGraph {
             }
         }
         val videoPages = f<VideoPagesFragment> {
-            deepLink("bilimiao://video/pages")
+//            deepLink("bilimiao://video/pages")
             argument(args.video) {
                 type = NavType.ParcelableType(VideoPageInfo::class.java)
                 nullable = false
@@ -177,7 +185,7 @@ object MainNavGraph {
         }
         val videoCommentDetail = f<VideoCommentDetailFragment> {
             argument(args.reply) {
-                type = NavType.ParcelableType(VideoCommentReplyInfo::class.java)
+                type = NavType.ParcelableType(VideoCommentDetailArg::class.java)
                 nullable = false
             }
         }
@@ -190,7 +198,7 @@ object MainNavGraph {
             }
         }
         val bangumiPages = f<BangumiPagesFragment> {
-            deepLink("bilimiao://bangumi/pages")
+//            deepLink("bilimiao://bangumi/pages")
             argument(args.id) {
                 type = NavType.StringType
                 nullable = false
@@ -213,6 +221,7 @@ object MainNavGraph {
         }
 
         val user = f<UserFragment> {
+            deepLink("bilimiao://user/{id}")
             deepLink("bilibili://user/{id}")
             deepLink("bilibili://space/{id}")
             argument(args.id) {
@@ -283,6 +292,7 @@ object MainNavGraph {
     object action {
         val id = id_counter++
         val global_to_web = dest.global to dest.web
+        val global_to_compose = dest.global to dest.compose
         val global_to_videoInfo = dest.global to dest.videoInfo
         val global_to_videoPages = dest.global to dest.videoPages
         val global_to_videoCoin = dest.global to dest.videoCoin

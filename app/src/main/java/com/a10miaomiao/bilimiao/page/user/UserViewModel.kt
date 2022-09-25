@@ -22,7 +22,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.store.FilterStore
-import com.a10miaomiao.bilimiao.store.UserStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

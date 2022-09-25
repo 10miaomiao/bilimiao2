@@ -98,7 +98,7 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
         val curVideo = viewModel.downloadStore.state.curVideo
         if (curVideo != null) {
             if (item.avid == curVideo?.avid
-                && item.page_data.cid === curVideo?.page_data.cid) {
+                && item.page_data.cid === curVideo?.page_data?.cid) {
                 downloadService.stopDownload()
                 return@OnItemClickListener
             }

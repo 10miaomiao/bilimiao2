@@ -32,16 +32,16 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
-import com.a10miaomiao.bilimiao.store.UserStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget._setContent
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.expandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
@@ -122,14 +122,14 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
         val info = viewModel.info
-        if (!userStore.isLogin() && (view.prop.key ?: 0) >= 3) {
+        if (!userStore.isLogin() && (menuItem.key ?: 0) >= 3) {
             toast("请先登录")
             return
         }
-        when (view.prop.key) {
+        when (menuItem.key) {
             0 -> {
                 // 更多
                 val pm = VideoMorePopupMenu(

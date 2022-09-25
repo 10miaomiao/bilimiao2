@@ -1,11 +1,11 @@
 package com.a10miaomiao.bilimiao.comm.mypage
 
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
+import android.view.View
 
 
 interface MyPage {
     val pageConfig: MyPageConfig
 
-    fun onMenuItemClick(view: MenuItemView) {
+    fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
     }
 }

@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.navigation.findNavController
 import androidx.viewpager.widget.ViewPager
-import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
@@ -21,14 +20,9 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
-import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
-import com.a10miaomiao.bilimiao.page.search.result.VideoResultViewModel
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -52,9 +46,9 @@ class SearchResultFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChange
         }
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
-        when (view.prop.key) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
             MenuKeys.search -> {
                 val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
                 val args = bundleOf(
@@ -63,7 +57,7 @@ class SearchResultFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChange
                 bsNav.navigate(MainNavGraph.action.global_to_searchStart, args)
             }
             else -> {
-                viewModel.curFragment?.onMenuItemClick(view)
+                viewModel.curFragment?.onMenuItemClick(view, menuItem)
             }
         }
     }

@@ -1,16 +1,17 @@
-package com.a10miaomiao.bilimiao.store
+package com.a10miaomiao.bilimiao.comm.store
 
+import android.app.Activity
 import android.content.Context
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.instance
-import splitties.toast.toast
 import java.io.File
 
 class UserStore(override val di: DI) :
@@ -49,7 +49,7 @@ class UserStore(override val di: DI) :
     }
 
     fun logout () {
-        Bilimiao.commApp.deleteAuth()
+        BilimiaoCommApp.commApp.deleteAuth()
         setUserInfo(null)
     }
 
@@ -107,5 +107,9 @@ class UserStore(override val di: DI) :
     fun isSelf(mid: String) = state.info?.mid == mid.toLong()
 
     fun isLogin() = state.info != null
+
+    fun Activity.toast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG)
+    }
 
 }

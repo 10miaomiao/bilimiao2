@@ -28,8 +28,6 @@ import org.kodein.di.instance
 import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
-import splitties.views.dsl.core.R
-import splitties.views.dsl.core.R.attr
 import splitties.views.padding
 import splitties.views.textColorResource
 

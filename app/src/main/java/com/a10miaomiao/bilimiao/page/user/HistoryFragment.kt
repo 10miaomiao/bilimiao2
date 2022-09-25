@@ -16,7 +16,6 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -30,7 +29,6 @@ import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -40,7 +38,6 @@ import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 

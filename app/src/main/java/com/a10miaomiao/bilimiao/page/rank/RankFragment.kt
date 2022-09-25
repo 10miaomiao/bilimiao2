@@ -15,16 +15,12 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
-import com.a10miaomiao.bilimiao.page.search.SearchResultViewModel
-import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -46,9 +42,9 @@ class RankFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChangeListener
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
-        when (view.prop.key) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
             MenuKeys.search -> {
                 val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
                 val args = bundleOf(

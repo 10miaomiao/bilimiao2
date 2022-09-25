@@ -5,9 +5,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.CompoundButton
-import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
@@ -25,11 +23,9 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware

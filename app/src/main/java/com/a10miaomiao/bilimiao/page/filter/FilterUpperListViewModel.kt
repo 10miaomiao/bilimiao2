@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.store.FilterStore
 import kotlinx.coroutines.launch
 import org.kodein.di.DI

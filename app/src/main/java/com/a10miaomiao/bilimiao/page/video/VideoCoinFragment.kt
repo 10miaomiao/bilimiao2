@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._imageResource
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -29,7 +28,6 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.dsl.core.*
-import splitties.views.imageResource
 
 class VideoCoinFragment : Fragment(), DIAware, MyPage {
 

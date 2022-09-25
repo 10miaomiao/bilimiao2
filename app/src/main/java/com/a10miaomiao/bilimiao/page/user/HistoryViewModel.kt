@@ -12,7 +12,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.store.UserStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI

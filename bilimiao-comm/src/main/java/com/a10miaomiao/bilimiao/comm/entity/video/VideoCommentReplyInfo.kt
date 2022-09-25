@@ -33,7 +33,7 @@ data class VideoCommentReplyInfo(
 ): Parcelable {
     @Parcelize
     data class Content(
-        val device: String,
+//        val device: String,
         val message: String,
         val plat: Int,
         val emote: Map<String, Emote>

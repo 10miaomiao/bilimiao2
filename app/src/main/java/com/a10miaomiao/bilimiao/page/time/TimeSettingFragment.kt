@@ -9,7 +9,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CompoundButton
 import android.widget.Spinner
-import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
@@ -23,7 +22,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import com.a10miaomiao.bilimiao.widget.datePickerView
 import com.a10miaomiao.bilimiao.widget.monthPickerView
 import kotlinx.coroutines.launch

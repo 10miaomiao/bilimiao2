@@ -1,7 +1,5 @@
 package com.a10miaomiao.bilimiao.page.filter
 
-import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -10,28 +8,21 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
-import cn.a10miaomiao.miao.binding.android.widget._isChecked
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
-import com.a10miaomiao.bilimiao.comm.diViewModel
-import com.a10miaomiao.bilimiao.comm.lazyUiDi
-import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -61,9 +52,9 @@ class FilterUpperListFragment : Fragment(), DIAware, MyPage {
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
-        when(view.prop.key) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when(menuItem.key) {
             MenuKeys.delete -> {
                 viewModel.deleteSelected()
             }

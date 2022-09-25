@@ -31,7 +31,6 @@ import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayout
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -367,10 +366,13 @@ class HomeFragment : Fragment(), DIAware {
 //                +button {
 //                    text = "测试"
 //                    setOnClickListener {
-//                        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-//                        nav.navigate(Uri.parse("bilimiao://time/setting"))
+//                        val nav = it.findNavController()
+//                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
+//                            MainNavGraph.args.url to "bilimiao://test"
+//                        ))
 //                    }
 //                }
+
             }
 
         }.wrapInLimitedFrameLayout {

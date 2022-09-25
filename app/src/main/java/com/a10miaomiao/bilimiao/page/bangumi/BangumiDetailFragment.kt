@@ -30,6 +30,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -38,7 +39,6 @@ import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.layout.DoubleColumnAutofitLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
@@ -74,9 +74,9 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
-        when (view.prop.key) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
             MenuKeys.more -> {
                 // 更多
                 val pm = BangumiMorePopupMenu(
