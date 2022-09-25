@@ -1,7 +1,5 @@
 package com.a10miaomiao.bilimiao.comm.mypage
 
-import com.a10miaomiao.bilimiao.MainNavGraph
-
 object MenuKeys {
     var id_counter = 100
 

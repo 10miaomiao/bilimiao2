@@ -8,8 +8,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -22,17 +22,14 @@ import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.commponents.loading.ListState
-import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.season.miniSeasonItemView
 import com.a10miaomiao.bilimiao.commponents.video.mediaItemView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
@@ -49,7 +46,6 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
 import splitties.views.padding
-import splitties.views.verticalPadding
 
 class UserFragment : Fragment(), DIAware, MyPage {
 
@@ -81,9 +77,9 @@ class UserFragment : Fragment(), DIAware, MyPage {
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
-        when (view.prop.key) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
             0 -> {
                 // 更多
                 val pm = UserMorePopupMenu(
@@ -160,13 +156,18 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         .navigate(MainNavGraph.action.user_to_userFavouriteList, args)
                 }
                 "attention" -> {
-                    val args = bundleOf(
-                        MainNavGraph.args.id to viewModel.id,
-                        MainNavGraph.args.name to info.card.name,
-                        MainNavGraph.args.type to "follow",
-                    )
-                    Navigation.findNavController(it)
-                        .navigate(MainNavGraph.action.user_to_userFollow, args)
+//                    val args = bundleOf(
+//                        MainNavGraph.args.id to viewModel.id,
+//                        MainNavGraph.args.name to info.card.name,
+//                        MainNavGraph.args.type to "follow",
+//                    )
+//                    Navigation.findNavController(it)
+//                        .navigate(MainNavGraph.action.user_to_userFollow, args)
+                    val nav = it.findNavController()
+                    val url = "bilimiao://user/${viewModel.id}/follow"
+                    nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
+                        MainNavGraph.args.url to url
+                    ))
                 }
                 "fans" -> {
                     val args = bundleOf(

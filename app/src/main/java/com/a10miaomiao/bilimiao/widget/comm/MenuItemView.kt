@@ -9,6 +9,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.core.view.marginTop
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.config.config
 import org.kodein.di.android.di
 import splitties.dimensions.dip
@@ -66,16 +67,6 @@ class MenuItemView @JvmOverloads constructor(
             }
         }
     }
-
-    class MenuItemPropInfo (
-        var key: Int? = null,
-        var title: String? = null,
-        var subTitle: String? = null,
-        var iconDrawable: Drawable? = null,
-        @DrawableRes
-        var iconResource: Int? = null,
-        var visibility: Int = View.VISIBLE
-    )
 
     inner class ViewUi: Ui {
         override val ctx: Context get() = context

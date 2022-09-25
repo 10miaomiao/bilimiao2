@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.page.auth
 
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -11,15 +10,12 @@ import android.webkit.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import cn.a10miaomiao.miao.binding.android.view._show
-import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +29,6 @@ import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.core.view
 
 class H5LoginFragment : Fragment(), DIAware, MyPage {

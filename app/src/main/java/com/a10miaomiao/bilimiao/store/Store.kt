@@ -6,7 +6,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import cn.a10miaomiao.download.DownloadService
 import com.a10miaomiao.bilimiao.MainActivity
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.LazyDI
@@ -36,6 +38,7 @@ class Store (
         }
 
         fun onCreate(savedInstanceState: Bundle?) {
+                windowStore.state.bottomSheetFragmentID = R.id.nav_bottom_sheet_fragment
                 windowStore.init(activity)
                 playerStore.init(activity)
                 downloadStore.init(activity)

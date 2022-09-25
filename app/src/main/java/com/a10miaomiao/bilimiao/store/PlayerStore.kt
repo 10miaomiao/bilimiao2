@@ -5,7 +5,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.LocalVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
-import com.a10miaomiao.bilimiao.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 

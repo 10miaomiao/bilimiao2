@@ -2,7 +2,6 @@ package com.a10miaomiao.bilimiao.page.filter
 
 import android.net.Uri
 import android.os.Bundle
-import android.os.Debug
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -13,25 +12,18 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
-import cn.a10miaomiao.miao.binding.android.widget._isChecked
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
-import com.a10miaomiao.bilimiao.comm.diViewModel
-import com.a10miaomiao.bilimiao.comm.lazyUiDi
-import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.store.FilterStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
+import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -41,7 +33,6 @@ import splitties.dimensions.dip
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
-import splitties.views.padding
 import splitties.views.rightPadding
 import splitties.views.topPadding
 
@@ -71,9 +62,9 @@ class FilterWordListFragment : Fragment(), DIAware, MyPage {
         )
     }
 
-    override fun onMenuItemClick(view: MenuItemView) {
-        super.onMenuItemClick(view)
-        when(view.prop.key) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when(menuItem.key) {
             MenuKeys.add -> {
                 val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://filter/word/add"))

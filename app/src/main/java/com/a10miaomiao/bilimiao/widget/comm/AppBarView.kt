@@ -10,6 +10,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.core.view.forEach
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarVerticalUi
@@ -104,7 +105,7 @@ class AppBarView @JvmOverloads constructor(
     class PropInfo (
         var title: String? = null,
         var navigationIcon: Drawable? = null,
-        var menus: List<MenuItemView.MenuItemPropInfo>? = null,
+        var menus: List<MenuItemPropInfo>? = null,
         var onNavigationClick: View.OnClickListener? = null,
     )
 

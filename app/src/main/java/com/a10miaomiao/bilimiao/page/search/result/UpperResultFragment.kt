@@ -5,30 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import cn.a10miaomiao.miao.binding.android.view._bottomPadding
-import cn.a10miaomiao.miao.binding.android.view._leftPadding
-import cn.a10miaomiao.miao.binding.android.view._rightPadding
-import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchUpperInfo
-import com.a10miaomiao.bilimiao.comm.entity.search.SearchVideoInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.upper.upperItem
-import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.TemplateViewModel
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -54,11 +44,11 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
 
     override val title = "UP主"
 
-    override val menus get() = listOf<MenuItemView.MenuItemPropInfo>(
+    override val menus get() = listOf<MenuItemPropInfo>(
 
     )
 
-    override fun onMenuItemClick(view: MenuItemView) {
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
 
     }
 

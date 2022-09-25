@@ -1,11 +1,7 @@
-package com.a10miaomiao.bilimiao.store.base
+package com.a10miaomiao.bilimiao.comm.store.base
 
 import android.content.Context
-import androidx.lifecycle.ViewModel
-import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DIAware
 
@@ -20,16 +16,7 @@ interface BaseStore<T> : DIAware {
     open fun init(context: Context) {
     }
 
-    suspend fun connectUi (ui: MiaoBindingUi) {
-        stateFlow.collect(object : FlowCollector<T> {
-            override suspend fun emit(value: T) {
-                ui.setState {  }
-            }
-        })
-    }
-
     fun setState (block: T.() -> Unit) {
         stateFlow.value = copyState().apply(block)
     }
-
 }

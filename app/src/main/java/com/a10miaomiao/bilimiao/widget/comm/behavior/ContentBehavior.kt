@@ -103,7 +103,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
 
         }
 
-        override fun onAnimationEnd(animation: Animator?) {
+        override fun onAnimationEnd(animation: Animator) {
             viewRef?.let {
                 if (it.layoutParams.height != height || it.layoutParams.width != width) {
                     it.layoutParams.height = height
@@ -133,7 +133,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
             viewRef?.requestLayout()
         }
 
-        override fun onAnimationEnd(animation: Animator?) {
+        override fun onAnimationEnd(animation: Animator) {
 //            headerViewRef?.visibility = View.GONE
         }
 
