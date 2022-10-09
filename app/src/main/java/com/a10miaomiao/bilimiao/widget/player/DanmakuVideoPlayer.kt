@@ -19,14 +19,16 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
+import splitties.dimensions.dip
 import java.text.DecimalFormat
 
 
 class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     enum class PlayerMode {
-        SMALL,
-        FULL
+        SMALL_TOP,
+        SMALL_FLOAT,
+        FULL,
     }
 
     // 弹幕组件
@@ -34,6 +36,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // 根布局组件
     private val mRootLayout: RelativeLayout by lazy { findViewById(R.id.root_layout) }
+
+    // 小窗顶部拖动横条
+    private val mDragBar: View by lazy { findViewById(R.id.drag_bar) }
 
     // 顶栏更多按钮
     private val mMoreBtn: View by lazy { findViewById(R.id.more) }
@@ -114,7 +119,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     // 当前模式
-    var mode = PlayerMode.SMALL
+    var mode = PlayerMode.SMALL_TOP
         set(value) {
             field = value
             updateMode()
@@ -206,15 +211,21 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     private fun updateMode() {
         when (mode) {
-            PlayerMode.SMALL -> {
+            PlayerMode.SMALL_TOP, PlayerMode.SMALL_FLOAT -> {
                 mFullModeBottomContainer.visibility = GONE
                 mPlaySpeedName.visibility = GONE
                 mBackButton.setImageResource(R.drawable.video_small_close)
+                if (mode == PlayerMode.SMALL_FLOAT) {
+                    mDragBar.visibility = mTopContainer.visibility
+                } else {
+                    mDragBar.visibility = GONE
+                }
             }
             PlayerMode.FULL -> {
                 mFullModeBottomContainer.visibility = VISIBLE
                 mPlaySpeedName.visibility = VISIBLE
                 mBackButton.setImageResource(R.drawable.bili_player_back_button)
+                mDragBar.visibility = GONE
             }
         }
     }
@@ -237,8 +248,18 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             }
         } else {
             super.setViewShowState(view, visibility)
-            if (mode == PlayerMode.FULL && view == mTopContainer) {
-                statusBarHelper?.isShowStatus = visibility == View.VISIBLE
+            if (view == mTopContainer) {
+                when (mode) {
+                    PlayerMode.SMALL_FLOAT -> {
+                        mDragBar.visibility = visibility
+                    }
+                    PlayerMode.SMALL_TOP -> {
+                        mDragBar.visibility = View.GONE
+                    }
+                    PlayerMode.FULL -> {
+                        statusBarHelper?.isShowStatus = visibility == View.VISIBLE
+                    }
+                }
             }
         }
     }
@@ -412,7 +433,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             mBottomContainer.setPadding(left, 0, right, 0)
             mLockContainer.setPadding(left, 0, right, 0)
         } else {
-            mTopContainer.setPadding(0, 0, 0, 0)
+            if (mode == PlayerMode.SMALL_FLOAT) {
+                mTopContainer.setPadding(0, dip(15), 0, 0)
+            } else {
+                mTopContainer.setPadding(0, 0, 0, 0)
+            }
             mBottomContainer.setPadding(0, 0, 0, 0)
             mLockContainer.setPadding(0, 0, 0, 0)
         }
@@ -420,6 +445,18 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     fun hideController() {
         hideAllWidget()
+    }
+
+    fun showSmallDargBar() {
+        if (mode == PlayerMode.SMALL_FLOAT) {
+            mDragBar.visibility = VISIBLE
+        } else {
+            mDragBar.visibility = GONE
+        }
+    }
+
+    fun hideSmallDargBar() {
+        mDragBar.visibility = mTopContainer.visibility
     }
 
     private fun setDialogVolumeProgressBar(context: Context) {

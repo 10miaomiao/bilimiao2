@@ -133,7 +133,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             avatar = item.member.avatar,
             time = NumberUtil.converCTime(item.ctime),
             floor = item.floor,
-            location = item.reply_control.location,
+            location = item.reply_control.location ?: "",
             content =item.content,
             like = item.like,
             count = item.count,

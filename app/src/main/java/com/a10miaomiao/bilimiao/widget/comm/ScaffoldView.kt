@@ -54,6 +54,8 @@ class ScaffoldView @JvmOverloads constructor(
     var appBarWidth = dip(100)
     var playerHeight = -3
     var playerWidth = -3
+    var _playerHeight = dip(200)
+    var _playerWidth = dip(300)
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null

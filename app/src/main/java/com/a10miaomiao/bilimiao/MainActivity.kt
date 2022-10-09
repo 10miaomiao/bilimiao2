@@ -42,7 +42,9 @@ import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
+import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
+import splitties.dimensions.dip
 
 
 class MainActivity
@@ -93,7 +95,7 @@ class MainActivity
                 insets
             }
             ui.root.onPlayerChanged = {
-                statusBarHelper.isLightStatusBar = !it
+                statusBarHelper.isLightStatusBar = !it || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
                 setWindowInsets(ui.root.rootWindowInsets)
             }
         } else {
@@ -221,6 +223,13 @@ class MainActivity
         windowStore.setBottomSheetContentInsets(
             0, config.bottomSheetTitleHeight, 0, bottom
         )
+        val playerLP = ui.mPlayerLayout.layoutParams
+        if (playerLP is ScaffoldView.LayoutParams) {
+            val behavior = playerLP.behavior
+            if (behavior is PlayerBehavior) {
+                behavior.setWindowInsets(left, top, right, bottom)
+            }
+        }
         ui.mBottomSheetLayout.setPadding(left, top, right, 0)
         val showPlayer = ui.root.showPlayer
         val fullScreenPlayer = ui.root.fullScreenPlayer
@@ -235,14 +244,17 @@ class MainActivity
                 0, if (fullScreenPlayer) 0 else top, 0, 0
             )
         } else {
+//            windowStore.setContentInsets(
+//                0, top, if (showPlayer) 0 else right, bottom,
+//            )
             windowStore.setContentInsets(
-                0, top, if (showPlayer) 0 else right, bottom,
+                0, top, right, bottom,
             )
             ui.mAppBar.setPadding(
                 left, top, 0, bottom
             )
             ui.mPlayerLayout.setPadding(
-                0, 0, if (fullScreenPlayer) 0 else right, 0
+                0, 0, 0, 0
             )
         }
         basePlayerDelegate.setWindowInsets(left, top, right, bottom)
@@ -299,7 +311,9 @@ class MainActivity
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        basePlayerDelegate.onConfigurationChanged(newConfig)
         ui.root.orientation = newConfig.orientation
+        statusBarHelper.isLightStatusBar = !ui.root.showPlayer || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             setWindowInsetsAndroidL()
         }

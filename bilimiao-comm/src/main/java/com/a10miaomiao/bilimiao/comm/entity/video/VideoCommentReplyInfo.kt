@@ -41,7 +41,7 @@ data class VideoCommentReplyInfo(
 //        val device: String,
         val message: String,
         val plat: Int,
-        val emote: MutableMap<String, Emote>?,
+        val emote: Map<String, Emote>?,
     ) : Parcelable
 
     @Parcelize
@@ -54,7 +54,7 @@ data class VideoCommentReplyInfo(
     @Parcelize
     data class ReplyControl(
         val time_desc: String,
-        val location: String,
+        val location: String?,
     ): Parcelable
 
 }

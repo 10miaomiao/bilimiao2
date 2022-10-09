@@ -152,7 +152,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             avatar = item.member.avatar,
             ctime = item.ctime,
             floor = item.floor,
-            location = item.reply_control.location,
+            location = item.reply_control.location ?: "",
             content = item.content,
             like = item.like,
             count = item.count,
@@ -189,12 +189,23 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
     }
 
     val itemUi = miaoBindingItemUi<VideoCommentReplyInfo> { item, index ->
+        DebugMiao.log(
+            item.mid,
+            item.member.uname,
+            item.member.avatar,
+            NumberUtil.converCTime(item.ctime),
+             item.reply_control.location,
+            item.floor,
+            item.content,
+             item.like,
+             item.count,
+        )
         videoCommentView(
             mid = item.mid,
             uname = item.member.uname,
             avatar = item.member.avatar,
             time = NumberUtil.converCTime(item.ctime),
-            location = item.reply_control.location,
+            location = item.reply_control.location ?: "",
             floor = item.floor,
             content =item.content,
             like = item.like,
