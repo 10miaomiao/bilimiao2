@@ -329,4 +329,12 @@
 
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/drag_bar"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:src="@drawable/shape_small_drag_bar"
+        android:scaleType="center"
+        android:visibility="gone"/>
+
 </RelativeLayout>

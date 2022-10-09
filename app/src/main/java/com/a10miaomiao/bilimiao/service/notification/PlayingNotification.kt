@@ -178,7 +178,7 @@ class PlayingNotification(
         val builder = NotificationCompat.Builder(playerService, NOTIFICATION_CHANNEL_ID)
 
         builder.setContentTitle(playingInfo.title ?: "bilimiao正在播放")
-        builder.setContentText(playingInfo.author)
+        builder.setContentText(playingInfo.author ?: "bilimiao")
         builder.setSmallIcon(R.drawable.bili_default_image_tv)
 //        builder.setLargeIcon(bitmap)
 //        builder.setDefaults(NotificationCompat.DEFAULT_ALL)

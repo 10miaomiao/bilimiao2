@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -68,7 +69,9 @@ class UserArchiveListViewModel(
                 }
                 list.pageNum = pageNum
             } else {
-                context.toast(res.message)
+                withContext(Dispatchers.Main) {
+                    context.toast(res.message)
+                }
                 throw Exception(res.message)
             }
         } catch (e: Exception) {

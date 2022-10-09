@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
+import splitties.dimensions.dip
 
 
 class ContentBehavior : CoordinatorLayout.Behavior<View> {
@@ -43,9 +44,12 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 width = 0
                 child.layout(0, 0, 0, 0)
             } else if (orientation == ScaffoldView.HORIZONTAL) {
-                child.layout(parent.appBarWidth, 0, parent.measuredWidth - playerWidth, parent.measuredHeight)
+//                child.layout(parent.appBarWidth, 0, parent.measuredWidth - playerWidth, parent.measuredHeight)
+//                height = parent.measuredHeight
+//                width = parent.measuredWidth - parent.appBarWidth - playerWidth
+                child.layout(parent.appBarWidth, 0, parent.measuredWidth, parent.measuredHeight)
                 height = parent.measuredHeight
-                width = parent.measuredWidth - parent.appBarWidth - playerWidth
+                width = parent.measuredWidth - parent.appBarWidth
             } else if (orientation == ScaffoldView.VERTICAL) {
                 child.layout(0, playerHeight, parent.measuredWidth, parent.measuredHeight - parent.appBarHeight)
                 height = parent.measuredHeight - parent.appBarHeight - playerHeight

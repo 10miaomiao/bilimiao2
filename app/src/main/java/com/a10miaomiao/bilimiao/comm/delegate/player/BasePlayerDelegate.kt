@@ -14,4 +14,5 @@ interface BasePlayerDelegate: BaseDelegate {
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?)
     fun isPlaying(): Boolean
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int)
+    fun onConfigurationChanged(newConfig: Configuration)
 }

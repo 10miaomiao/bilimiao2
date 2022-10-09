@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager
@@ -13,8 +14,10 @@ import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
+import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
@@ -70,6 +73,7 @@ class PlayerController(
         moreBtn.setOnClickListener(that::showMoreMenu)
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)
+        updatePlayerMode(activity.resources.configuration)
     }
 
     fun fullScreen(fullMode: String) {
@@ -87,11 +91,22 @@ class PlayerController(
     }
 
     fun smallScreen() {
-        views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.SMALL
+        views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.SMALL_TOP
+        updatePlayerMode(activity.resources.configuration)
         scaffoldApp.fullScreenPlayer = false
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         statusBarHelper.isShowStatus = true
         statusBarHelper.isShowNavigation = true
+    }
+
+    fun updatePlayerMode(config: Configuration) {
+        if (views.videoPlayer.mode != DanmakuVideoPlayer.PlayerMode.FULL) {
+            views.videoPlayer.mode = if (config.orientation == ScaffoldView.VERTICAL) {
+                DanmakuVideoPlayer.PlayerMode.SMALL_TOP
+            } else {
+                DanmakuVideoPlayer.PlayerMode.SMALL_FLOAT
+            }
+        }
     }
 
     fun initDanmakuContext() {

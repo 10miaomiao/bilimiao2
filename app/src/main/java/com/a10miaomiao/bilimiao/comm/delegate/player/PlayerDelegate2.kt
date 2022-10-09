@@ -346,4 +346,9 @@ class PlayerDelegate2(
         }
     }
 
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        controller.updatePlayerMode(newConfig)
+    }
+
 }

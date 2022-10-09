@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget._setContent
@@ -40,9 +41,8 @@ private fun MiaoUI.commentContentView(
         setNeedMention(false)
         isNeedSelf = true
         setNeedConvertUrl(false)
-
-        miaoEffect(content.emote) {
-            tag = content.emote
+        miaoEffect(content.emote ?: 0) {
+            tag = content.emote ?: 0
             setNextContentListener { ssb ->
                 val content = ssb.toString()
                 var emote = tag
