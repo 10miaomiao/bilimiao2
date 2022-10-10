@@ -28,7 +28,8 @@ class MiaoHttp(var url: String? = null) {
         for (key in headers.keys) {
             requestBuilder.addHeader(key, headers[key])
         }
-        requestBuilder.addHeader("referer","https://www.bilibili.com/")
+        requestBuilder.addHeader("user-agent", ApiHelper.USER_AGENT)
+        requestBuilder.addHeader("referer",ApiHelper.REFERER)
         requestBuilder.addHeader("cookie", (cookieManager.getCookie(url) ?: ""))
         if (body == null && formBody != null) {
             val bodyStr = ApiHelper.urlencode(formBody!!)

@@ -36,17 +36,18 @@ class UserApi {
         mid: String,
         pageNum: Int,
         pageSize: Int,
+        tid: Int = 0,
         keyword: String = "",
         order: String = "pubdate",
     ) = MiaoHttp.request {
-        url = "https://api.bilibili.com/x/space/arc/search?mid=$mid&pn=$pageNum&ps=$pageSize&keyword=${keyword}&order=${order}"
-//        url = BiliApiService.biliApi("x/space/arc/search",
-//            "mid" to mid,
-//            "pn" to pageNum.toString(),
-//            "ps" to pageSize.toString(),
-//            "keyword" to keyword,
-//            "order" to order
-//        )
+        url = BiliApiService.biliApi("x/space/arc/search",
+            "mid" to mid,
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+            "tid" to tid.toString(),
+            "keyword" to keyword,
+            "order" to order
+        )
     }
 
 

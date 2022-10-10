@@ -115,11 +115,18 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    private val handleTagItemClick = OnItemClickListener { adapter, view, position ->
+    private val handleSuggestTagItemClick = OnItemClickListener { adapter, view, position ->
         if (position == 0) {
             handleSearchClick.onClick(view)
             return@OnItemClickListener
         }
+        val item = adapter.data[position]
+        if (item is String) {
+            viewModel.startSearch(item, view)
+        }
+    }
+
+    private val handleHistoryTagItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.data[position]
         if (item is String) {
             viewModel.startSearch(item, view)
@@ -227,7 +234,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                                 items = viewModel.suggestList,
                                 itemUi = itemTagUi,
                             ) {
-                                setOnItemClickListener(handleTagItemClick)
+                                setOnItemClickListener(handleSuggestTagItemClick)
                             }
                         }..lParams(matchParent, wrapContent) {
                             horizontalMargin = config.pagePadding
@@ -270,7 +277,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                                 items = viewModel.historyList,
                                 itemUi = itemTagUi,
                             ) {
-                                setOnItemClickListener(handleTagItemClick)
+                                setOnItemClickListener(handleHistoryTagItemClick)
                             }
                         }..lParams(matchParent, wrapContent) {
                             horizontalMargin = config.pagePadding

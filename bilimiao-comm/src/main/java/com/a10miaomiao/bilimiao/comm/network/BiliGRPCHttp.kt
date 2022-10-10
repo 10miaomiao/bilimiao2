@@ -14,21 +14,6 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
     private val reqMessage: ReqT,
 ) {
 
-    companion object {
-        const val _grpcBase = "https://grpc.biliapi.net/"
-
-        /**
-         * User-Agent: Dalvik/2.1.0 (Linux; U; Android 6.0.1; MuMu Build/V417IR) 6.71.0 os/android model/MuMu mobi_app/android build/6710300 channel/bili innerVer/6710300 osVer/6.0.1 network/2
-         */
-        val userAgent = """
-            |${BiliGRPCConfig.getSystemUserAgent()} 
-            |os/android model/${Build.MODEL} mobi_app/android 
-            |build/${BiliGRPCConfig.build} channel/bili innerVer/${BiliGRPCConfig.build} 
-            |osVer/${Build.VERSION.RELEASE} network/2
-        """.trimMargin().replace("\n", "")
-    }
-
-
     private val client = OkHttpClient()
 
     var needToken = true
@@ -38,7 +23,7 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
         if (needToken && token.isNotBlank()) {
             addHeader(BiliHeaders.Authorization, BiliHeaders.Identify + " " + token)
         }
-        addHeader(BiliHeaders.UserAgent, userAgent)
+        addHeader(BiliHeaders.UserAgent, ApiHelper.USER_AGENT)
         addHeader(BiliHeaders.AppKey, BiliGRPCConfig.mobileApp)
         addHeader(BiliHeaders.BiliDevice, BiliGRPCConfig.getDeviceBin())
         addHeader(BiliHeaders.BiliFawkes, BiliGRPCConfig.getFawkesreqBin())
@@ -55,7 +40,7 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
     }
 
     private fun buildRequest(): Request {
-        val url = _grpcBase + grpcMethod.fullMethodName
+        val url = ApiHelper.GRPC_BASE + grpcMethod.fullMethodName
         val messageBytes = grpcMethod.streamRequest(reqMessage).readBytes()
         // 校验用?第五位为数组长度
         val stateBytes = byteArrayOf(0, 0, 0, 0, messageBytes.size.toByte())
