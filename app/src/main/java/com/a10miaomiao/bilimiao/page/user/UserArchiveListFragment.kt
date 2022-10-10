@@ -10,15 +10,16 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import bilibili.app.space.v1.SpaceOuterClass
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -29,10 +30,12 @@ import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
@@ -43,10 +46,56 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         title = "${viewModel.name}\n的\n投稿列表"
-
+        menus = listOf(
+            myMenuItem {
+                key = MenuKeys.filter
+                title = viewModel.rankOrder.title
+                iconResource = R.drawable.ic_baseline_filter_list_grey_24
+            },
+            myMenuItem {
+                key = MenuKeys.region
+                title = viewModel.region.title
+                iconResource = R.drawable.ic_baseline_grid_on_gray_24
+            },
+        )
     }
 
-    override val di: DI by lazyUiDi(ui = { ui })
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        when(menuItem.key) {
+            MenuKeys.region -> {
+                val pm = CheckPopupMenu(
+                    activity = requireActivity(),
+                    anchor = view,
+                    menus = viewModel.regionList,
+                    value = viewModel.region.value,
+                )
+                pm.onMenuItemClick = {
+                    viewModel.region = it
+                    viewModel.refreshList()
+                    pageConfig.notifyConfigChanged()
+                }
+                pm.show()
+            }
+            MenuKeys.filter -> {
+                val pm = CheckPopupMenu(
+                    activity = requireActivity(),
+                    anchor = view,
+                    menus = viewModel.rankOrderList,
+                    value = viewModel.rankOrder.value,
+                )
+                pm.onMenuItemClick = {
+                    viewModel.rankOrder = it
+                    viewModel.refreshList()
+                    pageConfig.notifyConfigChanged()
+                }
+                pm.show()
+            }
+        }
+    }
+
+    override val di: DI by lazyUiDi(ui = { ui }) {
+        bindSingleton<MyPage> { this@UserArchiveListFragment }
+    }
 
     private val viewModel by diViewModel<UserArchiveListViewModel>(di)
 

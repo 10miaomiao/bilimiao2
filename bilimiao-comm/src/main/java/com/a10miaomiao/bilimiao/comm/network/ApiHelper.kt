@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.network
 
 import android.net.Uri
+import android.os.Build
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import java.io.UnsupportedEncodingException
@@ -13,9 +14,23 @@ import java.util.Date
  */
 object ApiHelper {
 
-    val BUILD_VERSION = 5520400
-    val APP_KEY = "4409e2ce8ffd12b8";
-    val APP_SECRET = "59b43e04ad6965f34319062b478f83dd"
+    const val BUILD_VERSION = 5520400
+    const val APP_KEY = "4409e2ce8ffd12b8";
+    const val APP_SECRET = "59b43e04ad6965f34319062b478f83dd"
+
+    const val REFERER = "https://www.bilibili.com/"
+    const val GRPC_BASE = "https://grpc.biliapi.net/"
+
+    /**
+     * User-Agent: Dalvik/2.1.0 (Linux; U; Android 6.0.1; MuMu Build/V417IR) 6.71.0 os/android model/MuMu mobi_app/android build/6710300 channel/bili innerVer/6710300 osVer/6.0.1 network/2
+     */
+    val USER_AGENT = """
+            |${BiliGRPCConfig.getSystemUserAgent()} 
+            |os/android model/${Build.MODEL} mobi_app/android 
+            |build/${BiliGRPCConfig.build} channel/bili innerVer/${BiliGRPCConfig.build} 
+            |osVer/${Build.VERSION.RELEASE} network/2
+        """.trimMargin().replace("\n", "")
+
 
     fun getTimeSpen() = Date().time / 1000
 

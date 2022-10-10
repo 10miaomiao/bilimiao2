@@ -41,6 +41,7 @@ class SearchStartViewModel (
         historyList = searchHistoryDB.queryAllHistory()
     }
 
+
     /**
      * 加载搜索提示
      */
@@ -49,6 +50,10 @@ class SearchStartViewModel (
             ui.setState {
                 suggestList.clear()
             }
+            return@launch
+        }
+        ui.setState {
+            suggestList = mutableListOf("直接搜索“${keyword}”")
         }
         try {
             val res = BiliApiService.searchApi.suggestList(keyword).awaitCall()
@@ -57,10 +62,12 @@ class SearchStartViewModel (
             val jsonArray = (jsonParser.nextValue() as JSONObject).getJSONObject("result").getJSONArray("tag")
             if (keyword == editText.text.toString()) {
                 ui.setState {
-                    suggestList = (0 until jsonArray.length()).map {
-                        jsonArray.getJSONObject(it).getString("value")
-                    }.toMutableList()
-                    suggestList.add(0, "直接搜索“${keyword}”")
+                    suggestList.clear()
+                    suggestList = mutableListOf("直接搜索“${keyword}”")
+                    for (i in 0 until jsonArray.length()) {
+                        val value = jsonArray.getJSONObject(i).getString("value")
+                        suggestList.add(value)
+                    }
                 }
             }
         } catch (e: Exception) {
