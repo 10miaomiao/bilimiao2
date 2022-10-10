@@ -194,9 +194,9 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             item.member.uname,
             item.member.avatar,
             NumberUtil.converCTime(item.ctime),
-             item.reply_control.location,
+             item.reply_control,
             item.floor,
-            item.content,
+//            item.content,
              item.like,
              item.count,
         )

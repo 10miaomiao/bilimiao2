@@ -56,7 +56,7 @@ class VideoCommentListViewModel(
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo<VideoCommentInfo>>()
+                .gson<ResultInfo<VideoCommentInfo>>(isDebug = true)
             if (res.code == 0) {
                 val result = res.data.replies
                 if (result.size < list.pageSize) {

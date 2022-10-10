@@ -18,8 +18,21 @@ object DebugMiao {
             for (i in 1 until str.size) {
                 append(" , " + str[i].getString())
             }
+        }.toString()
+        val maxLength = 2001 - TAG.length
+        //大于4000时
+        while (message.length > maxLength) {
+            Log.d(TAG, message.substring(0, maxLength))
+            message = message.substring(maxLength)
         }
-        Log.d(TAG, message.toString())
+        Log.d(TAG, message)
+    }
+
+    fun i(tag: String, msg: String) {  //信息太长,分段打印
+        //因为String的length是字符数量不是字节数量所以为了防止中文字符过多，
+        //  把4*1024的MAX字节打印长度改为2001字符数
+        var msg = msg
+
     }
 
     fun logw(vararg str: Any?) {

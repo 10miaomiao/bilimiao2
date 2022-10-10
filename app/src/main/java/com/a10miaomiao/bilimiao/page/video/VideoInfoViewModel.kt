@@ -39,6 +39,7 @@ class VideoInfoViewModel(
     var relates = mutableListOf<VideoRelateInfo>()
     var pages = mutableListOf<VideoPageInfo>()
     var staffs = mutableListOf<VideoStaffInfo>()
+    var tags = mutableListOf<VideoTagInfo>()
 
     var loading = false
     var loadState = LoadMoreStatus.Loading
@@ -70,6 +71,7 @@ class VideoInfoViewModel(
                 data.desc = BiliUrlMatcher.customString(data.desc)
                 val relatesData = data.relates ?: listOf()
                 val staffData = data.staff ?: listOf()
+                val tagData = data.tag ?: listOf()
                 //                val relatesData = data.relates.filter {
 //                    filterStore.filterWord(it.title)
 //                            && it.owner != null
@@ -88,6 +90,7 @@ class VideoInfoViewModel(
                     relates = relatesData.filterNot { it.aid.isNullOrEmpty() }.toMutableList()
                     pages = pagesData.toMutableList()
                     staffs = staffData.toMutableList()
+                    tags = tagData.toMutableList()
                 }
                 withContext(Dispatchers.Main) {
                     jumpSeason(data)
