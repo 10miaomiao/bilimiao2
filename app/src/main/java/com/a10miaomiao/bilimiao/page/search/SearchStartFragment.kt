@@ -45,7 +45,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
-    private val ID_editText = 102
+    private val ID_editText = View.generateViewId()
 
     private lateinit var mEditText: EditText
 
@@ -116,6 +116,10 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
     }
 
     private val handleTagItemClick = OnItemClickListener { adapter, view, position ->
+        if (position == 0) {
+            handleSearchClick.onClick(view)
+            return@OnItemClickListener
+        }
         val item = adapter.data[position]
         if (item is String) {
             viewModel.startSearch(item, view)
@@ -170,8 +174,10 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                     horizontalPadding = iconSize + dip(15)
 
                     imeOptions = EditorInfo.IME_ACTION_SEARCH
-                    setOnEditorActionListener(handleEditorAction)
+                    isSingleLine = true
+                    inputType = EditorInfo.TYPE_CLASS_TEXT
 
+                    setOnEditorActionListener(handleEditorAction)
                 }..lParams(matchParent, dip(48))
                 +imageView {
                     setImageResource(R.drawable.ic_search_24dp)

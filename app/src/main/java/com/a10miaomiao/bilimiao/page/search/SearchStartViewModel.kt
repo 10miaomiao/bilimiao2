@@ -60,6 +60,7 @@ class SearchStartViewModel (
                     suggestList = (0 until jsonArray.length()).map {
                         jsonArray.getJSONObject(it).getString("value")
                     }.toMutableList()
+                    suggestList.add(0, "直接搜索“${keyword}”")
                 }
             }
         } catch (e: Exception) {

@@ -47,6 +47,7 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 requestLayout()
+                onPlayerChanged?.invoke(true)
             }
         }
 
