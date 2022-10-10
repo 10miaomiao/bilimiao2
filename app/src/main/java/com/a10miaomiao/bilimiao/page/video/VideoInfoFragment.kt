@@ -29,6 +29,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -40,6 +41,7 @@ import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget._setContent
 import com.a10miaomiao.bilimiao.widget.expandableTextView
@@ -47,6 +49,9 @@ import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -293,6 +298,15 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private val handlePageItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.pages[position]
         playVideo(item.cid, item.part)
+    }
+
+    private val handleTagsItemClick = OnItemClickListener { adapter, view, position ->
+        val item = viewModel.tags[position]
+        val nav = findNavController()
+        val args = bundleOf(
+            MainNavGraph.args.text to item.tag_name
+        )
+        nav.navigate(MainNavGraph.action.global_to_searchResult, args)
     }
 
     private val handleRelateItemClick = OnItemClickListener { adapter, view, position ->
@@ -542,6 +556,46 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         }
     }
 
+    val itemTagUi = miaoBindingItemUi<VideoTagInfo> { item, index ->
+        frameLayout {
+            views {
+                +frameLayout {
+                    apply(ViewStyle.roundRect(dip(5)))
+                    setBackgroundResource(config.selectableItemBackground)
+
+                    views {
+                        +textView {
+                            backgroundColor = config.blockBackgroundColor
+                            padding = dip(5)
+                            _text = item.tag_name
+                        }
+                    }
+                }..lParams {
+                    rightMargin =  dip(8)
+                    bottomMargin = dip(5)
+                }
+            }
+        }
+    }
+
+    fun MiaoUI.tagsView(): View {
+        return recyclerView {
+            isNestedScrollingEnabled = false
+            _miaoLayoutManage(
+                FlexboxLayoutManager(requireActivity()).apply {
+                    flexDirection = FlexDirection.ROW
+                    flexWrap = FlexWrap.WRAP
+                }
+            )
+            _miaoAdapter(
+                itemUi = itemTagUi,
+                items = viewModel.tags
+            ) {
+                setOnItemClickListener(handleTagsItemClick)
+            }
+        }
+    }
+
     fun MiaoUI.headerView(): View {
         val videoInfo = viewModel.info
         return verticalLayout {
@@ -640,6 +694,12 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                     _setContent(viewModel.info?.desc ?: "")
                     linkClickListener = handleLinkClickListener
                 }..lParams {
+                    width = matchParent
+                    height = wrapContent
+                    topMargin = dip(10)
+                }
+
+                +tagsView()..lParams {
                     width = matchParent
                     height = wrapContent
                     topMargin = dip(10)
