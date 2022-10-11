@@ -100,7 +100,9 @@ object ApiHelper {
     fun addAccessKeyAndMidToParams(params: MutableMap<String, String?>){
         BilimiaoCommApp.commApp.loginInfo?.token_info?.let{
             params["access_key"] = it.access_token
-            params["mid"] = it.mid.toString()
+            if (!params.contains("mid")) {
+                params["mid"] = it.mid.toString()
+            }
         }
     }
 

@@ -42,7 +42,7 @@ class UserArchiveListViewModel(
     val name by lazy { fragment.requireArguments().getString(MainNavGraph.args.name) }
 
     var regionList = listOf<CheckPopupMenu.MenuItemInfo<Int>>(
-        CheckPopupMenu.MenuItemInfo("全部视频", 0),
+        CheckPopupMenu.MenuItemInfo("全部(0)", 0),
     )
     var region = regionList[0]
 
@@ -54,6 +54,7 @@ class UserArchiveListViewModel(
     var rankOrder = rankOrderList[0]
 
     var triggered = false
+    var total = 0
     var list = PaginationInfo<SubmitVideosInfo.DataBean>()
 
     init {
@@ -88,9 +89,12 @@ class UserArchiveListViewModel(
                     }
                     list.data.addAll(vlist)
                 }
+                if (region.value == 0) {
+                    total = res.data.page.count
+                }
                 res.data.list.tlist?.let {
                     regionList = listOf(
-                        CheckPopupMenu.MenuItemInfo("全部(${res.data.page.count})", 0),
+                        CheckPopupMenu.MenuItemInfo("全部(${total})", 0),
                         *it.values.map {
                             CheckPopupMenu.MenuItemInfo("${it.name}(${it.count})", it.tid)
                         }.toTypedArray()
