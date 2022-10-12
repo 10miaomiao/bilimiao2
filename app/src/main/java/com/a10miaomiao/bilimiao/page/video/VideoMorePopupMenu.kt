@@ -14,6 +14,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import splitties.toast.toast
 
 class VideoMorePopupMenu (
@@ -78,7 +79,7 @@ class VideoMorePopupMenu (
                 if (info != null) {
                     val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
                     val args = bundleOf(
-                        MainNavGraph.args.video to info
+                        MainNavGraph.args.video to info.copy(relates = emptyList())
                     )
                     nav.navigate(MainNavGraph.action.global_to_downloadVideoCreate, args)
                 } else {

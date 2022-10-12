@@ -28,7 +28,7 @@ data class VideoInfo(
     val pubdate: Long,
     val relates: List<VideoRelateInfo>?,
     var req_user: VideoReqUserInfo,
-    val rights: VideoRelateInfo,
+//    val rights: VideoRelateInfo,
     val season: SeasonInfo?,
     val staff: List<VideoStaffInfo>?,
     var stat: VideoStatInfo,
