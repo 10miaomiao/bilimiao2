@@ -2,6 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.Bilimiao" parent="Theme.Material3.Dark.NoActionBar">
         <item name="themeName">@string/app_name</item>
+        <item name="isLightTheme">@bool/dark_theme</item>
         <item name="colorPrimary">@color/theme_color_primary</item>
         <item name="colorPrimaryVariant">@color/theme_color_primary_dark</item>
         <item name="colorOnPrimary">@color/theme_color_primary_trans</item>

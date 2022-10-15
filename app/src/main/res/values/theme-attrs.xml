@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="Theme">
-        <attr name="blockBackground" format="color" />
-        <attr name="defaultBackgroundColor" format="color" />
-        <attr name="foregroundColor" format="color" />
-        <attr name="lineColor" format="color" />
-        <attr name="themeName" format="string" />
-    </declare-styleable>
-
     <declare-styleable name="ExpandableTextView">
         <attr format="integer" name="ep_max_line"/>
         <attr format="boolean" name="ep_need_expand"/>

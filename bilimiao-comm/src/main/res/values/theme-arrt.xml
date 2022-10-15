@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Theme">
+        <attr name="blockBackground" format="color" />
+        <attr name="defaultBackgroundColor" format="color" />
+        <attr name="foregroundColor" format="color" />
+        <attr name="lineColor" format="color" />
+        <attr name="themeName" format="string" />
+        <attr name="isLightTheme" format="boolean" />
+    </declare-styleable>
+
+</resources>
