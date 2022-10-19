@@ -1,4 +1,5 @@
-package com.a10miaomiao.bilimiao.widget.picker
+package com.a10miaomiao.bilimiao.comm.store.model
+
 
 import java.util.*
 
@@ -53,22 +54,22 @@ class DateModel() {
         }
     }
 
-        /**
-         * 根据月份获取 TimeTo
-         */
-        fun getTimeToByMonth(): DateModel {
-            return DateModel().let {
-                it.year = year
-                it.month = month
-                it.date = getMonthDate()
-                it
-            }
+    /**
+     * 根据月份获取 TimeTo
+     */
+    fun getTimeToByMonth(): DateModel {
+        return DateModel().let {
+            it.year = year
+            it.month = month
+            it.date = getMonthDate()
+            it
         }
+    }
 
     /**
      * 获取某一月份的天数
      */
-     private fun getMonthDate(isLeapYear: Boolean, month: Int): Int {
+    private fun getMonthDate(isLeapYear: Boolean, month: Int): Int {
         if (month in 1..12) {
             val dates = intArrayOf(31, if (isLeapYear) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
             return dates[month - 1]
@@ -98,6 +99,12 @@ class DateModel() {
         val startL = getDate().time
         val endL = date.getDate().time
         return ((endL - startL) / (1000 * 60 * 60 * 24)).toInt()
+    }
+
+    fun set(newDate: DateModel) {
+        year = newDate.year
+        month = newDate.month
+        date = newDate.date
     }
 
     fun copy(): DateModel {

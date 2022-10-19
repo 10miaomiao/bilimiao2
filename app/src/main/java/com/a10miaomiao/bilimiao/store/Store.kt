@@ -8,6 +8,7 @@ import cn.a10miaomiao.download.DownloadService
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware

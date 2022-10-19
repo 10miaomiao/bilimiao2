@@ -24,6 +24,10 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.datePickerView
 import com.a10miaomiao.bilimiao.widget.monthPickerView
+import com.a10miaomiao.bilimiao.widget.rangeDateView
+import com.a10miaomiao.bilimiao.widget.rangedate.RangeDateUtils
+import com.a10miaomiao.bilimiao.widget.rangedate.model.SelectDateInfo
+import com.a10miaomiao.bilimiao.widget.rangedate.model.SelectDateType
 import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.dimensions.dip
@@ -112,79 +116,18 @@ class TimeSettingFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private var mSelectDateType: SelectDateType = SelectDateType.TYPE_NORMAL
+    private var mSelectDateInfo: SelectDateInfo = RangeDateUtils.getDefaultSelectDate()
+
     fun MiaoUI.customView(): View {
         return verticalLayout {
             gravity = Gravity.CENTER
 
             views {
-                +datePickerView {
-                    miaoEffect(null) {
-                        date = viewModel.timeFrom
-                    }
-                    onChanged = viewModel::changedTimeFromPicker
-                }..lParams {
-                    verticalMargin = config.dividerSize
-                }
-
-                +textView {
-                    text = "至"
-                }..lParams {
-                    horizontalMargin = dip(10)
-                }
-
-                +datePickerView {
-                    miaoEffect(null) {
-                        date = viewModel.timeTo
-                    }
-                    onChanged = viewModel::changedTimeToPicker
-                }..lParams {
-                    verticalMargin = config.dividerSize
-                }
-
-                +horizontalLayout {
-                    gravity = Gravity.CENTER_VERTICAL
-
-                    views {
-                        +textView {
-                            _text = "时间间隔：${viewModel.gapCount}天"
-                        }..lParams { rightMargin = dip(5) }
-
-                        +textView {
-                            _text = if (viewModel.isLink) {
-                                "已锁定"
-                            } else {
-                                "未锁定"
-                            }
-                        }
-
-                        +switch {
-                            _isEnabled = !(viewModel.gapCount < 0 || viewModel.gapCount  > 31)
-                            isChecked = viewModel.isLink
-                            setOnCheckedChangeListener(handleCheckedChange)
-                            textOn = "已锁定"
-                            textOff = "未锁定"
-                        }
-                    }
-
-                }
-
-                +textView {
-                    textColorResource = R.color.red
-                    miaoEffect(viewModel.gapCount) {
-                        if (it < 0) {
-                            visibility = View.VISIBLE
-                            text = "起始时间不能大于结束时间"
-                        } else if (it > 30) {
-                            visibility = View.VISIBLE
-                            text = "时间跨度不能超过30天"
-                        } else {
-                            visibility = View.GONE
-                        }
-                    }
-                }
+                +rangeDateView {
+                    initDate(mSelectDateType, mSelectDateInfo)
+                }..lParams(matchParent, wrapContent)
             }
-
-
 
         }
 

@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.store.Store
-import com.a10miaomiao.bilimiao.store.TimeSettingStore
-import com.a10miaomiao.bilimiao.widget.picker.DateModel
+import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -34,7 +34,7 @@ class TimeSettingViewModel(
     }
 
     fun saveTime() {
-        timeSettingStore.setTime(timeFrom.copy(), timeTo.copy())
+        timeSettingStore.setTime(0, timeFrom.copy(), timeTo.copy())
         timeSettingStore.save(spinnerSelected, isLink)
     }
 

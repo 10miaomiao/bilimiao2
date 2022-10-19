@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.navigation.findNavController
@@ -14,10 +15,11 @@ import androidx.viewpager.widget.ViewPager
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
+import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.*
-import com.a10miaomiao.bilimiao.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
@@ -70,8 +72,13 @@ class RegionFragment : Fragment(), DIAware , MyPage {
                 pm.show()
             }
             MenuKeys.time -> {
-                val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-                nav.navigate(Uri.parse("bilimiao://time/setting"))
+                val nav = requireActivity().findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
+                val url = "bilimiao://time/setting"
+                nav.navigate(
+                    MainNavGraph.action.global_to_compose, bundleOf(
+                        MainNavGraph.args.url to url
+                    )
+                )
             }
         }
     }

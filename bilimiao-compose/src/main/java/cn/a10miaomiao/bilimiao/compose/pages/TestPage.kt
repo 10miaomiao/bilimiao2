@@ -1,11 +1,14 @@
 package cn.a10miaomiao.bilimiao.compose.pages
 
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
@@ -29,6 +32,7 @@ import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavHostController
 import androidx.navigation.Navigation
 import androidx.navigation.compose.rememberNavController
+import bilibili.broadcast.v1.Mod
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
@@ -62,6 +66,25 @@ class TestPageViewModel(
 
 }
 
+
+@Composable
+fun ColorBox(
+    name: String,
+    color: Color,
+) {
+    Row() {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(color)
+        )
+        Text(
+            text = name,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
 @Composable
 fun TestPage() {
     val viewModel: TestPageViewModel = diViewModel()
@@ -69,22 +92,36 @@ fun TestPage() {
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.windowInsets
 
-    val nav = localNavController()
-//    val navController = rememberNavController()
+    val scrollState = rememberScrollState()
 
-    val toUserDatailPage = remember(nav) {
-        { id: String ->
-//            navController.navigate("user/$id/follow")
-//            nav.navigate(
-//                "bilimiao://user/$id".toUri(),
-//                defaultNavOptions
-//            )
-        }
-    }
-
-    "".isBlank()
     PageConfig(title = "测试页面")
-    Column() {
+    Column(
+        modifier = Modifier.verticalScroll(scrollState)
+    ) {
         Text(text = "hello world")
+        ColorBox("primary", MaterialTheme.colorScheme.primary)
+        ColorBox("onPrimary", MaterialTheme.colorScheme.onPrimary)
+        ColorBox("primaryContainer", MaterialTheme.colorScheme.primaryContainer)
+        ColorBox("onPrimaryContainer", MaterialTheme.colorScheme.onPrimaryContainer)
+        ColorBox("inversePrimary", MaterialTheme.colorScheme.inversePrimary)
+
+        ColorBox("secondary", MaterialTheme.colorScheme.secondary)
+        ColorBox("onSecondary", MaterialTheme.colorScheme.onSecondary)
+        ColorBox("secondaryContainer", MaterialTheme.colorScheme.secondaryContainer)
+        ColorBox("onSecondaryContainer", MaterialTheme.colorScheme.onSecondaryContainer)
+
+        ColorBox("tertiary", MaterialTheme.colorScheme.tertiary)
+        ColorBox("onTertiary", MaterialTheme.colorScheme.onTertiary)
+        ColorBox("tertiaryContainer", MaterialTheme.colorScheme.tertiaryContainer)
+        ColorBox("onTertiaryContainer", MaterialTheme.colorScheme.onTertiaryContainer)
+
+
+        ColorBox("background", MaterialTheme.colorScheme.background)
+        ColorBox("onBackground", MaterialTheme.colorScheme.onBackground)
+        ColorBox("surface", MaterialTheme.colorScheme.surface)
+        ColorBox("onSurface", MaterialTheme.colorScheme.onSurface)
+
+        ColorBox("outline", MaterialTheme.colorScheme.outline)
+        ColorBox("outlineVariant", MaterialTheme.colorScheme.outlineVariant)
     }
 }

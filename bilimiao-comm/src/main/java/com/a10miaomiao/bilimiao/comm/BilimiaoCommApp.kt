@@ -17,6 +17,8 @@ class BilimiaoCommApp(
 
     companion object {
         lateinit var commApp: BilimiaoCommApp
+
+        const val APP_NAME = "bilimiao"
     }
 
     fun onCreate() {

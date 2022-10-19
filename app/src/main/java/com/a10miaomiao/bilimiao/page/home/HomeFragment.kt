@@ -99,7 +99,10 @@ class HomeFragment : Fragment(), DIAware {
 
     val handleTimeSettingClick = View.OnClickListener {
         val nav = requireActivity().findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
-        nav.navigate(Uri.parse("bilimiao://time/setting"))
+        val url = "bilimiao://time/setting"
+        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
+            MainNavGraph.args.url to url
+        ))
     }
 
     val handleAdClick = View.OnClickListener {
