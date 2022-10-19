@@ -1,11 +1,12 @@
-package com.a10miaomiao.bilimiao.store
+package com.a10miaomiao.bilimiao.comm.store
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
-import com.a10miaomiao.bilimiao.Bilimiao
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.a10miaomiao.bilimiao.widget.picker.DateModel
+import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -16,6 +17,9 @@ class TimeSettingStore(override val di: DI) :
 
     companion object {
         const val TIME_TYPE = "timeType"
+        const val TIME_TYPE_CURRENT = 0
+        const val TIME_TYPE_MONTH = 1
+        const val TIME_TYPE_CUSTOM = 2
         const val TIME_FROM = "timeFrom"
         const val TIME_TO = "timeTo"
         const val TIME_IS_LINK = "timeIsLink"
@@ -25,6 +29,7 @@ class TimeSettingStore(override val di: DI) :
     data class State (
         var timeFrom: DateModel,
         var timeTo: DateModel,
+        var timeType: Int = TIME_TYPE_CURRENT,
         var rankOrder: String = "click"
     )
 
@@ -43,9 +48,12 @@ class TimeSettingStore(override val di: DI) :
     }
 
     fun initState () {
+        val sp = activity.getSharedPreferences(BilimiaoCommApp.APP_NAME, Context.MODE_PRIVATE)
+        val timeType = readTimeType(sp)
         setTime(
-            read(TIME_FROM),
-            read(TIME_TO)
+            timeType,
+            readTime(sp, timeType, TIME_FROM),
+            readTime(sp, timeType, TIME_TO)
         )
     }
 
@@ -60,25 +68,33 @@ class TimeSettingStore(override val di: DI) :
         }
     }
 
-    fun read(type: String): DateModel {
+    fun readTimeType(
+        sp: SharedPreferences,
+    ): Int {
+        return sp.getInt(TIME_TYPE, TIME_TYPE_CURRENT)
+    }
+
+    fun readTime(
+        sp: SharedPreferences,
+        timeType: Int,
+        timeName: String,
+    ): DateModel {
         val dateModel = DateModel()
-        val sp = activity.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
-        val timeType = sp.getInt(TIME_TYPE, 0)
         if (timeType == 0) {
             val now = Date()
             dateModel.setDate(now)
-            if (type == TIME_FROM) {
+            if (timeName == TIME_FROM) {
                 return dateModel.getTimeByGapCount(-7)
             }
             return dateModel
         }
-        val timeStr = sp.getString(type, "20180909")!!
+        val timeStr = sp.getString(timeName, "20180909")!!
         dateModel.setValue(timeStr)
         return dateModel
     }
 
     fun save(timeType: Int, isLink: Boolean) {
-        val sp = activity.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
+        val sp = activity.getSharedPreferences(BilimiaoCommApp.APP_NAME, Context.MODE_PRIVATE)
         val editor = sp.edit()
         editor.putString(TIME_FROM, state.timeFrom.getValue())
         editor.putString(TIME_TO, state.timeTo.getValue())
@@ -88,14 +104,17 @@ class TimeSettingStore(override val di: DI) :
     }
 
     fun setTime(
+        tType: Int,
         tFrom: DateModel,
         tTo: DateModel,
     ) {
         if (
-            state.timeFrom.diff(tFrom)
+            tType != state.timeType
+            || state.timeFrom.diff(tFrom)
             || state.timeTo.diff(tTo)
         ) {
             setState {
+                timeType= tType
                 timeFrom = tFrom
                 timeTo = tTo
             }

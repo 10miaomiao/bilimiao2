@@ -8,6 +8,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.navigation.arguments
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.content
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 
 
@@ -15,7 +16,7 @@ object PageRoute {
 
     val start = "bilimiao://start" content { BlankPage() }
 
-    val test = "bilimiao://test" content { BlankPage() }
+    val test = "bilimiao://test" content { TestPage() }
 
     object User {
         val follow = "bilimiao://user/{id}/follow" arguments listOf(
@@ -26,10 +27,16 @@ object PageRoute {
         }
     }
 
+    object Time {
+        val setting = "bilimiao://time/setting" content { TimeSettingPage() }
+    }
+
     fun builder(builder: NavGraphBuilder) = builder.run {
         +start.build(provider)
         +test.build(provider)
         +User.follow.build(provider)
+
+        +Time.setting.build(provider)
     }
 
 }

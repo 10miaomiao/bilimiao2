@@ -7,16 +7,10 @@ import androidx.lifecycle.viewModelScope
 import bilibili.app.show.v1.RankGrpc
 import bilibili.app.show.v1.RankOuterClass
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo2
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.store.FilterStore
-import com.a10miaomiao.bilimiao.store.TimeSettingStore
-import com.a10miaomiao.bilimiao.widget.picker.DateModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
