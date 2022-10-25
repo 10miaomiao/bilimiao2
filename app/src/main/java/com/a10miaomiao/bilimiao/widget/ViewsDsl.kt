@@ -3,15 +3,11 @@ package com.a10miaomiao.bilimiao.widget
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StyleRes
-import androidx.core.widget.NestedScrollView
-import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.image.RCImageView
 import com.a10miaomiao.bilimiao.widget.layout.LimitedFrameLayout
 import com.a10miaomiao.bilimiao.widget.picker.DatePickerView
 import com.a10miaomiao.bilimiao.widget.picker.MonthPickerView
-import com.a10miaomiao.bilimiao.widget.rangedate.RangeDateView
-import com.google.android.material.tabs.TabLayout
 import splitties.views.dsl.core.*
 
 inline fun View.rcImageView(
@@ -75,12 +71,4 @@ inline fun View.monthPickerView(
     initView: MonthPickerView.() -> Unit = {}
 ): MonthPickerView {
     return view({ MonthPickerView(it) }, id).apply(initView)
-}
-
-inline fun View.rangeDateView(
-    @IdRes id: Int = View.NO_ID,
-    @StyleRes theme: Int = NO_THEME,
-    initView: RangeDateView.() -> Unit = {}
-): RangeDateView {
-    return view({ RangeDateView(it) }, id).apply(initView)
 }

@@ -30,7 +30,7 @@ fun TextBox(
 ) {
     Surface(
         color = if (active) {
-            MaterialTheme.colorScheme.primaryContainer
+            MaterialTheme.colorScheme.tertiaryContainer
         } else {
             Color.Transparent
         },
