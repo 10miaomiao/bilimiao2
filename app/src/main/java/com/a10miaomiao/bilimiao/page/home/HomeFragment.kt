@@ -366,15 +366,15 @@ class HomeFragment : Fragment(), DIAware {
                     bottomMargin = config.dividerSize
                 }
 
-//                +button {
-//                    text = "测试"
-//                    setOnClickListener {
-//                        val nav = it.findNavController()
-//                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-//                            MainNavGraph.args.url to "bilimiao://test"
-//                        ))
-//                    }
-//                }
+                +button {
+                    text = "测试"
+                    setOnClickListener {
+                        val nav = it.findNavController()
+                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
+                            MainNavGraph.args.url to "bilimiao://test"
+                        ))
+                    }
+                }
 
             }
 

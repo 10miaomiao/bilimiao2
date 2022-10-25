@@ -76,7 +76,7 @@ class TimeSettingPageViewMode(
     val currentTime = MutableStateFlow(TimeInfo().apply {
         val now = Date()
         timeTo.setDate(now)
-        timeFrom.set(timeFrom.getTimeByGapCount(-7)) //最近7天
+        timeFrom.set(timeTo.getTimeByGapCount(-7)) //最近7天
     })
 
     val monthTime = MutableStateFlow(TimeInfo().apply {
@@ -88,7 +88,8 @@ class TimeSettingPageViewMode(
     })
 
     val customTime = MutableStateFlow(TimeInfo().apply {
-        timeFrom.year = -1
+        timeFrom.set(timeSettingStore.state.timeFrom)
+        timeTo.set(timeSettingStore.state.timeTo)
     })
 
     fun setMonthTime(year: Int, month: Int) {
@@ -108,6 +109,9 @@ class TimeSettingPageViewMode(
             if (start != null && end != null) {
                 timeFrom.set(start)
                 timeTo.set(end)
+            } else if (start != null) {
+                Toast.makeText(fragment.requireActivity(), "时间间隔不能大于30天", Toast.LENGTH_LONG)
+                    .show()
             } else {
                 timeFrom.year = -1
             }

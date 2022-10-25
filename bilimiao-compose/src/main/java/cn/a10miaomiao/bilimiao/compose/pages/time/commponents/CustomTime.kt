@@ -10,22 +10,21 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPageViewMode
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import java.util.*
+import kotlin.math.abs
 import kotlin.math.min
 
 @Composable
@@ -52,29 +51,27 @@ fun TextBox(
     modifier: Modifier,
     text: String,
     textColor: Color = Color.Unspecified,
+    height: Dp = 25.dp,
     onClick: (() -> Unit)? = null,
     status: TextBoxStatus = TextBoxStatus.Enable
 ) {
     Surface(
         modifier = if (onClick != null) {
             modifier.clickable(onClick = onClick)
-        } else {
-            modifier
-        }.padding(vertical = 2.dp),
+        } else modifier,
         color = if (status == TextBoxStatus.Start || status == TextBoxStatus.End) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            Color.Transparent
-        },
+            MaterialTheme.colorScheme.tertiaryContainer
+        } else Color.Transparent,
         shape = RoundedCornerShape(5.dp),
     ) {
         Column(
             modifier = Modifier
+                .padding(vertical = 5.dp)
                 .fillMaxWidth()
-                .height(30.dp)
+                .height(height)
                 .let {
                       if (status == TextBoxStatus.Middle) {
-                          it.background(MaterialTheme.colorScheme.secondaryContainer)
+                          it.background(MaterialTheme.colorScheme.tertiaryContainer)
                       } else it
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -84,6 +81,19 @@ fun TextBox(
                 text = text,
                 color = textColor
             )
+            if (status == TextBoxStatus.Start) {
+                Text(
+                    text = "起",
+                    color = textColor,
+                    fontSize = 10.sp,
+                )
+            } else if (status == TextBoxStatus.End) {
+                Text(
+                    text = "止",
+                    color = textColor,
+                    fontSize = 10.sp,
+                )
+            }
         }
     }
 }
@@ -142,6 +152,8 @@ fun Header(
     val titles = remember {
         listOf("一", "二", "三", "四", "五", "六", "日")
     }
+    var expanded by remember { mutableStateOf(false) }
+
     Column() {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -162,13 +174,30 @@ fun Header(
                     }
                 }
             )
-            MonthTextBox(
-                year = year.value,
-                month = month.value,
-                textColor = MaterialTheme.colorScheme.onBackground,
-                onClick = {
+            Box {
+                MonthTextBox(
+                    year = year.value,
+                    month = month.value,
+                    textColor = MaterialTheme.colorScheme.onBackground,
+                    onClick = {  expanded = !expanded },
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                ) {
+                    for (y in minDate.year..maxDate.year) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = "${y}年")
+                            },
+                            onClick = {
+                                year.value = y
+                                expanded = false
+                            }
+                        )
+                    }
                 }
-            )
+            }
             MonthTextBox(
                 year = year.value,
                 month = month.value + 1,
@@ -213,10 +242,10 @@ fun CustomTime(
     val maxDate = viewModel.maxDate
     val minDate = viewModel.minDate
 
-    val year = remember {
+    var year = remember {
         mutableStateOf(2009)
     }
-    val month = remember {
+    var month = remember {
         mutableStateOf(9)
     }
     val monthStartWeek = remember(year.value, month.value) {
@@ -231,6 +260,15 @@ fun CustomTime(
     }
     var endTime by remember {
         mutableStateOf<DateModel?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        if (timeFrom.year != -1) {
+            startTime = timeFrom.copy()
+            endTime = timeTo.copy()
+            year.value = timeFrom.year
+            month.value = timeFrom.month
+        }
     }
 
     val itemClick = remember(viewModel) {
@@ -248,7 +286,8 @@ fun CustomTime(
                     it.month = month.value
                     it.date = i
                 }
-                if (dateModel.year >= _startTime.year
+                if (abs(_startTime.getGapCount(dateModel)) > 30) {
+                } else if (dateModel.year >= _startTime.year
                     && dateModel.month >= _startTime.month
                     && dateModel.date > _startTime.date
                 ) {
@@ -268,6 +307,7 @@ fun CustomTime(
     }
 
     Column() {
+
         Header(
             year = year,
             month = month,
@@ -276,7 +316,7 @@ fun CustomTime(
         )
 
         Column(
-            modifier = Modifier.height(210.dp)
+            modifier = Modifier.height(270.dp)
         ) {
             var total = monthDayNum + monthStartWeek
             var num = 0
@@ -284,41 +324,51 @@ fun CustomTime(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
+                    val isMaxMonth = (year.value == maxDate.year && month.value == maxDate.month)
                     for (dayOfWeek in num..(num + 6)) {
                         val day = dayOfWeek - monthStartWeek + 1
-                        val curTime = DateModel().also {
-                            it.year = year.value
-                            it.month = month.value
-                            it.date = day
-                        }
-                        val _startTime = startTime
-                        val _endTime = endTime
-                        val status = if (_startTime == null) {
-                            TextBoxStatus.Enable
-                        } else if (!curTime.diff(_startTime)) {
-                            TextBoxStatus.Start
-                        } else if (_endTime == null) {
-                            TextBoxStatus.Enable
-                        } else if (!curTime.diff(_endTime)) {
-                            TextBoxStatus.End
-                        } else {
-                            if (_startTime.getGapCount(curTime) > 0
-                                && _endTime.getGapCount(curTime) < 0
-                            ) {
-                                TextBoxStatus.Middle
-                            } else {
-                                TextBoxStatus.Enable
+                        if (day in 1..monthDayNum && !(isMaxMonth && day > maxDate.date)) {
+                            val curTime = DateModel().also {
+                                it.year = year.value
+                                it.month = month.value
+                                it.date = day
                             }
-                        }
-                        if (day in 1..monthDayNum) {
+                            val _startTime = startTime
+                            val _endTime = endTime
+                            val status = if (_startTime == null) {
+                                TextBoxStatus.Enable
+                            } else if (!curTime.diff(_startTime)) {
+                                TextBoxStatus.Start
+                            } else if (_endTime == null) {
+                                if (abs(_startTime.getGapCount(curTime)) > 30) {
+                                    TextBoxStatus.Disable
+                                } else {
+                                    TextBoxStatus.Enable
+                                }
+                            } else if (!curTime.diff(_endTime)) {
+                                TextBoxStatus.End
+                            } else {
+                                if (_startTime.getGapCount(curTime) > 0
+                                    && _endTime.getGapCount(curTime) < 0
+                                ) {
+                                    TextBoxStatus.Middle
+                                } else {
+                                    TextBoxStatus.Enable
+                                }
+                            }
                             TextBox(
                                 text =  day.toString(),
                                 modifier = Modifier.weight(1f),
-                                textColor = if (dayOfWeek % 7 > 4) {
+                                textColor = if (status == TextBoxStatus.Disable) {
+                                    // 禁用
+                                    MaterialTheme.colorScheme.outlineVariant
+                                } else if (dayOfWeek % 7 > 4) {
+                                    // 周六、日
                                     MaterialTheme.colorScheme.onBackground
                                 } else {
                                     MaterialTheme.colorScheme.outline
                                 },
+                                height = 34.dp,
                                 status = status,
                                 onClick = {
                                     itemClick(day)

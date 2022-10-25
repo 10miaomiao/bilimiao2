@@ -23,7 +23,6 @@ import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
 import com.a10miaomiao.bilimiao.page.setting.*
-import com.a10miaomiao.bilimiao.page.time.TimeSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
@@ -65,9 +64,6 @@ object MainNavGraph {
 //                type = NavType.StringType
 //                nullable = true
 //            }
-        }
-        val timeSetting = f<TimeSettingFragment>() {
-            deepLink("bilimiao://time/setting")
         }
         val setting = f<SettingFragment>() {
             deepLink("bilimiao://setting")
