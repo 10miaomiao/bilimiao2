@@ -99,7 +99,7 @@ class TimeSettingPageViewMode(
             dateModel.month = month
             dateModel.date = 1
             timeFrom.set(dateModel)
-            dateModel.date = getMonthDayNum(dateModel.year, dateModel.year)
+            dateModel.date = getMonthDayNum(dateModel.year, dateModel.month)
             timeTo.set(dateModel)
         }
     }
