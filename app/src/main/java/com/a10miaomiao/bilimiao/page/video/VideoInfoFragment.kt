@@ -41,6 +41,7 @@ import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget._setContent
@@ -284,8 +285,18 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         viewModel.info?.let { info ->
             val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             val args = bundleOf(
-                MainNavGraph.args.video to info
+                MainNavGraph.args.video to VideoPagesParame(
+                    aid = info.aid,
+                    title = info.title,
+                    pic = info.pic,
+                    ownerId = info.owner.mid,
+                    ownerName = info.owner.name,
+                    pages = info.pages.map {
+                        VideoPagesParame.Page(it.cid, it.part)
+                    }
+                )
             )
+            DebugMiao.log(args)
             nav.navigate(MainNavGraph.action.global_to_videoPages, args)
         }
     }

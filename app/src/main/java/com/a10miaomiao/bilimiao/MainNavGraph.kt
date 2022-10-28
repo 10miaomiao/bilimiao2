@@ -6,7 +6,6 @@ import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.page.MainFragment
@@ -23,7 +22,6 @@ import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
 import com.a10miaomiao.bilimiao.page.setting.*
-import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.user.*
@@ -31,10 +29,8 @@ import com.a10miaomiao.bilimiao.page.user.bangumi.MyBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
-import com.a10miaomiao.bilimiao.page.video.VideoAddFavoriteFragment
-import com.a10miaomiao.bilimiao.page.video.VideoCoinFragment
-import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
-import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailArg
+import com.a10miaomiao.bilimiao.page.video.*
+import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailParame
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import kotlin.reflect.KClass
@@ -155,12 +151,12 @@ object MainNavGraph {
         val videoPages = f<VideoPagesFragment> {
 //            deepLink("bilimiao://video/pages")
             argument(args.video) {
-                type = NavType.ParcelableType(VideoPageInfo::class.java)
+                type = NavType.ParcelableType(VideoPagesParame::class.java)
                 nullable = false
             }
             argument(args.index) {
                 type = NavType.IntType
-                nullable = false
+                defaultValue = 0
             }
         }
         val videoCoin = f<VideoCoinFragment> {
@@ -181,7 +177,7 @@ object MainNavGraph {
         }
         val videoCommentDetail = f<VideoCommentDetailFragment> {
             argument(args.reply) {
-                type = NavType.ParcelableType(VideoCommentDetailArg::class.java)
+                type = NavType.ParcelableType(VideoCommentDetailParame::class.java)
                 nullable = false
             }
         }
