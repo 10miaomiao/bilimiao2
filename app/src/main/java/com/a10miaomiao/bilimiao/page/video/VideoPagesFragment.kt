@@ -50,7 +50,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
-    private val video by lazy { requireArguments().getParcelable<VideoInfo>(MainNavGraph.args.video)!! }
+    private val video by lazy { requireArguments().getParcelable<VideoPagesParame>(MainNavGraph.args.video)!! }
     private val pages by lazy { video.pages.toMutableList() }
 
     override fun onCreateView(
@@ -73,14 +73,14 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
             id = item.cid,
             coverUrl = video.pic,
             title = item.part,
-            ownerId = video.owner.mid,
-            ownerName = video.owner.name,
+            ownerId = video.ownerId,
+            ownerName = video.ownerName,
         )
         basePlayerDelegate.openPlayer(playerSource)
 //        Navigation.findNavController(view).popBackStack()
     }
 
-    val itemUi = miaoBindingItemUi<VideoPageInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<VideoPagesParame.Page> { item, index ->
         frameLayout {
             setBackgroundResource(R.drawable.shape_corner)
             layoutParams = ViewGroup.MarginLayoutParams(matchParent, wrapContent).apply {
