@@ -147,6 +147,7 @@ class TimeSettingPageViewMode(
             timeInfo.timeFrom.copy(),
             timeInfo.timeTo.copy(),
         )
+        timeSettingStore.save()
         fragment.findNavController().popBackStack()
     }
 
