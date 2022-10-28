@@ -28,7 +28,7 @@ class VideoAPI {
         pageSize: Int
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
-            "x/v2/reply",
+            "x/v2/reply/main",
             "oid" to aid,
             "plat" to "2",
             "sort" to sort.toString(),
@@ -48,7 +48,7 @@ class VideoAPI {
         pageSize: Int
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
-            "x/v2/reply/reply",
+            "x/v2/reply/main",
             "oid" to oid,
             "plat" to "2",
             "root" to rpid,

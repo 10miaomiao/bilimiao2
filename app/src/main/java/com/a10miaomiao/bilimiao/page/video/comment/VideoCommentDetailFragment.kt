@@ -11,6 +11,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -23,6 +24,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -126,15 +128,22 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    val itemUi = miaoBindingItemUi<VideoCommentReplyInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
         videoCommentView(
             mid = item.mid,
-            uname = item.member.uname,
-            avatar = item.member.avatar,
+            uname = item.member.name,
+            avatar = item.member.face,
             time = NumberUtil.converCTime(item.ctime),
-            floor = item.floor,
-            location = item.reply_control.location ?: "",
-            content =item.content,
+            location = item.replyControl.location,
+            floor = 0,
+            content =  VideoCommentViewContent(
+                message = item.content.message,
+                emote = item.content.emoteMap.values.map {
+                    VideoCommentViewContent.Emote(
+                        it.id, it.text, it.url
+                    )
+                },
+            ),
             like = item.like,
             count = item.count,
             onUpperClick = handleUserClick,

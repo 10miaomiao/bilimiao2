@@ -1,22 +1,20 @@
 package com.a10miaomiao.bilimiao.page.video.comment
 
 import android.os.Parcelable
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
-import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class VideoCommentDetailArg(
-    val oid: String,
+    val oid: Long,
     val rpid: Long,
-    val rpid_str: String,
-    val mid: String,
+    val mid: Long,
     val uname: String,
     val avatar: String,
     val ctime: Long,
     val floor: Int,
     val location: String,
-    val content: VideoCommentReplyInfo.Content,
-    val like: Int,
-    val count: Int,
+    val content: VideoCommentViewContent,
+    val like: Long,
+    val count: Long,
 ): Parcelable

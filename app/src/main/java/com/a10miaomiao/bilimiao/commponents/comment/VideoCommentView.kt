@@ -1,8 +1,10 @@
 package com.a10miaomiao.bilimiao.commponents.comment
 
 import android.graphics.Color
+import android.os.Parcelable
 import android.text.Spannable
 import android.view.View
+import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -23,13 +25,29 @@ import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import kotlinx.android.parcel.Parcelize
 import splitties.dimensions.dip
 import splitties.views.dsl.core.*
 import splitties.views.padding
 
+@Parcelize
+data class VideoCommentViewContent(
+//        val device: String,
+    val message: String,
+    val emote: List<Emote>?,
+) : Parcelable {
+
+    @Parcelize
+    data class Emote(
+        val id: Long,
+        val text: String,
+        val url: String
+    ) : Parcelable
+
+}
 
 private fun MiaoUI.commentContentView(
-    content: VideoCommentReplyInfo.Content,
+    content: VideoCommentViewContent,
     onLinkClick: ExpandableTextView.OnLinkClickListener? = null
 ): View {
     return expandableTextView {
@@ -41,25 +59,21 @@ private fun MiaoUI.commentContentView(
         setNeedMention(false)
         isNeedSelf = true
         setNeedConvertUrl(false)
-        miaoEffect(content.emote ?: 0) {
-            tag = content.emote ?: 0
+        miaoEffect(content.emote) {
+            tag = content.emote
             setNextContentListener { ssb ->
                 val content = ssb.toString()
-                var emote = tag
-                if (emote is Map<*, *>) {
-                    emote = emote as Map<String, VideoCommentReplyInfo.Emote>
-                    emote?.values?.forEach { emote ->
-                        val textLen = emote.text.length
-                        var index = content.indexOf(emote.text)
-                        while (index != -1) {
-                            val span = UrlImageSpan(
-                                context,
-                                emote.url,
-                                this
-                            )
-                            ssb.setSpan(span, index, index + textLen, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                            index = content.indexOf(emote.text, index + textLen)
-                        }
+                (tag as? List<VideoCommentViewContent.Emote>)?.forEach { emote ->
+                    val textLen = emote.text.length
+                    var index = content.indexOf(emote.text)
+                    while (index != -1) {
+                        val span = UrlImageSpan(
+                            context,
+                            emote.url,
+                            this
+                        )
+                        ssb.setSpan(span, index, index + textLen, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                        index = content.indexOf(emote.text, index + textLen)
                     }
                 }
             }
@@ -70,15 +84,15 @@ private fun MiaoUI.commentContentView(
 }
 
 fun MiaoUI.videoCommentView(
-    mid: String,
+    mid: Long,
     uname: String,
     avatar: String,
     time: String,
     location: String,
     floor: Int,
-    content: VideoCommentReplyInfo.Content,
-    like: Int,
-    count: Int,
+    content: VideoCommentViewContent,
+    like: Long,
+    count: Long,
     textIsSelectable: Boolean = false,
     onUpperClick: View.OnClickListener? = null,
     onLinkClick: ExpandableTextView.OnLinkClickListener? = null
@@ -91,7 +105,7 @@ fun MiaoUI.videoCommentView(
             // 头像
             +rcImageView {
                 isCircle = true
-                _tag = mid
+                _tag = mid.toString()
                 onUpperClick?.let {
                     setOnClickListener(onUpperClick)
                 }
