@@ -13,6 +13,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -31,6 +32,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -142,26 +144,31 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
     }
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
-        val item = adapter.getItem(position) as VideoCommentReplyInfo
+        val item = adapter.getItem(position) as ReplyOuterClass.ReplyInfo
+
         val reply = VideoCommentDetailArg(
             oid = item.oid,
-            rpid = item.rpid,
-            rpid_str = item.rpid_str,
+            rpid = item.id,
             mid = item.member.mid,
-            uname = item.member.uname,
-            avatar = item.member.avatar,
+            uname = item.member.name,
+            avatar = item.member.face,
             ctime = item.ctime,
-            floor = item.floor,
-            location = item.reply_control.location ?: "",
-            content = item.content,
+            floor = 0,
+            location = item.replyControl.location,
+            content = VideoCommentViewContent(
+                message = item.content.message,
+                emote = item.content.emoteMap.values.map {
+                    VideoCommentViewContent.Emote(
+                        it.id, it.text, it.url
+                    )
+                },
+            ),
             like = item.like,
             count = item.count,
         )
         val args = bundleOf(
             MainNavGraph.args.reply to reply
         )
-        DebugMiao.log(reply)
-
         Navigation.findNavController(view)
             .navigate(MainNavGraph.action.videoCommentList_to_videoCommentDetail, args)
     }
@@ -188,26 +195,22 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    val itemUi = miaoBindingItemUi<VideoCommentReplyInfo> { item, index ->
-        DebugMiao.log(
-            item.mid,
-            item.member.uname,
-            item.member.avatar,
-            NumberUtil.converCTime(item.ctime),
-             item.reply_control,
-            item.floor,
-//            item.content,
-             item.like,
-             item.count,
-        )
+    val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
         videoCommentView(
             mid = item.mid,
-            uname = item.member.uname,
-            avatar = item.member.avatar,
+            uname = item.member.name,
+            avatar = item.member.face,
             time = NumberUtil.converCTime(item.ctime),
-            location = item.reply_control.location ?: "",
-            floor = item.floor,
-            content =item.content,
+            location = item.replyControl.location,
+            floor = 0,
+            content = VideoCommentViewContent(
+                message = item.content.message,
+                emote = item.content.emoteMap.values.map {
+                    VideoCommentViewContent.Emote(
+                        it.id, it.text, it.url
+                    )
+                },
+            ),
             like = item.like,
             count = item.count,
             onUpperClick = handleUserClick,

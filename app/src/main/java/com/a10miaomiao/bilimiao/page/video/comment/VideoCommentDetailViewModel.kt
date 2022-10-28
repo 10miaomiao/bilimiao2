@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bilibili.main.community.reply.v1.ReplyGrpc
+import bilibili.main.community.reply.v1.ReplyOuterClass
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -13,6 +15,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +41,8 @@ class VideoCommentDetailViewModel(
     var sortOrder = 2
 
     var triggered = false
-    var list = PaginationInfo<VideoCommentReplyInfo>()
+    var list = PaginationInfo<ReplyOuterClass.ReplyInfo>()
+    private var _cursor: ReplyOuterClass.CursorReply? = null
 
     init {
         loadData()
@@ -51,30 +55,31 @@ class VideoCommentDetailViewModel(
             ui.setState {
                 list.loading = true
             }
-            val res = BiliApiService.videoAPI
-                .commentReplyList(
-                    oid = reply.oid,
-                    rpid = reply.rpid_str,
-                    pageNum = pageNum,
-                    pageSize = list.pageSize,
-                )
+            val req = ReplyOuterClass.DetailListReq.newBuilder().apply {
+                oid = reply.oid
+                root = reply.rpid
+                type = 1
+                scene = ReplyOuterClass.DetailListScene.REPLY
+                _cursor?.let {
+                    cursor = ReplyOuterClass.CursorReq.newBuilder()
+                        .setNext(it.prev)
+                        .setNext(it.next)
+                        .setMode(it.mode)
+                        .setModeValue(it.modeValue)
+                        .build()
+                }
+            }.build()
+            val res = ReplyGrpc.getDetailListMethod().request(req)
                 .awaitCall()
-                .gson<ResultInfo<VideoCommentInfo>>()
-            DebugMiao.log(res)
-            if (res.code == 0) {
-                val result = res.data.replies
-                if (result.size < list.pageSize) {
-                    ui.setState { list.finished = true }
+            if (_cursor == null){
+                list.data = mutableListOf()
+            }
+            ui.setState {
+                list.data.addAll(res.root.repliesList)
+                _cursor = res.cursor
+                if (res.cursor.isEnd) {
+                    list.finished = true
                 }
-                ui.setState {
-                    if (pageNum == 1) {
-                        list.data = arrayListOf()
-                    }
-                    list.data.addAll(result)
-                }
-            } else {
-                context.toast(res.message)
-                throw Exception(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -105,6 +110,7 @@ class VideoCommentDetailViewModel(
             list = PaginationInfo()
             triggered = true
             loadData()
+            _cursor = null
         }
     }
 

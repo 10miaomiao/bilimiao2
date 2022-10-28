@@ -93,13 +93,13 @@ class TimeSettingStore(override val di: DI) :
         return dateModel
     }
 
-    fun save(timeType: Int, isLink: Boolean) {
+    fun save() {
         val sp = activity.getSharedPreferences(BilimiaoCommApp.APP_NAME, Context.MODE_PRIVATE)
         val editor = sp.edit()
         editor.putString(TIME_FROM, state.timeFrom.getValue())
         editor.putString(TIME_TO, state.timeTo.getValue())
-        editor.putBoolean(TIME_IS_LINK, isLink)
-        editor.putInt(TIME_TYPE, timeType)
+//        editor.putBoolean(TIME_IS_LINK, isLink)
+        editor.putInt(TIME_TYPE, state.timeType)
         editor.apply()
     }
 
