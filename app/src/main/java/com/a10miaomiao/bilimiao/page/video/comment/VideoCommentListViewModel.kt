@@ -36,7 +36,7 @@ class VideoCommentListViewModel(
 
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
 
-    var sortOrder = 2
+    var sortOrder = 3
 
     var triggered = false
     var list = PaginationInfo<ReplyOuterClass.ReplyInfo>()
@@ -55,14 +55,13 @@ class VideoCommentListViewModel(
                 oid = id.toLong()
                 type = 1
                 rpid = 0
-                _cursor?.let {
-                    cursor = ReplyOuterClass.CursorReq.newBuilder()
-                        .setNext(it.prev)
-                        .setNext(it.next)
-                        .setMode(it.mode)
-                        .setModeValue(it.modeValue)
-                        .build()
-                }
+                cursor = ReplyOuterClass.CursorReq.newBuilder().apply {
+                    modeValue = sortOrder
+                    _cursor?.let {
+                        next = it.next
+                        prev = it.prev
+                    }
+                }.build()
             }.build()
             val res = ReplyGrpc.getMainListMethod().request(req)
                 .awaitCall()

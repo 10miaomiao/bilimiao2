@@ -20,14 +20,14 @@ class SortOrderPopupMenu(
     }
 
     private fun Menu.initMenu() {
-        add(Menu.FIRST, 2, 0, "按热度").apply {
+//        add(Menu.FIRST, 1, 0, "默认排序").apply {
+//            isChecked = checkedValue == 1
+//        }
+        add(Menu.FIRST, 2, 0, "按时间").apply {
             isChecked = checkedValue == 2
         }
-        add(Menu.FIRST, 1, 0, "按回复").apply {
-            isChecked = checkedValue == 1
-        }
-        add(Menu.FIRST, 0, 0, "按时间").apply {
-            isChecked = checkedValue == 0
+        add(Menu.FIRST, 3, 0, "按热度").apply {
+            isChecked = checkedValue == 3
         }
         setGroupCheckable(Menu.FIRST, true, true)
     }
@@ -42,9 +42,9 @@ class SortOrderPopupMenu(
 
     companion object {
         fun getText(value: Int) = when(value) {
-            2 -> "按热度"
-            1 -> "按回复"
-            0 -> "按时间"
+//            1 -> "默认排序"
+            2 -> "按时间"
+            3 -> "按热度"
             else -> "评论排序"
         }
     }
