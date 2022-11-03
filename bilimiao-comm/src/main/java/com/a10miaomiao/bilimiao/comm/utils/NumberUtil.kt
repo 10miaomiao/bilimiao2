@@ -4,6 +4,20 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object NumberUtil {
+    fun converString(num: Long): String {
+        if (num < 10000) {
+            return num.toString()
+        }
+        var unit = "万"
+        var newNum = num / 10000.0
+        if (num > 9999_9999){
+            unit = "亿"
+            newNum = num / 10000_0000.0
+        }
+        val numStr = String.format("%." + 1 + "f", newNum)
+        return numStr + unit
+    }
+
     fun converString(num: Int): String {
         if (num < 10000) {
             return num.toString()
@@ -45,7 +59,7 @@ object NumberUtil {
         val now = Calendar.getInstance().timeInMillis
         val deltime = (now - date.time) / 1000
         return when {
-            deltime > 365 * 24 * 60 * 60 -> {
+            deltime > 30 * 24 * 60 * 60 -> {
                 val sf = SimpleDateFormat("yyyy-MM-dd HH:mm")
                 sf.format(date)
             }

@@ -6,15 +6,13 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a10miaomiao.bilimiao.comm.apis.ArticleAPI
-import com.a10miaomiao.bilimiao.comm.apis.AudioAPI
-import com.a10miaomiao.bilimiao.comm.apis.BangumiAPI
-import com.a10miaomiao.bilimiao.comm.apis.VideoAPI
+import com.a10miaomiao.bilimiao.comm.apis.*
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.article.ArticleInfo
 import com.a10miaomiao.bilimiao.comm.entity.audio.AudioInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonEpisodeInfo
+import com.a10miaomiao.bilimiao.comm.entity.live.RoomInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -159,32 +157,19 @@ class CoverViewModel(
     }
 
     // 直播间
-    private fun loadRoomData() {
-//        val url = BiliApiService.getRoomInfo(id)
-//        loadDataDisposable?.dispose()
-//        loadDataDisposable = MiaoHttp.getJson<ResultInfo<Room>>(url)
-//            .flatMap{
-//                // 曲线救国，获取直播间信息接口没有封面信息了，但个人页面有
-//                // 所以先取得直播间up主的uid
-//                val uid = it.data.uid
-//                val url = BiliApiService.getSpace(uid.toString())
-//                MiaoHttp.getJson<ResultInfo<SpaceInfo>>(url)
-//            }
-//            .subscribeOn(Schedulers.io())
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe({ r ->
-//                val (code, data, msg) = r
-//                val liveInfo = data.live
-//                if (code == 0) {
-//                    title.value = liveInfo.title
-//                    loadCover(liveInfo.cover)
-//                } else {
-//                    activity.toast(msg)
-//                }
-//            }, { e ->
-//                e.printStackTrace()
-//            })
-//        val url2 = BiliApiService.getRoomInfo(id)
+    private suspend fun loadRoomData() {
+        val res = LiveApi().info(id).call().gson<ResultInfo<RoomInfo>>()
+        if (res.code == 0) {
+            val data = res.data
+            withContext(Dispatchers.Main) {
+                title.value = data.title
+                loadCover(data.user_cover)
+            }
+        } else {
+            withContext(Dispatchers.Main) {
+                toast(res.message)
+            }
+        }
     }
 
     // 专栏
