@@ -50,6 +50,10 @@ object BiliUrlMatcher {
         if (a != "") {
             return arrayOf("CV", a)
         }
+        a = matchingID(text, ".*bilibili.com/read/mobile/(\\d+)")
+        if (a != "") {
+            return arrayOf("CV", a)
+        }
         a = matchingID(text, ".*://m.bilibili.com/bangumi/play/ss(\\d+)")
         if (a != "") {
             return arrayOf("SS", a)
@@ -58,7 +62,7 @@ object BiliUrlMatcher {
         if (a != "") {
             return arrayOf("ROOM", a)
         }
-        a = matchingID(text, ".*://www.bilibili.com/video/BV([a-zA-Z0-9]+)")
+        a = matchingID(text, ".*bilibili.com/video/BV([a-zA-Z0-9]+)")
         if (a != "") {
             return arrayOf("BV", a)
         }
