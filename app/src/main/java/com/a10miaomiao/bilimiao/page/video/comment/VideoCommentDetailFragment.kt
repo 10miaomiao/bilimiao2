@@ -106,6 +106,10 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
     }
 
+    private val handleLikeClick = View.OnClickListener {
+        requireActivity().toast("暂不支持此操作")
+    }
+
     private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
         when (linkType) {
             LinkType.LINK_TYPE -> {
@@ -148,6 +152,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             count = item.count,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
+            onLikeClick = handleLikeClick,
         ).apply {
             layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
         }
@@ -190,6 +195,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                     count = reply.count,
                     onUpperClick = handleUserClick,
                     onLinkClick = handleLinkClickListener,
+                    onLikeClick = handleLikeClick,
                 ).apply {
                     _topPadding = contentInsets.top + config.dividerSize
                     backgroundColor = config.blockBackgroundColor

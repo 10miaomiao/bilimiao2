@@ -8,6 +8,7 @@ import bilibili.main.community.reply.v1.ReplyGrpc
 import bilibili.main.community.reply.v1.ReplyOuterClass
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
@@ -20,6 +21,7 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -101,6 +103,42 @@ class VideoCommentListViewModel(
             _cursor = null
             triggered = true
             loadData()
+        }
+    }
+
+    fun setLike(
+        index: Int,
+        updateView: (item: ReplyOuterClass.ReplyInfo) -> Unit,
+    ) = viewModelScope.launch(Dispatchers.IO){
+        try {
+            val item = list.data[index]
+            val newAction = if (item.replyControl.action == 1L) {
+                0
+            } else { 1 }
+            val res = BiliApiService.commentApi
+                .action(1, item.oid.toString(), item.id.toString(), newAction)
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.isSuccess) {
+                val replyControl = item.replyControl.toBuilder()
+                    .setAction(newAction.toLong())
+                    .build()
+                val newItem = item.toBuilder()
+                    .setReplyControl(replyControl)
+                    .build()
+                withContext(Dispatchers.Main) {
+                    updateView(newItem)
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    toast(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                toast("喵喵被搞坏了")
+            }
         }
     }
     

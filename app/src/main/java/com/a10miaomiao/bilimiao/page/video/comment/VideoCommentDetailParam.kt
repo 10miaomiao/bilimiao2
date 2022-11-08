@@ -5,7 +5,7 @@ import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class VideoCommentDetailParame(
+data class VideoCommentDetailParam(
     val oid: Long,
     val rpid: Long,
     val mid: Long,

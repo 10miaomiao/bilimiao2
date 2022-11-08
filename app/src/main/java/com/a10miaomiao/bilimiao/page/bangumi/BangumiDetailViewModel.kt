@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.connectUi
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerParamInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.BangumiInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
@@ -150,6 +150,6 @@ class BangumiDetailViewModel (
 
     fun isPlaying (epid: String): Boolean {
         val info = playerStore.state
-        return info.type == PlayerInfo.BANGUMI && info.epid == epid
+        return info.type == PlayerParamInfo.BANGUMI && info.epid == epid
     }
 }

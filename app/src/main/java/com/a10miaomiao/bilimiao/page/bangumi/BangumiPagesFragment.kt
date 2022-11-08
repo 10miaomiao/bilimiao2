@@ -15,7 +15,7 @@ import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerParamInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -72,7 +72,7 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
 
     private fun isPlaying(epid: String): Boolean {
         val info = playerStore.state
-        return info.type == PlayerInfo.BANGUMI && info.epid == epid
+        return info.type == PlayerParamInfo.BANGUMI && info.epid == epid
     }
 
     val handleItemClick = OnItemClickListener { adapter, view, position ->

@@ -1,8 +1,8 @@
-package com.a10miaomiao.bilimiao.comm.delegate.player
+package com.a10miaomiao.bilimiao.comm.delegate.player.entity
 
 import cn.a10miaomiao.download.BiliVideoEntry
 
-class PlayerInfo {
+class PlayerParamInfo {
     var type = ""
     var aid = ""
     var cid = ""

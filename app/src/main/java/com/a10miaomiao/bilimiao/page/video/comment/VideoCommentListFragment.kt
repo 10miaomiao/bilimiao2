@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -20,16 +21,18 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
+import com.a10miaomiao.bilimiao.commponents.comment.updateVideoCommentViewLikeIcon
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -82,6 +85,8 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
     private val viewModel by diViewModel<VideoCommentListViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
+
+    private var mAdapter: MiaoBindingAdapter<ReplyOuterClass.ReplyInfo>? = null
 
     private val handleMenuItemClickListener = PopupMenu.OnMenuItemClickListener {
         it.isChecked = true
@@ -143,7 +148,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.getItem(position) as ReplyOuterClass.ReplyInfo
 
-        val reply = VideoCommentDetailParame(
+        val reply = VideoCommentDetailParam(
             oid = item.oid,
             rpid = item.id,
             mid = item.member.mid,
@@ -192,8 +197,20 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+
+    private val handleLikeClick = View.OnClickListener {
+        requireActivity().toast("暂不支持此操作")
+//        val index = it.tag
+//        if (it is ImageView && index is Int && index >= 0) {
+//            viewModel.setLike(index) { item ->
+//                mAdapter?.setData(index, item)
+//            }
+//        }
+    }
+
     val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
         videoCommentView(
+            index = index,
             mid = item.mid,
             uname = item.member.name,
             avatar = item.member.face,
@@ -210,8 +227,10 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             ),
             like = item.like,
             count = item.count,
+            isLike = item.replyControl.action == 1L,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
+            onLikeClick = handleLikeClick,
         ).apply {
             layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
         }
@@ -249,6 +268,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
                 items = viewModel.list.data,
                 itemUi = itemUi,
             ) {
+                mAdapter = this
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 setOnItemClickListener(handleItemClick)
                 loadMoreModule.setOnLoadMoreListener {
