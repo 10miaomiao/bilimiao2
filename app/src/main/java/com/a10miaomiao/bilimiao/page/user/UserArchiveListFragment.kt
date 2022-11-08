@@ -64,7 +64,7 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
         when(menuItem.key) {
             MenuKeys.region -> {
                 val pm = CheckPopupMenu(
-                    activity = requireActivity(),
+                    context = requireActivity(),
                     anchor = view,
                     menus = viewModel.regionList,
                     value = viewModel.region.value,
@@ -78,7 +78,7 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
             }
             MenuKeys.filter -> {
                 val pm = CheckPopupMenu(
-                    activity = requireActivity(),
+                    context = requireActivity(),
                     anchor = view,
                     menus = viewModel.rankOrderList,
                     value = viewModel.rankOrder.value,

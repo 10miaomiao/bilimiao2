@@ -5,13 +5,12 @@ import android.net.Uri
 import cn.a10miaomiao.download.BiliVideoEntry
 import cn.a10miaomiao.download.DownloadFlieHelper
 import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.widget.player.BiliDanmukuParser
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.gson.Gson
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
 
@@ -89,4 +88,5 @@ class LocalVideoPlayerSource(
         return danmakuXMLFile.inputStream()
     }
 
+    override suspend fun getSubtitles(): List<DanmakuVideoPlayer.SubtitleSourceInfo> = emptyList()
 }

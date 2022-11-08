@@ -1,19 +1,19 @@
 package com.a10miaomiao.bilimiao.widget.menu
 
-import android.app.Activity
+import android.content.Context
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 
 class CheckPopupMenu<T>(
-    private val activity: Activity,
+    private val context: Context,
     private val anchor: View,
     private val menus: List<MenuItemInfo<T>>,
     private val value: T,
 ) : PopupMenu.OnMenuItemClickListener {
 
-    private val popupMenu = PopupMenu(activity, anchor)
+    private val popupMenu = PopupMenu(context, anchor)
 
     var onMenuItemClick: ((item: MenuItemInfo<T>) -> Unit)? = null
 

@@ -4,8 +4,7 @@ import android.app.Activity
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
-import com.a10miaomiao.bilimiao.comm.delegate.player.model.PlayerSourceInfo
-import kotlin.reflect.KFunction1
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 
 class QualityPopupMenu(
     private val activity: Activity,

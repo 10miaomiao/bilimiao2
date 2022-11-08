@@ -1,9 +1,5 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -13,11 +9,18 @@ import android.view.WindowManager
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
-import com.a10miaomiao.bilimiao.comm.delegate.player.model.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSubtitleSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlayerService
@@ -89,6 +92,7 @@ class PlayerDelegate2(
         }
         controller.initController()
         controller.initDanmakuContext()
+        views.videoPlayer.subtitleLoader = this::loadSubtitleData
 
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
@@ -216,7 +220,7 @@ class PlayerDelegate2(
             lastPosition = views.videoPlayer.currentPositionWhenPlaying
             quality = newQuality
             loadPlayerSource(
-                showQualityToast = true
+                isChangedQuality = true
             )
             toast("正在切换清晰度")
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -225,56 +229,91 @@ class PlayerDelegate2(
     }
 
     private fun loadPlayerSource(
-        showQualityToast: Boolean = false
+        isChangedQuality: Boolean = false
     ) {
         val source = playerSource ?: return
         playerCoroutineScope.launch(Dispatchers.IO) {
-            val danmukuParser = source.getDanmakuParser()
-            val sourceInfo = try {
-                source.getPlayerUrl(quality)
-            } catch (e: Throwable) {
-                // 避免解析信息出错导致崩溃
-                runBlocking(Dispatchers.Main) { toast(e.message.toString()) }
-                return@launch
-            }
-            withContext(Dispatchers.Main) {
-                // 设置通知栏控制器
-                PlayerService.selfInstance?.setPlayingInfo(
-                    source.title,
-                    source.ownerName,
-                    source.coverUrl,
-                    sourceInfo.duration
-                )
-                views.videoPlayer.releaseDanmaku()
-                views.videoPlayer.danmakuParser = danmukuParser
-                val header = getDefaultRequestProperties()
-                views.videoPlayer.setUp(
-                    sourceInfo.url,
-                    false,
-                    null,
-                    header,
-                    source.title
-                )
-                if (lastPosition > 0L) {
-                    views.videoPlayer.seekOnStart = lastPosition
-                    lastPosition = 0L
-                } else {
-                    views.videoPlayer.seekOnStart = 0
-                }
-                views.videoPlayer.startPlayLogic()
-
-                historyReport()
-
-                if (showQualityToast) {
-                    if (sourceInfo.quality == quality) {
-                        toast("已切换至【${sourceInfo.description}】")
+            try {
+                val danmukuParser = source.getDanmakuParser()
+                val sourceInfo = source.getPlayerUrl(quality)
+                withContext(Dispatchers.Main) {
+                    // 设置通知栏控制器
+                    PlayerService.selfInstance?.setPlayingInfo(
+                        source.title,
+                        source.ownerName,
+                        source.coverUrl,
+                        sourceInfo.duration
+                    )
+                    views.videoPlayer.releaseDanmaku()
+                    views.videoPlayer.danmakuParser = danmukuParser
+                    val header = getDefaultRequestProperties()
+                    views.videoPlayer.setUp(
+                        sourceInfo.url,
+                        false,
+                        null,
+                        header,
+                        source.title
+                    )
+                    if (lastPosition > 0L) {
+                        views.videoPlayer.seekOnStart = lastPosition
+                        lastPosition = 0L
                     } else {
-                        toast("清晰度切换失败")
+                        views.videoPlayer.seekOnStart = 0
+                    }
+                    views.videoPlayer.startPlayLogic()
+
+                    historyReport()
+
+                    if (isChangedQuality) {
+                        if (sourceInfo.quality == quality) {
+                            toast("已切换至【${sourceInfo.description}】")
+                        } else {
+                            toast("清晰度切换失败")
+                        }
                     }
                 }
+                if (!isChangedQuality) {
+                    views.videoPlayer.subtitleSourceList = source.getSubtitles()
+                }
+                quality = sourceInfo.quality
+                playerSourceInfo = sourceInfo
+
+            } catch (e: Throwable) {
+                // 避免解析信息出错导致崩溃
+                // showErrorLayout(e.message.toString())
+                runBlocking(Dispatchers.Main) { toast(e.message.toString()) }
             }
-            quality = sourceInfo.quality
-            playerSourceInfo = sourceInfo
+        }
+    }
+
+
+    /**
+     * 加载字幕数据
+     */
+    private fun loadSubtitleData(subtitleUrl: String) {
+        if (subtitleUrl.isBlank()) {
+            return
+        }
+        playerCoroutineScope.launch(Dispatchers.IO) {
+            try {
+                val res = MiaoHttp.request {
+                    url = UrlUtil.autoHttps(subtitleUrl)
+                }.awaitCall().gson<SubtitleJsonInfo>()
+                views.videoPlayer.subtitleBody = res.body.map {
+                    DanmakuVideoPlayer.SubtitleItemInfo(
+                        from = (it.from * 1000).toLong(),
+                        to = (it.to * 1000).toLong(),
+                        content = it.content,
+                    )
+                }
+            } catch (e: Throwable) {
+                // 避免解析信息出错导致崩溃
+                // showErrorLayout(e.message.toString())
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    toast(e.message.toString())
+                }
+            }
         }
     }
 

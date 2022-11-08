@@ -113,6 +113,30 @@
                 android:orientation="horizontal"></FrameLayout>
 
             <LinearLayout
+                android:id="@+id/subtitle_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/subtitle_switch_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:layout_marginBottom="3dp"
+                    android:src="@drawable/bili_player_subtitle_is_open" />
+
+                <TextView
+                    android:id="@+id/subtitle_switch_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="字幕开"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/default_tiny_text_size" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/danmaku_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -185,6 +209,18 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/bottom_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/layout_bottom"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:padding="5dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        />
 
     <ProgressBar
         android:id="@+id/bottom_progressbar"

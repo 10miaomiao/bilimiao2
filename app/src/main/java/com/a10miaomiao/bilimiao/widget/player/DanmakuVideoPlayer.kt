@@ -2,16 +2,19 @@ package com.a10miaomiao.bilimiao.widget.player
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Build
 import android.util.AttributeSet
 import android.view.*
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -20,7 +23,7 @@ import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
 import splitties.dimensions.dip
-import java.text.DecimalFormat
+import splitties.views.backgroundColor
 
 
 class DanmakuVideoPlayer : StandardGSYVideoPlayer {
@@ -44,13 +47,25 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     private val mMoreBtn: View by lazy { findViewById(R.id.more) }
 
     // 底栏布局
-    private val mBottomLayout: RelativeLayout by lazy { findViewById(R.id.layout_bottom) }
+    private val mBottomLayout: LinearLayout by lazy { findViewById(R.id.layout_bottom) }
 
     // 全屏时底栏布局
     private val mFullModeBottomContainer: ViewGroup by lazy { findViewById(R.id.layout_full_mode_bottom) }
 
     // 底栏播放按钮
     private val mButtomPlay: ImageView by lazy { findViewById(R.id.buttom_play) }
+
+    // 底部字幕
+    private val mBottomSubtitleTV: TextView by lazy { findViewById(R.id.bottom_subtitle) }
+
+    // 字幕开关
+    private val mSubtitleSwitch: ViewGroup by lazy { findViewById(R.id.subtitle_switch) }
+
+    // 字幕开关图标
+    private val mSubtitleSwitchIV: ImageView by lazy { findViewById(R.id.subtitle_switch_icon) }
+
+    // 字幕开关文字
+    private val mSubtitleSwitchTV: TextView by lazy { findViewById(R.id.subtitle_switch_text) }
 
     // 弹幕开关
     private val mDanmakuSwitch: ViewGroup by lazy { findViewById(R.id.danmaku_switch) }
@@ -118,6 +133,20 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    // 字幕源列表
+    var subtitleSourceList = emptyList<SubtitleSourceInfo>()
+        set(value) {
+            field = value
+            updateSubtitleSourceList()
+        }
+
+    // 当前选中字幕
+    var currentSubtitleSource: SubtitleSourceInfo? = null
+        set(value) {
+            field = value
+            updateCurrentSubtitleSource()
+        }
+
     // 当前模式
     var mode = PlayerMode.SMALL_TOP
         set(value) {
@@ -151,6 +180,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // 播放回调
     var videoPlayerCallBack: VideoPlayerCallBack? = null
+
+    // 加载字幕
+    var subtitleLoader: ((url: String) -> Unit)? = null
+
+    var subtitleBody: List<SubtitleItemInfo> = emptyList()
+
+    private var subtitleIndex = 0
 
     // 供外部访问
     val topContainer: ViewGroup get() = mTopContainer
@@ -201,6 +237,25 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             cancelDismissControlViewTimer()
             startDismissControlViewTimer()
         }
+        mSubtitleSwitch.setOnClickListener {
+            val menus = mutableListOf<CheckPopupMenu.MenuItemInfo<SubtitleSourceInfo?>>()
+            menus.addAll(subtitleSourceList.map {
+                CheckPopupMenu.MenuItemInfo(it.lan_doc, it)
+            })
+            menus.add(CheckPopupMenu.MenuItemInfo("关闭字幕", null))
+            val pm = CheckPopupMenu(
+                context = context,
+                anchor = it,
+                menus = menus,
+                value = currentSubtitleSource,
+            )
+            pm.onMenuItemClick = {
+                currentSubtitleSource = it.value
+            }
+            pm.show()
+        }
+        mBottomSubtitleTV.setTextColor(Color.parseColor("#FFFFFF"))
+        mBottomSubtitleTV.backgroundColor = Color.parseColor("#66000000")
 
         val lockClickListener = OnLockClickListener()
         mLock.setOnClickListener(lockClickListener)
@@ -230,6 +285,74 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    private fun updateSubtitleSourceList() {
+        if (subtitleSourceList.isEmpty()) {
+            setViewShowState(mSubtitleSwitch, GONE)
+            currentSubtitleSource = null
+        } else {
+            setViewShowState(mSubtitleSwitch, VISIBLE)
+            currentSubtitleSource = subtitleSourceList[0]
+        }
+    }
+
+    private fun updateCurrentSubtitleSource() {
+        subtitleBody = emptyList()
+        if (currentSubtitleSource == null) {
+            mSubtitleSwitchIV.setImageResource(R.drawable.bili_player_subtitle_is_closed)
+            mSubtitleSwitchTV.text = "字幕关"
+            mBottomSubtitleTV.visibility = GONE
+        } else {
+            mSubtitleSwitchIV.setImageResource(R.drawable.bili_player_subtitle_is_open)
+            mSubtitleSwitchTV.text = currentSubtitleSource?.lan_doc ?: "字幕开"
+            mBottomSubtitleTV.visibility = VISIBLE
+            subtitleLoader?.invoke(currentSubtitleSource?.subtitle_url ?: "")
+        }
+    }
+
+
+    override fun setProgressAndTime(
+        progress: Long,
+        secProgress: Long,
+        currentTime: Long,
+        totalTime: Long,
+        forceChange: Boolean
+    ) {
+        super.setProgressAndTime(progress, secProgress, currentTime, totalTime, forceChange)
+        setBottomSubtitleText(currentTime)
+    }
+
+    private fun setBottomSubtitleText(currentTime: Long) {
+        // 读取上一次索引位置，顺便检查是否在范围内
+        var index = if (subtitleIndex < 0) {
+            0
+        } else if (subtitleIndex < subtitleBody.size) {
+            subtitleIndex
+        } else {
+            subtitleBody.size - 1
+        }
+        while (index in subtitleBody.indices) {
+            val item = subtitleBody[index] // 索引位置字幕信息
+            if (item.from > currentTime) {
+                // 字幕开始时间大于当前时间
+                if (index != 0 && currentTime > subtitleBody[index - 1].to) {
+                    // 上一个字幕结束时间小于当前时间
+                    mBottomSubtitleTV.visibility = GONE
+                    break
+                } else {
+                    index--
+                }
+            } else if (item.to < currentTime) {
+                // 字幕结束时间小于当前时间
+                index++
+            } else {
+                subtitleIndex = index // 保存当前索引
+                mBottomSubtitleTV.text = item.content // 设置字幕内容
+                mBottomSubtitleTV.visibility = VISIBLE
+                break
+            }
+        }
+    }
+
     override fun setStateAndUi(state: Int) {
         super.setStateAndUi(state)
         val playBtnImageRes = if (state == CURRENT_STATE_PLAYING) {
@@ -243,12 +366,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     override fun setViewShowState(view: View, visibility: Int) {
         if (isPicInPicMode) {
-            if (view == mStartButton || view == mBottomProgressBar) {
+            if (view.id == mStartButton.id || view.id == mBottomProgressBar.id) {
                 view.visibility = visibility
             }
         } else {
             super.setViewShowState(view, visibility)
-            if (view == mTopContainer) {
+            if (view.id == mBottomLayout.id) {
+                mBottomSubtitleTV.translationY = if (visibility == VISIBLE) 0f else dip(40).toFloat()
                 when (mode) {
                     PlayerMode.SMALL_FLOAT -> {
                         mDragBar.visibility = visibility
@@ -528,5 +652,22 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     }
 
+    /**
+     * 字幕源信息
+     */
+    data class SubtitleSourceInfo (
+        val id: String,
+        val lan: String,
+        val lan_doc: String,
+        val subtitle_url: String,
+    )
 
+    /**
+     * 字幕信息
+     */
+    data class SubtitleItemInfo (
+        val from: Long,
+        val to: Long,
+        val content: String,
+    )
 }

@@ -1,15 +1,17 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player.model
 
-import bilibili.app.playurl.v1.PlayURLGrpc
-import bilibili.app.playurl.v1.Playurl
-import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayerV2Info
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.request
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.player.BiliDanmukuParser
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import java.io.ByteArrayInputStream
@@ -78,6 +80,28 @@ class VideoPlayerSource(
         } else {
             ByteArrayInputStream(CompressionTools.decompressXML(body.bytes()))
         }
+    }
+
+    override suspend fun getSubtitles(): List<DanmakuVideoPlayer.SubtitleSourceInfo> {
+        try {
+            val res = BiliApiService.playerAPI
+                .getPlayerV2Info(aid = aid, cid = id)
+                .awaitCall()
+                .gson<ResultInfo<PlayerV2Info>>()
+            if (res.isSuccess) {
+                return res.data.subtitle.subtitles.map {
+                    DanmakuVideoPlayer.SubtitleSourceInfo(
+                        id = it.id,
+                        lan = it.lan,
+                        lan_doc = it.lan_doc,
+                        subtitle_url = it.subtitle_url,
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return emptyList()
     }
 
     override suspend fun historyReport(progress: Long) {

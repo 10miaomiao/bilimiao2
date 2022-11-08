@@ -77,7 +77,7 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
             }
             MenuKeys.filter -> {
                 val pm = CheckPopupMenu(
-                    activity = requireActivity(),
+                    context = requireActivity(),
                     anchor = view,
                     menus = viewModel.rankOrdersMenus,
                     value = viewModel.rankOrder.value,
@@ -91,7 +91,7 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
             }
             MenuKeys.time -> {
                 val pm = CheckPopupMenu<Int>(
-                    activity = requireActivity(),
+                    context = requireActivity(),
                     anchor = view,
                     menus = viewModel.durationMenus,
                     value = viewModel.duration.value,
