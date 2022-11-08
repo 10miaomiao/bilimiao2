@@ -1,10 +1,12 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player.model
 
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.widget.player.BiliDanmukuParser
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import java.io.ByteArrayInputStream
@@ -39,6 +41,8 @@ class BangumiPlayerSource(
         }
         return PlayerSourceInfo(url, res.quality, acceptList, duration)
     }
+
+    override suspend fun getSubtitles(): List<DanmakuVideoPlayer.SubtitleSourceInfo> = emptyList()
 
     override suspend fun getDanmakuParser(): BaseDanmakuParser? {
         val inputStream = getBiliDanmukuStream()

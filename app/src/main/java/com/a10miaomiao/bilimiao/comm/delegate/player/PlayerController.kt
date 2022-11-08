@@ -259,6 +259,7 @@ class PlayerController(
         currentPosition: Long,
         duration: Long
     ) {
+
         PlayerService.selfInstance?.setProgress(
             duration,
             currentPosition
