@@ -19,47 +19,6 @@ class VideoAPI {
     }
 
     /**
-     * 视频评论
-     */
-    fun commentList(
-        aid: String,
-        sort: Int,
-        pageNum: Int,
-        pageSize: Int
-    ) = MiaoHttp.request {
-        url = BiliApiService.biliApi(
-            "x/v2/reply/main",
-            "oid" to aid,
-            "plat" to "2",
-            "sort" to sort.toString(),
-            "pn" to pageNum.toString(),
-            "ps" to pageSize.toString(),
-            "type" to "1"
-        )
-    }
-
-    /**
-     * 评论回复列表
-     */
-    fun commentReplyList(
-        oid: String,
-        rpid: String,
-        pageNum: Int,
-        pageSize: Int
-    ) = MiaoHttp.request {
-        url = BiliApiService.biliApi(
-            "x/v2/reply/main",
-            "oid" to oid,
-            "plat" to "2",
-            "root" to rpid,
-            "sort" to "0",
-            "type" to "1",
-            "pn" to pageNum.toString(),
-            "ps" to pageSize.toString(),
-        )
-    }
-
-    /**
      * 点👍
      */
     fun like(

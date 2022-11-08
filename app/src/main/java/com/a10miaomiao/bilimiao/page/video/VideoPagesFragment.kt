@@ -15,8 +15,6 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -50,7 +48,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
-    private val video by lazy { requireArguments().getParcelable<VideoPagesParame>(MainNavGraph.args.video)!! }
+    private val video by lazy { requireArguments().getParcelable<VideoPagesParam>(MainNavGraph.args.video)!! }
     private val pages by lazy { video.pages.toMutableList() }
 
     override fun onCreateView(
@@ -80,7 +78,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
 //        Navigation.findNavController(view).popBackStack()
     }
 
-    val itemUi = miaoBindingItemUi<VideoPagesParame.Page> { item, index ->
+    val itemUi = miaoBindingItemUi<VideoPagesParam.Page> { item, index ->
         frameLayout {
             setBackgroundResource(R.drawable.shape_corner)
             layoutParams = ViewGroup.MarginLayoutParams(matchParent, wrapContent).apply {

@@ -1,9 +1,13 @@
 package com.a10miaomiao.bilimiao.commponents.comment
 
+import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Parcelable
 import android.text.Spannable
+import android.view.Gravity
 import android.view.View
+import android.widget.ImageView
 import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._tag
@@ -15,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget._setContent
@@ -53,7 +58,7 @@ private fun MiaoUI.commentContentView(
     return expandableTextView {
         setLineSpacing(dip(4).toFloat(), 1.0f)
         setTextColor(config.foregroundColor)
-        textSize = 14f
+        textSize = 16f
         isNeedContract = true
         isNeedExpend = false
         setNeedMention(false)
@@ -84,6 +89,7 @@ private fun MiaoUI.commentContentView(
 }
 
 fun MiaoUI.videoCommentView(
+    index: Int = -1,
     mid: Long,
     uname: String,
     avatar: String,
@@ -94,8 +100,10 @@ fun MiaoUI.videoCommentView(
     like: Long,
     count: Long,
     textIsSelectable: Boolean = false,
+    isLike: Boolean = false,
     onUpperClick: View.OnClickListener? = null,
-    onLinkClick: ExpandableTextView.OnLinkClickListener? = null
+    onLinkClick: ExpandableTextView.OnLinkClickListener? = null,
+    onLikeClick: View.OnClickListener? = null,
 ): View {
     return horizontalLayout {
         padding = dip(10)
@@ -114,18 +122,18 @@ fun MiaoUI.videoCommentView(
 //              .placeholder(R.drawable.ico_user_default)
 
             }..lParams {
-                width = dip(32)
-                height = dip(32)
+                width = dip(40)
+                height = dip(40)
                 rightMargin = dip(10)
-                topMargin = dip(5)
+                topMargin = dip(4)
             }
 
             +verticalLayout {
                 views {
                     +textView {
                         setTextColor(config.foregroundColor)
-                        textSize = 14f
-                        tag = mid
+                        textSize = 16f
+                        _tag = mid
                         onUpperClick?.let {
                             setOnClickListener(onUpperClick)
                         }
@@ -136,16 +144,16 @@ fun MiaoUI.videoCommentView(
                     +horizontalLayout {
                         views {
                             +textView {
-                                setTextColor(Color.parseColor("#99a2aa"))
-                                textSize = 12f
+                                setTextColor(config.foregroundAlpha45Color)
+                                textSize = 14f
 
                                 _text = time
                             }..lParams {
                                 rightMargin = dip(10)
                             }
                             +textView {
-                                setTextColor(Color.parseColor("#99a2aa"))
-                                textSize = 12f
+                                setTextColor(config.foregroundAlpha45Color)
+                                textSize = 14f
 
                                 _show = floor != 0
                                 _text = "#${floor}"
@@ -153,13 +161,15 @@ fun MiaoUI.videoCommentView(
                                 rightMargin = dip(10)
                             }
                             +textView {
-                                setTextColor(Color.parseColor("#99a2aa"))
+                                setTextColor(config.foregroundAlpha45Color)
                                 textSize = 12f
 
                                 _show = location.isNotBlank()
                                 _text = location
                             }
                         }
+                    }..lParams {
+                        topMargin = dip(4)
                     }
 
                     +commentContentView(
@@ -168,23 +178,45 @@ fun MiaoUI.videoCommentView(
                     )..lParams {
                         width = matchParent
                         height = wrapContent
-                        topMargin = dip(3)
+                        verticalMargin = dip(8)
                     }
 
                     +horizontalLayout {
+                        gravity = Gravity.CENTER_VERTICAL
                         views {
-                            +textView {
-                                setTextColor(Color.parseColor("#99a2aa"))
-                                textSize = 12f
-                                _text = "${like}赞"
+                            val iconSize = dip(14)
+                            +imageView {
+                                setImageResource(R.drawable.ic_comment_unlike)
+                                _tag = index
+                                miaoEffect(isLike) {
+                                    imageTintList = ColorStateList.valueOf(
+                                        if (it) {
+                                            config.themeColor
+                                        } else {
+                                            config.foregroundAlpha45Color
+                                        }
+                                    )
+                                }
+                                onLikeClick?.let { setOnClickListener(it) }
+                            }..lParams(iconSize, iconSize) {
+                                rightMargin = dip(4)
                             }
                             +textView {
-                                setTextColor(Color.parseColor("#99a2aa"))
-                                textSize = 12f
+                                setTextColor(config.foregroundAlpha45Color)
+                                textSize = 14f
+                                _text = NumberUtil.converString(like)
+                            }..lParams(dip(80), wrapContent)
+                            +imageView {
+                                setImageResource(R.drawable.ic_comment_reply)
+                                imageTintList = ColorStateList.valueOf(config.foregroundAlpha45Color)
+                            }..lParams(iconSize, iconSize) {
+                                rightMargin = dip(4)
+                            }
+                            +textView {
+                                setTextColor(config.foregroundAlpha45Color)
+                                textSize = 14f
 
-                                _text = "${count}评论"
-                            }..lParams {
-                                leftMargin = dip(36)
+                                _text = NumberUtil.converString(count)
                             }
                         }
                     }..lParams {

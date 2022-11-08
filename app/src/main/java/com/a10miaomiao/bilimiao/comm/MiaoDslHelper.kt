@@ -13,6 +13,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.exception.BindingOnlySetException
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
@@ -26,10 +27,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 fun RequestManager.loadImageUrl(value: String): RequestBuilder<Drawable> {
-    val url = if ("://" in value)
-        value.replace("http://","https://")
-    else
-        "https:$value"
+    val url = UrlUtil.autoHttps(value)
     return load(url)
 }
 

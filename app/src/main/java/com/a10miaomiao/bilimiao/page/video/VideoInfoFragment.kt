@@ -285,14 +285,14 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         viewModel.info?.let { info ->
             val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             val args = bundleOf(
-                MainNavGraph.args.video to VideoPagesParame(
+                MainNavGraph.args.video to VideoPagesParam(
                     aid = info.aid,
                     title = info.title,
                     pic = info.pic,
                     ownerId = info.owner.mid,
                     ownerName = info.owner.name,
                     pages = info.pages.map {
-                        VideoPagesParame.Page(it.cid, it.part)
+                        VideoPagesParam.Page(it.cid, it.part)
                     }
                 )
             )

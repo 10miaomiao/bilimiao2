@@ -30,7 +30,7 @@ import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
 import com.a10miaomiao.bilimiao.page.video.*
-import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailParame
+import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailParam
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import kotlin.reflect.KClass
@@ -151,7 +151,7 @@ object MainNavGraph {
         val videoPages = f<VideoPagesFragment> {
 //            deepLink("bilimiao://video/pages")
             argument(args.video) {
-                type = NavType.ParcelableType(VideoPagesParame::class.java)
+                type = NavType.ParcelableType(VideoPagesParam::class.java)
                 nullable = false
             }
             argument(args.index) {
@@ -177,7 +177,7 @@ object MainNavGraph {
         }
         val videoCommentDetail = f<VideoCommentDetailFragment> {
             argument(args.reply) {
-                type = NavType.ParcelableType(VideoCommentDetailParame::class.java)
+                type = NavType.ParcelableType(VideoCommentDetailParam::class.java)
                 nullable = false
             }
         }

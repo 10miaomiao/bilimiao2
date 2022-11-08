@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class VideoPagesParame(
+data class VideoPagesParam(
     val aid: String,
     val pic: String,
     val title: String,

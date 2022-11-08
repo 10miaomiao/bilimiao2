@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.comm.delegate.player.model
+package com.a10miaomiao.bilimiao.comm.delegate.player.entity
 
 data class PlayerSourceInfo(
     val url: String,
