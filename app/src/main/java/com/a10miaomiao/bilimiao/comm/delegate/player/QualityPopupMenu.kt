@@ -3,12 +3,16 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 import android.app.Activity
 import android.view.Menu
 import android.view.View
+import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 
 class QualityPopupMenu(
     private val activity: Activity,
     private val anchor: View,
+    private val userStore: UserStore,
     private val list: List<PlayerSourceInfo.AcceptInfo>,
     private val value: Int,
 ) {
@@ -18,11 +22,28 @@ class QualityPopupMenu(
         popupMenu.menu.apply {
             initMenu()
         }
+
+        //使用反射，强制显示菜单图标
+        try {
+            val field = popupMenu.javaClass.getDeclaredField("mPopup")
+            field.isAccessible = true
+            val mPopup = field.get(popupMenu) as MenuPopupHelper
+            mPopup.setForceShowIcon(true)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun Menu.initMenu() {
         list.forEachIndexed { index, item ->
             add(Menu.FIRST, index, 0, item.description).apply {
+                if(item.quality > 80) {
+                    setIcon(R.drawable.ic_big_vip)
+                    isEnabled = userStore.isVip()
+                } else if (item.quality > 40 && !userStore.isLogin()) {
+                    setIcon(R.drawable.ic_login)
+                    isEnabled = false
+                }
                 isChecked = value == item.quality
             }
         }

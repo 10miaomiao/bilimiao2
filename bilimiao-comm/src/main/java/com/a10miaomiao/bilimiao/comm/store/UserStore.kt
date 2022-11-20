@@ -108,6 +108,8 @@ class UserStore(override val di: DI) :
 
     fun isLogin() = state.info != null
 
+    fun isVip() = (state.info?.vip_type ?: 0) > 0
+
     fun Activity.toast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG)
     }

@@ -4,6 +4,8 @@ import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -75,9 +77,16 @@ class UserFollowPageViewModel(
     private val userStore by instance<UserStore>()
 
     var mid = ""
+        set(value) {
+            if (field != value) {
+                field = value
+                loadData(1)
+            }
+        }
 
     val count = MutableStateFlow(1)
     val isRefreshing = MutableStateFlow(false)
+    val listState = MutableStateFlow(LazyListState(0, 0))
     val list = FlowPaginationInfo<FollowingItemInfo>()
 
     fun add() {
@@ -190,6 +199,8 @@ fun UserFollowPage(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLogin = userStore.isLogin()
 
+
+
     val nav = localNavController()
 
     val toUserDatailPage = remember(nav) {
@@ -203,7 +214,6 @@ fun UserFollowPage(
 
     LaunchedEffect(mid) {
         viewModel.mid = mid
-        viewModel.loadData(1)
     }
 
     PageConfig(title = if(userStore.isSelf(mid)) {

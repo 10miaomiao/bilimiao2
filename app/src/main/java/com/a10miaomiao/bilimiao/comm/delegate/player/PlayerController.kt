@@ -13,6 +13,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
@@ -33,6 +34,7 @@ class PlayerController(
     override val di: DI,
 ) : DIAware, VideoPlayerCallBack, GSYVideoProgressListener {
 
+    private val userStore by instance<UserStore>()
     private val statusBarHelper by instance<StatusBarHelper>()
     private val scaffoldApp get() = delegate.scaffoldApp
     private val views get() = delegate.views
@@ -159,6 +161,7 @@ class PlayerController(
         val popup = QualityPopupMenu(
             activity = activity,
             anchor = view,
+            userStore = userStore,
             list = sourceInfo.acceptList,
             value = delegate.quality
         )
