@@ -61,7 +61,7 @@ class VideoCommentListViewModel(
                     modeValue = sortOrder
                     _cursor?.let {
                         next = it.next
-                        prev = it.prev
+//                        prev = it.prev
                     }
                 }.build()
             }.build()

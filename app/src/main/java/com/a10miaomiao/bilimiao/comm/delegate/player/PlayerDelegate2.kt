@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.view.network
@@ -65,11 +66,16 @@ class PlayerDelegate2(
     var picInPicHelper: PicInPicHelper? = null
         private set
 
+    private val userStore by instance<UserStore>()
     private val playerStore by instance<PlayerStore>()
     private val themeDelegate by instance<ThemeDelegate>()
 
     var playerSourceInfo: PlayerSourceInfo? = null
+    // 未登陆：48[480P 清晰]及以下
+    // 已登陆无大会员：80[1080P 高清]及以下
+    // 大会员：无限制
     var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
+
     var speed = 1f // 播放速度
     private var lastPosition = 0L
     private val playerCoroutineScope = PlayerCoroutineScope()
@@ -319,7 +325,18 @@ class PlayerDelegate2(
 
     override fun openPlayer(source: BasePlayerSource) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        quality = prefs.getInt("player_quality", 64)
+        quality = prefs.getInt("player_quality", 64).let {
+            if (userStore.isLogin()) {
+                if (!userStore.isVip() && it > 80) {
+                    // 已登陆无大会员：80[1080P 高清]及以下
+                    return@let 80
+                }
+            } else if (it > 48) {
+                // 未登陆：48[480P 清晰]及以下
+                return@let 48
+            }
+            return@let it
+        }
         speed = prefs.getFloat("player_speed", 1f)
         lastPosition = 0L
         scaffoldApp.showPlayer = true

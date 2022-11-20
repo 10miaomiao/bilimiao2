@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.Navigation.findNavController
 import com.a10miaomiao.bilimiao.Bilimiao
+import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.apis.AuthApi
@@ -81,7 +82,7 @@ class H5LoginViewModel(
             if (res.code == 0) {
                 userStore.setUserInfo(res.data)
                 val nav = findNavController(view)
-                nav.popBackStack()
+                nav.popBackStack(MainNavGraph.dest.home, true)
             } else {
                 alert(res.message)
             }
