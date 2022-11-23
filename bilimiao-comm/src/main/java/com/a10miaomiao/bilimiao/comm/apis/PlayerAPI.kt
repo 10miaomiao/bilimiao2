@@ -29,6 +29,21 @@ class PlayerAPI {
         )
     }
 
+    fun getPlayerV2Info(
+        aid: String,
+        cid: String,
+        epId: String,
+        seasonId: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/player/v2",
+            "aid" to aid,
+            "cid" to cid,
+            "ep_id" to epId,
+            "season_id" to seasonId,
+        )
+    }
+
     /**
      * 获取视频播放地址
      */

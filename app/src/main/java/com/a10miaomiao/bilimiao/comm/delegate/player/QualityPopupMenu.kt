@@ -17,6 +17,8 @@ class QualityPopupMenu(
     private val value: Int,
 ) {
     private val popupMenu = PopupMenu(activity, anchor)
+    val MAX_QUALITY_NOT_LOGIN = 48 // 48[480P 清晰]
+    val MAX_QUALITY_NOT_VIP = 80 // 80[1080P 高清]
 
     init {
         popupMenu.menu.apply {
@@ -37,10 +39,10 @@ class QualityPopupMenu(
     private fun Menu.initMenu() {
         list.forEachIndexed { index, item ->
             add(Menu.FIRST, index, 0, item.description).apply {
-                if(item.quality > 80) {
+                if(item.quality > MAX_QUALITY_NOT_VIP) {
                     setIcon(R.drawable.ic_big_vip)
                     isEnabled = userStore.isVip()
-                } else if (item.quality > 40 && !userStore.isLogin()) {
+                } else if (item.quality > MAX_QUALITY_NOT_LOGIN && !userStore.isLogin()) {
                     setIcon(R.drawable.ic_login)
                     isEnabled = false
                 }
