@@ -71,9 +71,12 @@ class PlayerDelegate2(
     private val themeDelegate by instance<ThemeDelegate>()
 
     var playerSourceInfo: PlayerSourceInfo? = null
+
     // 未登陆：48[480P 清晰]及以下
     // 已登陆无大会员：80[1080P 高清]及以下
     // 大会员：无限制
+    val MAX_QUALITY_NOT_LOGIN = 48 // 48[480P 清晰]
+    val MAX_QUALITY_NOT_VIP = 80 // 80[1080P 高清]
     var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
 
     var speed = 1f // 播放速度
@@ -276,10 +279,11 @@ class PlayerDelegate2(
                         } else {
                             toast("清晰度切换失败")
                         }
+                    } else {
+                        views.videoPlayer.subtitleSourceList = withContext(Dispatchers.IO) {
+                            source.getSubtitles()
+                        }
                     }
-                }
-                if (!isChangedQuality) {
-                    views.videoPlayer.subtitleSourceList = source.getSubtitles()
                 }
                 quality = sourceInfo.quality
                 playerSourceInfo = sourceInfo
@@ -287,6 +291,7 @@ class PlayerDelegate2(
             } catch (e: Throwable) {
                 // 避免解析信息出错导致崩溃
                 // showErrorLayout(e.message.toString())
+                e.printStackTrace()
                 runBlocking(Dispatchers.Main) { toast(e.message.toString()) }
             }
         }
@@ -326,14 +331,12 @@ class PlayerDelegate2(
     override fun openPlayer(source: BasePlayerSource) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         quality = prefs.getInt("player_quality", 64).let {
-            if (userStore.isLogin()) {
-                if (!userStore.isVip() && it > 80) {
-                    // 已登陆无大会员：80[1080P 高清]及以下
-                    return@let 80
-                }
-            } else if (it > 48) {
+            if (!userStore.isLogin() && it > MAX_QUALITY_NOT_LOGIN) {
                 // 未登陆：48[480P 清晰]及以下
-                return@let 48
+                return@let MAX_QUALITY_NOT_LOGIN
+            } else if (!userStore.isVip() && it > MAX_QUALITY_NOT_VIP) {
+                // 无大会员：80[1080P 高清]及以下
+                return@let MAX_QUALITY_NOT_VIP
             }
             return@let it
         }
