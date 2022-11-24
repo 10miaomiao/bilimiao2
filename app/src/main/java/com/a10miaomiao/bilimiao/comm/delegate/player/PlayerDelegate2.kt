@@ -24,8 +24,10 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.PlayerStore
+import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.android.exoplayer2.source.MediaSource
@@ -354,6 +356,17 @@ class PlayerDelegate2(
         }
 
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        // 横屏时播放器是否默认全屏播放
+        controller.onlyFull = false
+        if (scaffoldApp.orientation == ScaffoldView.HORIZONTAL) {
+            val isPlayerHorizontalDefaultFull = prefs.getBoolean(VideoSettingFragment.PLAYER_HORIZONTAL_DEFAULT_FULL, false)
+            if (isPlayerHorizontalDefaultFull) {
+                val fullMode = prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
+                controller.fullScreen(fullMode)
+                controller.onlyFull = true
+            }
+        }
     }
 
     override fun closePlayer() {
