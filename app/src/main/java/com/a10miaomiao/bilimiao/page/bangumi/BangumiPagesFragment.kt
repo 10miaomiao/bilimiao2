@@ -52,10 +52,8 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
-    private val sid by lazy { requireArguments().getString(MainNavGraph.args.id)!! }
-    private val title by lazy { requireArguments().getString(MainNavGraph.args.title)!! }
-    private val pages by lazy { requireArguments().getParcelableArrayList<EpisodeInfo>(
-        MainNavGraph.args.pages) ?: mutableListOf() }
+    private val bangumi by lazy { requireArguments().getParcelable<BangumiPagesParam>(MainNavGraph.args.bangumi)!! }
+    private val episodes by lazy { bangumi.episodes.toMutableList() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,21 +74,21 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
     }
 
     val handleItemClick = OnItemClickListener { adapter, view, position ->
-        val item = pages[position]
+        val item = episodes[position]
         val playerSource = BangumiPlayerSource(
-            sid = item.section_id,
+            sid = bangumi.sid,
             epid = item.ep_id,
             aid = item.aid,
             id = item.cid.toString(),
             title = item.index_title.ifBlank { item.index },
             coverUrl = item.cover,
             ownerId = "",
-            ownerName = title
+            ownerName = bangumi.title
         )
         basePlayerDelegate.openPlayer(playerSource)
     }
 
-    val itemUi = miaoBindingItemUi<EpisodeInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<BangumiPagesParam.Episode> { item, index ->
         verticalLayout {
             setBackgroundResource(com.a10miaomiao.bilimiao.R.drawable.shape_corner)
             layoutParams = ViewGroup.MarginLayoutParams(matchParent, wrapContent).apply {
@@ -156,7 +154,7 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
             )
 
             _miaoAdapter(
-                items = pages,
+                items = episodes,
                 itemUi = itemUi,
                 depsAry = arrayOf(playerStore.state.cid)
             ) {

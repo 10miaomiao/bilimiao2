@@ -8,7 +8,7 @@ data class EpisodeInfo(
     val aid: String,
     val badge: String,
     val badge_type: Int,
-    val cid: Int,
+    val cid: String,
     val cover: String,
     val dimension: DimensionXInfo,
     val from: String,

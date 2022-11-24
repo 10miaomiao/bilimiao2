@@ -146,9 +146,20 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         viewModel.detailInfo?.let { info ->
             val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             val args = bundleOf(
-                MainNavGraph.args.id to info.season_id.toString(),
-                MainNavGraph.args.title to info.title,
-                MainNavGraph.args.pages to viewModel.episodes,
+                MainNavGraph.args.bangumi to BangumiPagesParam(
+                    sid = info.season_id.toString(),
+                    title = info.title,
+                    episodes = viewModel.episodes.map {
+                        BangumiPagesParam.Episode(
+                            aid = it.aid,
+                            cid = it.cid,
+                            cover = it.cover,
+                            ep_id = it.ep_id,
+                            index = it.index,
+                            index_title = it.index_title,
+                        )
+                    }
+                )
             )
             nav.navigate(MainNavGraph.action.global_to_bangumiPages, args)
         }
