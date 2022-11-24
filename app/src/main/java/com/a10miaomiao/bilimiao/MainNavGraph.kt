@@ -13,6 +13,7 @@ import com.a10miaomiao.bilimiao.page.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.download.DownloadFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
@@ -191,20 +192,8 @@ object MainNavGraph {
         }
         val bangumiPages = f<BangumiPagesFragment> {
 //            deepLink("bilimiao://bangumi/pages")
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.title) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.pages) {
-                type = NavType.ParcelableType(VideoPageInfo::class.java)
-                nullable = false
-            }
-            argument(args.index) {
-                type = NavType.IntType
+            argument(args.bangumi) {
+                type = NavType.ParcelableType(BangumiPagesParam::class.java)
                 nullable = false
             }
         }
@@ -368,6 +357,7 @@ object MainNavGraph {
         const val pages = "pages"
         const val index = "index"
         const val video = "video"
+        const val bangumi = "bangumi"
         const val region = "region"
         const val reply = "reply"
     }
