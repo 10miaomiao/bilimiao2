@@ -40,6 +40,8 @@ class PlayerController(
     private val views get() = delegate.views
     private val danmakuContext = DanmakuContext.create()
 
+    var onlyFull = false // 仅全屏播放
+
     private fun getFullMode(): String {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         return prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
@@ -50,11 +52,10 @@ class PlayerController(
         statusBarHelper = that.statusBarHelper
         isFullHideActionBar = true
         backButton.setOnClickListener {
-            if (scaffoldApp.fullScreenPlayer) {
-                smallScreen()
-            } else {
+            if (!scaffoldApp.fullScreenPlayer || onlyFull) {
                 delegate.closePlayer()
             }
+            smallScreen()
         }
         setIsTouchWiget(true)
         fullscreenButton.setOnClickListener {
