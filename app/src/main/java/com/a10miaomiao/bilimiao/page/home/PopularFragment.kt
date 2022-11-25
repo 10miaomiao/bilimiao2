@@ -143,6 +143,7 @@ class PopularFragment: Fragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
+                    scrollBarSize = 0
                     _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
@@ -162,6 +163,7 @@ class PopularFragment: Fragment(), DIAware {
                             layoutManager = LinearLayoutManager(requireContext()).apply {
                                 orientation = LinearLayoutManager.HORIZONTAL
                             }
+                            scrollBarSize = 0
                             _miaoAdapter(
                                 items = viewModel.topEntranceList,
                                 itemUi = topEntranceItemUi,

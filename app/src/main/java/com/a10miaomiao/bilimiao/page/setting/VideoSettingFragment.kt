@@ -42,6 +42,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
         const val PLAYER_AUTO_STOP = "player_auto_stop"
         const val PLAYER_PLAYING_NOTIFICATION = "player_playing_notification"
         const val PLAYER_FULL_MODE = "player_full_mode"
+        const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
         const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
 
 
@@ -127,6 +128,12 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
             title = "全屏播放设置"
             summary = ""
             initialSelection = "SENSOR_LANDSCAPE"
+        }
+
+        switch(PLAYER_VERTICAL_DEFAULT_FULL) {
+            title = "竖屏时播放器默认全屏播放"
+            summary = ""
+            defaultValue = false
         }
 
         switch(PLAYER_HORIZONTAL_DEFAULT_FULL) {
