@@ -40,7 +40,7 @@ class PlayerController(
     private val views get() = delegate.views
     private val danmakuContext = DanmakuContext.create()
 
-    var onlyFull = false // 仅全屏播放
+    private var onlyFull = false // 仅全屏播放
 
     private fun getFullMode(): String {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -51,12 +51,7 @@ class PlayerController(
         val that = this@PlayerController
         statusBarHelper = that.statusBarHelper
         isFullHideActionBar = true
-        backButton.setOnClickListener {
-            if (!scaffoldApp.fullScreenPlayer || onlyFull) {
-                delegate.closePlayer()
-            }
-            smallScreen()
-        }
+        backButton.setOnClickListener { onBackClick() }
         setIsTouchWiget(true)
         fullscreenButton.setOnClickListener {
             if (scaffoldApp.fullScreenPlayer) {
@@ -157,6 +152,29 @@ class PlayerController(
         views.videoPlayer.isShowDanmaKu = danmakuShow
     }
 
+    /**
+     * 播放器是否默认全屏播放
+     */
+    fun checkIsPlayerDefaultFull() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        onlyFull = false
+        if (scaffoldApp.orientation == ScaffoldView.VERTICAL) {
+            val isPlayerVerticalDefaultFull = prefs.getBoolean(VideoSettingFragment.PLAYER_VERTICAL_DEFAULT_FULL, false)
+            if (isPlayerVerticalDefaultFull) {
+                val fullMode = prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
+                fullScreen(fullMode)
+                onlyFull = true
+            }
+        } else {
+            val isPlayerHorizontalDefaultFull = prefs.getBoolean(VideoSettingFragment.PLAYER_HORIZONTAL_DEFAULT_FULL, false)
+            if (isPlayerHorizontalDefaultFull) {
+                val fullMode = prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
+                fullScreen(fullMode)
+                onlyFull = true
+            }
+        }
+    }
+
     fun showQualityPopupMenu(view: View) {
         val sourceInfo = delegate.playerSourceInfo ?: return
         val popup = QualityPopupMenu(
@@ -238,6 +256,13 @@ class PlayerController(
             }
         }
         return true
+    }
+
+    fun onBackClick() {
+        if (!scaffoldApp.fullScreenPlayer || onlyFull) {
+            delegate.closePlayer()
+        }
+        smallScreen()
     }
 
     override fun onVideoPause() {

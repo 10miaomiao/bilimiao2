@@ -150,7 +150,7 @@ class PlayerDelegate2(
             return true
         }
         if (scaffoldApp.fullScreenPlayer) {
-            controller.smallScreen()
+            controller.onBackClick()
             return true
         }
         return false
@@ -357,16 +357,8 @@ class PlayerDelegate2(
 
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // 横屏时播放器是否默认全屏播放
-        controller.onlyFull = false
-        if (scaffoldApp.orientation == ScaffoldView.HORIZONTAL) {
-            val isPlayerHorizontalDefaultFull = prefs.getBoolean(VideoSettingFragment.PLAYER_HORIZONTAL_DEFAULT_FULL, false)
-            if (isPlayerHorizontalDefaultFull) {
-                val fullMode = prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
-                controller.fullScreen(fullMode)
-                controller.onlyFull = true
-            }
-        }
+        // 播放器是否默认全屏播放
+        controller.checkIsPlayerDefaultFull()
     }
 
     override fun closePlayer() {
