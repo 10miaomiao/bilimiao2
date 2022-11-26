@@ -81,7 +81,11 @@ class HomeViewModel(
                 }
                 withContext(Dispatchers.Main) {
                     saveSettingList(res.data.settingList)
-                    showUpdateDialog(res.data.version, longVersionCode)
+                    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                    val autoCheckUpdate = prefs.getBoolean("auto_check_update", true)
+                    if (autoCheckUpdate) {
+                        showUpdateDialog(res.data.version, longVersionCode)
+                    }
                 }
             }
         } catch (e: Exception) {

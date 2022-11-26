@@ -231,6 +231,11 @@ class SettingFragment : Fragment(), DIAware, MyPage
             }
         }
 
+        switch("auto_check_update") {
+            title = "自动检测新版本"
+            defaultValue = true
+        }
+
         categoryHeader("other") {
             title = "其它"
         }
