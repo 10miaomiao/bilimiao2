@@ -38,6 +38,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 class VideoSettingFragment : Fragment(), DIAware, MyPage {
 
     companion object {
+        const val PLAYER_FNVAL = "player_fnval"
         const val PLAYER_BACKGROUND = "player_background"
         const val PLAYER_AUTO_STOP = "player_auto_stop"
         const val PLAYER_PLAYING_NOTIFICATION = "player_playing_notification"
@@ -45,6 +46,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
         const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
 
+        const val FNVAL_FLV = "2"
+        const val FNVAL_MP4 = "2"
+        const val FNVAL_DASH = "4048"
 
         const val KEY_SENSOR_LANDSCAPE = "SENSOR_LANDSCAPE"
         const val KEY_LANDSCAPE = "LANDSCAPE"
@@ -100,6 +104,17 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
 
     fun createRootScreen() = screen(context) {
         collapseIcon = true
+
+        val fnvalSelection = listOf(
+            SelectionItem(key = FNVAL_DASH, title = "dash(支持4K)"),
+            SelectionItem(key = FNVAL_MP4, title = "mp4(不支持2K及以上)"),
+//            SelectionItem(key = FNVAL_FLV, title = "flv(不支持2K及以上)"),
+        )
+        singleChoice(PLAYER_FNVAL, fnvalSelection) {
+            title = "视频获取方式选择(视频格式)"
+            summary = "不能播放时，换个格式试试吧"
+            initialSelection = FNVAL_DASH
+        }
 
         switch(PLAYER_BACKGROUND) {
             title = "后台播放"

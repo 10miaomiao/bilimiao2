@@ -9,11 +9,9 @@ import android.view.WindowManager
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
-import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
-import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
@@ -27,13 +25,15 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.PlayerStore
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
-import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+import com.google.android.exoplayer2.source.*
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser
 import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.upstream.TransferListener
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
@@ -80,6 +80,7 @@ class PlayerDelegate2(
     val MAX_QUALITY_NOT_LOGIN = 48 // 48[480P 清晰]
     val MAX_QUALITY_NOT_VIP = 80 // 80[1080P 高清]
     var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
+    var fnval = 4048 // 视频格式: 0:flv,1:mp4,4048:dash
 
     var speed = 1f // 播放速度
     private var lastPosition = 0L
@@ -164,20 +165,49 @@ class PlayerDelegate2(
         cacheDir: File?
     ): MediaSource? {
         val dataSourceArr = dataSource.split("\n")
-        if (dataSourceArr.size > 1) {
-            val uri = Uri.parse(dataSourceArr[0])
-            val dashStr = dataSourceArr[1]
-            // Create a data source factory.
-            val dataSourceFactory = DefaultHttpDataSource.Factory()
-            val header = getDefaultRequestProperties()
-            dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
-            dataSourceFactory.setDefaultRequestProperties(header)
-            // Create a DASH media source pointing to a DASH manifest uri.
-            val dashManifest = DashManifestParser().parse(uri, dashStr.toByteArray().inputStream())
-            val mediaSource = DashMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(dashManifest)
+        when (dataSourceArr[0]) {
+            "[local-merging]" -> {
+                // 本地音视频分离
+                val localSourceFactory = DefaultDataSource.Factory(activity)
+                val videoMedia = MediaItem.fromUri(dataSourceArr[1])
+                val audioMedia = MediaItem.fromUri(dataSourceArr[2])
+                return MergingMediaSource(
+                    ProgressiveMediaSource.Factory(localSourceFactory)
+                        .createMediaSource(videoMedia),
+                    ProgressiveMediaSource.Factory(localSourceFactory)
+                        .createMediaSource(audioMedia)
+                )
+            }
+            "[concatenating]" -> {
+                // 视频拼接
+                val dataSourceFactory = DefaultHttpDataSource.Factory()
+                val header = getDefaultRequestProperties()
+                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setDefaultRequestProperties(header)
+                return ConcatenatingMediaSource().apply {
+                    for(i in 1 until dataSourceArr.size) {
+                        addMediaSource(
+                            ProgressiveMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(MediaItem.fromUri(dataSourceArr[i]))
+                        )
+                    }
+                }
+            }
+            "[dash-mpd]" -> {
+                // Create a data source factory.
+                val dataSourceFactory = DefaultHttpDataSource.Factory()
+                val header = getDefaultRequestProperties()
+                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setDefaultRequestProperties(header)
+                // Create a DASH media source pointing to a DASH manifest uri.
+                val uri = Uri.parse(dataSourceArr[1])
+                val dashStr = dataSourceArr[2]
+                val dashManifest = DashManifestParser().parse(uri, dashStr.toByteArray().inputStream())
+                val mediaSource = DashMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(dashManifest)
 //                    mediaSource.prepareSource()
-            return mediaSource
+                return mediaSource
+            }
         }
         return null
     }
@@ -246,7 +276,7 @@ class PlayerDelegate2(
         playerCoroutineScope.launch(Dispatchers.IO) {
             try {
                 val danmukuParser = source.getDanmakuParser()
-                val sourceInfo = source.getPlayerUrl(quality)
+                val sourceInfo = source.getPlayerUrl(quality, fnval)
                 withContext(Dispatchers.Main) {
                     // 设置通知栏控制器
                     PlayerService.selfInstance?.setPlayingInfo(
@@ -332,6 +362,7 @@ class PlayerDelegate2(
 
     override fun openPlayer(source: BasePlayerSource) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        fnval = prefs.getString(VideoSettingFragment.PLAYER_FNVAL, VideoSettingFragment.FNVAL_DASH)!!.toInt()
         quality = prefs.getInt("player_quality", 64).let {
             if (!userStore.isLogin() && it > MAX_QUALITY_NOT_LOGIN) {
                 // 未登陆：48[480P 清晰]及以下

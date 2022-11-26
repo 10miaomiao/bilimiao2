@@ -26,7 +26,7 @@ class VideoPlayerSource(
     override val ownerName: String,
 ): BasePlayerSource {
 
-    override suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo {
+    override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
 //        val req = Playurl.PlayURLReq.newBuilder()
 //            .setAid(aid.toLong())
 //            .setCid(cid.toLong())
@@ -40,16 +40,26 @@ class VideoPlayerSource(
 //            .awaitCall()
 //        return getMpdUrl(quality, result.dash)
         val res = BiliApiService.playerAPI
-            .getVideoPalyUrl(aid, id, quality, dash = true)
+            .getVideoPalyUrl(aid, id, quality, fnval)
         val dash = res.dash
         var duration: Long
         val url = if (dash != null) {
             duration = dash.duration * 1000L
             DashSource(quality, dash).getMDPUrl()
         } else {
-            duration = res.durl!![0].length * 1000L
-            res.durl!![0].url
+            val durl = res.durl!!
+            if (durl.size == 1) {
+                duration = durl[0].length * 1000L
+                durl[0].url
+            } else {
+                duration = 0L
+                "[concatenating]\n" + durl.joinToString("\n") {
+                    duration += it.length * 1000L
+                    it.url
+                }
+            }
         }
+        DebugMiao.log("getPlayerUrl", url)
         val acceptDescription = res.accept_description
         val acceptList = res.accept_quality.mapIndexed { index, i ->
             PlayerSourceInfo.AcceptInfo(i, acceptDescription[index])

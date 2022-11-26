@@ -34,7 +34,7 @@ class LocalVideoPlayerSource(
     override val ownerName: String
         get() = "本地视频"
 
-    override suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo {
+    override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
         localEntry.owner_id
         val duration = localEntry.total_time_milli
         val videoDir = DownloadFlieHelper.getVideoPageFileDir(activity, localEntry)
@@ -57,13 +57,12 @@ class LocalVideoPlayerSource(
         if (dashJsonFile.exists()) {
             val dashJsonStr = dashJsonFile.readText()
             val dashJsonInfo = Gson().fromJson(dashJsonStr, PlayerAPI.Dash::class.java)
-            val mdpUrl = LocalDashSource(videoDir.absolutePath, PlayerAPI.Dash(
-                duration = localEntry.total_time_milli / 1000,
-                min_buffer_time = 1.5,
-                video = dashJsonInfo.video,
-                audio = dashJsonInfo.audio,
-            )).getMDPUrl()
-            return PlayerSourceInfo(mdpUrl, 0, acceptList, duration)
+            val videoFile = File(videoDir, "video.m4s")
+            val audioFile = File(videoDir, "audio.m4s")
+            val url = Uri.fromFile(videoFile).toString()
+            val audioUrl = Uri.fromFile(audioFile).toString()
+            val mergingUrl = "[local-merging]\n$url\n$audioUrl"
+            return PlayerSourceInfo(mergingUrl, 0, acceptList, duration)
         }
         return PlayerSourceInfo("", -1, acceptList, duration)
     }

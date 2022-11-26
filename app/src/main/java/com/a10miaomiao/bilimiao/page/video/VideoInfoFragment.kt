@@ -414,6 +414,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                         +recyclerView {
                             val lm = LinearLayoutManager(context)
                             lm.orientation = LinearLayoutManager.HORIZONTAL
+                            scrollBarSize = 0
                             _miaoLayoutManage(lm)
 
                             _miaoAdapter(
@@ -541,6 +542,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 // 多个up主信息
                 +recyclerView {
                     _show = isMutableUpper
+                    scrollBarSize = 0
                     _miaoLayoutManage(
                         LinearLayoutManager(context).apply {
                             orientation = LinearLayoutManager.HORIZONTAL
