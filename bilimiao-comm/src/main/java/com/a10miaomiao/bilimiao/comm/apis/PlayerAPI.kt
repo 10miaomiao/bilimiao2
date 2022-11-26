@@ -46,25 +46,26 @@ class PlayerAPI {
 
     /**
      * 获取视频播放地址
+     * fnval: 0:flv,1:mp4,4048:dash
      */
     fun getVideoPalyUrl(
         avid: String,
         cid: String,
         quality: Int = 64,
-        dash: Boolean = false,
+        fnval: Int = 4048,
     ): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "avid" to avid,
             "cid" to cid,
             "qn" to quality.toString(),
+            "fnval" to fnval.toString(),
+            "fnver" to "0",
             "type" to "",
             "otype" to "json",
             "appkey" to _appKey_VIDEO
         )
-        if (dash) {
+        if (fnval > 2) {
             params.put("fourk", "1")
-            params.put("fnver", "0")
-            params.put("fnval", "4048")
         }
         ApiHelper.addAccessKeyAndMidToParams(params)
         params["sign"] = ApiHelper.getSing(params, _appSecret_VIDEO)
@@ -86,12 +87,12 @@ class PlayerAPI {
         epid: String,
         cid: String,
         qn: Int = 64,
-        dash: Boolean = false,
+        fnval: Int = 4048,
     ): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "aid" to epid,
             "cid" to cid,
-            "fnval" to "2",
+            "fnval" to fnval.toString(),
             "fnver" to "0",
             "module" to "bangumi",
             "qn" to qn.toString(),
@@ -103,10 +104,8 @@ class PlayerAPI {
             "mobi_app" to "android",
             "platform" to "android"
         )
-        if (dash) {
+        if (fnval > 2) {
             params.put("fourk", "1")
-            params.put("fnver", "0")
-            params.put("fnval", "4048")
         }
         ApiHelper.addAccessKeyAndMidToParams(params)
         params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET)

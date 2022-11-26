@@ -8,6 +8,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.player.BiliDanmukuParser
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
@@ -26,18 +27,28 @@ class BangumiPlayerSource(
     override val ownerName: String,
 ): BasePlayerSource {
 
-    override suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo {
+    override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
         val res = BiliApiService.playerAPI
-            .getBangumiUrl(epid, id, quality, dash = true)
+            .getBangumiUrl(epid, id, quality, fnval)
         val dash = res.dash
         var duration: Long
         val url = if (dash != null) {
             duration = dash.duration * 1000L
             DashSource(quality, dash).getMDPUrl()
         } else {
-            duration = res.durl!![0].length * 1000L
-            res.durl!![0].url
+            val durl = res.durl!!
+            if (durl.size == 1) {
+                duration = durl[0].length * 1000L
+                durl[0].url
+            } else {
+                duration = 0L
+                "[concatenating]\n" + durl.joinToString("\n") {
+                    duration += it.length * 1000L
+                    it.url
+                }
+            }
         }
+        DebugMiao.log("getPlayerUrl", url)
         val acceptDescription = res.accept_description
         val acceptList = res.accept_quality.mapIndexed { index, i ->
             PlayerSourceInfo.AcceptInfo(i, acceptDescription[index])

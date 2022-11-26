@@ -29,6 +29,7 @@ import java.util.List;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkLibLoader;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
+import tv.danmaku.ijk.media.player.misc.IMediaDataSource;
 import tv.danmaku.ijk.media.player.misc.IjkTrackInfo;
 
 /**
@@ -73,6 +74,10 @@ public class MyIjkPlayerManager extends BasePlayerManager {
         String url = gsyModel.getUrl();
         BufferedInputStream videoBufferedInputStream = gsyModel.getVideoBufferedInputStream();
 
+        String[] urlArr = url.split("\n");
+        if (urlArr.length > 1) {
+            // dash
+        }
 
         try {
             //开启硬解码
@@ -91,6 +96,7 @@ public class MyIjkPlayerManager extends BasePlayerManager {
                     if (uri != null && uri.getScheme() != null && uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)) {
                         RawDataSourceProvider rawDataSourceProvider = RawDataSourceProvider.create(context, uri);
                         mediaPlayer.setDataSource(rawDataSourceProvider);
+
                     } else if (uri != null && uri.getScheme() != null && uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
                         ParcelFileDescriptor descriptor;
                         try {

@@ -349,6 +349,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                 +recyclerView {
                     val lm = LinearLayoutManager(context)
                     lm.orientation = LinearLayoutManager.HORIZONTAL
+                    scrollBarSize = 0
                     _miaoLayoutManage(lm)
 
                     _miaoAdapter(

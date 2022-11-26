@@ -11,7 +11,7 @@ interface BasePlayerSource {
     val coverUrl: String
     val ownerId: String
     val ownerName: String
-    suspend fun getPlayerUrl(quality: Int): PlayerSourceInfo
+    suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo
     suspend fun getSubtitles(): List<DanmakuVideoPlayer.SubtitleSourceInfo> = emptyList()
     suspend fun getDanmakuParser(): BaseDanmakuParser? = null
     suspend fun historyReport(progress: Long) {}
