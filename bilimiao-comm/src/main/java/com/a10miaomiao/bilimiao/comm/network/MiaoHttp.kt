@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.network
 
 import android.util.Log
 import android.webkit.CookieManager
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -30,6 +31,13 @@ class MiaoHttp(var url: String? = null) {
         }
         requestBuilder.addHeader("user-agent", ApiHelper.USER_AGENT)
         requestBuilder.addHeader("referer",ApiHelper.REFERER)
+        requestBuilder.addHeader("env", "prod")
+        requestBuilder.addHeader("app-key", "android")
+        requestBuilder.addHeader("x-bili-aurora-zone", "")
+        BilimiaoCommApp.commApp.loginInfo?.token_info?.let{
+            requestBuilder.addHeader("x-bili-mid", it.mid.toString())
+        }
+
         requestBuilder.addHeader("cookie", (cookieManager.getCookie(url) ?: ""))
         if (body == null && formBody != null) {
             val bodyStr = ApiHelper.urlencode(formBody!!)
