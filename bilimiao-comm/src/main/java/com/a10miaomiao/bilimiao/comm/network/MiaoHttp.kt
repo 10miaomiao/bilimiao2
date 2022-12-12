@@ -31,9 +31,11 @@ class MiaoHttp(var url: String? = null) {
         }
         requestBuilder.addHeader("user-agent", ApiHelper.USER_AGENT)
         requestBuilder.addHeader("referer",ApiHelper.REFERER)
-        requestBuilder.addHeader("env", "prod")
-        requestBuilder.addHeader("app-key", "android")
-        requestBuilder.addHeader("x-bili-aurora-zone", "")
+        if (url?.let { "bilibili.com" in it } == true) {
+            requestBuilder.addHeader("env", "prod")
+            requestBuilder.addHeader("app-key", "android")
+            requestBuilder.addHeader("x-bili-aurora-zone", "")
+        }
         BilimiaoCommApp.commApp.loginInfo?.token_info?.let{
             requestBuilder.addHeader("x-bili-mid", it.mid.toString())
         }

@@ -203,6 +203,14 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     Navigation.findNavController(view)
                         .navigate(MainNavGraph.action.user_to_userFavouriteDetail, args)
                 }
+                is SpaceInfo.Favourite2Item -> {
+                    val args = bundleOf(
+                        MainNavGraph.args.id to item.media_id,
+                        MainNavGraph.args.name to item.title
+                    )
+                    Navigation.findNavController(view)
+                        .navigate(MainNavGraph.action.user_to_userFavouriteDetail, args)
+                }
                 // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
                     val args = bundleOf(
@@ -333,7 +341,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         +userNavView(
                             title = "收藏",
                             tag = "favourite",
-                            number = userInfo?.favourite?.count ?: 0,
+                            number = userInfo?.favourite2?.count ?: 0,
                             isShow = userInfo?.tab?.favorite == true
                         )..lParams { weight = 1f }
                         +userNavView(
@@ -534,7 +542,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 }..lParams(matchParent, wrapContent)
 
                 // 收藏
-                isShow = viewModel.dataInfo?.favourite?.count?: 0 > 0
+                isShow = viewModel.dataInfo?.favourite2?.count?: 0 > 0
                 +mediaTitleView(
                     title = "${subject}的收藏",
                     isShow = isShow,
@@ -551,18 +559,16 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
                     )
                     val itemUi = miaoMemo(null) {
-                        miaoBindingItemUi<SpaceInfo.FavouriteItem> { item, _ ->
+                        miaoBindingItemUi<SpaceInfo.Favourite2Item> { item, _ ->
                             mediaItemView(
-                                title = item.name,
-                                subtitle = "共${item.cur_count}个视频",
-                                cover = if (item.cover != null && item.cover.isNotEmpty()) {
-                                    item.cover[0].pic
-                                } else { "" },
+                                title = item.title,
+                                subtitle = "共${item.count}个视频",
+                                cover = item.cover,
                             )
                         }
                     }
                     _miaoAdapter(
-                        items = viewModel.dataInfo?.favourite?.item?.toMutableList(),
+                        items = viewModel.dataInfo?.favourite2?.item?.toMutableList(),
                         itemUi = itemUi,
                     ){
                         setOnItemClickListener(handleItemClick)

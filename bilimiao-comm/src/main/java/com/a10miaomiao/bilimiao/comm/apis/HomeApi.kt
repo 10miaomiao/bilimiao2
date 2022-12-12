@@ -8,7 +8,7 @@ import java.util.*
 class HomeApi {
 
     /**
-     * 视频信息
+     * 视频推荐
      */
     fun recommendList(
         idx: Long,
@@ -24,17 +24,9 @@ class HomeApi {
             "column" to column,
             "device" to device,
             "device_name" to deviceName,
+            "device_type" to "0",
             "pull" to isPull.toString().lowercase(Locale.getDefault()),
         )
-//        var request = await _httpProvider.GetRequestMessageAsync(
-//                HttpMethod.Get,
-//        Home.Recommend,
-//        queryParameters,
-//        Models.Enums.RequestClientType.IOS);
-//        var response = await _httpProvider.SendAsync(request);
-//        var data = await _httpProvider.ParseAsync<ServerResponse<HomeRecommendInfo>>(response);
-//        return data.Data.Items.Where(p => !string.IsNullOrEmpty(p.Goto)).ToList();
-//        )
     }
 
 }
