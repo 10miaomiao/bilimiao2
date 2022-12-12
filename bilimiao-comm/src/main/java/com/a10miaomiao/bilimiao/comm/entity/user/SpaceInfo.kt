@@ -5,6 +5,7 @@ data class SpaceInfo(
     var live: LiveInfo,
     var images: ImagesInfo,
     var favourite: Media<FavouriteItem>,
+    var favourite2: Media<Favourite2Item>,
     var season: Media<SeasonItem>,
     var archive: Media<ArchiveItem>,
     var coin_archive: Media<ArchiveItem>,
@@ -80,6 +81,20 @@ data class SpaceInfo(
         val mtime: Long,
         val name: String,
         val state: Int
+    )
+
+    data class Favourite2Item(
+        val media_id: String,
+        val id: String,
+        val mid: String,
+        val title: String,
+        val cover: String,
+        val count: Int,
+        val type: Int,
+        val is_public: Int,
+        val ctime: String,
+        val mtime: String,
+        val is_default: Boolean,
     )
 
     data class FavouriteItemCover(

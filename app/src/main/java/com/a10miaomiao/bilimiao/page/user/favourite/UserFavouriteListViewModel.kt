@@ -8,8 +8,8 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.media.MediaInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
+import com.a10miaomiao.bilimiao.comm.entity.user.UserSpaceFavFolderInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -45,10 +45,23 @@ class UserFavouriteListViewModel(
             ui.setState {
                 list.loading = true
             }
-            val req = if (userStore.isSelf(id)) {
-                getSelfMedialist(pageNum)
+            val res = BiliApiService.userApi.favFolderList(id).awaitCall()
+                .gson<ResultInfo<UserSpaceFavFolderInfo>>()
+            if (res.code == 0) {
+                val result = res.data
+                val defaultFolderDetail = result.default_folder.folder_detail
+                val media0 = result.space_infos[0]
+                ui.setState {
+                    list.finished = true
+                    list.data.add(defaultFolderDetail)
+                    if (media0 != null) {
+                        list.data.addAll(media0.mediaListResponse.list)
+                    }
+                }
+                list.pageNum = pageNum
             } else {
-                getOtherMedialist(pageNum)
+                context.toast(res.message)
+                throw Exception(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -60,61 +73,6 @@ class UserFavouriteListViewModel(
                 list.loading = false
                 triggered = false
             }
-        }
-    }
-
-    private suspend fun getOtherMedialist(pageNum: Int) {
-        // TODO: 更新新版本的API
-        val res = BiliApiService.userApi.medialist(id).awaitCall()
-            .gson<ResultInfo<DataInfo>>()
-        if (res.code == 0) {
-            val result = res.data.favorite.items.map {
-                val cover = if (it.cover.isEmpty()) {
-                    ""
-                } else {
-                    it.cover[0].pic
-                }
-                MediaListInfo(
-                    cover = cover,
-                    intro = "${it.cur_count}个视频 ",
-                    title = it.name,
-                    cover_type = 0,
-                    ctime = 0,
-                    fav_state = 0,
-                    fid = it.fid,
-                    id = it.media_id,
-                    like_state = 0,
-                    media_count = it.cur_count,
-                    mid = it.mid,
-                    mtime = 0,
-                    state = it.state,
-                    type = 0
-                )
-            }
-            ui.setState {
-                list.finished = true
-                list.data.addAll(result)
-            }
-            list.pageNum = pageNum
-        } else {
-            context.toast(res.message)
-            throw Exception(res.message)
-        }
-    }
-
-    private suspend fun getSelfMedialist (pageNum: Int){
-        val res = BiliApiService.userApi.medialist().awaitCall()
-            .gson<ResultInfo<List<MediaInfo>>>()
-        if (res.code == 0) {
-            val result = res.data[0].mediaListResponse.list
-            ui.setState {
-                list.finished = true
-                list.data.addAll(result)
-            }
-            list.pageNum = pageNum
-        } else {
-            context.toast(res.message)
-            throw Exception(res.message)
         }
     }
 

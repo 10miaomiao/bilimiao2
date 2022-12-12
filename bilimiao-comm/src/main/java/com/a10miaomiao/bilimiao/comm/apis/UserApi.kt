@@ -64,6 +64,17 @@ class UserApi {
         )
     }
 
+    fun favFolderList(
+        up_mid: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/v3/fav/folder/space/v2",
+            "up_mid" to up_mid
+        )
+    }
+
+
+
     /**
      * 收藏夹列表详情
      */
