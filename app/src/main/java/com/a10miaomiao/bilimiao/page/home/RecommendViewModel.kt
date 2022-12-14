@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
+import com.a10miaomiao.bilimiao.comm.entity.home.WebRecommendInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
@@ -36,12 +37,8 @@ class RecommendViewModel(
     val fragment: Fragment by instance()
     val filterStore: FilterStore by instance()
 
-    private val _idx get() = if (list.data.size == 0) {
-        0
-    } else {
-        list.data[list.data.size - 1].idx
-    }
-    var list = PaginationInfo<RecommendCardInfo>()
+    private var _idx = 0L
+    var list = PaginationInfo<WebRecommendInfo.ItemInfo>()
     var triggered = false
 
     init {
@@ -56,12 +53,12 @@ class RecommendViewModel(
             ui.setState {
                 list.loading = true
             }
-            val res = BiliApiService.homeApi.recommendList(
+            val res = BiliApiService.homeApi.webRecommendList(
                 idx = idx,
-            ).awaitCall().gson<ResultInfo<HomeRecommendInfo>>()
+            ).awaitCall().gson<ResultInfo<WebRecommendInfo>>()
             if (res.isSuccess) {
-                val itemsList = res.data.items.filter {
-                   it.goto?.isNotEmpty() ?: false
+                val itemsList = res.data.item.filter {
+                   it.goto == "av"
                 }
                 ui.setState {
                     if (idx == 0L) {
@@ -69,6 +66,7 @@ class RecommendViewModel(
                     } else {
                         list.data.addAll(itemsList)
                     }
+                    _idx++
                     if (itemsList.isEmpty()) {
                         list.finished = true
                     }

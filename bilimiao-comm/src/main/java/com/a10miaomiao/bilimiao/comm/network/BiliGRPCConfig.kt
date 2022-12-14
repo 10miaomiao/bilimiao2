@@ -16,7 +16,7 @@ object BiliGRPCConfig {
     /**
      * 构建标识.
      */
-    val build = 6710300;
+    val build = 6740400;
 
     /**
      * 频道.

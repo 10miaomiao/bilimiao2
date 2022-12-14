@@ -14,11 +14,12 @@ import java.util.Date
  */
 object ApiHelper {
 
-    const val BUILD_VERSION = 5520400
-    const val APP_KEY = "4409e2ce8ffd12b8";
-    const val APP_SECRET = "59b43e04ad6965f34319062b478f83dd"
+    const val BUILD_VERSION = 6740400
+    const val APP_KEY = "1d8b6e7d45233436";
+    const val APP_SECRET = "560c52ccd288fed045859ed18bffd973"
 
     const val REFERER = "https://www.bilibili.com/"
+    const val APP_BASE = "https://app.bilibili.com/"
     const val GRPC_BASE = "https://grpc.biliapi.net/"
 
     /**
