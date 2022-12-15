@@ -116,7 +116,9 @@ object ApiHelper {
             "platform" to "android",
             "ts" to getTimeSpen().toString()
         )
-        addAccessKeyAndMidToParams(params)
+        if (params["notoken"]?.isEmpty() != false) {
+            addAccessKeyAndMidToParams(params)
+        }
         params["sign"] = getSing(params, APP_SECRET)
         return params
     }
