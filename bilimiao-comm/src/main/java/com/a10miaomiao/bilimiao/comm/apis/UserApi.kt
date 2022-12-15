@@ -46,7 +46,8 @@ class UserApi {
             "ps" to pageSize.toString(),
             "tid" to tid.toString(),
             "keyword" to keyword,
-            "order" to order
+            "order" to order,
+            "notoken" to "1", // 不带token,匿名访问
         )
     }
 

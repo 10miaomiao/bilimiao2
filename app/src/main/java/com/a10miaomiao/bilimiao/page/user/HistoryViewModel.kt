@@ -153,6 +153,8 @@ class HistoryViewModel(
         ui.setState {
             list = PaginationInfo()
             triggered = true
+            _viewAt = 0
+            _maxId = 0
             loadData(0L)
         }
     }
