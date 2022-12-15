@@ -10,12 +10,14 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import bilibili.app.interfaces.v1.HistoryOuterClass
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.entity.user.WebVideoHistoryInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -75,18 +77,18 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
         val args = bundleOf(
-            MainNavGraph.args.id to item.aid
+            MainNavGraph.args.id to item.history.bvid
         )
         Navigation.findNavController(view)
             .navigate(MainNavGraph.action.history_to_videoInfo, args)
     }
 
-    val itemUi = miaoBindingItemUi<VideoInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<WebVideoHistoryInfo.ItemInfo> { item, index ->
         videoItem (
             title = item.title,
-            pic = item.pic,
-            upperName = item.owner.name,
-            remark = NumberUtil.converCTime(item.view_at ?: 0),
+            pic = item.cover,
+            upperName = item.author_name,
+            remark = NumberUtil.converCTime(item.view_at),
         )
     }
 

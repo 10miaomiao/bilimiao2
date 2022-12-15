@@ -115,6 +115,9 @@ class UserApi {
         )
     }
 
+    /**
+     * 历史记录
+     */
     fun videoHistory (
         pageNum: Int,
         pageSize: Int,
@@ -123,6 +126,22 @@ class UserApi {
             "x/v2/history",
             "pn" to pageNum.toString(),
             "ps" to pageSize.toString(),
+        )
+    }
+
+    /**
+     * web端历史记录
+     * 不支持token，需要cookie
+     */
+    fun webVideoHistory (
+        max: Long,
+        viewAt: Long,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/web-interface/history/cursor",
+            "business" to "archive",
+            "max" to max.toString(),
+            "view_at" to viewAt.toString(),
         )
     }
 
