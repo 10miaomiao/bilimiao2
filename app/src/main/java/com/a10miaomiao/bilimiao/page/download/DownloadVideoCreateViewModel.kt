@@ -30,7 +30,7 @@ class DownloadVideoCreateViewModel(
     val fragment: Fragment by instance()
     val downloadDelegate: DownloadDelegate by instance()
 
-    val video = fragment.requireArguments().getParcelable<VideoInfo>(MainNavGraph.args.video)!!
+    val video = fragment.requireArguments().getParcelable<DownloadVideoCreateParam>(MainNavGraph.args.video)!!
 
     var acceptDescription = listOf<String>()
     var acceptQuality = listOf<Int>()
@@ -48,7 +48,7 @@ class DownloadVideoCreateViewModel(
             val aid = video.aid
             val cid = video.pages[0].cid
             val res = BiliApiService.playerAPI.getVideoPalyUrl(
-                aid, cid, quality
+                aid, cid, quality, fnval = 1
             )
             ui.setState {
                 acceptQuality = res.accept_quality
@@ -77,7 +77,7 @@ class DownloadVideoCreateViewModel(
         selectedList.clear()
     }
 
-    fun selectedItem (item: VideoPageInfo) {
+    fun selectedItem (item: DownloadVideoCreateParam.Page) {
         val index = selectedList.indexOf(item.cid)
         ui.setState {
             if (index == -1) {
@@ -88,7 +88,7 @@ class DownloadVideoCreateViewModel(
         }
     }
 
-    private fun downloadVideo(page: VideoPageInfo) {
+    private fun downloadVideo(page: DownloadVideoCreateParam.Page) {
         val pageData = BiliVideoPageData(
             cid = page.cid.toLong(),
             page = page.page,
@@ -124,7 +124,7 @@ class DownloadVideoCreateViewModel(
             spid = 0,
             seasion_id = 0,
             bvid = video.bvid,
-            owner_id = video.owner.mid.toLong(),
+            owner_id = video.mid.toLong(),
             page_data = pageData
         )
         val downloadService = downloadDelegate.downloadService

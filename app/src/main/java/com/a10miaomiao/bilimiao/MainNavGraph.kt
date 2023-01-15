@@ -234,6 +234,20 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val userChannelDetail = f<UserChannelDetailFragment> {
+            argument(args.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.name) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(args.parent) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
         val userFavouriteList = f<UserFavouriteListFragment> {
             argument(args.id) {
                 type = NavType.StringType
@@ -325,6 +339,7 @@ object MainNavGraph {
 
         val user_to_videoInfo = dest.user to dest.videoInfo
         val user_to_userArchiveList = dest.user to dest.userArchiveList
+        val user_to_userChannelDetail = dest.user to dest.userChannelDetail
         val user_to_userBangumi = dest.user to dest.userBangumi
         val user_to_myBangumi = dest.user to dest.myBangumi
         val user_to_userFavouriteList = dest.user to dest.userFavouriteList
@@ -336,6 +351,8 @@ object MainNavGraph {
 
         val userBangumi_to_bangumiDetail = dest.userBangumi to dest.bangumiDetail
         val myBangumi_to_bangumiDetail = dest.myBangumi to dest.bangumiDetail
+
+        val userChannelDetail_to_videoInfo = dest.userChannelDetail to dest.videoInfo
 
         val userFavouriteList_to_userFavouriteDetail = dest.userFavouriteList to dest.userFavouriteDetail
 
@@ -350,6 +367,7 @@ object MainNavGraph {
         const val url = "url"
         const val type = "type"
         const val id = "id"
+        const val parent = "parent"
         const val name = "name"
         const val title = "title"
         const val text = "text"

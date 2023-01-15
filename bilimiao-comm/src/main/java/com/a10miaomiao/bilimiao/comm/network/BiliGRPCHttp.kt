@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.network
 
 import android.os.Build
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import io.grpc.MethodDescriptor
 import okhttp3.*
 import java.io.IOException
@@ -14,6 +15,8 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
     private val reqMessage: ReqT,
 ) {
 
+    var baseUrl = ApiHelper.GRPC_BASE
+
     private val client = OkHttpClient()
 
     var needToken = true
@@ -22,13 +25,16 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
         val token = BilimiaoCommApp.commApp.loginInfo?.token_info?.access_token ?: ""
         if (needToken && token.isNotBlank()) {
             addHeader(BiliHeaders.Authorization, BiliHeaders.Identify + " " + token)
+            BilimiaoCommApp.commApp.loginInfo?.token_info?.let{
+                addHeader(BiliHeaders.BiliMid, it.mid.toString())
+            }
         }
         addHeader(BiliHeaders.UserAgent, ApiHelper.USER_AGENT)
         addHeader(BiliHeaders.AppKey, BiliGRPCConfig.mobileApp)
         addHeader(BiliHeaders.BiliDevice, BiliGRPCConfig.getDeviceBin())
         addHeader(BiliHeaders.BiliFawkes, BiliGRPCConfig.getFawkesreqBin())
         addHeader(BiliHeaders.BiliLocale, BiliGRPCConfig.getLocaleBin())
-        addHeader(BiliHeaders.BiliMeta, BiliGRPCConfig.getMetadataBin(""))
+        addHeader(BiliHeaders.BiliMeta, BiliGRPCConfig.getMetadataBin(token))
         addHeader(BiliHeaders.BiliNetwork, BiliGRPCConfig.getNetworkBin())
         addHeader(BiliHeaders.BiliRestriction, BiliGRPCConfig.getRestrictionBin())
         addHeader(BiliHeaders.GRPCAcceptEncodingKey, BiliHeaders.GRPCAcceptEncodingValue)
@@ -36,11 +42,12 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
         addHeader(BiliHeaders.Envoriment, BiliGRPCConfig.envorienment)
         addHeader(BiliHeaders.TransferEncodingKey, BiliHeaders.TransferEncodingValue)
         addHeader(BiliHeaders.TEKey, BiliHeaders.TEValue)
+        addHeader(BiliHeaders.Buvid, BilimiaoCommApp.commApp.getBilibiliBuvid())
         return this
     }
 
     private fun buildRequest(): Request {
-        val url = ApiHelper.GRPC_BASE + grpcMethod.fullMethodName
+        val url = baseUrl + grpcMethod.fullMethodName.replace("interfaces", "interface")
         val messageBytes = grpcMethod.streamRequest(reqMessage).readBytes()
         // 校验用?第五位为数组长度
         val stateBytes = byteArrayOf(0, 0, 0, 0, messageBytes.size.toByte())

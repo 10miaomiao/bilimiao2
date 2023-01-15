@@ -9,8 +9,6 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 
 class PlayerAPI {
-    private val _appKey_VIDEO = "84956560bc028eb7"
-    private val _appSecret_VIDEO = "94aba54af9065f71de72f5508f1cd42e"
 
     private fun getVideoHeaders(avid: String) = mapOf(
         "Referer" to "https://www.bilibili.com/av$avid",
@@ -62,15 +60,12 @@ class PlayerAPI {
             "fnver" to "0",
             "type" to "",
             "otype" to "json",
-            "appkey" to _appKey_VIDEO
         )
         if (fnval > 2) {
             params.put("fourk", "1")
         }
-        ApiHelper.addAccessKeyAndMidToParams(params)
-        params["sign"] = ApiHelper.getSing(params, _appSecret_VIDEO)
         val res = MiaoHttp.request {
-            url = "https://api.bilibili.com/x/player/playurl?" + ApiHelper.urlencode(params)
+            url = BiliApiService.biliApi("x/player/playurl", *params.toList().toTypedArray())
             headers = getVideoHeaders(avid)
         }.call().gson<ResultInfo<PlayurlData>>()
         if (res.code == 0) {
@@ -107,10 +102,8 @@ class PlayerAPI {
         if (fnval > 2) {
             params.put("fourk", "1")
         }
-        ApiHelper.addAccessKeyAndMidToParams(params)
-        params["sign"] = ApiHelper.getSing(params, ApiHelper.APP_SECRET)
         val res = MiaoHttp.request {
-            url = "https://api.bilibili.com/pgc/player/api/playurl?" + ApiHelper.urlencode(params)
+            url = BiliApiService.biliApi("pgc/player/api/playurl", *params.toList().toTypedArray())
         }.awaitCall().gson<PlayurlData>()
         if (res.code == 0) {
             return res

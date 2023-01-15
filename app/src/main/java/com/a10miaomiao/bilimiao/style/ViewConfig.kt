@@ -24,6 +24,9 @@ class ViewConfig(val context: Context) {
 
     val themeName get() = context.resources.getString(context.attr(R.attr.themeName))
 
+    val colorSurfaceResource get() = context.attr(com.google.android.material.R.attr.colorSurface)
+    val colorSurface get() = context.resources.getColor(colorSurfaceResource)
+
     val themeColorResource get() = context.attr(android.R.attr.colorPrimary)
     val themeColor get() = context.resources.getColor(themeColorResource)
 

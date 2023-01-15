@@ -13,7 +13,6 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
-import com.a10miaomiao.bilimiao.comm.entity.home.WebRecommendInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -70,7 +69,7 @@ class RecommendFragment: Fragment(), DIAware {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
         val args = bundleOf(
-            MainNavGraph.args.id to item.id
+            MainNavGraph.args.id to item.param
         )
         if (item.goto == "av") {
             Navigation.findNavController(view)
@@ -81,16 +80,16 @@ class RecommendFragment: Fragment(), DIAware {
         }
     }
 
-    val itemUi = miaoBindingItemUi<WebRecommendInfo.ItemInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<RecommendCardInfo> { item, index ->
         videoItem (
             title = item.title,
-            pic =item.pic,
-            upperName = item.owner.name,
-            playNum = item.stat.view,
-            damukuNum = item.stat.danmaku,
+            pic =item.cover,
+            upperName = item.args.up_name,
+            playNum = item.cover_left_text_1,
+            damukuNum = item.cover_left_text_2,
         )
     }
-
+    
     val ui = miaoBindingUi {
         val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
         val contentInsets = windowStore.getContentInsets(parentView)

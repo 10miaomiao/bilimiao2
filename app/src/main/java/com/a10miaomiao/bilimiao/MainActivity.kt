@@ -10,11 +10,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.DisplayMetrics
+import android.view.Gravity
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
@@ -141,9 +143,10 @@ class MainActivity
         if (PlayerService.selfInstance == null) {
             startService(Intent(this, PlayerService::class.java))
         }
+
     }
     
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent?.data?.let { uri ->
             val navOptions = NavOptions.Builder()
@@ -182,6 +185,7 @@ class MainActivity
             title = config.title
             menus = config.menus
         }
+        ui.setNavigationTitle(config.title)
     }
 
     val onBackClick = View.OnClickListener {
@@ -257,6 +261,9 @@ class MainActivity
                 0, 0, 0, 0
             )
         }
+        ui.leftNavigationView.setPadding(
+            left, if (showPlayer) 0 else top, 0, 0,
+        )
         basePlayerDelegate.setWindowInsets(left, top, right, bottom)
     }
 

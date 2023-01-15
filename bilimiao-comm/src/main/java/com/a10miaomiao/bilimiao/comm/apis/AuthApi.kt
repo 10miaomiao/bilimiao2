@@ -1,9 +1,15 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
+import android.util.Base64
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.utils.RSAUtil
+import java.security.KeyFactory
+import java.security.spec.X509EncodedKeySpec
 import java.util.*
+import javax.crypto.Cipher
 
 class AuthApi {
 
@@ -41,4 +47,112 @@ class AuthApi {
         method = MiaoHttp.POST
     }
 
+    /**
+     * 验证码
+     */
+    fun captchaPre() = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/safecenter/captcha/pre"
+        formBody = ApiHelper.createParams(
+            "disable_rcmd" to "0",
+        )
+        method = MiaoHttp.POST
+    }
+
+    /**
+     * 密码加密密钥
+     */
+    fun webKey() = MiaoHttp.request {
+        url = BiliApiService.createUrl("https://passport.bilibili.com/x/passport-login/web/key",
+            "disable_rcmd" to "0",
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),)
+    }
+
+    /**
+     * 密码登录
+     */
+    fun oauth2Login(
+        username: String,
+        passport: String,
+        key: String,
+        rhash: String,
+    ) = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/passport-login/oauth2/login"
+        formBody = ApiHelper.createParams(
+            "disable_rcmd" to "0",
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+            "password" to RSAUtil.rsaPassword(passport, key, rhash),
+            "username" to username,
+        )
+        method = MiaoHttp.POST
+    }
+
+    /**
+     * 短信验证码发送
+     */
+    fun smsSend(
+        tmpCode: String,
+        geeChallenge: String,
+        geeSeccode: String,
+        geeValidate: String,
+        recaptchaToken: String,
+    ) = MiaoHttp.request{
+        url = "https://passport.bilibili.com/x/safecenter/common/sms/send"
+        formBody = ApiHelper.createParams(
+            "disable_rcmd" to "0",
+            "sms_type" to "loginTelCheck",
+            "tmp_code" to tmpCode,
+            "gee_challenge" to geeChallenge,
+            "gee_seccode" to geeSeccode,
+            "gee_validate" to geeValidate,
+            "recaptcha_token" to recaptchaToken,
+        )
+        method = MiaoHttp.POST
+    }
+
+
+    /**
+     * 手机号验证登录
+     */
+    fun telVerify(
+        code: String,
+        tmpCode: String,
+        requestId: String,
+        source: String,
+        captcha_key: String,
+    ) = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/safecenter/login/tel/verify"
+        formBody = ApiHelper.createParams(
+            "disable_rcmd" to "0",
+            "type" to "loginTelCheck",
+            "code" to code,
+            "tmp_code" to tmpCode,
+            "request_id" to requestId,
+            "source" to source,
+            "captcha_key" to captcha_key,
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+        )
+        method = MiaoHttp.POST
+    }
+
+    fun oauth2AccessToken(
+        code: String,
+    )  = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/passport-login/oauth2/access_token"
+        formBody = ApiHelper.createParams(
+            "disable_rcmd" to "0",
+            "code" to code,
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+            "grant_type" to "authorization_code",
+        )
+        method = MiaoHttp.POST
+    }
+
+    fun userInfo(
+        tmpCode: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.createUrl("https://passport.bilibili.com/x/safecenter/user/info",
+            "tmp_code" to tmpCode,
+        )
+//        url = "https://passport.bilibili.com/h5-app/passport/risk/verify?tmp_token=67381b8106a9f8c7ee7ea657be75a111&request_id=e6afd2ea2a614236a9ca8935d51772b6&source=risk"
+    }
 }

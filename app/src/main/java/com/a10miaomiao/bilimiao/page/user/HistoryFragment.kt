@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -37,6 +38,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
+import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
@@ -77,18 +79,26 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
         val args = bundleOf(
-            MainNavGraph.args.id to item.history.bvid
+            MainNavGraph.args.id to item.oid.toString()
         )
         Navigation.findNavController(view)
             .navigate(MainNavGraph.action.history_to_videoInfo, args)
     }
 
-    val itemUi = miaoBindingItemUi<WebVideoHistoryInfo.ItemInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<HistoryOuterClass.CursorItem> { item, index ->
         videoItem (
             title = item.title,
-            pic = item.cover,
-            upperName = item.author_name,
-            remark = NumberUtil.converCTime(item.view_at),
+            pic = if (item.hasCardOgv()) {
+                item.cardOgv.cover
+            } else {
+                item.cardUgc.cover
+            },
+            upperName = if (item.hasCardOgv()) {
+                null
+            } else {
+                item.cardUgc.name
+            },
+            remark = NumberUtil.converCTime(item.viewAt),
         )
     }
 

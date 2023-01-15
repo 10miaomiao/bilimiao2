@@ -6,7 +6,7 @@ buildscript {
         build_tools_version = 30
         target_sdk_version = 32
 
-        material_version = "1.5.0"
+        material_version = "1.6.1"
         splitties_version = "3.0.0-beta06"
         nav_version = "2.3.5"
         kodein_di_version = '7.12.0'

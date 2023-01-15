@@ -5,8 +5,8 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class UpperChannelInfo(
-    var cid : Int,
-    var mid : Int,
+    var cid : String,
+    var mid : String,
     var name : String,
     var intro : String,
     var mtime : Long,

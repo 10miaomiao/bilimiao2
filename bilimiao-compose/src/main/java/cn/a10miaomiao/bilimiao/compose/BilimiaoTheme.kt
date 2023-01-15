@@ -38,12 +38,16 @@ fun BilimiaoTheme(content: @Composable () -> Unit) {
                 primary = themeColor,
                 secondary = themeColor,
                 tertiary = themeColor,
+                secondaryContainer = themeColor.copy(alpha = 0.2f),
+                tertiaryContainer = themeColor.copy(alpha = 0.2f),
             )
         } else {
             darkColorScheme(
                 primary = themeColor,
                 secondary = themeColor,
                 tertiary = themeColor,
+                secondaryContainer = themeColor.copy(alpha = 0.2f),
+                tertiaryContainer = themeColor.copy(alpha = 0.2f),
             )
         },
         content = content,

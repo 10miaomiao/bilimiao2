@@ -4,6 +4,8 @@ data class LoginInfo(
     val cookie_info: CookieInfo?,
     val sso: List<String>?,
     val status: Int,
+    val message: String?,
+    val url: String?,
     val token_info: TokenInfo
 ){
     data class CookieInfo(

@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentContainerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
@@ -28,16 +30,69 @@ import splitties.views.dsl.constraintlayout.constraintLayout
 import splitties.views.dsl.constraintlayout.lParams
 import splitties.views.dsl.constraintlayout.parentId
 import splitties.views.dsl.core.*
+import splitties.views.dsl.recyclerview.recyclerView
 
 
 //inline infix fun View.
 @OptIn(InternalSplittiesApi::class)
 class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
+    val leftNavigationList = mutableListOf(
+        NavigationListAdapter.NavigationItem(
+            title = "当前页面",
+            subtitle = "首页"
+        ),
+        NavigationListAdapter.NavigationItem(
+            itemType = NavigationListAdapter.ITEM_DIVIDER,
+            title = "",
+        ),
+        NavigationListAdapter.NavigationItem(
+            title = "首页",
+        ),
+        NavigationListAdapter.NavigationItem(
+            title = "番剧",
+        ),
+        NavigationListAdapter.NavigationItem(
+            title = "动态",
+        ),
+        NavigationListAdapter.NavigationItem(
+            itemType = NavigationListAdapter.ITEM_DIVIDER,
+            title = "",
+        ),
+        NavigationListAdapter.NavigationItem(
+            title = "我的收藏/订阅",
+        ),
+        NavigationListAdapter.NavigationItem(
+            title = "历史记录",
+        ),
+        NavigationListAdapter.NavigationItem(
+            title = "我的下载",
+        ),
+        NavigationListAdapter.NavigationItem(
+            itemType = NavigationListAdapter.ITEM_DIVIDER,
+            title = "",
+        ),
+        NavigationListAdapter.NavigationItem(
+            title = "设置",
+        ),
+    )
+    val leftNavigationAdapter = NavigationListAdapter(leftNavigationList)
+    val leftNavigationView = recyclerView {
+        backgroundColor= config.windowBackgroundColor
+        layoutManager = LinearLayoutManager(ctx)
+        adapter = leftNavigationAdapter
+    }
 
-    val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
+    val mContainerView = inflate<View>(R.layout.container_fragment) {
         backgroundColor = config.windowBackgroundColor
     }
+//    val mContainerView = view<DrawerLayout> {
+//        addView(inflate(R.layout.container_fragment))
+//        addView(leftNavigationView, DrawerLayout.LayoutParams(matchParent, matchParent).apply {
+//            gravity = Gravity.LEFT
+//        })
+//        backgroundColor = config.windowBackgroundColor
+//    }
 
     val mBottomSheetView = inflate<FragmentContainerView>(R.layout.bottom_sheet_fragment) {
         backgroundColor = config.windowBackgroundColor
@@ -136,4 +191,12 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
     }
 
+    fun setNavigationTitle(
+        title: String,
+    ) {
+        leftNavigationAdapter.setData(0, NavigationListAdapter.NavigationItem(
+            title = "当前页面",
+            subtitle = title.replace("\n", " "),
+        ))
+    }
 }
