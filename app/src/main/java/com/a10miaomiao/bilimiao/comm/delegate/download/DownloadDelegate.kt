@@ -74,7 +74,8 @@ class DownloadDelegate(
         var res = BiliApiService.playerAPI.getVideoPalyUrl(
             entry.avid.toString(),
             entry.page_data.cid.toString(),
-            entry.prefered_video_quality
+            entry.prefered_video_quality,
+            fnval = 1,
         )
         val segmentList = res.durl!!.map { item ->
             Segment(

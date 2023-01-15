@@ -55,6 +55,8 @@ class H5LoginViewModel(
                     refresh_token = ""
                 ),
                 status = 0,
+                message =  null,
+                url = null,
                 sso = null,
                 cookie_info = null
             )
@@ -80,9 +82,11 @@ class H5LoginViewModel(
                 AuthApi().account().call().gson<ResultInfo<UserInfo>>()
             }
             if (res.code == 0) {
-                userStore.setUserInfo(res.data)
-                val nav = findNavController(view)
-                nav.popBackStack(MainNavGraph.dest.home, true)
+                withContext(Dispatchers.Main) {
+                    userStore.setUserInfo(res.data)
+                    val nav = findNavController(view)
+                    nav.popBackStack(MainNavGraph.dest.home, true)
+                }
             } else {
                 alert(res.message)
             }

@@ -63,9 +63,7 @@ class BangumiDetailViewModel (
                 seasonsIndex = -1
                 episodes = mutableListOf()
             }
-            val res = BiliApiService.bangumiAPI.seasonInfo(id)
-                .awaitCall()
-                .gson<ResultInfo2<BangumiInfo>>()
+            val res = BiliApiService.bangumiAPI.seasonInfo(id).awaitCall().gson<ResultInfo2<BangumiInfo>>()
             if (res.code == 0) {
                 val result = res.result
                 ui.setState {

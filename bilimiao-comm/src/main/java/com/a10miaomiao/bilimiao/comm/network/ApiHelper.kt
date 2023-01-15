@@ -3,11 +3,10 @@ package com.a10miaomiao.bilimiao.comm.network
 import android.net.Uri
 import android.os.Build
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import java.io.UnsupportedEncodingException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.Date
+import java.util.*
 
 /**
  * Created by 10喵喵 on 2017/4/9.
@@ -34,6 +33,19 @@ object ApiHelper {
 
 
     fun getTimeSpen() = Date().time / 1000
+
+    /**
+     * 获得一个UUID
+     * @return String UUID
+     */
+    fun getUUID(): String {
+        return UUID.randomUUID().toString().replace("-", "")
+    }
+
+    fun generateBuvid(): String {
+        val uuid = getUUID() + getUUID()
+        return "XY" + uuid.substring(0, 35).uppercase()
+    }
 
 
     fun getSing(url: String, secret: String): String {
@@ -112,6 +124,7 @@ object ApiHelper {
             *pairs,
             "appkey" to APP_KEY,
             "build" to BUILD_VERSION.toString(),
+            "buvid" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
             "mobi_app" to "android",
             "platform" to "android",
             "ts" to getTimeSpen().toString()

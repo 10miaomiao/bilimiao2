@@ -13,6 +13,7 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/theme_color_secondary</item>
         <item name="colorSecondaryVariant">@color/theme_color_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_secondary_container_color</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="m">@android:color/transparent</item>
@@ -29,6 +30,8 @@
         <item name="defaultBackgroundColor">@color/windowBackgroundColor</item>
 
         <item name="android:windowBackground">@drawable/splash_default</item>
+
+        <item name="navigationViewStyle">@style/Widget.Bilimaio.Material3.NavigationView</item>
     </style>
 
     <style name="Theme.DayNight.Bilimiao" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
@@ -40,6 +43,7 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/theme_color_secondary</item>
         <item name="colorSecondaryVariant">@color/theme_color_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_secondary_container_color</item>
         <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">@color/black</item>
@@ -56,6 +60,8 @@
         <item name="defaultBackgroundColor">@color/darkWindowBackgroundColor</item>
 
         <item name="android:windowBackground">@drawable/splash_default</item>
+
+        <item name="navigationViewStyle">@style/Widget.Bilimaio.Material3.NavigationView</item>
     </style>
 
 

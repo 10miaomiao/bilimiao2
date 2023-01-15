@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">bilimiao-dev</string>
+    <string name="app_name">bilimiao</string>
     <string name="view_cover" tools:ignore="ExtraTranslation">查看b站封面</string>
 
     <string name="playing_notification_description">播放通知提供播放暂停等操作。</string>

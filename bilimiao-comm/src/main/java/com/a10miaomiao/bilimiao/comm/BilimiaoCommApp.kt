@@ -1,9 +1,12 @@
 package com.a10miaomiao.bilimiao.comm
 
 import android.app.Application
+import android.content.Context
 import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.utils.AESUtil
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
 import java.io.File
 
@@ -14,6 +17,7 @@ class BilimiaoCommApp(
         private set
 
     private val key = "Message Word"
+    private var _bilibiliBuvid = ""
 
     companion object {
         lateinit var commApp: BilimiaoCommApp
@@ -72,5 +76,21 @@ class BilimiaoCommApp(
         cookieManager.flush()
         this.loginInfo = null
     }
+
+
+    fun getBilibiliBuvid(): String {
+        if (_bilibiliBuvid.isNotBlank()) {
+            return _bilibiliBuvid
+        }
+        val sp = app.getSharedPreferences(APP_NAME, Context.MODE_PRIVATE)
+        var buvid = sp.getString("buvid", "")!!
+        if (buvid.isBlank()) {
+            buvid = ApiHelper.generateBuvid()
+            sp.edit().putString("buvid", buvid).apply()
+        }
+        _bilibiliBuvid = buvid
+        return buvid
+    }
+
 
 }

@@ -212,6 +212,16 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         .navigate(MainNavGraph.action.user_to_userFavouriteDetail, args)
                 }
                 // 跳转番剧
+                is UpperChannelInfo -> {
+                    val args = bundleOf(
+                        MainNavGraph.args.id to item.cid,
+                        MainNavGraph.args.parent to item.mid,
+                        MainNavGraph.args.name to item.name
+                    )
+                    Navigation.findNavController(view)
+                        .navigate(MainNavGraph.action.user_to_userChannelDetail, args)
+                }
+                // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
                     val args = bundleOf(
                         MainNavGraph.args.id to item.param

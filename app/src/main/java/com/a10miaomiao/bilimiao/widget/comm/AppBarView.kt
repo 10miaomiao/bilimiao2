@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.widget.comm
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -20,6 +21,9 @@ import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
 import splitties.views.padding
 import splitties.views.topPadding
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 class AppBarView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -80,7 +84,12 @@ class AppBarView @JvmOverloads constructor(
         this.prop = newProp()
     }
 
+    @OptIn(ExperimentalContracts::class)
+    @SuppressLint("RestrictedApi")
     fun setProp(block: PropInfo.() -> Unit) {
+        contract {
+            callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        }
         val prop = newProp()
         prop.block()
         this.prop = prop

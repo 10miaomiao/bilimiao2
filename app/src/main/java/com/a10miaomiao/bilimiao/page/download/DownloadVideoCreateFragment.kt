@@ -75,7 +75,7 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
         viewModel.selectedItem(item)
     }
 
-    val itemUi = miaoBindingItemUi<VideoPageInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<DownloadVideoCreateParam.Page> { item, index ->
         frameLayout {
             setBackgroundResource(R.drawable.shape_corner)
             layoutParams = lParams {

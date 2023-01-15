@@ -79,18 +79,30 @@ class HomeFragment : Fragment(), DIAware {
     val handleHeaderClick = View.OnClickListener{
         val userInfo = viewModel.userStore.state.info
         if (userInfo != null) {
+            // 跳转个人中心
             val nav = Navigation.findNavController(it)
             val args = bundleOf(
                 MainNavGraph.args.id to userInfo.mid.toString()
             )
             nav.navigate(MainNavGraph.action.home_to_user, args)
+        } else {
+            // 跳转登录
+            val nav = Navigation.findNavController(it)
+            val url = "bilimiao://auth/login"
+            nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
+                MainNavGraph.args.url to url
+            ))
         }
     }
 
     val handleHeaderLongClick = View.OnLongClickListener{
         if (viewModel.userStore.state.info == null) {
+            // 跳转登录
             val nav = Navigation.findNavController(it)
-            nav.navigate(MainNavGraph.action.home_to_h5Login)
+            val url = "bilimiao://auth/login"
+            nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
+                MainNavGraph.args.url to url
+            ))
             true
         } else {
             false
@@ -366,15 +378,20 @@ class HomeFragment : Fragment(), DIAware {
                     bottomMargin = config.dividerSize
                 }
 
-//                +button {
-//                    text = "测试"
-//                    setOnClickListener {
-//                        val nav = it.findNavController()
+                +button {
+                    text = "测试"
+                    setOnClickListener {
+                        val nav = it.findNavController()
 //                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
 //                            MainNavGraph.args.url to "bilimiao://test"
 //                        ))
-//                    }
-//                }
+                        //【不當哥哥了！（僅限港澳台地區）】https://www.bilibili.com/bangumi/play/ep719017?vd_source=2bcb4ee461719ac7def0c91f553096a3
+                        // https://www.bilibili.com/bangumi/play/ss44493
+                        nav.navigate(MainNavGraph.action.global_to_bangumiDetail, bundleOf(
+                            MainNavGraph.args.id to "44493"
+                        ))
+                    }
+                }
 
             }
 

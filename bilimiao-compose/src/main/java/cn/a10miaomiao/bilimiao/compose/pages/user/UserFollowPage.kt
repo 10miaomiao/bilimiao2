@@ -5,11 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,15 +19,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.compose.rememberNavController
-import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.comm.localNavController
+import cn.a10miaomiao.bilimiao.compose.comm.localFragmentNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.toast
-import cn.a10miaomiao.bilimiao.compose.pages.TestPageViewModel
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -46,7 +40,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberDI
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
@@ -200,8 +193,7 @@ fun UserFollowPage(
     val isLogin = userStore.isLogin()
 
 
-
-    val nav = localNavController()
+    val nav = localFragmentNavController()
 
     val toUserDatailPage = remember(nav) {
         { id: String ->

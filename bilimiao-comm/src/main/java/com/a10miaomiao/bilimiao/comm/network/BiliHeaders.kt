@@ -16,6 +16,7 @@ object BiliHeaders {
     const val BiliRestriction = "x-bili-restriction-bin";
     const val BiliLocale = "x-bili-locale-bin";
     const val BiliFawkes = "x-bili-fawkes-req-bin";
+    const val BiliMid = "x-bili-mid";
     const val GRPCAcceptEncodingKey = "grpc-accept-encoding";
     const val GRPCAcceptEncodingValue = "identity,deflate,gzip";
     const val GRPCTimeOutKey = "grpc-timeout";
@@ -25,4 +26,5 @@ object BiliHeaders {
     const val TransferEncodingValue = "chunked";
     const val TEKey = "TE";
     const val TEValue = "trailers";
+    const val Buvid = "buvid"
 }
