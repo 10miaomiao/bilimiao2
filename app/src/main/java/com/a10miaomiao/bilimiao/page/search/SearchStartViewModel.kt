@@ -33,7 +33,7 @@ class SearchStartViewModel (
     val ui: MiaoBindingUi by instance()
 
     var historyList = mutableListOf<String>()
-    var suggestList = mutableListOf<String>()
+    var suggestList = mutableListOf<SuggestInfo>()
 
     private val searchHistoryDB = SearchHistoryDB(activity, SearchHistoryDB.DB_NAME, null, 1)
 
@@ -41,6 +41,32 @@ class SearchStartViewModel (
         historyList = searchHistoryDB.queryAllHistory()
     }
 
+
+    fun initSuggestData(keyword: String) {
+        suggestList = mutableListOf(
+            SuggestInfo(
+                text = "直接搜索“${keyword}”",
+                type = "SEARCH",
+                value = keyword,
+            )
+        )
+        if (isNumeric(keyword)) {
+            suggestList.add(
+                SuggestInfo(
+                    text = "查看视频“AV${keyword}”",
+                    type = "AV",
+                    value = keyword,
+                )
+            )
+            suggestList.add(
+                SuggestInfo(
+                    text = "查看番剧“SS${keyword}”",
+                    type = "SS",
+                    value = keyword,
+                )
+            )
+        }
+    }
 
     /**
      * 加载搜索提示
@@ -53,7 +79,7 @@ class SearchStartViewModel (
             return@launch
         }
         ui.setState {
-            suggestList = mutableListOf("直接搜索“${keyword}”")
+            initSuggestData(keyword)
         }
         try {
             val res = BiliApiService.searchApi.suggestList(keyword).awaitCall()
@@ -62,11 +88,14 @@ class SearchStartViewModel (
             val jsonArray = (jsonParser.nextValue() as JSONObject).getJSONObject("result").getJSONArray("tag")
             if (keyword == editText.text.toString()) {
                 ui.setState {
-                    suggestList.clear()
-                    suggestList = mutableListOf("直接搜索“${keyword}”")
+                    initSuggestData(keyword)
                     for (i in 0 until jsonArray.length()) {
                         val value = jsonArray.getJSONObject(i).getString("value")
-                        suggestList.add(value)
+                        suggestList.add(SuggestInfo(
+                            text = value,
+                            value = value,
+                            type = "TEXT"
+                        ))
                     }
                 }
             }
@@ -106,5 +135,19 @@ class SearchStartViewModel (
             historyList.clear()
         }
     }
+
+
+    /**
+     * 字符串是否为数字
+     */
+    fun isNumeric(s: String): Boolean {
+        return s.toCharArray().all { Character.isDigit(it) }
+    }
+
+    data class SuggestInfo(
+        val text: String, // 显示文字
+        val type: String, // 类型：TEXT:普通文字、SEARCH:直接搜索、AV:视频ID、SS:番剧ID
+        val value: String,
+    )
 
 }
