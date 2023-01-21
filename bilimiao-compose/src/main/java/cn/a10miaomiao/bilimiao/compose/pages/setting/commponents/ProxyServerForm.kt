@@ -33,6 +33,7 @@ fun ProxyServerForm(
             label = {
                 Text(text = "服务器名称")
             },
+            singleLine = true,
         )
         TextField(
             modifier = Modifier
@@ -43,6 +44,7 @@ fun ProxyServerForm(
             label = {
                 Text(text = "服务器地址")
             },
+            singleLine = true,
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,

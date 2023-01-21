@@ -8,7 +8,10 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -116,13 +119,35 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
     }
 
     private val handleSuggestTagItemClick = OnItemClickListener { adapter, view, position ->
-        if (position == 0) {
-            handleSearchClick.onClick(view)
-            return@OnItemClickListener
-        }
         val item = adapter.data[position]
-        if (item is String) {
-            viewModel.startSearch(item, view)
+        if (item is SearchStartViewModel.SuggestInfo) {
+            when(item.type) {
+                "SEARCH" -> {
+                    val keyword = item.value
+                    viewModel.startSearch(keyword, view)
+                }
+                "AV" -> {
+                    Navigation.findNavController(view).popBackStack()
+                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                    val args = bundleOf(
+                        MainNavGraph.args.type to "AV",
+                        MainNavGraph.args.id to item.value
+                    )
+                    nav.navigate(MainNavGraph.action.global_to_videoInfo, args)
+                }
+                "SS" -> {
+                    Navigation.findNavController(view).popBackStack()
+                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                    val args = bundleOf(
+                        MainNavGraph.args.id to item.value
+                    )
+                    nav.navigate(MainNavGraph.action.global_to_bangumiDetail, args)
+                }
+                else -> {
+                    val keyword = item.text
+                    viewModel.startSearch(keyword, view)
+                }
+            }
         }
     }
 
@@ -145,8 +170,18 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
 
     }
 
-    val itemTagUi = miaoBindingItemUi<String> { item, index ->
-        frameLayout {
+    val itemHistoryTagUi = miaoBindingItemUi<String> { item, index ->
+        tagItem(item)
+    }
+
+    val itemSuggestTagUi = miaoBindingItemUi<SearchStartViewModel.SuggestInfo> { item, index ->
+        tagItem(item.text)
+    }
+
+    fun MiaoUI.tagItem(
+        text: String,
+    ): View{
+        return frameLayout {
             views {
                 +frameLayout {
                     apply(ViewStyle.roundRect(dip(5)))
@@ -156,7 +191,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                         +textView {
                             backgroundColor = config.blockBackgroundColor
                             padding = dip(5)
-                            _text = item
+                            _text = text
                         }
                     }
                 }..lParams {
@@ -165,7 +200,6 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                 }
             }
         }
-
     }
 
     fun MiaoUI.secrchBoxView (): View {
@@ -232,7 +266,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                             )
                             _miaoAdapter(
                                 items = viewModel.suggestList,
-                                itemUi = itemTagUi,
+                                itemUi = itemSuggestTagUi,
                             ) {
                                 setOnItemClickListener(handleSuggestTagItemClick)
                             }
@@ -275,7 +309,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                             )
                             _miaoAdapter(
                                 items = viewModel.historyList,
-                                itemUi = itemTagUi,
+                                itemUi = itemHistoryTagUi,
                             ) {
                                 setOnItemClickListener(handleHistoryTagItemClick)
                             }
