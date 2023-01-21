@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.comm.apis
 import android.os.SystemClock
 import android.widget.Toast
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
@@ -83,9 +84,11 @@ class PlayerAPI {
         cid: String,
         qn: Int = 64,
         fnval: Int = 4048,
+        noToken: Boolean = false,
+        proxyHost: String? = null,
     ): PlayurlData {
         val params = mutableMapOf<String, String?>(
-            "aid" to epid,
+            "ep_id" to epid,
             "cid" to cid,
             "fnval" to fnval.toString(),
             "fnver" to "0",
@@ -94,19 +97,26 @@ class PlayerAPI {
             "season_type" to "1",
             "session" to ApiHelper.getMD5((System.currentTimeMillis() - SystemClock.currentThreadTimeMillis()).toString()),
             "track_path" to "",
-            "appkey" to ApiHelper.APP_KEY,
             "device" to "android",
             "mobi_app" to "android",
             "platform" to "android"
         )
         if (fnval > 2) {
-            params.put("fourk", "1")
+            params["fourk"] = "1"
+        }
+        if (noToken) {
+            params["notoken"] = "1"
         }
         val res = MiaoHttp.request {
             url = BiliApiService.biliApi("pgc/player/api/playurl", *params.toList().toTypedArray())
+            if (proxyHost != null) {
+                url = url?.replace("https://api.bilibili.com/", "https://$proxyHost/")
+            }
         }.awaitCall().gson<PlayurlData>()
         if (res.code == 0) {
             return res
+        } else if (res.code == -10403) {
+            throw AreaLimitException()
         } else {
             throw Exception(res.message)
         }

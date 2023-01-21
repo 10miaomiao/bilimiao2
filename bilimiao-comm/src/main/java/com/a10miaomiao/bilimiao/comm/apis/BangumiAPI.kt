@@ -16,6 +16,14 @@ class BangumiAPI {
     }
 
     /**
+     * 番剧剧集信息
+     */
+    fun seasonSection(seasonId: String) = MiaoHttp.request {
+        url = BiliApiService.biliApi("pgc/web/season/section",
+            "season_id" to seasonId)
+    }
+
+    /**
      * 剧集信息
      */
     fun episodeInfo(epId: String) = MiaoHttp.request {

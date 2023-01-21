@@ -104,12 +104,23 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         elevation = dip(20).toFloat()
     }
 
-    val mPlayerLayout = PlayerService.selfInstance?.videoPlayerView?.apply {
-        (parent as? ViewGroup)?.removeAllViews()
-    } ?: inflate<DanmakuVideoPlayer>(R.layout.include_palyer2) {
+
+    val mPlayerLayout = frameLayout {
         backgroundColor = 0xFF000000.toInt()
         elevation = dip(20).toFloat()
-        PlayerService.selfInstance?.videoPlayerView = this
+
+        val videoPlayerView = PlayerService.selfInstance?.videoPlayerView?.apply {
+            (parent as? ViewGroup)?.removeAllViews()
+        } ?: inflate<DanmakuVideoPlayer>(R.layout.include_palyer2) {
+            PlayerService.selfInstance?.videoPlayerView = this
+        }
+
+        val errorMessageView = inflate<RelativeLayout>(R.layout.include_error_message_box)
+        val areaLimitView = inflate<RelativeLayout>(R.layout.include_area_limit_box)
+
+        addView(videoPlayerView, lParams(matchParent, matchParent))
+        addView(errorMessageView, lParams(matchParent, matchParent))
+        addView(areaLimitView, lParams(matchParent, matchParent))
     }
 
     override var bottomSheetTitleView = textView {

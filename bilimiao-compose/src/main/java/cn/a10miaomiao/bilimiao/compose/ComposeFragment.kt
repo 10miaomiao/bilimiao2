@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.findNavController
@@ -44,44 +47,58 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
         requireArguments().getString("url", "")
     }
 
+    private lateinit var fragmentNav: NavController
+    private lateinit var composeNav: NavHostController
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val nav = findNavController()
+        fragmentNav = findNavController()
         return ComposeView(requireContext()).apply {
             setContent {
+                composeNav = rememberNavController()
                 CompositionLocalProvider(
                     LocalFragment provides this@ComposeFragment,
-                    LocalFragmentNavController provides nav,
+                    LocalFragmentNavController provides fragmentNav,
+                    LocalNavController provides composeNav,
                     LocalPageConfigInfo provides pageConfigInfo,
                 ) {
                     withDI(di = di) {
                         BilimiaoTheme {
-                            MyNavHost(url)
+                            MyNavHost(composeNav, url)
                         }
                     }
                 }
             }
         }
-
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+//        showPrivacyDialog()
+//        requireActivity().onBackPressedDispatcher
+//            .addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
+//                override fun handleOnBackPressed() {
+//                    composeNav.
+//                }
+//            })
+    }
+
+
 }
 
 @Composable
-fun MyNavHost(startRoute: String) {
-    val navController = rememberNavController()
-    CompositionLocalProvider(
-        LocalNavController provides navController,
-    ) {
-        NavHost(
-            navController = navController,
-            startDestination = PageRoute.start.route,
-            builder = PageRoute::builder
-        )
-    }
-
+fun MyNavHost(
+    navController: NavHostController,
+    startRoute: String,
+) {
+    NavHost(
+        navController = navController,
+        startDestination = PageRoute.start.route,
+        builder = PageRoute::builder
+    )
     LaunchedEffect(startRoute) {
         navController.navigate(startRoute) {
             popUpTo(0) {

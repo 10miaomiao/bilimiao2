@@ -130,11 +130,11 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
     private val handleEpisodeItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.episodes[position]
         val playerSource = BangumiPlayerSource(
-            sid = item.section_id,
-            epid = item.ep_id,
+            sid = viewModel.id,
+            epid = item.id,
             aid = item.aid,
             id = item.cid.toString(),
-            title = item.index_title.ifBlank { item.index },
+            title = item.long_title.ifBlank { item.title },
             coverUrl = item.cover,
             ownerId = "",
             ownerName = viewModel.detailInfo?.season_title ?: "番剧"
@@ -154,9 +154,9 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                             aid = it.aid,
                             cid = it.cid,
                             cover = it.cover,
-                            ep_id = it.ep_id,
-                            index = it.index,
-                            index_title = it.index_title,
+                            ep_id = it.id,
+                            index = it.title,
+                            index_title = it.long_title,
                         )
                     }
                 )
@@ -175,8 +175,8 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
             verticalPadding = dip(10)
             gravity = Gravity.LEFT
 
-            val isSelect = viewModel.isPlaying(item.ep_id)
-            val isEmptyTitle = item.index_title.isEmpty()
+            val isSelect = viewModel.isPlaying(item.id)
+            val isEmptyTitle = item.long_title.isEmpty()
             _isEnabled = !isSelect
 
             views {
@@ -185,7 +185,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     _text = if (isEmptyTitle) {
                         item.index
                     } else {
-                        "第${item.index}集"
+                        "第${item.title}集"
                     }
                     _textColorResource = if (isSelect) {
                         config.themeColorResource
@@ -203,7 +203,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     textAlignment = TextView.TEXT_ALIGNMENT_TEXT_START
 
                     _show = !isEmptyTitle
-                    _text = item.index_title
+                    _text = item.long_title
                     _textColorResource = if (isSelect) {
                         config.themeColorResource
                     } else {

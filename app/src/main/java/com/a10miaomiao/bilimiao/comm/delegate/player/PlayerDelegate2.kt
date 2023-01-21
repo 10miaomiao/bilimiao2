@@ -4,13 +4,20 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.NetworkOnMainThreadException
 import android.preference.PreferenceManager
+import android.view.View
 import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
+import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
+import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -49,6 +56,7 @@ import tv.danmaku.ijk.media.exo2.Exo2PlayerManager
 import tv.danmaku.ijk.media.exo2.ExoMediaSourceInterceptListener
 import tv.danmaku.ijk.media.exo2.ExoSourceManager
 import java.io.File
+import java.net.UnknownHostException
 
 
 class PlayerDelegate2(
@@ -62,6 +70,12 @@ class PlayerDelegate2(
     val views by lazy { PlayerViews(activity) }
     val controller by lazy {
         PlayerController(activity, this, di)
+    }
+    val errorMessageBoxController by lazy {
+        ErrorMessageBoxController(activity, this, di)
+    }
+    val areaLimitBoxController by lazy {
+        AreaLimitBoxController(activity, this, di)
     }
     val scaffoldApp by lazy { activity.getScaffoldView() }
 
@@ -185,10 +199,10 @@ class PlayerDelegate2(
                 dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 return ConcatenatingMediaSource().apply {
-                    for(i in 1 until dataSourceArr.size) {
+                    for (i in 1 until dataSourceArr.size) {
                         addMediaSource(
                             ProgressiveMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(MediaItem.fromUri(dataSourceArr[i]))
+                                .createMediaSource(MediaItem.fromUri(dataSourceArr[i]))
                         )
                     }
                 }
@@ -202,7 +216,8 @@ class PlayerDelegate2(
                 // Create a DASH media source pointing to a DASH manifest uri.
                 val uri = Uri.parse(dataSourceArr[1])
                 val dashStr = dataSourceArr[2]
-                val dashManifest = DashManifestParser().parse(uri, dashStr.toByteArray().inputStream())
+                val dashManifest =
+                    DashManifestParser().parse(uri, dashStr.toByteArray().inputStream())
                 val mediaSource = DashMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(dashManifest)
 //                    mediaSource.prepareSource()
@@ -320,11 +335,25 @@ class PlayerDelegate2(
                 quality = sourceInfo.quality
                 playerSourceInfo = sourceInfo
 
+            } catch (e: DabianException) {
+                withContext(Dispatchers.Main) {
+                    errorMessageBoxController.show("少儿不宜，禁止观看", canRetry = false)
+                }
+            }  catch (e: AreaLimitException) {
+                withContext(Dispatchers.Main) {
+                    (playerSource as? BangumiPlayerSource)?.let {
+                        areaLimitBoxController.show(it)
+                    } ?: errorMessageBoxController.show("抱歉你所在的地区不可观看！")
+                }
+            } catch (e: UnknownHostException) {
+                withContext(Dispatchers.Main) {
+                    errorMessageBoxController.show("无法连接到御坂网络")
+                }
             } catch (e: Throwable) {
-                // 避免解析信息出错导致崩溃
-                // showErrorLayout(e.message.toString())
                 e.printStackTrace()
-                runBlocking(Dispatchers.Main) { toast(e.message.toString()) }
+                withContext(Dispatchers.Main) {
+                    errorMessageBoxController.show(e.message ?: e.toString())
+                }
             }
         }
     }
@@ -360,9 +389,27 @@ class PlayerDelegate2(
         }
     }
 
+    /**
+     * 记录播放位置
+     */
+    fun reloadPlayer () {
+        lastPosition = views.videoPlayer.currentPositionWhenPlaying
+        loadPlayerSource()
+    }
+
     override fun openPlayer(source: BasePlayerSource) {
+        errorMessageBoxController.hide()
+        areaLimitBoxController.hide()
+
+
+        historyReport()
+        views.videoPlayer.release()
+        lastPosition = 0L
+
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        fnval = prefs.getString(VideoSettingFragment.PLAYER_FNVAL, VideoSettingFragment.FNVAL_DASH)!!.toInt()
+        fnval =
+            prefs.getString(VideoSettingFragment.PLAYER_FNVAL, VideoSettingFragment.FNVAL_DASH)!!
+                .toInt()
         quality = prefs.getInt("player_quality", 64).let {
             if (!userStore.isLogin() && it > MAX_QUALITY_NOT_LOGIN) {
                 // 未登陆：48[480P 清晰]及以下
@@ -378,7 +425,7 @@ class PlayerDelegate2(
         scaffoldApp.showPlayer = true
         playerCoroutineScope.onStart()
         playerSource = source
-        setThumbImageView(source.coverUrl)
+//        setThumbImageView(source.coverUrl)
         views.videoPlayer.setSpeed(speed, true)
         loadPlayerSource()
         // 播放倍速提示

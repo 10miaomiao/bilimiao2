@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -13,6 +16,8 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
+import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
@@ -22,9 +27,7 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
 import de.Maxr1998.modernpreferences.PreferencesAdapter
-import de.Maxr1998.modernpreferences.helpers.screen
-import de.Maxr1998.modernpreferences.helpers.singleChoice
-import de.Maxr1998.modernpreferences.helpers.switch
+import de.Maxr1998.modernpreferences.helpers.*
 import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -40,6 +43,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
     companion object {
         const val PLAYER_FNVAL = "player_fnval"
         const val PLAYER_BACKGROUND = "player_background"
+        const val PLAYER_PROXY = "player_proxy"
         const val PLAYER_AUTO_STOP = "player_auto_stop"
         const val PLAYER_PLAYING_NOTIFICATION = "player_playing_notification"
         const val PLAYER_FULL_MODE = "player_full_mode"
@@ -121,6 +125,21 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
             summary = "遇到困难时，不要停下来."
             defaultValue = true
         }
+
+        pref(PLAYER_PROXY) {
+            title = "区域限制设置"
+            summary = "滴，出差卡"
+
+            onClick {
+                val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                val url = "bilimiao://setting/proxy"
+                nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
+                    MainNavGraph.args.url to url
+                ))
+                true
+            }
+        }
+
         switch(PLAYER_AUTO_STOP) {
             title = "关闭详情页时同时关闭播放"
             summary = "呐呐呐呐呐呐呐呐呐"
