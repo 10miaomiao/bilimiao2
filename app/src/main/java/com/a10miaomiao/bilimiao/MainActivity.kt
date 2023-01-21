@@ -189,14 +189,14 @@ class MainActivity
     }
 
     val onBackClick = View.OnClickListener {
-        navController.popBackStack()
+        onBackPressed()
     }
     
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when(intent?.action) {
                 PlayerService.ACTION_CREATED -> {
-                    PlayerService.selfInstance?.videoPlayerView = ui.mPlayerLayout
+                    PlayerService.selfInstance?.videoPlayerView = findViewById(R.id.video_player)
                 }
             }
         }

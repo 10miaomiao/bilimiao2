@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:id="@+id/area_limit_layout">
+
+    <View
+        android:layout_width="30dp"
+        android:layout_height="0dp"
+        android:id="@+id/center"
+        android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/area_limit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="抱歉您所在地区不可观看！"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:layout_above="@id/center"
+        android:layout_marginBottom="50dp"/>
+
+    <LinearLayout
+        android:id="@+id/proxy_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/center"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="选择代理："
+            android:textColor="@color/white" />
+
+        <Spinner
+            android:id="@+id/proxy_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
+            />
+
+        <TextView
+            android:id="@+id/proxy_set_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="?colorAccent"
+            android:text="代理设置"
+            android:background="?selectableItemBackgroundBorderless"/>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/area_limit_ok_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/center"
+        android:layout_toEndOf="@id/center"
+        android:layout_marginTop="20dp"
+        android:textColor="?colorOnSurface"
+        android:text="使用代理"/>
+
+    <TextView
+        android:id="@+id/area_limit_close_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/area_limit_ok_btn"
+        android:layout_alignBottom="@id/area_limit_ok_btn"
+        android:layout_toStartOf="@id/center"
+        android:textColor="?colorAccent"
+        android:text="关闭播放"
+        android:gravity="center"
+        android:background="?selectableItemBackgroundBorderless"/>
+
+</RelativeLayout>

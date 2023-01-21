@@ -10,6 +10,9 @@ import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 
@@ -47,6 +50,17 @@ object PageRoute {
         val setting = "bilimiao://time/setting" content { TimeSettingPage() }
     }
 
+    object Setting {
+        val proxySetting = "bilimiao://setting/proxy" content { ProxySettingPage() }
+        val proxy_addProxyServer = "bilimiao://setting/proxy/add" content { AddProxyServerPage() }
+        val proxy_editProxyServer = "bilimiao://setting/proxy/edit/{index}" arguments listOf(
+            navArgument("index") { type = NavType.IntType },
+        ) content {
+            val index = it.arguments?.getInt("index") ?: -1
+            EditProxyServerPage(index)
+        }
+    }
+
     fun builder(builder: NavGraphBuilder) = builder.run {
         +start.build(provider)
         +test.build(provider)
@@ -54,6 +68,10 @@ object PageRoute {
         +Auth.telVerify.build(provider)
         +User.follow.build(provider)
         +Time.setting.build(provider)
+        +Setting.proxySetting.build(provider)
+        +Setting.proxy_addProxyServer.build(provider)
+        +Setting.proxy_editProxyServer.build(provider)
+
     }
 
 }

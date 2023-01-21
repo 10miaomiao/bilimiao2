@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerParamInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.BangumiInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
+import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.ToastInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -25,7 +26,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.toast.toast
-import java.lang.Exception
+import kotlin.Exception
 
 class BangumiDetailViewModel (
     override val di: DI,
@@ -42,14 +43,17 @@ class BangumiDetailViewModel (
 
     var detailInfo: BangumiInfo? = null
     var loading = false
-    var episodes = mutableListOf<EpisodeInfo>()
     var seasons = listOf<SeasonInfo>()
     var seasonsIndex = -1
+
+    var episodesLoading = false
+    var episodes = mutableListOf<EpisodeInfo>()
 
     val isFollow get() = detailInfo?.user_status?.follow == 1
 
     init {
         loadData()
+        loadEpisodeList()
         viewModelScope.launch {
             playerStore.connectUi(ui)
         }
@@ -61,7 +65,6 @@ class BangumiDetailViewModel (
                 loading = true
                 detailInfo = null
                 seasonsIndex = -1
-                episodes = mutableListOf()
             }
             val res = BiliApiService.bangumiAPI.seasonInfo(id).awaitCall().gson<ResultInfo2<BangumiInfo>>()
             if (res.code == 0) {
@@ -70,7 +73,6 @@ class BangumiDetailViewModel (
                     detailInfo = result
                     seasons = result.seasons
                     seasonsIndex = result.seasons.indexOfFirst { it.season_id == id }
-                    episodes = result.episodes.toMutableList()
                 }
             } else {
                 withContext(Dispatchers.Main) {
@@ -89,9 +91,51 @@ class BangumiDetailViewModel (
             withContext(Dispatchers.Main) {
                 myPage.pageConfig.notifyConfigChanged()
             }
-            DebugMiao.log("isFollow", detailInfo?.user_status)
-            DebugMiao.log("isFollow", isFollow)
         }
+    }
+
+    /**
+     * 剧集信息
+     */
+    fun loadEpisodeList() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            ui.setState {
+                episodesLoading = true
+                episodes = mutableListOf()
+            }
+            val res = BiliApiService.bangumiAPI.seasonSection(id)
+                .awaitCall()
+                .gson<ResultInfo2<SeasonSectionInfo>>()
+            if (res.code == 0) {
+                val result = res.result
+                ui.setState {
+                    episodes = result.main_section.episodes.toMutableList()
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    context.toast(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                context.toast("无法连接到御坂网络")
+            }
+        } finally {
+            ui.setState {
+                loading = false
+            }
+            withContext(Dispatchers.Main) {
+                myPage.pageConfig.notifyConfigChanged()
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    fun mideInfo() {
+
     }
 
     fun followSeason() = viewModelScope.launch(Dispatchers.IO) {
