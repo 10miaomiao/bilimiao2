@@ -162,7 +162,7 @@ fun MiaoUI.videoCommentView(
                             }
                             +textView {
                                 setTextColor(config.foregroundAlpha45Color)
-                                textSize = 12f
+                                textSize = 14f
 
                                 _show = location.isNotBlank()
                                 _text = location
