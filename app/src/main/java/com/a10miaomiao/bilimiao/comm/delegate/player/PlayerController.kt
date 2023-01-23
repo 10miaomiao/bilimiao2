@@ -111,6 +111,7 @@ class PlayerController(
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         var scaleTextSize = prefs.getString("danmaku_fontsize", "1")?.toFloatOrNull() ?: 1f
         val danmakuSpeed = prefs.getString("danmaku_speed", "1")?.toFloatOrNull() ?: 1f
+        val danmakuTransparent = prefs.getInt("danmaku_transparent", 100)
         val danmakuShow = prefs.getBoolean("danmaku_show", true)
         val danmakuR2LShow = prefs.getBoolean("danmaku_r2l_show", true)
         val danmakuFTShow = prefs.getBoolean("danmaku_ft_show", true)
@@ -147,6 +148,7 @@ class PlayerController(
             setScrollSpeedFactor(danmakuSpeed)
             setScaleTextSize(scaleTextSize)
             setMaximumLines(maxLinesPair)
+            setDanmakuTransparency(danmakuTransparent / 100f)
 //            preventOverlapping(overlappingEnablePair)
         }
         views.videoPlayer.isShowDanmaKu = danmakuShow
