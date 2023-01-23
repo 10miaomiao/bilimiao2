@@ -177,6 +177,13 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage
             summary = "想要多大的"
             initialSelection = "1"
         }
+        seekBar("danmaku_transparent") {
+            title = "字体透明度"
+            default = 100
+            max = 100
+            min = 0
+            formatter = { "$it%" }
+        }
 
         categoryHeader("speed") {
             title = "速度"
