@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
+import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.time.commponents.*
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
@@ -149,7 +150,7 @@ fun TimeSettingPage(
 
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
+    val windowInsets = windowState.getContentInsets(localContainerView())
 
     val cardIndex = viewModel.cardIndex.collectAsState().value
 
