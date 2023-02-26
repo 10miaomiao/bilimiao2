@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view.*
@@ -31,6 +32,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -40,6 +42,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.layout.DoubleColumnAutofitLayout
+import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -47,6 +50,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
+import splitties.toast.toast
 import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
@@ -66,7 +70,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                 if (viewModel.isFollow) {
                     iconResource = R.drawable.ic_baseline_favorite_24
                     title = "已追番"
-                } else  {
+                } else {
                     iconResource = R.drawable.ic_outline_favorite_border_24
                     title = "追番"
                 }
@@ -128,7 +132,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
     }
 
     private val handleEpisodeItemClick = OnItemClickListener { adapter, view, position ->
-        val item = viewModel.episodes[position]
+        val item = viewModel.mainEpisodes[position]
         val playerSource = BangumiPlayerSource(
             sid = viewModel.id,
             epid = item.id,
@@ -142,14 +146,36 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         basePlayerDelegate.openPlayer(playerSource)
     }
 
+    private val handleOtherEpisodeItemClick = OnItemClickListener { adapter, view, position ->
+        val item = adapter.getItem(position)
+        if (item is EpisodeInfo) {
+            if (playerStore.state.cid == item.cid) {
+                toast("已在播放")
+            } else {
+                val playerSource = BangumiPlayerSource(
+                    sid = viewModel.id,
+                    epid = item.id,
+                    aid = item.aid,
+                    id = item.cid.toString(),
+                    title = item.long_title.ifBlank { item.title },
+                    coverUrl = item.cover,
+                    ownerId = "",
+                    ownerName = viewModel.detailInfo?.season_title ?: "番剧"
+                )
+                basePlayerDelegate.openPlayer(playerSource)
+            }
+        }
+    }
+
     private val handleMoreClick = View.OnClickListener {
         viewModel.detailInfo?.let { info ->
-            val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+            val nav =
+                Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             val args = bundleOf(
                 MainNavGraph.args.bangumi to BangumiPagesParam(
                     sid = info.season_id.toString(),
                     title = info.title,
-                    episodes = viewModel.episodes.map {
+                    episodes = viewModel.mainEpisodes.map {
                         BangumiPagesParam.Episode(
                             aid = it.aid,
                             cid = it.cid,
@@ -165,7 +191,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    val episodeItemUi = miaoBindingItemUi<EpisodeInfo> { item, index ->
+    val mainEpisodesItemUi = miaoBindingItemUi<EpisodeInfo> { item, index ->
         verticalLayout {
             setBackgroundResource(R.drawable.shape_corner)
             layoutParams = ViewGroup.MarginLayoutParams(wrapContent, matchParent).apply {
@@ -183,7 +209,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                 +textView {
                     textColorResource = R.color.text_black
                     _text = if (isEmptyTitle) {
-                        item.index
+                        item.title
                     } else {
                         "第${item.title}集"
                     }
@@ -211,6 +237,38 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     }
                 }..lParams(dip(120), wrapContent) {
                     topMargin = dip(5)
+                }
+            }
+        }
+    }
+
+    val otherEpisodesItemUi = miaoBindingItemUi<EpisodeInfo> { item, index ->
+        verticalLayout {
+            layoutParams = ViewGroup.MarginLayoutParams(dip(180), matchParent).apply {
+                rightMargin = dip(5)
+            }
+            padding = dip(5)
+            setBackgroundResource(config.selectableItemBackground)
+
+            views {
+                +rcImageView {
+                    radius = dip(5)
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                    _network(item.cover)
+                }..lParams(matchParent, dip(100))
+
+                +textView {
+                    textSize = 16f
+                    ellipsize = TextUtils.TruncateAt.END
+                    maxLines = 2
+                    setTextColor(config.foregroundColor)
+                    _text = if (item.long_title.isBlank()) {
+                        item.long_title
+                    } else {
+                        item.title
+                    }
+                }..lParams {
+                    verticalMargin = dip(5)
                 }
             }
         }
@@ -257,7 +315,8 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                         +textView {
                             textSize = 15f
                             setTextColor(config.foregroundAlpha45Color)
-                            _text = "${detailInfo?.rating?.score ?: ""}分/${detailInfo?.rating?.count ?: ""}人评分"
+                            _text =
+                                "${detailInfo?.rating?.score ?: ""}分/${detailInfo?.rating?.count ?: ""}人评分"
                         }..lParams { rightMargin = config.dividerSize }
 
                         +textView {
@@ -317,7 +376,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    fun MiaoUI.episodesView(): View {
+    fun MiaoUI.mainSectionView(): View {
         return verticalLayout {
             backgroundColor = config.blockBackgroundColor
             padding = config.pagePadding
@@ -353,8 +412,8 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     _miaoLayoutManage(lm)
 
                     _miaoAdapter(
-                        items = viewModel.episodes,
-                        itemUi = episodeItemUi,
+                        items = viewModel.mainEpisodes,
+                        itemUi = mainEpisodesItemUi,
                         depsAry = arrayOf(playerStore.state.cid),
                     ) {
                         setOnItemClickListener(handleEpisodeItemClick)
@@ -366,14 +425,62 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    fun MiaoUI.otherSectionView(
+        title: String,
+        items: List<EpisodeInfo>,
+    ): View {
+        return verticalLayout {
+            backgroundColor = config.blockBackgroundColor
+            padding = config.pagePadding
+            apply(ViewStyle.roundRect(dip(10)))
+
+            addView(textView {
+                textSize = 18f
+                setTextColor(config.foregroundColor)
+                text = title
+            }, lParams {
+                bottomMargin = config.dividerSize
+                height = wrapContent
+                width = matchParent
+            })
+
+            addView(recyclerView {
+                val lm = LinearLayoutManager(context)
+                lm.orientation = LinearLayoutManager.HORIZONTAL
+                layoutManager = lm
+                adapter = object : MiaoBindingAdapter<EpisodeInfo>(
+                    items.toMutableList(),
+                    otherEpisodesItemUi,
+                ) {}.apply {
+                    setOnItemClickListener(handleOtherEpisodeItemClick)
+                }
+            }, lParams {
+                width = matchParent
+            })
+        }
+    }
+
     fun MiaoUI.contentView(): View {
         return verticalLayout {
             views {
                 +descView()..lParams(matchParent, wrapContent) {
                     bottomMargin = config.pagePadding
                 }
-                +episodesView()..lParams(matchParent, wrapContent) {
+                +mainSectionView()..lParams(matchParent, wrapContent) {
                     bottomMargin = config.pagePadding
+                }
+                +verticalLayout {
+                    miaoEffect(viewModel.otherSection) {
+                        removeAllViews()
+                        it.forEach {
+                            addView(
+                                otherSectionView(it.title, it.episodes),
+                                lParams(matchParent, wrapContent) {
+                                    bottomMargin = config.pagePadding
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

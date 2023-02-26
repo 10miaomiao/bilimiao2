@@ -28,7 +28,7 @@ import org.kodein.di.instance
 import splitties.toast.toast
 import kotlin.Exception
 
-class BangumiDetailViewModel (
+class BangumiDetailViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -46,8 +46,9 @@ class BangumiDetailViewModel (
     var seasons = listOf<SeasonInfo>()
     var seasonsIndex = -1
 
-    var episodesLoading = false
-    var episodes = mutableListOf<EpisodeInfo>()
+    var sectionLoading = false
+    var mainEpisodes = mutableListOf<EpisodeInfo>()
+    var otherSection = emptyList<SeasonSectionInfo.SectionInfo>()
 
     val isFollow get() = detailInfo?.user_status?.follow == 1
 
@@ -66,7 +67,8 @@ class BangumiDetailViewModel (
                 detailInfo = null
                 seasonsIndex = -1
             }
-            val res = BiliApiService.bangumiAPI.seasonInfo(id).awaitCall().gson<ResultInfo2<BangumiInfo>>()
+            val res = BiliApiService.bangumiAPI.seasonInfo(id).awaitCall()
+                .gson<ResultInfo2<BangumiInfo>>()
             if (res.code == 0) {
                 val result = res.result
                 ui.setState {
@@ -100,8 +102,9 @@ class BangumiDetailViewModel (
     fun loadEpisodeList() = viewModelScope.launch(Dispatchers.IO) {
         try {
             ui.setState {
-                episodesLoading = true
-                episodes = mutableListOf()
+                sectionLoading = true
+                mainEpisodes = mutableListOf()
+                otherSection = emptyList()
             }
             val res = BiliApiService.bangumiAPI.seasonSection(id)
                 .awaitCall()
@@ -109,7 +112,8 @@ class BangumiDetailViewModel (
             if (res.code == 0) {
                 val result = res.result
                 ui.setState {
-                    episodes = result.main_section.episodes.toMutableList()
+                    mainEpisodes = result.main_section.episodes.toMutableList()
+                    otherSection = result.section
                 }
             } else {
                 withContext(Dispatchers.Main) {
@@ -141,7 +145,11 @@ class BangumiDetailViewModel (
     fun followSeason() = viewModelScope.launch(Dispatchers.IO) {
         try {
             val detailInfo = detailInfo ?: return@launch
-            val mode = if (isFollow) { 2 } else { 1 }
+            val mode = if (isFollow) {
+                2
+            } else {
+                1
+            }
             val res = (if (mode == 2) {
                 BiliApiService.bangumiAPI.cancelFollowSeason(id)
             } else {
@@ -152,11 +160,13 @@ class BangumiDetailViewModel (
                 detailInfo.user_status.follow = 2 - mode
                 withContext(Dispatchers.Main) {
                     myPage.pageConfig.notifyConfigChanged()
-                    context.toast(if (mode == 1) {
-                        res.result?.toast ?: "追番成功"
-                    } else {
-                        res.result?.toast ?: "已取消追番"
-                    })
+                    context.toast(
+                        if (mode == 1) {
+                            res.result?.toast ?: "追番成功"
+                        } else {
+                            res.result?.toast ?: "已取消追番"
+                        }
+                    )
                 }
             } else {
                 withContext(Dispatchers.Main) {
@@ -171,11 +181,12 @@ class BangumiDetailViewModel (
         }
     }
 
-    fun refreshData () {
+    fun refreshData() {
 //        ui.setState {
 //            list = PaginationInfo()
 //            triggered = true
-            loadData()
+        loadData()
+        loadEpisodeList()
 //        }
     }
 
@@ -184,13 +195,14 @@ class BangumiDetailViewModel (
             id = seasons[index].season_id
             fragment.requireArguments().putString(MainNavGraph.args.id, id)
             loadData()
+            loadEpisodeList()
             ui.setState {
                 seasonsIndex = index
             }
         }
     }
 
-    fun isPlaying (epid: String): Boolean {
+    fun isPlaying(epid: String): Boolean {
         val info = playerStore.state
         return info.type == PlayerParamInfo.BANGUMI && info.epid == epid
     }

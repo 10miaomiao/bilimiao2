@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.comm
 
+import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
@@ -8,7 +9,16 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.Navigation
+import bilibili.app.view.v1.ViewGrpc
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
+
+
+
+internal val LocalContainerView: ProvidableCompositionLocal<ViewGroup?> = compositionLocalOf { null }
+
+@Composable
+fun localContainerView() = LocalContainerView.current
+
 
 internal val LocalFragment: ProvidableCompositionLocal<Fragment> = compositionLocalOf { ComposeFragment() }
 

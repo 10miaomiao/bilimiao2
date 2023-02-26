@@ -9,12 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalView
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.comm.LocalContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.LocalFragment
 import cn.a10miaomiao.bilimiao.compose.comm.LocalFragmentNavController
 import cn.a10miaomiao.bilimiao.compose.comm.LocalNavController
@@ -60,6 +62,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
             setContent {
                 composeNav = rememberNavController()
                 CompositionLocalProvider(
+                    LocalContainerView provides container,
                     LocalFragment provides this@ComposeFragment,
                     LocalFragmentNavController provides fragmentNav,
                     LocalNavController provides composeNav,
