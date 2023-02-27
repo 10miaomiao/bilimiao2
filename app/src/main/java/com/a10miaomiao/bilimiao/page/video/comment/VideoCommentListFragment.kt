@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -30,6 +31,7 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
@@ -40,7 +42,9 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -108,6 +112,23 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
+
+        // 页面返回回调数据接收
+        findNavController().currentBackStackEntry?.let {
+            it.savedStateHandle.get<VideoCommentDetailParam>(MainNavGraph.args.reply)?.let {
+                val index = it.index
+                val item = viewModel.list.data[index]
+                val replyControl = item.replyControl.toBuilder()
+                    .setAction(it.action)
+                    .build()
+                val newItem = item.toBuilder()
+                    .setReplyControl(replyControl)
+                    .setLike(it.like)
+                    .build()
+                viewModel.list.data[index] = newItem
+                mAdapter?.setData(index, newItem)
+            }
+        }
     }
 
     private fun toSelfLink (view: View, url: String) {
@@ -148,6 +169,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
         val item = adapter.getItem(position) as ReplyOuterClass.ReplyInfo
 
         val reply = VideoCommentDetailParam(
+            index = position,
             oid = item.oid,
             rpid = item.id,
             mid = item.member.mid,
@@ -166,6 +188,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             ),
             like = item.like,
             count = item.count,
+            action = item.replyControl.action,
         )
         val args = bundleOf(
             MainNavGraph.args.reply to reply
@@ -198,13 +221,14 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
 
 
     private val handleLikeClick = View.OnClickListener {
-        requireActivity().toast("暂不支持此操作")
-//        val index = it.tag
-//        if (it is ImageView && index is Int && index >= 0) {
-//            viewModel.setLike(index) { item ->
-//                mAdapter?.setData(index, item)
-//            }
-//        }
+//        requireActivity().toast("暂不支持此操作")
+        val index = it.tag
+        if (index is Int && index >= 0) {
+            viewModel.setLike(index) { item ->
+                viewModel.list.data[index] = item
+                mAdapter?.setData(index, item)
+            }
+        }
     }
 
     val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
@@ -263,11 +287,10 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             }
             footerView.layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
 
-            _miaoAdapter(
+            mAdapter = _miaoAdapter(
                 items = viewModel.list.data,
                 itemUi = itemUi,
             ) {
-                mAdapter = this
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 setOnItemClickListener(handleItemClick)
                 loadMoreModule.setOnLoadMoreListener {

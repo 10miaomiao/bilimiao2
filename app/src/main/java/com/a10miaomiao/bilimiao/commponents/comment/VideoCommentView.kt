@@ -202,9 +202,19 @@ fun MiaoUI.videoCommentView(
                                 rightMargin = dip(4)
                             }
                             +textView {
-                                setTextColor(config.foregroundAlpha45Color)
                                 textSize = 14f
                                 _text = NumberUtil.converString(like)
+                                _tag = index
+                                miaoEffect(isLike) {
+                                    setTextColor(
+                                        if (it) {
+                                            config.themeColor
+                                        } else {
+                                            config.foregroundAlpha45Color
+                                        }
+                                    )
+                                }
+                                onLikeClick?.let { setOnClickListener(it) }
                             }..lParams(dip(80), wrapContent)
                             +imageView {
                                 setImageResource(R.drawable.ic_comment_reply)

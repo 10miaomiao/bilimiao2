@@ -127,7 +127,6 @@ class LoginPageViewModel(
                     geeChallenge = gt3Result.geetest_challenge,
                 )
             }.awaitCall().gson<ResultInfo<LoginInfo>>()
-            DebugMiao.log(res)
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val loginInfo = res.data
