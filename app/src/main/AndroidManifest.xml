@@ -51,7 +51,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="bilibili" />
-                <data android:scheme="bilimiao" />v
+                <data android:scheme="bilimiao" />
             </intent-filter>
         </activity>
 

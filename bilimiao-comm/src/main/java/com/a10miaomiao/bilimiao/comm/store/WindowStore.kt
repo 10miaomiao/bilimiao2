@@ -2,11 +2,13 @@ package com.a10miaomiao.bilimiao.store
 
 import android.app.Activity
 import android.content.Context
+import android.os.Debug
 import android.util.DisplayMetrics
 import android.view.View
 import androidx.core.graphics.Insets
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 
@@ -15,7 +17,7 @@ class WindowStore(
     override val di: DI
 ) : ViewModel(), BaseStore<WindowStore.State> {
 
-    data class State (
+    data class State(
         var bottomSheetFragmentID: Int = 0,
         var windowInsets: Insets = Insets(),
         var contentInsets: Insets = Insets(),
@@ -43,19 +45,19 @@ class WindowStore(
         return state.getContentInsets(view)
     }
 
-    fun setWindowInsets (left: Int, top: Int, right: Int, bottom: Int) {
+    fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
         this.setState {
             windowInsets = Insets(left, top, right, bottom, density)
         }
     }
 
-    fun setContentInsets (left: Int, top: Int, right: Int, bottom: Int) {
+    fun setContentInsets(left: Int, top: Int, right: Int, bottom: Int) {
         this.setState {
             contentInsets = Insets(left, top, right, bottom, density)
         }
     }
 
-    fun setBottomSheetContentInsets (left: Int, top: Int, right: Int, bottom: Int) {
+    fun setBottomSheetContentInsets(left: Int, top: Int, right: Int, bottom: Int) {
         this.setState {
             bottomSheetContentInsets = Insets(left, top, right, bottom, density)
         }
