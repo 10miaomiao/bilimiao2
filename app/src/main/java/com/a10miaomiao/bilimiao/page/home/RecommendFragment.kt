@@ -71,11 +71,10 @@ class RecommendFragment: Fragment(), DIAware {
         val args = bundleOf(
             MainNavGraph.args.id to item.param
         )
-        if (item.goto == "av") {
+        if (item.goto == "av" || item.goto == "vertical_av") {
             Navigation.findNavController(view)
                 .navigate(MainNavGraph.action.global_to_videoInfo, args)
         } else {
-            DebugMiao.log(item.goto)
             BiliUrlMatcher.toUrlLink(view, item.uri)
         }
     }
