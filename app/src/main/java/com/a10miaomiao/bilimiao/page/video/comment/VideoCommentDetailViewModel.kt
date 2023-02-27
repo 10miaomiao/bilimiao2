@@ -32,7 +32,7 @@ class VideoCommentDetailViewModel(
     val userStore: UserStore by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
-    val reply by lazy { fragment.requireArguments().getParcelable<VideoCommentDetailParam>("reply")!! }
+    var reply: VideoCommentDetailParam
 
     // 0：按时间，1：按点赞数，2：按回复数
     var sortOrder = 2
@@ -42,6 +42,7 @@ class VideoCommentDetailViewModel(
     private var _cursor: ReplyOuterClass.CursorReply? = null
 
     init {
+        reply = fragment.requireArguments().getParcelable<VideoCommentDetailParam>("reply")!!
         loadData()
     }
 
@@ -110,17 +111,44 @@ class VideoCommentDetailViewModel(
         }
     }
 
+    fun setRootLike() = viewModelScope.launch(Dispatchers.IO){
+        try {
+            val newAction = if (reply.action == 1L) {
+                0
+            } else { 1 }
+            val res = BiliApiService.commentApi
+                .action(1, reply.oid.toString(), reply.rpid.toString(), newAction)
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.isSuccess) {
+                ui.setState {
+                    reply = reply.copy(
+                        action = newAction.toLong(),
+                        like = reply.like - 1 + newAction * 2
+                    )
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    toast(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                toast("喵喵被搞坏了:" + e.message ?: e.toString())
+            }
+        }
+    }
+
     fun setLike(
         index: Int,
         updateView: (item: ReplyOuterClass.ReplyInfo) -> Unit,
-    ) = viewModelScope.launch(Dispatchers.IO) {
+    ) = viewModelScope.launch(Dispatchers.IO){
         try {
             val item = list.data[index]
             val newAction = if (item.replyControl.action == 1L) {
                 0
-            } else {
-                1
-            }
+            } else { 1 }
             val res = BiliApiService.commentApi
                 .action(1, item.oid.toString(), item.id.toString(), newAction)
                 .awaitCall()
@@ -131,6 +159,7 @@ class VideoCommentDetailViewModel(
                     .build()
                 val newItem = item.toBuilder()
                     .setReplyControl(replyControl)
+                    .setLike(item.like - 1 + newAction * 2)
                     .build()
                 withContext(Dispatchers.Main) {
                     updateView(newItem)
@@ -143,7 +172,7 @@ class VideoCommentDetailViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                toast("喵喵被搞坏了")
+                toast("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }

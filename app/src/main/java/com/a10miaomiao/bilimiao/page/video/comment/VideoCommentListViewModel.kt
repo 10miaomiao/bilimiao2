@@ -125,6 +125,7 @@ class VideoCommentListViewModel(
                     .build()
                 val newItem = item.toBuilder()
                     .setReplyControl(replyControl)
+                    .setLike(item.like - 1 + newAction * 2)
                     .build()
                 withContext(Dispatchers.Main) {
                     updateView(newItem)
@@ -137,7 +138,7 @@ class VideoCommentListViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                toast("喵喵被搞坏了")
+                toast("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }

@@ -6,6 +6,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class VideoCommentDetailParam(
+    val index: Int,
     val oid: Long,
     val rpid: Long,
     val mid: Long,
@@ -17,4 +18,5 @@ data class VideoCommentDetailParam(
     val content: VideoCommentViewContent,
     val like: Long,
     val count: Long,
+    val action: Long,
 ): Parcelable

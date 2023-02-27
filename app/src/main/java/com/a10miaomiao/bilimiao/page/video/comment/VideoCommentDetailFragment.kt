@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -23,6 +26,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
@@ -54,6 +58,8 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
 
     private val windowStore by instance<WindowStore>()
 
+    private var mAdapter: MiaoBindingAdapter<ReplyOuterClass.ReplyInfo>? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,6 +73,17 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
+        // 页面返回回调
+        requireActivity().onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val nav = findNavController()
+                    nav.previousBackStackEntry?.let {
+                        it.savedStateHandle[MainNavGraph.args.reply] = viewModel.reply
+                    }
+                    nav.popBackStack()
+                }
+            })
     }
 
     private fun toSelfLink (view: View, url: String) {
@@ -106,8 +123,18 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
     }
 
+    private val handleRootLikeClick = View.OnClickListener {
+        viewModel.setRootLike()
+    }
+
     private val handleLikeClick = View.OnClickListener {
-        requireActivity().toast("暂不支持此操作")
+        val index = it.tag
+        if (index is Int && index >= 0) {
+            viewModel.setLike(index) { item ->
+                viewModel.list.data[index] = item
+                mAdapter?.setData(index, item)
+            }
+        }
     }
 
     private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
@@ -134,6 +161,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
 
     val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
         videoCommentView(
+            index = index,
             mid = item.mid,
             uname = item.member.name,
             avatar = item.member.face,
@@ -150,6 +178,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             ),
             like = item.like,
             count = item.count,
+            isLike = item.replyControl.action == 1L,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
             onLikeClick = handleLikeClick,
@@ -170,7 +199,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 LinearLayoutManager(requireContext())
             )
 
-            val mAdapter = _miaoAdapter(
+            mAdapter = _miaoAdapter(
                 items = viewModel.list.data,
                 itemUi = itemUi,
             ) {
@@ -181,7 +210,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 }
             }
 
-            headerViews(mAdapter) {
+            headerViews(mAdapter!!) {
                 val reply = viewModel.reply
                 +videoCommentView(
                     mid = reply.mid,
@@ -193,9 +222,10 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                     content = reply.content,
                     like = reply.like,
                     count = reply.count,
+                    isLike = reply.action == 1L,
                     onUpperClick = handleUserClick,
                     onLinkClick = handleLinkClickListener,
-                    onLikeClick = handleLikeClick,
+                    onLikeClick = handleRootLikeClick,
                 ).apply {
                     _topPadding = contentInsets.top + config.dividerSize
                     backgroundColor = config.blockBackgroundColor
@@ -207,7 +237,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 }
             }
 
-            footerViews(mAdapter) {
+            footerViews(mAdapter!!) {
                 +listStateView(
                     when {
                         viewModel.triggered -> ListState.NORMAL
