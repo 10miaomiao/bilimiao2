@@ -32,6 +32,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import bilibili.main.community.reply.v1.ReplyOuterClass.Url
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
@@ -44,6 +45,7 @@ import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -51,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
@@ -61,10 +64,16 @@ import kotlin.contracts.contract
 
 class LoginPageViewModel(
     override val di: DI,
-) : ViewModel(), DIAware {
+): ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
+
+    private var verifyUrl = ""
+    private var recaptchaToken = ""
 
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
+
+    private val biliGeetestUtil = BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
+    private var tmpNavController: NavController? = null
 
     val loading = MutableStateFlow(false)
     val userName = MutableStateFlow("")
@@ -79,7 +88,8 @@ class LoginPageViewModel(
     }
 
     fun stringLogin(
-        navController: NavController
+        navController: NavController,
+        gt3Result: BiliGeetestUtil.GT3ResultBean? = null,
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             if (userName.value.isBlank()) {
@@ -96,13 +106,28 @@ class LoginPageViewModel(
             }
             loading.value = true
             val webKey = getWebKey()
-            val res = BiliApiService.authApi
-                .oauth2Login(
+            val res = if (gt3Result == null) {
+                // 不带验证码
+                BiliApiService.authApi.oauth2Login(
                     username = userName.value,
                     passport = password.value,
                     key = webKey.key,
                     rhash = webKey.hash
-                ).awaitCall().gson<ResultInfo<LoginInfo>>()
+                )
+            } else {
+                // 带验证码
+                BiliApiService.authApi.oauth2Login(
+                    username = userName.value,
+                    passport = password.value,
+                    key = webKey.key,
+                    rhash = webKey.hash,
+                    recaptchaToken = recaptchaToken,
+                    geeValidate = gt3Result.geetest_validate,
+                    geeSeccode = gt3Result.geetest_seccode,
+                    geeChallenge = gt3Result.geetest_challenge,
+                )
+            }.awaitCall().gson<ResultInfo<LoginInfo>>()
+            DebugMiao.log(res)
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val loginInfo = res.data
@@ -130,6 +155,10 @@ class LoginPageViewModel(
                             }
                         }
                     }
+                } else if (res.code == -105 && gt3Result == null) {
+                    tmpNavController = navController
+                    verifyUrl = res.data.url ?: ""
+                    biliGeetestUtil.startCustomFlow()
                 } else {
                     alert(res.message)
                 }
@@ -184,6 +213,30 @@ class LoginPageViewModel(
             setNegativeButton("关闭", null)
             initBuilder()
         }.show()
+    }
+
+    override suspend fun onGTDialogResult(
+        result: BiliGeetestUtil.GT3ResultBean
+    ): Boolean {
+        tmpNavController?.let {
+            stringLogin(it, result)
+        }
+        return true
+    }
+
+    override suspend fun getGTApiJson(): JSONObject? {
+        val queryMap = UrlUtil.getQueryKeyValueMap(Uri.parse(verifyUrl))
+        if (queryMap.containsKey("recaptcha_token")) {
+            recaptchaToken = queryMap["recaptcha_token"] ?: ""
+            return JSONObject().apply {
+                put("success", 1)
+                put("challenge", queryMap["gee_challenge"] ?: "")
+                put("gt", queryMap["gee_gt"] ?: "")
+            }
+        } else {
+            alert("加载验证码出现错误")
+            return null
+        }
     }
 }
 

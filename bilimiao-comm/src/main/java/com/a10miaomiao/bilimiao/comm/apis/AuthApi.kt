@@ -68,6 +68,34 @@ class AuthApi {
     }
 
     /**
+     * 密码登录带验证码
+     */
+    fun oauth2Login(
+        username: String,
+        passport: String,
+        key: String,
+        rhash: String,
+        geeChallenge: String,
+        geeSeccode: String,
+        geeValidate: String,
+        recaptchaToken: String,
+    ) = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/passport-login/oauth2/login"
+        formBody = ApiHelper.createParams(
+            "disable_rcmd" to "0",
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+            "password" to RSAUtil.rsaPassword(passport, key, rhash),
+            "username" to username,
+            "gee_type" to "10",
+            "gee_challenge" to geeChallenge,
+            "gee_seccode" to geeSeccode,
+            "gee_validate" to geeValidate,
+            "recaptcha_token" to recaptchaToken,
+        )
+        method = MiaoHttp.POST
+    }
+
+    /**
      * 密码登录
      */
     fun oauth2Login(

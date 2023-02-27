@@ -38,12 +38,14 @@ import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
@@ -55,23 +57,21 @@ import kotlin.contracts.contract
 
 class TelVerifyPageViewModel(
     override val di: DI,
-) : ViewModel(), DIAware {
+) : ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
 
     var code = ""
     var requestId = ""
     var source = ""
-    var geeChallenge = ""
     var recaptchaToken = ""
 
     private var captchaKey = ""
 
-    internal val jsBridge = JsBridge(this)
-
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
 
+    private val biliGeetestUtil = BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
+
     val hideTel = MutableStateFlow("")
-    val geetestValidatorUrl = MutableStateFlow("")
     val countdown = MutableStateFlow(0)
     val verifyCode = MutableStateFlow("")
     val loading = MutableStateFlow(false)
@@ -103,60 +103,6 @@ class TelVerifyPageViewModel(
             }
             if (res.isSuccess) {
                 hideTel.value = res.data.account_info.hide_tel
-            } else {
-                Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
-                    .show()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(fragment.requireActivity(), "网络错误：$e", Toast.LENGTH_SHORT)
-                .show()
-            e.printStackTrace()
-        }
-    }
-
-    fun getCaptchaPre() = viewModelScope.launch(Dispatchers.Main){
-        try {
-            val res = withContext(Dispatchers.IO) {
-                BiliApiService.authApi.captchaPre()
-                    .awaitCall()
-                    .gson<ResultInfo<CaptchaPreInfo>>()
-            }
-            if (res.isSuccess) {
-                val geeGt = res.data.gee_gt
-                geeChallenge = res.data.gee_challenge
-                recaptchaToken = res.data.recaptcha_token
-                geetestValidatorUrl.value = "file:///android_asset/geetest-validator/index.html?gt=$geeGt&challenge=${geeChallenge}"
-            } else {
-                Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
-                    .show()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(fragment.requireActivity(), "网络错误：$e", Toast.LENGTH_SHORT)
-                .show()
-            e.printStackTrace()
-        }
-    }
-
-    fun sendSms(
-        validate: String,
-        seccode: String
-    ) = viewModelScope.launch(Dispatchers.Main){
-        try {
-            geetestValidatorUrl.value = ""
-            val res = withContext(Dispatchers.IO) {
-                BiliApiService.authApi.smsSend(
-                    tmpCode = code,
-                    geeChallenge = geeChallenge,
-                    geeSeccode = seccode,
-                    geeValidate = validate,
-                    recaptchaToken = recaptchaToken,
-                ).awaitCall().gson<ResultInfo<SmsSendInfo>>()
-            }
-            if (res.isSuccess) {
-                startCountdown(60)
-                captchaKey = res.data.captcha_key
-                Toast.makeText(fragment.requireActivity(), "已发送短信验证码", Toast.LENGTH_SHORT)
-                    .show()
             } else {
                 Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
                     .show()
@@ -257,17 +203,58 @@ class TelVerifyPageViewModel(
         }.show()
     }
 
-}
+    fun sendSms() {
+        biliGeetestUtil.startCustomFlow()
+    }
 
-internal class JsBridge(val viewModel: TelVerifyPageViewModel) {
-    @JavascriptInterface
-    fun postMessage (validate: String, seccode: String) {
-        viewModel.sendSms(validate, seccode)
+    /**
+     * 验证码回调，发送验证码
+     */
+    override suspend fun onGTDialogResult(
+        result: BiliGeetestUtil.GT3ResultBean
+    ): Boolean {
+        val res = withContext(Dispatchers.IO) {
+            BiliApiService.authApi.smsSend(
+                tmpCode = code,
+                geeChallenge = result.geetest_challenge,
+                geeSeccode = result.geetest_seccode,
+                geeValidate = result.geetest_validate,
+                recaptchaToken = recaptchaToken,
+            ).awaitCall().gson<ResultInfo<SmsSendInfo>>()
+        }
+        if (res.isSuccess) {
+            startCountdown(60)
+            captchaKey = res.data.captcha_key
+            Toast.makeText(fragment.requireActivity(), "已发送短信验证码", Toast.LENGTH_SHORT)
+                .show()
+            return true
+        } else {
+            Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
     }
-    @JavascriptInterface
-    fun close() {
-        viewModel.geetestValidatorUrl.value = ""
+
+    override suspend fun getGTApiJson(): JSONObject? {
+        val res = withContext(Dispatchers.IO) {
+            BiliApiService.authApi.captchaPre()
+                .awaitCall()
+                .gson<ResultInfo<CaptchaPreInfo>>()
+        }
+        if (res.isSuccess) {
+            val geeGt = res.data.gee_gt
+            val geeChallenge = res.data.gee_challenge
+            recaptchaToken = res.data.recaptcha_token
+            return JSONObject().apply {
+                put("success", 1)
+                put("challenge", geeChallenge)
+                put("gt", geeGt)
+            }
+        } else {
+            return null
+        }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -285,7 +272,6 @@ fun TelVerifyPage(
     val windowInsets = windowState.getContentInsets(LocalView.current)
 
     val hideTel by viewModel.hideTel.collectAsState()
-    val geetestValidatorUrl by viewModel.geetestValidatorUrl.collectAsState()
     val countdown by viewModel.countdown.collectAsState()
     val verifyCode by viewModel.verifyCode.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -308,29 +294,6 @@ fun TelVerifyPage(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        AndroidView(
-            factory = {
-                WebView(it).apply {
-                    settings.apply {
-                        javaScriptEnabled = true
-                    }
-                    addJavascriptInterface(viewModel.jsBridge, "JsBridge")
-                }
-            },
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            if(it.tag != geetestValidatorUrl) {
-                if (geetestValidatorUrl.isBlank()) {
-                    it.visibility = View.GONE
-                } else {
-                    it.loadUrl(geetestValidatorUrl)
-                    it.visibility = View.VISIBLE
-                }
-            }
-            it.tag = geetestValidatorUrl
-        }
-
-        if (geetestValidatorUrl.isBlank()) {
             Column(
                 modifier = Modifier
                     .widthIn(max = 600.dp)
@@ -369,7 +332,7 @@ fun TelVerifyPage(
                         trailingIcon = {
                             Box(modifier = Modifier.padding(end = 5.dp)) {
                                 Button(
-                                    onClick = viewModel::getCaptchaPre,
+                                    onClick = viewModel::sendSms,
                                     enabled = countdown == 0,
                                     modifier = Modifier.width(120.dp)
                                 ) {
@@ -406,6 +369,5 @@ fun TelVerifyPage(
                 }
                 Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
             }
-        }
     }
 }
