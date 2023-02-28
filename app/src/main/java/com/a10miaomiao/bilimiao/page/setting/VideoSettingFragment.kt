@@ -1,13 +1,14 @@
 package com.a10miaomiao.bilimiao.page.setting
 
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -24,10 +25,12 @@ import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
+import de.Maxr1998.modernpreferences.preferences.SwitchPreference
 import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -38,7 +41,8 @@ import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.recyclerview.recyclerView
 
-class VideoSettingFragment : Fragment(), DIAware, MyPage {
+class VideoSettingFragment : Fragment(), DIAware, MyPage
+    , SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
         const val PLAYER_FNVAL = "player_fnval"
@@ -49,6 +53,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
         const val PLAYER_FULL_MODE = "player_full_mode"
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
         const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
+
+        const val PLAYER_SUBTITLE_SHOW = "player_subtitle_show"
+        const val PLAYER_AI_SUBTITLE_SHOW = "player_ai_subtitle_show"
 
         const val FNVAL_FLV = "2"
         const val FNVAL_MP4 = "2"
@@ -68,6 +75,8 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
 
     private val windowStore by instance<WindowStore>()
 
+    private var mAdapter: PreferencesAdapter? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -82,6 +91,40 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        prefs.registerOnSharedPreferenceChangeListener(this)
+        onSharedPreferenceChanged(prefs, PLAYER_SUBTITLE_SHOW)
+        onSharedPreferenceChanged(prefs, PLAYER_AI_SUBTITLE_SHOW)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        prefs.unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+        mAdapter?.run {
+            val aiSubtitlePreference = currentScreen[PLAYER_AI_SUBTITLE_SHOW] as SwitchPreference
+            if (key == PLAYER_SUBTITLE_SHOW) {
+                val subtitlePreference = currentScreen[PLAYER_SUBTITLE_SHOW] as SwitchPreference
+                if (sharedPreferences.getBoolean(PLAYER_SUBTITLE_SHOW, true)) {
+                    subtitlePreference.summary = "字幕功能已启用"
+                    aiSubtitlePreference.enabled = true
+                } else {
+                    subtitlePreference.summary = "字幕功能已关闭"
+                    aiSubtitlePreference.enabled = false
+                }
+                notifyDataSetChanged()
+            } else if (key == PLAYER_AI_SUBTITLE_SHOW) {
+                if (sharedPreferences.getBoolean(PLAYER_AI_SUBTITLE_SHOW, false)) {
+                    aiSubtitlePreference.summary = "AI字幕功能已启用"
+                } else {
+                    aiSubtitlePreference.summary = "AI字幕功能已关闭"
+                }
+                notifyDataSetChanged()
+            }
+        }
     }
 
     val ui = miaoBindingUi {
@@ -95,7 +138,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
             views {
                 +recyclerView {
                     _miaoLayoutManage(LinearLayoutManager(requireContext()))
-                    val mAdapter = miaoMemo(null) {
+                    mAdapter = miaoMemo(null) {
                         PreferencesAdapter(createRootScreen())
                     }
                     miaoEffect(null, {
@@ -109,6 +152,10 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
     fun createRootScreen() = screen(context) {
         collapseIcon = true
 
+        categoryHeader("1") {
+            title = "视频源设置"
+        }
+
         val fnvalSelection = listOf(
             SelectionItem(key = FNVAL_DASH, title = "dash(支持4K)"),
             SelectionItem(key = FNVAL_MP4, title = "mp4(不支持2K及以上)"),
@@ -118,12 +165,6 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
             title = "视频获取方式选择(视频格式)"
             summary = "不能播放时，换个格式试试吧"
             initialSelection = FNVAL_DASH
-        }
-
-        switch(PLAYER_BACKGROUND) {
-            title = "后台播放"
-            summary = "遇到困难时，不要停下来."
-            defaultValue = true
         }
 
         pref(PLAYER_PROXY) {
@@ -138,6 +179,16 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
                 ))
                 true
             }
+        }
+
+        categoryHeader("2") {
+            title = "播放控制设置"
+        }
+
+        switch(PLAYER_BACKGROUND) {
+            title = "后台播放"
+            summary = "遇到困难时，不要停下来."
+            defaultValue = true
         }
 
         switch(PLAYER_AUTO_STOP) {
@@ -175,6 +226,25 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage {
             summary = ""
             defaultValue = false
         }
+
+        categoryHeader("3") {
+            title = "字幕显示设置"
+        }
+
+        switch(PLAYER_SUBTITLE_SHOW) {
+            title = "字幕显示"
+            summary = "字幕功能已打开"
+            summaryDisabled = "字幕功能已关闭"
+            defaultValue = true
+        }
+
+        switch(PLAYER_AI_SUBTITLE_SHOW) {
+            title = "AI字幕显示"
+            summary = "无论什么字幕都显示"
+            summaryDisabled = "字幕功能已关闭"
+            defaultValue = false
+        }
+
 
     }
 

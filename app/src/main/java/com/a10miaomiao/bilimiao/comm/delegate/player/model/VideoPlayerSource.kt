@@ -105,6 +105,7 @@ class VideoPlayerSource(
                         lan = it.lan,
                         lan_doc = it.lan_doc,
                         subtitle_url = it.subtitle_url,
+                        ai_status = it.ai_status,
                     )
                 }
             }

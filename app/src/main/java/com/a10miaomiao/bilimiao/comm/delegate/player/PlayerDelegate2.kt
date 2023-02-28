@@ -4,12 +4,8 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.NetworkOnMainThreadException
 import android.preference.PreferenceManager
-import android.view.View
 import android.view.WindowManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -25,7 +21,6 @@ import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.config.config
@@ -35,7 +30,6 @@ import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.*
 import com.google.android.exoplayer2.source.dash.DashMediaSource
 import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser
@@ -46,7 +40,6 @@ import com.google.android.exoplayer2.upstream.TransferListener
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -119,6 +112,7 @@ class PlayerDelegate2(
         controller.initController()
         controller.initDanmakuContext()
         views.videoPlayer.subtitleLoader = this::loadSubtitleData
+        views.videoPlayer.subtitleSourceSelector = this::selectSourceSubtitle
 
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
@@ -290,6 +284,7 @@ class PlayerDelegate2(
         val source = playerSource ?: return
         playerCoroutineScope.launch(Dispatchers.IO) {
             try {
+                source.getSubtitles()
                 val danmukuParser = source.getDanmakuParser()
                 val sourceInfo = source.getPlayerUrl(quality, fnval)
                 withContext(Dispatchers.Main) {
@@ -387,6 +382,19 @@ class PlayerDelegate2(
                 }
             }
         }
+    }
+
+    /**
+     * 字幕源选择
+     */
+    private fun selectSourceSubtitle(list: List<DanmakuVideoPlayer.SubtitleSourceInfo>): DanmakuVideoPlayer.SubtitleSourceInfo? {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        val showSubtitle = prefs.getBoolean(VideoSettingFragment.PLAYER_SUBTITLE_SHOW, true)
+        val showAiSubtitle = prefs.getBoolean(VideoSettingFragment.PLAYER_AI_SUBTITLE_SHOW, false)
+        if (showSubtitle) {
+            return list.find { showAiSubtitle || it.ai_status == 0  }
+        }
+        return null
     }
 
     /**
