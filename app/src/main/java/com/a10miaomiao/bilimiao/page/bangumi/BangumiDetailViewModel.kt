@@ -112,7 +112,9 @@ class BangumiDetailViewModel(
             if (res.code == 0) {
                 val result = res.result
                 ui.setState {
-                    mainEpisodes = result.main_section.episodes.toMutableList()
+                    result.main_section?.let {
+                        mainEpisodes = it.episodes.toMutableList()
+                    }
                     otherSection = result.section
                 }
             } else {

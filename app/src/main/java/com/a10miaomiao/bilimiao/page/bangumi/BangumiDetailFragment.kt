@@ -381,6 +381,9 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
             backgroundColor = config.blockBackgroundColor
             padding = config.pagePadding
             apply(ViewStyle.roundRect(dip(10)))
+
+            _show = viewModel.mainEpisodes.isNotEmpty()
+
             views {
                 +horizontalLayout {
                     views {
