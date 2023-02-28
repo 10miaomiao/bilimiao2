@@ -188,6 +188,12 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     var subtitleSourceSelector: ((list: List<SubtitleSourceInfo>) -> SubtitleSourceInfo?)? = null
 
     var subtitleBody: List<SubtitleItemInfo> = emptyList()
+        set(value) {
+            field = value
+            if (value.isNotEmpty()) {
+                postDelayed(subtitleTask, 0)
+            }
+        }
 
     private var subtitleIndex = 0
 
@@ -312,18 +318,43 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
 
-    override fun setProgressAndTime(
-        progress: Long,
-        secProgress: Long,
-        currentTime: Long,
-        totalTime: Long,
-        forceChange: Boolean
-    ) {
-        super.setProgressAndTime(progress, secProgress, currentTime, totalTime, forceChange)
-        setBottomSubtitleText(currentTime)
+//    override fun setProgressAndTime(
+//        progress: Long,
+//        secProgress: Long,
+//        currentTime: Long,
+//        totalTime: Long,
+//        forceChange: Boolean
+//    ) {
+//        super.setProgressAndTime(progress, secProgress, currentTime, totalTime, forceChange)
+//        setBottomSubtitleText(currentTime)
+//    }
+
+    override fun startProgressTimer() {
+        super.startProgressTimer()
+        if (subtitleBody.isNotEmpty()) {
+            postDelayed(subtitleTask, 100)
+        }
     }
 
-    private fun setBottomSubtitleText(currentTime: Long) {
+    override fun cancelProgressTimer() {
+        super.cancelProgressTimer()
+        removeCallbacks(subtitleTask)
+    }
+
+    var subtitleTask: Runnable = object : Runnable {
+        override fun run() {
+            if (mCurrentState == CURRENT_STATE_PLAYING || mCurrentState == CURRENT_STATE_PAUSE) {
+                setBottomSubtitleText()
+            }
+            if (mPostProgress) {
+                postDelayed(this, 100)
+            }
+        }
+    }
+
+    private fun setBottomSubtitleText() {
+        if (subtitleBody.isEmpty()) return
+        val currentTime = currentPositionWhenPlaying
         // 读取上一次索引位置，顺便检查是否在范围内
         var index = if (subtitleIndex < 0) {
             0
