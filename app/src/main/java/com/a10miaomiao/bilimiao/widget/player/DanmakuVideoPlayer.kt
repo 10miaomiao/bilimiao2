@@ -184,6 +184,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // 加载字幕
     var subtitleLoader: ((url: String) -> Unit)? = null
 
+    // 字幕源选择
+    var subtitleSourceSelector: ((list: List<SubtitleSourceInfo>) -> SubtitleSourceInfo?)? = null
+
     var subtitleBody: List<SubtitleItemInfo> = emptyList()
 
     private var subtitleIndex = 0
@@ -291,20 +294,19 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             currentSubtitleSource = null
         } else {
             setViewShowState(mSubtitleSwitch, VISIBLE)
-            currentSubtitleSource = subtitleSourceList[0]
+            currentSubtitleSource = subtitleSourceSelector?.invoke(subtitleSourceList)
         }
     }
 
     private fun updateCurrentSubtitleSource() {
         subtitleBody = emptyList()
+        mBottomSubtitleTV.visibility = GONE
         if (currentSubtitleSource == null) {
             mSubtitleSwitchIV.setImageResource(R.drawable.bili_player_subtitle_is_closed)
             mSubtitleSwitchTV.text = "字幕关"
-            mBottomSubtitleTV.visibility = GONE
         } else {
             mSubtitleSwitchIV.setImageResource(R.drawable.bili_player_subtitle_is_open)
             mSubtitleSwitchTV.text = currentSubtitleSource?.lan_doc ?: "字幕开"
-            mBottomSubtitleTV.visibility = VISIBLE
             subtitleLoader?.invoke(currentSubtitleSource?.subtitle_url ?: "")
         }
     }
@@ -660,6 +662,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         val lan: String,
         val lan_doc: String,
         val subtitle_url: String,
+        val ai_status: Int,
     )
 
     /**

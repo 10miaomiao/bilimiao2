@@ -148,7 +148,7 @@ class MainActivity
     
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent?.data?.let { uri ->
+        intent.data?.let { uri ->
             val navOptions = NavOptions.Builder()
                 .setEnterAnim(R.anim.miao_fragment_open_enter)
                 .setExitAnim(R.anim.miao_fragment_open_exit)
