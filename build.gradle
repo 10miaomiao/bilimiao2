@@ -12,6 +12,8 @@ buildscript {
         kodein_di_version = '7.12.0'
         lifecycle_version = '2.5.1'
         compose_version = '1.2.1'
+
+        gson_version = '2.10.1'
     }
 
     repositories {
