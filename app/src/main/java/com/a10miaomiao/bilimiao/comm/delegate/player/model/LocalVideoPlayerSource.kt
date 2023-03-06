@@ -5,7 +5,9 @@ import android.net.Uri
 import cn.a10miaomiao.download.BiliVideoEntry
 import cn.a10miaomiao.download.DownloadFlieHelper
 import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.a10miaomiao.bilimiao.widget.player.BiliDanmukuParser
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.gson.Gson
@@ -17,7 +19,7 @@ import java.io.InputStream
 class LocalVideoPlayerSource(
     val activity: Activity,
     val localEntry: BiliVideoEntry
-): BasePlayerSource {
+): BasePlayerSource() {
 
     override val id: String
         get() = localEntry.page_data.cid.toString()
@@ -81,11 +83,11 @@ class LocalVideoPlayerSource(
         }
     }
 
-    private suspend fun getBiliDanmukuStream(): InputStream? {
+    private fun getBiliDanmukuStream(): InputStream? {
         val videoDir = DownloadFlieHelper.getDownloadFileDir(activity, localEntry)
         val danmakuXMLFile = File(videoDir, "danmaku.xml")
         return danmakuXMLFile.inputStream()
     }
 
-    override suspend fun getSubtitles(): List<DanmakuVideoPlayer.SubtitleSourceInfo> = emptyList()
+    override suspend fun getSubtitles(): List<SubtitleSourceInfo> = emptyList()
 }

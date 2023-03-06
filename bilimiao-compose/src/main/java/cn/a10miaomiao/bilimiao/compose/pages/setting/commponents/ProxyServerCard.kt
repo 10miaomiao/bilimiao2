@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting.commponents
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,26 +20,18 @@ import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 
 @Composable
 fun ProxyServerCard(
-    index: Int,
     name: String,
     host: String,
     isTrust: Boolean,
+    onClick: () -> Unit,
 ) {
-    val nav = localNavController()
-    val click = remember(nav, index) {
-        {
-            nav.navigate("bilimiao://setting/proxy/edit/$index")
-            Unit
-        }
-    }
-
     Box(
         modifier = Modifier.padding(vertical = 10.dp, horizontal = 20.dp),
     ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = click),
+                .clickable(onClick = onClick),
             shape = RoundedCornerShape(10.dp),
             color = MaterialTheme.colorScheme.background
         ) {

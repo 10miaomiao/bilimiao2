@@ -8,6 +8,7 @@ import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 
 class PlayerAPI {
 
@@ -108,10 +109,17 @@ class PlayerAPI {
             params["notoken"] = "1"
         }
         val res = MiaoHttp.request {
-            url = BiliApiService.biliApi("pgc/player/api/playurl", *params.toList().toTypedArray())
-            if (proxyHost != null) {
-                url = url?.replace("https://api.bilibili.com/", "https://$proxyHost/")
+            url = BiliApiService.biliApi(
+                "pgc/player/api/playurl",
+                *params.toList().toTypedArray()
+            ).let {
+                if (proxyHost != null) {
+                    UrlUtil.replaceHost(it, proxyHost)
+                } else {
+                    it
+                }
             }
+
         }.awaitCall().gson<PlayurlData>()
         if (res.code == 0) {
             return res

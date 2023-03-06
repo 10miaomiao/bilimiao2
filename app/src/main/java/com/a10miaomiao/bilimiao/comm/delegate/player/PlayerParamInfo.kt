@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.comm.delegate.player.entity
+package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import cn.a10miaomiao.download.BiliVideoEntry
 
