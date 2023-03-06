@@ -89,6 +89,13 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
 //            })
     }
 
+    fun onBackPressed(): Boolean {
+        if (!composeNav.popBackStack()) {
+            findNavController().popBackStack()
+        }
+        return true
+    }
+
 
 }
 

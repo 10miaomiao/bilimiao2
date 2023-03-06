@@ -14,12 +14,12 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
-import com.a10miaomiao.bilimiao.comm.delegate.player.model.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.view.network
@@ -86,7 +86,7 @@ class PlayerDelegate2(
     // 大会员：无限制
     val MAX_QUALITY_NOT_LOGIN = 48 // 48[480P 清晰]
     val MAX_QUALITY_NOT_VIP = 80 // 80[1080P 高清]
-    var quality = 64 // 默认[高清 720P]懒得做记忆功能，先不弄
+    var quality = 64 // 默认[高清 720P]
     var fnval = 4048 // 视频格式: 0:flv,1:mp4,4048:dash
 
     var speed = 1f // 播放速度
@@ -183,6 +183,21 @@ class PlayerDelegate2(
                     ProgressiveMediaSource.Factory(localSourceFactory)
                         .createMediaSource(videoMedia),
                     ProgressiveMediaSource.Factory(localSourceFactory)
+                        .createMediaSource(audioMedia)
+                )
+            }
+            "[merging]" -> {
+                // 音视频分离
+                val dataSourceFactory = DefaultHttpDataSource.Factory()
+                val header = getDefaultRequestProperties()
+                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setDefaultRequestProperties(header)
+                val videoMedia = MediaItem.fromUri(dataSourceArr[1])
+                val audioMedia = MediaItem.fromUri(dataSourceArr[2])
+                return MergingMediaSource(
+                    ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(videoMedia),
+                    ProgressiveMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(audioMedia)
                 )
             }
@@ -323,7 +338,15 @@ class PlayerDelegate2(
                         }
                     } else {
                         views.videoPlayer.subtitleSourceList = withContext(Dispatchers.IO) {
-                            source.getSubtitles()
+                            source.getSubtitles().map {
+                                DanmakuVideoPlayer.SubtitleSourceInfo(
+                                    id = it.id,
+                                    lan = it.lan,
+                                    lan_doc = it.lan_doc,
+                                    subtitle_url = it.subtitle_url,
+                                    ai_status = it.ai_status,
+                                )
+                            }
                         }
                     }
                 }
@@ -499,6 +522,14 @@ class PlayerDelegate2(
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         controller.updatePlayerMode(newConfig)
+    }
+
+    override fun setProxy(proxyServer: ProxyServerInfo, uposHost: String) {
+        playerSource?.let {
+            it.proxyServer = proxyServer
+            it.uposHost = uposHost
+            openPlayer(it)
+        }
     }
 
 }

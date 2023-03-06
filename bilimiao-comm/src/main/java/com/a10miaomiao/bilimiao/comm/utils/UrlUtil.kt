@@ -26,4 +26,9 @@ object UrlUtil {
         return keyValueMap
     }
 
+
+    fun replaceHost(url: String, host: String): String {
+        return url.replace(":\\\\?\\/\\\\?\\/[^\\/]+\\\\?\\/".toRegex(), "://${host}/")
+    }
+
 }

@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentOnAttachListener
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
+import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -105,8 +106,12 @@ class BottomSheetDelegate(
         // 上滑菜单未关闭则先关闭上滑菜单
         val behavior = ui.bottomSheetBehavior
         if (behavior?.state != BottomSheetBehavior.STATE_HIDDEN) {
-            if (navBottomSheetController.currentDestination?.id == MainNavGraph.dest.template) {
+            val currentDestinationId = navBottomSheetController.currentDestination?.id
+            if (currentDestinationId == MainNavGraph.dest.template) {
                 behavior?.state =  BottomSheetBehavior.STATE_HIDDEN
+            } else if (currentDestinationId == MainNavGraph.dest.compose) {
+                (navBottomSheetFragment.childFragmentManager.fragments.last()
+                        as? ComposeFragment)?.onBackPressed()
             } else {
                 navBottomSheetController.popBackStack()
             }

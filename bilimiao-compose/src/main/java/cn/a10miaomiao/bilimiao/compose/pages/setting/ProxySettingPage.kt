@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
+import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerCard
@@ -49,15 +50,20 @@ fun ProxySettingPage() {
     val viewModel: ProxySettingPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
+    val windowInsets = windowState.getContentInsets(localContainerView())
 
     val serverList by viewModel.serverList.collectAsState()
 
     val nav = localNavController()
-
     val addClick = remember(nav) {
         {
             nav.navigate("bilimiao://setting/proxy/add")
+            Unit
+        }
+    }
+    val editClick = remember(nav) {
+        { index: Int ->
+            nav.navigate("bilimiao://setting/proxy/edit/$index")
             Unit
         }
     }
@@ -96,10 +102,10 @@ fun ProxySettingPage() {
             ) {
                 val item = serverList[it]
                 ProxyServerCard(
-                    index = it,
                     name = item.name,
                     host = item.host,
                     isTrust = item.isTrust,
+                    onClick = { editClick(it) }
                 )
             }
 

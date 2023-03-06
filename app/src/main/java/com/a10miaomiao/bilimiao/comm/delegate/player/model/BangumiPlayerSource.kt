@@ -1,6 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player.model
 
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayerV2Info
@@ -10,7 +12,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.widget.player.BiliDanmukuParser
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
@@ -27,9 +29,7 @@ class BangumiPlayerSource(
     override val coverUrl: String,
     override val ownerId: String,
     override val ownerName: String,
-): BasePlayerSource {
-
-    var proxyServer: ProxyServerInfo? = null
+): BasePlayerSource() {
 
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
         val res = proxyServer?.let {
@@ -45,9 +45,15 @@ class BangumiPlayerSource(
         var duration: Long
         val url = if (dash != null) {
             duration = dash.duration * 1000L
-            DashSource(quality, dash).getMDPUrl()
+            DashSource(res.quality, dash, uposHost).getMDPUrl()
         } else {
-            val durl = res.durl!!
+            val durl = if (uposHost.isBlank()) {
+                res.durl!!
+            } else {
+                res.durl!!.map {
+                    it.copy(url = UrlUtil.replaceHost(it.url, uposHost))
+                }
+            }
             if (durl.size == 1) {
                 duration = durl[0].length * 1000L
                 durl[0].url
@@ -66,7 +72,7 @@ class BangumiPlayerSource(
         return PlayerSourceInfo(url, res.quality, acceptList, duration)
     }
 
-    override suspend fun getSubtitles(): List<DanmakuVideoPlayer.SubtitleSourceInfo> {
+    override suspend fun getSubtitles(): List<SubtitleSourceInfo> {
         try {
             val res = BiliApiService.playerAPI
                 .getPlayerV2Info(aid = aid, cid = id, epId = epid, seasonId = sid)
@@ -74,7 +80,7 @@ class BangumiPlayerSource(
                 .gson<ResultInfo<PlayerV2Info>>()
             if (res.isSuccess) {
                 return res.data.subtitle.subtitles.map {
-                    DanmakuVideoPlayer.SubtitleSourceInfo(
+                    SubtitleSourceInfo(
                         id = it.id,
                         lan = it.lan,
                         lan_doc = it.lan_doc,

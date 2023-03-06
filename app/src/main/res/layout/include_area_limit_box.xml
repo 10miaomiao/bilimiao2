@@ -20,41 +20,8 @@
         android:textColor="@color/white"
         android:textSize="20sp"
         android:layout_above="@id/center"
-        android:layout_marginBottom="50dp"/>
+        android:layout_marginBottom="30dp"/>
 
-    <LinearLayout
-        android:id="@+id/proxy_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/center"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="选择代理："
-            android:textColor="@color/white" />
-
-        <Spinner
-            android:id="@+id/proxy_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/white"
-            />
-
-        <TextView
-            android:id="@+id/proxy_set_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textColor="?colorAccent"
-            android:text="代理设置"
-            android:background="?selectableItemBackgroundBorderless"/>
-
-    </LinearLayout>
 
     <Button
         android:id="@+id/area_limit_ok_btn"

@@ -2,10 +2,12 @@ package com.a10miaomiao.bilimiao.comm.delegate.player.model
 
 import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 
 class DashSource(
     val quality: Int,
-    val dashData: PlayerAPI.Dash
+    val dashData: PlayerAPI.Dash,
+    val uposHost: String = ""
 ) {
 
     private fun getDashVideo(): PlayerAPI.DashItem? {
@@ -45,11 +47,15 @@ class DashSource(
         </AdaptationSet>
         ${
             if (audio != null) {
+                var audioUrl = audio.base_url
+                if (uposHost.isNotBlank()) {
+                    UrlUtil.replaceHost(audioUrl, uposHost)
+                }
                 """
                  <AdaptationSet>
                     <ContentComponent contentType="audio" id="2" />
                     <Representation bandwidth="${audio.bandwidth}" codecs="${audio.codecs}" id="${audio.id}" mimeType="${audio.mime_type}" >
-                        <BaseURL>${audio.base_url.replace("&", "&amp;")}</BaseURL>
+                        <BaseURL>${audioUrl.replace("&", "&amp;")}</BaseURL>
                         <SegmentBase indexRange="${audio.segment_base.index_range}">
                             <Initialization range="${audio.segment_base.initialization}" />
                         </SegmentBase>
@@ -63,7 +69,10 @@ class DashSource(
     </Period>
 </MPD>
         """.trimIndent()
-        val url = video.base_url
+        var url = video.base_url
+        if (uposHost.isNotBlank()) {
+            UrlUtil.replaceHost(url, uposHost)
+        }
         return "[dash-mpd]\n" + url + "\n" + mpdStr.replace("\n", "")
     }
 
