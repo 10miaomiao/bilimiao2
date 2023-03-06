@@ -12,8 +12,8 @@ android {
         applicationId "com.a10miaomiao.bilimiao"
         minSdk 21
         targetSdk 33
-        versionCode 68
-        versionName "2.2.4"
+        versionCode 70
+        versionName "2.2.5 beta2"
         flavorDimensions "default"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -31,7 +31,7 @@ android {
     }
     productFlavors{
         coolapk {
-//            applicationId "cn.a10miaomiao.bilimiao.dev"
+            applicationId "cn.a10miaomiao.bilimiao.dev"
             manifestPlaceholders = [
                     APP_CHANNEL_VALUE: "Coolapk"
             ]
@@ -72,7 +72,7 @@ android {
             variant.packageApplicationProvider.get().outputDirectory = outputDirectory
         }
         variant.outputs.forEach {
-            it.outputFileName = "app-${flavor}-${version}.apk" //最终修改生成的apk文件名
+            it.outputFileName = "bilimiao-${flavor}-${version}.apk" //最终修改生成的apk文件名
         }
     }
 
@@ -127,7 +127,7 @@ dependencies {
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
 
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation "com.google.code.gson:gson:$gson_version"
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
 
