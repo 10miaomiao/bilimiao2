@@ -116,7 +116,7 @@ class BangumiPlayerSource(
         }
         val res = BiliApiService.playerAPI.getDanmakuList(id)
             .awaitCall()
-        val body = res.body()
+        val body = res.body
         return if (body == null) {
             null
         } else {

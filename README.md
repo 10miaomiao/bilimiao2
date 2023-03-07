@@ -3,29 +3,25 @@ bilimiao2.2
 [下载体验](https://10miaomiao.cn/project/1)
 
 ### 感谢以下开源项目
+* [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
+* [BiliRoaming](https://github.com/yujincheng08/BiliRoaming)
 * [Kodein-DI](https://github.com/Kodein-Framework/Kodein-DI)
 * [Splitties](https://github.com/LouisCAD/Splitties)
 * [okhttp](https://github.com/square/okhttp)
 * [glide](https://github.com/bumptech/glide)
 * [BaseRecyclerViewAdapterHelper](https://github.com/CymChad/BaseRecyclerViewAdapterHelper)
+* [ModernAndroidPreferences](https://github.com/Maxr1998/ModernAndroidPreferences)
 * [NumberPickerView](https://github.com/Carbs0126/NumberPickerView)
 * [ShadowLayout](https://github.com/lihangleo2/ShadowLayout)
 * [GSYVideoPlayer](https://github.com/CarGuo/GSYVideoPlayer)
 * [DanmakuFlameMaster](https://github.com/bilibili/DanmakuFlameMaster)
-
+* [mojito](https://github.com/mikaelzero/mojito)
+* 
 ### 关于我
 * 个人网站 [10喵喵](https://10miaomiao.cn/)
 * B站 [10喵喵](https://space.bilibili.com/6789810/)
 
 ### 更新日志
-1、修改 登录方式——取消网页登录，使用帐号密码登录
-2、增加 区域限制代理设置S
-3、增加 弹幕透明度设置
-4、增加 播放器默认全屏设置选项
-5、增加 播放器视频格式设置（视频黑屏不能播放时，可试试修改该项设置）
-6、增加 关闭更新检测设置选项
-7、增加 关于界面支持手动检测最新版本
-( ◑ ω ◐ )兔子年快乐
 
 + 2.2.4 (68)
   + 修改 登录方式——取消网页登录，使用帐号密码登录

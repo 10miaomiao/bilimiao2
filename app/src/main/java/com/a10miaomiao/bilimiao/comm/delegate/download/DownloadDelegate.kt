@@ -116,7 +116,7 @@ class DownloadDelegate(
     fun getDanmakuXML(cid: String): InputStream {
         return BiliApiService.playerAPI.getDanmakuList(cid)
             .call().let {
-                ByteArrayInputStream(CompressionTools.decompressXML(it.body()!!.bytes()))
+                ByteArrayInputStream(CompressionTools.decompressXML(it.body!!.bytes()))
             }
     }
 

@@ -49,7 +49,7 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         try {
             val res = MiaoHttp.request {
                 url = "https://passport.bilibili.com/login/app/third?appkey=27eb53fc9058f8c3&api=http%3A%2F%2Flink.acg.tv%2Fforum.php&sign=67ec798004373253d60114caaad89a8c"
-            }.call().body()!!.string()
+            }.call().body!!.string()
             val json = JSONObject(res)
             withContext(Dispatchers.Main) {
                 if (json.getInt("code") == 0) {

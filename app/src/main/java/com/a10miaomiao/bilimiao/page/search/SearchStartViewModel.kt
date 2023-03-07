@@ -83,7 +83,7 @@ class SearchStartViewModel (
         }
         try {
             val res = BiliApiService.searchApi.suggestList(keyword).awaitCall()
-            val jsonStr = res.body()!!.string()
+            val jsonStr = res.body!!.string()
             val jsonParser = JSONTokener(jsonStr)
             val jsonArray = (jsonParser.nextValue() as JSONObject).getJSONObject("result").getJSONArray("tag")
             if (keyword == editText.text.toString()) {

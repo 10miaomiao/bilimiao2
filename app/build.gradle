@@ -102,6 +102,8 @@ dependencies {
     implementation 'com.drakeet.drawer:drawer:1.0.3'
 //    implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+
     // 依赖注入
     implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_di_version"
 
@@ -125,10 +127,15 @@ dependencies {
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.4'
 //    implementation 'com.github.lihangleo2:ShadowLayout:3.2.4'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+    // 图片预览工具
+    implementation "com.github.mikaelzero.mojito:mojito:$mojito_version"
+    //support long image and gif with Sketch
+    implementation "com.github.mikaelzero.mojito:SketchImageViewLoader:$mojito_version"
+    //load with glide
+    implementation "com.github.mikaelzero.mojito:GlideImageLoader:$mojito_version"
 
     implementation "com.google.code.gson:gson:$gson_version"
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation 'io.grpc:grpc-protobuf-lite:1.33.0'
 
     // 播放器

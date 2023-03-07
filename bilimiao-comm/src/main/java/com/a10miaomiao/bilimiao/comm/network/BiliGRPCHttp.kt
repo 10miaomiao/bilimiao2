@@ -5,6 +5,8 @@ import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import io.grpc.MethodDescriptor
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -56,9 +58,8 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
         System.arraycopy(stateBytes, 0, bodyBytes, 0, stateBytes.size)
         System.arraycopy(messageBytes, 0, bodyBytes, stateBytes.size, messageBytes.size)
 
-        val body = RequestBody.create(
-            MediaType.parse(BiliHeaders.GRPCContentType),
-            bodyBytes,
+        val body = bodyBytes.toRequestBody(
+            BiliHeaders.GRPCContentType.toMediaType()
         )
         return Request.Builder()
             .url(url)
@@ -68,7 +69,7 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
     }
 
     private fun parseResponse(res: Response): RespT {
-        val inputStream = res.body()!!.byteStream()
+        val inputStream = res.body!!.byteStream()
         inputStream.skip(5L)
         return grpcMethod.parseResponse(inputStream)
     }
