@@ -82,7 +82,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="200dp"
                         android:padding="10dp"
-                        android:scaleType="fitCenter"
+                        android:scaleType="centerInside"
                         android:layout_gravity="center"/>
 
                     <TextView

@@ -8,6 +8,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.isActive
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -27,7 +29,7 @@ class MiaoHttp(var url: String? = null) {
 
     private fun buildRequest(): Request {
         for (key in headers.keys) {
-            requestBuilder.addHeader(key, headers[key])
+            requestBuilder.addHeader(key, headers[key]!!)
         }
         requestBuilder.addHeader("user-agent", ApiHelper.USER_AGENT)
         requestBuilder.addHeader("referer",ApiHelper.REFERER)
@@ -44,8 +46,9 @@ class MiaoHttp(var url: String? = null) {
         requestBuilder.addHeader("cookie", (cookieManager.getCookie(url) ?: ""))
         if (body == null && formBody != null) {
             val bodyStr = ApiHelper.urlencode(formBody!!)
-            body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded")
-                , bodyStr)
+            body = bodyStr.toRequestBody(
+                "application/x-www-form-urlencoded".toMediaType()
+            )
         }
         Log.d(TAG, "-----START-$method-----")
         Log.d(TAG, "URL = $url")
@@ -54,7 +57,7 @@ class MiaoHttp(var url: String? = null) {
         }
         Log.d(TAG, "------END-$method------")
         val req = requestBuilder.method(method, body)
-            .url(url)
+            .url(url!!)
             .build()
         return req
     }
@@ -104,12 +107,12 @@ class MiaoHttp(var url: String? = null) {
         }
 
         inline fun <reified T> gsonConverterFactory(): (response: Response) -> T = { response ->
-            val jsonStr = response.body()!!.string()
+            val jsonStr = response.body!!.string()
             Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
         }
 
         inline fun <reified T> Response.gson(isDebug: Boolean = false): T {
-            val jsonStr = this.body()!!.string()
+            val jsonStr = this.body!!.string()
             if (isDebug) {
                 DebugMiao.log(jsonStr)
             }

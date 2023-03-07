@@ -34,6 +34,7 @@ class CoverViewModel(
     private var type: String = ""
     private var id: String = ""
 
+    var coverUrl = MutableLiveData<String>()
     var coverBitmap = MutableLiveData<Bitmap>()
     var title = MutableLiveData<String>()
     var loading = MutableLiveData<Boolean>()
@@ -57,7 +58,7 @@ class CoverViewModel(
     fun resolveUrl(url: String) = viewModelScope.launch(Dispatchers.IO){
         try {
             val res = MiaoHttp(url).get()
-            val url = res.request().url().toString()
+            val url = res.request.url.toString()
             val urlInfo = BiliUrlMatcher.findIDByUrl(url)
             type = urlInfo[0].toUpperCase()
             id = urlInfo[1]
@@ -206,6 +207,7 @@ class CoverViewModel(
 
     private fun loadCover(pic: String) {
         var newPic = pic.replace("http://", "https://")
+        coverUrl.value = newPic
         Glide.with(activity)
             .asBitmap()
             .load(newPic)

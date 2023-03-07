@@ -1,10 +1,11 @@
 package com.a10miaomiao.bilimiao
 
 import android.app.Application
-import android.view.View
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import net.mikaelzero.mojito.Mojito
+import net.mikaelzero.mojito.loader.glide.GlideImageLoader
+import net.mikaelzero.mojito.view.sketch.SketchImageLoadFactory
 
 class Bilimiao: Application() {
 
@@ -20,6 +21,10 @@ class Bilimiao: Application() {
     override fun onCreate() {
         super.onCreate()
         ThemeDelegate.setNightMode(this)
+        Mojito.initialize(
+            GlideImageLoader.with(this),
+            SketchImageLoadFactory()
+        )
         commApp.onCreate()
     }
 }

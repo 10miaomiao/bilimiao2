@@ -28,6 +28,7 @@ import java.io.FileOutputStream
 import android.provider.MediaStore
 
 import android.content.ContentValues
+import net.mikaelzero.mojito.ext.mojito
 import java.io.OutputStream
 
 
@@ -136,6 +137,12 @@ class CoverActivity : AppCompatActivity() {
 //        mColseIv.setOnClickListener {
 //            mMotionLayout.transitionToStart()
 //        }
+        mCoverIv.setOnClickListener {
+            viewModel.coverUrl.value?.let { url ->
+                DebugMiao.log(url)
+                mCoverIv.mojito(url)
+            }
+        }
         mMoreIv.setOnClickListener {
             val popupMenu = PopupMenu(this, it)
             popupMenu.inflate(R.menu.cover)
