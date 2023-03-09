@@ -8,8 +8,10 @@ import androidx.activity.OnBackPressedCallback
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -52,6 +54,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
     private lateinit var fragmentNav: NavController
     private lateinit var composeNav: NavHostController
 
+    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,6 +63,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
         fragmentNav = findNavController()
         return ComposeView(requireContext()).apply {
             setContent {
+                // TODO: 嵌套滚动
+                rememberNestedScrollInteropConnection()
                 composeNav = rememberNavController()
                 CompositionLocalProvider(
                     LocalContainerView provides container,

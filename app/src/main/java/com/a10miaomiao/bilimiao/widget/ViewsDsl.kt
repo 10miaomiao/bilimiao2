@@ -4,6 +4,7 @@ import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StyleRes
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
+import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
 import com.a10miaomiao.bilimiao.widget.image.RCImageView
 import com.a10miaomiao.bilimiao.widget.layout.LimitedFrameLayout
 import com.a10miaomiao.bilimiao.widget.picker.DatePickerView
@@ -71,4 +72,12 @@ inline fun View.monthPickerView(
     initView: MonthPickerView.() -> Unit = {}
 ): MonthPickerView {
     return view({ MonthPickerView(it) }, id).apply(initView)
+}
+
+inline fun View.nineGridImageView(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: NineGridImageView.() -> Unit = {}
+): NineGridImageView {
+    return view({ NineGridImageView(it) }, id).apply(initView)
 }

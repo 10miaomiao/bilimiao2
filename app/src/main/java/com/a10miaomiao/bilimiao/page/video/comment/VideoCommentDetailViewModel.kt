@@ -129,13 +129,13 @@ class VideoCommentDetailViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    toast(res.message)
+                    context.toast(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                toast("喵喵被搞坏了:" + e.message ?: e.toString())
+                context.toast("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }
@@ -166,13 +166,13 @@ class VideoCommentDetailViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    toast(res.message)
+                    context.toast(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                toast("喵喵被搞坏了:" + e.message ?: e.toString())
+                context.toast("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }
