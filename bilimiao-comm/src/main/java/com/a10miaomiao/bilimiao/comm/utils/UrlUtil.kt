@@ -26,9 +26,19 @@ object UrlUtil {
         return keyValueMap
     }
 
-
     fun replaceHost(url: String, host: String): String {
         return url.replace(":\\\\?\\/\\\\?\\/[^\\/]+\\\\?\\/".toRegex(), "://${host}/")
+    }
+
+    /**
+     * 替换http为https
+     */
+    fun reviseUrl(url: String): String {
+        return if ("://" in url) {
+            url.replace("http://", "https://")
+        } else {
+            "https:$url"
+        }
     }
 
 }

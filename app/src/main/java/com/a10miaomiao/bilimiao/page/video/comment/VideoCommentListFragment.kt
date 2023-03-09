@@ -8,6 +8,7 @@ import android.widget.ImageView
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
@@ -31,8 +32,9 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.ImageSaveUtil
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -41,10 +43,13 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
+import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
+import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
 import com.chad.library.adapter.base.listener.OnItemClickListener
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import net.mikaelzero.mojito.Mojito
+import net.mikaelzero.mojito.impl.DefaultPercentProgress
+import net.mikaelzero.mojito.impl.NumIndicator
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -152,7 +157,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
 
     private val handleUserClick = View.OnClickListener {
         val id = it.tag
-        if (id != null) {
+        if (id != null && id is String) {
             val args = bundleOf(
                 MainNavGraph.args.id to id
             )
@@ -185,6 +190,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
                         it.id, it.text, it.url
                     )
                 },
+                picturesList = item.content.picturesList.map { UrlUtil.reviseUrl(it.imgSrc) },
             ),
             like = item.like,
             count = item.count,
@@ -231,6 +237,33 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleImageItemClick = object : OnImageItemClickListener {
+        override fun onClick(
+            nineGridView: NineGridImageView,
+            imageView: ImageView,
+            url: String,
+            urlList: List<String>,
+            externalPosition: Int,
+            position: Int
+        ) {
+            Mojito.start(imageView.context) {
+                urls(urlList)
+                position(position)
+                progressLoader {
+                    DefaultPercentProgress()
+                }
+                setIndicator(NumIndicator())
+                views(nineGridView.getImageViews().toTypedArray())
+                mojitoListener(
+                    onLongClick = { activity, _, _, _, i ->
+                        val imageUrl = urlList[i]
+                        ImageSaveUtil(activity!!, imageUrl).showMemu()
+                    }
+                )
+            }
+        }
+    }
+
     val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
         videoCommentView(
             index = index,
@@ -247,6 +280,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
                         it.id, it.text, it.url
                     )
                 },
+                picturesList = item.content.picturesList.map { UrlUtil.reviseUrl(it.imgSrc) },
             ),
             like = item.like,
             count = item.count,
@@ -254,6 +288,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
             onLikeClick = handleLikeClick,
+            onImageItemClick = handleImageItemClick,
         ).apply {
             layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
         }

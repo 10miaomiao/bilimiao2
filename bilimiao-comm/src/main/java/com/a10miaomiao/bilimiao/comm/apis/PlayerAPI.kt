@@ -46,7 +46,7 @@ class PlayerAPI {
 
     /**
      * 获取视频播放地址
-     * fnval: 0:flv,1:mp4,4048:dash
+     * fnval: 976:flv,1:mp4,4048:dash
      */
     fun getVideoPalyUrl(
         avid: String,
@@ -60,6 +60,7 @@ class PlayerAPI {
             "qn" to quality.toString(),
             "fnval" to fnval.toString(),
             "fnver" to "0",
+            "force_host" to "2", // 强制音视频返回 https
             "type" to "",
             "otype" to "json",
         )
@@ -93,6 +94,7 @@ class PlayerAPI {
             "cid" to cid,
             "fnval" to fnval.toString(),
             "fnver" to "0",
+            "force_host" to "2", // 强制音视频返回 https
             "module" to "bangumi",
             "qn" to qn.toString(),
             "season_type" to "1",

@@ -69,6 +69,7 @@ class VideoCommentListViewModel(
                 .awaitCall()
             if (_cursor == null){
                 list.data = mutableListOf()
+                DebugMiao.log(res.repliesList[1])
             }
             ui.setState {
                 list.data.addAll(res.repliesList)
@@ -132,13 +133,13 @@ class VideoCommentListViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    toast(res.message)
+                    context.toast(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                toast("喵喵被搞坏了:" + e.message ?: e.toString())
+                context.toast("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }

@@ -8,6 +8,7 @@ import android.text.Spannable
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
+import androidx.core.view.marginBottom
 import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._tag
@@ -27,6 +28,9 @@ import com.a10miaomiao.bilimiao.widget.expandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.UrlImageSpan
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
+import com.a10miaomiao.bilimiao.widget.gridimage.GlideNineGridImageLoader
+import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
+import com.a10miaomiao.bilimiao.widget.nineGridImageView
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -40,6 +44,7 @@ data class VideoCommentViewContent(
 //        val device: String,
     val message: String,
     val emote: List<Emote>?,
+    val picturesList: List<String>,
 ) : Parcelable {
 
     @Parcelize
@@ -47,6 +52,14 @@ data class VideoCommentViewContent(
         val id: Long,
         val text: String,
         val url: String
+    ) : Parcelable
+
+    @Parcelize
+    data class Picture(
+        val src: String,
+        val width: Int,
+        val height: Int,
+        val size: Int,
     ) : Parcelable
 
 }
@@ -64,8 +77,11 @@ private fun MiaoUI.commentContentView(
         setNeedMention(false)
         isNeedSelf = true
         setNeedConvertUrl(false)
+
         miaoEffect(content.emote) {
             tag = content.emote
+        }
+        miaoEffect(null) {
             setNextContentListener { ssb ->
                 val content = ssb.toString()
                 (tag as? List<VideoCommentViewContent.Emote>)?.forEach { emote ->
@@ -84,6 +100,7 @@ private fun MiaoUI.commentContentView(
             }
         }
         _setContent(BiliUrlMatcher.customString(content.message))
+
         linkClickListener = onLinkClick
     }
 }
@@ -104,6 +121,7 @@ fun MiaoUI.videoCommentView(
     onUpperClick: View.OnClickListener? = null,
     onLinkClick: ExpandableTextView.OnLinkClickListener? = null,
     onLikeClick: View.OnClickListener? = null,
+    onImageItemClick: OnImageItemClickListener? = null,
 ): View {
     return horizontalLayout {
         padding = dip(10)
@@ -179,6 +197,23 @@ fun MiaoUI.videoCommentView(
                         width = matchParent
                         height = wrapContent
                         verticalMargin = dip(8)
+                    }
+
+                    +nineGridImageView {
+                        spacing = dip(10)
+                        onlyOneSize = dip(200)
+                        miaoEffect(null){
+                            imageLoader = GlideNineGridImageLoader()
+                        }
+                        miaoEffect(content.picturesList) {
+//                            externalPosition = holder.bindingAdapterPosition
+                            setUrlList(content.picturesList)
+                        }
+                        onImageItemClick?.let { onImageItemClickListener = it }
+                    }..lParams {
+                        width = matchParent
+                        height = wrapContent
+                        bottomMargin = dip(8)
                     }
 
                     +horizontalLayout {

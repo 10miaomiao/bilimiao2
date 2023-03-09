@@ -28,6 +28,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -107,7 +108,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
 
     private val handleUserClick = View.OnClickListener {
         val id = it.tag
-        if (id != null) {
+        if (id != null && id is String) {
             val args = bundleOf(
                 MainNavGraph.args.id to id
             )
@@ -168,13 +169,14 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             time = NumberUtil.converCTime(item.ctime),
             location = item.replyControl.location,
             floor = 0,
-            content =  VideoCommentViewContent(
+            content = VideoCommentViewContent(
                 message = item.content.message,
                 emote = item.content.emoteMap.values.map {
                     VideoCommentViewContent.Emote(
                         it.id, it.text, it.url
                     )
                 },
+                picturesList = item.content.picturesList.map { UrlUtil.reviseUrl(it.imgSrc) },
             ),
             like = item.like,
             count = item.count,
