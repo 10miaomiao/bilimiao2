@@ -24,6 +24,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.utils.ImageSaveUtil
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.season.miniSeasonItemView
 import com.a10miaomiao.bilimiao.commponents.video.mediaItemView
@@ -35,6 +36,10 @@ import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
+import net.mikaelzero.mojito.Mojito
+import net.mikaelzero.mojito.ext.mojito
+import net.mikaelzero.mojito.impl.DefaultPercentProgress
+import net.mikaelzero.mojito.impl.NumIndicator
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -116,6 +121,18 @@ class UserFragment : Fragment(), DIAware, MyPage {
         super.onViewCreated(view, savedInstanceState)
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
+        }
+    }
+
+    private val handleFaceClick = View.OnClickListener {
+        viewModel.dataInfo?.card?.face?.let { faceUrl ->
+            (it as ImageView).mojito(faceUrl) {
+                mojitoListener(
+                    onLongClick = { fragmentActivity, _, _, _, _ ->
+                        ImageSaveUtil(fragmentActivity!!, faceUrl).showMemu()
+                    }
+                )
+            }
         }
     }
 
@@ -271,7 +288,8 @@ class UserFragment : Fragment(), DIAware, MyPage {
             views {
                 +rcImageView {
                     isCircle = true
-                    _network(userCardInfo?.face)
+                    setOnClickListener(handleFaceClick)
+                    _network(userCardInfo?.face, "@200w_200h")
                 }..lParams(dip(64), dip(64)) {
                     rightMargin = dip(10)
                 }
@@ -417,7 +435,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 +rcImageView {
                     radius = dip(5)
                     scaleType = ImageView.ScaleType.FIT_CENTER
-                    _network(cover)
+                    _network(cover, "@672w_378h_1c_")
                 }..lParams(matchParent, dip(100))
 
                 +textView {

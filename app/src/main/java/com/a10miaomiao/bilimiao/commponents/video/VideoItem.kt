@@ -36,7 +36,7 @@ fun MiaoUI.videoItem (
             // 封面
             +rcImageView {
                 radius = dip(5)
-                _network(pic)
+                _network(pic, "@672w_378h_1c_")
             }..lParams {
                 width = dip(140)
                 height = dip(85)

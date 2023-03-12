@@ -9,7 +9,7 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.glide.GlideBlurTransformation
-import com.a10miaomiao.bilimiao.comm.view.loadPic
+import com.a10miaomiao.bilimiao.comm.loadImageUrl
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
@@ -38,7 +38,7 @@ fun MiaoUI.mediaItemView (
                 miaoEffect(cover) {
                     if (it != null && it.isNotEmpty()) {
                         Glide.with(context)
-                            .loadPic(it)
+                            .loadImageUrl(it, "@672w_378h_1c_")
                             .apply(RequestOptions().transform(GlideBlurTransformation(context, 25f)))
                             .into(this)
                     }

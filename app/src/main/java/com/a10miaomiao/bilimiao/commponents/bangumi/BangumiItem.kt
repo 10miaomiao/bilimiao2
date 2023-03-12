@@ -26,7 +26,7 @@ fun MiaoUI.bangumiItem(
         views {
             +rcImageView {
                 radius = dip(5)
-                _network(cover)
+                _network(cover, "@560w_746h")
             }..lParams(width = dip(100), height = dip(133)) {
                 rightMargin = dip(5)
             }

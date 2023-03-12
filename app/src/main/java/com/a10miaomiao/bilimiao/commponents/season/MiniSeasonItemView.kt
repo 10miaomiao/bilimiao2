@@ -7,7 +7,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
-import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.rcImageView
@@ -26,20 +25,20 @@ fun MiaoUI.miniSeasonItemView(
         setBackgroundResource(config.selectableItemBackground)
 
         views {
-            // 固定宽高比例 11:14
+            // 固定宽高比例 560:746
             +constraintLayout {
 
                 views {
                     +rcImageView {
                         radius = dip(5)
                         scaleType = ImageView.ScaleType.FIT_CENTER
-                        _network(cover)
+                        _network(cover, "@560w_746h")
                     }..lParams {
                         width = 0
                         height = 0
                         leftToLeft = ConstraintLayout.LayoutParams.PARENT_ID
                         rightToRight = ConstraintLayout.LayoutParams.PARENT_ID
-                        dimensionRatio = "11:14"
+                        dimensionRatio = "560:746"
                     }
 
                 }

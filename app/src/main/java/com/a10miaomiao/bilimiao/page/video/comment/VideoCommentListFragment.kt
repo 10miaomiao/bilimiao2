@@ -190,7 +190,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
                         it.id, it.text, it.url
                     )
                 },
-                picturesList = item.content.picturesList.map { UrlUtil.reviseUrl(it.imgSrc) },
+                picturesList = item.content.picturesList.map { UrlUtil.autoHttps(it.imgSrc) },
             ),
             like = item.like,
             count = item.count,
@@ -280,7 +280,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
                         it.id, it.text, it.url
                     )
                 },
-                picturesList = item.content.picturesList.map { UrlUtil.reviseUrl(it.imgSrc) },
+                picturesList = item.content.picturesList.map { UrlUtil.autoHttps(it.imgSrc) },
             ),
             like = item.like,
             count = item.count,

@@ -21,22 +21,45 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.dsl.core.*
+import splitties.views.imageDrawable
 import splitties.views.imageResource
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-fun RequestManager.loadImageUrl(value: String): RequestBuilder<Drawable> {
+fun RequestManager.loadImageUrl(
+    value: String,
+    suffix: String = "",
+): RequestBuilder<Drawable> {
     val url = UrlUtil.autoHttps(value)
-    return load(url)
+    return load(url + suffix)
+}
+
+fun ImageView.network(
+    url: String,
+    suffix: String = "",
+)  {
+    if (url.isBlank()) {
+        imageDrawable = null
+        return
+    }
+    Glide.with(context)
+        .loadImageUrl(url, suffix)
+        .centerCrop()
+//            .transform(GlideRoundTransform(context))
+        .diskCacheStrategy(DiskCacheStrategy.ALL)
+//        .placeholder(R.drawable.bili_default_image_tv)
+        .dontAnimate()
+        .into(this)
 }
 
 fun ImageView._network(
-    url: String?
+    url: String?,
+    suffix: String = "",
 ) = miaoEffect(url) {
     if (url != null) {
         Glide.with(context)
-            .loadImageUrl(url)
+            .loadImageUrl(url, suffix)
             .centerCrop()
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .placeholder(R.drawable.bili_default_image_tv)
