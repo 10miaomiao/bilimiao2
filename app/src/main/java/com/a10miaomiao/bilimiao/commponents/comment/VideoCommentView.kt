@@ -66,6 +66,7 @@ data class VideoCommentViewContent(
 
 private fun MiaoUI.commentContentView(
     content: VideoCommentViewContent,
+    textIsSelectable: Boolean,
     onLinkClick: ExpandableTextView.OnLinkClickListener? = null
 ): View {
     return expandableTextView {
@@ -74,6 +75,7 @@ private fun MiaoUI.commentContentView(
         textSize = 16f
         isNeedContract = true
         isNeedExpend = false
+//        setTextIsSelectable(textIsSelectable)
         setNeedMention(false)
         isNeedSelf = true
         setNeedConvertUrl(false)
@@ -192,6 +194,7 @@ fun MiaoUI.videoCommentView(
 
                     +commentContentView(
                         content = content,
+                        textIsSelectable = textIsSelectable,
                         onLinkClick = onLinkClick,
                     )..lParams {
                         width = matchParent

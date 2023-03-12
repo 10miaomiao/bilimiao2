@@ -25,10 +25,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.*
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -37,8 +34,13 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
+import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
+import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
+import net.mikaelzero.mojito.Mojito
+import net.mikaelzero.mojito.impl.DefaultPercentProgress
+import net.mikaelzero.mojito.impl.NumIndicator
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -160,6 +162,33 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleImageItemClick = object : OnImageItemClickListener {
+        override fun onClick(
+            nineGridView: NineGridImageView,
+            imageView: ImageView,
+            url: String,
+            urlList: List<String>,
+            externalPosition: Int,
+            position: Int
+        ) {
+            Mojito.start(imageView.context) {
+                urls(urlList)
+                position(position)
+                progressLoader {
+                    DefaultPercentProgress()
+                }
+                setIndicator(NumIndicator())
+                views(nineGridView.getImageViews().toTypedArray())
+                mojitoListener(
+                    onLongClick = { activity, _, _, _, i ->
+                        val imageUrl = urlList[i]
+                        ImageSaveUtil(activity!!, imageUrl).showMemu()
+                    }
+                )
+            }
+        }
+    }
+
     val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
         videoCommentView(
             index = index,
@@ -176,14 +205,16 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                         it.id, it.text, it.url
                     )
                 },
-                picturesList = item.content.picturesList.map { UrlUtil.reviseUrl(it.imgSrc) },
+                picturesList = item.content.picturesList.map { UrlUtil.autoHttps(it.imgSrc) },
             ),
             like = item.like,
             count = item.count,
             isLike = item.replyControl.action == 1L,
+            textIsSelectable = true,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
             onLikeClick = handleLikeClick,
+            onImageItemClick = handleImageItemClick,
         ).apply {
             layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
         }
@@ -225,9 +256,11 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                     like = reply.like,
                     count = reply.count,
                     isLike = reply.action == 1L,
+                    textIsSelectable = true,
                     onUpperClick = handleUserClick,
                     onLinkClick = handleLinkClickListener,
                     onLikeClick = handleRootLikeClick,
+                    onImageItemClick = handleImageItemClick,
                 ).apply {
                     _topPadding = contentInsets.top + config.dividerSize
                     backgroundColor = config.blockBackgroundColor

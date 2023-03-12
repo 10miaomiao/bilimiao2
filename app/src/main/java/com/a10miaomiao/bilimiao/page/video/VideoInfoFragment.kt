@@ -472,7 +472,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
             views {
                 +rcImageView {
                     isCircle = true
-                    _network(item.face)
+                    _network(item.face, "@200w_200h")
                 }..lParams {
                     height = dip(40)
                     width = dip(40)
@@ -511,7 +511,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                     views {
                         +rcImageView {
                             isCircle = true
-                            _network(viewModel.info?.owner?.face)
+                            _network(viewModel.info?.owner?.face, "@200w_200h")
                         }..lParams {
                             height = dip(40)
                             width = dip(40)
@@ -617,7 +617,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                     views {
                         +rcImageView {
                             radius = dip(5)
-                            _network(videoInfo?.pic)
+                            _network(videoInfo?.pic, "@672w_378h_1c_")
                         }..lParams {
                             width = dip(150)
                             height = dip(100)

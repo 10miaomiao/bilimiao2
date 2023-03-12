@@ -18,7 +18,6 @@ import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.view.loadPic
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -100,7 +99,7 @@ class VideoRegionFragment : Fragment(), DIAware, MyPage {
                                     visibility = View.VISIBLE
                                 } else if (item.logo != null) {
                                     Glide.with(context)
-                                        .loadPic(item.logo!!)
+                                        .loadImageUrl(item.logo!!)
                                         .override(dip(24), dip(24))
                                         .into(this)
                                     visibility = View.VISIBLE

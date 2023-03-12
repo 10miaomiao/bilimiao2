@@ -24,9 +24,6 @@ package com.a10miaomiao.bilimiao.widget.gridimage
 
 import android.graphics.Bitmap
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
-import com.a10miaomiao.bilimiao.comm.view.loadPic
-import com.a10miaomiao.bilimiao.comm.view.network
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.BitmapImageViewTarget
 import com.bumptech.glide.request.transition.Transition

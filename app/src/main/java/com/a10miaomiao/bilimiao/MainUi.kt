@@ -133,7 +133,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 //        translationY = dip(-200f)
 
         addView(limitedFrameLayout {
-//            maxHeight = dip(500)
+            maxHeight = dip(500)
             maxWidth = dip(600)
 
             addView(shadowLayout {

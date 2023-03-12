@@ -76,9 +76,6 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
-        mPreferencesAdapter?.let { mAdapter ->
-            mAdapter.onScreenChangeListener
-        }
         val intentFilter = IntentFilter()
         intentFilter.addAction(UPDATE_ACTION)
         requireActivity().registerReceiver(mBroadcastReceiver, intentFilter)

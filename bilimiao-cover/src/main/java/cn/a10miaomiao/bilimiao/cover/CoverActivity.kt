@@ -139,7 +139,6 @@ class CoverActivity : AppCompatActivity() {
 //        }
         mCoverIv.setOnClickListener {
             viewModel.coverUrl.value?.let { url ->
-                DebugMiao.log(url)
                 mCoverIv.mojito(url)
             }
         }

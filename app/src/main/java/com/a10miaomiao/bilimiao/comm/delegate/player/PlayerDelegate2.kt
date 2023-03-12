@@ -17,12 +17,12 @@ import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
+import com.a10miaomiao.bilimiao.comm.network
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.comm.view.network
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService

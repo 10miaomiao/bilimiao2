@@ -8,12 +8,12 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import cn.a10miaomiao.download.BiliVideoEntry
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._height
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -33,6 +33,7 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.chad.library.adapter.base.listener.OnItemLongClickListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -68,12 +69,10 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
         return ui.root
     }
 
-    @OptIn(InternalCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
     }
 
-    @OptIn(InternalCoroutinesApi::class)
     override fun onResume() {
         super.onResume()
     }
@@ -108,7 +107,7 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
 
     val handleItemLongClick = OnItemLongClickListener { adapter, view, position ->
         val item = downloadDelegate.downloadList[position]
-        AlertDialog.Builder(requireContext()).apply {
+        MaterialAlertDialogBuilder(requireContext()).apply {
             setTitle("确定删除，喵？")
             setMessage("删除\"${item.title}\"?")
             setNegativeButton("确定删除") { dialog, which ->
@@ -205,7 +204,9 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
                     }
                     headerViews(mAdapter) {
                         +frameLayout {
-                        }..lParams(matchParent, contentInsets.top)
+                        }..lParams(matchParent, 0) {
+                            _height = contentInsets.top
+                        }
                     }
                 }..lParams(matchParent, matchParent) {
                     weight = 1f

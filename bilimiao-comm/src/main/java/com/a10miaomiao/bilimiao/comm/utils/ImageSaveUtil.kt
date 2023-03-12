@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
@@ -20,6 +19,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 import java.io.FileOutputStream
 
@@ -35,7 +35,7 @@ class ImageSaveUtil(
     )
 
     fun showMemu() {
-        AlertDialog.Builder(activity)
+        MaterialAlertDialogBuilder(activity)
             .setItems(menuItems) { _, i ->
                 saveImage()
             }

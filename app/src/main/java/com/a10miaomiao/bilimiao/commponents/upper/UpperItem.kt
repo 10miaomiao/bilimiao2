@@ -26,7 +26,7 @@ fun MiaoUI.upperItem(
         views {
             +rcImageView {
                 isCircle = true
-                _network(face)
+                _network(face, "@200w_200h")
             }..lParams (width = dip(64), height = dip(64)) {
                 rightMargin = config.dividerSize
             }
