@@ -25,15 +25,19 @@ import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
 import com.a10miaomiao.bilimiao.store.RegionStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.Maxr1998.modernpreferences.Preference
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
+import de.Maxr1998.modernpreferences.preferences.SwitchPreference
 import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import org.kodein.di.*
+import splitties.toast.toast
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import java.io.BufferedReader
@@ -54,6 +58,8 @@ class SettingFragment : Fragment(), DIAware, MyPage
 
     private val windowStore by instance<WindowStore>()
     private val regionStore by instance<RegionStore>()
+
+    private var mPreferencesAdapter: PreferencesAdapter? = null
 
     private val themeDelegate by instance<ThemeDelegate>()
 
@@ -119,6 +125,24 @@ class SettingFragment : Fragment(), DIAware, MyPage
         }
     }
 
+    private fun showGlideImageCache() {
+        MaterialAlertDialogBuilder(requireContext()).apply {
+            val cacheSize = GlideCacheUtil.getCacheSize(requireContext())
+            setTitle("提示")
+            setMessage("确定清空图片缓存？当前缓存大小：$cacheSize")
+            setNegativeButton("取消", null)
+            setPositiveButton("确定") { text, d ->
+                GlideCacheUtil.clearImageAllCache(requireContext())
+                toast("清理完成，已清理$cacheSize")
+                mPreferencesAdapter?.currentScreen?.let { screen ->
+                    val danmakuShowSP = screen["glide_image_cache"] as Preference
+                    danmakuShowSP.summary = "刚刚清理"
+                }
+                mPreferencesAdapter?.notifyDataSetChanged()
+            }
+        }.show()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -147,9 +171,10 @@ class SettingFragment : Fragment(), DIAware, MyPage
                     val mAdapter = miaoMemo(null) {
                         PreferencesAdapter(createRootScreen())
                     }
-                    miaoEffect(null, {
+                    miaoEffect(null) {
                         adapter = mAdapter
-                    })
+                    }
+                    mPreferencesAdapter = mAdapter
                 }..lParams(matchParent, matchParent)
             }
         }
@@ -235,6 +260,17 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "自动检测新版本"
             defaultValue = true
         }
+
+        pref("glide_image_cache") {
+            title = "图片缓存"
+            val cacheSize = GlideCacheUtil.getCacheSize(requireContext())
+            summary = cacheSize
+            onClick {
+                showGlideImageCache()
+                true
+            }
+        }
+
 
         categoryHeader("other") {
             title = "其它"
