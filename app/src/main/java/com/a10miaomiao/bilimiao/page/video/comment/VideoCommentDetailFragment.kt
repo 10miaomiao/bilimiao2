@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
@@ -21,6 +22,7 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -60,6 +62,8 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
     private val viewModel by diViewModel<VideoCommentDetailViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
+
+    private val themeDelegate by instance<ThemeDelegate>()
 
     private var mAdapter: MiaoBindingAdapter<ReplyOuterClass.ReplyInfo>? = null
 
@@ -180,9 +184,10 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 setIndicator(NumIndicator())
                 views(nineGridView.getImageViews().toTypedArray())
                 mojitoListener(
-                    onLongClick = { activity, _, _, _, i ->
+                    onLongClick = { a, _, _, _, i ->
                         val imageUrl = urlList[i]
-                        ImageSaveUtil(activity!!, imageUrl).showMemu()
+                        val context = ContextThemeWrapper(a, themeDelegate.getThemeResId())
+                        ImageSaveUtil(a!!, imageUrl).showMemu(context)
                     }
                 )
             }

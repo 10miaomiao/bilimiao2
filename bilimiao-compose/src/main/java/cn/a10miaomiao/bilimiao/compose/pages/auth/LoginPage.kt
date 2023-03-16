@@ -1,12 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
-import android.app.ProgressDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -49,6 +44,7 @@ import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -203,11 +199,11 @@ class LoginPageViewModel(
     }
 
     @OptIn(ExperimentalContracts::class)
-    private inline fun alert(title: String, initBuilder: (AlertDialog.Builder.() -> Unit)) {
+    private inline fun alert(title: String, initBuilder: (MaterialAlertDialogBuilder.() -> Unit)) {
         contract {
             callsInPlace(initBuilder, InvocationKind.EXACTLY_ONCE)
         }
-        AlertDialog.Builder(fragment.requireActivity()).apply {
+        MaterialAlertDialogBuilder(fragment.requireActivity()).apply {
             setTitle(title)
             setNegativeButton("关闭", null)
             initBuilder()
