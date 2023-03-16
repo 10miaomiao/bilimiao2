@@ -1,10 +1,12 @@
 package com.a10miaomiao.bilimiao.page.video.comment
 
+import android.content.ContextWrapper
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -23,6 +25,7 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
@@ -93,6 +96,8 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
     private val viewModel by diViewModel<VideoCommentListViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
+
+    private val themeDelegate by instance<ThemeDelegate>()
 
     private var mAdapter: MiaoBindingAdapter<ReplyOuterClass.ReplyInfo>? = null
 
@@ -255,9 +260,10 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
                 setIndicator(NumIndicator())
                 views(nineGridView.getImageViews().toTypedArray())
                 mojitoListener(
-                    onLongClick = { activity, _, _, _, i ->
+                    onLongClick = { a, _, _, _, i ->
                         val imageUrl = urlList[i]
-                        ImageSaveUtil(activity!!, imageUrl).showMemu()
+                        val context = ContextThemeWrapper(a, themeDelegate.getThemeResId())
+                        ImageSaveUtil(a!!, imageUrl).showMemu(context)
                     }
                 )
             }

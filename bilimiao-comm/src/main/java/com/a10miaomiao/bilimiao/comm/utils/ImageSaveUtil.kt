@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.comm.utils
 import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -34,8 +35,8 @@ class ImageSaveUtil(
         "保存图片"
     )
 
-    fun showMemu() {
-        MaterialAlertDialogBuilder(activity)
+    fun showMemu(context: Context = activity) {
+        MaterialAlertDialogBuilder(context)
             .setItems(menuItems) { _, i ->
                 saveImage()
             }

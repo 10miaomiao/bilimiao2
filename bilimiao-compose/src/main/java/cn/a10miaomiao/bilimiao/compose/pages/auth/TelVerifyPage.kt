@@ -6,7 +6,6 @@ import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -40,6 +39,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -192,11 +192,11 @@ class TelVerifyPageViewModel(
     }
 
     @OptIn(ExperimentalContracts::class)
-    private inline fun alert(title: String, initBuilder: (AlertDialog.Builder.() -> Unit)) {
+    private inline fun alert(title: String, initBuilder: (MaterialAlertDialogBuilder.() -> Unit)) {
         contract {
             callsInPlace(initBuilder, InvocationKind.EXACTLY_ONCE)
         }
-        AlertDialog.Builder(fragment.requireActivity()).apply {
+        MaterialAlertDialogBuilder(fragment.requireActivity()).apply {
             setTitle(title)
             setNegativeButton("关闭", null)
             initBuilder()

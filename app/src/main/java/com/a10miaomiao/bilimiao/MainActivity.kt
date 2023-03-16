@@ -8,15 +8,12 @@ import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.DisplayMetrics
-import android.view.Gravity
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
@@ -28,8 +25,6 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.*
 import org.kodein.di.DI
@@ -40,13 +35,10 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
-import splitties.dimensions.dip
 
 
 class MainActivity
@@ -278,11 +270,17 @@ class MainActivity
     override fun onResume() {
         super.onResume()
         basePlayerDelegate.onResume()
+
+        // 百度移动统计埋点
+        StatService.onResume(this)
     }
 
     override fun onPause() {
         super.onPause()
         basePlayerDelegate.onPause()
+
+        // 百度移动统计埋点
+        StatService.onPause(this)
     }
 
     override fun onDestroy() {

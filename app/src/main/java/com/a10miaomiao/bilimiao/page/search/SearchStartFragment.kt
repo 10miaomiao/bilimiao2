@@ -7,7 +7,6 @@ import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
@@ -31,6 +30,7 @@ import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -159,7 +159,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
     }
 
     private val handleDeleteHistoryClick = View.OnClickListener {
-        AlertDialog.Builder(requireContext()).apply {
+        MaterialAlertDialogBuilder(requireContext()).apply {
             setTitle("确定清空搜索历史，喵？")
             setNegativeButton("确定清空") { dialog, which ->
                 viewModel.deleteAllSearchHistory()

@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.page.home
 
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager
@@ -9,34 +8,26 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.Bilimiao
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.diViewModel
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.store.RegionStore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.collections.forEachWithIndex
 import splitties.toast.toast
-import java.io.BufferedReader
-import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.*
 
 class HomeViewModel(
@@ -92,7 +83,7 @@ class HomeViewModel(
             e.printStackTrace()
         }
     }
-
+    
     fun showUpdateDialog(version: MiaoAdInfo.VersionBean, curVersionCode: Long) {
         // 当前版本大于等于最新版本不提示更新
         if (curVersionCode >= version.versionCode) {
@@ -104,7 +95,7 @@ class HomeViewModel(
         if (version.versionCode === noUpdateVersionCode && curVersionCode >= version.miniVersionCode) {
             return
         }
-        val dialog = AlertDialog.Builder(context).apply {
+        val dialog = MaterialAlertDialogBuilder(context).apply {
             setTitle("有新版本：" + version.versionName)
             setMessage(version.content)
             setPositiveButton("去更新", null)

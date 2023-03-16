@@ -30,6 +30,7 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.kodein.di.*
@@ -172,7 +173,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
         if (sp.getBoolean("is_approve_privacy", false)) {
             return
         }
-        val dialog = AlertDialog.Builder(requireActivity()).apply {
+        val dialog = MaterialAlertDialogBuilder(requireActivity()).apply {
             setTitle("温馨提示")
             setMessage("根据相关政策法规，你需要先阅读并同意《隐私协议》才能使用本软件")
             setCancelable(false)
