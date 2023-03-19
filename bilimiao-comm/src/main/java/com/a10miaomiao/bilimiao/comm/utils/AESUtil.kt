@@ -35,7 +35,7 @@ object AESUtil {
     /**
      * 解密
      */
-    fun decrypt(content: ByteArray, secretKey: SecretKey): String {
+    fun decrypt(content: ByteArray, secretKey: SecretKey): ByteArray {
         // 秘钥
         val enCodeFormat = secretKey.encoded
         // 创建AES秘钥
@@ -45,13 +45,13 @@ object AESUtil {
         // 初始化解密器
         cipher.init(Cipher.DECRYPT_MODE, key)
         // 解密
-        return String(cipher.doFinal(content))
+        return cipher.doFinal(content)
     }
 
     /**
      * 加密
      */
-    fun encrypt(content: String, secretKey: SecretKey): ByteArray {
+    fun encrypt(content: ByteArray, secretKey: SecretKey): ByteArray {
         // 秘钥
         val enCodeFormat = secretKey.encoded
         // 创建AES秘钥
@@ -61,6 +61,6 @@ object AESUtil {
         // 初始化加密器
         cipher.init(Cipher.ENCRYPT_MODE, key)
         // 加密
-        return cipher.doFinal(content.toByteArray())
+        return cipher.doFinal(content)
     }
 }

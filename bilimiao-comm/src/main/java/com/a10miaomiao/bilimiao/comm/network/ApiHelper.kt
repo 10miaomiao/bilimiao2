@@ -13,21 +13,29 @@ import java.util.*
  */
 object ApiHelper {
 
-    const val BUILD_VERSION = 6740400
-    const val APP_KEY = "1d8b6e7d45233436";
-    const val APP_SECRET = "560c52ccd288fed045859ed18bffd973"
+    const val BUILD_VERSION = 1390002
+    const val BILI_APP_VERSION = "1.39.0"
+
+    // 用哪个APP_KEY登录后，之后的请求之后只能用同一个APP_KEY，现统一使用HD版的APP_KEY，APP版的APP_KEY无法使用二维码登录
+    // Android APP
+//    const val APP_KEY = "1d8b6e7d45233436";
+//    const val APP_SECRET = "560c52ccd288fed045859ed18bffd973"
+    // Android HD
+    const val APP_KEY = "dfca71928277209b";
+    const val APP_SECRET = "b5475a8825547a4fc26c7d518eaaa02e"
 
     const val REFERER = "https://www.bilibili.com/"
     const val APP_BASE = "https://app.bilibili.com/"
     const val GRPC_BASE = "https://grpc.biliapi.net/"
 
     /**
-     * User-Agent: Dalvik/2.1.0 (Linux; U; Android 6.0.1; MuMu Build/V417IR) 6.71.0 os/android model/MuMu mobi_app/android build/6710300 channel/bili innerVer/6710300 osVer/6.0.1 network/2
+     * User-Agent: Dalvik/2.1.0 (Linux; U; Android 12; sdk_gpc_x86_64 Build/SE2B.220326.023) 1.39.0 os/android model/sdk_gpc_x86_64 mobi_app/android_hd build/1390002 channel/yingyongbao innerVer/1390002 osVer/12 network/1
+     *             Dalvik/2.1.0 (Linux; U; Android 12; sdk_gpc_x86_64 Build/SE2B.220326.023) 1.39.0 os/android model/sdk_gpc_x86_64 mobi_app/android_hd build/1390002 channel/bili innerVer/1390002osVer/12 network/2
      */
     val USER_AGENT = """
             |${BiliGRPCConfig.getSystemUserAgent()} 
-            |os/android model/${Build.MODEL} mobi_app/android 
-            |build/${BiliGRPCConfig.build} channel/bili innerVer/${BiliGRPCConfig.build} 
+            |${BILI_APP_VERSION} os/android model/${Build.MODEL} mobi_app/android_hd 
+            |build/${BUILD_VERSION} channel/bili innerVer/${BUILD_VERSION}
             |osVer/${Build.VERSION.RELEASE} network/2
         """.trimMargin().replace("\n", "")
 

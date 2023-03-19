@@ -1,21 +1,22 @@
 package cn.a10miaomiao.bilimiao.compose
 
-import androidx.compose.runtime.Composable
 import androidx.navigation.*
-import androidx.navigation.compose.ComposeNavigator
-import androidx.navigation.compose.composable
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.NavDestinationBuilder
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.arguments
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.content
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
+import cn.a10miaomiao.bilimiao.compose.pages.auth.QrCodeLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 
 object PageRoute {
@@ -26,10 +27,11 @@ object PageRoute {
 
     object Auth {
         val login = "bilimiao://auth/login" content { LoginPage() }
+        val qr_login = "bilimiao://auth/qr_login" content { QrCodeLoginPage() }
         val telVerify = "bilimiao://auth/tel_verify?code={code}&request_id={request_id}&source={source}" arguments listOf(
             navArgument("code") { type = NavType.StringType },
-            navArgument("request_id") { type = NavType.StringType },
-            navArgument("source") { type = NavType.StringType },
+            navArgument("request_id") { type = NavType.StringType; defaultValue = "" },
+            navArgument("source") { type = NavType.StringType; defaultValue = "" },
         ) content {
             val code = it.arguments?.getString("code") ?: ""
             val requestId = it.arguments?.getString("request_id") ?: ""
@@ -66,15 +68,26 @@ object PageRoute {
     fun builder(builder: NavGraphBuilder) = builder.run {
         +start.build(provider)
         +test.build(provider)
-        +Auth.login.build(provider)
-        +Auth.telVerify.build(provider)
-        +User.follow.build(provider)
-        +Time.setting.build(provider)
-        +Setting.proxySetting.build(provider)
-        +Setting.proxy_addProxyServer.build(provider)
-        +Setting.proxy_editProxyServer.build(provider)
-        +Setting.proxy_selectProxyServer.build(provider)
+        autoBuild(Auth, Auth::class.java)
+        autoBuild(User, User::class.java)
+        autoBuild(Time, Time::class.java)
+        autoBuild(Setting, Setting::class.java)
+    }
+    
+    inline fun <reified T> NavGraphBuilder.autoBuild(t: T) {
+        autoBuild(t, T::class.java)
+    }
 
+    fun <T> NavGraphBuilder.autoBuild(t: T, clazz: Class<T>) {
+        val typeName = NavDestinationBuilder::class.java.name
+        clazz.methods.forEach {
+            if (it.returnType.name == typeName) {
+                (it.invoke(t) as? NavDestinationBuilder)?.let { obj ->
+//                    DebugMiao.log(obj.route)
+                    addDestination(obj.build(provider))
+                }
+            }
+        }
     }
 
 }

@@ -83,7 +83,7 @@ class HomeViewModel(
             e.printStackTrace()
         }
     }
-    
+
     fun showUpdateDialog(version: MiaoAdInfo.VersionBean, curVersionCode: Long) {
         // 当前版本大于等于最新版本不提示更新
         if (curVersionCode >= version.versionCode) {

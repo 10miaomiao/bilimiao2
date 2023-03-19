@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,6 +102,18 @@ class UserStore(override val di: DI) :
                 activity.toast("无法连接到御坂网络")
             }
             e.printStackTrace()
+        }
+    }
+
+    fun sso() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.authApi
+                .sso()
+                .awaitCall()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 

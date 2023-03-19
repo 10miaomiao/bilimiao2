@@ -7,6 +7,7 @@ import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.utils.AESUtil
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.MiaoEncryptDecrypt
 import com.google.gson.Gson
 import java.io.File
 
@@ -16,6 +17,7 @@ class BilimiaoCommApp(
     var loginInfo: LoginInfo? = null
         private set
 
+    private val authFilePath get() = app.filesDir.path + "/auth_hd"
     private val key = "Message Word"
     private var _bilibiliBuvid = ""
 
@@ -30,7 +32,7 @@ class BilimiaoCommApp(
         readAuthInfo()
     }
 
-    private fun setCookie(cookieInfo: LoginInfo.CookieInfo) {
+    fun setCookie(cookieInfo: LoginInfo.CookieInfo) {
         val cookieManager = CookieManager.getInstance()
         cookieManager.removeSessionCookies(null)//移除
         cookieManager.removeAllCookies(null)
@@ -42,22 +44,30 @@ class BilimiaoCommApp(
         cookieManager.flush()
     }
 
+    private fun getMiaoEncryptDecrypt(): MiaoEncryptDecrypt {
+        val key = getBilibiliBuvid().toByteArray()
+        return MiaoEncryptDecrypt(key)
+    }
+
     fun saveAuthInfo(loginInfo: LoginInfo) {
         this.loginInfo = loginInfo
-        val jsonStr = Gson().toJson(loginInfo)
+        val miaoED = getMiaoEncryptDecrypt()
+        val jsonByteArray = Gson().toJson(loginInfo).toByteArray()
         val secretKey = AESUtil.getKey(key, app)
-        val cipher = AESUtil.encrypt(jsonStr, secretKey)
-        val file = File(app.filesDir.path + "/auth")
+        val cipher = AESUtil.encrypt(miaoED.encrypt(jsonByteArray), secretKey)
+        val file = File(authFilePath)
         file.writeBytes(cipher)
         loginInfo.cookie_info?.let { setCookie(it) }
     }
 
-    fun readAuthInfo(): LoginInfo? {
+    private fun readAuthInfo(): LoginInfo? {
         try {
+            val miaoED = getMiaoEncryptDecrypt()
             val secretKey = AESUtil.getKey(key, app)
-            val file = File(app.filesDir.path + "/auth")
+            val file = File(authFilePath)
             val cipher = file.readBytes()
-            val jsonStr = AESUtil.decrypt(cipher, secretKey)
+            val jsonByteArray = miaoED.decrypt(AESUtil.decrypt(cipher, secretKey))
+            val jsonStr = String(jsonByteArray)
             val loginInfo = Gson().fromJson(jsonStr, LoginInfo::class.java)
             this.loginInfo = loginInfo
             return loginInfo
@@ -68,7 +78,7 @@ class BilimiaoCommApp(
     }
 
     fun deleteAuth() {
-        val file = File(app.filesDir.path + "/auth")
+        val file = File(authFilePath)
         file.delete()
         val cookieManager = CookieManager.getInstance()
         cookieManager.removeSessionCookies(null)//移除

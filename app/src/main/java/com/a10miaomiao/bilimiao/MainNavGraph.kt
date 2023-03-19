@@ -199,6 +199,11 @@ object MainNavGraph {
         }
 
         val h5Login = f<H5LoginFragment> {
+            deepLink("bilimiao://auth/h5/{url}")
+            argument(args.url) {
+                type = NavType.StringType
+                defaultValue = "https://passport.bilibili.com/ajax/miniLogin/minilogin"
+            }
         }
 
         val user = f<UserFragment> {

@@ -28,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import bilibili.main.community.reply.v1.ReplyOuterClass.Url
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
@@ -122,13 +123,31 @@ class LoginPageViewModel(
                     geeSeccode = gt3Result.geetest_seccode,
                     geeChallenge = gt3Result.geetest_challenge,
                 )
-            }.awaitCall().gson<ResultInfo<LoginInfo>>()
+            }.awaitCall().gson<ResultInfo<LoginInfo.PasswordLoginInfo>>()
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val loginInfo = res.data
+                    DebugMiao.log(loginInfo)
                     if (loginInfo.status == 0) {
-                        BilimiaoCommApp.commApp.saveAuthInfo(loginInfo)
+                        BilimiaoCommApp.commApp.saveAuthInfo(loginInfo.toLoginInfo())
                         authInfo()
+                    } else if (loginInfo.status == 1){
+                        alert("提示") {
+                            setMessage(loginInfo.message)
+                            setNegativeButton("取消", null)
+                            setPositiveButton("请往验证") { _, _ ->
+                                val map = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
+                                val params = mapOf(
+                                    "code" to map["tmp_token"]!!
+                                )
+                                navController.navigate(PageRoute.Auth.telVerify.url(params))
+                            }
+//                            setNeutralButton("使用原始网页") { _, _ ->
+//                                fragment.findNavController().navigate(
+//                                    Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
+//                                )
+//                            }
+                        }
                     } else if (loginInfo.status == 2){
                         alert("提示") {
                             setMessage(loginInfo.message)
@@ -278,13 +297,6 @@ fun LoginPage(
         )
     }
 
-//    val test = remember(nav) {
-//        {
-//            nav.navigate("bilimiao://auth/tel_verify?code=147f6f734894caf16b9a5812c0f29111&request_id=9363b39b672348b6ab110808348601b9&source=risk")
-//            Unit
-//        }
-//    }
-
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -388,9 +400,22 @@ fun LoginPage(
                     text = "登录"
                 )
             }
-//            Button(onClick = test) {
-//                Text(text = "测试")
-//            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                TextButton(onClick = {
+                    nav.navigate(PageRoute.Auth.qr_login.url())
+                }) {
+                    Text(text = "二微码登录")
+                }
+            }
+            Button(onClick = {
+                nav.navigate("bilimiao://auth/tel_verify?code=147f6f734894caf16b9a5812c0f29111&request_id=9363b39b672348b6ab110808348601b9&source=risk")
+            }) {
+                Text(text = "测试")
+            }
             Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
 
         }

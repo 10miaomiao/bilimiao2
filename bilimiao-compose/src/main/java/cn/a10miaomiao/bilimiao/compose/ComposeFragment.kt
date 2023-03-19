@@ -111,7 +111,7 @@ fun MyNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = PageRoute.start.route,
+        startDestination = PageRoute.start.url(),
         builder = PageRoute::builder
     )
     LaunchedEffect(startRoute) {

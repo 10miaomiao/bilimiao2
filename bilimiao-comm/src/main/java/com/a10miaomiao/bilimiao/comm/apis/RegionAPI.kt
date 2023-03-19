@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 
@@ -25,8 +27,7 @@ class RegionAPI {
         timeFrom: String,
         timeTo: String,
     ) = MiaoHttp.request {
-        url = BiliApiService.createUrl(
-            "https://s.search.bilibili.com/cate/search",
+        val params = mutableMapOf(
             "main_ver" to "v3",
             "search_type" to "video",
             "view_type" to  "hot_rank",
@@ -38,5 +39,6 @@ class RegionAPI {
             "time_from" to timeFrom,
             "time_to" to timeTo
         )
+        url = "https://s.search.bilibili.com/cate/search?" + ApiHelper.urlencode(params)
     }
 }
