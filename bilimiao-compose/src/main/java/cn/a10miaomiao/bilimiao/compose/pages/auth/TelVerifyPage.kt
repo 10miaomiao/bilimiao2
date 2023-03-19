@@ -6,6 +6,7 @@ import android.view.View
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -28,6 +29,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
@@ -69,9 +71,11 @@ class TelVerifyPageViewModel(
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
 
-    private val biliGeetestUtil = BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
+    private val biliGeetestUtil =
+        BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
 
-    val hideTel = MutableStateFlow("")
+    val verifyType = MutableStateFlow(VerifyType.TEL)
+    val tmpAccountInfo = MutableStateFlow<TmpUserInfo.AccountInfo?>(null)
     val countdown = MutableStateFlow(0)
     val verifyCode = MutableStateFlow("")
     val loading = MutableStateFlow(false)
@@ -82,8 +86,8 @@ class TelVerifyPageViewModel(
 
     fun startCountdown(second: Int) {
         countdown.value = second
-        flow<Int>{
-            for (i in second downTo 0){
+        flow<Int> {
+            for (i in second downTo 0) {
                 emit(i)
                 delay(1000)
             }
@@ -94,15 +98,29 @@ class TelVerifyPageViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun getUserInfo() = viewModelScope.launch(Dispatchers.Main){
+    fun getTmpUserInfo() = viewModelScope.launch(Dispatchers.Main) {
         try {
             val res = withContext(Dispatchers.IO) {
-                BiliApiService.authApi.userInfo(tmpCode = code)
+                BiliApiService.authApi.tmpUserInfo(tmpCode = code)
                     .awaitCall()
                     .gson<ResultInfo<TmpUserInfo>>()
             }
             if (res.isSuccess) {
-                hideTel.value = res.data.account_info.hide_tel
+                val info = res.data.account_info
+                tmpAccountInfo.value = info
+                if (info.bind_mail && !info.mail_verify) {
+                    verifyType.value = VerifyType.EMAIL
+                } else if (info.bind_tel && !info.tel_verify) {
+                    verifyType.value = VerifyType.TEL
+                } else {
+                    MaterialAlertDialogBuilder(fragment.requireActivity()).apply {
+                        setTitle("不支持验证")
+                        setMessage("此帐号不支持手机号及邮箱验证，请去B站官方客户端或PC网页版完善帐号信息后再重新登录")
+                        setNegativeButton("确定") { _, _ ->
+                            fragment.findNavController().popBackStack()
+                        }
+                    }.show()
+                }
             } else {
                 Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
                     .show()
@@ -114,7 +132,7 @@ class TelVerifyPageViewModel(
         }
     }
 
-    fun verifyTel() = viewModelScope.launch(Dispatchers.Main){
+    fun verifyTel() = viewModelScope.launch(Dispatchers.Main) {
         try {
             if (verifyCode.value.isBlank()) {
                 alert("请输入验证码")
@@ -122,13 +140,23 @@ class TelVerifyPageViewModel(
             }
             loading.value = true
             val res = withContext(Dispatchers.IO) {
-                BiliApiService.authApi.telVerify(
-                    code = verifyCode.value,
-                    tmpCode = code,
-                    requestId = requestId,
-                    source = source,
-                    captcha_key = captchaKey,
-                ).awaitCall().gson<ResultInfo<VerifyTelInfo>>()
+                if (verifyType.value == VerifyType.TEL) {
+                    BiliApiService.authApi.telVerify(
+                        code = verifyCode.value,
+                        tmpCode = code,
+                        requestId = requestId,
+                        source = source,
+                        captcha_key = captchaKey,
+                    ).awaitCall().gson<ResultInfo<VerifyTelInfo>>()
+                } else {
+                    BiliApiService.authApi.emailVerify(
+                        code = verifyCode.value,
+                        tmpCode = code,
+                        requestId = requestId,
+                        source = source,
+                        captcha_key = captchaKey,
+                    ).awaitCall().gson<ResultInfo<VerifyTelInfo>>()
+                }
             }
             if (res.isSuccess) {
                 getOauth2AccessToken(res.data.code)
@@ -203,14 +231,18 @@ class TelVerifyPageViewModel(
         }.show()
     }
 
-    fun sendSms() {
+    fun setVerifyType(value: VerifyType) {
+        verifyType.value = value
+    }
+
+    fun sendClick() {
         biliGeetestUtil.startCustomFlow()
     }
 
     /**
-     * 验证码回调，发送验证码
+     * 发送短信验证码
      */
-    override suspend fun onGTDialogResult(
+    private suspend fun sendSms(
         result: BiliGeetestUtil.GT3ResultBean
     ): Boolean {
         val res = withContext(Dispatchers.IO) {
@@ -230,6 +262,51 @@ class TelVerifyPageViewModel(
             return true
         } else {
             Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+    }
+
+    /**
+     * 发送邮箱验证码
+     */
+    private suspend fun sendEmail(
+        result: BiliGeetestUtil.GT3ResultBean
+    ): Boolean {
+        val res = withContext(Dispatchers.IO) {
+            BiliApiService.authApi.emailSend(
+                tmpCode = code,
+                geeChallenge = result.geetest_challenge,
+                geeSeccode = result.geetest_seccode,
+                geeValidate = result.geetest_validate,
+                recaptchaToken = recaptchaToken,
+            ).awaitCall().gson<ResultInfo<SmsSendInfo>>()
+        }
+        if (res.isSuccess) {
+            startCountdown(60)
+            captchaKey = res.data.captcha_key
+            Toast.makeText(fragment.requireActivity(), "已发送邮箱验证码", Toast.LENGTH_SHORT)
+                .show()
+            return true
+        } else {
+            Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+    }
+
+    /**
+     * 验证码回调，发送验证码
+     */
+    override suspend fun onGTDialogResult(
+        result: BiliGeetestUtil.GT3ResultBean
+    ): Boolean {
+        if (verifyType.value == VerifyType.TEL) {
+            return sendSms(result)
+        } else if (verifyType.value == VerifyType.EMAIL) {
+            return sendEmail(result)
+        } else {
+            Toast.makeText(fragment.requireActivity(), "未知类型", Toast.LENGTH_SHORT)
                 .show()
             return false
         }
@@ -255,6 +332,11 @@ class TelVerifyPageViewModel(
         }
     }
 
+    enum class VerifyType {
+        TEL,
+        EMAIL,
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -271,7 +353,8 @@ fun TelVerifyPage(
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(LocalView.current)
 
-    val hideTel by viewModel.hideTel.collectAsState()
+    val verifyType by viewModel.verifyType.collectAsState()
+    val tmpAccountInfo by viewModel.tmpAccountInfo.collectAsState()
     val countdown by viewModel.countdown.collectAsState()
     val verifyCode by viewModel.verifyCode.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -288,86 +371,133 @@ fun TelVerifyPage(
         viewModel.code = code
         viewModel.requestId = requestId
         viewModel.source = source
-        viewModel.getUserInfo()
+        viewModel.getTmpUserInfo()
     }
 
     Box(
         modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
-            Column(
+        Column(
+            modifier = Modifier
+                .widthIn(max = 600.dp)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 10.dp)
+        ) {
+            Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
+            Text(
+                text = "帐号验证",
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .widthIn(max = 600.dp)
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 10.dp)
-            ) {
-                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
+                    .padding(top = 45.dp, bottom = 20.dp)
+                    .fillMaxWidth()
+            )
+            if (verifyType == TelVerifyPageViewModel.VerifyType.TEL) {
                 Text(
-                    text = "帐号验证",
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(top = 45.dp, bottom = 20.dp)
-                        .fillMaxWidth()
-                )
-                Text(
-                    text = "手机号：$hideTel",
+                    text = "手机号：${tmpAccountInfo?.hide_tel}",
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 40.dp)
                         .fillMaxWidth()
                 )
+            } else if (verifyType == TelVerifyPageViewModel.VerifyType.EMAIL) {
+                Text(
+                    text = "邮箱：${tmpAccountInfo?.hide_mail}l",
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(bottom = 40.dp)
+                        .fillMaxWidth()
+                )
+            }
 //                Row(
 //                    modifier = Modifier.fillMaxWidth(),
 //                    verticalAlignment = Alignment.CenterVertically,
 //                ) {
-                    TextField(
-                        label = {
-                            Text(text = "短信验证码")
-                        },
-                        value = verifyCode,
-                        onValueChange = viewModel::setVerifyCode,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        trailingIcon = {
-                            Box(modifier = Modifier.padding(end = 5.dp)) {
-                                Button(
-                                    onClick = viewModel::sendSms,
-                                    enabled = countdown == 0,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    if (countdown == 0) {
-                                        Text(text = "获取验证码")
-                                    } else {
-                                        Text(text = countdown.toString() + "秒")
-                                    }
-                                }
+            TextField(
+                label = {
+                    if (verifyType == TelVerifyPageViewModel.VerifyType.TEL) {
+                        Text(text = "短信验证码")
+                    } else if (verifyType == TelVerifyPageViewModel.VerifyType.EMAIL)  {
+                        Text(text = "邮箱验证码")
+                    } else {
+                        Text(text = "验证码")
+                    }
+                },
+                value = verifyCode,
+                onValueChange = viewModel::setVerifyCode,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                trailingIcon = {
+                    Box(modifier = Modifier.padding(end = 5.dp)) {
+                        Button(
+                            onClick = viewModel::sendClick,
+                            enabled = countdown == 0,
+                            modifier = Modifier.width(120.dp)
+                        ) {
+                            if (countdown == 0) {
+                                Text(text = "获取验证码")
+                            } else {
+                                Text(text = countdown.toString() + "秒")
                             }
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                        keyboardActions = verifyCodeKeyboardActions,
-                    )
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = verifyCodeKeyboardActions,
+            )
 
 //                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Button(
-                    onClick = viewModel::verifyTel,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !loading,
-                ) {
-                    if (loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(12.dp),
-                            strokeWidth = 1.dp,
-                            color = MaterialTheme.colorScheme.outline,
-                        )
-                    }
-                    Text(
-                        modifier = Modifier.padding(horizontal = 5.dp),
-                        text = "确认"
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(
+                onClick = viewModel::verifyTel,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !loading,
+            ) {
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(12.dp),
+                        strokeWidth = 1.dp,
+                        color = MaterialTheme.colorScheme.outline,
                     )
                 }
-                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
+                Text(
+                    modifier = Modifier.padding(horizontal = 5.dp),
+                    text = "确认"
+                )
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                if (verifyType == TelVerifyPageViewModel.VerifyType.TEL
+                    && tmpAccountInfo?.bind_mail == true
+                    && tmpAccountInfo?.mail_verify == true
+                ) {
+                    TextButton(onClick = {
+                        viewModel.setVerifyType(TelVerifyPageViewModel.VerifyType.EMAIL)
+                    }) {
+                        Text(text = "使用邮箱验证")
+                    }
+                }
+                if (verifyType == TelVerifyPageViewModel.VerifyType.EMAIL
+                    && tmpAccountInfo?.bind_mail == true
+                    && tmpAccountInfo?.mail_verify == true
+                ) {
+                    TextButton(onClick = {
+                        viewModel.setVerifyType(TelVerifyPageViewModel.VerifyType.TEL)
+                    }) {
+                        Text(text = "使用手机号验证")
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
+        }
     }
+
 }

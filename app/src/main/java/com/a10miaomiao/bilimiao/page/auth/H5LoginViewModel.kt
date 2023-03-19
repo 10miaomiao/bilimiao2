@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,6 +46,7 @@ class H5LoginViewModel(
     fun resolveUrl(view: View, url: String) {
         try {
             updateLoading(true)
+            DebugMiao.log("resolveUrl", url)
             val accessKey = "access_key=(.*?)&".toRegex().find(url)!!.groupValues[1]
             val mid = "mid=(.*?)&".toRegex().find(url)!!.groupValues[1]
             val loginInfo = LoginInfo(
@@ -54,9 +56,6 @@ class H5LoginViewModel(
                     expires_in = 7200,
                     refresh_token = ""
                 ),
-                status = 0,
-                message =  null,
-                url = null,
                 sso = null,
                 cookie_info = null
             )

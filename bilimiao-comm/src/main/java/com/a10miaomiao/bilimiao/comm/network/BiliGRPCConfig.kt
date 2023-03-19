@@ -14,11 +14,6 @@ import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 object BiliGRPCConfig {
 
     /**
-     * 构建标识.
-     */
-    val build = 6740400;
-
-    /**
      * 频道.
      */
     val channel = "bilibili140";
@@ -41,17 +36,18 @@ object BiliGRPCConfig {
     /**
      * 未知.
      */
-    val buvid = "XZFD48CFF1E68E637D0DF11A562468A8DC314";
+//    val buvid = "XZFD48CFF1E68E637D0DF11A562468A8DC314";
+    val buvid get() = BilimiaoCommApp.commApp.getBilibiliBuvid()
 
     /**
      * 应用类型.
      */
-    val mobileApp = "android";
+    val mobileApp = "android_hd";
 
     /**
      * 移动平台.
      */
-    val platform = "android";
+    val platform = "android_hd";
 
     /**
      * 产品环境.
@@ -91,7 +87,7 @@ object BiliGRPCConfig {
         val msg = MetadataOuterClass.Metadata.newBuilder()
             .setAccessKey(accessToken)
             .setMobiApp(mobileApp)
-            .setBuild(build)
+            .setBuild(ApiHelper.BUILD_VERSION)
             .setChannel(channel)
             .setBuvid(buvid)
             .setPlatform(platform)
@@ -106,7 +102,7 @@ object BiliGRPCConfig {
         val msg = DeviceOuterClass.Device.newBuilder()
             .setAppId(appId)
             .setMobiApp(mobileApp)
-            .setBuild(build)
+            .setBuild(ApiHelper.BUILD_VERSION)
             .setChannel(channel)
             .setBuvid(buvid)
             .setPlatform(platform)
@@ -167,7 +163,6 @@ object BiliGRPCConfig {
         } else {
             userAgent = System.getProperty("http.agent")
         }
-        userAgent = System.getProperty("http.agent")
         //调整编码，防止中文出错
         val sb = StringBuffer()
         var i = 0

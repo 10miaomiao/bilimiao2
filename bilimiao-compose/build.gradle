@@ -57,11 +57,14 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-compose:$nav_version"
 
-    def accompanist_version = "0.26.4-beta"
+    def accompanist_version = "0.29.2-rc"
     implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist_version"
+    implementation "com.google.accompanist:accompanist-drawablepainter:$accompanist_version"
 
     implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_di_version"
     implementation "org.kodein.di:kodein-di-framework-compose:$kodein_di_version"
+
+    implementation 'com.github.alexzhirkevich:custom-qr-generator:1.6.0'
 
     implementation "com.google.code.gson:gson:$gson_version"
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"

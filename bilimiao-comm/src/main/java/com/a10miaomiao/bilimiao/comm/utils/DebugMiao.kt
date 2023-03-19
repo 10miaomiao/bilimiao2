@@ -1,6 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.utils
 
+import android.content.pm.ApplicationInfo
 import android.util.Log
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 
 /**
  * Created by 10喵喵 on 2018/2/22.
@@ -9,11 +11,18 @@ object DebugMiao {
 
     private const val TAG = "DebugMiao"
 
+    private var isDebug: Boolean? = null
+
     private inline fun Any?.getString(): String {
         return this?.toString() ?: "null"
     }
 
     fun log(vararg str: Any?) {
+        if (isDebug == null) {
+            isDebug = BilimiaoCommApp.commApp.app.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE !== 0
+        } else if (isDebug == false){
+            return
+        }
         var message = StringBuilder(str[0].getString()).apply {
             for (i in 1 until str.size) {
                 append(" , " + str[i].getString())
