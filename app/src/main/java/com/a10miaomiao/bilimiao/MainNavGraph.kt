@@ -31,9 +31,7 @@ import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
 import com.a10miaomiao.bilimiao.page.video.*
-import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailParam
-import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentDetailFragment
-import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
+import com.a10miaomiao.bilimiao.page.video.comment.*
 import kotlin.reflect.KClass
 
 
@@ -182,6 +180,12 @@ object MainNavGraph {
                 nullable = false
             }
         }
+        val replyDetail = f<ReplyDetailFragment> {
+            argument(args.reply) {
+                type = NavType.ParcelableType(ReplyDetailParam::class.java)
+                nullable = false
+            }
+        }
 
         val bangumiDetail = f<BangumiDetailFragment> {
             deepLink("bilibili://bangumi/season/{id}")
@@ -304,6 +308,7 @@ object MainNavGraph {
         val global_to_searchStart = dest.global to dest.searchStart
         val global_to_searchResult = dest.global to dest.searchResult
         val global_to_videoRegion = dest.global to dest.videoRegion
+        val global_to_replyDetail = dest.global to dest.replyDetail
 
         val home_to_region = dest.home to dest.region
         val home_to_setting = dest.home to dest.setting

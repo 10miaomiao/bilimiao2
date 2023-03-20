@@ -69,10 +69,22 @@ class VideoCommentListViewModel(
                 .awaitCall()
             if (_cursor == null){
                 list.data = mutableListOf()
-                DebugMiao.log(res.repliesList[1])
+                when {
+                    res.upTop != null && res.upTop.id != 0L -> {
+                        list.data.add(res.upTop)
+                    }
+                    res.adminTop != null && res.adminTop.id != 0L -> {
+                        list.data.add(res.adminTop)
+                    }
+                    res.voteTop != null && res.voteTop.id != 0L-> {
+                        list.data.add(res.voteTop)
+                    }
+                }
             }
             ui.setState {
-                list.data.addAll(res.repliesList)
+                if (res.repliesList != null) {
+                    list.data.addAll(res.repliesList)
+                }
                 _cursor = res.cursor
                 if (res.cursor.isEnd) {
                     list.finished = true
