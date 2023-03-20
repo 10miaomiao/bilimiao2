@@ -258,6 +258,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
 
         switch("auto_check_update") {
             title = "自动检测新版本"
+            summary = "已经没有什么好害怕的了"
             defaultValue = true
         }
 

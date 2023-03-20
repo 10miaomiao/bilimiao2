@@ -21,6 +21,7 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
@@ -39,6 +40,7 @@ import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
 import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.chad.library.adapter.base.listener.OnItemLongClickListener
 import kotlinx.coroutines.launch
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
@@ -128,6 +130,64 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
     }
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
+    }
+
+    private val handleHeaderLongClick = View.OnLongClickListener {
+        val reply = viewModel.reply
+        val replyParam = ReplyDetailParam(
+            index = 0,
+            oid = reply.oid,
+            rpid = reply.rpid,
+            mid = reply.mid,
+            uname = reply.uname,
+            avatar = reply.avatar,
+            ctime = reply.ctime,
+            floor = reply.floor,
+            location = reply.location,
+            content = reply.content,
+            like = reply.like,
+            count = reply.count,
+            action = reply.action,
+        )
+        val args = bundleOf(
+            MainNavGraph.args.reply to replyParam
+        )
+        Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+            .navigate(MainNavGraph.action.global_to_replyDetail, args)
+        true
+    }
+
+    private val handleItemLongClick = OnItemLongClickListener { adapter, view, position ->
+        val item = adapter.getItem(position) as ReplyOuterClass.ReplyInfo
+        val reply = ReplyDetailParam(
+            index = position,
+            oid = item.oid,
+            rpid = item.id,
+            mid = item.member.mid,
+            uname = item.member.name,
+            avatar = item.member.face,
+            ctime = item.ctime,
+            floor = 0,
+            location = item.replyControl.location,
+            content = VideoCommentViewContent(
+                message = item.content.message,
+                emote = item.content.emoteMap.values.map {
+                    VideoCommentViewContent.Emote(
+                        it.id, it.text, it.url
+                    )
+                },
+                picturesList = item.content.picturesList.map { UrlUtil.autoHttps(it.imgSrc) },
+            ),
+            like = item.like,
+            count = item.count,
+            action = item.replyControl.action,
+        )
+        val args = bundleOf(
+            MainNavGraph.args.reply to reply
+        )
+        Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+            .navigate(MainNavGraph.action.global_to_replyDetail, args)
+        true
     }
 
     private val handleRootLikeClick = View.OnClickListener {
@@ -243,6 +303,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             ) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 setOnItemClickListener(handleItemClick)
+                setOnItemLongClickListener(handleItemLongClick)
                 loadMoreModule.setOnLoadMoreListener {
                     viewModel.loadMode()
                 }
@@ -269,6 +330,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 ).apply {
                     _topPadding = contentInsets.top + config.dividerSize
                     backgroundColor = config.blockBackgroundColor
+                    setOnLongClickListener(handleHeaderLongClick)
                 }..lParams(matchParent, matchParent)
                 +textView {
                     text = "全部回复"

@@ -2,10 +2,7 @@ package com.a10miaomiao.bilimiao.comm.utils
 
 import android.Manifest
 import android.app.Activity
-import android.content.ContentValues
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
@@ -32,18 +29,35 @@ class ImageSaveUtil(
     private val path = Environment.getExternalStorageDirectory().path + "/BiliMiao/bili图片/"
 
     private val menuItems = arrayOf<String>(
-        "保存图片"
+        "保存图片",
+        "复制图片链接",
     )
 
     fun showMemu(context: Context = activity) {
         MaterialAlertDialogBuilder(context)
             .setItems(menuItems) { _, i ->
-                saveImage()
+                when(i) {
+                    0 -> downloadAndSaveImage()
+                    1 -> copyImageUrl()
+                }
             }
             .show()
     }
 
-    private fun saveImage() {
+    /**
+     * 复制图片链接到剪切板
+     */
+    private fun copyImageUrl() {
+        val clipboardManager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText("imageUrl", imageUrl)
+        clipboardManager.setPrimaryClip(clipData)
+        toast("图片链接已复制到剪切板")
+    }
+
+    /**
+     * 下载并保存图片
+     */
+    private fun downloadAndSaveImage() {
         Glide.with(activity)
             .asBitmap()
             .load(imageUrl)
@@ -86,7 +100,7 @@ class ImageSaveUtil(
         try {
             val fileName = getFileName()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                saveSignImage(fileName, bitmap)
+                saveImageToAlbum(fileName, bitmap)
                 toast("已保存至系统相册，文件名:${fileName}")
                 return
             } else if (
@@ -143,7 +157,7 @@ class ImageSaveUtil(
     /**
      * 将文件保存到公共的媒体文件夹
      */
-    private fun saveSignImage(fileName: String, bitmap: Bitmap) {
+    private fun saveImageToAlbum(fileName: String, bitmap: Bitmap) {
         try {
             //设置保存参数到ContentValues中
             val contentValues = ContentValues()
@@ -159,6 +173,7 @@ class ImageSaveUtil(
             //执行insert操作，向系统文件夹中添加文件
             //EXTERNAL_CONTENT_URI代表外部存储器，该值不变
             val contentResolver = activity.contentResolver
+
             val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             if (uri != null) {
                 //若生成了uri，则表示该文件添加成功

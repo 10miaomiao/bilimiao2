@@ -4,6 +4,7 @@ import android.content.ContextWrapper
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.view.ContextThemeWrapper
@@ -48,7 +49,9 @@ import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
 import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
+import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.chad.library.adapter.base.listener.OnItemLongClickListener
 import kotlinx.coroutines.launch
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
@@ -208,6 +211,39 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             .navigate(MainNavGraph.action.videoCommentList_to_videoCommentDetail, args)
     }
 
+    private val handleItemLongClick = OnItemLongClickListener { adapter, view, position ->
+        val item = adapter.getItem(position) as ReplyOuterClass.ReplyInfo
+        val reply = ReplyDetailParam(
+            index = position,
+            oid = item.oid,
+            rpid = item.id,
+            mid = item.member.mid,
+            uname = item.member.name,
+            avatar = item.member.face,
+            ctime = item.ctime,
+            floor = 0,
+            location = item.replyControl.location,
+            content = VideoCommentViewContent(
+                message = item.content.message,
+                emote = item.content.emoteMap.values.map {
+                    VideoCommentViewContent.Emote(
+                        it.id, it.text, it.url
+                    )
+                },
+                picturesList = item.content.picturesList.map { UrlUtil.autoHttps(it.imgSrc) },
+            ),
+            like = item.like,
+            count = item.count,
+            action = item.replyControl.action,
+        )
+        val args = bundleOf(
+            MainNavGraph.args.reply to reply
+        )
+        Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
+            .navigate(MainNavGraph.action.global_to_replyDetail, args)
+        true
+    }
+
     private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
         when (linkType) {
             LinkType.LINK_TYPE -> {
@@ -334,6 +370,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             ) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 setOnItemClickListener(handleItemClick)
+                setOnItemLongClickListener(handleItemLongClick)
                 loadMoreModule.setOnLoadMoreListener {
                     viewModel.loadMode()
                 }
