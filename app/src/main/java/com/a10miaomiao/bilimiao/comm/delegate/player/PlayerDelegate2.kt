@@ -431,11 +431,12 @@ class PlayerDelegate2(
     override fun openPlayer(source: BasePlayerSource) {
         errorMessageBoxController.hide()
         areaLimitBoxController.hide()
-
-
-        historyReport()
-        views.videoPlayer.release()
         lastPosition = 0L
+        if (playerSource != null) {
+            historyReport()
+            playerCoroutineScope.onStop()
+            views.videoPlayer.release()
+        }
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         fnval =
@@ -452,7 +453,6 @@ class PlayerDelegate2(
             return@let it
         }
         speed = prefs.getFloat("player_speed", 1f)
-        lastPosition = 0L
         scaffoldApp.showPlayer = true
         playerCoroutineScope.onStart()
         playerSource = source

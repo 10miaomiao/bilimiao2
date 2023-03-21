@@ -233,6 +233,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     private fun initView() {
+        isShowDragProgressTextOnSeekBar = true
         enlargeImageRes = R.drawable.ic_player_portrait_fullscreen
         shrinkImageRes = R.drawable.ic_player_portrait_fullscreen
         setDialogVolumeProgressBar(context)
@@ -452,10 +453,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     override fun release() {
-        onVideoPause()
         releaseDanmaku()
         super.release()
-
     }
 
     fun closeVideo() {
