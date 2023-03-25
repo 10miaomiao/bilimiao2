@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package bilibili.app.dynamic.v2;
+
+
+// 动态-描述文字模块
+message ModuleDesc {
+  // 描述信息(已按高亮拆分)
+  repeated Description desc = 1;
+  // 点击跳转链接
+  string jump_uri = 2;
+  // 文本原本
+  string text = 3;
+}
+
+// Description 文本描述
+message Description {
+  // 文本内容
+  string text = 1;
+  // 文本类型
+  DescType type = 2;
+  // 点击跳转链接
+  string uri = 3;
+  // emoji类型
+  EmojiType emoji_type = 4;
+  // 商品类型
+  string goods_type = 5;
+  // 前置Icon
+  string icon_url = 6;
+  // icon_name
+  string icon_name = 7;
+  // 资源ID
+  string rid = 8;
+  // 商品卡特殊字段
+  ModuleDescGoods goods = 9;
+  // 文本原始文案
+  string orig_text = 10;
+}
+
+// 文本类型
+enum DescType {
+  // 占位
+  desc_type_none = 0;
+  // 文本
+  desc_type_text = 1;
+  // @
+  desc_type_aite = 2;
+  // 抽奖
+  desc_type_lottery = 3;
+  // 投票
+  desc_type_vote = 4;
+  // 话题
+  desc_type_topic = 5;
+  // 商品
+  desc_type_goods = 6;
+  // bv
+  desc_type_bv = 7;
+  // av
+  desc_type_av = 8;
+  // 表情
+  desc_type_emoji = 9;
+  // 外露用户
+  desc_type_user = 10;
+  // 专栏
+  desc_type_cv   = 11;
+  // 小视频
+  desc_type_vc   = 12;
+  // 网址
+  desc_type_web  = 13;
+  // 淘宝
+  desc_type_taobao  = 14;
+  // 邮箱
+  desc_type_mail = 15;
+  // 番剧season
+  desc_type_ogv_season = 16;
+  // 番剧ep
+  desc_type_ogv_ep = 17;
+}
+
+// 表情包类型
+enum EmojiType {
+  // 占位
+  emoji_none = 0;
+  // emoji旧类型
+  emoji_old = 1;
+  // emoji新类型
+  emoji_new = 2;
+  // 大会员表情
+  vip = 3;
+}
+
+// 正文商品卡参数
+message ModuleDescGoods {
+  // 商品类型
+  // 1:淘宝 2:会员购
+  int32 source_type = 1;
+  // 跳转链接
+  string jump_url = 2;
+  // schema_url
+  string schema_url = 3;
+  // item_id
+  int64 item_id = 4;
+  // open_white_list
+  repeated string open_white_list = 5;
+  // use_web_v2
+  bool user_web_v2 = 6;
+  // ad mark
+  string ad_mark = 7;
+  // schemaPackageName(Android用)
+  string schema_package_name = 8;
+}

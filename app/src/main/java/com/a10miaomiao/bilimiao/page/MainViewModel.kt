@@ -5,6 +5,8 @@ import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.page.home.DynamicFragment
 import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.HomeFragment
 import com.a10miaomiao.bilimiao.page.home.RecommendFragment
@@ -21,6 +23,8 @@ class MainViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
+
+    val userStore by instance<UserStore>()
 
     var position = -1
 
@@ -42,6 +46,9 @@ class MainViewModel(
         }
         if (prefs.getBoolean("home_popular_show", true)) {
             list.add(PopularFragment::class)
+        }
+        if (userStore.isLogin()) {
+            list.add(DynamicFragment::class)
         }
         return list
     }

@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package bilibili.app.dynamic.v2;
+
+option java_outer_classname = "DynamicCommonOuterClass";
+
+// 刷新方式
+enum Refresh {
+  // 刷新列表
+  refresh_new = 0;
+  // 请求历史
+  refresh_history = 1;
+}
+
+// 秒开通用参数
+message PlayurlParam {
+  // 清晰度
+  int32 qn = 1;
+  // 流版本
+  int32 fnver = 2;
+  // 流类型
+  int32 fnval = 3;
+  // 是否强制使用域名
+  int32 force_host = 4;
+  // 是否4k
+  int32 fourk = 5;
+}
+
+// DynamicType 枚举-动态类型
+enum DynamicType {
+  // 占位
+  dyn_none = 0;
+  // 转发
+  forward = 1;
+  // 稿件: ugc、小视频、短视频、UGC转PGC
+  av = 2;
+  // pgc：番剧、PGC番剧、PGC电影、PGC电视剧、PGC国创、PGC纪录片
+  pgc = 3;
+  // 付费更新批次
+  courses = 4;
+  // 折叠
+  fold = 5;
+  // 纯文字
+  word = 6;
+  // 图文
+  draw = 7;
+  // 专栏 原仅phone端
+  article = 8;
+  // 音频 原仅phone端
+  music = 9;
+  // 通用卡 方形
+  common_square = 10;
+  // 通用卡 竖形
+  common_vertical = 11;
+  // 直播卡 只有转发态
+  live = 12;
+  // 播单 原仅phone端 只有转发态
+  medialist = 13;
+  // 付费更新批次 只有转发态
+  courses_season = 14;
+  // 广告卡
+  ad = 15;
+  // 小程序卡
+  applet = 16;
+  // 订阅卡
+  subscription = 17;
+  // 直播推荐卡
+  live_rcmd = 18;
+  // 通栏
+  banner = 19;
+  // 合集卡
+  ugc_season = 20;
+  // 新订阅卡
+  subscription_new = 21;
+}
+
+// 动态模块类型
+enum DynModuleType {
+  // 占位
+  module_none = 0;
+  // 发布人模块
+  module_author = 1;
+  // 争议小黄条
+  module_dispute = 2;
+  // 描述文案
+  module_desc = 3;
+  // 动态卡片
+  module_dynamic = 4;
+  // 转发模块
+  module_forward = 5;
+  // 点赞用户(废弃)
+  module_likeUser = 6;
+  // 小卡模块
+  module_extend = 7;
+  // 附加卡
+  module_additional = 8;
+  // 计数信息
+  module_stat = 9;
+  // 折叠
+  module_fold = 10;
+  // 评论外露(废弃)
+  module_comment = 11;
+  // 外露交互模块(点赞、评论)
+  module_interaction = 12;
+  // 转发卡的发布人模块
+  module_author_forward = 13;
+  // 广告卡模块
+  module_ad = 14;
+  // 通栏模块
+  module_banner = 15;
+  // 获取物料失败模块
+  module_item_null = 16;
+  // 分享组件
+  module_share_info = 17;
+  // 相关推荐模块
+  module_recommend = 18;
+  // 转发卡计数信息
+  module_stat_forward = 19;
+  // 顶部模块
+  module_top = 20;
+  // 底部模块
+  module_bottom = 21;
+}
+
+// 播放器类型
+enum MediaType {
+  // 本地
+  MediaTypeNone = 0;
+  // UGC
+  MediaTypeUGC = 1;
+  // PGC
+  MediaTypePGC = 2;
+  // 直播
+  MediaTypeLive = 3;
+  // 小视频
+  MediaTypeVCS = 4;
+}
+
+// Dimension 尺寸信息
+message Dimension {
+  //
+  int64 height = 1;
+  //
+  int64 width = 2;
+  //
+  int64 rotate = 3;
+}
+
+// 角标信息
+message VideoBadge {
+  // 文案
+  string text = 1;
+  // 文案颜色-日间
+  string text_color = 2;
+  // 文案颜色-夜间
+  string text_color_night = 3;
+  // 背景颜色-日间
+  string bg_color = 4;
+  // 背景颜色-夜间
+  string bg_color_night = 5;
+  // 边框颜色-日间
+  string border_color = 6;
+  // 边框颜色-夜间
+  string border_color_night = 7;
+  // 样式
+  int32 bg_style = 8;
+  // 背景透明度-日间
+  int32 bg_alpha = 9;
+  // 背景透明度-夜间
+  int32 bg_alpha_night = 10;
+}
+
+// 视频类型
+enum VideoType {
+  //普通视频
+  video_type_general = 0;
+  //动态视频
+  video_type_dynamic = 1;
+  //直播回放视频
+  video_type_playback = 2;
+}
+
+enum ReserveType {
+  // 占位
+  reserve_none = 0;
+  // 预约召回
+  reserve_recall = 1;
+}

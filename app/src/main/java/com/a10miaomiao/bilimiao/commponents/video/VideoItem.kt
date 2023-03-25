@@ -51,6 +51,7 @@ fun MiaoUI.videoItem (
                         ellipsize = TextUtils.TruncateAt.END
                         maxLines = 2
                         setTextColor(config.foregroundColor)
+                        textSize = 14f
                         _text = title ?: ""
                     }..lParams(matchParent, matchParent) {
                         weight = 1f
@@ -71,7 +72,7 @@ fun MiaoUI.videoItem (
                             }
 
                             +textView {
-                                textSize = 12f
+                                textSize = 14f
                                 setTextColor(config.foregroundAlpha45Color)
                                 _text = upperName ?: ""
                             }
@@ -86,7 +87,7 @@ fun MiaoUI.videoItem (
                         views {
 
                             +textView {
-                                textSize = 12f
+                                textSize = 14f
                                 setTextColor(config.foregroundAlpha45Color)
                                 _text = remark ?: ""
                             }
@@ -96,7 +97,7 @@ fun MiaoUI.videoItem (
                     // 播放量，弹幕数量
                     +horizontalLayout {
                         gravity = Gravity.CENTER_VERTICAL
-                        _show = playNum != null && damukuNum != null
+                        _show = playNum != null || damukuNum != null
 
                         views {
                             +imageView {
@@ -106,9 +107,9 @@ fun MiaoUI.videoItem (
                                 rightMargin = dip(3)
                             }
                             +textView {
-                                textSize = 12f
+                                textSize = 14f
                                 setTextColor(config.foregroundAlpha45Color)
-                                _text = NumberUtil.converString(playNum ?: "")
+                                _text = NumberUtil.converString(playNum ?: "0")
                             }
                             +space()..lParams(width = dip(10))
                             +imageView {
@@ -118,9 +119,9 @@ fun MiaoUI.videoItem (
                                 rightMargin = dip(3)
                             }
                             +textView {
-                                textSize = 12f
+                                textSize = 14f
                                 setTextColor(config.foregroundAlpha45Color)
-                                _text = NumberUtil.converString(damukuNum ?: "")
+                                _text = NumberUtil.converString(damukuNum ?: "0")
                             }
                         }
                     }

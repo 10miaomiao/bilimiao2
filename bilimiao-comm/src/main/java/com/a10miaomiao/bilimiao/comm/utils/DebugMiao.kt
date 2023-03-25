@@ -11,16 +11,20 @@ object DebugMiao {
 
     private const val TAG = "DebugMiao"
 
-    private var isDebug: Boolean? = null
+    private var _isDebug: Boolean? = null
+    val isDebug: Boolean get() {
+        if (_isDebug == null) {
+            _isDebug = BilimiaoCommApp.commApp.app.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE !== 0
+        }
+        return _isDebug!!
+    }
 
     private inline fun Any?.getString(): String {
         return this?.toString() ?: "null"
     }
 
     fun log(vararg str: Any?) {
-        if (isDebug == null) {
-            isDebug = BilimiaoCommApp.commApp.app.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE !== 0
-        } else if (isDebug == false){
+        if (!isDebug) {
             return
         }
         var message = StringBuilder(str[0].getString()).apply {

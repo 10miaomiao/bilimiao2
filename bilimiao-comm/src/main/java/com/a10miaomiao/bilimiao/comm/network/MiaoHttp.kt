@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.network
 
+import android.content.pm.ApplicationInfo
 import android.util.Log
 import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
@@ -51,12 +52,14 @@ class MiaoHttp(var url: String? = null) {
                 "application/x-www-form-urlencoded".toMediaType()
             )
         }
-        Log.d(TAG, "-----START-$method-----")
-        Log.d(TAG, "URL = $url")
-        formBody?.let {
-            Log.d(TAG, "BODY = $it")
+        if (DebugMiao.isDebug) {
+            Log.d(TAG, "-----START-$method-----")
+            Log.d(TAG, "URL = $url")
+            formBody?.let {
+                Log.d(TAG, "BODY = $it")
+            }
+            Log.d(TAG, "------END-$method------")
         }
-        Log.d(TAG, "------END-$method------")
         val req = requestBuilder.method(method, body)
             .url(url!!)
             .build()

@@ -23,10 +23,8 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.*
-import com.a10miaomiao.bilimiao.page.home.HomeFragment
-import com.a10miaomiao.bilimiao.page.home.PopularFragment
-import com.a10miaomiao.bilimiao.page.home.RecommendFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.page.home.*
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
@@ -114,11 +112,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
         HomeFragment::class to HomeFragment::newFragmentInstance,
         RecommendFragment::class to RecommendFragment::newFragmentInstance,
         PopularFragment::class to PopularFragment::newFragmentInstance,
+        DynamicFragment::class to DynamicFragment::newFragmentInstance,
     )
     private val titleMap: Map<KClass<out Fragment>, String> = mapOf(
         HomeFragment::class to "首页",
         RecommendFragment::class to "推荐",
         PopularFragment::class to "热门",
+        DynamicFragment::class to "动态"
     )
 
     override fun onCreateView(

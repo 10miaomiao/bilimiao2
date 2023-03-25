@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package bilibili.app.dynamic.v2;
+
+
+// 动态-计数模块
+message ModuleStat {
+  // 转发数
+  int64 repost = 1;
+  // 点赞数
+  int64 like = 2;
+  // 评论数
+  int64 reply = 3;
+  // 点赞拓展信息
+//  LikeInfo like_info = 4;
+  // 禁评
+  bool no_comment = 5;
+  // 禁转
+  bool no_forward = 6;
+  // 点击评论跳转链接
+  string reply_url = 7;
+  // 禁评文案
+  string no_comment_text = 8;
+  // 禁转文案
+  string no_forward_text = 9;
+}
+
+// 点赞拓展信息
+message LikeInfo {
+  // 点赞动画
+  LikeAnimation animation = 1;
+  // 是否点赞
+  bool is_like = 2;
+}
+
+// 点赞动画
+message LikeAnimation {
+  // 开始动画
+  string begin = 1;
+  // 过程动画
+  string proc = 2;
+  // 结束动画
+  string end = 3;
+  // id
+  int64 like_icon_id = 4;
+}
