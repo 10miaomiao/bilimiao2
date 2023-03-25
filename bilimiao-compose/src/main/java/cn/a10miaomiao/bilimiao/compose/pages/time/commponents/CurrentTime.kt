@@ -21,17 +21,27 @@ fun CurrentTime(
     val timeFrom = currentTime.value.timeFrom
     val timeTo = currentTime.value.timeTo
 
+    val text = when (timeTo.month) {
+        1, 2, 3, -> "春天，\n就要来了，\n与你相遇林下的春天，\n就要来了。\n"
+        4 -> "四月，\n还是那个四月。\n但是，这个春天，\n只剩下铛的伴奏，\n再也没有弦的悠扬。\n没有你的春天，\n已经来了。"
+        5, 6, 7 -> "我们所度过的每个平凡的日常\n也许就是连续发生的奇迹。"
+        8 -> "10年後の8月\nまた出会えるのを\n信じて"
+        9 -> ""
+        10 -> ""
+        11, 12 -> ""
+        else -> "hello world"
+    }
+
     Column() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp),
-            contentAlignment = Alignment.Center
+                .padding(start = 40.dp, top = 20.dp, bottom = 20.dp),
         ) {
             Text(
                 color = MaterialTheme.colorScheme.outline,
                 fontSize = 14.sp,
-                text = "春天，马上就要来了。\n让我与你相遇的春天，就要来了。\n再也没有你的春天，就要来了。"
+                text = text
             )
         }
         Text(
