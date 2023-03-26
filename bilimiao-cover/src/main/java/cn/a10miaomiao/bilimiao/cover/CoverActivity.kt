@@ -1,8 +1,7 @@
 package cn.a10miaomiao.bilimiao.cover
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Outline
@@ -10,6 +9,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.*
@@ -23,13 +24,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import net.mikaelzero.mojito.ext.mojito
 import java.io.File
 import java.io.FileOutputStream
-import android.provider.MediaStore
-
-import android.content.ContentValues
-import net.mikaelzero.mojito.ext.mojito
-import java.io.OutputStream
 
 
 class CoverActivity : AppCompatActivity() {
@@ -145,7 +142,7 @@ class CoverActivity : AppCompatActivity() {
         mMoreIv.setOnClickListener {
             val popupMenu = PopupMenu(this, it)
             popupMenu.inflate(R.menu.cover)
-//            popupMenu.setOnMenuItemClickListener(this::onMenuItemClick)
+            popupMenu.setOnMenuItemClickListener(this::onMenuItemClick)
             popupMenu.show()
         }
         mSaveCoverLl.setOnClickListener {
@@ -188,6 +185,27 @@ class CoverActivity : AppCompatActivity() {
         })
     }
 
+    fun onMenuItemClick(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.cover_custom -> {
+                toast("施工中")
+            }
+            R.id.cover_copy -> {
+                viewModel.coverUrl.value?.let {
+                    val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clipData = ClipData.newPlainText("imageUrl", it)
+                    clipboardManager.setPrimaryClip(clipData)
+                    toast("图片链接已复制到剪切板")
+                }
+            }
+            R.id.cover_more -> {
+                viewModel.openMore()
+            }
+        }
+        return true
+    }
+
+
     /**
      * 保存图片
      */
@@ -197,7 +215,6 @@ class CoverActivity : AppCompatActivity() {
             File(path).let {
                 if (!it.exists()) {
                     val b = it.mkdirs()
-                    DebugMiao.log("saveImage" +b )
                 }
             }
             // 保存图片文件
