@@ -82,13 +82,28 @@ class DynamicFragment: Fragment(), DIAware {
     }
 
     private val handleAuthorClick = View.OnClickListener {
-        val id = it.tag
-        if (id is String) {
+        val tag = it.tag
+        if (tag is Pair<*, *>
+            && tag.first is Int
+            && tag.second is String
+        ) {
+            val (type, id) = tag
             val args = bundleOf(
                 MainNavGraph.args.id to id
             )
-            Navigation.findNavController(it)
-                .navigate(MainNavGraph.action.global_to_user, args)
+            when(type) {
+                ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
+                    Navigation.findNavController(it)
+                        .navigate(MainNavGraph.action.global_to_user, args)
+                }
+                ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
+                    Navigation.findNavController(it)
+                        .navigate(MainNavGraph.action.global_to_bangumiDetail, args)
+                }
+                else -> {
+                    toast("未知跳转类型")
+                }
+            }
         }
     }
 
@@ -100,9 +115,13 @@ class DynamicFragment: Fragment(), DIAware {
                 MainNavGraph.args.id to item.dynamicContent.id
             )
             when(item.dynamicType) {
-                ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive -> {
+                ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
                     Navigation.findNavController(it)
                         .navigate(MainNavGraph.action.global_to_videoInfo, args)
+                }
+                ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
+                    Navigation.findNavController(it)
+                        .navigate(MainNavGraph.action.global_to_bangumiDetail, args)
                 }
                 else -> {
                     toast("未知跳转类型")
@@ -113,6 +132,7 @@ class DynamicFragment: Fragment(), DIAware {
 
     val itemUi = miaoBindingItemUi<DynamicViewModel.DataInfo> { item, index ->
         dynamicCardView(
+            dynamicType = item.dynamicType,
             mid = item.mid,
             name = item.name,
             face = item.face,

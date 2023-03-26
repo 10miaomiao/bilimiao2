@@ -4,6 +4,7 @@ package bilibili.app.dynamic.v2;
 
 import "bilibili/app/dynamic/v2/common.proto";
 import "bilibili/app/dynamic/v2/archive.proto";
+import "bilibili/app/dynamic/v2/pgc.proto";
 import "bilibili/app/dynamic/v2/author.proto";
 import "bilibili/app/dynamic/v2/desc.proto";
 import "bilibili/app/dynamic/v2/stat.proto";

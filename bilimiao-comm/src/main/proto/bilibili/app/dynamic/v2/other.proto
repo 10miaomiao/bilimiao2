@@ -74,79 +74,7 @@ message ModuleDispute {
   string uri = 3;
 }
 
-// MdlDynPGC 动态-详情模块-pgc
-message MdlDynPGC {
-  // 标题
-  string title = 1;
-  // 封面图
-  string cover = 2;
-  // 秒开地址
-  string uri = 3;
-  // 视频封面展示项 1
-  string cover_left_text_1 = 4;
-  // 视频封面展示项 2
-  string cover_left_text_2 = 5;
-  // 封面视频展示项 3
-  string cover_left_text_3 = 6;
-  // cid
-  int64 cid = 7;
-  // season_id
-  int64 season_id = 8;
-  // epid
-  int64 epid = 9;
-  // aid
-  int64 aid = 10;
-  // 视频源类型
-  MediaType media_type = 11;
-  // 番剧类型
-  VideoSubType sub_type = 12;
-  // 番剧是否为预览视频
-  bool is_preview = 13;
-  // 尺寸信息
-  Dimension dimension = 14;
-  // 角标，多个角标之前有间距
-  repeated VideoBadge badge = 15;
-  // 是否能够自动播放
-  bool  can_play= 16;
-  // season
-  PGCSeason season = 17;
-  // 播放按钮
-  string play_icon = 18;
-  // 时长
-  int64 duration = 19;
-  // 跳转地址
-  string jump_url = 20;
-  // 新角标，多个角标之前没有间距
-  repeated VideoBadge badge_category = 21;
-  // 当前是否是pgc正片
-  bool is_feature = 22;
-}
 
-// 番剧类型
-enum VideoSubType {
-  // 没有子类型
-  VideoSubTypeNone = 0;
-  // 番剧
-  VideoSubTypeBangumi = 1;
-  // 电影
-  VideoSubTypeMovie = 2;
-  // 纪录片
-  VideoSubTypeDocumentary = 3;
-  // 国创
-  VideoSubTypeDomestic = 4;
-  // 电视剧
-  VideoSubTypeTeleplay = 5;
-}
-
-// PGC单季信息
-message PGCSeason {
-  // 是否完结
-  int32 is_finish = 1;
-  // 标题
-  string title = 2;
-  // 类型
-  int32 type = 3;
-}
 
 // 动态-详情模块-付费课程系列
 message MdlDynCourSeason {

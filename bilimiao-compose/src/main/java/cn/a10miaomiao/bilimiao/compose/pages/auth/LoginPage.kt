@@ -131,7 +131,7 @@ class LoginPageViewModel(
                     if (loginInfo.status == 0) {
                         BilimiaoCommApp.commApp.saveAuthInfo(loginInfo.toLoginInfo())
                         authInfo()
-                    } else if ("tmp_token=" in loginInfo.url){
+                    } else if (loginInfo.url != null && "tmp_token=" in loginInfo.url){
                         alert("提示") {
                             setMessage(loginInfo.message)
                             setNegativeButton("取消", null)
