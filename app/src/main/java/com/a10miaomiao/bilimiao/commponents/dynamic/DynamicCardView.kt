@@ -21,6 +21,7 @@ import splitties.views.topPadding
 
 
 fun MiaoUI.dynamicAuthorView(
+    dynamicType: Int,
     mid: String,
     name: String,
     face: String,
@@ -28,7 +29,7 @@ fun MiaoUI.dynamicAuthorView(
     onAuthorClick: View.OnClickListener? = null,
 ): View {
     return horizontalLayout {
-        _tag = mid
+        _tag = Pair(dynamicType, mid)
         padding = config.pagePadding
         bottomPadding = config.smallPadding
         setBackgroundResource(config.selectableItemBackground)
@@ -137,6 +138,7 @@ fun MiaoUI.dynamicStatView(
 
 
 fun MiaoUI.dynamicCardView(
+    dynamicType: Int,
     mid: String,
     name: String,
     face: String,
@@ -150,6 +152,7 @@ fun MiaoUI.dynamicCardView(
         views {
 
             +dynamicAuthorView(
+                dynamicType = dynamicType,
                 mid = mid,
                 name = name,
                 face = face,

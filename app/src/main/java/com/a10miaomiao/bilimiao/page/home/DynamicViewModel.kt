@@ -79,7 +79,7 @@ class DynamicViewModel(
                             name = userModule.author.name,
                             face = userModule.author.face,
                             labelText = userModule.ptimeLabelText,
-                            dynamicType = dynamicModule.type,
+                            dynamicType = dynamicModule.typeValue,
                             like = statModule.like,
                             reply = statModule.reply,
                             dynamicContent = getDynamicContent(dynamicModule),
@@ -138,12 +138,20 @@ class DynamicViewModel(
         return when(dynamicModule.type) {
             ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive -> {
                 val dynArchive = dynamicModule.dynArchive
-
                 DynamicContentInfo(
                     id = dynArchive.avid.toString(),
                     title = dynArchive.title,
                     pic = dynArchive.cover,
                     remark = dynArchive.coverLeftText2 + "    " + dynArchive.coverLeftText3,
+                )
+            }
+            ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc -> {
+                val dynPgc = dynamicModule.dynPgc
+                DynamicContentInfo(
+                    id = dynPgc.seasonId.toString(),
+                    title = dynPgc.title,
+                    pic = dynPgc.cover,
+                    remark = dynPgc.coverLeftText2 + "    " + dynPgc.coverLeftText3,
                 )
             }
             else -> DynamicContentInfo("")
@@ -157,7 +165,7 @@ class DynamicViewModel(
         val labelText: String,
         val like: Long,
         val reply: Long,
-        val dynamicType: ModuleOuterClass.ModuleDynamicType,
+        val dynamicType: Int,
         val dynamicContent: DynamicContentInfo,
     )
 
