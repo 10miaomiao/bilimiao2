@@ -10,14 +10,16 @@ import android.view.ViewGroup
 import android.webkit.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view.*
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
@@ -58,33 +60,37 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
 
         override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
 //            return BilibiliRouter.gotoUrl(context!!, url)
+            DebugMiao.log("shouldOverrideUrlLoading", url)
             return false
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             var url = request.url.toString()
+            DebugMiao.log("shouldOverrideUrlLoading2", url)
             return this.shouldOverrideUrlLoading(view, url)
         }
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
             viewModel.updateLoading(true)
+            DebugMiao.log("onPageStarted", url)
 //            loading set true
         }
 
         override fun onPageFinished(view: WebView, url: String) {
             super.onPageFinished(view, url)
             viewModel.updateLoading(false)
-            if (url.contains("access_key=") && url.contains("mid=")) {
-                viewModel.resolveUrl(view, url)
-            } else if (url == "https://passport.bilibili.com/ajax/miniLogin/redirect") {
-                requestThird(view)
+            DebugMiao.log("onPageFinished", url)
+            if (url.contains("passport.bilibili.com/tv/passport/#/common/success")) {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    viewModel.checkQRCode(isPolling = false)
+                }
             } else if (url.contains("bilibili.com")) {
                 val js = """javascript:(function() {
                         var parent = document.getElementsByTagName('head').item(0);
                         var style = document.createElement('style');
                         style.type = 'text/css';
-                        style.innerHTML = '#internationalHeader,.international-footer,.bili-footer,#cannot-check{display: none !important;}';
+                        style.innerHTML = '#internationalHeader,.international-footer,.bili-footer,#cannot-check,.open-app{display: none !important;}';
                         parent.appendChild(style);
                     })()
                 """
@@ -99,9 +105,10 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         ) {
             super.onReceivedError(view, request, error)
             request?.url?.toString()?.let { url ->
-                if (url.contains("access_key=") && url.contains("mid=")) {
-                    viewModel.resolveUrl(view, url)
-                }
+                DebugMiao.log("onReceivedError", url)
+//                if (url.contains("access_key=") && url.contains("mid=")) {
+//                    viewModel.resolveUrl(view, url)
+//                }
             }
         }
 
@@ -129,8 +136,14 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         webView.settings.apply {
             javaScriptEnabled = true
         }
-        var url = requireArguments().getString(MainNavGraph.args.url, "https://passport.bilibili.com/ajax/miniLogin/minilogin")
-        webView.loadUrl(Uri.decode(url))
+
+        var url = requireArguments().getString(MainNavGraph.args.url, "")
+        if (url.isBlank()) {
+            viewModel.getQrCodeUrl(webView)
+        } else {
+            webView.loadUrl(Uri.decode(url))
+        }
+
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
@@ -139,6 +152,11 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
         frameLayout {
+            val contentInsets = windowStore.getContentInsets(parentView)
+            _topPadding = contentInsets.top
+            _bottomPadding = contentInsets.bottom
+            _leftPadding = contentInsets.left
+            _rightPadding = contentInsets.right
 
             views {
                 +view<WebView>(ID_webView) {

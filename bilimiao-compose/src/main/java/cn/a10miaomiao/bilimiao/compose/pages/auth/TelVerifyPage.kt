@@ -40,6 +40,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -105,13 +106,14 @@ class TelVerifyPageViewModel(
                     .awaitCall()
                     .gson<ResultInfo<TmpUserInfo>>()
             }
+            DebugMiao.log("getTmpUserInfo", res)
             if (res.isSuccess) {
                 val info = res.data.account_info
                 tmpAccountInfo.value = info
-                if (info.bind_mail && !info.mail_verify) {
-                    verifyType.value = VerifyType.EMAIL
-                } else if (info.bind_tel && !info.tel_verify) {
+                if (info.bind_tel && info.tel_verify) {
                     verifyType.value = VerifyType.TEL
+                } else if (info.bind_mail && info.mail_verify) {
+                    verifyType.value = VerifyType.EMAIL
                 } else {
                     MaterialAlertDialogBuilder(fragment.requireActivity()).apply {
                         setTitle("不支持验证")
@@ -404,7 +406,7 @@ fun TelVerifyPage(
                 )
             } else if (verifyType == TelVerifyPageViewModel.VerifyType.EMAIL) {
                 Text(
-                    text = "邮箱：${tmpAccountInfo?.hide_mail}l",
+                    text = "邮箱：${tmpAccountInfo?.hide_mail}",
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier

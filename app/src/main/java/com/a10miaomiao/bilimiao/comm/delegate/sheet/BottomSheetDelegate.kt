@@ -98,7 +98,7 @@ class BottomSheetDelegate(
     }
 
     private fun setMyPageConfig(config: MyPageConfigInfo) {
-        ui.bottomSheetTitleView.text = config.title
+        ui.bottomSheetTitleView.text = config.title.replace("\n", " ")
     }
 
 
