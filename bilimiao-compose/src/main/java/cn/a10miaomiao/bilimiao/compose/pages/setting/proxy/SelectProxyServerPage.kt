@@ -50,11 +50,11 @@ class SelectProxyServerPageViewModel(
 
     val uposList = listOf(
         BiliUposInfo("none", "不替换", ""),
-        BiliUposInfo("ks3", "ks3（金山云）", "upos-sz-mirrorks3.bilivideo.com"),
-        BiliUposInfo("kodo", "kodo（七牛云）", "upos-sz-mirrorkodo.bilivideo.com"),
+//        BiliUposInfo("ks3", "ks3（金山云）", "upos-sz-mirrorks3.bilivideo.com"),
+//        BiliUposInfo("kodo", "kodo（七牛云）", "upos-sz-mirrorkodo.bilivideo.com"),
         BiliUposInfo("cos", "cos（腾讯云）", "upos-sz-mirrorcos.bilivideo.com"),
-        BiliUposInfo("bos", "bos（百度云）", "upos-sz-mirrorbos.bilivideo.com"),
-        BiliUposInfo("wcs", "wcs（网宿云）", "upos-sz-mirrorwcs.bilivideo.com"),
+//        BiliUposInfo("bos", "bos（百度云）", "upos-sz-mirrorbos.bilivideo.com"),
+//        BiliUposInfo("wcs", "wcs（网宿云）", "upos-sz-mirrorwcs.bilivideo.com"),
         BiliUposInfo("hw", "hw（华为云）", "upos-sz-mirrorhw.bilivideo.com"),
     )
     val selectedUpos = MutableStateFlow(uposList[0])

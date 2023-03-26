@@ -49,7 +49,7 @@ class DashSource(
             if (audio != null) {
                 var audioUrl = audio.base_url
                 if (uposHost.isNotBlank()) {
-                    UrlUtil.replaceHost(audioUrl, uposHost)
+                    audioUrl = UrlUtil.replaceHost(audioUrl, uposHost)
                 }
                 """
                  <AdaptationSet>
@@ -71,7 +71,7 @@ class DashSource(
         """.trimIndent()
         var url = video.base_url
         if (uposHost.isNotBlank()) {
-            UrlUtil.replaceHost(url, uposHost)
+            url = UrlUtil.replaceHost(url, uposHost)
         }
         return "[dash-mpd]\n" + url + "\n" + mpdStr.replace("\n", "")
     }
