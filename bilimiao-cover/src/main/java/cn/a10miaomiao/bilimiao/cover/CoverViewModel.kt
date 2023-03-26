@@ -1,7 +1,9 @@
 package cn.a10miaomiao.bilimiao.cover
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -45,17 +48,58 @@ class CoverViewModel(
 
     }
 
-    fun setConfig(type: String, id: String){
+    fun setConfig(type: String, id: String) {
         this.type = type
         this.id = id
-        this.fileName.value = type  + id
+        this.fileName.value = type + id
         loadData()
+    }
+
+    fun openMore() {
+        val intent = Intent(Intent.ACTION_VIEW)
+        when (type) {
+            "AV" -> {
+                intent.data = Uri.parse("bilimiao://video/$id")
+                activity.startActivity(intent)
+            }
+            "BV" -> {
+                intent.data = Uri.parse("bilimiao://video/BV$id")
+                activity.startActivity(intent)
+            }
+            "SS" -> {
+                intent.data = Uri.parse("bilimiao://bangumi/season/$id")
+                activity.startActivity(intent)
+            }
+            "UID" -> {
+                intent.data = Uri.parse("bilimiao://user/$id")
+                activity.startActivity(intent)
+            }
+            "EP" -> {
+                intent.data = Uri.parse("https://m.bilibili.com/bangumi/play/ep$id")
+                activity.startActivity(intent)
+            }
+            "ROOM" -> {
+                intent.data = Uri.parse("https://live.bilibili.com/$id")
+                activity.startActivity(intent)
+            }
+            "CV" -> {
+                intent.data = Uri.parse("https://www.bilibili.com/read/cv$id")
+                activity.startActivity(intent)
+            }
+            "AU" -> {
+                intent.data = Uri.parse("https://m.bilibili.com/audio/au$id")
+                activity.startActivity(intent)
+            }
+            else -> {
+                toast("暂不支持查看更多")
+            }
+        }
     }
 
     /**
      * 解析短链接出长链接，然后再正则匹配出类型和id
      */
-    fun resolveUrl(url: String) = viewModelScope.launch(Dispatchers.IO){
+    fun resolveUrl(url: String) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val res = MiaoHttp(url).get()
             val url = res.request.url.toString()
@@ -206,7 +250,7 @@ class CoverViewModel(
     }
 
     private fun loadCover(pic: String) {
-        var newPic = pic.replace("http://", "https://")
+        var newPic = UrlUtil.autoHttps(pic)
         coverUrl.value = newPic
         Glide.with(activity)
             .asBitmap()

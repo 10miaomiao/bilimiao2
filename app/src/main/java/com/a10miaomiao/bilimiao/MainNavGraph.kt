@@ -137,6 +137,7 @@ object MainNavGraph {
             }
         }
         val videoInfo = f<VideoInfoFragment> {
+            deepLink("bilimiao://video/{id}")
             deepLink("bilibili://video/{id}")
             argument(args.type) {
                 type = NavType.StringType
@@ -188,6 +189,7 @@ object MainNavGraph {
         }
 
         val bangumiDetail = f<BangumiDetailFragment> {
+            deepLink("bilimiao://bangumi/season/{id}")
             deepLink("bilibili://bangumi/season/{id}")
             argument(args.id) {
                 type = NavType.StringType
@@ -203,10 +205,11 @@ object MainNavGraph {
         }
 
         val h5Login = f<H5LoginFragment> {
+            deepLink("bilimiao://auth/h5")
             deepLink("bilimiao://auth/h5/{url}")
             argument(args.url) {
                 type = NavType.StringType
-                defaultValue = "https://passport.bilibili.com/ajax/miniLogin/minilogin"
+                defaultValue = ""
             }
         }
 
