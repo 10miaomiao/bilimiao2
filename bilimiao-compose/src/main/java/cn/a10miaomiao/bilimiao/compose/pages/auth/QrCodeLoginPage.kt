@@ -73,7 +73,7 @@ class QrCodeLoginPageViewModel(
             val res = BiliApiService.authApi
                 .qrCode()
                 .awaitCall()
-                .gson<ResultInfo<QRLoginInfo>>(isDebug = true)
+                .gson<ResultInfo<QRLoginInfo>>()
             if (res.isSuccess) {
                 renderQrcode(res.data.url)
                 launch {
@@ -108,7 +108,7 @@ class QrCodeLoginPageViewModel(
             val res = BiliApiService.authApi
                 .checkQrCode(authCode)
                 .awaitCall()
-                .gson<ResultInfo<LoginInfo.QrLoginInfo>>(isDebug = true)
+                .gson<ResultInfo<LoginInfo.QrLoginInfo>>()
             when(res.code) {
                 86039 -> {
                     // 未确认

@@ -131,15 +131,14 @@ class LoginPageViewModel(
                     if (loginInfo.status == 0) {
                         BilimiaoCommApp.commApp.saveAuthInfo(loginInfo.toLoginInfo())
                         authInfo()
-                    } else if (loginInfo.status == 1){
+                    } else if ("tmp_token=" in loginInfo.url){
                         alert("提示") {
                             setMessage(loginInfo.message)
                             setNegativeButton("取消", null)
                             setPositiveButton("请往验证") { _, _ ->
-                                val map = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
-                                val params = mapOf(
-                                    "code" to map["tmp_token"]!!
-                                )
+                                val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
+                                params["code"] = params["tmp_token"]!!
+                                params.remove("tmp_token")
                                 navController.navigate(PageRoute.Auth.telVerify.url(params))
                             }
 //                            setNeutralButton("使用原始网页") { _, _ ->
@@ -148,20 +147,12 @@ class LoginPageViewModel(
 //                                )
 //                            }
                         }
-                    } else if (loginInfo.status == 2){
-                        alert("提示") {
-                            setMessage(loginInfo.message)
-                            setNegativeButton("取消", null)
-                            setPositiveButton("请往验证") {_, _ ->
-                                val map = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
-                                navController.navigate("bilimiao://auth/tel_verify?code=${map["tmp_token"]}&request_id=${map["request_id"]}&source=${map["source"]}")
-                            }
-                        }
                     } else {
-                        alert(loginInfo.message ?: "登录失败：未知错误" + loginInfo.status) {
+                        alert( "登录失败，请稍后重试：" + loginInfo.status) {
+                            setMessage(loginInfo.message)
+                            setNegativeButton("关闭", null)
                             if (loginInfo.url != null) {
-                                setNegativeButton("取消", null)
-                                setPositiveButton("查看") {_, _ ->
+                                setPositiveButton("查看") { _, _ ->
                                     val intent = Intent(Intent.ACTION_VIEW)
                                     intent.data = Uri.parse(loginInfo.url)
                                     fragment.requireActivity().startActivity(intent)
@@ -251,6 +242,11 @@ class LoginPageViewModel(
             alert("加载验证码出现错误")
             return null
         }
+    }
+
+    fun toH5LoginPage() {
+        fragment.findNavController()
+            .navigate(Uri.parse("bilimiao://auth/h5"))
     }
 }
 
@@ -405,16 +401,15 @@ fun LoginPage(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
+                TextButton(onClick = viewModel::toH5LoginPage) {
+                    Text(text = "网页登录")
+                }
+                Spacer(modifier = Modifier.width(20.dp))
                 TextButton(onClick = {
                     nav.navigate(PageRoute.Auth.qr_login.url())
                 }) {
                     Text(text = "二微码登录")
                 }
-            }
-            Button(onClick = {
-                nav.navigate("bilimiao://auth/tel_verify?code=147f6f734894caf16b9a5812c0f29111&request_id=9363b39b672348b6ab110808348601b9&source=risk")
-            }) {
-                Text(text = "测试")
             }
             Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
 

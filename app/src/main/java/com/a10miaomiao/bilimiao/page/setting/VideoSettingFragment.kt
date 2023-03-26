@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -172,7 +173,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             summary = "滴，出差卡"
 
             onClick {
-                val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                val nav = findNavController()
                 val url = "bilimiao://setting/proxy"
                 nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
                     MainNavGraph.args.url to url

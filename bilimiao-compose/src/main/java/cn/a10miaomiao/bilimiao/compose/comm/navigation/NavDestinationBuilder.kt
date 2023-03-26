@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.comm.navigation
 
 import androidx.navigation.*
 import androidx.navigation.compose.ComposeNavigator
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 class NavDestinationBuilder(
     private val route: String,
@@ -19,7 +20,7 @@ class NavDestinationBuilder(
     ): String {
         var url = route
         arguments.forEach {
-            url.replace("{$it}", params[it.name]!!)
+            url = url.replace("{${it.name}}", params[it.name]!!)
         }
         return url
     }
