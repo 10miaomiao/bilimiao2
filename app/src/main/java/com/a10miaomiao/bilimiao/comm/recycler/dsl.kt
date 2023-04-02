@@ -16,6 +16,24 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+
+inline fun <T> miaoAdapter(
+    items: MutableList<T>? = null,
+    itemUi: MiaoBindingItemUi<T>,
+    adapterInit: (MiaoBindingAdapter<T>.() -> Unit),
+): MiaoBindingAdapter<T> {
+    return object : MiaoBindingAdapter<T>(
+        items,
+        itemUi,
+    ) {}.apply(adapterInit)
+}
+inline fun <T> miaoAdapter(
+    items: MutableList<T>? = null,
+    itemUi: MiaoBindingItemUi<T>,
+): MiaoBindingAdapter<T> {
+    return miaoAdapter(items, itemUi) {}
+}
+
 fun <T> RecyclerView._miaoAdapter(
     items: MutableList<T>? = null,
     itemUi: MiaoBindingItemUi<T>,

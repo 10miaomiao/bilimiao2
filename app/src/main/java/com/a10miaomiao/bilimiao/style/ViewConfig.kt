@@ -47,6 +47,10 @@ class ViewConfig(val context: Context) {
 
     val selectableItemBackground get() = context.attr(android.R.attr.selectableItemBackground)
     val selectableItemBackgroundBorderless get() = context.attr(android.R.attr.selectableItemBackgroundBorderless)
+
+    val appBarHeight get() = context.dip(70)
+    val appBarTitleHeight get() = context.dip(20)
+    val appBarMenuHeight get() = context.dip(50)
 }
 
 inline val Context.config get() = ViewConfig(this)

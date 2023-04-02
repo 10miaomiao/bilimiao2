@@ -615,6 +615,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 +recyclerView {
                     horizontalPadding = config.pagePadding
                     _show = isShow
+                    _bottomPadding = contentInsets.bottom + config.pagePadding
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
@@ -630,9 +631,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     ){
                         setOnItemClickListener(handleItemClick)
                     }
-                }..lParams(matchParent, wrapContent) {
-                    _bottomPadding = contentInsets.bottom + config.pagePadding
-                }
+                }..lParams(matchParent, wrapContent)
             }
         }.wrapInLimitedFrameLayout {
             maxWidth = config.containerWidth

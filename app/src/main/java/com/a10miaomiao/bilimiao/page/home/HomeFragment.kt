@@ -12,20 +12,28 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.MiaoEncryptDecrypt
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.comment.ReplyDetailParam
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
+import com.a10miaomiao.bilimiao.widget.wrapInNestedScrollableHostLayout
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
@@ -37,6 +45,7 @@ import splitties.dimensions.dip
 import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
+import java.nio.charset.Charset
 
 class HomeFragment : Fragment(), DIAware {
 
@@ -52,6 +61,7 @@ class HomeFragment : Fragment(), DIAware {
     override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<HomeViewModel>(di)
+    private val userStore by instance<UserStore>()
 
     private val themeDelegate by instance<ThemeDelegate>()
 
@@ -382,12 +392,12 @@ class HomeFragment : Fragment(), DIAware {
 //                    setOnClickListener {
 //                        val nav = it.findNavController()
 //                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-//                            MainNavGraph.args.url to "bilimiao://auth/login"
+//                            MainNavGraph.args.url to PageRoute.Auth.login.url()
 //                        ))
 //                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
 //                            MainNavGraph.args.url to "bilimiao://setting/proxy"
 //                        ))
-
+//
 //                        【不當哥哥了！（僅限港澳台地區）】https://www.bilibili.com/bangumi/play/ep719017?vd_source=2bcb4ee461719ac7def0c91f553096a3
 //                         https://www.bilibili.com/bangumi/play/ss44493
 //                        nav.navigate(MainNavGraph.action.global_to_bangumiDetail, bundleOf(
@@ -403,7 +413,7 @@ class HomeFragment : Fragment(), DIAware {
         }.wrapInNestedScrollView (
             height = ViewGroup.LayoutParams.MATCH_PARENT,
             gravity = Gravity.CENTER_HORIZONTAL,
-        )
+        ).wrapInNestedScrollableHostLayout()
     }
 
 }

@@ -7,6 +7,7 @@ import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
 import com.a10miaomiao.bilimiao.widget.image.RCImageView
 import com.a10miaomiao.bilimiao.widget.layout.LimitedFrameLayout
+import com.a10miaomiao.bilimiao.widget.layout.NestedScrollableHostLayout
 import com.a10miaomiao.bilimiao.widget.picker.DatePickerView
 import com.a10miaomiao.bilimiao.widget.picker.MonthPickerView
 import splitties.views.dsl.core.*
@@ -54,6 +55,16 @@ inline fun View.wrapInLimitedFrameLayout(
         this.maxHeight = maxHeight
         initView()
         addView(this@wrapInLimitedFrameLayout, lParams(matchParent, matchParent))
+    }
+}
+
+inline fun View.wrapInNestedScrollableHostLayout(
+    @IdRes id: Int = View.NO_ID,
+    initView: NestedScrollableHostLayout.() -> Unit = {}
+): NestedScrollableHostLayout {
+    return view({ NestedScrollableHostLayout(it) }, id).apply {
+        initView()
+        addView(this@wrapInNestedScrollableHostLayout, lParams(matchParent, matchParent))
     }
 }
 

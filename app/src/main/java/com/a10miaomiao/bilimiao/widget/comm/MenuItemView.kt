@@ -47,8 +47,10 @@ class MenuItemView @JvmOverloads constructor(
         if (prop.iconResource == null && prop.iconDrawable == null) {
             ui.icon.visibility = View.GONE
         } else if (prop.iconDrawable != null) {
+            ui.icon.visibility = View.VISIBLE
             ui.icon.setImageDrawable(prop.iconDrawable)
         } else if (prop.iconResource != null) {
+            ui.icon.visibility = View.VISIBLE
             ui.icon.setImageResource(prop.iconResource!!)
         }
         if (prop.title == null) {
@@ -60,6 +62,7 @@ class MenuItemView @JvmOverloads constructor(
         if (subTitle == null) {
             ui.subTitle.visibility = View.GONE
         } else {
+            ui.subTitle.visibility = View.VISIBLE
             ui.subTitle.text = if (orientation == HORIZONTAL) {
                 subTitle
             } else {

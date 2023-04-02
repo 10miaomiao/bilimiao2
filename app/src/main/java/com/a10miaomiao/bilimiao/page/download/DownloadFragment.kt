@@ -12,21 +12,18 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import cn.a10miaomiao.download.BiliVideoEntry
-import cn.a10miaomiao.miao.binding.android.view._bottomPadding
-import cn.a10miaomiao.miao.binding.android.view._height
-import cn.a10miaomiao.miao.binding.android.view._leftPadding
-import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.LocalVideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
-import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
-import com.a10miaomiao.bilimiao.comm.recycler.headerViews
-import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.DownloadStore
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -41,6 +38,7 @@ import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
 import splitties.views.dsl.core.*
+import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityCenter
 import splitties.views.padding
@@ -50,6 +48,21 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         title = "我的下载"
+        menus = listOf(
+            MenuItemPropInfo(
+                key = 0,
+                title = "提示",
+                iconResource = R.drawable.ic_baseline_lightbulb_24
+            )
+        )
+    }
+
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        when (menuItem.key) {
+            0 -> {
+                showHelpDialog()
+            }
+        }
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
@@ -77,7 +90,19 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
         super.onResume()
     }
 
-    val handleHelpClick = View.OnClickListener {
+    private fun showHelpDialog() {
+        MaterialAlertDialogBuilder(requireContext()).apply {
+            val downloadPath = downloadDelegate.downloadService.getDownloadPath()
+            setTitle("提示")
+            setMessage("下载的文件保存在：\n$downloadPath\n目录结构与B站官方客户端保持一致，可与B站官方客户端相互复制缓存文件")
+            setNegativeButton("复制路径") { dialog, which ->
+                copyDownloadPath()
+            }
+            setPositiveButton("取消", null)
+        }.show()
+    }
+
+    private fun copyDownloadPath() {
         val downloadPath = downloadDelegate.downloadService.getDownloadPath()
         val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipData = ClipData.newPlainText("path", downloadPath)
@@ -208,17 +233,15 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
                             _height = contentInsets.top
                         }
                     }
+                    footerViews(mAdapter) {
+                        +frameLayout {
+                        }..lParams(matchParent, 0) {
+                            _height = contentInsets.bottom
+                        }
+                    }
                 }..lParams(matchParent, matchParent) {
                     weight = 1f
                 }
-                +textView {
-                    padding = config.pagePadding
-                    _bottomPadding = config.pagePadding + contentInsets.bottom
-                    text = "下载的视频在哪？"
-                    gravity = gravityCenter
-                    setTextColor(config.themeColor)
-                    setOnClickListener(handleHelpClick)
-                }..lParams(matchParent, wrapContent)
             }
         }
 

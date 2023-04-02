@@ -287,10 +287,8 @@ fun CustomTime(
                     it.date = i
                 }
                 if (abs(_startTime.getGapCount(dateModel)) > 30) {
-                } else if (dateModel.year >= _startTime.year
-                    && dateModel.month >= _startTime.month
-                    && dateModel.date > _startTime.date
-                ) {
+                    // TODO: toast
+                } else if (dateModel.getDate().time > _startTime.getDate().time) {
                     endTime = dateModel
                 } else {
                     endTime = _startTime
@@ -335,6 +333,7 @@ fun CustomTime(
                             }
                             val _startTime = startTime
                             val _endTime = endTime
+
                             val status = if (_startTime == null) {
                                 TextBoxStatus.Enable
                             } else if (!curTime.diff(_startTime)) {
@@ -356,6 +355,7 @@ fun CustomTime(
                                     TextBoxStatus.Enable
                                 }
                             }
+
                             TextBox(
                                 text =  day.toString(),
                                 modifier = Modifier.weight(1f),
