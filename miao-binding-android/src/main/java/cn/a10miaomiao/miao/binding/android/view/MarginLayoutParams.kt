@@ -42,13 +42,13 @@ inline var ViewGroup.MarginLayoutParams._topMargin: Int
         topMargin = value
     }
 
-inline var ViewGroup.MarginLayoutParams._bottomPadding: Int
+inline var ViewGroup.MarginLayoutParams._bottomMargin: Int
     get() = bottomMargin
     set(@Px value) = miaoEffect(value) {
         bottomMargin = value
     }
 
-inline var ViewGroup.MarginLayoutParams._leftPadding: Int
+inline var ViewGroup.MarginLayoutParams._leftMargin: Int
     get() = leftMargin
     set(@Px value) = miaoEffect(value) {
         leftMargin = value

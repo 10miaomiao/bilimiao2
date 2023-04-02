@@ -40,8 +40,10 @@ import kotlin.reflect.KClass
 
 class MainFragment : Fragment(), DIAware, MyPage {
 
+    private var pageTitle = "bilimiao\n-\n首页"
+
     override val pageConfig = myPageConfig {
-        title = "bilimiao"
+        title = pageTitle
         menus = listOf(
             myMenuItem {
                 key = MenuKeys.setting
@@ -221,6 +223,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
             TabLayoutMediator(tabLayout, viewPager) { tab, position ->
                 tab.text = titleMap[viewModel.navList[position]] ?: ""
             }.attach()
+            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    val title = titleMap[viewModel.navList[position]] ?: ""
+                    pageTitle = "bilimiao\n-\n$title"
+                    pageConfig.notifyConfigChanged()
+                }
+            })
         } else {
             if (!viewModel.equalsNavList(viewModel.navList, newNavList)) {
                 viewModel.navList = newNavList

@@ -14,6 +14,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
@@ -37,8 +38,11 @@ import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
+import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import splitties.dimensions.dip
 
 
 class MainActivity
@@ -136,6 +140,9 @@ class MainActivity
             startService(Intent(this, PlayerService::class.java))
         }
 
+//        HideBottomViewOnScrollBehavior
+//        ui.mAppBar.hideAll()
+
     }
     
     override fun onNewIntent(intent: Intent) {
@@ -169,7 +176,7 @@ class MainActivity
         arguments: Bundle?
     ) {
         ui.mAppBar.canBack = destination.id != MainNavGraph.dest.home
-        ui.mAppBar.cleanProp()
+//        ui.mAppBar.cleanProp()
     }
 
     fun setMyPageConfig(config: MyPageConfigInfo) {
@@ -178,6 +185,11 @@ class MainActivity
             menus = config.menus
         }
         ui.setNavigationTitle(config.title)
+        if (ui.root.orientation == ScaffoldView.VERTICAL) {
+            ((ui.mAppBar.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? AppBarBehavior)?.let{
+                it.slideUp(ui.mAppBar)
+            }
+        }
     }
 
     val onBackClick = View.OnClickListener {
@@ -231,7 +243,7 @@ class MainActivity
         val fullScreenPlayer = ui.root.fullScreenPlayer
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
             windowStore.setContentInsets(
-                left, if (showPlayer) 0 else top, right, 0,
+                left, if (showPlayer) 0 else top, right, bottom + config.appBarTitleHeight,
             )
             ui.mAppBar.setPadding(
                 left, 0, right, bottom

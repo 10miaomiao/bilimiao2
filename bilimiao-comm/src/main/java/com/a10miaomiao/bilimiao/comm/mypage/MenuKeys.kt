@@ -3,6 +3,8 @@ package com.a10miaomiao.bilimiao.comm.mypage
 object MenuKeys {
     var id_counter = 100
 
+    val back = -233
+
     val setting = id_counter++
     val history = id_counter++
     val download = id_counter++

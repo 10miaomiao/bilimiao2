@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import androidx.core.view.forEach
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarVerticalUi
@@ -51,7 +52,11 @@ class AppBarView @JvmOverloads constructor(
 
     private val menuItemClick = OnClickListener { view ->
         (view as? MenuItemView)?.let {
-            onMenuItemClick?.invoke(it)
+            if (it.prop.key == MenuKeys.back) {
+                onBackClick?.onClick(view)
+            } else {
+                onMenuItemClick?.invoke(it)
+            }
         }
     }
 
@@ -108,6 +113,14 @@ class AppBarView @JvmOverloads constructor(
         prop?.let {
             mUi.setProp(prop)
         }
+    }
+
+    fun showMenu() {
+        (mUi as? AppBarVerticalUi)?.showMenu()
+    }
+
+    fun hideMenu() {
+        (mUi as? AppBarVerticalUi)?.hideMenu()
     }
 
 

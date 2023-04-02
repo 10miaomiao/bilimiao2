@@ -51,8 +51,9 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 height = parent.measuredHeight
                 width = parent.measuredWidth - parent.appBarWidth
             } else if (orientation == ScaffoldView.VERTICAL) {
-                child.layout(0, playerHeight, parent.measuredWidth, parent.measuredHeight - parent.appBarHeight)
-                height = parent.measuredHeight - parent.appBarHeight - playerHeight
+                child.layout(0, playerHeight, parent.measuredWidth, parent.measuredHeight)
+//                height = parent.measuredHeight - parent.appBarHeight - playerHeight
+                height = parent.measuredHeight - playerHeight
                 width = parent.measuredWidth
             }
             if (child.layoutParams.height != height || child.layoutParams.width != width) {
