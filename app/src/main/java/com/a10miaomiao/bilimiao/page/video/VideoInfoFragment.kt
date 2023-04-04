@@ -631,7 +631,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                                 +textView {
                                     textSize = 16f
                                     ellipsize = TextUtils.TruncateAt.END
-                                    maxLines = 2
+                                    maxLines = 4
                                     setTextColor(config.foregroundColor)
                                     _text = videoInfo?.title ?: ""
                                 }..lParams(weight = 1f)

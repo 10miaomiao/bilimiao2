@@ -74,6 +74,7 @@ fun MiaoUI.videoItem (
                             +textView {
                                 textSize = 14f
                                 setTextColor(config.foregroundAlpha45Color)
+                                maxLines = 1
                                 _text = upperName ?: ""
                             }
                         }
