@@ -33,7 +33,7 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
-class DynamicFragment: Fragment(), DIAware {
+class DynamicFragment: RecyclerViewFragment(), DIAware {
 
     companion object {
         fun newFragmentInstance(): DynamicFragment {
@@ -63,6 +63,12 @@ class DynamicFragment: Fragment(), DIAware {
         }
         ui.parentView = container
         return ui.root
+    }
+
+    override fun refreshList() {
+        if (!viewModel.list.loading) {
+            viewModel.refreshList()
+        }
     }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
@@ -170,7 +176,7 @@ class DynamicFragment: Fragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    _miaoLayoutManage(
+                    mLayoutManager = _miaoLayoutManage(
                         LinearLayoutManager(requireContext())
                     )
 

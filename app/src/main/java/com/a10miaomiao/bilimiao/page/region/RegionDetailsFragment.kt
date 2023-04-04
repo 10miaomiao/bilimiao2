@@ -29,7 +29,7 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
-class RegionDetailsFragment : Fragment(), DIAware {
+class RegionDetailsFragment : RecyclerViewFragment(), DIAware {
 
     companion object {
         const val TID = "tid"
@@ -55,6 +55,12 @@ class RegionDetailsFragment : Fragment(), DIAware {
         savedInstanceState: Bundle?
     ): View {
         return ui.root
+    }
+
+    override fun refreshList() {
+        if (!viewModel.list.loading) {
+            viewModel.refreshList()
+        }
     }
 
     override fun onResume() {
@@ -106,7 +112,7 @@ class RegionDetailsFragment : Fragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    _miaoLayoutManage(
+                    mLayoutManager = _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
 

@@ -15,12 +15,9 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
@@ -95,9 +92,12 @@ class SearchResultFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChange
                 override fun getPageTitle(position: Int) = viewModel.fragments[position].title
             }
             viewPager.adapter = mAdapter
-            tabLayout.setTabsFromPagerAdapter(mAdapter)
             tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
             tabLayout.setupWithViewPager(viewPager)
+            tabLayout.addOnDoubleClickTabListener {
+                viewModel.fragments[it.position].toListTop()
+            }
+
             viewPager.addOnPageChangeListener(this)
             viewPager.post {
                 viewModel.position = 0

@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.page.rank
 
 import android.os.Bundle
+import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +16,13 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
@@ -81,20 +84,32 @@ class RankFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChangeListener
         if  (viewPager.adapter == null) {
             val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
                 override fun getItem(p0: Int): Fragment {
-                    var fragment = viewModel.fragments[p0]
-                    if (fragment == null) {
-                        val tid = viewModel.tids[p0]
-                        fragment = RankDetailFragment.newInstance(tid)
-                    }
-                    return fragment
+                    val tid = viewModel.tids[p0]
+                    return RankDetailFragment.newInstance(tid)
                 }
-                override fun getCount() = viewModel.fragments.size
+                override fun getCount() = viewModel.tids.size
                 override fun getPageTitle(position: Int) = viewModel.titles[position]
+                private val registeredFragments = SparseArray<Fragment>()
+                override fun instantiateItem(container: ViewGroup, position: Int): Any {
+                    val obj = super.instantiateItem(container, position)
+                    if (obj is Fragment) {
+                        registeredFragments.put(position, obj)
+                    }
+                    return obj
+                }
+                fun getRegisteredFragment(position: Int): Fragment? {
+                    return registeredFragments[position]
+                }
             }
             viewPager.adapter = mAdapter
-            tabLayout.setTabsFromPagerAdapter(mAdapter)
             tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
             tabLayout.setupWithViewPager(viewPager)
+            tabLayout.addOnDoubleClickTabListener {
+                val fragment = mAdapter.getRegisteredFragment(it.position)
+                if (fragment is RecyclerViewFragment) {
+                    fragment.toListTop()
+                }
+            }
             viewPager.addOnPageChangeListener(this)
             viewPager.post {
                 viewModel.position = 0

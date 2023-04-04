@@ -32,7 +32,7 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.padding
 
-class RankDetailFragment : Fragment(), DIAware {
+class RankDetailFragment : RecyclerViewFragment(), DIAware {
 
     companion object {
         const val TID = "tid"
@@ -58,6 +58,11 @@ class RankDetailFragment : Fragment(), DIAware {
         return ui.root
     }
 
+    override fun refreshList() {
+        if (!viewModel.list.loading) {
+            viewModel.refreshList()
+        }
+    }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
         viewModel.refreshList()
@@ -113,7 +118,7 @@ class RankDetailFragment : Fragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    _miaoLayoutManage(
+                    mLayoutManager = _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
 

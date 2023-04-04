@@ -9,15 +9,18 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.miao.binding.android.view._bottomMargin
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchVideoInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
@@ -119,6 +122,12 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
         return ui.root
     }
 
+    override fun refreshList() {
+        if (!viewModel.list.loading) {
+            viewModel.refreshList()
+        }
+    }
+
     fun changeVideoRegion(region: RegionInfo) {
         viewModel.regionId = region.tid
         viewModel.regionName = region.name
@@ -156,7 +165,7 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    _miaoLayoutManage(
+                    mLayoutManager = _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
 
@@ -168,9 +177,8 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
                             viewModel.list.finished -> ListState.NOMORE
                             else -> ListState.NORMAL
                         }
-                    )
-                    footerView..lParams(matchParent, wrapContent) {
-                        bottomMargin = contentInsets.bottom
+                    ).apply {
+                        _bottomPadding = contentInsets.bottom
                     }
 
                     _miaoAdapter(

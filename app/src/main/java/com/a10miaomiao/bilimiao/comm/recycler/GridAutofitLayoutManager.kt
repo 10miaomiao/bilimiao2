@@ -1,10 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.recycler
 
 import android.content.Context
-import android.util.TypedValue
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 class GridAutofitLayoutManager : GridLayoutManager {
 

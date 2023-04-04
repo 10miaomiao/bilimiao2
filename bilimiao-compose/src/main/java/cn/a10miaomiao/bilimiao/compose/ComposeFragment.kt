@@ -54,7 +54,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
     private lateinit var fragmentNav: NavController
     private lateinit var composeNav: NavHostController
 
-    @OptIn(ExperimentalComposeUiApi::class)
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -64,7 +64,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
         return ComposeView(requireContext()).apply {
             setContent {
                 // TODO: 嵌套滚动
-                rememberNestedScrollInteropConnection()
+                rememberNestedScrollInteropConnection(container ?: LocalView.current)
                 composeNav = rememberNavController()
                 CompositionLocalProvider(
                     LocalContainerView provides container,
