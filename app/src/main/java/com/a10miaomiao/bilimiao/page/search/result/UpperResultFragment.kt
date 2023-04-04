@@ -8,6 +8,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchUpperInfo
@@ -65,6 +66,11 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
         return ui.root
     }
 
+    override fun refreshList() {
+        if (!viewModel.list.loading) {
+            viewModel.refreshList()
+        }
+    }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
         viewModel.refreshList()
@@ -97,7 +103,7 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    _miaoLayoutManage(
+                    mLayoutManager = _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
 
@@ -109,9 +115,8 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
                             viewModel.list.finished -> ListState.NOMORE
                             else -> ListState.NORMAL
                         }
-                    )
-                    footerView..lParams(matchParent, wrapContent) {
-                        bottomMargin = contentInsets.bottom
+                    ).apply {
+                        _bottomPadding = contentInsets.bottom
                     }
 
                     _miaoAdapter(

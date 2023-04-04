@@ -21,6 +21,7 @@ import androidx.fragment.app.FragmentOnAttachListener
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -36,6 +37,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
@@ -112,6 +114,7 @@ class MainActivity
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
 
         ui.mAppBar.onBackClick = this.onBackClick
+        ui.mAppBar.onBackLongClick = this.onBackLongClick
         ui.mAppBar.onMenuItemClick = {
             val fragment = navHostFragment.childFragmentManager.primaryNavigationFragment
             if (fragment is MyPage) {
@@ -192,8 +195,26 @@ class MainActivity
         }
     }
 
+    private fun goBackHome(): Boolean {
+        val nav = findNavController(R.id.nav_host_fragment)
+        return nav.popBackStack(MainNavGraph.dest.home, false)
+    }
+
     val onBackClick = View.OnClickListener {
         onBackPressed()
+    }
+
+    val onBackLongClick = View.OnLongClickListener {
+        if (ui.root.showPlayer) {
+            MainBackPopupMenu(
+                this@MainActivity,
+                it,
+                basePlayerDelegate
+            ).show()
+            true
+        } else {
+            goBackHome()
+        }
     }
     
     val broadcastReceiver = object : BroadcastReceiver() {

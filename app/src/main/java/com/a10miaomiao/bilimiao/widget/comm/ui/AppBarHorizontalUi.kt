@@ -15,6 +15,9 @@ import splitties.views.dsl.core.*
 class AppBarHorizontalUi(
     override val ctx: Context,
     val menuItemClick: View.OnClickListener,
+    val menuItemLongClick: View.OnLongClickListener,
+    val backClick: View.OnClickListener? = null,
+    val backLongClick: View.OnLongClickListener? = null,
 ) : AppBarUi {
 
     val mNavigationIcon = imageView {
@@ -24,6 +27,8 @@ class AppBarHorizontalUi(
     val mNavigationIconLayout = frameLayout {
         padding = dip(10)
         bottomPadding = 0
+        backClick?.let(::setOnClickListener)
+        backLongClick?.let(::setOnLongClickListener)
         addView(mNavigationIcon, lParams {
             gravity = Gravity.CENTER
             width = dip(24)
@@ -72,9 +77,6 @@ class AppBarHorizontalUi(
                 mNavigationIcon.imageDrawable = prop.navigationIcon
             } else {
                 mNavigationIconLayout.visibility = View.GONE
-            }
-            if (prop.onNavigationClick != null) {
-                mNavigationIcon.setOnClickListener(prop.onNavigationClick)
             }
             if (prop.title != null) {
                 mTitleLayout.visibility = View.VISIBLE

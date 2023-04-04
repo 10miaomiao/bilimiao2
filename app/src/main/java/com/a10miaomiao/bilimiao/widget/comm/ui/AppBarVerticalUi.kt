@@ -22,6 +22,9 @@ import splitties.views.imageDrawable
 class AppBarVerticalUi(
     override val ctx: Context,
     val menuItemClick: View.OnClickListener,
+    val menuItemLongClick: View.OnLongClickListener,
+    val backClick: View.OnClickListener? = null,
+    val backLongClick: View.OnLongClickListener? = null,
 ) : AppBarUi {
 
     val mTitleHeight = ctx.config.appBarTitleHeight
@@ -115,9 +118,6 @@ class AppBarVerticalUi(
             } else {
 //                mNavigationIconLayout.visibility = View.GONE
             }
-            if (prop.onNavigationClick != null) {
-                mNavigationIcon.setOnClickListener(prop.onNavigationClick)
-            }
             mTitle.text = (prop.title ?: "").replace("\n", " ")
 
             val menus = mutableListOf<MenuItemPropInfo>()
@@ -144,6 +144,7 @@ class AppBarVerticalUi(
                             menuItemView.minimumWidth = dip(60)
                             menuItemView.setBackgroundResource(config.selectableItemBackgroundBorderless)
                             menuItemView.setOnClickListener(menuItemClick)
+                            menuItemView.setOnLongClickListener(menuItemLongClick)
                             addView(menuItemView, lParams {
                                 width = wrapContent
                                 height = matchParent

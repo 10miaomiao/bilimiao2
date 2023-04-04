@@ -13,6 +13,7 @@ import androidx.core.view.forEach
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarVerticalUi
@@ -32,6 +33,7 @@ class AppBarView @JvmOverloads constructor(
 
     var canBack = false
     var onBackClick: View.OnClickListener? = null
+    var onBackLongClick: View.OnLongClickListener? = null
     var onMenuItemClick: ((MenuItemView) -> Unit)? = null
 
     var orientation = ScaffoldView.VERTICAL
@@ -59,6 +61,14 @@ class AppBarView @JvmOverloads constructor(
             }
         }
     }
+    private val menuItemLongClick = OnLongClickListener { view ->
+        if (view is MenuItemView
+            && view.prop.key == MenuKeys.back) {
+            onBackLongClick?.onLongClick(view) ?: false
+        } else {
+            false
+        }
+    }
 
     private var mUi = createUi()
 
@@ -71,9 +81,21 @@ class AppBarView @JvmOverloads constructor(
 
     fun createUi (): AppBarUi {
         return if (orientation == ScaffoldView.HORIZONTAL) {
-            AppBarHorizontalUi(context, menuItemClick)
+            AppBarHorizontalUi(
+                context,
+                menuItemClick = menuItemClick,
+                menuItemLongClick = menuItemLongClick,
+                backClick = onBackClick,
+                backLongClick = onBackLongClick
+            )
         } else {
-            AppBarVerticalUi(context, menuItemClick)
+            AppBarVerticalUi(
+                context,
+                menuItemClick = menuItemClick,
+                menuItemLongClick = menuItemLongClick,
+                backClick = onBackClick,
+                backLongClick = onBackLongClick
+            )
         }
     }
 
@@ -103,7 +125,7 @@ class AppBarView @JvmOverloads constructor(
     private fun newProp (): PropInfo {
         val prop = PropInfo()
         if (canBack) {
-            prop.onNavigationClick = onBackClick
+//            prop.onNavigationClick = onBackClick
             prop.navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp)
         }
         return prop
@@ -128,7 +150,6 @@ class AppBarView @JvmOverloads constructor(
         var title: String? = null,
         var navigationIcon: Drawable? = null,
         var menus: List<MenuItemPropInfo>? = null,
-        var onNavigationClick: View.OnClickListener? = null,
     )
 
 }
