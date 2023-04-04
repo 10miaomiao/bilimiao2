@@ -78,11 +78,24 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.oid.toString()
-        )
-        Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.history_to_videoInfo, args)
+        val nav = Navigation.findNavController(view)
+        when(item.business) {
+            "archive" -> {
+                val args = bundleOf(
+                    MainNavGraph.args.id to item.oid.toString()
+                )
+                nav.navigate(MainNavGraph.action.history_to_videoInfo, args)
+            }
+            "pgc" -> {
+                val args = bundleOf(
+                    MainNavGraph.args.id to item.kid.toString()
+                )
+                nav.navigate(MainNavGraph.action.history_to_bangumiDetail, args)
+            }
+            else -> {
+                toast("未知跳转类型")
+            }
+        }
     }
 
     val itemUi = miaoBindingItemUi<HistoryOuterClass.CursorItem> { item, index ->

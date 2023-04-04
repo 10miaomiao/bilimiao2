@@ -374,6 +374,7 @@ object MainNavGraph {
         val userFollow_to_user = dest.userFollow to dest.user
 
         val history_to_videoInfo = dest.history to dest.videoInfo
+        val history_to_bangumiDetail = dest.history to dest.bangumiDetail
     }
 
     object args {
