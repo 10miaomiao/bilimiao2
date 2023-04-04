@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -31,7 +32,7 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
-class RecommendFragment: Fragment(), DIAware {
+class RecommendFragment: RecyclerViewFragment(), DIAware {
 
     companion object {
         fun newFragmentInstance(): RecommendFragment {
@@ -61,6 +62,12 @@ class RecommendFragment: Fragment(), DIAware {
         }
         ui.parentView = container
         return ui.root
+    }
+
+    override fun refreshList() {
+        if (!viewModel.list.loading) {
+            viewModel.refreshList()
+        }
     }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
@@ -103,7 +110,7 @@ class RecommendFragment: Fragment(), DIAware {
             views {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
-                    _miaoLayoutManage(
+                    mLayoutManager = _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
 
@@ -127,10 +134,9 @@ class RecommendFragment: Fragment(), DIAware {
                                 else -> ListState.NORMAL
                             },
                             viewModel::tryAgainLoadData,
-                        )..lParams(matchParent, wrapContent) {
-                            bottomMargin = contentInsets.bottom
-                        }
-
+                        ).apply {
+                            _bottomPadding = contentInsets.bottom
+                        }..lParams(matchParent, wrapContent)
                     }
                 }.wrapInSwipeRefreshLayout {
                     setColorSchemeResources(config.themeColorResource)

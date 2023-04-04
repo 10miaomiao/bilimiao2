@@ -65,12 +65,13 @@ fun <T> RecyclerView._miaoAdapter(
     return mAdapter
 }
 
-fun RecyclerView._miaoLayoutManage(
-    lm: RecyclerView.LayoutManager
-) {
+
+fun <T: RecyclerView.LayoutManager> RecyclerView._miaoLayoutManage(
+    lm: T
+): T {
     val ref = miaoRef(lm)
     val pLm = ref.value
-    miaoEffect(null, {
+    miaoEffect(null) {
         val topView = pLm.getChildAt(0)
         if (topView != null) {
             when (lm) {
@@ -87,7 +88,8 @@ fun RecyclerView._miaoLayoutManage(
         }
         ref.value = lm
         layoutManager = lm
-    })
+    }
+    return pLm
 }
 
 inline fun RecyclerView.headerViews(adapter: MiaoBindingAdapter<*>, block: RecyclerViews.() -> Unit) {

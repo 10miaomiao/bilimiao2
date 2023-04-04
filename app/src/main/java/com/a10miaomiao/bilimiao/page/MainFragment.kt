@@ -22,7 +22,9 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.mypage.*
+import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.page.home.*
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -223,6 +225,14 @@ class MainFragment : Fragment(), DIAware, MyPage {
             TabLayoutMediator(tabLayout, viewPager) { tab, position ->
                 tab.text = titleMap[viewModel.navList[position]] ?: ""
             }.attach()
+            tabLayout.addOnDoubleClickTabListener {
+                val itemId = mAdapter.getItemId(it.position)
+                childFragmentManager.findFragmentByTag("f$itemId")?.let { currentFragment ->
+                    if (currentFragment is RecyclerViewFragment) {
+                        currentFragment.toListTop()
+                    }
+                }
+            }
             viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     val title = titleMap[viewModel.navList[position]] ?: ""

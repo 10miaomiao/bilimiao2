@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.card.v1.Single
 import bilibili.app.show.v1.PopularOuterClass
+import cn.a10miaomiao.miao.binding.android.view._bottomMargin
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -37,7 +38,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.gravityCenter
 import splitties.views.verticalPadding
 
-class PopularFragment: Fragment(), DIAware {
+class PopularFragment: RecyclerViewFragment(), DIAware {
 
     companion object {
         fun newFragmentInstance(): PopularFragment {
@@ -67,6 +68,12 @@ class PopularFragment: Fragment(), DIAware {
         }
         ui.parentView = container
         return ui.root
+    }
+
+    override fun refreshList() {
+        if (!viewModel.list.loading) {
+            viewModel.refreshList()
+        }
     }
 
     private val handleTopEntranceItemClick = OnItemClickListener { adapter, view, position ->
@@ -145,7 +152,7 @@ class PopularFragment: Fragment(), DIAware {
                 +recyclerView {
                     backgroundColor = config.windowBackgroundColor
                     scrollBarSize = 0
-                    _miaoLayoutManage(
+                    mLayoutManager = _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
                     )
 
@@ -184,7 +191,7 @@ class PopularFragment: Fragment(), DIAware {
                             },
                             viewModel::tryAgainLoadData
                         )..lParams(matchParent, wrapContent) {
-                            bottomMargin = contentInsets.bottom
+                            _bottomMargin = contentInsets.bottom
                         }
                     }
                 }.wrapInSwipeRefreshLayout {

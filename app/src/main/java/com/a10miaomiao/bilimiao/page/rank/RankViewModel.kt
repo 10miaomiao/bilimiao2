@@ -19,7 +19,6 @@ class RankViewModel(
     var position = 0
     val tids = mutableListOf<Int>()
     val titles = mutableListOf<String>()
-    var fragments: Array<Fragment?>
 
 //    val type = fragment.requireArguments().getString(MainNavGraph.args.type)
 
@@ -32,7 +31,6 @@ class RankViewModel(
             tids.add(it.tid)
             titles.add(it.name)
         }
-        fragments = Array(tids.size) { null }
     }
 
 }

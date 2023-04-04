@@ -22,7 +22,6 @@ class RegionViewModel(
     private val timeSettingStore: TimeSettingStore by instance()
 
     val region = fragment.requireArguments().getParcelable<RegionInfo>(MainNavGraph.args.region)!!
-    val fragments = Array<Fragment?>(region.children.size) { null }
 
     init {
         viewModelScope.launch {

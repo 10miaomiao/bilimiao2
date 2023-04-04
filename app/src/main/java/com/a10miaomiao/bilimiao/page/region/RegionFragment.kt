@@ -1,8 +1,8 @@
 package com.a10miaomiao.bilimiao.page.region
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Bundle
+import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +18,9 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.mypage.*
+import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
@@ -28,7 +30,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.views.dsl.core.*
 
-class RegionFragment : Fragment(), DIAware , MyPage {
+class RegionFragment : Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui }) {
         bindSingleton<MyPage> { this@RegionFragment }
@@ -40,8 +42,8 @@ class RegionFragment : Fragment(), DIAware , MyPage {
 
     private val timeSettingStore: TimeSettingStore by instance()
 
-    private val ID_viewPager = 233
-    private val ID_tabLayout = 234
+    private val ID_viewPager = View.generateViewId()
+    private val ID_tabLayout = View.generateViewId()
 
     override val pageConfig = myPageConfig {
         title = "时光姬-" + viewModel.region.name
@@ -72,7 +74,8 @@ class RegionFragment : Fragment(), DIAware , MyPage {
                 pm.show()
             }
             MenuKeys.time -> {
-                val nav = requireActivity().findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
+                val nav =
+                    requireActivity().findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
                 val url = "bilimiao://time/setting"
                 nav.navigate(
                     MainNavGraph.action.global_to_compose, bundleOf(
@@ -107,23 +110,44 @@ class RegionFragment : Fragment(), DIAware , MyPage {
     private fun initView(view: View) {
         val tabLayout = view.findViewById<TabLayout>(ID_tabLayout)
         val viewPager = view.findViewById<ViewPager>(ID_viewPager)
-        if  (viewPager.adapter == null) {
+        if (viewPager.adapter == null) {
             val mAdapter = object : FragmentStatePagerAdapter(childFragmentManager) {
                 override fun getItem(p0: Int): Fragment {
-                    var fragment = viewModel.fragments[p0]
-                    if (fragment == null) {
-                        val tid = viewModel.region.children[p0].tid
-                        fragment = RegionDetailsFragment.newInstance(tid)
-                    }
+                    val tid = viewModel.region.children[p0].tid
+                    val fragment = RegionDetailsFragment.newInstance(tid)
                     return fragment
+//                    var fragment = viewModel.fragments[p0]
+//                    if (fragment == null) {
+//                        val tid = viewModel.region.children[p0].tid
+//                        fragment = RegionDetailsFragment.newInstance(tid)
+//                        viewModel.fragments[p0] = fragment
+//                    }
+//                    return fragment
                 }
                 override fun getCount() = viewModel.region.children.size
                 override fun getPageTitle(position: Int) = viewModel.region.children[position].name
+                private val registeredFragments = SparseArray<Fragment>()
+                override fun instantiateItem(container: ViewGroup, position: Int): Any {
+                    val obj = super.instantiateItem(container, position)
+                    if (obj is Fragment) {
+                        registeredFragments.put(position, obj)
+                    }
+                    return obj
+                }
+                fun getRegisteredFragment(position: Int): Fragment? {
+                    return registeredFragments[position]
+                }
             }
+
             viewPager.adapter = mAdapter
-            tabLayout.setTabsFromPagerAdapter(mAdapter)
             tabLayout.tabMode = TabLayout.MODE_SCROLLABLE
             tabLayout.setupWithViewPager(viewPager)
+            tabLayout.addOnDoubleClickTabListener {
+                val fragment = mAdapter.getRegisteredFragment(it.position)
+                if (fragment is RecyclerViewFragment) {
+                    fragment.toListTop()
+                }
+            }
         }
     }
 
