@@ -1,6 +1,10 @@
+import cn.a10miaomiao.bilimiao.build.*
+
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    id("kotlin-android")
+    id("kotlin-parcelize")
+    id("bilimiao-build")
 }
 
 android {
@@ -29,7 +33,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget =("1.8")
+        jvmTarget = "1.8"
     }
 
     buildFeatures {
@@ -46,45 +50,37 @@ android {
 }
 
 dependencies {
-    val compose_version: String by rootProject.extra
-    val kodein_di_version: String by rootProject.extra
-    val gson_version: String by rootProject.extra
-    val okhttp_version: String by rootProject.extra
+    implementation(Libraries.core)
+    implementation(Libraries.appcompat)
+    implementation(Libraries.material)
+    implementation(Libraries.lifecycle)
+    implementation(Libraries.lifecycleViewModel)
+    implementation(Libraries.navigationFragment)
+    implementation(Libraries.navigationUi)
 
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.appcompat:appcompat:1.3.0")
-    implementation("com.google.android.material:material:1.4.0")
+    implementation(Libraries.kotlinxCoroutinesAndroid)
+    implementation(Libraries.kodeinDi) // 依赖注入
+    implementation(Libraries.kodeinDiCompose) // 依赖注入
 
-    val nav_version = "2.5.1"
-    implementation("androidx.compose.ui:ui:$compose_version")
-    implementation("androidx.compose.material3:material3:1.0.0-beta02")
-    implementation("androidx.compose.material3:material3-window-size-class:1.0.0-beta02")
-    implementation("androidx.compose.ui:ui-tooling-preview:$compose_version")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
-    implementation("androidx.activity:activity-compose:1.3.1")
+    implementation(Libraries.composeUi)
+    implementation(Libraries.composeMaterial3)
+    implementation(Libraries.composeMaterial3WindowSizeClass)
+    implementation(Libraries.composeUiToolingPreview)
+    implementation(Libraries.activityCompose)
+    implementation(Libraries.navigationCompose)
 
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation(Libraries.accompanistSwipeRefresh)
+    implementation(Libraries.accompanistDrawablePainter)
 
-    val accompanist_version = "0.29.2-rc"
-    implementation("com.google.accompanist:accompanist-swiperefresh:$accompanist_version")
-    implementation("com.google.accompanist:accompanist-drawablepainter:$accompanist_version")
-
-    implementation("org.kodein.di:kodein-di-framework-android-x:$kodein_di_version")
-    implementation("org.kodein.di:kodein-di-framework-compose:$kodein_di_version")
-
-    implementation("com.github.alexzhirkevich:custom-qr-generator:1.6.0")
-
-    implementation("com.google.code.gson:gson:$gson_version")
-    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
-
-    implementation("com.github.skydoves:landscapist-glide:2.0.0")
+    implementation(Libraries.gson)
+    implementation(Libraries.okhttp3)
+    implementation(Libraries.glide)
+    implementation(Libraries.glideCompose)
+    implementation(Libraries.qrGenerator)
 
     implementation(project(":bilimiao-comm"))
-    
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+
+    testImplementation(Libraries.junit)
+    androidTestImplementation(Libraries.androidxJunit)
+    androidTestImplementation(Libraries.espresso)
 }

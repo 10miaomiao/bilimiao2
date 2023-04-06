@@ -1,10 +1,12 @@
 import com.google.protobuf.gradle.*
+import cn.a10miaomiao.bilimiao.build.*
 
 plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-parcelize")
     id("com.google.protobuf") // proto
+    id("bilimiao-build")
 }
 
 android {
@@ -33,9 +35,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget =("1.8")
+        jvmTarget = "1.8"
     }
-
 
     sourceSets["main"].proto {
         srcDir("src/main/proto") // 模块下的proto文件夹
@@ -79,36 +80,30 @@ protobuf {
 }
 
 dependencies {
-    val material_version: String by rootProject.extra
-    val lifecycle_version: String by rootProject.extra
-    val kodein_di_version: String by rootProject.extra
-    val gson_version: String by rootProject.extra
-    val okhttp_version: String by rootProject.extra
+    implementation(Libraries.core)
+    implementation(Libraries.appcompat)
+    implementation(Libraries.material)
+    implementation(Libraries.lifecycle)
+    implementation(Libraries.lifecycleViewModel)
 
-    implementation("androidx.core:core-ktx:1.6.0")
-    implementation("androidx.appcompat:appcompat:1.2.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version")
-    implementation("com.google.android.material:material:$material_version")
+    implementation(Libraries.kotlinxCoroutinesAndroid)
+    implementation(Libraries.kodeinDi)
+    implementation(Libraries.glide)
 
-    implementation("org.kodein.di:kodein-di-framework-android-x:$kodein_di_version")
+    implementation(Libraries.gson)
+    implementation(Libraries.okhttp3)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
-    implementation("com.github.bumptech.glide:glide:4.13.2")
+    implementation(Libraries.grpcProtobuf)
+    implementation(Libraries.grpcStub)
 
-    implementation("com.google.code.gson:gson:$gson_version")
-    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
-
-    implementation("io.grpc:grpc-protobuf-lite:1.33.0")
-    implementation("io.grpc:grpc-stub:1.33.0")
     implementation("javax.annotation:javax.annotation-api:1.2")
 
     // 极验验证
-    implementation("com.geetest.sensebot:sensebot:4.3.8.1")
+    implementation(Libraries.sensebot)
 
     implementation(project(":DanmakuFlameMaster"))
 
-    testImplementation("junit:junit:4.+")
-    androidTestImplementation("androidx.test.ext:junit:1.1.2")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
+    testImplementation(Libraries.junit)
+    androidTestImplementation(Libraries.androidxJunit)
+    androidTestImplementation(Libraries.espresso)
 }

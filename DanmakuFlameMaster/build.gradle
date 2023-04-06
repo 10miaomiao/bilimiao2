@@ -26,3 +26,10 @@ android {
         versionName '1.0.0'
     }
 }
+
+dependencies {
+    def version = "0.9.21"
+    implementation "com.github.ctiao:ndkbitmap-armv7a:$version"
+    implementation "com.github.ctiao:ndkbitmap-armv5:$version"
+    implementation "com.github.ctiao:ndkbitmap-x86:$version"
+}

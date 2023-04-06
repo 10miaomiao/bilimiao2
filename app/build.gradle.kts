@@ -1,8 +1,10 @@
+import cn.a10miaomiao.bilimiao.build.*
+
 plugins {
     id("com.android.application")
     id("kotlin-parcelize")
     id("kotlin-android")
-
+    id("bilimiao-build")
 //    kotlin("android")
 }
 
@@ -87,67 +89,38 @@ android {
 }
 
 dependencies {
-    val material_version: String by rootProject.extra
-    val kodein_di_version: String by rootProject.extra
-    val splitties_version: String by rootProject.extra
-    val nav_version: String by rootProject.extra
+    implementation(Libraries.core)
+    implementation(Libraries.appcompat)
+    implementation(Libraries.material)
+    implementation(Libraries.lifecycle)
+    implementation(Libraries.lifecycleViewModel)
+    implementation(Libraries.navigationFragment)
+    implementation(Libraries.navigationUi)
 
-    implementation("androidx.core:core-ktx:1.6.0")
-    implementation("androidx.appcompat:appcompat:1.3.1")
-    implementation("com.google.android.material:material:${material_version}")
+    implementation(Libraries.kotlinxCoroutinesAndroid)
+    implementation(Libraries.kodeinDi) // 依赖注入
 
-    implementation("androidx.recyclerview:recyclerview:1.2.0")
-    implementation("com.google.android.flexbox:flexbox:3.0.0")
-    implementation("me.zhanghai.android.foregroundcompat:library:1.0.2")
-    implementation("com.drakeet.drawer:drawer:1.0.3")
-//    implementation("androidx.work:work-runtime-ktx:2.7.1")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
-
-    // 依赖注入
-    implementation("org.kodein.di:kodein-di-framework-android-x:$kodein_di_version")
-
-    implementation("com.louiscad.splitties:splitties-fun-pack-android-base:$splitties_version")
-    implementation("com.louiscad.splitties:splitties-fun-pack-android-base-with-views-dsl:$splitties_version")
-    implementation("com.louiscad.splitties:splitties-fun-pack-android-appcompat:$splitties_version")
-    implementation("com.louiscad.splitties:splitties-fun-pack-android-appcompat-with-views-dsl:$splitties_version")
-    implementation("com.louiscad.splitties:splitties-fun-pack-android-material-components:$splitties_version")
-    implementation("com.louiscad.splitties:splitties-fun-pack-android-material-components-with-views-dsl:$splitties_version")
-
-    implementation("com.github.bumptech.glide:glide:4.13.2")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
-
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
+    implementation(Libraries.recyclerview)
+    implementation(Libraries.baseRecyclerViewAdapterHelper)
+    implementation(Libraries.swiperefreshlayout)
+    implementation(Libraries.flexbox)
+    implementation(Libraries.foregroundCompat)
+    implementation(Libraries.drawer)
+    implementation(Libraries.modernAndroidPreferences)
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
-    implementation("de.maxr1998:modernandroidpreferences:2.2.0")
-
-    implementation("com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.4")
 //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")
 
-    val mojito_version: String by rootProject.extra
-    val gson_version: String by rootProject.extra
-    val okhttp_version: String by rootProject.extra
+    implementationSplitties()
+    implementationMojito()
+    implementationGSYVideoPlayer()
 
-    // 图片预览工具
-    implementation("com.github.mikaelzero.mojito:mojito:$mojito_version")
-    //support long image and gif with Sketch
-    implementation("com.github.mikaelzero.mojito:SketchImageViewLoader:$mojito_version")
-    //load with glide
-    implementation("com.github.mikaelzero.mojito:GlideImageLoader:$mojito_version")
 
-    implementation("com.google.code.gson:gson:$gson_version")
-    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
-    implementation("io.grpc:grpc-protobuf-lite:1.33.0")
-
-    // 播放器
-    val gsyVideoPlayerVersion = "v8.3.4-release-jitpack"
-    implementation("com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer:v8.3.4-release-jitpack")
-    implementation("com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${gsyVideoPlayerVersion}")
-    //是否需要ExoPlayer模式
-    implementation("com.github.CarGuo.GSYVideoPlayer:GSYVideoPlayer-exo2:${gsyVideoPlayerVersion}")
+    implementation(Libraries.gson)
+    implementation(Libraries.okhttp3)
+    implementation(Libraries.grpcProtobuf)
+    implementation(Libraries.glide)
+    annotationProcessor(Libraries.glideCompiler)
 
 
     implementation(project(":bilimiao-comm"))
@@ -157,22 +130,18 @@ dependencies {
     implementation(project(":download"))
     implementation(project(":miao-binding"))
     implementation(project(":miao-binding-android"))
-
     // 弹幕引擎
     implementation(project(":DanmakuFlameMaster"))
-//    implementation("com.github.ctiao:DanmakuFlameMaster:0.9.25")
-    implementation("com.github.ctiao:ndkbitmap-armv7a:0.9.21")
-    implementation("com.github.ctiao:ndkbitmap-armv5:0.9.21")
-    implementation("com.github.ctiao:ndkbitmap-x86:0.9.21")
 
     // ijpplayer
 //    implementation project(":ijkplayer-java")
 //    implementation project(":player")
 
     // 百度统计
-    implementation("com.baidu.mobstat:mtj-sdk:latest.integration")
+    implementation(Libraries.baiduMobstat)
 
-    testImplementation("junit:junit:4.+")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+
+    testImplementation(Libraries.junit)
+    androidTestImplementation(Libraries.androidxJunit)
+    androidTestImplementation(Libraries.espresso)
 }
