@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("bilimiao-build")
     repositories {
         gradlePluginPortal()
         google()
@@ -21,4 +22,3 @@ include(":miao-binding", ":miao-binding-android")
 include(":bilimiao-comm", ":bilimiao-cover", "bilimiao-appwidget", "bilimiao-compose")
 include(":DanmakuFlameMaster")
 include(":download")
-

@@ -8,11 +8,12 @@ plugins {
 }
 
 android {
-    compileSdk = 30
+    compileSdk = 32
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 32
+
         version = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -28,10 +29,12 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -41,20 +44,14 @@ dependencies {
     implementation(Libraries.core)
     implementation(Libraries.appcompat)
     implementation(Libraries.material)
-    implementation(Libraries.lifecycleViewModel)
 
-    implementation(Libraries.kotlinxCoroutinesAndroid)
-    implementation(Libraries.glide)
+    //TODO: 弃用RXJAVA，改用kotlin协程
+    implementation("io.reactivex.rxjava2:rxandroid:2.0.2")
+    implementation("io.reactivex.rxjava2:rxjava:2.0.2")
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
-
-    // 图片预览工具
-    implementationMojito()
-
-    implementation(project(":bilimiao-comm"))
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.espresso)
-
 }
