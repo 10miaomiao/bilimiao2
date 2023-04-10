@@ -5,6 +5,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import com.a10miaomiao.bilimiao.comm.attr
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
@@ -16,8 +17,8 @@ class AppBarHorizontalUi(
     override val ctx: Context,
     val menuItemClick: View.OnClickListener,
     val menuItemLongClick: View.OnLongClickListener,
-    val backClick: View.OnClickListener? = null,
-    val backLongClick: View.OnLongClickListener? = null,
+    val backClick: View.OnClickListener,
+    val backLongClick: View.OnLongClickListener,
 ) : AppBarUi {
 
     val mNavigationIcon = imageView {
@@ -27,8 +28,8 @@ class AppBarHorizontalUi(
     val mNavigationIconLayout = frameLayout {
         padding = dip(10)
         bottomPadding = 0
-        backClick?.let(::setOnClickListener)
-        backLongClick?.let(::setOnLongClickListener)
+        setOnClickListener(backClick)
+        setOnLongClickListener(backLongClick)
         addView(mNavigationIcon, lParams {
             gravity = Gravity.CENTER
             width = dip(24)

@@ -179,10 +179,10 @@ class CoverActivity : AppCompatActivity() {
         viewModel.title.observe(this, Observer {
             it?.let { text -> mTitleTv.text = text }
         })
-        viewModel.fileName.observe(this, {
+        viewModel.fileName.observe(this) {
             mIDTv.text = it
             mPermissionTv.text = "文件名：$it.jpg"
-        })
+        }
     }
 
     fun onMenuItemClick(item: MenuItem): Boolean {

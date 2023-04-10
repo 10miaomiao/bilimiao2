@@ -52,6 +52,14 @@ class AppBarView @JvmOverloads constructor(
             updateProp()
         }
 
+    private val backClick = OnClickListener { view ->
+        onBackClick?.onClick(view)
+
+    }
+    private val backLongClick = OnLongClickListener { view ->
+        onBackLongClick?.onLongClick(view) ?: false
+    }
+
     private val menuItemClick = OnClickListener { view ->
         (view as? MenuItemView)?.let {
             if (it.prop.key == MenuKeys.back) {
@@ -85,16 +93,16 @@ class AppBarView @JvmOverloads constructor(
                 context,
                 menuItemClick = menuItemClick,
                 menuItemLongClick = menuItemLongClick,
-                backClick = onBackClick,
-                backLongClick = onBackLongClick
+                backClick = backClick,
+                backLongClick = backLongClick,
             )
         } else {
             AppBarVerticalUi(
                 context,
                 menuItemClick = menuItemClick,
                 menuItemLongClick = menuItemLongClick,
-                backClick = onBackClick,
-                backLongClick = onBackLongClick
+//                backClick = backClick,
+//                backLongClick = backLongClick,
             )
         }
     }

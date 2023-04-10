@@ -1,20 +1,27 @@
 package com.a10miaomiao.bilimiao
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import androidx.annotation.CallSuper
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
@@ -23,28 +30,29 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
-import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
-import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.comm.*
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
+import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.service.PlayerService
+import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.store.*
+import com.a10miaomiao.bilimiao.widget.comm.*
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
-import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
-import splitties.dimensions.dip
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.bindSingleton
 
 
 class MainActivity
@@ -143,14 +151,19 @@ class MainActivity
             startService(Intent(this, PlayerService::class.java))
         }
 
-//        HideBottomViewOnScrollBehavior
-//        ui.mAppBar.hideAll()
+        // 安卓13开始手动申请通知权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                //2、申请权限: 参数二：权限的数组；参数三：请求码
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+            }
+        }
 
     }
-    
-    override fun onNewIntent(intent: Intent) {
+
+    override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        intent.data?.let { uri ->
+        intent?.data?.let { uri ->
             val navOptions = NavOptions.Builder()
                 .setEnterAnim(R.anim.miao_fragment_open_enter)
                 .setExitAnim(R.anim.miao_fragment_open_exit)
@@ -336,6 +349,63 @@ class MainActivity
         super.onStop()
         basePlayerDelegate.onStop()
     }
+
+    /**
+     * 通知权限设置界面跳转
+     */
+    private fun jumpNotificationSetting() {
+        val intent = Intent()
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+                intent.putExtra("app_package", packageName)
+                intent.putExtra("app_uid", applicationInfo.uid)
+            } else {
+                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                intent.addCategory(Intent.CATEGORY_DEFAULT)
+                intent.data = Uri.parse("package:$packageName")
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            val uri = Uri.fromParts("package", packageName, null)
+            intent.data = uri
+            startActivity(intent)
+        }
+    }
+
+    /**
+     * 通知权限授权提示
+     */
+    private fun showNotificationPermissionTips() {
+        MaterialAlertDialogBuilder(this).apply {
+            setTitle("请求授权”通知权限“")
+            setMessage("从Android13开始，需要您授予通知权限，在您向该应用授予该权限之前，该应用都将无法发送通知。\n受影响的功能：通知栏播放器控制器、下载进度通知")
+            setCancelable(false)
+            setPositiveButton("去授权"){ dialog, _ ->
+                jumpNotificationSetting()
+            }
+            setNegativeButton("拒绝", null)
+        }.show()
+    }
+
+    /**
+     * 判断授权的方法  授权成功直接调用写入方法  这是监听的回调
+     * 参数  上下文   授权结果的数组   申请授权的数组
+     */
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            val i = permissions.indexOf(Manifest.permission.POST_NOTIFICATIONS)
+            if (i != -1 && grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                showNotificationPermissionTips()
+            }
+        }
+    }
+
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
