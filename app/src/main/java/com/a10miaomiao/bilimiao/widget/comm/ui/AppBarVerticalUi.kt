@@ -23,8 +23,8 @@ class AppBarVerticalUi(
     override val ctx: Context,
     val menuItemClick: View.OnClickListener,
     val menuItemLongClick: View.OnLongClickListener,
-    val backClick: View.OnClickListener? = null,
-    val backLongClick: View.OnLongClickListener? = null,
+//    val backClick: View.OnClickListener,
+//    val backLongClick: View.OnLongClickListener,
 ) : AppBarUi {
 
     val mTitleHeight = ctx.config.appBarTitleHeight

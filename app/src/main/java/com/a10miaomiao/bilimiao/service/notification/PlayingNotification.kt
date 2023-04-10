@@ -29,7 +29,6 @@ class PlayingNotification(
 ) {
 
     companion object {
-        const val POST_NOTIFICATION_PERMISSION = "android.permission.POST_NOTIFICATION"
 
         const val ACTION_CMD_TOGGLE_PAUSE = "${PlayerService.BILIMIAO_PLAYER_PACKAGE_NAME}.PlayingNotification.cmd.togglepause"
         const val ACTION_CMD_CLOSE = "${PlayerService.BILIMIAO_PLAYER_PACKAGE_NAME}.PlayingNotification.cmd.close"
