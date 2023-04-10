@@ -6,8 +6,8 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
-import androidx.appcompat.graphics.drawable.DrawableWrapper
 import androidx.core.graphics.drawable.DrawableCompat
+import net.mikaelzero.mojito.view.sketch.core.util.DrawableWrapper
 
 @SuppressLint("RestrictedApi")
 class AutoMirrorDrawable(drawable: Drawable) : DrawableWrapper(drawable) {
@@ -44,7 +44,7 @@ class AutoMirrorDrawable(drawable: Drawable) : DrawableWrapper(drawable) {
     }
 
     override fun getConstantState(): ConstantState? =
-        wrappedDrawable.constantState?.let { DelegateConstantState(it) }
+        wrappedDrawable?.constantState?.let { DelegateConstantState(it) }
 
     private class DelegateConstantState(
         private val constantState: ConstantState

@@ -29,6 +29,9 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
+import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
+import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
 import de.Maxr1998.modernpreferences.preferences.SwitchPreference
@@ -46,6 +49,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
     , SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
+        const val PLAYER_DECODER = "player_decoder"
         const val PLAYER_FNVAL = "player_fnval"
         const val PLAYER_BACKGROUND = "player_background"
         const val PLAYER_PROXY = "player_proxy"
@@ -57,6 +61,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         const val PLAYER_SUBTITLE_SHOW = "player_subtitle_show"
         const val PLAYER_AI_SUBTITLE_SHOW = "player_ai_subtitle_show"
+
+        const val DECODER_DEFAULT = "default"
+        const val DECODER_AV1 = "AV1"
 
         const val FNVAL_FLV = "2"
         const val FNVAL_MP4 = "2"
@@ -124,6 +131,14 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
                     aiSubtitlePreference.summary = "AI字幕功能已关闭"
                 }
                 notifyDataSetChanged()
+            } else if (key == PLAYER_DECODER) {
+                if (sharedPreferences.getString(PLAYER_DECODER, DECODER_DEFAULT) == DECODER_AV1) {
+                    // AV1
+                    PlayerFactory.setPlayManager(Libgav1Media3ExoPlayerManager::class.java)
+                } else {
+                    // 默认
+                    PlayerFactory.setPlayManager(Media3ExoPlayerManager::class.java)
+                }
             }
         }
     }
@@ -142,9 +157,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
                     mAdapter = miaoMemo(null) {
                         PreferencesAdapter(createRootScreen())
                     }
-                    miaoEffect(null, {
+                    miaoEffect(null) {
                         adapter = mAdapter
-                    })
+                    }
                 }..lParams(matchParent, matchParent)
             }
         }
@@ -152,6 +167,19 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
     fun createRootScreen() = screen(context) {
         collapseIcon = true
+
+        categoryHeader("0") {
+            title = "播放器设置"
+        }
+        val engineSelection = listOf(
+            SelectionItem(key = DECODER_DEFAULT, title = "默认"),
+            SelectionItem(key = DECODER_AV1, title = "AV1"),
+        )
+        singleChoice(PLAYER_DECODER, engineSelection) {
+            title = "解码器设置"
+            summary = "修改后重启播放器生效"
+            initialSelection = DECODER_DEFAULT
+        }
 
         categoryHeader("1") {
             title = "视频源设置"
