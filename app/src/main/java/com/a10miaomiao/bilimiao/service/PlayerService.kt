@@ -2,14 +2,14 @@ package com.a10miaomiao.bilimiao.service
 
 import android.app.Service
 import android.content.Intent
+import android.media.MediaMetadata
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.os.IBinder
 import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import androidx.media.session.MediaButtonReceiver
-import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
@@ -34,7 +34,13 @@ class PlayerService : Service() {
         }
 
     private val playingNotification by lazy { PlayingNotification(this) }
-    var mediaSession: MediaSessionCompat? = null
+
+    val mediaSession by lazy {
+        MediaSessionCompat(this, "BilimiaoPlayer").apply {
+            setCallback(mediaSessionCallback)
+        }
+    }
+//    var mediaSession: MediaSession? = null
     private val info: PlayingInfo = PlayingInfo()
     private var showNotification = true // 是否显示通知栏控制器
 
@@ -42,11 +48,8 @@ class PlayerService : Service() {
         super.onCreate()
         selfInstance = this
 
-        mediaSession = MediaSessionCompat(
-            this,
-            "BilimiaoPlayer"
-        )
-        mediaSession?.setCallback(mediaSessionCallback)
+
+//        mediaSession?.setCallback(mediaSessionCallback)
 
         sendBroadcast(Intent(ACTION_CREATED))
     }
@@ -142,7 +145,7 @@ class PlayerService : Service() {
                     videoPlayerView?.currentPositionWhenPlaying ?: 0L,
                     1.0f
                 )
-            mediaSession?.setPlaybackState(stateBuilder.build())
+            mediaSession.setPlaybackState(stateBuilder.build())
         }
         playingNotification.updateForPlaying()
     }
@@ -158,7 +161,7 @@ class PlayerService : Service() {
                     1.0f
                 )
 //        setCustomAction(stateBuilder)
-            mediaSession?.setPlaybackState(stateBuilder.build())
+            mediaSession.setPlaybackState(stateBuilder.build())
         }
     }
 

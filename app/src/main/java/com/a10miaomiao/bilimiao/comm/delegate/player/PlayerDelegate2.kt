@@ -7,16 +7,29 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.WindowManager
 import android.widget.ImageView
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.TransferListener
+import androidx.media3.exoplayer.dash.DashMediaSource
+import androidx.media3.exoplayer.dash.manifest.DashManifestParser
+import androidx.media3.exoplayer.source.ConcatenatingMediaSource
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
-import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
-import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
+import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
+import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.network
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -29,14 +42,10 @@ import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.source.*
-import com.google.android.exoplayer2.source.dash.DashMediaSource
-import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.exoplayer2.upstream.TransferListener
+import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
+import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
+import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
+import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,9 +54,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.toast.toast
-import tv.danmaku.ijk.media.exo2.Exo2PlayerManager
-import tv.danmaku.ijk.media.exo2.ExoMediaSourceInterceptListener
-import tv.danmaku.ijk.media.exo2.ExoSourceManager
 import java.io.File
 import java.net.UnknownHostException
 
@@ -103,9 +109,8 @@ class PlayerDelegate2(
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-//        PlayerFactory.setPlayManager(MyIjkPlayerManager::class.java)
-        PlayerFactory.setPlayManager(Exo2PlayerManager::class.java) //EXO模式
-        ExoSourceManager.setExoMediaSourceInterceptListener(this)
+        initPlayer()
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             picInPicHelper = PicInPicHelper(activity, views.videoPlayer)
         }
@@ -165,6 +170,21 @@ class PlayerDelegate2(
         return false
     }
 
+    @OptIn(markerClass = [UnstableApi::class])
+    private fun initPlayer() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        val playerEngine = prefs.getString(VideoSettingFragment.PLAYER_DECODER, VideoSettingFragment.DECODER_DEFAULT)
+        if (playerEngine == VideoSettingFragment.DECODER_AV1) {
+            // AV1
+            PlayerFactory.setPlayManager(Libgav1Media3ExoPlayerManager::class.java)
+        } else {
+            // 默认
+            PlayerFactory.setPlayManager(Media3ExoPlayerManager::class.java)
+        }
+        ExoSourceManager.setExoMediaSourceInterceptListener(this)
+    }
+
+    @OptIn(markerClass = [UnstableApi::class])
     override fun getMediaSource(
         dataSource: String,
         preview: Boolean,

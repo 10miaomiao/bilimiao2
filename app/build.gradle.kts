@@ -96,6 +96,7 @@ dependencies {
     implementation(Libraries.lifecycleViewModel)
     implementation(Libraries.navigationFragment)
     implementation(Libraries.navigationUi)
+    implementation(Libraries.media)
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi) // 依赖注入
@@ -113,15 +114,21 @@ dependencies {
 
     implementationSplitties()
     implementationMojito()
-    implementationGSYVideoPlayer()
 
+    // 播放器相关
+    implementation(Libraries.media3)
+    implementation(Libraries.media3Decoder)
+    implementation(Libraries.media3Ui)
+    implementation(Libraries.media3ExoPlayer)
+    implementation(Libraries.media3ExoPlayerDash)
+    implementation(Libraries.gsyVideoPlayer)
+    implementation(files("libs/lib-decoder-av1-release.aar"))
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
     implementation(Libraries.grpcProtobuf)
     implementation(Libraries.glide)
     annotationProcessor(Libraries.glideCompiler)
-
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-cover"))
@@ -139,7 +146,6 @@ dependencies {
 
     // 百度统计
     implementation(Libraries.baiduMobstat)
-
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
