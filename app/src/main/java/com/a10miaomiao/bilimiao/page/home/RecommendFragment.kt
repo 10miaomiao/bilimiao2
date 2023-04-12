@@ -22,6 +22,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
 import com.a10miaomiao.bilimiao.widget.wrapInNestedScrollableHostLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
@@ -108,7 +109,7 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
 //            _bottomPadding = contentInsets.bottom
 
             views {
-                +recyclerView {
+                +recyclerviewAtViewPager2 {
                     backgroundColor = config.windowBackgroundColor
                     mLayoutManager = _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
@@ -142,7 +143,6 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
                     setColorSchemeResources(config.themeColorResource)
                     setOnRefreshListener(handleRefresh)
                     _isRefreshing = viewModel.triggered
-                }.wrapInNestedScrollableHostLayout{
                 }..lParams(matchParent, matchParent)
             }
         }
