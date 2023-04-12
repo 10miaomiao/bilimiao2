@@ -413,7 +413,7 @@ class HomeFragment : Fragment(), DIAware {
         }.wrapInNestedScrollView (
             height = ViewGroup.LayoutParams.MATCH_PARENT,
             gravity = Gravity.CENTER_HORIZONTAL,
-        ).wrapInNestedScrollableHostLayout()
+        )
     }
 
 }

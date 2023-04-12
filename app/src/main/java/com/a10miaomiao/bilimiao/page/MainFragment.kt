@@ -30,6 +30,7 @@ import com.a10miaomiao.bilimiao.page.home.*
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -273,6 +274,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     _rightPadding = contentInsets.right
                     offscreenPageLimit = ViewPager2.OFFSCREEN_PAGE_LIMIT_DEFAULT
                     isSaveEnabled = false
+                }.wrapInViewPager2Container {
                 }..lParams(matchParent, matchParent) {
                     weight = 1f
                 }

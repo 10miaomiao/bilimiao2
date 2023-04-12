@@ -3,13 +3,15 @@ package com.a10miaomiao.bilimiao.widget
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StyleRes
+import androidx.viewpager2.widget.ViewPager2
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
 import com.a10miaomiao.bilimiao.widget.image.RCImageView
 import com.a10miaomiao.bilimiao.widget.layout.LimitedFrameLayout
-import com.a10miaomiao.bilimiao.widget.layout.NestedScrollableHostLayout
+import com.a10miaomiao.bilimiao.widget.recycler.ViewPager2Container
 import com.a10miaomiao.bilimiao.widget.picker.DatePickerView
 import com.a10miaomiao.bilimiao.widget.picker.MonthPickerView
+import com.a10miaomiao.bilimiao.widget.recycler.RecyclerviewAtViewPager2
 import splitties.views.dsl.core.*
 
 inline fun View.rcImageView(
@@ -58,14 +60,22 @@ inline fun View.wrapInLimitedFrameLayout(
     }
 }
 
-inline fun View.wrapInNestedScrollableHostLayout(
+inline fun ViewPager2.wrapInViewPager2Container(
     @IdRes id: Int = View.NO_ID,
-    initView: NestedScrollableHostLayout.() -> Unit = {}
-): NestedScrollableHostLayout {
-    return view({ NestedScrollableHostLayout(it) }, id).apply {
+    initView: ViewPager2Container.() -> Unit = {}
+): ViewPager2Container {
+    return view({ ViewPager2Container(it) }, id).apply {
         initView()
-        addView(this@wrapInNestedScrollableHostLayout, lParams(matchParent, matchParent))
+        addView(this@wrapInViewPager2Container, lParams(matchParent, matchParent))
     }
+}
+
+inline fun View.recyclerviewAtViewPager2(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: RecyclerviewAtViewPager2.() -> Unit = {}
+): RecyclerviewAtViewPager2 {
+    return view({ RecyclerviewAtViewPager2(it) }, id).apply(initView)
 }
 
 
