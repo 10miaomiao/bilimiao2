@@ -9,6 +9,8 @@ import com.a10miaomiao.bilimiao.comm.utils.AESUtil
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.MiaoEncryptDecrypt
 import com.google.gson.Gson
+import com.kongzue.dialogx.DialogX
+import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
 import java.io.File
 
 class BilimiaoCommApp(
@@ -30,6 +32,9 @@ class BilimiaoCommApp(
     fun onCreate() {
         commApp = this
         readAuthInfo()
+
+        DialogX.init(app)
+        DialogX.globalStyle = MaterialYouStyle.style()
     }
 
     fun setCookie(cookieInfo: LoginInfo.CookieInfo) {

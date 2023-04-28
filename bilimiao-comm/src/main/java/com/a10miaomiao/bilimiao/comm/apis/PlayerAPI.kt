@@ -155,7 +155,9 @@ class PlayerAPI {
         val durl: List<Durl>?,
         val dash: Dash?,
         val code: Int,
-        val support_formats: List<SupportFormats>
+        val support_formats: List<SupportFormats>,
+        val last_play_time: Long,
+        val last_play_cid: String,
     )
 
     data class Durl(

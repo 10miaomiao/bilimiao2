@@ -13,6 +13,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
@@ -425,6 +426,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     override fun onPrepared() {
         super.onPrepared()
         onPrepareDanmaku(this)
+        videoPlayerCallBack?.onPrepared()
     }
 
     override fun onVideoPause() {

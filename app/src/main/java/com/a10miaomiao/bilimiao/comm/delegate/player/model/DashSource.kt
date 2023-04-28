@@ -10,7 +10,7 @@ class DashSource(
     val uposHost: String = ""
 ) {
 
-    private fun getDashVideo(): PlayerAPI.DashItem? {
+    fun getDashVideo(): PlayerAPI.DashItem? {
         val videoList = dashData.video
         var conditionStreams = videoList.find { it.id == quality }
         if (conditionStreams != null) {
@@ -21,7 +21,7 @@ class DashSource(
         return null
     }
 
-    private fun getDashAudio(): PlayerAPI.DashItem? {
+    fun getDashAudio(): PlayerAPI.DashItem? {
         val audioList = dashData.audio
         if (audioList.isNotEmpty()) {
             return audioList[0]
@@ -30,8 +30,9 @@ class DashSource(
     }
 
 
-    fun getMDPUrl(): String {
-        val video = getDashVideo()!!
+    fun getMDPUrl(
+        video: PlayerAPI.DashItem = getDashVideo()!!
+    ): String {
         val audio = getDashAudio()
         var mpdStr = """
 <MPD xmlns="urn:mpeg:DASH:schema:MPD:2011" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" type="static" mediaPresentationDuration="PT${dashData.duration}S" minBufferTime="PT${dashData.min_buffer_time}S">
