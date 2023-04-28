@@ -50,7 +50,12 @@ class LocalVideoPlayerSource(
         if (videoFlie.exists()) {
             val url = Uri.fromFile(videoFlie).toString()
 
-            return PlayerSourceInfo(url, 0, acceptList, duration)
+            return PlayerSourceInfo().also {
+                it.url = url
+                it.quality = 0
+                it.acceptList = acceptList
+                it.duration = duration
+            }
         }
 
         val dashJsonFile = File(
@@ -64,9 +69,19 @@ class LocalVideoPlayerSource(
             val url = Uri.fromFile(videoFile).toString()
             val audioUrl = Uri.fromFile(audioFile).toString()
             val mergingUrl = "[local-merging]\n$url\n$audioUrl"
-            return PlayerSourceInfo(mergingUrl, 0, acceptList, duration)
+            return PlayerSourceInfo().also {
+                it.url = mergingUrl
+                it.quality = 0
+                it.acceptList = acceptList
+                it.duration = duration
+            }
         }
-        return PlayerSourceInfo("", -1, acceptList, duration)
+        return PlayerSourceInfo().also {
+            it.url = ""
+            it.quality = -1
+            it.acceptList = acceptList
+            it.duration = duration
+        }
     }
 
     override suspend fun getDanmakuParser(): BaseDanmakuParser? {

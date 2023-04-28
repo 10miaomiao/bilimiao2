@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.entity.search.SearchResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchVideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.FilterStore
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import kotlinx.coroutines.Dispatchers
@@ -89,25 +90,25 @@ class VideoResultViewModel(
                 .gson<ResultInfo<SearchResultInfo<SearchArchiveInfo>>>()
             if (res.code == 0) {
                 var result = res.data.items.archive
-                var totalCount = 0 // 屏蔽前数量
-                if (result.size < list.pageSize) {
-                    ui.setState { list.finished = true }
-                }
-                totalCount = result.size
-                result = result.filter {
-                    filterStore.filterWord(it.title)
-                            && filterStore.filterUpper(it.mid.toLong())
-                }
-                ui.setState {
-                    if (pageNum == 1) {
-                        list.data = arrayListOf()
+                if (result == null) {
+                    ui.setState {
+                        list.finished = true
                     }
-                    list.data.addAll(result)
+                } else {
+                    var totalCount = result.size // 屏蔽前数量
+                    result = result.filter {
+                        filterStore.filterWord(it.title)
+                                && filterStore.filterUpper(it.mid.toLong())
+                    }
+                    ui.setState {
+                        list.finished = totalCount == 0
+                        if (pageNum == 1) {
+                            list.data = arrayListOf()
+                        }
+                        list.data.addAll(result)
+                    }
                 }
                 list.pageNum = pageNum
-                if (list.data.size < 10 && totalCount != result.size) {
-                    _loadData(pageNum + 1)
-                }
             } else {
                 withContext(Dispatchers.Main) {
                     context.toast(res.message)
