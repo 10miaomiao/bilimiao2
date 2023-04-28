@@ -69,6 +69,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val FNVAL_MP4 = "2"
         const val FNVAL_DASH = "4048"
 
+        const val KEY_AUTO = "AUTO"
         const val KEY_SENSOR_LANDSCAPE = "SENSOR_LANDSCAPE"
         const val KEY_LANDSCAPE = "LANDSCAPE"
         const val KEY_REVERSE_LANDSCAPE = "REVERSE_LANDSCAPE"
@@ -233,15 +234,16 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         }
 
         val fullModeSelection = listOf(
+            SelectionItem(key = KEY_AUTO, title = "跟随视频"),
+            SelectionItem(key = KEY_UNSPECIFIED, title = "跟随系统"),
             SelectionItem(key = KEY_SENSOR_LANDSCAPE, title = "横向全屏(自动旋转)"),
             SelectionItem(key = KEY_LANDSCAPE, title = "横向全屏(固定方向1)"),
             SelectionItem(key = KEY_REVERSE_LANDSCAPE, title = "横向全屏(固定方向2)"),
-            SelectionItem(key = KEY_UNSPECIFIED, title = "不指定方向"),
         )
         singleChoice(PLAYER_FULL_MODE, fullModeSelection) {
             title = "全屏播放设置"
             summary = ""
-            initialSelection = "SENSOR_LANDSCAPE"
+            initialSelection = KEY_AUTO
         }
 
         switch(PLAYER_VERTICAL_DEFAULT_FULL) {
