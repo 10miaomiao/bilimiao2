@@ -19,6 +19,7 @@ class WindowStore(
 
     data class State(
         var bottomSheetFragmentID: Int = 0,
+        var bottomAppBarHeight: Int = 0,
         var windowInsets: Insets = Insets(),
         var contentInsets: Insets = Insets(),
         var bottomSheetContentInsets: Insets = Insets(),
@@ -35,6 +36,9 @@ class WindowStore(
     override fun copyState() = state.copy()
 
     private var density = 1f
+
+    val bottomAppBarHeight get() = state.bottomAppBarHeight
+    val bottomAppBarHeightDp get() = state.bottomAppBarHeight / density
 
     override fun init(context: Context) {
         super.init(context)
@@ -63,6 +67,12 @@ class WindowStore(
         }
     }
 
+    fun setBottomAppBarHeight(height: Int) {
+        this.setState {
+            bottomAppBarHeight = height
+        }
+    }
+
     class Insets(
         val left: Int = 0,
         val top: Int = 0,
@@ -70,10 +80,10 @@ class WindowStore(
         val bottom: Int = 0,
         private val density: Float = 0f,
     ) {
-        val leftDp get() = left / density
-        val topDp get() = top / density
-        val rightDp get() = right / density
-        val bottomDp get() = bottom / density
+        val leftDp = left / density
+        val topDp = top / density
+        val rightDp = right / density
+        val bottomDp = bottom / density
     }
 
 }
