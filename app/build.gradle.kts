@@ -108,6 +108,7 @@ dependencies {
     implementation(Libraries.foregroundCompat)
     implementation(Libraries.drawer)
     implementation(Libraries.modernAndroidPreferences)
+    implementation(Libraries.dialogX)
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
 //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")

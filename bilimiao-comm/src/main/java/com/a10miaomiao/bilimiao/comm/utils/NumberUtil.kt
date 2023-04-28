@@ -41,6 +41,15 @@ object NumberUtil {
 
     }
 
+    fun converDuration(duration: Long): String {
+        var s = (duration % 60).toString()
+        var min = (duration / 60).toString()
+        if (s.length == 1)
+            s = "0$s"
+        if (min.length == 1)
+            min = "0$min"
+        return "$min:$s"
+    }
     fun converDuration(duration: Int): String {
         var s = (duration % 60).toString()
         var min = (duration / 60).toString()

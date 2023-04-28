@@ -5,11 +5,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
@@ -27,6 +30,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
 import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
@@ -35,6 +39,8 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
@@ -46,6 +52,7 @@ import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptList
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
+import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,7 +60,6 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 import java.io.File
 import java.net.UnknownHostException
 
@@ -107,6 +113,7 @@ class PlayerDelegate2(
                 playerStore.clearPlayerInfo()
             }
         }
+    val playerSourceId get() = playerSource?.id ?: ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         initPlayer()
@@ -173,7 +180,10 @@ class PlayerDelegate2(
     @OptIn(markerClass = [UnstableApi::class])
     private fun initPlayer() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        val playerEngine = prefs.getString(VideoSettingFragment.PLAYER_DECODER, VideoSettingFragment.DECODER_DEFAULT)
+        val playerEngine = prefs.getString(
+            VideoSettingFragment.PLAYER_DECODER,
+            VideoSettingFragment.DECODER_DEFAULT
+        )
         if (playerEngine == VideoSettingFragment.DECODER_AV1) {
             // AV1
             PlayerFactory.setPlayManager(Libgav1Media3ExoPlayerManager::class.java)
@@ -277,8 +287,11 @@ class PlayerDelegate2(
     }
 
     private fun historyReport() {
-        playerCoroutineScope.launch(Dispatchers.IO) {
-            playerSource?.historyReport(views.videoPlayer.currentPositionWhenPlaying / 1000)
+        val progress = views.videoPlayer.currentPositionWhenPlaying / 1000
+        playerSource?.let {
+            activity.lifecycleScope.launch(Dispatchers.IO) {
+                it.historyReport(progress)
+            }
         }
     }
 
@@ -294,7 +307,7 @@ class PlayerDelegate2(
             lastPosition = views.videoPlayer.currentPositionWhenPlaying
             speed = newSpeed
             views.videoPlayer.setSpeed(speed, true)
-            toast("已切换到${speed}倍速")
+            PopTip.show("已切换到${speed}倍速").showTop()
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             prefs.edit().putFloat("player_speed", newSpeed).apply()
         }
@@ -307,7 +320,7 @@ class PlayerDelegate2(
             loadPlayerSource(
                 isChangedQuality = true
             )
-            toast("正在切换清晰度")
+            PopTip.show("正在切换清晰度").showTop()
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             prefs.edit().putInt("player_quality", newQuality).apply()
         }
@@ -343,8 +356,22 @@ class PlayerDelegate2(
                     if (lastPosition > 0L) {
                         views.videoPlayer.seekOnStart = lastPosition
                         lastPosition = 0L
-                    } else {
-                        views.videoPlayer.seekOnStart = 0
+                    } else if (
+                        sourceInfo.lastPlayCid == source.id
+                        && sourceInfo.lastPlayTime > 0L
+                    ) {
+                        views.videoPlayer.seekOnStart = sourceInfo.lastPlayTime
+                        lastPosition = 0L
+                        val lastTimeStr = NumberUtil.converDuration(sourceInfo.lastPlayTime / 1000)
+                        controller.postPrepared(sourceInfo.lastPlayCid) {
+                            PopTip.show("自动恢复:$lastTimeStr", "重新开始")
+                                .showTop()
+                                .showLong()
+                                .setButton { dialog, v ->
+                                    views.videoPlayer.startPlayLogic()
+                                    false
+                                }
+                        }
                     }
                     views.videoPlayer.startPlayLogic()
 
@@ -352,9 +379,9 @@ class PlayerDelegate2(
 
                     if (isChangedQuality) {
                         if (sourceInfo.quality == quality) {
-                            toast("已切换至【${sourceInfo.description}】")
+                            PopTip.show("已切换至【${sourceInfo.description}】").showTop()
                         } else {
-                            toast("清晰度切换失败")
+                            PopTip.show("清晰度切换失败").showTop()
                         }
                     } else {
                         views.videoPlayer.subtitleSourceList = withContext(Dispatchers.IO) {
@@ -377,7 +404,7 @@ class PlayerDelegate2(
                 withContext(Dispatchers.Main) {
                     errorMessageBoxController.show("少儿不宜，禁止观看", canRetry = false)
                 }
-            }  catch (e: AreaLimitException) {
+            } catch (e: AreaLimitException) {
                 withContext(Dispatchers.Main) {
                     (playerSource as? BangumiPlayerSource)?.let {
                         areaLimitBoxController.show(it)
@@ -417,11 +444,9 @@ class PlayerDelegate2(
                     )
                 }
             } catch (e: Throwable) {
-                // 避免解析信息出错导致崩溃
-                // showErrorLayout(e.message.toString())
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    toast(e.message.toString())
+                    PopTip.show(e.message.toString()).showTop()
                 }
             }
         }
@@ -435,7 +460,7 @@ class PlayerDelegate2(
         val showSubtitle = prefs.getBoolean(VideoSettingFragment.PLAYER_SUBTITLE_SHOW, true)
         val showAiSubtitle = prefs.getBoolean(VideoSettingFragment.PLAYER_AI_SUBTITLE_SHOW, false)
         if (showSubtitle) {
-            return list.find { showAiSubtitle || it.ai_status == 0  }
+            return list.find { showAiSubtitle || it.ai_status == 0 }
         }
         return null
     }
@@ -443,7 +468,7 @@ class PlayerDelegate2(
     /**
      * 记录播放位置
      */
-    fun reloadPlayer () {
+    fun reloadPlayer() {
         lastPosition = views.videoPlayer.currentPositionWhenPlaying
         loadPlayerSource()
     }
@@ -476,14 +501,13 @@ class PlayerDelegate2(
         scaffoldApp.showPlayer = true
         playerCoroutineScope.onStart()
         playerSource = source
-//        setThumbImageView(source.coverUrl)
+        setThumbImageView(source.coverUrl)
         views.videoPlayer.setSpeed(speed, true)
         loadPlayerSource()
         // 播放倍速提示
         if (speed != 1f) {
-            toast("注意，当前为${speed}倍速")
+            PopTip.show("注意，当前为${speed}倍速").showTop()
         }
-
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // 播放器是否默认全屏播放

@@ -41,35 +41,37 @@ class BangumiPlayerSource(
         } ?: BiliApiService.playerAPI.getBangumiUrl(
             epid, id, quality, fnval
         )
-        val dash = res.dash
-        var duration: Long
-        val url = if (dash != null) {
-            duration = dash.duration * 1000L
-            DashSource(res.quality, dash, uposHost).getMDPUrl()
-        } else {
-            val durl = if (uposHost.isBlank()) {
-                res.durl!!
-            } else {
-                res.durl!!.map {
-                    it.copy(url = UrlUtil.replaceHost(it.url, uposHost))
-                }
+        return PlayerSourceInfo().also {
+            it.lastPlayCid = res.last_play_cid
+            it.lastPlayTime = res.last_play_time
+            it.quality = res.quality
+            it.acceptList = res.accept_quality.mapIndexed { index, i ->
+                PlayerSourceInfo.AcceptInfo(i, res.accept_description[index])
             }
-            if (durl.size == 1) {
-                duration = durl[0].length * 1000L
-                durl[0].url
+            val dash = res.dash
+            if (dash != null) {
+                it.duration = dash.duration * 1000L
+                val dashSource = DashSource(res.quality, dash)
+                val dashVideo = dashSource.getDashVideo()!!
+                it.height = dashVideo.height
+                it.width = dashVideo.width
+                it.url = dashSource.getMDPUrl(dashVideo)
             } else {
-                duration = 0L
-                "[concatenating]\n" + durl.joinToString("\n") {
-                    duration += it.length * 1000L
-                    it.url
+                val durl = res.durl!!
+                if (durl.size == 1) {
+                    it.duration = durl[0].length * 1000L
+                    it.url = durl[0].url
+                } else {
+                    var duration = 0L
+                    it.url = "[concatenating]\n" + durl.joinToString("\n") { d ->
+                        duration += d.length * 1000L
+                        d.url
+                    }
+                    it.duration = duration
                 }
+
             }
         }
-        val acceptDescription = res.accept_description
-        val acceptList = res.accept_quality.mapIndexed { index, i ->
-            PlayerSourceInfo.AcceptInfo(i, acceptDescription[index])
-        }
-        return PlayerSourceInfo(url, res.quality, acceptList, duration)
     }
 
     override suspend fun getSubtitles(): List<SubtitleSourceInfo> {

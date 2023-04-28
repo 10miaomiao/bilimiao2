@@ -4,6 +4,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
 import android.preference.PreferenceManager
 import android.util.Rational
 import android.view.MenuItem
@@ -38,13 +39,16 @@ class PlayerController(
     private val statusBarHelper by instance<StatusBarHelper>()
     private val scaffoldApp get() = delegate.scaffoldApp
     private val views get() = delegate.views
+    private val playerSourceInfo get() = delegate.playerSourceInfo
     private val danmakuContext = DanmakuContext.create()
 
     private var onlyFull = false // 仅全屏播放
 
+    private var preparedRunQueue = mutableListOf<Pair<String, Runnable>>()
+
     private fun getFullMode(): String {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        return prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
+        return prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_AUTO)!!
     }
 
     fun initController() = views.videoPlayer.run {
@@ -74,20 +78,38 @@ class PlayerController(
         updatePlayerMode(activity.resources.configuration)
     }
 
+    /**
+     * 全屏
+     */
     fun fullScreen(fullMode: String) {
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.FULL
         scaffoldApp.fullScreenPlayer = true
         activity.requestedOrientation = when (fullMode) {
+            // 横向全屏(自动旋转)
             VideoSettingFragment.KEY_SENSOR_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            // 横向全屏(固定方向1)
             VideoSettingFragment.KEY_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            // 横向全屏(固定方向2)
             VideoSettingFragment.KEY_REVERSE_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+            // 跟随系统：不指定方向
             VideoSettingFragment.KEY_UNSPECIFIED -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            // 跟随视频：竖向视频时为不指定方向，横向视频时候为横向全屏(自动旋转)
+            VideoSettingFragment.KEY_AUTO -> {
+                if ((playerSourceInfo?.screenProportion ?: 1f) < 1f) {
+                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                } else {
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                }
+            }
             else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
         statusBarHelper.isShowStatus = views.videoPlayer.topContainer.visibility == View.VISIBLE
         statusBarHelper.isShowNavigation = false
     }
 
+    /**
+     * 退出全屏
+     */
     fun smallScreen() {
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.SMALL_TOP
         updatePlayerMode(activity.resources.configuration)
@@ -206,8 +228,9 @@ class PlayerController(
         val checkMenuId = when (fullMode) {
             VideoSettingFragment.KEY_SENSOR_LANDSCAPE -> R.id.full_mode_sl
             VideoSettingFragment.KEY_LANDSCAPE -> R.id.full_mode_l
-                VideoSettingFragment.KEY_REVERSE_LANDSCAPE -> R.id.full_mode_rl
-                VideoSettingFragment.KEY_UNSPECIFIED -> R.id.full_mode_u
+            VideoSettingFragment.KEY_REVERSE_LANDSCAPE -> R.id.full_mode_rl
+            VideoSettingFragment.KEY_UNSPECIFIED -> R.id.full_mode_u
+            VideoSettingFragment.KEY_AUTO -> R.id.full_mode_auto
             else -> R.id.full_mode_sl
         }
         popupMenu.inflate(R.menu.player_full_mode)
@@ -223,6 +246,7 @@ class PlayerController(
             R.id.full_mode_l -> VideoSettingFragment.KEY_LANDSCAPE
             R.id.full_mode_rl -> VideoSettingFragment.KEY_REVERSE_LANDSCAPE
             R.id.full_mode_u -> VideoSettingFragment.KEY_UNSPECIFIED
+            R.id.full_mode_auto -> VideoSettingFragment.KEY_AUTO
             else -> VideoSettingFragment.KEY_SENSOR_LANDSCAPE
         }
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
@@ -265,6 +289,23 @@ class PlayerController(
             delegate.closePlayer()
         }
         smallScreen()
+    }
+
+    /**
+     * 到准备完成后执行
+     */
+    fun postPrepared(id: String, action: Runnable) {
+        preparedRunQueue.add(Pair(id, action))
+    }
+
+    override fun onPrepared() {
+        preparedRunQueue.forEach {
+            val (id, action) = it
+            if (id == delegate.playerSourceId) {
+                views.videoPlayer.post(action)
+            }
+        }
+        preparedRunQueue = mutableListOf()
     }
 
     override fun onVideoPause() {

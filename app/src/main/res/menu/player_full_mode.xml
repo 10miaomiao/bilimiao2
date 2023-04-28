@@ -6,18 +6,18 @@
         android:id="@+id/full_mode"
         android:checkableBehavior="single">
 
+        <item android:title="跟随视频"
+            android:id="@+id/full_mode_auto" />
+        <item android:title="跟随系统"
+            android:id="@+id/full_mode_u" />
         <item android:title="横屏全屏(自动旋转)"
             android:id="@+id/full_mode_sl" />
-
         <item
             android:id="@+id/full_mode_l"
             android:title="横向全屏(固定方向1)" />
 
         <item android:title="横向全屏(固定方向2)"
             android:id="@+id/full_mode_rl" />
-
-        <item android:title="不指定方向"
-            android:id="@+id/full_mode_u" />
 
     </group>
 

@@ -13,6 +13,7 @@ buildscript {
         mavenCentral()
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://maven.aliyun.com/repository/public")
+        maven("https://jitpack.io")
     }
 
     val kotlin_version: String by extra
