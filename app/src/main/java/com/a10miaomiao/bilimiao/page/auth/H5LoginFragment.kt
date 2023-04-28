@@ -154,7 +154,7 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         frameLayout {
             val contentInsets = windowStore.getContentInsets(parentView)
             _topPadding = contentInsets.top
-            _bottomPadding = contentInsets.bottom
+            _bottomPadding = windowStore.bottomAppBarHeight
             _leftPadding = contentInsets.left
             _rightPadding = contentInsets.right
 

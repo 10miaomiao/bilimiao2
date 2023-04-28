@@ -34,6 +34,7 @@ import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.kongzue.dialogx.dialogs.PopTip
 import org.kodein.di.*
 import splitties.experimental.InternalSplittiesApi
 import splitties.toast.toast
@@ -149,14 +150,14 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     val now = System.currentTimeMillis()
                     if (scaffoldApp.showPlayer) {
                         if (now - backKeyPressedTimes > 2000) {
-                            requireActivity().toast("再按一次退出播放")
+                            PopTip.show("再按一次退出播放")
                             backKeyPressedTimes = now
                         } else {
                             playerDelegate.closePlayer()
                         }
                     } else {
                         if (now - backKeyPressedTimes > 2000) {
-                            requireActivity().toast("再按一次退出bilimiao")
+                            PopTip.show("再按一次退出bilimiao")
                             backKeyPressedTimes = now
                         } else {
                             requireActivity().finish()

@@ -184,6 +184,7 @@ fun UserFollowPage(
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(LocalView.current)
+    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
@@ -306,7 +307,7 @@ fun UserFollowPage(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 5.dp, bottom = windowInsets.bottomDp.dp),
+                        .padding(vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
@@ -340,6 +341,9 @@ fun UserFollowPage(
                 LaunchedEffect(Unit) {
                     viewModel.loadMore()
                 }
+            }
+            item {
+                Spacer(modifier = Modifier.height(bottomAppBarHeight.dp))
             }
         }
     }
