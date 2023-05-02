@@ -22,6 +22,7 @@ import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
+import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
@@ -267,10 +268,24 @@ class PlayerController(
     private fun moreMenuItemClick(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.mini_window -> {
-                // 设置宽高比例值，第一个参数表示分子，第二个参数表示分母
-                var aspectRatio = Rational(16, 9)
-                // TODO: 自适应视频画面比例
-                delegate.picInPicHelper?.enterPictureInPictureMode(aspectRatio)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val height = playerSourceInfo?.height
+                    val width = playerSourceInfo?.width
+                    // 设置宽高比例值
+                    var aspectRatio = if (height == null || width == null) {
+                        Rational(16, 9)
+                    } else {
+                        Rational(width, height)
+                    }
+                    try {
+                        delegate.picInPicHelper?.enterPictureInPictureMode(aspectRatio)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        PopTip.show("此设备不支持小窗播放")
+                    }
+                } else {
+                    PopTip.show("小窗播放功能需要安卓8.0及以上版本")
+                }
             }
             R.id.video_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
@@ -326,8 +341,12 @@ class PlayerController(
     }
 
     override fun setStateAndUi(state: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            delegate.picInPicHelper?.updatePictureInPictureActions(state)
+        delegate.picInPicHelper?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && it.isInPictureInPictureMode) {
+                try {
+                    it.updatePictureInPictureActions(state)
+                } catch (e: Exception) { }
+            }
         }
         PlayerService.selfInstance?.playerState = state
     }

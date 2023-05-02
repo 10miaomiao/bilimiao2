@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 class PicInPicHelper(
     val activity: Activity,
     val videoPlayer: DanmakuVideoPlayer
@@ -36,6 +37,9 @@ class PicInPicHelper(
 
 
     private val builder = PictureInPictureParams.Builder()
+
+    var isInPictureInPictureMode = false
+        private set
 
 
     val broadcastReceiver = object : BroadcastReceiver() {
@@ -105,12 +109,12 @@ class PicInPicHelper(
     }
 
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        this.isInPictureInPictureMode = isInPictureInPictureMode
         if (isInPictureInPictureMode) {
             activity.registerReceiver(broadcastReceiver, IntentFilter(ACTION_MEDIA_CONTROL))
         } else {
             activity.unregisterReceiver(broadcastReceiver)
         }
-
     }
 
 }
