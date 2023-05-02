@@ -69,7 +69,6 @@ class ThemeDelegate(
 
     fun onCreate(savedInstanceState: Bundle?) {
         setTheme()
-        DebugMiao.log(Build.VERSION.SDK_INT )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             themeList.add(
                 ThemeInfo(

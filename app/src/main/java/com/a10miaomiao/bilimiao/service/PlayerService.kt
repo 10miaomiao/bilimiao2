@@ -166,8 +166,10 @@ class PlayerService : Service() {
     }
 
     private fun setupMediaSession() {
+        // TODO: 封面
         val metaData = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, info.author ?: "bilimiao")
+            .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, info.author ?: "bilimiao")
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, info.title ?: "bilimiao正在播放")
             .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, info.duration)
 //            .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, (getPosition() + 1).toLong())

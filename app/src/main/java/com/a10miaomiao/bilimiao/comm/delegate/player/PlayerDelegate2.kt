@@ -82,6 +82,9 @@ class PlayerDelegate2(
     val areaLimitBoxController by lazy {
         AreaLimitBoxController(activity, this, di)
     }
+    val completionBoxController by lazy {
+        CompletionBoxController(activity, this, di)
+    }
     val scaffoldApp by lazy { activity.getScaffoldView() }
 
     var picInPicHelper: PicInPicHelper? = null
@@ -286,8 +289,9 @@ class PlayerDelegate2(
         return header
     }
 
-    private fun historyReport() {
-        val progress = views.videoPlayer.currentPositionWhenPlaying / 1000
+    internal fun historyReport() {
+        val progress = views.videoPlayer.currentPosition / 1000
+        DebugMiao.log("historyReport",progress)
         playerSource?.let {
             activity.lifecycleScope.launch(Dispatchers.IO) {
                 it.historyReport(progress)
@@ -359,6 +363,7 @@ class PlayerDelegate2(
                     } else if (
                         sourceInfo.lastPlayCid == source.id
                         && sourceInfo.lastPlayTime > 0L
+                        && sourceInfo.lastPlayTime < sourceInfo.duration - 1
                     ) {
                         views.videoPlayer.seekOnStart = sourceInfo.lastPlayTime
                         lastPosition = 0L
@@ -474,6 +479,7 @@ class PlayerDelegate2(
     }
 
     override fun openPlayer(source: BasePlayerSource) {
+        completionBoxController.hide()
         errorMessageBoxController.hide()
         areaLimitBoxController.hide()
         lastPosition = 0L

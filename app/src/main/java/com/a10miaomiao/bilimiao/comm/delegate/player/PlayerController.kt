@@ -298,6 +298,9 @@ class PlayerController(
         preparedRunQueue.add(Pair(id, action))
     }
 
+    /**
+     * 准备完成
+     */
     override fun onPrepared() {
         preparedRunQueue.forEach {
             val (id, action) = it
@@ -306,6 +309,14 @@ class PlayerController(
             }
         }
         preparedRunQueue = mutableListOf()
+    }
+
+    /**
+     * 播放结束
+     */
+    override fun onAutoCompletion() {
+        delegate.completionBoxController.show()
+        delegate.historyReport()
     }
 
     override fun onVideoPause() {

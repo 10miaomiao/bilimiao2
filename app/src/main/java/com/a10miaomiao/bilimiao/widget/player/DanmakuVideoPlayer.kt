@@ -108,24 +108,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     private val mDanmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
         override fun currMillisecond(): Long {
-            val currentPosition: Long = if (mCurrentState == CURRENT_STATE_PLAYING
-                || mCurrentState == CURRENT_STATE_PAUSE
-            ) {
-                try {
-                    gsyVideoManager.currentPosition
-                } catch (e: Exception) {
-                    0L
-                }
-            } else {
-                mCurrentPosition
+            return try {
+                gsyVideoManager.currentPosition
+            } catch (e: Exception) {
+                0L
             }
-            if (
-                currentPosition < lastTime && lastTime - currentPosition < 1000
-            ) {
-                return lastTime
-            }
-            lastTime = currentPosition
-            return currentPosition
         }
 
         override fun update(curr: Long): Long {
@@ -198,7 +185,14 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     private var subtitleIndex = 0
 
-    // 供外部访问
+    val isAutoCompletion get() = currentState == CURRENT_STATE_AUTO_COMPLETE
+    val currentPosition get() = try {
+        gsyVideoManager.currentPosition
+    } catch (e: Exception) {
+        0L
+    }
+
+    // 供外部访问isAutoCompletion
     val topContainer: ViewGroup get() = mTopContainer
     val qualityView: View get() = mQuality
     val speedView: View get() = mPlaySpeed
@@ -407,7 +401,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         } else {
             super.setViewShowState(view, visibility)
             if (view.id == mBottomLayout.id) {
-                mBottomSubtitleTV.translationY = if (visibility == VISIBLE) 0f else dip(40).toFloat()
+                mBottomSubtitleTV.translationY =
+                    if (visibility == VISIBLE) 0f else dip(40).toFloat()
                 when (mode) {
                     PlayerMode.SMALL_FLOAT -> {
                         mDragBar.visibility = visibility
@@ -427,6 +422,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         super.onPrepared()
         onPrepareDanmaku(this)
         videoPlayerCallBack?.onPrepared()
+    }
+
+    override fun onAutoCompletion() {
+        super.onAutoCompletion()
+        videoPlayerCallBack?.onAutoCompletion()
+        releaseDanmaku()
+        DebugMiao.log("onAutoCompletion")
     }
 
     override fun onVideoPause() {
@@ -451,7 +453,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     override fun onCompletion() {
+        super.onCompletion()
         releaseDanmaku()
+        DebugMiao.log("onCompletion")
     }
 
     override fun release() {
@@ -689,7 +693,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     /**
      * 字幕源信息
      */
-    data class SubtitleSourceInfo (
+    data class SubtitleSourceInfo(
         val id: String,
         val lan: String,
         val lan_doc: String,
@@ -700,7 +704,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     /**
      * 字幕信息
      */
-    data class SubtitleItemInfo (
+    data class SubtitleItemInfo(
         val from: Long,
         val to: Long,
         val content: String,
