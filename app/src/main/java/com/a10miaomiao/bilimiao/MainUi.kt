@@ -115,10 +115,12 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             PlayerService.selfInstance?.videoPlayerView = this
         }
 
+        val completionView = inflate<RelativeLayout>(R.layout.include_completion_box)
         val errorMessageView = inflate<RelativeLayout>(R.layout.include_error_message_box)
         val areaLimitView = inflate<RelativeLayout>(R.layout.include_area_limit_box)
 
         addView(videoPlayerView, lParams(matchParent, matchParent))
+        addView(completionView, lParams(matchParent, matchParent))
         addView(errorMessageView, lParams(matchParent, matchParent))
         addView(areaLimitView, lParams(matchParent, matchParent))
     }

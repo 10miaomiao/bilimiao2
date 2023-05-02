@@ -84,7 +84,6 @@ class PlayingNotification(
 
     fun setPlayingInfo(info: PlayerService.PlayingInfo) {
         playingInfo = info
-        DebugMiao.log("playingInfo0", playingInfo)
         val url = playingInfo.cover
         if (url == null){
             coverBitmap = null
@@ -175,7 +174,6 @@ class PlayingNotification(
             setNotificationActions(it)
             return it
         }
-        DebugMiao.log("playingInfo", playingInfo)
         val builder = NotificationCompat.Builder(playerService, NOTIFICATION_CHANNEL_ID)
 
         builder.setContentTitle(playingInfo.title ?: "bilimiao正在播放")
