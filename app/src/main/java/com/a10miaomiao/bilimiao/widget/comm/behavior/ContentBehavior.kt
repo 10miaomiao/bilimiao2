@@ -25,37 +25,39 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
     }
 
     var viewRef: View? = null
+    var downHeight = 0 // 界面下降高度
     var height = 0
     var width = 0
     var showPlayer = false
 
     override fun onLayoutChild(parent: CoordinatorLayout, child: View, layoutDirection: Int): Boolean {
         if (parent is ScaffoldView) {
-//           ki
             val orientation = parent.orientation
-            var playerWidth = 0
-            var playerHeight = 0
-            if (parent.showPlayer) {
-                playerWidth = parent.playerWidth
-                playerHeight = parent.playerHeight
-            }
+            val playerWidth = parent.playerWidth
+            val playerHeight = parent.playerHeight
             if (parent.fullScreenPlayer) {
                 height = 0
                 width = 0
                 child.layout(0, 0, 0, 0)
-            } else if (orientation == ScaffoldView.HORIZONTAL) {
-//                child.layout(parent.appBarWidth, 0, parent.measuredWidth - playerWidth, parent.measuredHeight)
-//                height = parent.measuredHeight
-//                width = parent.measuredWidth - parent.appBarWidth - playerWidth
-                child.layout(parent.appBarWidth, 0, parent.measuredWidth, parent.measuredHeight)
+            } else {
+                val left = if (orientation == ScaffoldView.HORIZONTAL) parent.appBarWidth else 0
+                child.layout(left, 0, parent.measuredWidth, parent.measuredHeight)
                 height = parent.measuredHeight
-                width = parent.measuredWidth - parent.appBarWidth
-            } else if (orientation == ScaffoldView.VERTICAL) {
-                child.layout(0, playerHeight, parent.measuredWidth, parent.measuredHeight)
-//                height = parent.measuredHeight - parent.appBarHeight - playerHeight
-                height = parent.measuredHeight - playerHeight
-                width = parent.measuredWidth
+                width = parent.measuredWidth - left
+
+                if (orientation == ScaffoldView.VERTICAL) {
+                    child.translationX = 0f
+                    if (downHeight != playerHeight) {
+                        downHeight = playerHeight
+                        startDownAnimation(child, playerHeight.toFloat())
+                    }
+                } else {
+                    child.translationX = 0f
+                    child.translationY = 0f
+                    downHeight = 0
+                }
             }
+
             if (child.layoutParams.height != height || child.layoutParams.width != width) {
                 child.layoutParams.height = height
                 child.layoutParams.width = width
@@ -69,84 +71,14 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         return true
     }
 
-    fun playerChanged (parent: ScaffoldView, show: Boolean) {
-        viewRef?.let {
-            val animate = it.animate()
-            animate.duration = 200
-            animate.setListener(downAnimatorListener)
-            if (parent.orientation == ScaffoldView.HORIZONTAL) {
-                if (show) {
-                    width = parent.measuredWidth - parent.appBarWidth - parent.playerWidth
-                } else {
-                    width = parent.measuredWidth - parent.appBarWidth
-                }
-//                animate.scaleX(
-//                    width.toFloat() / it.layoutParams.width.toFloat()
-//                )
-                animate.translationX(
-                    (width.toFloat() - it.layoutParams.width.toFloat()) / 4
-                )
-            } else if (parent.orientation == ScaffoldView.VERTICAL) {
-                if (show) {
-                    height = parent.measuredHeight - parent.appBarHeight - parent.playerHeight
-                } else {
-                    height = parent.measuredHeight - parent.appBarHeight
-                }
-//                animate.scaleY(
-//                    height.toFloat() / it.layoutParams.height.toFloat()
-//                )
-                animate.translationY(
-                    (it.layoutParams.height.toFloat() - height.toFloat()) / 4
-                )
-            }
-            animate.start()
-        }
-    }
-
-    private val downAnimatorListener = object : Animator.AnimatorListener {
-        override fun onAnimationStart(animation: Animator) {
-
-        }
-
-        override fun onAnimationEnd(animation: Animator) {
-            viewRef?.let {
-                if (it.layoutParams.height != height || it.layoutParams.width != width) {
-                    it.layoutParams.height = height
-                    it.layoutParams.width = width
-//                    it.requestLayout()
-                    val animate = it.animate()
-                    animate.duration = 100
-                    animate.setListener(upAnimatorListener)
-                    animate.translationY(0f)
-                    animate.translationX(0f)
-                    animate.start()
-                }
-            }
-        }
-
-        override fun onAnimationCancel(animation: Animator) {
-
-        }
-
-        override fun onAnimationRepeat(animation: Animator) {}
-    }
-
-    private val upAnimatorListener = object : Animator.AnimatorListener {
-        override fun onAnimationStart(animation: Animator) {
-//            viewRef?.layoutParams?.height = height
-//            viewRef?.requestLayout()
-            viewRef?.requestLayout()
-        }
-
-        override fun onAnimationEnd(animation: Animator) {
-//            headerViewRef?.visibility = View.GONE
-        }
-
-        override fun onAnimationCancel(animation: Animator) {
-
-        }
-
-        override fun onAnimationRepeat(animation: Animator) {}
+    private fun startDownAnimation(
+        child: View,
+        height: Float,
+    ) {
+        child.animate().apply {
+            duration = 200
+            translationY(height)
+        }.start()
     }
 
 

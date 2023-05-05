@@ -229,14 +229,12 @@ class DownloadFragment : Fragment(), DIAware, MyPage {
                     }
                     headerViews(mAdapter) {
                         +frameLayout {
-                        }..lParams(matchParent, 0) {
-                            _height = contentInsets.top
+                            _topPadding = contentInsets.top
                         }
                     }
                     footerViews(mAdapter) {
                         +frameLayout {
-                        }..lParams(matchParent, 0) {
-                            _height = contentInsets.bottom
+                            _topPadding = contentInsets.bottom
                         }
                     }
                 }..lParams(matchParent, matchParent) {

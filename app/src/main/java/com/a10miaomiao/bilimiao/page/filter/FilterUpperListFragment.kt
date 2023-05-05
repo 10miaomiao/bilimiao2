@@ -143,8 +143,8 @@ class FilterUpperListFragment : Fragment(), DIAware, MyPage {
                 isForceUpdate = true,
             )
             headerViews(mAdapter) {
-                +frameLayout()..lParams {
-                    _height = insets.top
+                +frameLayout {
+                    _topPadding = insets.top
                 }
             }
             footerViews(mAdapter) {
@@ -163,8 +163,8 @@ class FilterUpperListFragment : Fragment(), DIAware, MyPage {
                         }
                     }
                 }..lParams(matchParent, dip(400))
-                +frameLayout()..lParams {
-                    _height = insets.bottom
+                +frameLayout {
+                    _topPadding = insets.bottom
                 }
             }
         }

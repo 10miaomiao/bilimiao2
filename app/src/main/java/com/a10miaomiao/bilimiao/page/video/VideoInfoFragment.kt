@@ -736,6 +736,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         connectStore(viewLifecycleOwner, windowStore)
         connectStore(viewLifecycleOwner, playerStore)
         val contentInsets = windowStore.getContentInsets(parentView)
+        DebugMiao.log("VideoInfoFragmentContentInsets", contentInsets)
         val info = viewModel.info
         // 监听info改变，修改页面标题
         miaoEffect(listOf(info, info?.req_user, info?.staff)) {
@@ -764,8 +765,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
             }
             footerViews(mAdapter) {
                 +frameLayout {
-                }..lParams {
-                    _height = contentInsets.bottom
+                    _topPadding = contentInsets.bottom
                 }
             }
         }.wrapInSwipeRefreshLayout {

@@ -39,7 +39,6 @@ class PicInPicHelper(
     private val builder = PictureInPictureParams.Builder()
 
     var isInPictureInPictureMode = false
-        private set
 
 
     val broadcastReceiver = object : BroadcastReceiver() {
