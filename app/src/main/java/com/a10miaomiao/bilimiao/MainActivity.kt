@@ -276,9 +276,15 @@ class MainActivity
         val showPlayer = ui.root.showPlayer
         val fullScreenPlayer = ui.root.fullScreenPlayer
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
-            windowStore.setContentInsets(
-                left, if (showPlayer) 0 else top, right, bottom + config.appBarTitleHeight,
-            )
+            if (showPlayer) {
+                windowStore.setContentInsets(
+                    left, 0, right, bottom + config.appBarTitleHeight + ui.root.playerHeight,
+                )
+            } else {
+                windowStore.setContentInsets(
+                    left, top, right, bottom + config.appBarTitleHeight,
+                )
+            }
             windowStore.setBottomAppBarHeight(bottom + config.appBarHeight)
             ui.mAppBar.setPadding(
                 left, 0, right, bottom
@@ -409,6 +415,7 @@ class MainActivity
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         basePlayerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)

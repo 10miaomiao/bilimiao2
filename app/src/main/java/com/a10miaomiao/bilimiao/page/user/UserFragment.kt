@@ -47,6 +47,7 @@ import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
 import splitties.views.backgroundColor
+import splitties.views.bottomPadding
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
@@ -466,9 +467,14 @@ class UserFragment : Fragment(), DIAware, MyPage {
             val mAdapter = _miaoAdapter(null, itemUi)
 
             headerViews(mAdapter) {
-                +userCardView()..lParams(matchParent, wrapContent) {
+                +frameLayout {
+                    _topPadding = contentInsets.top
+                }
+
+                +userCardView().apply {
+                }..lParams(matchParent, wrapContent) {
                     horizontalMargin = config.pagePadding
-                    _topMargin = contentInsets.top + config.pagePadding
+                    topMargin = config.pagePadding
                 }
 
                 val subject = if(viewModel.isSelf) "我" else "Ta"
@@ -615,7 +621,6 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 +recyclerView {
                     horizontalPadding = config.pagePadding
                     _show = isShow
-                    _bottomPadding = contentInsets.bottom + config.pagePadding
                     isNestedScrollingEnabled = false
                     _miaoLayoutManage(
                         GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
@@ -632,6 +637,9 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         setOnItemClickListener(handleItemClick)
                     }
                 }..lParams(matchParent, wrapContent)
+                +frameLayout {
+                    _topPadding = contentInsets.bottom + config.pagePadding
+                }
             }
         }.wrapInLimitedFrameLayout {
             maxWidth = config.containerWidth
