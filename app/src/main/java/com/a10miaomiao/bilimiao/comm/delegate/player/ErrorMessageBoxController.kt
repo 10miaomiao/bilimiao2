@@ -35,6 +35,7 @@ class ErrorMessageBoxController(
             delegate.reloadPlayer()
         }
         errorMessageCloseBtn.setOnClickListener {
+            delegate.controller.smallScreen()
             hide()
             delegate.closePlayer()
         }
