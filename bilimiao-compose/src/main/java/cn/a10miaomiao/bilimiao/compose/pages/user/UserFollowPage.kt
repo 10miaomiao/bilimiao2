@@ -116,11 +116,11 @@ class UserFollowPageViewModel(
             } else {
                 list.fail.value = res.message
             }
-            isRefreshing.value = false
         } catch (e: Exception) {
             list.fail.value = "无法连接到御坂网络"
         } finally {
             list.loading.value = false
+            isRefreshing.value = false
         }
     }
 
@@ -343,7 +343,7 @@ fun UserFollowPage(
                 }
             }
             item {
-                Spacer(modifier = Modifier.height(bottomAppBarHeight.dp))
+                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
             }
         }
     }

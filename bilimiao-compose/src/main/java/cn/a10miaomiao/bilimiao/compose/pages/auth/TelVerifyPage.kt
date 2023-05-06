@@ -354,6 +354,7 @@ fun TelVerifyPage(
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(LocalView.current)
+    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     val verifyType by viewModel.verifyType.collectAsState()
     val tmpAccountInfo by viewModel.tmpAccountInfo.collectAsState()
@@ -498,7 +499,7 @@ fun TelVerifyPage(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
         }
     }
 

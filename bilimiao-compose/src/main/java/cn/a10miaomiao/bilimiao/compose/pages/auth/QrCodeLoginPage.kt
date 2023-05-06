@@ -173,6 +173,7 @@ fun QrCodeLoginPage() {
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
+    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     val scrollState = rememberScrollState()
 

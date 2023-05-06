@@ -42,8 +42,8 @@ class BangumiPlayerSource(
             epid, id, quality, fnval
         )
         return PlayerSourceInfo().also {
-            it.lastPlayCid = res.last_play_cid
-            it.lastPlayTime = res.last_play_time
+            it.lastPlayCid = res.last_play_cid ?: ""
+            it.lastPlayTime = res.last_play_time ?: 0
             it.quality = res.quality
             it.acceptList = res.accept_quality.mapIndexed { index, i ->
                 PlayerSourceInfo.AcceptInfo(i, res.accept_description[index])
