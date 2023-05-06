@@ -285,7 +285,7 @@ class MainActivity
                     left, top, right, bottom + config.appBarTitleHeight,
                 )
             }
-            windowStore.setBottomAppBarHeight(bottom + config.appBarHeight)
+            windowStore.setBottomAppBarHeight(config.appBarMenuHeight)
             ui.mAppBar.setPadding(
                 left, 0, right, bottom
             )
@@ -299,7 +299,7 @@ class MainActivity
             windowStore.setContentInsets(
                 0, top, right, bottom,
             )
-            windowStore.setBottomAppBarHeight(bottom)
+            windowStore.setBottomAppBarHeight(0)
             ui.mAppBar.setPadding(
                 left, top, 0, bottom
             )

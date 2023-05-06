@@ -205,7 +205,7 @@ class WebFragment : Fragment(), DIAware, MyPage {
             _leftPadding = contentInsets.left
             _rightPadding = contentInsets.right
 //            _topPadding = contentInsets.top
-            _bottomPadding = windowStore.bottomAppBarHeight
+            _bottomPadding = contentInsets.bottom + windowStore.bottomAppBarHeight
 
             views {
                 +view<WebView>(ID_webView) {

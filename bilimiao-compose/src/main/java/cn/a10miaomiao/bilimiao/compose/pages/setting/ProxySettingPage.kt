@@ -51,6 +51,7 @@ fun ProxySettingPage() {
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
+    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     val serverList by viewModel.serverList.collectAsState()
 
@@ -115,7 +116,7 @@ fun ProxySettingPage() {
                         modifier = Modifier
                             .height(200.dp)
                             .fillMaxWidth()
-                            .padding(bottom = windowInsets.bottomDp.dp),
+                            .padding(bottom = windowInsets.bottomDp.dp + bottomAppBarHeight.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -128,7 +129,7 @@ fun ProxySettingPage() {
                         modifier = Modifier
                             .height(50.dp)
                             .fillMaxWidth()
-                            .padding(bottom = windowInsets.bottomDp.dp),
+                            .padding(bottom = windowInsets.bottomDp.dp + bottomAppBarHeight.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(

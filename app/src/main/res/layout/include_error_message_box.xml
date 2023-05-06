@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    android:id="@+id/error_message_layout">
+    android:id="@+id/error_message_layout"
+    android:visibility="gone">
 
     <View
         android:layout_width="30dp"

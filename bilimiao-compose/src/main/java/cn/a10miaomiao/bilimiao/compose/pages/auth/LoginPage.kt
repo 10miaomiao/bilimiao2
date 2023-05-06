@@ -262,6 +262,7 @@ fun LoginPage(
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(LocalView.current)
+    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     val loading by viewModel.loading.collectAsState()
     val userName by viewModel.userName.collectAsState()
@@ -411,7 +412,7 @@ fun LoginPage(
                     Text(text = "二微码登录")
                 }
             }
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
 
         }
     }
