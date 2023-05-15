@@ -5,7 +5,6 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-android")
     id("bilimiao-build")
-//    kotlin("android")
 }
 
 android {
@@ -16,8 +15,8 @@ android {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 21
         targetSdk = 33
-        versionCode = 73
-        versionName = "2.2.6 beta1"
+        versionCode = 76
+        versionName = "2.2.6 beta3.1"
 
         flavorDimensions("default")
 
@@ -85,7 +84,6 @@ android {
         isCheckReleaseBuilds = false
         isAbortOnError = false
     }
-
 }
 
 dependencies {

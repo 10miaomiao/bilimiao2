@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -24,8 +25,11 @@ import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
+import com.a10miaomiao.bilimiao.page.filter.FilterListFragment
+import com.a10miaomiao.bilimiao.page.setting.*
 import com.a10miaomiao.bilimiao.store.RegionStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -47,6 +51,13 @@ import java.io.InputStreamReader
 
 class SettingFragment : Fragment(), DIAware, MyPage
     , SharedPreferences.OnSharedPreferenceChangeListener {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "setting"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://setting")
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "设置"
@@ -211,7 +222,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             summary = "库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                nav.navigate(MainNavGraph.action.setting_to_themeSetting)
+                nav.navigate(ThemeSettingFragment.actionId)
                 true
             }
         }
@@ -221,7 +232,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             summary = "整个宇宙将为你闪烁"
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                nav.navigate(MainNavGraph.action.setting_to_homeSetting)
+                nav.navigate(HomeSettingFragment.actionId)
                 true
             }
         }
@@ -231,7 +242,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             summary = "咖啡拿铁,咖啡摩卡,卡布奇诺!"
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                nav.navigate(MainNavGraph.action.setting_to_videoSetting)
+                nav.navigate(VideoSettingFragment.actionId)
                 true
             }
         }
@@ -241,7 +252,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             summary = "相信的心就是你的魔法"
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                nav.navigate(MainNavGraph.action.setting_to_danmakuSetting)
+                nav.navigate(DanmakuSettingFragment.actionId)
                 true
             }
         }
@@ -251,7 +262,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             summary = "只对时光机生效"
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                nav.navigate(MainNavGraph.action.setting_to_filterList)
+                nav.navigate(FilterListFragment.actionId)
                 true
             }
         }
@@ -285,7 +296,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             summary = "版本：$version"
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                nav.navigate(MainNavGraph.action.setting_to_about)
+                nav.navigate(AboutFragment.actionId)
                 true
             }
         }

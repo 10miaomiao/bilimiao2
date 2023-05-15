@@ -8,13 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavType
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -36,7 +41,7 @@ import java.util.*
 
 class WebFragment : Fragment(), DIAware, MyPage {
 
-    companion object {
+    companion object : FragmentNavigatorBuilder() {
         /**
          * User-Agent: Mozilla/5.0 (Linux; Android 6.0.1; MuMu Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36 os/android model/MuMu build/6710300 osVer/6.0.1 sdkInt/23 network/2 BiliApp/6710300 mobi_app/android channel/bili Buvid/XZB6797B5E07C2A4D64B31242957D7B1B9CDF sessionID/4bfd832a innerVer/6710300 c_locale/zh_CN s_locale/zh_CN disable_rcmd/0
          */
@@ -53,6 +58,21 @@ class WebFragment : Fragment(), DIAware, MyPage {
             |s_locale/zh_CN 
             |disable_rcmd/0
         """.trimMargin().replace("\n", "")
+
+        override val name = "web"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilibili://browser/?url={url}")
+            argument(MainNavArgs.url) {
+                type = NavType.StringType
+                nullable = true
+            }
+        }
+
+        fun createArguments(url: String): Bundle {
+            return bundleOf(
+                MainNavArgs.url to url
+            )
+        }
     }
 
     private var pageTitle = "加载中"
@@ -185,7 +205,7 @@ class WebFragment : Fragment(), DIAware, MyPage {
             }
             webView.addJavascriptInterface(BiliJsBridge(), "_BiliJsBridge")
 //            webView.addJavascriptInterface(InJavaScriptLocalObj2(), "java_obj.test")
-            val url = requireArguments().getString(MainNavGraph.args.url)
+            val url = requireArguments().getString(MainNavArgs.url)
             if (url == null) {
                 findNavController().popBackStack()
             } else {

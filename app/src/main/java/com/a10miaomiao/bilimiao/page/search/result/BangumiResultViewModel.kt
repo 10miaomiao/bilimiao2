@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchBangumiInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchListInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchUpperInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.store.FilterStore
@@ -31,7 +32,7 @@ class BangumiResultViewModel (
     val fragment: Fragment by instance()
     val filterStore: FilterStore by instance()
 
-    val keyword by lazy { fragment.requireArguments().getString(MainNavGraph.args.text, "") }
+    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text, "") }
 
     var list = PaginationInfo<SearchBangumiInfo>()
     var triggered = false

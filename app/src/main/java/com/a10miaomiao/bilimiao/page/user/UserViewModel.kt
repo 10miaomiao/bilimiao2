@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.store.FilterStore
@@ -55,7 +56,7 @@ class UserViewModel(
     val isFollow get() = dataInfo?.card?.relation?.is_follow == 1
 
     init {
-        id = fragment.requireArguments().getString(MainNavGraph.args.id, "")
+        id = fragment.requireArguments().getString(MainNavArgs.id, "")
         if (id.isBlank() && userStore.isLogin()) {
             id = userStore.state.info?.mid?.toString() ?: ""
         }

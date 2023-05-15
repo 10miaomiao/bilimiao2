@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ class DownloadVideoCreateViewModel(
     val fragment: Fragment by instance()
     val downloadDelegate: DownloadDelegate by instance()
 
-    val video = fragment.requireArguments().getParcelable<DownloadVideoCreateParam>(MainNavGraph.args.video)!!
+    val video = fragment.requireArguments().getParcelable<DownloadVideoCreateParam>(MainNavArgs.video)!!
 
     var acceptDescription = listOf<String>()
     var acceptQuality = listOf<Int>()

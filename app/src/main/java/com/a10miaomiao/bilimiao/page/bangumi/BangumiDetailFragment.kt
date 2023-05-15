@@ -12,7 +12,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view.*
@@ -31,6 +33,8 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -38,6 +42,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.layout.DoubleColumnAutofitLayout
@@ -55,6 +60,26 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
 class BangumiDetailFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "bangumi.detail"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://bangumi/season/{id}")
+            deepLink("bilibili://bangumi/season/{id}")
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+
+        fun createArguments(
+            id: String
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.id to id,
+            )
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "番剧详情"
@@ -170,8 +195,8 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
         viewModel.detailInfo?.let { info ->
             val nav =
                 Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
-            val args = bundleOf(
-                MainNavGraph.args.bangumi to BangumiPagesParam(
+            val args = BangumiPagesFragment.createArguments(
+                BangumiPagesParam(
                     sid = info.season_id.toString(),
                     title = info.title,
                     episodes = viewModel.mainEpisodes.map {
@@ -186,7 +211,7 @@ class BangumiDetailFragment : Fragment(), DIAware, MyPage {
                     }
                 )
             )
-            nav.navigate(MainNavGraph.action.global_to_bangumiPages, args)
+            nav.navigate(BangumiPagesFragment.actionId, args)
         }
     }
 

@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -19,6 +21,8 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -27,6 +31,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
@@ -42,7 +47,30 @@ import splitties.views.dsl.recyclerview.recyclerView
 
 class UserFavouriteDetailFragment : Fragment(), DIAware, MyPage {
 
-    private val name by lazy { requireArguments().getString(MainNavGraph.args.name, "") }
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "user.favourite.detail"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(MainNavArgs.name) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+        fun createArguments(
+            id: String,
+            name: String,
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.id to id,
+                MainNavArgs.name to name,
+            )
+        }
+    }
+
+    private val name by lazy { requireArguments().getString(MainNavArgs.name, "") }
 
     override val pageConfig = myPageConfig {
         title = name
@@ -75,11 +103,9 @@ class UserFavouriteDetailFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.id
-        )
+        val args = VideoInfoFragment.createArguments(item.id)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.userFavouriteDetail_to_videoInfo, args)
+            .navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<MediasInfo> { item, index ->

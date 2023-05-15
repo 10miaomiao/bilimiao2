@@ -9,12 +9,16 @@ import android.view.ViewGroup
 import android.webkit.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.miao.binding.android.view.*
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -28,6 +32,35 @@ import splitties.views.dsl.core.*
 import java.util.regex.Pattern
 
 class UserFollowFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "user.follow"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(MainNavArgs.type) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(MainNavArgs.name) {
+                type = NavType.StringType
+                defaultValue = "Ta"
+            }
+        }
+        fun createArguments(
+            id: String,
+            type: String,
+            name: String = "Ta",
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.id to id,
+                MainNavArgs.type to type,
+                MainNavArgs.name to name,
+            )
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = if (userStore.isSelf(mid!!)) {
@@ -46,9 +79,9 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
 
     private val userStore by instance<UserStore>()
 
-    private val type by lazy { requireArguments().getString(MainNavGraph.args.type) }
-    private val mid by lazy { requireArguments().getString(MainNavGraph.args.id) }
-    private val name by lazy { requireArguments().getString(MainNavGraph.args.name) }
+    private val type by lazy { requireArguments().getString(MainNavArgs.type) }
+    private val mid by lazy { requireArguments().getString(MainNavArgs.id) }
+    private val name by lazy { requireArguments().getString(MainNavArgs.name) }
     private var loading: Boolean = false
 
     override fun onCreateView(
@@ -72,11 +105,9 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
             val matcher = compile.matcher(url)
             if (matcher.find()) {
                 val id = matcher.group(1)
-                val args = bundleOf(
-                    MainNavGraph.args.id to id,
-                )
+                val args = UserFragment.createArguments(id)
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.userFollow_to_user, args)
+                    .navigate(UserFragment.actionId, args)
                 return true
             }
 //            if (night){

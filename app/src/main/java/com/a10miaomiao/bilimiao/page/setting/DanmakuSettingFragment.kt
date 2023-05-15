@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -21,6 +22,7 @@ import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -40,9 +42,15 @@ import splitties.views.dsl.recyclerview.recyclerView
 class DanmakuSettingFragment : Fragment(), DIAware, MyPage
     , SharedPreferences.OnSharedPreferenceChangeListener {
 
-    companion object {
+    companion object : FragmentNavigatorBuilder() {
         const val UPDATE_ACTION = "com.a10miaomiao.bilimiao.ui.setting.DanmakuSettingFragment.UPDATE"
+
+        override val name = "setting.danmaku"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://setting/danmaku")
+        }
     }
+
 
     override val pageConfig = myPageConfig {
         title = "弹幕设置"

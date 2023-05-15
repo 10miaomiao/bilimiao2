@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -76,12 +77,10 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.param
-        )
         if (item.goto == "av" || item.goto == "vertical_av") {
+            val args = VideoInfoFragment.createArguments(item.param)
             Navigation.findNavController(view)
-                .navigate(MainNavGraph.action.global_to_videoInfo, args)
+                .navigate(VideoInfoFragment.actionId, args)
         } else {
             BiliUrlMatcher.toUrlLink(view, item.uri)
         }

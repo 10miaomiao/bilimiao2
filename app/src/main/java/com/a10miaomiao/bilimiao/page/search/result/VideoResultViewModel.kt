@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchArchiveInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchVideoInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -36,7 +37,7 @@ class VideoResultViewModel(
     val fragment: Fragment by instance()
     val filterStore: FilterStore by instance()
 
-    val keyword by lazy { fragment.requireArguments().getString(MainNavGraph.args.text, "") }
+    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text, "") }
 
     var list = PaginationInfo<SearchVideoInfo>()
     var triggered = false

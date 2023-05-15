@@ -138,7 +138,7 @@ class H5LoginViewModel(
             }
             if (res.isSuccess) {
                 userStore.setUserInfo(res.data)
-                fragment.findNavController().popBackStack(MainNavGraph.dest.home, false)
+                fragment.findNavController().popBackStack(MainNavGraph.dest.main, false)
             } else {
                 alert("获取用户信息失败，请稍后重试：" + res.message)
                 throw Exception(res.message)

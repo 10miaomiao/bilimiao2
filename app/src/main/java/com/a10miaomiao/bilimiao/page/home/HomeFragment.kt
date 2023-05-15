@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -30,6 +31,8 @@ import com.a10miaomiao.bilimiao.comm.utils.MiaoEncryptDecrypt
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.region.RegionFragment
+import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.comment.ReplyDetailParam
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
@@ -89,17 +92,13 @@ class HomeFragment : Fragment(), DIAware {
         if (userInfo != null) {
             // 跳转个人中心
             val nav = Navigation.findNavController(it)
-            val args = bundleOf(
-                MainNavGraph.args.id to userInfo.mid.toString()
-            )
-            nav.navigate(MainNavGraph.action.home_to_user, args)
+            val args = UserFragment.createArguments(userInfo.mid.toString())
+            nav.navigate(UserFragment.actionId, args)
         } else {
             // 跳转登录
             val nav = Navigation.findNavController(it)
             val url = "bilimiao://auth/login"
-            nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-                MainNavGraph.args.url to url
-            ))
+            nav.navigateToCompose(url)
         }
     }
 
@@ -108,9 +107,7 @@ class HomeFragment : Fragment(), DIAware {
             // 跳转登录
             val nav = Navigation.findNavController(it)
             val url = "bilimiao://auth/login"
-            nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-                MainNavGraph.args.url to url
-            ))
+            nav.navigateToCompose(url)
             true
         } else {
             false
@@ -120,9 +117,7 @@ class HomeFragment : Fragment(), DIAware {
     val handleTimeSettingClick = View.OnClickListener {
         val nav = requireActivity().findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
         val url = "bilimiao://time/setting"
-        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-            MainNavGraph.args.url to url
-        ))
+        nav.navigateToCompose(url)
     }
 
     val handleAdClick = View.OnClickListener {
@@ -169,10 +164,8 @@ class HomeFragment : Fragment(), DIAware {
     val regionItemClick = OnItemClickListener { baseQuickAdapter, view, i  ->
         val regions = viewModel.regionStore.state.regions
         val nav = Navigation.findNavController(view)
-        val args = bundleOf(
-            MainNavGraph.args.region to regions[i]
-        )
-        nav.navigate(MainNavGraph.action.home_to_region, args)
+        val args = RegionFragment.createArguments(regions[i])
+        nav.navigate(RegionFragment.actionId, args)
     }
 
     fun MiaoUI.timeView(): View {
@@ -391,16 +384,16 @@ class HomeFragment : Fragment(), DIAware {
 //                    setOnClickListener {
 //                        val nav = it.findNavController()
 //                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-//                            MainNavGraph.args.url to PageRoute.Auth.login.url()
+//                            MainNavArgs.url to PageRoute.Auth.login.url()
 //                        ))
 //                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-//                            MainNavGraph.args.url to "bilimiao://setting/proxy"
+//                            MainNavArgs.url to "bilimiao://setting/proxy"
 //                        ))
 //
 //                        【不當哥哥了！（僅限港澳台地區）】https://www.bilibili.com/bangumi/play/ep719017?vd_source=2bcb4ee461719ac7def0c91f553096a3
 //                         https://www.bilibili.com/bangumi/play/ss44493
 //                        nav.navigate(MainNavGraph.action.global_to_bangumiDetail, bundleOf(
-//                            MainNavGraph.args.id to "44493"
+//                            MainNavArgs.id to "44493"
 //                        ))
 //                    }
 //                }

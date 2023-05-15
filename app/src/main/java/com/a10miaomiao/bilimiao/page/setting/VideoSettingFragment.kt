@@ -10,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -25,6 +26,8 @@ import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
@@ -48,7 +51,12 @@ import splitties.views.dsl.recyclerview.recyclerView
 class VideoSettingFragment : Fragment(), DIAware, MyPage
     , SharedPreferences.OnSharedPreferenceChangeListener {
 
-    companion object {
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "setting.video"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://setting/video")
+        }
+
         const val PLAYER_DECODER = "player_decoder"
         const val PLAYER_FNVAL = "player_fnval"
         const val PLAYER_BACKGROUND = "player_background"
@@ -204,9 +212,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             onClick {
                 val nav = findNavController()
                 val url = "bilimiao://setting/proxy"
-                nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-                    MainNavGraph.args.url to url
-                ))
+                nav.navigateToCompose(url)
                 true
             }
         }

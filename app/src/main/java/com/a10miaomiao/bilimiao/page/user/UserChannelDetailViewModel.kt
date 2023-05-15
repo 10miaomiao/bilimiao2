@@ -10,6 +10,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -30,9 +31,9 @@ class UserChannelDetailViewModel (
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val mid by lazy { fragment.requireArguments().getString(MainNavGraph.args.parent, "") }
-    val cid by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
-    val name by lazy { fragment.requireArguments().getString(MainNavGraph.args.name, "") }
+    val mid by lazy { fragment.requireArguments().getString(MainNavArgs.parent, "") }
+    val cid by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
+    val name by lazy { fragment.requireArguments().getString(MainNavArgs.name, "") }
 
     var triggered = false
     var list = PaginationInfo<VideoArchives>()

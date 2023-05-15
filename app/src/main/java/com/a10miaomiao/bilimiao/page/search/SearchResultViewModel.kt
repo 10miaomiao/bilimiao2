@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.page.search.result.BangumiResultFragment
 import com.a10miaomiao.bilimiao.page.search.result.BaseResultFragment
 import com.a10miaomiao.bilimiao.page.search.result.UpperResultFragment
@@ -21,7 +22,7 @@ class SearchResultViewModel(
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
 
-    val keyword by lazy { fragment.requireArguments().getString(MainNavGraph.args.text) }
+    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text) }
 
     var position = -1
     val fragments by lazy {

@@ -34,7 +34,7 @@ class MainBackPopupMenu(
         when (item?.itemId) {
             0 -> {
                 val nav = activity.findNavController(R.id.nav_host_fragment)
-                return nav.popBackStack(MainNavGraph.dest.home, false)
+                return nav.popBackStack(MainNavGraph.dest.main, false)
             }
             1 -> {
                 basePlayerDelegate.closePlayer()

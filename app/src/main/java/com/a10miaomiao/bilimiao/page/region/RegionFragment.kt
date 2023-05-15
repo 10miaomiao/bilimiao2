@@ -10,7 +10,9 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.navigation.NavType
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.viewpager.widget.ViewPager
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -19,7 +21,11 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
+import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -31,6 +37,22 @@ import org.kodein.di.instance
 import splitties.views.dsl.core.*
 
 class RegionFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "region"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.region) {
+                type = NavType.ParcelableType(RegionInfo::class.java)
+            }
+        }
+        fun createArguments(
+            region: RegionInfo
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.region to region
+            )
+        }
+    }
 
     override val di: DI by lazyUiDi(ui = { ui }) {
         bindSingleton<MyPage> { this@RegionFragment }
@@ -77,11 +99,7 @@ class RegionFragment : Fragment(), DIAware, MyPage {
                 val nav =
                     requireActivity().findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
                 val url = "bilimiao://time/setting"
-                nav.navigate(
-                    MainNavGraph.action.global_to_compose, bundleOf(
-                        MainNavGraph.args.url to url
-                    )
-                )
+                nav.navigateToCompose(url)
             }
         }
     }
@@ -124,6 +142,7 @@ class RegionFragment : Fragment(), DIAware, MyPage {
 //                    }
 //                    return fragment
                 }
+
                 override fun getCount() = viewModel.region.children.size
                 override fun getPageTitle(position: Int) = viewModel.region.children[position].name
                 private val registeredFragments = SparseArray<Fragment>()
@@ -134,6 +153,7 @@ class RegionFragment : Fragment(), DIAware, MyPage {
                     }
                     return obj
                 }
+
                 fun getRegisteredFragment(position: Int): Fragment? {
                     return registeredFragments[position]
                 }

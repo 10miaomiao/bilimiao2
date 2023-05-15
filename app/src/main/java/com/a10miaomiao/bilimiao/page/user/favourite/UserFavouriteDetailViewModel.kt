@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.entity.media.MediaInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -34,7 +35,7 @@ class UserFavouriteDetailViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
 
     var triggered = false
     var list = PaginationInfo<MediasInfo>()

@@ -11,18 +11,20 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateParam
 import splitties.toast.toast
 
-class VideoMorePopupMenu (
+class VideoMorePopupMenu(
     private val activity: Activity,
     private val anchor: View,
     private val viewModel: VideoInfoViewModel,
-): PopupMenu.OnMenuItemClickListener {
+) : PopupMenu.OnMenuItemClickListener {
 
     private val popupMenu = PopupMenu(activity, anchor)
 
@@ -58,7 +60,8 @@ class VideoMorePopupMenu (
             2, 3 -> {
                 val info = viewModel.info
                 if (info != null) {
-                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clipboard =
+                        activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     var label: String
                     var text: String
                     if (item.itemId == 2) {
@@ -79,25 +82,24 @@ class VideoMorePopupMenu (
                 val info = viewModel.info
                 if (info != null) {
                     val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                    val args = bundleOf(
-                        MainNavGraph.args.video to DownloadVideoCreateParam(
-                            aid = info.aid,
-                            bvid = info.bvid,
-                            title = info.title,
-                            pic = info.pic,
-                            mid = info.owner.mid,
-                            pages = info.pages.map {
-                                DownloadVideoCreateParam.Page(
-                                    cid = it.cid,
-                                    page = it.page,
-                                    part = it.part,
-                                    from = it.from,
-                                    vid = it.vid,
-                                )
-                            }
-                        )
+                    val video = DownloadVideoCreateParam(
+                        aid = info.aid,
+                        bvid = info.bvid,
+                        title = info.title,
+                        pic = info.pic,
+                        mid = info.owner.mid,
+                        pages = info.pages.map {
+                            DownloadVideoCreateParam.Page(
+                                cid = it.cid,
+                                page = it.page,
+                                part = it.part,
+                                from = it.from,
+                                vid = it.vid,
+                            )
+                        }
                     )
-                    nav.navigate(MainNavGraph.action.global_to_downloadVideoCreate, args)
+                    val args = DownloadVideoCreateFragment.createArguments(video)
+                    nav.navigate(DownloadVideoCreateFragment.actionId, args)
                 } else {
                     activity.toast("请等待信息加载完成")
                 }
@@ -109,7 +111,10 @@ class VideoMorePopupMenu (
                         action = Intent.ACTION_SEND
                         type = "text/plain"
                         putExtra(Intent.EXTRA_SUBJECT, "bilibili视频分享")
-                        putExtra(Intent.EXTRA_TEXT, "${info.title} https://www.bilibili.com/video/${info.bvid}")
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "${info.title} https://www.bilibili.com/video/${info.bvid}"
+                        )
                     }
                     activity.startActivity(Intent.createChooser(shareIntent, "分享"))
                 } else {

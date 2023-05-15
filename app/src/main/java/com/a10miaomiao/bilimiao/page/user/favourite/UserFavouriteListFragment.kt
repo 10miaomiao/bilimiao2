@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -19,6 +21,8 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -42,7 +46,30 @@ import splitties.views.dsl.recyclerview.recyclerView
 
 class UserFavouriteListFragment : Fragment(), DIAware, MyPage {
 
-    private val name by lazy { requireArguments().getString(MainNavGraph.args.name, "") }
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "user.favourite.list"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(MainNavArgs.name) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+        fun createArguments(
+            id: String,
+            name: String,
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.id to id,
+                MainNavArgs.name to name,
+            )
+        }
+    }
+
+    private val name by lazy { requireArguments().getString(MainNavArgs.name, "") }
 
     override val pageConfig = myPageConfig {
         title = "${name}\n的\n收藏夹"
@@ -75,12 +102,9 @@ class UserFavouriteListFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.id,
-            MainNavGraph.args.name to item.title,
-        )
+        val args = UserFavouriteDetailFragment.createArguments(item.id, item.title)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.userFavouriteList_to_userFavouriteDetail, args)
+            .navigate(UserFavouriteDetailFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<MediaListInfo> { item, index ->

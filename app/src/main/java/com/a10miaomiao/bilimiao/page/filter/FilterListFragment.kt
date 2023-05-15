@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.MainNavGraph
@@ -15,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -35,6 +37,13 @@ import splitties.views.padding
 import splitties.views.textColorResource
 
 class FilterListFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "filter.list"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://filter/list")
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "时光姬\n-\n屏蔽管理"
@@ -64,12 +73,12 @@ class FilterListFragment : Fragment(), DIAware, MyPage {
 
     val handleToWordClick = View.OnClickListener {
         val nav = Navigation.findNavController(it)
-        nav.navigate(MainNavGraph.action.filterList_to_filterWordList)
+        nav.navigate(FilterWordListFragment.actionId)
     }
 
     val handleToUpperClick = View.OnClickListener {
         val nav = Navigation.findNavController(it)
-        nav.navigate(MainNavGraph.action.filterList_to_filterUpperList)
+        nav.navigate(FilterUpperListFragment.actionId)
     }
 
     fun MiaoUI.tagView(
