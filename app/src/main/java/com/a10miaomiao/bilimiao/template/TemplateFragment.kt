@@ -12,12 +12,17 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.*
 import splitties.views.dsl.core.*
 
 class TemplateFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "template"
+    }
 
     override val pageConfig = myPageConfig {
         title = "bilimiao2"

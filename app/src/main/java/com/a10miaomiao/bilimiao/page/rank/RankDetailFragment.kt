@@ -22,6 +22,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
@@ -70,11 +71,9 @@ class RankDetailFragment : RecyclerViewFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.param
-        )
+        val args = VideoInfoFragment.createArguments(item.param)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.global_to_videoInfo, args)
+            .navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<RankOuterClass.Item> { item, index ->

@@ -23,6 +23,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.DownloadStore
@@ -45,6 +46,10 @@ import splitties.views.padding
 import java.text.DecimalFormat
 
 class DownloadFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "download"
+    }
 
     override val pageConfig = myPageConfig {
         title = "我的下载"

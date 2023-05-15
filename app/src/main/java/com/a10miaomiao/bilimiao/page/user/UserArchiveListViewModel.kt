@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
@@ -38,8 +39,8 @@ class UserArchiveListViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
-    val name by lazy { fragment.requireArguments().getString(MainNavGraph.args.name) }
+    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
+    val name by lazy { fragment.requireArguments().getString(MainNavArgs.name) }
 
     var regionList = listOf<CheckPopupMenu.MenuItemInfo<Int>>(
         CheckPopupMenu.MenuItemInfo("全部(0)", 0),

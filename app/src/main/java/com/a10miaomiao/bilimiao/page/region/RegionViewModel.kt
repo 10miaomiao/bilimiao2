@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -21,7 +22,7 @@ class RegionViewModel(
     private val myPage: MyPage by instance()
     private val timeSettingStore: TimeSettingStore by instance()
 
-    val region = fragment.requireArguments().getParcelable<RegionInfo>(MainNavGraph.args.region)!!
+    val region = fragment.requireArguments().getParcelable<RegionInfo>(MainNavArgs.region)!!
 
     init {
         viewModelScope.launch {

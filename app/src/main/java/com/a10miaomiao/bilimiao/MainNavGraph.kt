@@ -4,11 +4,16 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import androidx.navigation.fragment.fragment
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
+import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.MainFragment
+import com.a10miaomiao.bilimiao.page.MainFragment.Companion.build
 import com.a10miaomiao.bilimiao.page.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
@@ -37,361 +42,12 @@ import kotlin.reflect.KClass
 
 object MainNavGraph {
     // Counter for id's. First ID will be 1.
-    private var id_counter = 1
-    private val globalActionList = arrayListOf<FragmentAction>()
-    private val idToFragment = hashMapOf<Int, FragmentDest>()
-    private var id = id_counter++
+    private var id_counter = 100
 
     object dest {
-        val id = id_counter++
-        val global = id_counter++
-        val home = f<MainFragment>()
-        val template = f<TemplateFragment>()
-        val web = f<WebFragment>() {
-            deepLink("bilibili://browser/?url={url}")
-            argument(args.url) {
-                type = NavType.StringType
-                nullable = true
-            }
-        }
-        val compose = f<ComposeFragment>() {
-//            argument(args.url) {
-//                type = NavType.StringType
-//                nullable = true
-//            }
-        }
-        val setting = f<SettingFragment>() {
-            deepLink("bilimiao://setting")
-        }
-        val danmakuSetting = f<DanmakuSettingFragment>() {
-            deepLink("bilimiao://setting/danmaku")
-        }
-        val themeSetting = f<ThemeSettingFragment> {
-            deepLink("bilimiao://setting/theme")
-        }
-        val videoSetting = f<VideoSettingFragment>() {
-            deepLink("bilimiao://setting/video")
-        }
-        val homeSetting = f<HomeSettingFragment>() {
-            deepLink("bilimiao://setting/home")
-        }
-        val about = f<AboutFragment>() {
-            deepLink("bilimiao://about")
-        }
-        val filterList = f<FilterListFragment>() {
-            deepLink("bilimiao://filter/list")
-        }
-        val filterUpperList = f<FilterUpperListFragment>() {
-            deepLink("bilimiao://filter/upper/list")
-        }
-        val filterWordList = f<FilterWordListFragment>() {
-            deepLink("bilimiao://filter/word/list")
-        }
-        val filterEditWorld = f<FilterEditWorldFragment>() {
-            deepLink("bilimiao://filter/word/edit/{name}")
-        }
-        val filterAddWord = f<FilterAddWordFragment>() {
-            deepLink("bilimiao://filter/word/add")
-        }
-
-        val download = f<DownloadFragment> {
-        }
-        val downloadVideoCreate = f<DownloadVideoCreateFragment> {
-            argument(args.video) {
-                type = NavType.ParcelableType(VideoInfo::class.java)
-            }
-        }
-
-        val searchStart = f<SearchStartFragment> {
-            argument(args.text) {
-                type = NavType.StringType
-                nullable = true
-            }
-        }
-        val searchResult = f<SearchResultFragment> {
-            argument(args.text) {
-                type = NavType.StringType
-                nullable = true
-            }
-        }
-
-        val videoRegion = f<VideoRegionFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-
-        val region = f<RegionFragment> {
-            argument(args.region) {
-                type = NavType.ParcelableType(RegionInfo::class.java)
-            }
-        }
-
-        val rank = f<RankFragment> {
-            deepLink("bilibili://rank")
-            deepLink("bilibili://rank?type={type}")
-            argument(args.type) {
-                type = NavType.StringType
-                nullable = true
-            }
-        }
-        val videoInfo = f<VideoInfoFragment> {
-            deepLink("bilimiao://video/{id}")
-            deepLink("bilibili://video/{id}")
-            argument(args.type) {
-                type = NavType.StringType
-                defaultValue = "AV"
-            }
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val videoPages = f<VideoPagesFragment> {
-//            deepLink("bilimiao://video/pages")
-            argument(args.video) {
-                type = NavType.ParcelableType(VideoPagesParam::class.java)
-                nullable = false
-            }
-            argument(args.index) {
-                type = NavType.IntType
-                defaultValue = 0
-            }
-        }
-        val videoCoin = f<VideoCoinFragment> {
-            argument(args.num) {
-                type = NavType.IntType
-                defaultValue = 1
-            }
-        }
-        val videoAddFavorite = f<VideoAddFavoriteFragment> {
-
-        }
-
-        val videoCommentList = f<VideoCommentListFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val videoCommentDetail = f<VideoCommentDetailFragment> {
-            argument(args.reply) {
-                type = NavType.ParcelableType(VideoCommentDetailParam::class.java)
-                nullable = false
-            }
-        }
-        val replyDetail = f<ReplyDetailFragment> {
-            argument(args.reply) {
-                type = NavType.ParcelableType(ReplyDetailParam::class.java)
-                nullable = false
-            }
-        }
-
-        val bangumiDetail = f<BangumiDetailFragment> {
-            deepLink("bilimiao://bangumi/season/{id}")
-            deepLink("bilibili://bangumi/season/{id}")
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val bangumiPages = f<BangumiPagesFragment> {
-//            deepLink("bilimiao://bangumi/pages")
-            argument(args.bangumi) {
-                type = NavType.ParcelableType(BangumiPagesParam::class.java)
-                nullable = false
-            }
-        }
-
-        val h5Login = f<H5LoginFragment> {
-            deepLink("bilimiao://auth/h5")
-            deepLink("bilimiao://auth/h5/{url}")
-            argument(args.url) {
-                type = NavType.StringType
-                defaultValue = ""
-            }
-        }
-
-        val user = f<UserFragment> {
-            deepLink("bilimiao://user/{id}")
-            deepLink("bilibili://user/{id}")
-            deepLink("bilibili://space/{id}")
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = true
-            }
-        }
-        val history = f<HistoryFragment> {
-        }
-        val userArchiveList = f<UserArchiveListFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.name) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val myBangumi = f<MyBangumiFragment> {
-        }
-        val userBangumi = f<UserBangumiFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.name) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val userChannelDetail = f<UserChannelDetailFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.name) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.parent) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val userFavouriteList = f<UserFavouriteListFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.name) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val userFavouriteDetail = f<UserFavouriteDetailFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.name) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        val userFollow = f<UserFollowFragment> {
-            argument(args.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.type) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(args.name) {
-                type = NavType.StringType
-                defaultValue = "Ta"
-            }
-        }
-    }
-
-    object action {
-        val id = id_counter++
-        val global_to_web = dest.global to dest.web
-        val global_to_compose = dest.global to dest.compose
-        val global_to_videoInfo = dest.global to dest.videoInfo
-        val global_to_videoPages = dest.global to dest.videoPages
-        val global_to_videoCoin = dest.global to dest.videoCoin
-        val global_to_videoAddFavorite = dest.global to dest.videoAddFavorite
-        val global_to_user = dest.global to dest.user
-        val global_to_bangumiDetail = dest.global to dest.bangumiDetail
-        val global_to_bangumiPages = dest.global to dest.bangumiPages
-        val global_to_downloadVideoCreate = dest.global to dest.downloadVideoCreate
-        val global_to_searchStart = dest.global to dest.searchStart
-        val global_to_searchResult = dest.global to dest.searchResult
-        val global_to_videoRegion = dest.global to dest.videoRegion
-        val global_to_replyDetail = dest.global to dest.replyDetail
-
-        val home_to_region = dest.home to dest.region
-        val home_to_setting = dest.home to dest.setting
-        val home_to_h5Login = dest.home to dest.h5Login
-        val home_to_user = dest.home to dest.user
-        val home_to_history = dest.home to dest.history
-        val home_to_download = dest.home to dest.download
-
-        val setting_to_themeSetting = dest.setting to dest.themeSetting
-        val setting_to_homeSetting = dest.setting to dest.homeSetting
-        val setting_to_videoSetting = dest.setting to dest.videoSetting
-        val setting_to_danmakuSetting = dest.setting to dest.danmakuSetting
-        val setting_to_about = dest.setting to dest.about
-        val setting_to_filterList = dest.setting to dest.filterList
-
-        val filterList_to_filterUpperList = dest.filterList to dest.filterUpperList
-        val filterList_to_filterWordList = dest.filterList to dest.filterWordList
-
-        val region_to_videoInfo = dest.region to dest.videoInfo
-
-        val searchResult_to_videoInfo = dest.searchResult to dest.videoInfo
-        val searchResult_to_bangumiDetail = dest.searchResult to dest.bangumiDetail
-        val searchResult_to_user = dest.searchResult to dest.user
-
-        val videoInfo_to_videoInfo = dest.videoInfo to dest.videoInfo
-        val videoInfo_to_user = dest.videoInfo to dest.user
-        val videoInfo_to_videoCommentList = dest.videoInfo to dest.videoCommentList
-        val videoInfo_to_bangumiDetail = a(dest.videoInfo, dest.bangumiDetail) {
-//            popUpTo = dest.region
-        }
-
-        val videoCommentList_to_user = dest.videoCommentList to dest.user
-        val videoCommentList_to_videoInfo = dest.videoCommentList to dest.videoInfo
-        val videoCommentList_to_videoCommentDetail = dest.videoCommentList to dest.videoCommentDetail
-
-        val videoCommentDetail_to_user = dest.videoCommentDetail to dest.user
-        val videoCommentDetail_to_videoInfo = dest.videoCommentDetail to dest.videoInfo
-
-        val user_to_videoInfo = dest.user to dest.videoInfo
-        val user_to_userArchiveList = dest.user to dest.userArchiveList
-        val user_to_userChannelDetail = dest.user to dest.userChannelDetail
-        val user_to_userBangumi = dest.user to dest.userBangumi
-        val user_to_myBangumi = dest.user to dest.myBangumi
-        val user_to_userFavouriteList = dest.user to dest.userFavouriteList
-        val user_to_userFavouriteDetail = dest.user to dest.userFavouriteDetail
-        val user_to_userFollow = dest.user to dest.userFollow
-        val user_to_bangumiDetail = dest.user to dest.bangumiDetail
-
-        val userArchiveList_to_videoInfo = dest.userArchiveList to dest.videoInfo
-
-        val userBangumi_to_bangumiDetail = dest.userBangumi to dest.bangumiDetail
-        val myBangumi_to_bangumiDetail = dest.myBangumi to dest.bangumiDetail
-
-        val userChannelDetail_to_videoInfo = dest.userChannelDetail to dest.videoInfo
-
-        val userFavouriteList_to_userFavouriteDetail = dest.userFavouriteList to dest.userFavouriteDetail
-
-        val userFavouriteDetail_to_videoInfo = dest.userFavouriteDetail to dest.videoInfo
-
-        val userFollow_to_user = dest.userFollow to dest.user
-
-        val history_to_videoInfo = dest.history to dest.videoInfo
-        val history_to_bangumiDetail = dest.history to dest.bangumiDetail
-    }
-
-    object args {
-        const val url = "url"
-        const val type = "type"
-        const val id = "id"
-        const val parent = "parent"
-        const val name = "name"
-        const val title = "title"
-        const val text = "text"
-        const val num = "num"
-        const val pages = "pages"
-        const val index = "index"
-        const val video = "video"
-        const val bangumi = "bangumi"
-        const val region = "region"
-        const val reply = "reply"
+        val main = id_counter++
+        val template = id_counter++
+        val compose = id_counter++
     }
 
     private val defaultNavOptionsBuilder: NavOptionsBuilder.() -> Unit = {
@@ -404,89 +60,77 @@ object MainNavGraph {
     }
 
     fun createGraph(navController: NavController, startDestination: Int) {
-        navController.graph = navController.createGraph(id, startDestination) {
-            val id = dest.id + action.id
-            idToFragment.values.forEach { fd ->
-                destination(
-                    FragmentNavigatorDestinationBuilder(
-                        provider[FragmentNavigator::class],
-                        fd.id,
-                        fd.fragmentClass
-                    ).apply {
-                        fd.builder(this)
-                        fd.actionList.forEach { fa ->
-                            this.action(fa.id) {
-                                destinationId = fa.destinationId
-                                navOptions(fa.optionsBuilder)
-                            }
-                        }
-                    }
-                )
-            }
-            globalActionList.forEach { fa ->
-                action(fa.id) {
-                    destinationId = fa.destinationId
-                    navOptions(fa.optionsBuilder)
-                }
-            }
+        navController.graph = navController.createGraph(0, startDestination) {
+            addFragment(MainFragment::class, MainFragment.Companion, dest.main)
+            addFragment(TemplateFragment::class, TemplateFragment.Companion, dest.template)
+            addFragment(WebFragment::class, WebFragment.Companion)
+            addFragment(ComposeFragment::class, ComposeFragmentNavigatorBuilder, dest.compose)
+
+            addFragment(RegionFragment::class, RegionFragment.Companion)
+            addFragment(RankFragment::class, RankFragment.Companion)
+
+            addFragment(VideoInfoFragment::class, VideoInfoFragment.Companion)
+            addFragment(VideoCoinFragment::class, VideoCoinFragment.Companion)
+            addFragment(VideoPagesFragment::class, VideoPagesFragment.Companion)
+            addFragment(VideoAddFavoriteFragment::class, VideoAddFavoriteFragment.Companion)
+
+            addFragment(VideoCommentListFragment::class, VideoCommentListFragment.Companion)
+            addFragment(VideoCommentDetailFragment::class, VideoCommentDetailFragment.Companion)
+            addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
+
+            addFragment(UserFragment::class, UserFragment.Companion)
+            addFragment(MyBangumiFragment::class, MyBangumiFragment.Companion)
+            addFragment(UserBangumiFragment::class, UserBangumiFragment.Companion)
+            addFragment(UserFavouriteListFragment::class, UserFavouriteListFragment.Companion)
+            addFragment(UserFavouriteDetailFragment::class, UserFavouriteDetailFragment.Companion)
+            addFragment(UserArchiveListFragment::class, UserArchiveListFragment.Companion)
+            addFragment(UserChannelDetailFragment::class, UserChannelDetailFragment.Companion)
+            addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
+            addFragment(HistoryFragment::class, HistoryFragment.Companion)
+
+            addFragment(SearchStartFragment::class, SearchStartFragment.Companion)
+            addFragment(SearchResultFragment::class, SearchResultFragment.Companion)
+            addFragment(VideoRegionFragment::class, VideoRegionFragment.Companion)
+
+            addFragment(DownloadFragment::class, DownloadFragment.Companion)
+            addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
+
+            addFragment(AboutFragment::class, AboutFragment.Companion)
+            addFragment(DanmakuSettingFragment::class, DanmakuSettingFragment.Companion)
+            addFragment(HomeSettingFragment::class, HomeSettingFragment.Companion)
+            addFragment(SettingFragment::class, SettingFragment.Companion)
+            addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
+            addFragment(VideoSettingFragment::class, VideoSettingFragment.Companion)
+
+            addFragment(FilterListFragment::class, FilterListFragment.Companion)
+            addFragment(FilterWordListFragment::class, FilterWordListFragment.Companion)
+            addFragment(FilterUpperListFragment::class, FilterUpperListFragment.Companion)
+            addFragment(FilterAddWordFragment::class, FilterAddWordFragment.Companion)
+            addFragment(FilterEditWorldFragment::class, FilterEditWorldFragment.Companion)
         }
     }
 
-    private fun f(
-        fragmentClass: KClass<out Fragment>,
-        builder: (FragmentNavigatorDestinationBuilder.() -> Unit) = {},
-    ): Int {
-        id_counter++
-        val id = id_counter
-        val fd = FragmentDest(
-            id, fragmentClass, builder
+    fun NavGraphBuilder.addFragment(
+        kClass: KClass<out Fragment>,
+        builder: FragmentNavigatorBuilder,
+        _id: Int = id_counter++,
+    ) {
+        val id = if (builder.id == 0) _id else builder.id
+        val actionId = if (builder.actionId == 0) id_counter++ else builder.actionId
+        DebugMiao.log(builder.name, id, actionId)
+        destination(
+            FragmentNavigatorDestinationBuilder(
+                provider[FragmentNavigator::class],
+                id,
+                kClass,
+            ).apply {
+                builder.run { build(id, actionId) }
+            }
         )
-        idToFragment[id] = fd
-        return id
+        action(actionId) {
+            destinationId = id
+            navOptions(defaultNavOptionsBuilder)
+        }
     }
-
-    private inline fun <reified T : Fragment> f(
-        noinline builder: (FragmentNavigatorDestinationBuilder.() -> Unit) = {},
-    ): Int {
-        return f(T::class, builder)
-    }
-
-    private fun a(
-        fragmentId: Int,
-        destinationId: Int,
-        optionsBuilder: (NavOptionsBuilder.() -> Unit) = defaultNavOptionsBuilder
-    ): Int {
-        id_counter++
-        val id = id_counter
-        val fa = FragmentAction(
-            id, fragmentId, destinationId, optionsBuilder
-        )
-        val actionList = idToFragment[fragmentId]?.actionList ?: globalActionList
-        actionList.add(fa)
-        return id
-    }
-
-    private infix fun Int.to(that: Int): Int = a(this, that)
-
-
-    private class FragmentDest(
-        val id: Int,
-        val fragmentClass: KClass<out Fragment>,
-        val builder: FragmentNavigatorDestinationBuilder.() -> Unit,
-        val actionList: ArrayList<FragmentAction> = arrayListOf(),
-    )
-
-    private class FragmentAction(
-        val id: Int,
-        val fragmentId: Int,
-        val destinationId: Int,
-        val optionsBuilder: NavOptionsBuilder.() -> Unit,
-
-        )
-
-    private class FragmentArgument(
-        name: String,
-        navType: NavArgument
-    )
 
 }

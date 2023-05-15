@@ -12,6 +12,7 @@ import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -40,9 +41,7 @@ class AreaLimitBoxController(
         areaLimitOkBtn.setOnClickListener {
             val nav = activity.findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
             val url = "bilimiao://setting/proxy/select"
-            nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-                MainNavGraph.args.url to url
-            ))
+            nav.navigateToCompose(url)
         }
         areaLimitCloseBtn.setOnClickListener {
             hide()

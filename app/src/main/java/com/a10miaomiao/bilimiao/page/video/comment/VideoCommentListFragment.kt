@@ -13,7 +13,9 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +33,8 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -44,6 +48,8 @@ import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.user.UserFragment
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
@@ -67,6 +73,24 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
 class VideoCommentListFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "video.comment.list"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+
+        fun createArguments(
+            id: String
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.id to id,
+            )
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "评论列表"
@@ -128,7 +152,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
 
         // 页面返回回调数据接收
         findNavController().currentBackStackEntry?.let {
-            it.savedStateHandle.get<VideoCommentDetailParam>(MainNavGraph.args.reply)?.let {
+            it.savedStateHandle.get<VideoCommentDetailParam>(MainNavArgs.reply)?.let {
                 val index = it.index
                 val item = viewModel.list.data[index]
                 val replyControl = item.replyControl.toBuilder()
@@ -151,14 +175,11 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
         if (urlType == "BV") {
             urlId = "BV$urlId"
         }
-        val args = bundleOf(
-            MainNavGraph.args.id to urlId
-        )
         when(urlType){
             "AV", "BV" -> {
-                args.putString(MainNavGraph.args.type, urlType)
+                val args = VideoInfoFragment.createArguments(urlId)
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.videoCommentList_to_videoInfo, args)
+                    .navigate(VideoInfoFragment.actionId, args)
             }
         }
     }
@@ -166,11 +187,9 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
     private val handleUserClick = View.OnClickListener {
         val id = it.tag
         if (id != null && id is String) {
-            val args = bundleOf(
-                MainNavGraph.args.id to id
-            )
+            val args = UserFragment.createArguments(id)
             Navigation.findNavController(it)
-                .navigate(MainNavGraph.action.videoCommentList_to_user, args)
+                .navigate(UserFragment.actionId, args)
         }
     }
 
@@ -204,11 +223,9 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             count = item.count,
             action = item.replyControl.action,
         )
-        val args = bundleOf(
-            MainNavGraph.args.reply to reply
-        )
+        val args = VideoCommentDetailFragment.createArguments(reply)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.videoCommentList_to_videoCommentDetail, args)
+            .navigate(VideoCommentDetailFragment.actionId, args)
     }
 
     private val handleItemLongClick = OnItemLongClickListener { adapter, view, position ->
@@ -236,11 +253,9 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
             count = item.count,
             action = item.replyControl.action,
         )
-        val args = bundleOf(
-            MainNavGraph.args.reply to reply
-        )
+        val args = ReplyDetailFragment.createArguments(reply)
         Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
-            .navigate(MainNavGraph.action.global_to_replyDetail, args)
+            .navigate(ReplyDetailFragment.actionId, args)
         true
     }
 

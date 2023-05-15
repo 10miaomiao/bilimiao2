@@ -71,7 +71,7 @@ class BangumiMorePopupMenu (
 //                if (info != null) {
 //                    val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
 //                    val args = bundleOf(
-//                        MainNavGraph.args.video to info
+//                        MainNavArgs.video to info
 //                    )
 //                    nav.navigate(MainNavGraph.action.global_to_downloadVideoCreate, args)
 //                } else {

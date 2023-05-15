@@ -19,12 +19,14 @@ import com.a10miaomiao.bilimiao.comm.entity.search.SearchVideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -44,7 +46,7 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
         fun newInstance(text: String?): VideoResultFragment {
             val fragment = VideoResultFragment()
             val bundle = Bundle()
-            bundle.putString(MainNavGraph.args.text, text)
+            bundle.putString(MainNavArgs.text, text)
             fragment.arguments = bundle
             return fragment
         }
@@ -73,10 +75,8 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
         when (menuItem.key) {
             MenuKeys.region -> {
                 val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-                val args = bundleOf(
-                    MainNavGraph.args.id to viewModel.regionId.toString()
-                )
-                nav.navigate(MainNavGraph.action.global_to_videoRegion, args)
+                val args = VideoRegionFragment.createArguments(viewModel.regionId.toString())
+                nav.navigate(VideoRegionFragment.actionId, args)
             }
             MenuKeys.filter -> {
                 val pm = CheckPopupMenu(
@@ -141,11 +141,9 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.param
-        )
+        val args = VideoInfoFragment.createArguments(item.param)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.searchResult_to_videoInfo, args)
+            .navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<SearchVideoInfo> { item, index ->

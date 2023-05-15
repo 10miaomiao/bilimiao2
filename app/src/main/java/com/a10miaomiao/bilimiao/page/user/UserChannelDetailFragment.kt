@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.interfaces.v1.HistoryOuterClass
@@ -19,6 +21,8 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -28,6 +32,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
@@ -42,6 +47,35 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
 class UserChannelDetailFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "user.channel.detail"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(MainNavArgs.name) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(MainNavArgs.parent) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+        fun createArguments(
+            id: String,
+            name: String,
+            parent: String,
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.id to id,
+                MainNavArgs.name to name,
+                MainNavArgs.parent to parent,
+            )
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "${viewModel.name}\n的\n列表"
@@ -74,11 +108,9 @@ class UserChannelDetailFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.aid,
-        )
+        val args = VideoInfoFragment.createArguments(item.aid)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.userChannelDetail_to_videoInfo, args)
+            .navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<UserChannelDetailViewModel.VideoArchives> { item, index ->

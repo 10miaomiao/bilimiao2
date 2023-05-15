@@ -13,11 +13,13 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchBangumiInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.commponents.bangumi.bangumiItem
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
@@ -36,7 +38,7 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
         fun newInstance(text: String?): BangumiResultFragment {
             val fragment = BangumiResultFragment()
             val bundle = Bundle()
-            bundle.putString(MainNavGraph.args.text, text)
+            bundle.putString(MainNavArgs.text, text)
             fragment.arguments = bundle
             return fragment
         }
@@ -77,11 +79,8 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.param
-        )
-        Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.searchResult_to_bangumiDetail, args)
+        val args = BangumiDetailFragment.createArguments(item.param)
+        Navigation.findNavController(view).navigate(BangumiDetailFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<SearchBangumiInfo> { item, index ->

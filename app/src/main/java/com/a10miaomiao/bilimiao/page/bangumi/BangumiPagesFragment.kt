@@ -7,7 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavType
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -19,6 +22,8 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerParamInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -39,6 +44,24 @@ import splitties.views.verticalPadding
 
 class BangumiPagesFragment : Fragment(), DIAware, MyPage {
 
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "bangumi.pages"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.bangumi) {
+                type = NavType.ParcelableType(BangumiPagesParam::class.java)
+                nullable = false
+            }
+        }
+
+        fun createArguments(
+            bangumi: BangumiPagesParam
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.bangumi to bangumi,
+            )
+        }
+    }
+
     override val pageConfig = myPageConfig {
         title = "番剧剧集"
     }
@@ -51,7 +74,7 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
-    private val bangumi by lazy { requireArguments().getParcelable<BangumiPagesParam>(MainNavGraph.args.bangumi)!! }
+    private val bangumi by lazy { requireArguments().getParcelable<BangumiPagesParam>(MainNavArgs.bangumi)!! }
     private val episodes by lazy { bangumi.episodes.toMutableList() }
 
     override fun onCreateView(

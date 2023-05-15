@@ -6,9 +6,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._imageResource
@@ -19,6 +22,8 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -31,6 +36,24 @@ import splitties.views.dsl.core.*
 
 class VideoCoinFragment : Fragment(), DIAware, MyPage {
 
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "video.coin"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.num) {
+                type = NavType.IntType
+                defaultValue = 1
+            }
+        }
+
+        fun createArguments(
+            num: Int,
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.num to num,
+            )
+        }
+    }
+
     override val pageConfig = myPageConfig {
         title = "投币"
     }
@@ -38,7 +61,7 @@ class VideoCoinFragment : Fragment(), DIAware, MyPage {
     override val di: DI by lazyUiDi(ui = { ui })
 
 //    private val viewModel by diViewModel<VideoCoinViewModel>(di)
-    val maxNum by lazy { requireArguments().getInt(MainNavGraph.args.num, 1) }
+    val maxNum by lazy { requireArguments().getInt(MainNavArgs.num, 1) }
 
     var coinNum = 1
 

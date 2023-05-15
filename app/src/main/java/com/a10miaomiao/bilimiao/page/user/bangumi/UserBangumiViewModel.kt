@@ -10,6 +10,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.MyBangumiInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -29,7 +30,7 @@ class UserBangumiViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
 
     var triggered = false
     var list = PaginationInfo<ItemInfo>()

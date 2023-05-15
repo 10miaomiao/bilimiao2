@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -19,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.FilterStore
@@ -33,6 +35,13 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
 class FilterUpperListFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "filter.upper.list"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://filter/upper/list")
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "屏蔽管理\n-\nUP主"

@@ -9,8 +9,10 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -20,11 +22,16 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
+import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateParam
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
@@ -41,6 +48,25 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
 class SearchStartFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "search.start"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.text) {
+                type = NavType.StringType
+                nullable = true
+            }
+        }
+
+        fun createArguments(): Bundle {
+            return bundleOf()
+        }
+        fun createArguments(text: String): Bundle {
+            return bundleOf(
+                MainNavArgs.text to text
+            )
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "搜索"
@@ -81,7 +107,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                 viewModel.loadSuggestData(text, mEditText)
             }
         })
-        val text = requireArguments().getString(MainNavGraph.args.text)
+        val text = requireArguments().getString(MainNavArgs.text)
         if (text != null) {
             mEditText.setText(text)
         }
@@ -129,19 +155,14 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                 "AV" -> {
                     Navigation.findNavController(view).popBackStack()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = bundleOf(
-                        MainNavGraph.args.type to "AV",
-                        MainNavGraph.args.id to item.value
-                    )
-                    nav.navigate(MainNavGraph.action.global_to_videoInfo, args)
+                    val args = VideoInfoFragment.createArguments(item.value)
+                    nav.navigate(VideoInfoFragment.actionId, args)
                 }
                 "SS" -> {
                     Navigation.findNavController(view).popBackStack()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = bundleOf(
-                        MainNavGraph.args.id to item.value
-                    )
-                    nav.navigate(MainNavGraph.action.global_to_bangumiDetail, args)
+                    val args = BangumiDetailFragment.createArguments(item.value)
+                    nav.navigate(BangumiDetailFragment.actionId, args)
                 }
                 else -> {
                     val keyword = item.text

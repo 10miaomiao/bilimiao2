@@ -25,6 +25,8 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.WebFragment
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -82,11 +84,9 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
         if (url.indexOf("bilibili://") == 0) {
             BiliNavigation.navigationTo(view, url)
         } else {
-            val args = bundleOf(
-                MainNavGraph.args.url to url,
-            )
+            val args = WebFragment.createArguments(url)
             findNavController().navigate(
-                MainNavGraph.action.global_to_web,
+                WebFragment.actionId,
                 args,
             )
         }
@@ -98,11 +98,9 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.base.param
-        )
+        val args = VideoInfoFragment.createArguments(item.base.param)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.global_to_videoInfo, args)
+            .navigate(VideoInfoFragment.actionId, args)
     }
 
     val topEntranceItemUi = miaoBindingItemUi<PopularOuterClass.EntranceShow> { item, index ->

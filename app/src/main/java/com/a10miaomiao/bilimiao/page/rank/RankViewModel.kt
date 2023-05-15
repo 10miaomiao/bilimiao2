@@ -20,7 +20,7 @@ class RankViewModel(
     val tids = mutableListOf<Int>()
     val titles = mutableListOf<String>()
 
-//    val type = fragment.requireArguments().getString(MainNavGraph.args.type)
+//    val type = fragment.requireArguments().getString(MainNavArgs.type)
 
 
     init {

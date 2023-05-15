@@ -5,13 +5,19 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavType
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
+import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -28,6 +34,24 @@ import splitties.views.padding
 import splitties.views.verticalPadding
 
 class ReplyDetailFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "video.comment.reply"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.reply) {
+                type = NavType.ParcelableType(ReplyDetailParam::class.java)
+                nullable = false
+            }
+        }
+
+        fun createArguments(
+            reply: ReplyDetailParam
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.reply to reply,
+            )
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "评论内容详情"

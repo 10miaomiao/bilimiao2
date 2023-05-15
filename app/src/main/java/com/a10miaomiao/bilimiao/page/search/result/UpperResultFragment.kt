@@ -13,12 +13,14 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchUpperInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.upper.upperItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
@@ -37,7 +39,7 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
         fun newInstance(text: String?): UpperResultFragment {
             val fragment = UpperResultFragment()
             val bundle = Bundle()
-            bundle.putString(MainNavGraph.args.text, text)
+            bundle.putString(MainNavArgs.text, text)
             fragment.arguments = bundle
             return fragment
         }
@@ -78,11 +80,9 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = bundleOf(
-            MainNavGraph.args.id to item.param
-        )
+        val args = UserFragment.createArguments(item.param)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.searchResult_to_user, args)
+            .navigate(UserFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<SearchUpperInfo> { item, index ->

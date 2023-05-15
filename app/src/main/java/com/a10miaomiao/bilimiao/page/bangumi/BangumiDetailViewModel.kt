@@ -15,6 +15,7 @@ import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.ToastInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -39,7 +40,7 @@ class BangumiDetailViewModel(
 
     private val playerStore by instance<PlayerStore>()
 
-    var id: String = fragment.requireArguments().getString(MainNavGraph.args.id, "")
+    var id: String = fragment.requireArguments().getString(MainNavArgs.id, "")
 
     var detailInfo: BangumiInfo? = null
     var loading = false
@@ -195,7 +196,7 @@ class BangumiDetailViewModel(
     fun updateSeasonsIndex(index: Int) {
         if (seasonsIndex != index) {
             id = seasons[index].season_id
-            fragment.requireArguments().putString(MainNavGraph.args.id, id)
+            fragment.requireArguments().putString(MainNavArgs.id, id)
             loadData()
             loadEpisodeList()
             ui.setState {

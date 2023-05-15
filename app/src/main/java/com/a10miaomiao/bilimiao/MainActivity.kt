@@ -117,7 +117,7 @@ class MainActivity
         navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-        MainNavGraph.createGraph(navController, MainNavGraph.dest.home)
+        MainNavGraph.createGraph(navController, MainNavGraph.dest.main)
         navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
 
@@ -159,6 +159,7 @@ class MainActivity
             }
         }
 
+//        DebugMiao.log(IMiaoNavList.navList)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -191,7 +192,7 @@ class MainActivity
         destination: NavDestination,
         arguments: Bundle?
     ) {
-        ui.mAppBar.canBack = destination.id != MainNavGraph.dest.home
+        ui.mAppBar.canBack = destination.id != MainNavGraph.dest.main
 //        ui.mAppBar.cleanProp()
     }
 
@@ -210,7 +211,7 @@ class MainActivity
 
     private fun goBackHome(): Boolean {
         val nav = findNavController(R.id.nav_host_fragment)
-        return nav.popBackStack(MainNavGraph.dest.home, false)
+        return nav.popBackStack(MainNavGraph.dest.main, false)
     }
 
     val onBackClick = View.OnClickListener {

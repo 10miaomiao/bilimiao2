@@ -7,6 +7,8 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavType
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -17,6 +19,8 @@ import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.FilterStore
@@ -33,6 +37,17 @@ import splitties.views.textColorResource
 
 class FilterEditWorldFragment : Fragment(), DIAware, MyPage {
 
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "filter.edit.word"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://filter/word/edit/{name}")
+            argument(MainNavArgs.name) {
+                type = NavType.StringType
+                nullable = true
+            }
+        }
+    }
+
     override val pageConfig = myPageConfig {
         title = "编辑屏蔽关键字"
     }
@@ -43,7 +58,7 @@ class FilterEditWorldFragment : Fragment(), DIAware, MyPage {
     private val filterStore by instance<FilterStore>()
     private val supportHelper by instance<SupportHelper>()
 
-    private val name by lazy { requireArguments().getString(MainNavGraph.args.name, "") }
+    private val name by lazy { requireArguments().getString(MainNavArgs.name, "") }
 
     private val ID_editText = 100
 

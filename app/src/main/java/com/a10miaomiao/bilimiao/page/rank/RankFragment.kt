@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.navigation.NavType
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.viewpager.widget.ViewPager
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -22,7 +24,10 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
+import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
@@ -33,6 +38,24 @@ import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.core.wrapContent
 
 class RankFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChangeListener {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "rank"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilibili://rank")
+            deepLink("bilibili://rank?type={type}")
+            argument(MainNavArgs.type) {
+                type = NavType.StringType
+                nullable = true
+            }
+        }
+
+        fun createArguments(text: String): Bundle {
+            return bundleOf(
+                MainNavArgs.text to text
+            )
+        }
+    }
 
     override val pageConfig = myPageConfig {
         title = "排行榜"
@@ -50,9 +73,7 @@ class RankFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChangeListener
         when (menuItem.key) {
             MenuKeys.search -> {
                 val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-                val args = bundleOf(
-                )
-                bsNav.navigate(MainNavGraph.action.global_to_searchStart, args)
+                bsNav.navigate(SearchStartFragment.actionId)
             }
         }
     }

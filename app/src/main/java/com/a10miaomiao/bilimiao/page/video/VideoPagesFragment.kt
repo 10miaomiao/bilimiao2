@@ -5,7 +5,10 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavType
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -17,6 +20,8 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -36,6 +41,31 @@ import splitties.views.verticalPadding
 
 class VideoPagesFragment : Fragment(), DIAware, MyPage {
 
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "video.pages"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+//            deepLink("bilimiao://video/pages")
+            argument(MainNavArgs.video) {
+                type = NavType.ParcelableType(VideoPagesParam::class.java)
+                nullable = false
+            }
+            argument(MainNavArgs.index) {
+                type = NavType.IntType
+                defaultValue = 0
+            }
+        }
+
+        fun createArguments(
+            video: VideoPagesParam,
+            index: Int = 0,
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.video to video,
+                MainNavArgs.index to index,
+            )
+        }
+    }
+
     override val pageConfig = myPageConfig {
         title = "分P列表"
     }
@@ -48,7 +78,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
-    private val video by lazy { requireArguments().getParcelable<VideoPagesParam>(MainNavGraph.args.video)!! }
+    private val video by lazy { requireArguments().getParcelable<VideoPagesParam>(MainNavArgs.video)!! }
     private val pages by lazy { video.pages.toMutableList() }
 
     override fun onCreateView(

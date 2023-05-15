@@ -22,6 +22,9 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
+import com.a10miaomiao.bilimiao.page.user.UserFragment
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -78,7 +81,7 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
 //        val item = viewModel.list.data[position]
 //        val args = bundleOf(
-//            MainNavGraph.args.id to item.param
+//            MainNavArgs.id to item.param
 //        )
 //        if (item.goto == "av" || item.goto == "vertical_av") {
 //            Navigation.findNavController(view)
@@ -94,18 +97,17 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
             && tag.first is Int
             && tag.second is String
         ) {
-            val (type, id) = tag
-            val args = bundleOf(
-                MainNavGraph.args.id to id
-            )
+            val (type, id) = tag as Pair<Int, String>
             when(type) {
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
+                    val args = UserFragment.createArguments(id)
                     Navigation.findNavController(it)
-                        .navigate(MainNavGraph.action.global_to_user, args)
+                        .navigate(UserFragment.actionId, args)
                 }
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
+                    val args = BangumiDetailFragment.createArguments(id)
                     Navigation.findNavController(it)
-                        .navigate(MainNavGraph.action.global_to_bangumiDetail, args)
+                        .navigate(BangumiDetailFragment.actionId, args)
                 }
                 else -> {
                     toast("未知跳转类型")
@@ -118,17 +120,16 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
         val index = it.tag
         if (index is Int && index in viewModel.list.data.indices) {
             val item = viewModel.list.data[index]
-            val args = bundleOf(
-                MainNavGraph.args.id to item.dynamicContent.id
-            )
             when(item.dynamicType) {
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
+                    val args = VideoInfoFragment.createArguments(item.dynamicContent.id)
                     Navigation.findNavController(it)
-                        .navigate(MainNavGraph.action.global_to_videoInfo, args)
+                        .navigate(VideoInfoFragment.actionId, args)
                 }
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
+                    val args = BangumiDetailFragment.createArguments(item.dynamicContent.id)
                     Navigation.findNavController(it)
-                        .navigate(MainNavGraph.action.global_to_bangumiDetail, args)
+                        .navigate(BangumiDetailFragment.actionId, args)
                 }
                 else -> {
                     toast("未知跳转类型")

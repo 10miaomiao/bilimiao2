@@ -10,6 +10,7 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
@@ -31,7 +32,7 @@ class VideoCommentDetailViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
     var reply: VideoCommentDetailParam
 
     // 0：按时间，1：按点赞数，2：按回复数

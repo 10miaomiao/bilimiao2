@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.provider.MediaStore.Video
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.*
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -26,6 +28,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
@@ -34,6 +37,8 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
@@ -43,6 +48,9 @@ import com.a10miaomiao.bilimiao.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
+import com.a10miaomiao.bilimiao.page.user.UserFragment
+import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget._setContent
 import com.a10miaomiao.bilimiao.widget.expandableTextView
@@ -63,7 +71,39 @@ import splitties.views.dsl.core.*
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
 
-class VideoInfoFragment: Fragment(), DIAware, MyPage {
+class VideoInfoFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        const val TYPE_AV = "AV"
+        const val TYPE_BV = "BV"
+        override val name = "main"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://video/{id}")
+            deepLink("bilibili://video/{id}")
+            argument(MainNavArgs.type) {
+                type = NavType.StringType
+                defaultValue = TYPE_AV
+            }
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+        }
+
+        fun createArguments(
+            id: String
+        ): Bundle {
+            val type = if (id.indexOf("BV") == 0) {
+                VideoInfoFragment.TYPE_BV
+            } else {
+                VideoInfoFragment.TYPE_AV
+            }
+            return bundleOf(
+                MainNavArgs.type to type,
+                MainNavArgs.id to id,
+            )
+        }
+    }
 
     override val di: DI by lazyUiDi(ui = { ui })
 
@@ -149,10 +189,8 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                 // 评论
                 if (info != null) {
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = bundleOf(
-                        MainNavGraph.args.id to info.aid
-                    )
-                    nav.navigate(MainNavGraph.action.videoInfo_to_videoCommentList, args)
+                    val args = VideoCommentListFragment.createArguments(info.aid)
+                    nav.navigate(VideoCommentListFragment.actionId, args)
                 }
             }
             2 -> {
@@ -165,28 +203,38 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                     action = Intent.ACTION_SEND
                     type = "text/plain"
                     putExtra(Intent.EXTRA_SUBJECT, "bilibili视频分享")
-                    putExtra(Intent.EXTRA_TEXT, "${info.title} https://www.bilibili.com/video/${info.bvid}")
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        "${info.title} https://www.bilibili.com/video/${info.bvid}"
+                    )
                 }
                 requireActivity().startActivity(Intent.createChooser(shareIntent, "分享"))
             }
             3 -> {
                 // 收藏
                 if (info != null) {
-                    val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
-                    val args = bundleOf(
-                        MainNavGraph.args.id to info.aid
+                    val nav = Navigation.findNavController(
+                        requireActivity(),
+                        R.id.nav_bottom_sheet_fragment
                     )
-                    nav.navigate(MainNavGraph.action.global_to_videoAddFavorite, args)
+                    val args = VideoAddFavoriteFragment.createArguments(info.aid)
+                    nav.navigate(VideoAddFavoriteFragment.actionId, args)
                 }
             }
             4 -> {
                 // 投币
                 if (info != null) {
-                    val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
-                    val args = bundleOf(
-                        MainNavGraph.args.num to if (info.copyright == 2) { 1 } else { 2 }
+                    val nav = Navigation.findNavController(
+                        requireActivity(),
+                        R.id.nav_bottom_sheet_fragment
                     )
-                    nav.navigate(MainNavGraph.action.global_to_videoCoin, args)
+                    val num = if (info.copyright == 2) {
+                        1
+                    } else {
+                        2
+                    }
+                    val args = VideoCoinFragment.createArguments(num)
+                    nav.navigate(VideoCoinFragment.actionId, args)
                 }
             }
             5 -> {
@@ -217,7 +265,8 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         super.onDestroy()
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         if (prefs.getBoolean("player_auto_stop", false)
-            && playerStore.state.aid == viewModel.id) {
+            && playerStore.state.aid == viewModel.id
+        ) {
             basePlayerDelegate.closePlayer()
         }
     }
@@ -233,33 +282,33 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private fun playVideo(cid: String, title: String) {
         val info = viewModel.info
         if (info != null) {
-            basePlayerDelegate.openPlayer(VideoPlayerSource(
-                title = title,
-                coverUrl = info.pic,
-                aid = info.aid,
-                id = cid,
-                ownerId = info.owner.mid,
-                ownerName = info.owner.name,
-            ))
+            basePlayerDelegate.openPlayer(
+                VideoPlayerSource(
+                    title = title,
+                    coverUrl = info.pic,
+                    aid = info.aid,
+                    id = cid,
+                    ownerId = info.owner.mid,
+                    ownerName = info.owner.name,
+                )
+            )
 //            basePlayerDelegate.playVideo(info.aid.toString(), cid, title)
         }
     }
 
-    private fun toSelfLink (view: View, url: String) {
+    private fun toSelfLink(view: View, url: String) {
         val urlInfo = BiliUrlMatcher.findIDByUrl(url)
         val urlType = urlInfo[0]
         var urlId = urlInfo[1]
         if (urlType == "BV") {
             urlId = "BV$urlId"
         }
-        val args = bundleOf(
-            MainNavGraph.args.id to urlId
-        )
-        when(urlType){
+
+        when (urlType) {
             "AV", "BV" -> {
-                args.putString(MainNavGraph.args.type, urlType)
+                val args = createArguments(urlId)
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
+                    .navigate(actionId, args)
             }
             else -> {
                 BiliUrlMatcher.toUrlLink(view, url)
@@ -268,11 +317,9 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     }
 
     private fun toUser(view: View, mid: String) {
-        val args = bundleOf(
-            MainNavGraph.args.id to mid
-        )
+        val args = UserFragment.createArguments(mid)
         Navigation.findNavController(view)
-            .navigate(MainNavGraph.action.videoInfo_to_user, args)
+            .navigate(UserFragment.actionId, args)
     }
 
     private val handleUpperClick = View.OnClickListener {
@@ -284,8 +331,8 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private val handleMorePageClick = View.OnClickListener {
         viewModel.info?.let { info ->
             val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
-            val args = bundleOf(
-                MainNavGraph.args.video to VideoPagesParam(
+            val args = VideoPagesFragment.createArguments(
+                video = VideoPagesParam(
                     aid = info.aid,
                     title = info.title,
                     pic = info.pic,
@@ -296,8 +343,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                     }
                 )
             )
-            DebugMiao.log(args)
-            nav.navigate(MainNavGraph.action.global_to_videoPages, args)
+            nav.navigate(VideoPagesFragment.actionId, args)
         }
     }
 
@@ -314,21 +360,17 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
     private val handleTagsItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.tags[position]
         val nav = findNavController()
-        val args = bundleOf(
-            MainNavGraph.args.text to item.tag_name
-        )
-        nav.navigate(MainNavGraph.action.global_to_searchResult, args)
+        val args = SearchResultFragment.createArguments(item.tag_name)
+        nav.navigate(SearchResultFragment.actionId, args)
     }
 
     private val handleRelateItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.getItem(position)
         if (item is VideoRelateInfo) {
             if (item.goto == "av") {
-                val args = bundleOf(
-                    MainNavGraph.args.id to item.aid
-                )
+                val args = createArguments(item.aid!!)
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.videoInfo_to_videoInfo, args)
+                    .navigate(actionId, args)
             } else {
                 val url = item.uri
                 val re = BiliNavigation.navigationTo(view, url)
@@ -347,27 +389,28 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
         viewModel.loadData()
     }
 
-    private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
-        when (linkType) {
-            LinkType.LINK_TYPE -> {
-                val url = content
-                val re = BiliNavigation.navigationTo(view, url)
-                if (!re) {
-                    if (url.indexOf("bilibili://") == 0) {
-                        toast("不支持打开的链接：$url")
-                    } else {
-                        BiliUrlMatcher.toUrlLink(view, url)
+    private val handleLinkClickListener =
+        ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
+            when (linkType) {
+                LinkType.LINK_TYPE -> {
+                    val url = content
+                    val re = BiliNavigation.navigationTo(view, url)
+                    if (!re) {
+                        if (url.indexOf("bilibili://") == 0) {
+                            toast("不支持打开的链接：$url")
+                        } else {
+                            BiliUrlMatcher.toUrlLink(view, url)
+                        }
                     }
                 }
-            }
-            LinkType.MENTION_TYPE -> {
+                LinkType.MENTION_TYPE -> {
 //                toast("你点击了@用户 内容是：$content")
-            }
-            LinkType.SELF -> {
-                toSelfLink(view, selfContent)
+                }
+                LinkType.SELF -> {
+                    toSelfLink(view, selfContent)
+                }
             }
         }
-    }
 
     val pageItemUi = miaoBindingItemUi<VideoPageInfo> { item, index ->
         frameLayout {
@@ -584,7 +627,7 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                         }
                     }
                 }..lParams {
-                    rightMargin =  dip(8)
+                    rightMargin = dip(8)
                     bottomMargin = dip(5)
                 }
             }
@@ -642,7 +685,8 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                                     views {
 
                                         +imageView {
-                                            imageTintList = ColorStateList.valueOf(config.foregroundAlpha45Color)
+                                            imageTintList =
+                                                ColorStateList.valueOf(config.foregroundAlpha45Color)
                                             setImageResource(R.drawable.ic_info_views)
                                         }..lParams(dip(14), dip(14)) {
                                             gravity = Gravity.CENTER
@@ -650,14 +694,16 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                                         +textView {
                                             textSize = 12f
                                             setTextColor(config.foregroundAlpha45Color)
-                                            _text = NumberUtil.converString(videoInfo?.stat?.view ?: "")
+                                            _text =
+                                                NumberUtil.converString(videoInfo?.stat?.view ?: "")
                                         }..lParams {
                                             leftMargin = dip(3)
                                             rightMargin = dip(16)
                                         }
 
                                         +imageView {
-                                            imageTintList = ColorStateList.valueOf(config.foregroundAlpha45Color)
+                                            imageTintList =
+                                                ColorStateList.valueOf(config.foregroundAlpha45Color)
                                             setImageResource(R.drawable.ic_info_danmakus)
                                         }..lParams(dip(14), dip(14)) {
                                             gravity = Gravity.CENTER
@@ -665,7 +711,9 @@ class VideoInfoFragment: Fragment(), DIAware, MyPage {
                                         +textView {
                                             textSize = 12f
                                             setTextColor(config.foregroundAlpha45Color)
-                                            _text = NumberUtil.converString(videoInfo?.stat?.danmaku ?: "")
+                                            _text = NumberUtil.converString(
+                                                videoInfo?.stat?.danmaku ?: ""
+                                            )
                                         }..lParams {
                                             leftMargin = dip(3)
                                             rightMargin = dip(16)

@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.interfaces.v1.HistoryOuterClass
@@ -21,6 +23,8 @@ import com.a10miaomiao.bilimiao.comm.entity.user.WebVideoHistoryInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -31,6 +35,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
@@ -46,6 +51,10 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
 class HistoryFragment : Fragment(), DIAware, MyPage {
+
+    companion object : FragmentNavigatorBuilder() {
+        override val name = "history"
+    }
 
     override val pageConfig = myPageConfig {
         title = "历史记录"
@@ -81,16 +90,15 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
         val nav = Navigation.findNavController(view)
         when(item.business) {
             "archive" -> {
-                val args = bundleOf(
-                    MainNavGraph.args.id to item.oid.toString()
-                )
-                nav.navigate(MainNavGraph.action.history_to_videoInfo, args)
+                val args = VideoInfoFragment.createArguments(item.oid.toString())
+                Navigation.findNavController(view)
+                    .navigate(VideoInfoFragment.actionId, args)
             }
             "pgc" -> {
                 val args = bundleOf(
-                    MainNavGraph.args.id to item.kid.toString()
+                    MainNavArgs.id to item.kid.toString()
                 )
-                nav.navigate(MainNavGraph.action.history_to_bangumiDetail, args)
+//                nav.navigate(MainNavGraph.action.history_to_bangumiDetail, args)
             }
             else -> {
                 toast("未知跳转类型")

@@ -7,7 +7,11 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
+import com.a10miaomiao.bilimiao.page.user.UserFragment
+import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import java.util.regex.Pattern
 
 object BiliNavigation {
@@ -27,22 +31,18 @@ object BiliNavigation {
             var matcher = compile.matcher(url)
             if (matcher.find()) {
                 val id = matcher.group(1)
-                val args = bundleOf(
-                    MainNavGraph.args.id to "BV$id",
-                )
+                val args = VideoInfoFragment.createArguments("BV$id")
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.global_to_videoInfo, args)
+                    .navigate(VideoInfoFragment.actionId, args)
                 return true
             }
             compile = Pattern.compile("ss(\\d+)")
             matcher = compile.matcher(url)
             if (matcher.find()) {
                 val id = matcher.group(1)
-                val args = bundleOf(
-                    MainNavGraph.args.id to id,
-                )
+                val args = BangumiDetailFragment.createArguments(id)
                 Navigation.findNavController(view)
-                    .navigate(MainNavGraph.action.global_to_bangumiDetail, args)
+                    .navigate(BangumiDetailFragment.actionId, args)
                 return true
             }
         }
@@ -55,16 +55,16 @@ object BiliNavigation {
         if (host == "space.bilibili.com") {
             val path = uri.path!!.replace("/", "")
             argId = if (isNumeric(path)) { path } else { "" }
-            actionId = MainNavGraph.action.global_to_user
+            actionId = UserFragment.actionId
         }
         if (queryParameterNames.contains("avid")) {
             argId = uri.getQueryParameter("avid")!!
-            actionId = MainNavGraph.action.global_to_videoInfo
+            actionId = VideoInfoFragment.actionId
         }
 
         if (actionId != 0) {
             val args = bundleOf(
-                MainNavGraph.args.id to argId,
+                MainNavArgs.id to argId,
             )
             Navigation.findNavController(view)
                 .navigate(actionId, args)

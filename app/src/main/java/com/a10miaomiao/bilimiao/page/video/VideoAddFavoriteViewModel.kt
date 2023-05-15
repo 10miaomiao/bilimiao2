@@ -9,6 +9,7 @@ import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaResponseInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
@@ -28,7 +29,7 @@ class VideoAddFavoriteViewModel(
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
 
-    val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
 
     var list = mutableListOf<MediaListInfo>()
     var loading = false

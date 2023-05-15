@@ -10,6 +10,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -38,7 +39,7 @@ class VideoRegionViewModel(
     val fragment: Fragment by instance()
     val regionStore: RegionStore by instance()
 
-    val checkRegionId by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    val checkRegionId by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
 
     val allRegionInfo = RegionInfo(
         tid =0,

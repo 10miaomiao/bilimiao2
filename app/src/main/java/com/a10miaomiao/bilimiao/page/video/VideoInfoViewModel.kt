@@ -11,9 +11,11 @@ import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.*
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,8 +34,8 @@ class VideoInfoViewModel(
     val fragment: Fragment by instance()
 
 
-    //    val type by lazy { fragment.requireArguments().getString(MainNavGraph.args.type, "AV") }
-    val id by lazy { fragment.requireArguments().getString(MainNavGraph.args.id, "") }
+    //    val type by lazy { fragment.requireArguments().getString(MainNavArgs.type, "AV") }
+    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
 
     var info: VideoInfo? = null
     var relates = mutableListOf<VideoRelateInfo>()
@@ -58,9 +60,9 @@ class VideoInfoViewModel(
             }
 //            val filterStore = Store.from(context).filterStore
             val type = if (id.indexOf("BV") == 0) {
-                "BV"
+                VideoInfoFragment.TYPE_BV
             } else {
-                "AV"
+                VideoInfoFragment.TYPE_AV
             }
             val res = BiliApiService.videoAPI
                 .info(id, type = type)
@@ -118,10 +120,8 @@ class VideoInfoViewModel(
         info.season?.let {
             if (it.is_jump == 1) {
                 val nav = fragment.findNavController()
-                val args = bundleOf(
-                    MainNavGraph.args.id to it.season_id
-                )
-                nav.navigate(MainNavGraph.action.videoInfo_to_bangumiDetail, args)
+                val args = BangumiDetailFragment.createArguments(it.season_id)
+                nav.navigate(BangumiDetailFragment.actionId, args)
             }
         }
     }

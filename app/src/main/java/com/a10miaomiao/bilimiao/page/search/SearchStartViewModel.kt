@@ -116,10 +116,8 @@ class SearchStartViewModel (
         searchHistoryDB.insertHistory(keyword)
         Navigation.findNavController(view).popBackStack()
         val nav = activity.findNavController(R.id.nav_host_fragment)
-        val args = bundleOf(
-            MainNavGraph.args.text to keyword
-        )
-        nav.navigate(MainNavGraph.action.global_to_searchResult, args)
+        val args = SearchResultFragment.createArguments(keyword)
+        nav.navigate(SearchResultFragment.actionId, args)
     }
 
     fun deleteSearchHistory(text: String){
