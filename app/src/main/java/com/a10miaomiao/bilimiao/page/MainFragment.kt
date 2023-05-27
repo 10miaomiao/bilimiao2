@@ -28,6 +28,7 @@ import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.page.download.DownloadFragment
@@ -37,6 +38,7 @@ import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
+import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -102,8 +104,9 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 nav.navigate(DownloadFragment.actionId)
             }
             MenuKeys.search -> {
-                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-                bsNav.navigate(SearchStartFragment.actionId)
+//                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+//                bsNav.navigate(SearchStartFragment.actionId)
+                scaffoldApp.openSearchDrawer()
             }
         }
     }

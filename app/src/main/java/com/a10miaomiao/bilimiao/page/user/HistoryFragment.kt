@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.page.user
 
 import android.os.Bundle
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,13 +19,14 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.user.WebVideoHistoryInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -37,6 +39,7 @@ import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -54,10 +57,44 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
 
     companion object : FragmentNavigatorBuilder() {
         override val name = "history"
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.text) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = ""
+            }
+        }
     }
 
     override val pageConfig = myPageConfig {
-        title = "历史记录"
+        var searchTitle = "搜索"
+        if (viewModel.keyword?.isBlank() == true) {
+            title = "历史记录"
+        } else {
+            title = "搜索\n-\n历史记录\n-\n${viewModel.keyword}"
+            searchTitle = "继续搜索"
+        }
+        search = SearchConfigInfo(
+            name = "搜索历史记录",
+            action = HistoryFragment.actionId,
+            keyword = viewModel.keyword ?: "",
+        )
+        menus = listOf(
+            myMenuItem {
+                key = MenuKeys.search
+                title = searchTitle
+                iconResource = R.drawable.ic_search_gray
+            },
+        )
+    }
+
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
+            MenuKeys.search -> {
+                requireActivity().getScaffoldView().openSearchDrawer()
+            }
+        }
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
@@ -120,6 +157,7 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
                 item.cardUgc.name
             },
             remark = NumberUtil.converCTime(item.viewAt),
+            isHtml = true,
         )
     }
 

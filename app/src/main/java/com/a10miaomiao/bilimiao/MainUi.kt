@@ -37,62 +37,18 @@ import splitties.views.dsl.recyclerview.recyclerView
 @OptIn(InternalSplittiesApi::class)
 class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
-    val leftNavigationList = mutableListOf(
-        NavigationListAdapter.NavigationItem(
-            title = "当前页面",
-            subtitle = "首页"
-        ),
-        NavigationListAdapter.NavigationItem(
-            itemType = NavigationListAdapter.ITEM_DIVIDER,
-            title = "",
-        ),
-        NavigationListAdapter.NavigationItem(
-            title = "首页",
-        ),
-        NavigationListAdapter.NavigationItem(
-            title = "番剧",
-        ),
-        NavigationListAdapter.NavigationItem(
-            title = "动态",
-        ),
-        NavigationListAdapter.NavigationItem(
-            itemType = NavigationListAdapter.ITEM_DIVIDER,
-            title = "",
-        ),
-        NavigationListAdapter.NavigationItem(
-            title = "我的收藏/订阅",
-        ),
-        NavigationListAdapter.NavigationItem(
-            title = "历史记录",
-        ),
-        NavigationListAdapter.NavigationItem(
-            title = "我的下载",
-        ),
-        NavigationListAdapter.NavigationItem(
-            itemType = NavigationListAdapter.ITEM_DIVIDER,
-            title = "",
-        ),
-        NavigationListAdapter.NavigationItem(
-            title = "设置",
-        ),
-    )
-    val leftNavigationAdapter = NavigationListAdapter(leftNavigationList)
-    val leftNavigationView = recyclerView {
-        backgroundColor= config.windowBackgroundColor
-        layoutManager = LinearLayoutManager(ctx)
-        adapter = leftNavigationAdapter
-    }
 
-    val mContainerView = inflate<View>(R.layout.container_fragment) {
+    val leftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
         backgroundColor = config.windowBackgroundColor
     }
-//    val mContainerView = view<DrawerLayout> {
-//        addView(inflate(R.layout.container_fragment))
-//        addView(leftNavigationView, DrawerLayout.LayoutParams(matchParent, matchParent).apply {
-//            gravity = Gravity.LEFT
-//        })
-//        backgroundColor = config.windowBackgroundColor
-//    }
+
+    val mContainerView = view<DrawerLayout> {
+        addView(inflate(R.layout.container_fragment))
+        addView(leftContainerView, DrawerLayout.LayoutParams(matchParent, matchParent).apply {
+            gravity = Gravity.LEFT
+        })
+        backgroundColor = config.windowBackgroundColor
+    }
 
     val mBottomSheetView = inflate<FragmentContainerView>(R.layout.bottom_sheet_fragment) {
         backgroundColor = config.windowBackgroundColor
@@ -100,6 +56,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
     }
 
     val mAppBar = view<AppBarView>{
+        setOnClickListener {  }
         backgroundColor = config.blockBackgroundColor
         elevation = dip(20).toFloat()
     }
@@ -208,9 +165,9 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
     fun setNavigationTitle(
         title: String,
     ) {
-        leftNavigationAdapter.setData(0, NavigationListAdapter.NavigationItem(
-            title = "当前页面",
-            subtitle = title.replace("\n", " "),
-        ))
+//        leftNavigationAdapter.setData(0, NavigationListAdapter.NavigationItem(
+//            title = "当前页面",
+//            subtitle = title.replace("\n", " "),
+//        ))
     }
 }
