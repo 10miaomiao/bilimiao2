@@ -11,6 +11,7 @@ class PageConfigInfo(
 ) {
     var title: String = ""
     var menus: List<MenuItemPropInfo>? = null
+    var onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
 }
 
 internal val LocalPageConfigInfo: ProvidableCompositionLocal<PageConfigInfo?> =
@@ -19,7 +20,8 @@ internal val LocalPageConfigInfo: ProvidableCompositionLocal<PageConfigInfo?> =
 @Composable
 fun PageConfig(
     title: String = "",
-    menus: List<MenuItemPropInfo>? = null
+    menus: List<MenuItemPropInfo>? = null,
+
 ) {
     val pageConfigInfo = LocalPageConfigInfo.current
     LaunchedEffect(title, menus) {
@@ -28,5 +30,62 @@ fun PageConfig(
             it.menus = menus
             it.page.pageConfig.notifyConfigChanged()
         }
+    }
+
+}
+
+@Composable
+fun PageMenuItemClick(
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+) {
+    val pageConfigInfo = LocalPageConfigInfo.current
+    LaunchedEffect(onMenuItemClick) {
+        pageConfigInfo?.onMenuItemClick = onMenuItemClick
+    }
+}
+@Composable
+fun PageMenuItemClick(
+    key1: Any?,
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+) {
+    val pageConfigInfo = LocalPageConfigInfo.current
+    LaunchedEffect(key1, onMenuItemClick) {
+        pageConfigInfo?.onMenuItemClick = onMenuItemClick
+    }
+}
+@Composable
+fun PageMenuItemClick(
+    key1: Any?,
+    key2: Any?,
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+) {
+    val pageConfigInfo = LocalPageConfigInfo.current
+    LaunchedEffect(key1, key2, onMenuItemClick) {
+        pageConfigInfo?.onMenuItemClick = onMenuItemClick
+    }
+}
+@Composable
+fun PageMenuItemClick(
+    key1: Any?,
+    key2: Any?,
+    key3: Any?,
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+) {
+    val pageConfigInfo = LocalPageConfigInfo.current
+    LaunchedEffect(key1, key2, onMenuItemClick) {
+        pageConfigInfo?.onMenuItemClick = onMenuItemClick
+    }
+}
+@Composable
+fun PageMenuItemClick(
+    key1: Any?,
+    key2: Any?,
+    key3: Any?,
+    key4: Any?,
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+) {
+    val pageConfigInfo = LocalPageConfigInfo.current
+    LaunchedEffect(key1, key2, key3, key4, onMenuItemClick) {
+        pageConfigInfo?.onMenuItemClick = onMenuItemClick
     }
 }

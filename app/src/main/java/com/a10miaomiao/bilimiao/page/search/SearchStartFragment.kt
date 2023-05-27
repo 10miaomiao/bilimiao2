@@ -5,7 +5,9 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
+import android.widget.CompoundButton
 import android.widget.EditText
+import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -16,11 +18,11 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
@@ -30,7 +32,6 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
-import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateParam
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -66,6 +67,10 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                 MainNavArgs.text to text
             )
         }
+
+        private val ID_editText = View.generateViewId()
+        private val ID_radioButton_all = View.generateViewId()
+        private val ID_radioButton_self = View.generateViewId()
     }
 
     override val pageConfig = myPageConfig {
@@ -74,9 +79,9 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
-    private val ID_editText = View.generateViewId()
-
     private lateinit var mEditText: EditText
+    private lateinit var mAllRadioButton: RadioButton
+    private lateinit var mSelfRadioButton: RadioButton
 
     private val viewModel by diViewModel<SearchStartViewModel>(di)
     private val supportHelper by instance<SupportHelper>()
@@ -93,6 +98,8 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mEditText = view.findViewById(ID_editText)
+        mAllRadioButton = view.findViewById(ID_radioButton_all)
+        mSelfRadioButton = view.findViewById(ID_radioButton_self)
         mEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
 
@@ -107,20 +114,52 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                 viewModel.loadSuggestData(text, mEditText)
             }
         })
-        val text = requireArguments().getString(MainNavArgs.text)
+        mAllRadioButton.setOnCheckedChangeListener(handleCheckedChange)
+        mSelfRadioButton.setOnCheckedChangeListener(handleCheckedChange)
+        val text = arguments?.getString(MainNavArgs.text)
         if (text != null) {
             mEditText.setText(text)
         }
     }
 
+    fun setConfig(config: SearchConfigInfo?) {
+        if (config == null) {
+            mEditText.setText("")
+            mAllRadioButton.isChecked = true
+            mSelfRadioButton.visibility = View.GONE
+            viewModel.selfSearchAction = -1
+        } else {
+            mEditText.setText(config.keyword)
+            mEditText.setSelection(config.keyword.length)
+            if (config.name.isNotBlank() && config.action != -1) {
+                viewModel.selfSearchAction = config.action
+                mSelfRadioButton.visibility = View.VISIBLE
+                mSelfRadioButton.text = config.name
+                mSelfRadioButton.isChecked = true
+            } else {
+                mAllRadioButton.isChecked = true
+                mSelfRadioButton.visibility = View.GONE
+                viewModel.selfSearchAction = -1
+            }
+        }
+    }
+
+    fun showSoftInput() {
+        supportHelper.showSoftInput(mEditText)
+    }
+
+    fun hideSoftInput() {
+        supportHelper.hideSoftInput(mEditText)
+    }
+
     override fun onResume() {
         super.onResume()
-        supportHelper.showSoftInput(mEditText)
+//        supportHelper.showSoftInput(mEditText)
     }
 
     override fun onPause() {
         super.onPause()
-        supportHelper.hideSoftInput(mEditText)
+//        supportHelper.hideSoftInput(mEditText)
     }
 
     private val handleEditorAction = TextView.OnEditorActionListener { v, actionId, event ->
@@ -189,6 +228,18 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
             setPositiveButton("取消", null)
         }.show()
 
+    }
+
+    private val handleCheckedChange = CompoundButton.OnCheckedChangeListener { compoundButton, b ->
+        if (b) {
+            if (compoundButton.id == ID_radioButton_all) {
+                mSelfRadioButton.isChecked = false
+                viewModel.searchAction = viewModel.allSearchAction
+            } else {
+                mAllRadioButton.isChecked = false
+                viewModel.searchAction = viewModel.selfSearchAction
+            }
+        }
     }
 
     val itemHistoryTagUi = miaoBindingItemUi<String> { item, index ->
@@ -271,9 +322,25 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
             _bottomPadding = contentInsets.bottom
 
             views {
-                +secrchBoxView().apply {
+                +flexboxLayout {
                     _topPadding = contentInsets.top
+                    horizontalPadding = config.pagePadding
+                    flexDirection = FlexDirection.ROW
+                    flexWrap = FlexWrap.WRAP
+                    backgroundColor = config.blockBackgroundColor
+
+                    views {
+                        +radioButton(ID_radioButton_all) {
+                            text = "搜索全站"
+                            isChecked = true
+                        }..lParams { rightMargin = config.dividerSize }
+                        +radioButton(ID_radioButton_self) {
+                            text = ""
+                            visibility = View.GONE
+                        }
+                    }
                 }..lParams(width = matchParent)
+                +secrchBoxView()..lParams(width = matchParent)
 
                 +verticalLayout {
                     views {

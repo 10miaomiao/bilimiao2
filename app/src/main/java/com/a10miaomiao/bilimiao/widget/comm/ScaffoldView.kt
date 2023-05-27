@@ -2,10 +2,13 @@ package com.a10miaomiao.bilimiao.widget.comm
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.customview.widget.ViewDragHelper
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
@@ -69,6 +72,9 @@ class ScaffoldView @JvmOverloads constructor(
 
     var bottomSheet: View? = null
     var bottomSheetBehavior: BottomSheetBehavior<View>? = null
+
+    private var drawerLayout: DrawerLayout? = null
+    var drawerFragment: Fragment? = null
 
     lateinit var mDragHelper: ViewDragHelper
 
@@ -162,8 +168,39 @@ class ScaffoldView @JvmOverloads constructor(
                     this.bottomSheetBehavior = behavior
                 }
             }
+            if (child is DrawerLayout) {
+                this.drawerLayout = child
+            }
         }
         super.addView(child, params)
+    }
+
+    fun isDrawerOpen(): Boolean {
+        return drawerLayout?.isDrawerOpen(Gravity.LEFT) ?: false
+    }
+
+    fun openDrawer() {
+        drawerLayout?.openDrawer(Gravity.LEFT)
+    }
+
+    fun closeDrawer() {
+        drawerLayout?.closeDrawer(Gravity.LEFT)
+    }
+
+    fun slideUpBottomAppBar() {
+        if (orientation == VERTICAL) {
+            appBar?.let {
+                appBarBehavior?.slideUp(it)
+            }
+        }
+    }
+
+    fun slideDownBottomAppBar() {
+        if (orientation == VERTICAL) {
+            appBar?.let {
+                appBarBehavior?.slideDown(it)
+            }
+        }
     }
 
 

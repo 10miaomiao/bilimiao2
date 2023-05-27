@@ -4,7 +4,7 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.annotation.DrawableRes
 
-class MenuItemPropInfo (
+data class MenuItemPropInfo (
     var key: Int? = null,
     var title: String? = null,
     var subTitle: String? = null,

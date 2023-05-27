@@ -4,21 +4,15 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
-import androidx.navigation.fragment.fragment
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.MainFragment
-import com.a10miaomiao.bilimiao.page.MainFragment.Companion.build
 import com.a10miaomiao.bilimiao.page.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.download.DownloadFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
@@ -48,6 +42,7 @@ object MainNavGraph {
         val main = id_counter++
         val template = id_counter++
         val compose = id_counter++
+        val web = id_counter++
     }
 
     private val defaultNavOptionsBuilder: NavOptionsBuilder.() -> Unit = {
@@ -63,7 +58,7 @@ object MainNavGraph {
         navController.graph = navController.createGraph(0, startDestination) {
             addFragment(MainFragment::class, MainFragment.Companion, dest.main)
             addFragment(TemplateFragment::class, TemplateFragment.Companion, dest.template)
-            addFragment(WebFragment::class, WebFragment.Companion)
+            addFragment(WebFragment::class, WebFragment.Companion, dest.web)
             addFragment(ComposeFragment::class, ComposeFragmentNavigatorBuilder, dest.compose)
 
             addFragment(RegionFragment::class, RegionFragment.Companion)
@@ -77,6 +72,11 @@ object MainNavGraph {
             addFragment(VideoCommentListFragment::class, VideoCommentListFragment.Companion)
             addFragment(VideoCommentDetailFragment::class, VideoCommentDetailFragment.Companion)
             addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
+
+            addFragment(BangumiDetailFragment::class, BangumiDetailFragment.Companion)
+            addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)
+
+            addFragment(H5LoginFragment::class, H5LoginFragment.Companion)
 
             addFragment(UserFragment::class, UserFragment.Companion)
             addFragment(MyBangumiFragment::class, MyBangumiFragment.Companion)

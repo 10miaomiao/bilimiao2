@@ -22,8 +22,10 @@ import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
 import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.google.android.material.tabs.TabLayout
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -61,15 +63,19 @@ class SearchResultFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChange
         ).apply {
             viewModel.curFragment?.let { addAll(it.menus) }
         }
+        search = SearchConfigInfo(
+            keyword = viewModel.keyword ?: ""
+        )
     }
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
         when (menuItem.key) {
             MenuKeys.search -> {
-                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-                val args = SearchStartFragment.createArguments(viewModel.keyword ?: "")
-                bsNav.navigate(SearchStartFragment.actionId, args)
+//                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+//                val args = SearchStartFragment.createArguments(viewModel.keyword ?: "")
+//                bsNav.navigate(SearchStartFragment.actionId, args)
+                requireActivity().getScaffoldView().openSearchDrawer()
             }
             else -> {
                 viewModel.curFragment?.onMenuItemClick(view, menuItem)

@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
@@ -42,6 +43,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
+import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.store.*
@@ -81,6 +83,7 @@ class MainActivity
     private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val supportHelper by lazy { SupportHelper(this) }
 
+    private lateinit var leftFragment: SearchStartFragment
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
 
@@ -121,6 +124,11 @@ class MainActivity
         navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
 
+        (supportFragmentManager.findFragmentByTag(getString(R.string.tag_left_fragment)) as? SearchStartFragment)?.let {
+            leftFragment = it
+            ui.root.drawerFragment = it
+        }
+
         ui.mAppBar.onBackClick = this.onBackClick
         ui.mAppBar.onBackLongClick = this.onBackLongClick
         ui.mAppBar.onMenuItemClick = {
@@ -130,6 +138,7 @@ class MainActivity
             }
         }
 
+        ui.mContainerView.addDrawerListener(onDrawer)
 //        lifecycleScope.launch(Dispatchers.IO){
 //            val refreshToken = Bilimiao.commApp.loginInfo!!.token_info.refresh_token
 //            DebugMiao.log(Bilimiao.commApp.loginInfo)
@@ -207,6 +216,7 @@ class MainActivity
                 it.slideUp(ui.mAppBar)
             }
         }
+        leftFragment.setConfig(config.search)
     }
 
     private fun goBackHome(): Boolean {
@@ -238,6 +248,25 @@ class MainActivity
                     PlayerService.selfInstance?.videoPlayerView = findViewById(R.id.video_player)
                 }
             }
+        }
+    }
+
+    val  onDrawer = object : DrawerLayout.DrawerListener {
+        override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+
+        }
+
+        override fun onDrawerOpened(drawerView: View) {
+            ui.root.slideDownBottomAppBar()
+//            leftFragment.showSoftInput()
+        }
+
+        override fun onDrawerClosed(drawerView: View) {
+            ui.root.slideUpBottomAppBar()
+            leftFragment.hideSoftInput()
+        }
+
+        override fun onDrawerStateChanged(newState: Int) {
         }
     }
 
@@ -308,9 +337,6 @@ class MainActivity
                 0, 0, 0, 0
             )
         }
-        ui.leftNavigationView.setPadding(
-            left, if (showPlayer) 0 else top, 0, 0,
-        )
         basePlayerDelegate.setWindowInsets(left, top, right, bottom)
     }
 
@@ -438,6 +464,10 @@ class MainActivity
     }
 
     override fun onBackPressed() {
+        if (ui.root.isDrawerOpen()) {
+            ui.root.closeDrawer()
+            return
+        }
         if (bottomSheetDelegate.onBackPressed()) {
             return
         }
