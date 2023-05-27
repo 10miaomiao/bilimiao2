@@ -610,15 +610,19 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     fun showSmallDargBar() {
-        if (mode == PlayerMode.SMALL_FLOAT) {
-            mDragBar.visibility = VISIBLE
-        } else {
-            mDragBar.visibility = GONE
+        post {
+            if (mode == PlayerMode.SMALL_FLOAT) {
+                mDragBar.visibility = VISIBLE
+            } else {
+                mDragBar.visibility = GONE
+            }
         }
     }
 
     fun hideSmallDargBar() {
-        mDragBar.visibility = mTopContainer.visibility
+        post {
+            mDragBar.visibility = mTopContainer.visibility
+        }
     }
 
     private fun setDialogVolumeProgressBar(context: Context) {
