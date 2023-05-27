@@ -20,6 +20,7 @@ import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
@@ -80,11 +81,11 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
                 title = viewModel.rankOrder.title
                 iconResource = R.drawable.ic_baseline_filter_list_grey_24
             },
-            myMenuItem {
-                key = MenuKeys.region
-                title = viewModel.region.title
-                iconResource = R.drawable.ic_baseline_grid_on_gray_24
-            },
+//            myMenuItem {
+//                key = MenuKeys.region
+//                title = viewModel.region.title
+//                iconResource = R.drawable.ic_baseline_grid_on_gray_24
+//            },
         )
     }
 
@@ -150,18 +151,18 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = VideoInfoFragment.createArguments(item.aid)
+        val args = VideoInfoFragment.createArguments(item.param)
         Navigation.findNavController(view)
             .navigate(VideoInfoFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<SubmitVideosInfo.DataBean> { item, index ->
+    val itemUi = miaoBindingItemUi<ArchiveInfo> { item, index ->
         videoItem (
             title = item.title,
-            pic = item.pic,
-            remark = NumberUtil.converCTime(item.created),
+            pic = item.cover,
+            remark = NumberUtil.converCTime(item.ctime),
             playNum = item.play,
-            damukuNum = item.video_review,
+            damukuNum = item.danmaku,
         )
     }
 

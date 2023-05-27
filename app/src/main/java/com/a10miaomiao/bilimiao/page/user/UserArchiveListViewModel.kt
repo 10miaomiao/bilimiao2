@@ -10,6 +10,8 @@ import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo2
+import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
+import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
@@ -50,64 +52,117 @@ class UserArchiveListViewModel(
     val rankOrderList = listOf<CheckPopupMenu.MenuItemInfo<String>>(
         CheckPopupMenu.MenuItemInfo("最新发布", "pubdate"),
         CheckPopupMenu.MenuItemInfo("最多播放", "click"),
-        CheckPopupMenu.MenuItemInfo("最多收藏", "stow"),
+//        CheckPopupMenu.MenuItemInfo("最多收藏", "stow"),
     )
     var rankOrder = rankOrderList[0]
 
     var triggered = false
     var total = 0
-    var list = PaginationInfo<SubmitVideosInfo.DataBean>()
+    var list = PaginationInfo<ArchiveInfo>()
+    private var _aid: String = ""
 
     init {
-        loadData(1)
+//        loadData(1)
+        loadData2("")
     }
 
-    private fun loadData(
-        pageNum: Int = list.pageNum
+//    private fun loadData(
+//        pageNum: Int = list.pageNum
+//    ) = viewModelScope.launch(Dispatchers.IO){
+//        try {
+//            ui.setState {
+//                list.loading = true
+//            }
+//            val res = BiliApiService.userApi
+//                .upperVideoList(
+//                    mid = id,
+//                    tid = region.value,
+//                    order = rankOrder.value,
+//                    pageNum = pageNum,
+//                    pageSize = list.pageSize,
+//                )
+//                .awaitCall()
+//                .gson<ResultInfo<SubmitVideosInfo>>()
+//            if (res.code == 0) {
+//                val vlist = res.data.list.vlist
+//                if (vlist.size < list.pageSize) {
+//                    ui.setState { list.finished = true }
+//                }
+//                ui.setState {
+//                    if (pageNum == 1) {
+//                        list.data = arrayListOf()
+//                    }
+//                    list.data.addAll(vlist)
+//                }
+//                if (region.value == 0) {
+//                    total = res.data.page.count
+//                }
+//                res.data.list.tlist?.let {
+//                    regionList = listOf(
+//                        CheckPopupMenu.MenuItemInfo("全部(${total})", 0),
+//                        *it.values.map {
+//                            CheckPopupMenu.MenuItemInfo("${it.name}(${it.count})", it.tid)
+//                        }.toTypedArray()
+//                    )
+//                    if (region.value == 0) {
+//                        region = regionList[0]
+//                    }
+//                    withContext(Dispatchers.Main) {
+//                        myPage.pageConfig.notifyConfigChanged()
+//                    }
+//                }
+//                list.pageNum = pageNum
+//            } else {
+//                withContext(Dispatchers.Main) {
+//                    context.toast(res.message)
+//                }
+//                throw Exception(res.message)
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            ui.setState {
+//                list.fail = true
+//            }
+//        } finally {
+//            ui.setState {
+//                list.loading = false
+//                triggered = false
+//            }
+//        }
+//    }
+
+    private fun loadData2(
+        aid: String = _aid
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
             ui.setState {
                 list.loading = true
             }
             val res = BiliApiService.userApi
-                .upperVideoList(
-                    mid = id,
-                    tid = region.value,
+                .upperVideoList2(
+                    vmid = id,
+//                    tid = region.value,
                     order = rankOrder.value,
-                    pageNum = pageNum,
+                    aid = aid,
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo<SubmitVideosInfo>>()
+                .gson<ResultInfo<ArchiveCursorInfo>>()
             if (res.code == 0) {
-                val vlist = res.data.list.vlist
-                if (vlist.size < list.pageSize) {
-                    ui.setState { list.finished = true }
-                }
+                val items: List<ArchiveInfo>? = res.data.item
                 ui.setState {
-                    if (pageNum == 1) {
-                        list.data = arrayListOf()
+                    if (aid.isBlank()) {
+                        list.data = mutableListOf()
                     }
-                    list.data.addAll(vlist)
+                    items?.let {
+                        list.data.addAll(it)
+                        _aid = it.last().param
+                    }
                 }
                 if (region.value == 0) {
-                    total = res.data.page.count
+                    total = res.data.count
                 }
-                res.data.list.tlist?.let {
-                    regionList = listOf(
-                        CheckPopupMenu.MenuItemInfo("全部(${total})", 0),
-                        *it.values.map {
-                            CheckPopupMenu.MenuItemInfo("${it.name}(${it.count})", it.tid)
-                        }.toTypedArray()
-                    )
-                    if (region.value == 0) {
-                        region = regionList[0]
-                    }
-                    withContext(Dispatchers.Main) {
-                        myPage.pageConfig.notifyConfigChanged()
-                    }
-                }
-                list.pageNum = pageNum
+                list.finished = !res.data.has_next
             } else {
                 withContext(Dispatchers.Main) {
                     context.toast(res.message)
@@ -128,14 +183,14 @@ class UserArchiveListViewModel(
     }
 
     private fun _loadData() {
-        loadData()
+        loadData2()
     }
 
     fun loadMode () {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
-            loadData(
-                pageNum = pageNum + 1
+            loadData2(
+                _aid
             )
         }
     }
@@ -144,7 +199,7 @@ class UserArchiveListViewModel(
         ui.setState {
             list = PaginationInfo()
             triggered = true
-            loadData()
+            loadData2("")
         }
     }
 

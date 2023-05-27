@@ -1,14 +1,18 @@
 package com.a10miaomiao.bilimiao.commponents.video
 
+import android.text.Html
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.widget._text
+import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.HtmlTagHandler
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
@@ -26,6 +30,7 @@ fun MiaoUI.videoItem (
     remark: String? = null,
     playNum: String? = null,
     damukuNum: String? = null,
+    isHtml: Boolean = false,
 ): View {
     return horizontalLayout {
         layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
@@ -52,7 +57,14 @@ fun MiaoUI.videoItem (
                         maxLines = 2
                         setTextColor(config.foregroundColor)
                         textSize = 14f
-                        _text = title ?: ""
+                        if (isHtml) {
+                            miaoEffect(title) {
+                                DebugMiao.log(it)
+                                text = HtmlTagHandler.fromHtml( "<html><body>$it</body></html>")
+                            }
+                        } else {
+                            _text = title ?: ""
+                        }
                     }..lParams(matchParent, matchParent) {
                         weight = 1f
                     }
