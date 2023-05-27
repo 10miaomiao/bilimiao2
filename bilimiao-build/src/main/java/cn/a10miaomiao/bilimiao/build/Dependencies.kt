@@ -77,8 +77,8 @@ object Libraries {
     const val foregroundCompat = "me.zhanghai.android.foregroundcompat:library:1.0.2"
     const val drawer = "com.drakeet.drawer:drawer:1.0.3"
     const val modernAndroidPreferences = "de.maxr1998:modernandroidpreferences:2.2.0"
-    const val dialogX = "com.kongzue.dialogx:DialogX:0.0.47"
-    const val dialogXMaterialYou = "com.kongzue.dialogx.style:DialogXMaterialYouStyle:0.0.47"
+    const val dialogX = "com.kongzue.dialogx:DialogX:0.0.48"
+    const val dialogXMaterialYou = "com.kongzue.dialogx.style:DialogXMaterialYouStyle:0.0.48"
 
     const val gsyVideoPlayer = "com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${Versions.gsyVideoPlayer}"
 
