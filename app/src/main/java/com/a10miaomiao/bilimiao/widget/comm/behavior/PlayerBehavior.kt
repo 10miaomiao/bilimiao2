@@ -4,11 +4,13 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.*
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat.offsetLeftAndRight
 import androidx.core.view.ViewCompat.offsetTopAndBottom
+import androidx.core.view.get
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import splitties.dimensions.dip
@@ -132,7 +134,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         layoutDirection: Int
     ): Boolean {
         if (isMove) {
-            return false
+            return true
         }
         val scaffoldView = parent as? ScaffoldView ?: return false
         currentOrientation = scaffoldView.orientation
@@ -211,8 +213,11 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                     mFirstY = event.rawY.roundToInt()
                     mFirstX = event.rawX.roundToInt()
                 }
-                if (child is DanmakuVideoPlayer) {
-                    child.showSmallDargBar()
+//                if (child is DanmakuVideoPlayer) {
+//                    child.showSmallDargBar()
+//                }
+                (child as? ViewGroup)?.getChildAt(0)?.let {
+                    if (it is DanmakuVideoPlayer) it.showSmallDargBar()
                 }
             }
             MotionEvent.ACTION_MOVE -> {
@@ -229,8 +234,11 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                 if (isMove) {
                     isMove = false
                     resetPosition(event, child)
-                    if (child is DanmakuVideoPlayer) {
-                        child.hideSmallDargBar()
+//                    if (child is DanmakuVideoPlayer) {
+//                        child.hideSmallDargBar()
+//                    }
+                    (child as? ViewGroup)?.getChildAt(0)?.let {
+                        if (it is DanmakuVideoPlayer) it.hideSmallDargBar()
                     }
                 }
             }
