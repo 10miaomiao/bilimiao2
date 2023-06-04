@@ -44,8 +44,12 @@ class MenuItemView @JvmOverloads constructor(
         if (visibility != prop.visibility) {
             visibility = prop.visibility
         }
-        if (prop.iconResource == null && prop.iconDrawable == null) {
+        if (prop.iconResource == null && prop.iconDrawable == null && prop.iconFileName == null) {
             ui.icon.visibility = View.GONE
+        } else if (prop.iconFileName != null) {
+            val iconResource = context.resources.getIdentifier(prop.iconFileName, "drawable", context.packageName)
+            ui.icon.visibility = View.VISIBLE
+            ui.icon.setImageResource(iconResource)
         } else if (prop.iconDrawable != null) {
             ui.icon.visibility = View.VISIBLE
             ui.icon.setImageDrawable(prop.iconDrawable)

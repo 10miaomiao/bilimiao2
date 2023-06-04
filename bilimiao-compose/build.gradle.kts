@@ -78,6 +78,8 @@ dependencies {
     implementation(Libraries.glideCompose)
     implementation(Libraries.qrGenerator)
 
+    implementation(Libraries.dialogX)
+
     implementation(project(":bilimiao-comm"))
 
     testImplementation(Libraries.junit)
