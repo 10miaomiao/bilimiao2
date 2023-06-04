@@ -137,17 +137,22 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
             return true
         }
         val scaffoldView = parent as? ScaffoldView ?: return false
-        currentOrientation = scaffoldView.orientation
+
         if (scaffoldView.fullScreenPlayer) {
             // 全屏
             onFullScreenLayoutChild(scaffoldView, child)
-        } else if (currentOrientation == ScaffoldView.HORIZONTAL) {
+        } else if (scaffoldView.orientation == ScaffoldView.HORIZONTAL) {
             // 横向屏幕
             onHorizontalScreenLayoutChild(scaffoldView, child)
         } else {
             // 竖向屏幕
             onVerticalScreenLayoutChild(scaffoldView, child)
         }
+        if (scaffoldView.orientation != currentOrientation) {
+            child.translationX = 0f
+            child.translationY = 0f
+        }
+        currentOrientation = scaffoldView.orientation
         // 播放器尺寸校正
         if (child.layoutParams.height != height || child.layoutParams.width != width) {
             child.layoutParams.height = height
