@@ -48,15 +48,43 @@ class SelectProxyServerPageViewModel(
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())
     var selectedServerIndex = MutableStateFlow(-1)
 
+//    bos（百度）upos-sz-mirrorbos.bilivideo.com
+//    cos（騰訊） upos-sz-mirrorcos.bilivideo.com
+//    cosb（騰訊）upos-sz-mirrorcosb.bilivideo.com
+//    coso1（騰訊） upos-sz-mirrorcoso1.bilivideo.com
+//    hw（華為） upos-sz-mirrorhw.bilivideo.com
+//    hwb（華為） upos-sz-mirrorhwb.bilivideo.com
+//    hwo1（華為） upos-sz-mirrorhwo1.bilivideo.com
+//    08c（華為）upos-sz-mirror08c.bilivideo.com
+//    08h（華為） upos-sz-mirror08h.bilivideo.com
+//    08ct（華為） upos-sz-mirror08ct.bilivideo.com
+//    ali（阿里） upos-sz-mirrorali.bilivideo.com
+//    alib（阿里） upos-sz-mirroralib.bilivideo.com
+//    alio1（阿里） upos-sz-mirroralio1.bilivideo.com
+//    Akamai海外 upos-hz-mirrorakam.akamaized.net
+//    aliov（阿里海外） upos-sz-mirroraliov.bilivideo.com
+//    hwov（華為海外） upos-sz-mirrorhwov.bilivideo.com
+//    cosov（騰訊海外） upos-sz-mirrorcosov.bilivideo.com
+//    hk_bcache（Bilibili海外） cn-hk-eq-bcache-01.bilivideo.com
+//    tf_hw（華為） upos-tf-all-hw.bilivideo.com
+//    tf_tx（騰訊） upos-tf-all-tx.bilivideo.com
     val uposList = listOf(
         BiliUposInfo("none", "不替换", ""),
-//        BiliUposInfo("ks3", "ks3（金山云）", "upos-sz-mirrorks3.bilivideo.com"),
+//        BiliUposInfo("ks3", "ks3（金山云）", "upos-sz-mirrorali.bilivideo.com"),
 //        BiliUposInfo("kodo", "kodo（七牛云）", "upos-sz-mirrorkodo.bilivideo.com"),
+        BiliUposInfo("ali", "ali（阿里云）", "upos-sz-mirrorali.bilivideo.com"),
         BiliUposInfo("cos", "cos（腾讯云）", "upos-sz-mirrorcos.bilivideo.com"),
 //        BiliUposInfo("bos", "bos（百度云）", "upos-sz-mirrorbos.bilivideo.com"),
 //        BiliUposInfo("wcs", "wcs（网宿云）", "upos-sz-mirrorwcs.bilivideo.com"),
         BiliUposInfo("hw", "hw（华为云）", "upos-sz-mirrorhw.bilivideo.com"),
+        BiliUposInfo("akamai", "akamai（Akamai海外）", "upos-hz-mirrorakam.akamaized.net"),
+        BiliUposInfo("aliov", "aliov（阿里海外）", "upos-sz-mirroraliov.bilivideo.com"),
+//        BiliUposInfo("aliov", "hwov（华为海外）", "upos-sz-mirrorhwov.bilivideo.com"),
+        BiliUposInfo("aliov", "cosov（腾讯海外）", "upos-sz-mirrorcosov.bilivideo.com"),
+        BiliUposInfo("tf_hw", "tf_hw（华为）", "upos-tf-all-hw.bilivideo.com"),
+        BiliUposInfo("tf_tx", "tf_tx（腾讯）", "upos-tf-all-tx.bilivideo.com"),
     )
+
     val selectedUpos = MutableStateFlow(uposList[0])
 
     fun readServerList() {
