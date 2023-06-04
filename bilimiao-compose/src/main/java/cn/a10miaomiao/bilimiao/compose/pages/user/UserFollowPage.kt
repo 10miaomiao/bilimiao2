@@ -7,11 +7,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -24,15 +27,21 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localFragmentNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.toast
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceDialog
+import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceItem
+import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.rememberDialogState
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.kongzue.dialogx.dialogs.PopTip
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,15 +54,17 @@ import org.kodein.di.instance
 
 data class FollowingItemInfo(
     val mid: String,
-    val attribute: Int,
+    val attribute: Int, // 关注属性: 0：未关注, 2：已关注, 6：已互粉
     val mtime: Long,
-    val special: Int,
+    val special: Int, // 特别关注标志: 0：否, 1：是
     val uname: String,
     val face: String,
     val sign: String,
     val face_nft: Int,
     val nft_icon: String,
-)
+) {
+    val isFollowing get() = attribute == 2 || attribute == 6
+}
 
 data class FollowingsInfo(
     val list: List<FollowingItemInfo>,
@@ -82,8 +93,22 @@ class UserFollowPageViewModel(
     val listState = MutableStateFlow(LazyListState(0, 0))
     val list = FlowPaginationInfo<FollowingItemInfo>()
 
+    val orderTypeList = listOf(
+        SingleChoiceItem("最常访问", "attention"),
+        SingleChoiceItem("关注顺序", ""),
+    )
+    val orderType = MutableStateFlow("attention")
+
     fun add() {
         count.value = count.value + 1
+    }
+
+    fun changeOrderType(value: String) {
+        orderType.value = value
+        list.data.value = emptyList()
+        list.finished.value = false
+        list.fail.value = ""
+        loadData(1)
     }
 
     fun loadData(
@@ -95,7 +120,8 @@ class UserFollowPageViewModel(
                 .followings(
                     mid = mid,
                     pageNum = pageNum,
-                    pageSize = list.pageSize
+                    pageSize = list.pageSize,
+                    order = orderType.value
                 )
                 .awaitCall()
                 .gson<ResultInfo<FollowingsInfo>>()
@@ -143,32 +169,49 @@ class UserFollowPageViewModel(
         try {
             if (!userStore.isLogin()) {
                 withContext(Dispatchers.Main) {
-                    activity.toast("请先登录")
+                    PopTip.show("请先登录")
                 }
                 return@launch
             }
             val item = list.data.value[index]
-            val mode = if (true) { 2 } else { 1 }
+            val mode = if (item.isFollowing) {
+                2
+            } else {
+                1
+            }
+            val newAttribute = if (item.isFollowing) {
+                0
+            } else {
+                2
+            }
             val res = BiliApiService.userApi
                 .attention(item.mid, mode)
                 .awaitCall().gson<MessageInfo>()
             if (res.code == 0) {
-//                detailInfo.card.relation.is_follow = 2 - mode
-                withContext(Dispatchers.Main) {
-                    activity.toast(if (mode == 1) {
-                        "关注成功"
+                list.data.value = list.data.value.map {
+                    if (item.mid == it.mid) {
+                        it.copy(attribute = newAttribute)
                     } else {
-                        "已取消关注"
-                    })
+                        it
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    PopTip.show(
+                        if (mode == 2) {
+                            "已取消关注"
+                        } else {
+                            "关注成功"
+                        }
+                    )
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    activity.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                activity.toast("网络错误")
+                PopTip.show("网络错误")
             }
             e.printStackTrace()
         }
@@ -193,6 +236,9 @@ fun UserFollowPage(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLogin = userStore.isLogin()
 
+    val dialogState = rememberDialogState()
+    val orderTypeList = viewModel.orderTypeList
+    val orderType by viewModel.orderType.collectAsState()
 
     val nav = localFragmentNavController()
 
@@ -209,12 +255,34 @@ fun UserFollowPage(
         viewModel.mid = mid
     }
 
-    PageConfig(title = if(userStore.isSelf(mid)) {
-        "我的关注"
-    } else {
-        "Ta的关注"
-    })
-
+    PageConfig(
+        title = if (userStore.isSelf(mid)) {
+            "我的关注"
+        } else {
+            "Ta的关注"
+        },
+        menus = listOf(
+            myMenuItem {
+                key = 1
+                iconFileName = "ic_baseline_filter_list_grey_24"
+                title = "排序"
+            }
+        )
+    )
+    PageMenuItemClick(viewModel, dialogState) {
+        when (it.key) {
+            1 -> {
+                dialogState.openDialog = true
+            }
+        }
+    }
+    SingleChoiceDialog(
+        dialogState,
+        title = "选择排序方式",
+        list = orderTypeList,
+        selected = orderType,
+        onChange = viewModel::changeOrderType
+    )
     SwipeRefresh(
         state = rememberSwipeRefreshState(isRefreshing),
         onRefresh = { viewModel.refresh() },
@@ -241,7 +309,7 @@ fun UserFollowPage(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             GlideImage(
-                                imageModel = item.face.replace("http://", "https://"),
+                                imageModel = UrlUtil.autoHttps(item.face),
                                 modifier = Modifier
                                     .size(50.dp)
                                     .clip(CircleShape)
@@ -266,38 +334,50 @@ fun UserFollowPage(
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             }
-//                            Button(
-//                                onClick = { /*TODO*/ },
-//                                modifier = Modifier
-//                                    .padding(0.dp)
-//                                    .size(65.dp, 30.dp),
-//                                contentPadding = PaddingValues(0.dp),
-//                                shape = RoundedCornerShape(5.dp),
-//                                enabled = isLogin,
-//                            ) {
-//                                Row(
-//                                    verticalAlignment = Alignment.CenterVertically,
-//                                ) {
-//                                    if (!isLogin) {
-//                                        Text(
-//                                            text = "未登录",
-//                                            fontSize = 12.sp,
-//                                        )
-//                                    } else {
-//                                        Icon(
-//                                            modifier = Modifier.size(15.dp),
-//                                            imageVector = Icons.Filled.Add,
-//                                            contentDescription = null,
-//                                        )
-//                                        Text(
-//                                            text = "关注",
-//                                            fontSize = 12.sp,
-//                                        )
-//                                    }
-//
-//                                }
-//
-//                            }
+                            Button(
+                                onClick = { viewModel.attention(it) },
+                                modifier = Modifier
+                                    .padding(0.dp)
+                                    .size(65.dp, 30.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(5.dp),
+                                enabled = isLogin,
+                                colors = if (item.isFollowing) {
+                                    ButtonDefaults.buttonColors(
+                                        containerColor = Color.Gray
+                                    )
+                                } else {
+                                    ButtonDefaults.buttonColors()
+                                }
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    if (!isLogin) {
+                                        Text(
+                                            text = "未登录",
+                                            fontSize = 12.sp,
+                                        )
+                                    } else if (item.isFollowing) {
+                                        Text(
+                                            text = "已关注",
+                                            fontSize = 12.sp,
+                                        )
+                                    } else {
+                                        Icon(
+                                            modifier = Modifier.size(15.dp),
+                                            imageVector = Icons.Filled.Add,
+                                            contentDescription = null,
+                                        )
+                                        Text(
+                                            text = "关注",
+                                            fontSize = 12.sp,
+                                        )
+                                    }
+
+                                }
+
+                            }
                         }
                     }
                 }

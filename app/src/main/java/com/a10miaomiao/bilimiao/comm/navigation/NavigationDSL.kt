@@ -21,5 +21,5 @@ fun ScaffoldView.openSearchDrawer() {
 
 fun ScaffoldView.closeSearchDrawer() {
     (drawerFragment as? SearchStartFragment)?.hideSoftInput()
-    openDrawer()
+    closeDrawer()
 }

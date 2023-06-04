@@ -24,6 +24,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.LocalFragmentNavController
 import cn.a10miaomiao.bilimiao.compose.comm.LocalNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import org.kodein.di.DI
@@ -45,6 +46,11 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
     override val pageConfig = myPageConfig {
         title = pageConfigInfo.title
         menus = pageConfigInfo.menus
+    }
+
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        pageConfigInfo.onMenuItemClick?.invoke(menuItem)
     }
 
     private val url by lazy {

@@ -11,5 +11,8 @@ data class MenuItemPropInfo (
     var iconDrawable: Drawable? = null,
     @DrawableRes
     var iconResource: Int? = null,
+    var iconFileName: String? = null,
     var visibility: Int = View.VISIBLE
-)
+) {
+
+}
