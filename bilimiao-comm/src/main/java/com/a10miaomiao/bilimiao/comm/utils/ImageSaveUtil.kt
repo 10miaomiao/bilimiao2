@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kongzue.dialogx.dialogs.PopTip
 import java.io.File
 import java.io.FileOutputStream
 
@@ -51,7 +52,7 @@ class ImageSaveUtil(
         val clipboardManager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipData = ClipData.newPlainText("imageUrl", imageUrl)
         clipboardManager.setPrimaryClip(clipData)
-        toast("图片链接已复制到剪切板")
+        PopTip.show("图片链接已复制到剪切板")
     }
 
     /**
@@ -101,7 +102,7 @@ class ImageSaveUtil(
             val fileName = getFileName()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 saveImageToAlbum(fileName, bitmap)
-                toast("已保存至系统相册，文件名:${fileName}")
+                PopTip.show("已保存至系统相册，文件名:${fileName}")
                 return
             } else if (
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
@@ -121,16 +122,16 @@ class ImageSaveUtil(
             // 保存图片文件
             File(path + fileName).let {
                 if (it.exists()) {
-                    toast("图片已存在")
+                    PopTip.show("图片已存在")
                     return
                 }
                 it.writeBitmap(bitmap)
-                toast("图片已保存至 ${it.path}")
+                PopTip.show("图片已保存至 ${it.path}")
                 notifyPhoto(it)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            toast("保存失败：" + e.message ?: e.toString())
+            PopTip.show("保存失败：" + e.message ?: e.toString())
         }
     }
 
@@ -188,10 +189,6 @@ class ImageSaveUtil(
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    private fun toast(msg: String) {
-        Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
     }
 
     private fun getFileName(): String {
