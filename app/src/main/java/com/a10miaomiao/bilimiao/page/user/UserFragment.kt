@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.*
 import android.widget.ImageView
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
@@ -19,6 +20,7 @@ import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
@@ -139,6 +141,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
         bindSingleton<MyPage> { this@UserFragment }
     }
 
+    private val themeDelegate by instance<ThemeDelegate>()
     private val viewModel by diViewModel<UserViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
@@ -162,8 +165,9 @@ class UserFragment : Fragment(), DIAware, MyPage {
         viewModel.dataInfo?.card?.face?.let { faceUrl ->
             (it as ImageView).mojito(faceUrl) {
                 mojitoListener(
-                    onLongClick = { fragmentActivity, _, _, _, _ ->
-                        ImageSaveUtil(fragmentActivity!!, faceUrl).showMemu()
+                    onLongClick = { a, _, _, _, _ ->
+                        val context = ContextThemeWrapper(a, themeDelegate.getThemeResId())
+                        ImageSaveUtil(a!!, faceUrl).showMemu(context)
                     }
                 )
             }

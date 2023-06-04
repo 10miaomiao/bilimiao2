@@ -168,6 +168,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                             backKeyPressedTimes = now
                         } else {
                             playerDelegate.closePlayer()
+                            backKeyPressedTimes = 0
                         }
                     } else {
                         if (now - backKeyPressedTimes > 2000) {
