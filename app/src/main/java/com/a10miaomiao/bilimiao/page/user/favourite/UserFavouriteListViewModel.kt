@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
@@ -46,18 +47,20 @@ class UserFavouriteListViewModel(
             ui.setState {
                 list.loading = true
             }
-            val res = BiliApiService.userApi.favFolderList(id).awaitCall()
-                .gson<ResultInfo<UserSpaceFavFolderInfo>>()
+            val res = BiliApiService.userApi.favFolderList(
+                id,
+                pageNum = pageNum,
+                pageSize = list.pageSize
+            ).awaitCall().gson<ResultInfo<ListAndCountInfo<MediaListInfo>>>()
             if (res.code == 0) {
                 val result = res.data
-                val defaultFolderDetail = result.default_folder.folder_detail
-                val media0 = result.space_infos[0]
                 ui.setState {
-                    list.finished = true
-                    list.data.add(defaultFolderDetail)
-                    if (media0 != null) {
-                        list.data.addAll(media0.mediaListResponse.list)
+                    if (pageNum == 1) {
+                        list.data = result.list.toMutableList()
+                    } else {
+                        list.data.addAll(result.list)
                     }
+                    list.finished = !result.has_more
                 }
                 list.pageNum = pageNum
             } else {
