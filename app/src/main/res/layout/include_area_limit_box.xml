@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    android:id="@+id/area_limit_layout">
+    android:id="@+id/area_limit_layout"
+    android:visibility="gone">
 
     <View
         android:layout_width="30dp"

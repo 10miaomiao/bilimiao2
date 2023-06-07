@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.AnimationDrawable
 import android.os.Build
 import android.util.AttributeSet
 import android.view.*
@@ -24,6 +25,7 @@ import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
 import splitties.dimensions.dip
+import splitties.resources.drawable
 import splitties.views.backgroundColor
 
 
@@ -103,6 +105,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // 右边解锁按钮
     private val mUnlockRightIV: ImageView by lazy { findViewById(R.id.unlock_right) }
+
+    // 倍数播放提示
+    private val mSpeedTips: LinearLayout by lazy { findViewById(R.id.speed_tips) }
+
+    // 倍数播放提示图标
+    private val mSpeedTipsIV: ImageView by lazy { findViewById(R.id.speed_tips_icon) }
+
 
     // 弹幕时间与播放器时间同步
     private val mDanmakuTime = object : DanmakuTimer() {
@@ -313,6 +322,46 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    // start 长按倍速播放
+    private var touchSurfaceDownTime = Long.MAX_VALUE
+    private var isSpeedPlaying = false
+    private val longClickControlTask = Runnable {
+        if (System.currentTimeMillis() - touchSurfaceDownTime >= 500
+            && !mChangePosition && !mChangeVolume && !mBrightness) {
+            isSpeedPlaying = true
+            speed = 2f
+            mSpeedTips.visibility = View.VISIBLE
+            mTouchingProgressBar = false
+            (mSpeedTipsIV.drawable as? AnimationDrawable)?.start()
+        }
+    }
+
+    override fun touchSurfaceDown(x: Float, y: Float) {
+        super.touchSurfaceDown(x, y)
+        touchSurfaceDownTime = System.currentTimeMillis()
+        postDelayed(longClickControlTask, 500)
+    }
+
+    override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
+        if (isSpeedPlaying) {
+            return
+        }
+        super.touchSurfaceMove(deltaX, deltaY, y)
+    }
+
+    override fun touchSurfaceUp() {
+        removeCallbacks(longClickControlTask)
+        touchSurfaceDownTime = Long.MAX_VALUE
+        if (isSpeedPlaying) {
+            mSpeedTips.visibility = View.GONE
+            isSpeedPlaying = false
+            speed = 1f
+            (mSpeedTipsIV.drawable as? AnimationDrawable)?.stop()
+        } else {
+            super.touchSurfaceUp()
+        }
+    }
+    // end
 
 //    override fun setProgressAndTime(
 //        progress: Long,
