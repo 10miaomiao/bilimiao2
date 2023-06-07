@@ -93,10 +93,15 @@ class UserApi {
 
     fun favFolderList(
         up_mid: String,
+        pageNum: Int,
+        pageSize: Int,
     ) = MiaoHttp.request {
+        // 用户空间 x/v3/fav/folder/space/v2
         url = BiliApiService.biliApi(
-            "x/v3/fav/folder/space/v2",
-            "up_mid" to up_mid
+            "x/v3/fav/folder/created/list",
+            "up_mid" to up_mid,
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
         )
     }
 
