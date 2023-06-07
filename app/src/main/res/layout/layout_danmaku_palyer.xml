@@ -373,4 +373,27 @@
         android:scaleType="center"
         android:visibility="gone"/>
 
+    <LinearLayout
+        android:id="@+id/speed_tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_player_speed_tips_bg"
+        android:layout_centerHorizontal="true"
+        android:padding="10dp"
+        android:layout_marginTop="40dp"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/speed_tips_icon"
+            android:layout_width="40dp"
+            android:layout_height="20dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/shape_player_speed_tips_icon"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2倍速播放中"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
 </RelativeLayout>

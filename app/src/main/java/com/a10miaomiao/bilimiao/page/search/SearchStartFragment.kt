@@ -26,6 +26,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.closeSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -34,6 +35,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -85,6 +87,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
 
     private val viewModel by diViewModel<SearchStartViewModel>(di)
     private val supportHelper by instance<SupportHelper>()
+    private val scaffoldApp by lazy { requireActivity().getScaffoldView() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -177,7 +180,8 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
     private val handleCloseClick = View.OnClickListener {
         val text = mEditText.text.toString()
         if (text.isEmpty()) {
-            findNavController().popBackStack()
+            scaffoldApp.closeSearchDrawer()
+//            findNavController().popBackStack()
         } else {
             mEditText.setText("")
         }
@@ -192,13 +196,15 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                     viewModel.startSearch(keyword, view)
                 }
                 "AV" -> {
-                    Navigation.findNavController(view).popBackStack()
+                    scaffoldApp.closeSearchDrawer()
+//                    Navigation.findNavController(view).popBackStack()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = VideoInfoFragment.createArguments(item.value)
                     nav.navigate(VideoInfoFragment.actionId, args)
                 }
                 "SS" -> {
-                    Navigation.findNavController(view).popBackStack()
+                    scaffoldApp.closeSearchDrawer()
+//                    Navigation.findNavController(view).popBackStack()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = BangumiDetailFragment.createArguments(item.value)
                     nav.navigate(BangumiDetailFragment.actionId, args)
