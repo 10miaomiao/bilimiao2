@@ -25,7 +25,6 @@ import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
 import splitties.dimensions.dip
-import splitties.resources.drawable
 import splitties.views.backgroundColor
 
 
@@ -201,7 +200,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         0L
     }
 
-    // 供外部访问isAutoCompletion
+    // 供外部访问
     val topContainer: ViewGroup get() = mTopContainer
     val qualityView: View get() = mQuality
     val speedView: View get() = mPlaySpeed
@@ -327,6 +326,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     private var isSpeedPlaying = false
     private val longClickControlTask = Runnable {
         if (System.currentTimeMillis() - touchSurfaceDownTime >= 500
+            && mCurrentState == CURRENT_STATE_PLAYING
             && !mChangePosition && !mChangeVolume && !mBrightness) {
             isSpeedPlaying = true
             speed = 2f

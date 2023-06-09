@@ -339,6 +339,7 @@ class PlayerDelegate2(
                 source.getSubtitles()
                 val danmukuParser = source.getDanmakuParser()
                 val sourceInfo = source.getPlayerUrl(quality, fnval)
+//                DebugMiao.log("playerSourceInfo", sourceInfo.url)
                 withContext(Dispatchers.Main) {
                     // 设置通知栏控制器
                     PlayerService.selfInstance?.setPlayingInfo(
