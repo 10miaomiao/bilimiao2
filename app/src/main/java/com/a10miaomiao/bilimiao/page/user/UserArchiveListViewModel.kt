@@ -143,6 +143,7 @@ class UserArchiveListViewModel(
                     vmid = id,
 //                    tid = region.value,
                     order = rankOrder.value,
+                    keyword = keyword,
                     aid = aid,
                     pageSize = list.pageSize,
                 )

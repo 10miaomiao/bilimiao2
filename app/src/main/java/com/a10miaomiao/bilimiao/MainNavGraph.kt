@@ -84,6 +84,7 @@ object MainNavGraph {
             addFragment(UserFavouriteListFragment::class, UserFavouriteListFragment.Companion)
             addFragment(UserFavouriteDetailFragment::class, UserFavouriteDetailFragment.Companion)
             addFragment(UserArchiveListFragment::class, UserArchiveListFragment.Companion)
+            addFragment(UserSearchArchiveListFragment::class, UserSearchArchiveListFragment.Companion)
             addFragment(UserChannelDetailFragment::class, UserChannelDetailFragment.Companion)
             addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
             addFragment(HistoryFragment::class, HistoryFragment.Companion)
