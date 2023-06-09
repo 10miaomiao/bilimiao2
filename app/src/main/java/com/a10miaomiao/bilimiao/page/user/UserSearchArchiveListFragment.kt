@@ -146,7 +146,7 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
         val item = viewModel.list.data[position]
         val args = VideoInfoFragment.createArguments(item.aid.toString())
         Navigation.findNavController(view)
-            .navigate(actionId, args)
+            .navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<Archive.Arc> { item, index ->
@@ -156,6 +156,7 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
             remark = NumberUtil.converCTime(item.ctime),
             playNum = item.stat.view.toString(),
             damukuNum = item.stat.danmaku.toString(),
+            isHtml = true,
         )
     }
 
