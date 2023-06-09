@@ -211,11 +211,7 @@ class MainActivity
             menus = config.menus
         }
         ui.setNavigationTitle(config.title)
-        if (ui.root.orientation == ScaffoldView.VERTICAL) {
-            ((ui.mAppBar.layoutParams as? CoordinatorLayout.LayoutParams)?.behavior as? AppBarBehavior)?.let{
-                it.slideUp(ui.mAppBar)
-            }
-        }
+        ui.root.slideUpBottomAppBar()
         leftFragment.setConfig(config.search)
     }
 
@@ -251,7 +247,7 @@ class MainActivity
         }
     }
 
-    val  onDrawer = object : DrawerLayout.DrawerListener {
+    val onDrawer = object : DrawerLayout.DrawerListener {
         override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
 
         }
@@ -267,6 +263,13 @@ class MainActivity
         }
 
         override fun onDrawerStateChanged(newState: Int) {
+        }
+    }
+
+    fun searchSelfPage(keyword: String) {
+        val fragment = navHostFragment.childFragmentManager.primaryNavigationFragment
+        if (fragment is MyPage) {
+            fragment.onSearchSelfPage(this, keyword)
         }
     }
 

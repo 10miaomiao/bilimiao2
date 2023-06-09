@@ -130,19 +130,19 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
             mEditText.setText("")
             mAllRadioButton.isChecked = true
             mSelfRadioButton.visibility = View.GONE
-            viewModel.selfSearchAction = -1
+            viewModel.searchMode = 0
         } else {
             mEditText.setText(config.keyword)
             mEditText.setSelection(config.keyword.length)
-            if (config.name.isNotBlank() && config.action != -1) {
-                viewModel.selfSearchAction = config.action
+            if (config.name.isNotBlank()) {
+                viewModel.searchMode = 1
                 mSelfRadioButton.visibility = View.VISIBLE
                 mSelfRadioButton.text = config.name
                 mSelfRadioButton.isChecked = true
             } else {
                 mAllRadioButton.isChecked = true
                 mSelfRadioButton.visibility = View.GONE
-                viewModel.selfSearchAction = -1
+                viewModel.searchMode = 0
             }
         }
     }
@@ -240,10 +240,10 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
         if (b) {
             if (compoundButton.id == ID_radioButton_all) {
                 mSelfRadioButton.isChecked = false
-                viewModel.searchAction = viewModel.allSearchAction
+                viewModel.searchMode = 0
             } else {
                 mAllRadioButton.isChecked = false
-                viewModel.searchAction = viewModel.selfSearchAction
+                viewModel.searchMode = 1
             }
         }
     }

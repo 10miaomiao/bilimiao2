@@ -203,7 +203,6 @@ class ScaffoldView @JvmOverloads constructor(
         }
     }
 
-
     inline fun lParams(
         width: Int = wrapContent,
         height: Int = wrapContent,

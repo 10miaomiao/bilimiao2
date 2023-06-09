@@ -31,7 +31,8 @@ class HistoryViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text) }
+//    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text) }
+    var keyword = ""
 
     var triggered = false
     var list = PaginationInfo<HistoryOuterClass.CursorItem>()
@@ -41,6 +42,7 @@ class HistoryViewModel(
     private var _viewAt = 0L
 
     init {
+        keyword = fragment.requireArguments().getString(MainNavArgs.text, "")
         loadData(0L)
     }
 

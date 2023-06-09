@@ -2,7 +2,6 @@ package com.a10miaomiao.bilimiao.page.user
 
 import android.content.Context
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,19 +11,16 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.interfaces.v1.HistoryOuterClass
+import bilibili.app.archive.v1.Archive
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.user.WebVideoHistoryInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
+import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
@@ -33,7 +29,6 @@ import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -42,64 +37,72 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
-import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
-class HistoryFragment : Fragment(), DIAware, MyPage {
+class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
 
     companion object : FragmentNavigatorBuilder() {
-        override val name = "history"
+        override val name = "user.archive.search"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = false
+            }
+            argument(MainNavArgs.name) {
+                type = NavType.StringType
+                nullable = false
+            }
             argument(MainNavArgs.text) {
                 type = NavType.StringType
-                nullable = true
-                defaultValue = ""
+                nullable = false
             }
         }
-
         fun createArguments(
+            id: String,
+            name: String,
             keyword: String,
         ): Bundle {
             return bundleOf(
+                MainNavArgs.id to id,
+                MainNavArgs.name to name,
                 MainNavArgs.text to keyword,
             )
         }
     }
 
     override val pageConfig = myPageConfig {
-        var searchTitle = "搜索"
-        if (viewModel.keyword?.isBlank() == true) {
-            title = "历史记录"
+        title = if (viewModel.keyword?.isBlank() == true) {
+            "${viewModel.name}\n的\n投稿列表"
         } else {
-            title = "搜索\n-\n历史记录\n-\n${viewModel.keyword}"
-            searchTitle = "继续搜索"
+            "搜索\n-\n投稿列表\n-\n${viewModel.keyword}"
         }
-        search = SearchConfigInfo(
-            name = "搜索历史记录",
-            keyword = viewModel.keyword ?: "",
-        )
         menus = listOf(
             myMenuItem {
                 key = MenuKeys.search
-                title = searchTitle
+                title = "继续搜索"
                 iconResource = R.drawable.ic_search_gray
             },
+        )
+        search = SearchConfigInfo(
+            name = "搜索投稿列表",
+            keyword = viewModel.keyword,
         )
     }
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
-        super.onMenuItemClick(view, menuItem)
-        when (menuItem.key) {
+        when(menuItem.key) {
             MenuKeys.search -> {
                 requireActivity().getScaffoldView().openSearchDrawer()
             }
@@ -107,21 +110,16 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
     }
 
     override fun onSearchSelfPage(context: Context, keyword: String) {
-        if (viewModel.keyword.isBlank()) {
-            findNavController().navigate(
-                HistoryFragment.actionId,
-                HistoryFragment.createArguments(keyword,)
-            )
-        } else {
-            viewModel.keyword = keyword
-            pageConfig.notifyConfigChanged()
-            viewModel.refreshList()
-        }
+        viewModel.keyword = keyword
+        pageConfig.notifyConfigChanged()
+        viewModel.refreshList()
     }
 
-    override val di: DI by lazyUiDi(ui = { ui })
+    override val di: DI by lazyUiDi(ui = { ui }) {
+        bindSingleton<MyPage> { this@UserSearchArchiveListFragment }
+    }
 
-    private val viewModel by diViewModel<HistoryViewModel>(di)
+    private val viewModel by diViewModel<UserSearchArchiveListViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
 
@@ -146,40 +144,18 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val nav = Navigation.findNavController(view)
-        when(item.business) {
-            "archive" -> {
-                val args = VideoInfoFragment.createArguments(item.oid.toString())
-                Navigation.findNavController(view)
-                    .navigate(VideoInfoFragment.actionId, args)
-            }
-            "pgc" -> {
-                val args = bundleOf(
-                    MainNavArgs.id to item.kid.toString()
-                )
-//                nav.navigate(MainNavGraph.action.history_to_bangumiDetail, args)
-            }
-            else -> {
-                toast("未知跳转类型")
-            }
-        }
+        val args = VideoInfoFragment.createArguments(item.aid.toString())
+        Navigation.findNavController(view)
+            .navigate(actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<HistoryOuterClass.CursorItem> { item, index ->
+    val itemUi = miaoBindingItemUi<Archive.Arc> { item, index ->
         videoItem (
             title = item.title,
-            pic = if (item.hasCardOgv()) {
-                item.cardOgv.cover
-            } else {
-                item.cardUgc.cover
-            },
-            upperName = if (item.hasCardOgv()) {
-                null
-            } else {
-                item.cardUgc.name
-            },
-            remark = NumberUtil.converCTime(item.viewAt),
-            isHtml = true,
+            pic = item.pic,
+            remark = NumberUtil.converCTime(item.ctime),
+            playNum = item.stat.view.toString(),
+            damukuNum = item.stat.danmaku.toString(),
         )
     }
 
@@ -229,6 +205,5 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
             _isRefreshing = viewModel.triggered
         }
     }
-
 
 }
