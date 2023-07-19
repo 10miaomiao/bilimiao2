@@ -5,13 +5,9 @@ import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cn.a10miaomiao.download.BiliVideoEntry
-import cn.a10miaomiao.download.BiliVideoPageData
-import com.a10miaomiao.bilimiao.MainNavGraph
+import cn.a10miaomiao.bilimiao.download.DownloadService
+import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +25,6 @@ class DownloadVideoCreateViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
-    val downloadDelegate: DownloadDelegate by instance()
 
     val video = fragment.requireArguments().getParcelable<DownloadVideoCreateParam>(MainNavArgs.video)!!
 
@@ -37,19 +32,37 @@ class DownloadVideoCreateViewModel(
     var acceptQuality = listOf<Int>()
     var quality = 64
     val selectedList = mutableListOf<String>()
+    var downloadedList = mutableListOf<BiliDownloadEntryInfo>()
 
     init {
+        getDownloadedList()
         loadAcceptQuality()
     }
 
-    fun loadAcceptQuality() = viewModelScope.launch(Dispatchers.IO) {
+    private fun getDownloadedList() = viewModelScope.launch(Dispatchers.IO) {
+        val downloadService = DownloadService.getService(context)
+        _getDownloadedList(downloadService)
+        downloadService.downloadListVersion.collect {
+            _getDownloadedList(downloadService)
+        }
+    }
+
+    private fun _getDownloadedList(downloadService: DownloadService) {
+        ui.setState {
+            downloadedList = downloadService.downloadList.filter {
+                it.entry.avid?.toString() == video.aid
+            }.map { it.entry }.toMutableList()
+        }
+    }
+
+    private fun loadAcceptQuality() = viewModelScope.launch(Dispatchers.IO) {
         try {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             quality = prefs.getInt("player_quality", 64)
             val aid = video.aid
             val cid = video.pages[0].cid
             val res = BiliApiService.playerAPI.getVideoPalyUrl(
-                aid, cid, quality, fnval = 1
+                aid, cid, quality, fnval = 4048
             )
             ui.setState {
                 acceptQuality = res.accept_quality
@@ -90,7 +103,7 @@ class DownloadVideoCreateViewModel(
     }
 
     private fun downloadVideo(page: DownloadVideoCreateParam.Page) {
-        val pageData = BiliVideoPageData(
+        val pageData = BiliDownloadEntryInfo.PageInfo(
             cid = page.cid.toLong(),
             page = page.page,
             from = page.from,
@@ -104,31 +117,36 @@ class DownloadVideoCreateViewModel(
             download_title = "视频已缓存完成",
             download_subtitle = video.title
         )
-        val biliVideoEntry = BiliVideoEntry(
-            media_type = 1,
-            has_dash_audio = false,
+        val currentTime = System.currentTimeMillis()
+        val biliVideoEntry = BiliDownloadEntryInfo(
+            media_type = 2,
+            has_dash_audio = true,
             is_completed = false,
             total_bytes = 0,
             downloaded_bytes = 0,
             title = video.title,
             type_tag = quality.toString(),
             cover = video.pic,
-            prefered_video_quality = 112,
+            prefered_video_quality = quality,
             guessed_total_bytes = 0,
             total_time_milli = 0,
             danmaku_count = 1000,
-            time_update_stamp = 1589831292571L,
-            time_create_stamp = 1589831261539L,
+            time_update_stamp = currentTime,
+            time_create_stamp = currentTime,
             can_play_in_advance = true,
             interrupt_transform_temp_file = false,
             avid = video.aid.toLong(),
             spid = 0,
-            seasion_id = 0,
+            season_id = null,
+            ep = null,
+            source = null,
             bvid = video.bvid,
             owner_id = video.mid.toLong(),
             page_data = pageData
         )
-        val downloadService = downloadDelegate.downloadService
-        downloadService.createDownload(biliVideoEntry)
+        viewModelScope.launch {
+            val downloadService = DownloadService.getService(context)
+            downloadService.createDownload(biliVideoEntry)
+        }
     }
 }

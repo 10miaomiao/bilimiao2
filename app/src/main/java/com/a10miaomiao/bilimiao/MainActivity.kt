@@ -26,12 +26,12 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import com.a10miaomiao.bilimiao.comm.delegate.download.DownloadDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -52,6 +52,7 @@ import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -70,14 +71,12 @@ class MainActivity
         store.loadStoreModules(this)
         bindSingleton { basePlayerDelegate }
         bindSingleton { themeDelegate }
-        bindSingleton { downloadDelegate }
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
     }
 
     private val store by lazy { Store(this, di) }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
-    private val downloadDelegate by lazy { DownloadDelegate(this, di) }
     private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate2(this, di) }
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
@@ -93,7 +92,6 @@ class MainActivity
         ui = MainUi(this)
         setContentView(ui.root)
         basePlayerDelegate.onCreate(savedInstanceState)
-        downloadDelegate.onCreate(savedInstanceState)
         bottomSheetDelegate.onCreate(savedInstanceState)
         store.onCreate(savedInstanceState)
         ui.root.showPlayer = basePlayerDelegate.isPlaying()
@@ -167,7 +165,6 @@ class MainActivity
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
             }
         }
-
 //        DebugMiao.log(IMiaoNavList.navList)
     }
 
@@ -369,7 +366,6 @@ class MainActivity
 
     override fun onDestroy() {
         basePlayerDelegate.onDestroy()
-        downloadDelegate.onDestroy()
         bottomSheetDelegate.onDestroy()
         store.onDestroy()
         navController.removeOnDestinationChangedListener(this)

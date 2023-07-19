@@ -1,9 +1,9 @@
 package com.a10miaomiao.bilimiao.store
 
 import androidx.lifecycle.ViewModel
+import cn.a10miaomiao.bilimiao.download.LocalPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
-import com.a10miaomiao.bilimiao.comm.delegate.player.model.LocalVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.model.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,6 @@ class PlayerStore(override val di: DI) :
     companion object {
         const val VIDEO = "video"
         const val BANGUMI = "bangumi"
-        const val LOCAL_VIDEO = "local_video"
     }
 
     data class State (
@@ -55,12 +54,11 @@ class PlayerStore(override val di: DI) :
                 }
             }
             // 本地视频
-            is LocalVideoPlayerSource -> {
-                val localEntry = source.localEntry
+            is LocalPlayerSource -> {
                 this.setState {
-                    this.type = LOCAL_VIDEO
-                    this.aid = localEntry.avid.toString()
-                    this.cid = localEntry.page_data.cid.toString()
+                    this.type = VIDEO
+                    this.aid = source.ownerId
+                    this.cid = source.id
                     this.title = source.title
                     this.sid = ""
                     this.epid = ""

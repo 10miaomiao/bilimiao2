@@ -19,6 +19,5 @@ dependencyResolutionManagement {
 rootProject.name = "bilimiao"
 include(":app")
 include(":miao-binding", ":miao-binding-android")
-include(":bilimiao-comm", ":bilimiao-cover", "bilimiao-appwidget", "bilimiao-compose")
+include(":bilimiao-comm", ":bilimiao-cover", ":bilimiao-download", "bilimiao-appwidget", "bilimiao-compose")
 include(":DanmakuFlameMaster")
-include(":download")

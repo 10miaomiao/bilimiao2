@@ -23,7 +23,7 @@ class DashSource(
 
     fun getDashAudio(): PlayerAPI.DashItem? {
         val audioList = dashData.audio
-        if (audioList.isNotEmpty()) {
+        if (audioList?.isNotEmpty() == true) {
             return audioList[0]
         }
         return null
