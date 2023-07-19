@@ -13,7 +13,6 @@ import com.a10miaomiao.bilimiao.page.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
-import com.a10miaomiao.bilimiao.page.download.DownloadFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.filter.*
 import com.a10miaomiao.bilimiao.page.rank.RankFragment
@@ -93,7 +92,6 @@ object MainNavGraph {
             addFragment(SearchResultFragment::class, SearchResultFragment.Companion)
             addFragment(VideoRegionFragment::class, VideoRegionFragment.Companion)
 
-            addFragment(DownloadFragment::class, DownloadFragment.Companion)
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 
             addFragment(AboutFragment::class, AboutFragment.Companion)

@@ -71,7 +71,8 @@
             android:exported="true"/>
         <service android:name="cn.a10miaomiao.download.DownloadService"
             android:exported="true"/>
-
+        <service android:name="cn.a10miaomiao.bilimiao.download.DownloadService"
+            android:exported="true"/>
 <!--        <receiver-->
 <!--            android:label="@string/app_widget_name_new"-->
 <!--            android:name="cn.a10miaomiao.bilimiao.appwidget.NoteWidgetProvider_2x2"-->

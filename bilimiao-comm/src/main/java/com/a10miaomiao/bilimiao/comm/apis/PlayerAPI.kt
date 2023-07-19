@@ -182,7 +182,7 @@ class PlayerAPI {
         val duration: Long,
         val min_buffer_time: Double,
         val video: List<DashItem>,
-        val audio: List<DashItem>,
+        val audio: List<DashItem>?,
     )
 
     data class DashItem(

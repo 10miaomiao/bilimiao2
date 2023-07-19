@@ -130,18 +130,15 @@ dependencies {
     annotationProcessor(Libraries.glideCompiler)
 
     implementation(project(":bilimiao-comm"))
+    implementation(project(":bilimiao-download"))
     implementation(project(":bilimiao-cover"))
 //    implementation project(":bilimiao-appwidget")
     implementation(project(":bilimiao-compose"))
-    implementation(project(":download"))
     implementation(project(":miao-binding"))
     implementation(project(":miao-binding-android"))
     // 弹幕引擎
     implementation(project(":DanmakuFlameMaster"))
 
-    // ijpplayer
-//    implementation project(":ijkplayer-java")
-//    implementation project(":player")
 
     // 百度统计
     implementation(Libraries.baiduMobstat)

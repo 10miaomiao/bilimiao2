@@ -31,15 +31,15 @@ fun PageConfig(
             it.page.pageConfig.notifyConfigChanged()
         }
     }
-    DisposableEffect(LocalLifecycleOwner.current) {
-        onDispose {
-            pageConfigInfo?.let {
-                it.title = ""
-                it.menus = null
-                it.page.pageConfig.notifyConfigChanged()
-            }
-        }
-    }
+//    DisposableEffect(LocalLifecycleOwner.current) {
+//        onDispose {
+//            pageConfigInfo?.let {
+//                it.title = ""
+//                it.menus = null
+//                it.page.pageConfig.notifyConfigChanged()
+//            }
+//        }
+//    }
 }
 
 @Composable
@@ -50,11 +50,11 @@ fun PageMenuItemClick(
     LaunchedEffect(onMenuItemClick) {
         pageConfigInfo?.onMenuItemClick = onMenuItemClick
     }
-    DisposableEffect(LocalLifecycleOwner.current) {
-        onDispose {
-            pageConfigInfo?.onMenuItemClick = null
-        }
-    }
+//    DisposableEffect(LocalLifecycleOwner.current) {
+//        onDispose {
+//            pageConfigInfo?.onMenuItemClick = null
+//        }
+//    }
 }
 @Composable
 fun PageMenuItemClick(
@@ -65,11 +65,11 @@ fun PageMenuItemClick(
     LaunchedEffect(key1, onMenuItemClick) {
         pageConfigInfo?.onMenuItemClick = onMenuItemClick
     }
-    DisposableEffect(LocalLifecycleOwner.current) {
-        onDispose {
-            pageConfigInfo?.onMenuItemClick = null
-        }
-    }
+//    DisposableEffect(LocalLifecycleOwner.current) {
+//        onDispose {
+//            pageConfigInfo?.onMenuItemClick = null
+//        }
+//    }
 }
 @Composable
 fun PageMenuItemClick(
@@ -93,11 +93,11 @@ fun PageMenuItemClick(
     LaunchedEffect(key1, key2, onMenuItemClick) {
         pageConfigInfo?.onMenuItemClick = onMenuItemClick
     }
-    DisposableEffect(LocalLifecycleOwner.current) {
-        onDispose {
-            pageConfigInfo?.onMenuItemClick = null
-        }
-    }
+//    DisposableEffect(LocalLifecycleOwner.current) {
+//        onDispose {
+//            pageConfigInfo?.onMenuItemClick = null
+//        }
+//    }
 }
 @Composable
 fun PageMenuItemClick(
@@ -111,9 +111,9 @@ fun PageMenuItemClick(
     LaunchedEffect(key1, key2, key3, key4, onMenuItemClick) {
         pageConfigInfo?.onMenuItemClick = onMenuItemClick
     }
-    DisposableEffect(LocalLifecycleOwner.current) {
-        onDispose {
-            pageConfigInfo?.onMenuItemClick = null
-        }
-    }
+//    DisposableEffect(LocalLifecycleOwner.current) {
+//        onDispose {
+//            pageConfigInfo?.onMenuItemClick = null
+//        }
+//    }
 }

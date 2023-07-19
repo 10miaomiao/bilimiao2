@@ -39,6 +39,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
     override val di: DI = subDI(closestDI()) {
         bindSingleton { this@ComposeFragment }
         bindSingleton { this@ComposeFragment.requireArguments() }
+        bindSingleton { composeNav }
     }
 
     private val pageConfigInfo = PageConfigInfo(this)
@@ -59,7 +60,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
 
     private lateinit var fragmentNav: NavController
     private lateinit var composeNav: NavHostController
-
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -10,10 +10,9 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
-import com.a10miaomiao.bilimiao.widget.player.BiliDanmukuParser
-import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
+import master.flame.danmaku.danmaku.parser.BiliDanmukuParser
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
