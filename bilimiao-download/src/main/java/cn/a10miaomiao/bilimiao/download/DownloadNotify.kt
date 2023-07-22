@@ -7,10 +7,11 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
+import okhttp3.internal.notify
 
 class DownloadNotify(val context: Context) {
     val ACTION_CMD = "cn.a10miaomiao.bilimiao.download.DownloadNotify"
-    val notificationID = 1010
+    val notificationID = 10000
     val channelId = "cn.a10miaomiao.bilimiao.download.DownloadNotify.control"
     val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val builder = NotificationBuilder(context, channelId)
@@ -24,8 +25,7 @@ class DownloadNotify(val context: Context) {
 
     fun notifyData(info: CurrentDownloadInfo) {
 //        val builder = NotificationCompat.Builder(context, channelId)
-        if (builder.info?.id == info.id
-            && builder.info?.parentId == info.parentId) {
+        if (builder.taskId == info.taskId) {
             builder.setContentText(info.statusText)
             builder.setProgress(info.size.toInt(), info.progress.toInt(), false)
         } else {
@@ -36,10 +36,32 @@ class DownloadNotify(val context: Context) {
             builder.priority = NotificationCompat.PRIORITY_DEFAULT
             builder.setOnlyAlertOnce(true)
             builder.setOngoing(true)
-            builder.info = info
+            builder.taskId = info.taskId
         }
         val notification = builder.build()
         manager.notify(notificationID, notification)
+    }
+
+    fun showCompletedStatusNotify(info: CurrentDownloadInfo) {
+        manager.notify(
+            notificationID + info.taskId.toInt(),
+            NotificationCompat.Builder(context, channelId).apply {
+                setContentTitle(info.name)
+                setContentText("下载完成")
+                setSmallIcon(R.drawable.ic_baseline_file_download_done_24)
+            }.build()
+        )
+    }
+
+    fun showErrorStatusNotify(info: CurrentDownloadInfo) {
+        manager.notify(
+            notificationID + info.taskId.toInt(),
+            NotificationCompat.Builder(context, channelId).apply {
+                setContentTitle(info.name)
+                setContentText("下载出错")
+                setSmallIcon(R.drawable.ic_baseline_error_24)
+            }.build()
+        )
     }
 
     fun cancel() {
@@ -50,7 +72,7 @@ class DownloadNotify(val context: Context) {
         context: Context,
         channelId: String,
     ) : NotificationCompat.Builder(context, channelId) {
-        var info: CurrentDownloadInfo? = null
+        var taskId = 0L
     }
 
 }

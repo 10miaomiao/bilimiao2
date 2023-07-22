@@ -9,15 +9,14 @@ import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadMediaFileInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
+import kotlinx.coroutines.flow.collect
+import java.io.*
 import kotlin.coroutines.CoroutineContext
 
 class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
@@ -45,26 +44,34 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + job
-    private var downloadNotify: DownloadNotify? = null
+    private val downloadNotify by lazy { DownloadNotify(this) }
     private var downloadManager: DownloadManager? = null
     private var audioDownloadManager: DownloadManager? = null
+    private var currentTaskId = 1L
+    private var idCounter = 1L
+
     private var audioDownloadManagerCallback = object : DownloadManager.Callback {
         override fun onTaskRunning(info: CurrentDownloadInfo) {
-//            TODO("Not yet implemented")
         }
 
         override fun onTaskComplete(info: CurrentDownloadInfo) {
-//            TODO("Not yet implemented")
+            if (downloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_COMPLETED) {
+                downloadNotify.showCompletedStatusNotify(info)
+                completeDownload()
+            }
         }
 
         override fun onTaskError(info: CurrentDownloadInfo, error: Throwable) {
-//            TODO("Not yet implemented")
+            if (downloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_COMPLETED) {
+
+            }
         }
 
     }
 
     var downloadList = mutableListOf<BiliDownloadEntryAndPathInfo>()
     var downloadListVersion = MutableStateFlow(0)
+    var waitDownloadQueue = mutableListOf<BiliDownloadEntryAndPathInfo>()
     val curDownload = MutableStateFlow<CurrentDownloadInfo?>(null)
     private val curBiliDownloadEntryAndPathInfo: BiliDownloadEntryAndPathInfo?
         get() = curDownload.value?.let { cur ->
@@ -81,7 +88,15 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             readDownloadList()
             channel.send(this@DownloadService)
         }
-        downloadNotify = DownloadNotify(this)
+        launch {
+            curDownload.collect { info ->
+                if (info == null) {
+                    downloadNotify.cancel()
+                } else {
+                    downloadNotify.notifyData(info)
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -121,6 +136,13 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
     }
 
     /**
+     * 是否处于等待下载队列中
+     */
+    fun isInWaitDownloadQueue(dirPath: String): Boolean {
+        return waitDownloadQueue.indexOfFirst { it.entryDirPath == dirPath } > 0
+    }
+
+    /**
      * 创建任务
      */
     fun createDownload(
@@ -147,6 +169,8 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         downloadListVersion.value++
         if (curDownload.value == null) {
             startDownload(biliDownInfo)
+        } else {
+            waitDownloadQueue.add(biliDownInfo)
         }
     }
 
@@ -157,10 +181,10 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         if (biliDownInfo != null) {
             startDownload(biliDownInfo)
         } else {
-            val entryFile = File(entryDirPath, "entry.json")
-            if (entryFile.exists()) {
-
-            }
+//            val entryFile = File(entryDirPath, "entry.json")
+//            if (entryFile.exists()) {
+//
+//            }
         }
     }
     /**
@@ -178,14 +202,17 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         val entry = biliDownInfo.entry
         val parentId = entry.season_id ?: entry.avid?.toString() ?: ""
         val id = entry.page_data?.cid ?: entry.ep?.episode_id ?: 0L
+        currentTaskId = idCounter++
         val currentDownloadInfo = CurrentDownloadInfo(
+            taskId = currentTaskId,
             parentId = parentId,
             id = id,
             name = entry.name,
             url = "",
             header = mapOf(),
-            size = 0,
-            length = 0
+            size = entry.total_bytes,
+            progress = entry.downloaded_bytes,
+            length = entry.total_time_milli,
         )
         if (!danmakuXMLFile.exists()) {
             try {
@@ -196,8 +223,8 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                 val res = MiaoHttp.request {
                     url = BiliPalyUrlHelper.danmakuXMLUrl(biliDownInfo.entry)
                 }.awaitCall()
-                val inputStream = res.body!!.byteStream()
-                inputStream.inputStreamToFile(danmakuXMLFile)
+                val xmlBytes = CompressionTools.decompressXML(res.body!!.bytes())
+                danmakuXMLFile.writeBytes(xmlBytes)
             } catch (e: Exception){
                 curDownload.value = currentDownloadInfo.copy(
                     status = CurrentDownloadInfo.STATUS_FAIL_DANMAKU,
@@ -213,6 +240,9 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         currentDownloadInfo: CurrentDownloadInfo,
         biliDownInfo: BiliDownloadEntryAndPathInfo,
     ) {
+        if (currentDownloadInfo.taskId != currentTaskId) {
+            return
+        }
         val entry = biliDownInfo.entry
         val entryDir = File(biliDownInfo.entryDirPath)
         val videoDir = File(entryDir, entry.type_tag)
@@ -229,6 +259,10 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             val mediaJsonFile = File(videoDir, "index.json")
             val mediaJsonStr = Gson().toJson(mediaFileInfo)
             mediaJsonFile.writeText(mediaJsonStr)
+
+            if (currentDownloadInfo.taskId != currentTaskId) {
+                return
+            }
 
             curMediaFile = mediaJsonFile
             curMediaFileInfo = mediaFileInfo
@@ -251,11 +285,12 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                         size = entry.total_bytes,
                         length = mediaFileInfo.duration
                     ), this)
-                    downloadManager?.start(File(videoDir, "video.m4s"))
                     curDownload.value = currentDownloadInfo
+                    downloadManager?.start(File(videoDir, "video.m4s"))
                     val audio = mediaFileInfo.audio
                     if (audio != null && audio.isNotEmpty()) {
                         audioDownloadManager = DownloadManager(this, CurrentDownloadInfo(
+                            taskId = currentDownloadInfo.taskId,
                             parentId = currentDownloadInfo.parentId,
                             id = currentDownloadInfo.id,
                             name = entry.name,
@@ -279,13 +314,15 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         }
     }
 
-    fun cancelDownload() {
-        DebugMiao.log("cancelDownload", curDownload.value)
-        downloadManager?.cancel()
-        audioDownloadManager?.cancel()
-        downloadManager = null
-        audioDownloadManager = null
-        stopDownload()
+    fun cancelDownload(taskId: Long) {
+        if (taskId == currentTaskId) {
+            downloadManager?.cancel()
+            audioDownloadManager?.cancel()
+            downloadManager = null
+            audioDownloadManager = null
+            currentTaskId = 0L
+            stopDownload()
+        }
     }
 
     /**
@@ -299,17 +336,18 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             if (entryAndPathInfo != null) {
                 entryAndPathInfo.entry.total_bytes = cur.size
                 entryAndPathInfo.entry.downloaded_bytes = cur.progress
-                val entryJsonFile = File(entryAndPathInfo.entryDirPath, "entry.json")
-                val entryJsonStr = Gson().toJson(entryAndPathInfo.entry)
-                entryJsonFile.writeText(entryJsonStr)
-                downloadManager?.cancel()?.let {
-                    curDownload.value = it
-                }
+                updateBiliDownloadEntryJson(
+                    entryAndPathInfo.entryDirPath,
+                    entryAndPathInfo.entry,
+                )
+                downloadListVersion.value++
+                downloadManager?.cancel()
             }
         }
         curDownload.value = null
         curMediaFile = null
         curMediaFileInfo = null
+        nextDownload()
     }
 
     /**
@@ -326,7 +364,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             // 如果为当前下载任务则先停止任务
             val entryAndPathInfo = downloadList[index]
             if (curDownload.value?.id == entryAndPathInfo.entry.key) {
-                cancelDownload()
+                cancelDownload(currentTaskId)
             }
         }
         val downloadDir = File(pageDirPath)
@@ -346,12 +384,33 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         }
     }
 
+    /**
+     * 完成下载
+     */
+    private fun completeDownload() {
+        val (_, entryDirPath, entry) = curBiliDownloadEntryAndPathInfo ?: return
+        entry.downloaded_bytes = entry.total_bytes
+        entry.total_bytes = entry.total_bytes
+        entry.is_completed = true
+        entry.total_time_milli = (curDownload.value?.length ?: 0L) * 1000
+        updateBiliDownloadEntryJson(entryDirPath, entry)
+        downloadListVersion.value++
+        curDownload.value = null
+        curMediaFile = null
+        curMediaFileInfo = null
+        downloadManager = null
+        audioDownloadManager = null
+        nextDownload()
+    }
+
+    /**
+     * 完成下载
+     */
     private fun nextDownload() {
-        downloadList.find {
-//            !it.entry.is_completed
-            it.entry.total_bytes == 0L
-        }?.let {
-            startDownload(it)
+        if (waitDownloadQueue.isNotEmpty()) {
+            val next = waitDownloadQueue[0]
+            waitDownloadQueue.removeAt(0)
+            startDownload(next)
         }
     }
 
@@ -371,35 +430,48 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             }
         }
         curDownload.value = info.copy()
-        downloadNotify?.notifyData(info)
     }
 
     override fun onTaskComplete(info: CurrentDownloadInfo) {
-        if (info.size != 0L && info.size == info.progress) {
-            val (_, entryDirPath, entry) = curBiliDownloadEntryAndPathInfo ?: return
-            entry.downloaded_bytes = info.progress
-            entry.total_bytes = info.size
-            entry.is_completed = true
-            val entryJsonFile = File(entryDirPath, "entry.json")
-            val entryJsonStr = Gson().toJson(entry)
-            entryJsonFile.writeText(entryJsonStr)
-//            downloadList.removeAt(index)
-            downloadListVersion.value++
-            curDownload.value = null
-            curMediaFile = null
-            curMediaFileInfo = null
-        } else {
-
+        if (info.size == 0L || info.size != info.progress) {
+            // TODO: 未知错误
+            return
         }
-        // TODO: 视频下载完成，但音频未完成的情况
-        downloadNotify?.notifyData(info)
-        nextDownload()
+        when (audioDownloadManager?.downloadInfo?.status) {
+            CurrentDownloadInfo.STATUS_DOWNLOADING -> {
+                // 等待音频下载完成
+                curDownload.value = info.copy(
+                    status = CurrentDownloadInfo.STATUS_AUDIO_DOWNLOADING
+                )
+            }
+            CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD -> {
+                // 重新下载音频
+                curBiliDownloadEntryAndPathInfo?.let(::startDownload)
+            }
+            CurrentDownloadInfo.STATUS_COMPLETED, null -> {
+                // 完成下载
+                downloadNotify.showCompletedStatusNotify(info)
+                completeDownload()
+            }
+        }
     }
 
     override fun onTaskError(info: CurrentDownloadInfo, error: Throwable) {
-        DebugMiao.log(TAG, "onTaskError", info)
         error.printStackTrace()
-        downloadNotify?.notifyData(info)
+        curDownload.value = info.copy(
+            status = CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
+        )
+        downloadNotify.showErrorStatusNotify(info)
+    }
+
+    private fun updateBiliDownloadEntryJson(
+        entryDirPath: String,
+        entry: BiliDownloadEntryInfo,
+    ) {
+        // 保存视频信息
+        val entryJsonFile = File(entryDirPath, "entry.json")
+        val entryJsonStr = Gson().toJson(entry)
+        entryJsonFile.writeText(entryJsonStr)
     }
 
     private fun getDownloadPath(): String {
@@ -433,17 +505,6 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             pageDir.mkdir()
         }
         return pageDir
-    }
-
-    @Throws(IOException::class)
-    private fun InputStream.inputStreamToFile(file: File) {
-        val outputStream = FileOutputStream(file)
-        var read = -1
-        outputStream.use {
-            while (read().also { read = it } != -1) {
-                it.write(read)
-            }
-        }
     }
 
 }

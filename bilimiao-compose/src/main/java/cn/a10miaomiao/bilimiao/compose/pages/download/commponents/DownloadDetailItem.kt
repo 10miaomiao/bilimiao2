@@ -28,7 +28,7 @@ fun DownloadDetailItem(
     item: DownloadItemInfo,
     onClick: () -> Unit,
     onStartClick: () -> Unit,
-    onPauseClick: () -> Unit,
+    onPauseClick: (taskId: Long) -> Unit,
     onDeleteClick: () -> Unit,
 ) {
     var expandedMoreMenu by remember { mutableStateOf(false) }
@@ -48,7 +48,7 @@ fun DownloadDetailItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     GlideImage(
-                        imageModel = UrlUtil.autoHttps(item.cover),
+                        imageModel = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
                         modifier = Modifier
                             .size(width = 60.dp, height = 40.dp)
                             .clip(RoundedCornerShape(5.dp))
@@ -79,7 +79,7 @@ fun DownloadDetailItem(
                     }
                     if (!item.is_completed) {
                         if (item.cid == curDownload?.id && curDownload.status in 100 until  200) {
-                            IconButton(onClick = onPauseClick) {
+                            IconButton(onClick = { onPauseClick(curDownload.taskId) }) {
                                 Icon(Icons.Filled.Pause, null)
                             }
                         } else {

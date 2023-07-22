@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -92,6 +93,15 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
         viewModel.selectedItem(item)
     }
 
+    val handleItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            viewModel.selectedQuality(viewModel.acceptQuality[position])
+        }
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+        }
+    }
+
     val itemUi = miaoBindingItemUi<DownloadVideoCreateParam.Page> { item, index ->
         frameLayout {
             setBackgroundResource(R.drawable.shape_corner)
@@ -167,10 +177,10 @@ class DownloadVideoCreateFragment : Fragment(), DIAware, MyPage {
                                 mAdapter.clear()
                                 mAdapter.addAll(viewModel.acceptDescription)
                             }
-//                    miaoEffect(viewModel.spinnerSelected) {
-//                        setSelection(it)
-//                    }
-//                    onItemChanged(viewModel::changedSpinnerItem)
+                            miaoEffect(viewModel.qualityIndex) {
+                                setSelection(it)
+                            }
+                            onItemSelectedListener = handleItemSelectedListener
                         }..lParams(width = wrapContent)
                     }
                 }

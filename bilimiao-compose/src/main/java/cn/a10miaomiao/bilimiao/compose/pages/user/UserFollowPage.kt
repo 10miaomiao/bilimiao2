@@ -309,7 +309,7 @@ fun UserFollowPage(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             GlideImage(
-                                imageModel = UrlUtil.autoHttps(item.face),
+                                imageModel = UrlUtil.autoHttps(item.face) + "@200w_200h",
                                 modifier = Modifier
                                     .size(50.dp)
                                     .clip(CircleShape)
