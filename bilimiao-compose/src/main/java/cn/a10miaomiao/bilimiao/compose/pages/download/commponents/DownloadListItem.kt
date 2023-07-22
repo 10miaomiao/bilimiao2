@@ -28,7 +28,6 @@ fun DownloadListItem(
     item: DownloadInfo,
     onClick: () -> Unit
 ) {
-    val nav = localNavController()
     Box(
         modifier = Modifier.padding(5.dp),
     ) {
@@ -46,7 +45,7 @@ fun DownloadListItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     GlideImage(
-                        imageModel = UrlUtil.autoHttps(item.cover),
+                        imageModel = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
                         modifier = Modifier
                             .size(width = 120.dp, height = 80.dp)
                             .clip(RoundedCornerShape(5.dp))

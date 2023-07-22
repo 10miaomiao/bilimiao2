@@ -178,13 +178,13 @@ class DownloadDetailPageViewModel(
         downloadService?.startDownload(item.dir_path)
     }
 
-    fun pauseClick(item: DownloadItemInfo) {
-        downloadService?.cancelDownload()
+    fun pauseClick(item: DownloadItemInfo, taskId: Long) {
+        downloadService?.cancelDownload(taskId)
     }
 
     fun deleteDownload(
-        dirPath: String,
         item: DownloadItemInfo,
+        dirPath: String,
     ) {
         val info = downloadInfo?.value ?: return
         viewModelScope.launch {
@@ -237,21 +237,21 @@ fun DownloadDetailPage(
             items(
                 downloadItems,
                 key = { it.cid },
-            ) {
+            ) { item ->
                 DownloadDetailItem(
                     curDownload = curDownload,
-                    item = it,
+                    item = item,
                     onClick = {
-                        viewModel.itemClick(it)
+                        viewModel.itemClick(item)
                     },
                     onStartClick = {
-                        viewModel.startClick(it)
+                        viewModel.startClick(item)
                     },
                     onPauseClick = {
-                        viewModel.pauseClick(it)
+                        viewModel.pauseClick(item, it)
                     },
                     onDeleteClick = {
-                        viewModel.deleteDownload(dirPath, it)
+                        viewModel.deleteDownload(item, dirPath)
                     }
                 )
             }

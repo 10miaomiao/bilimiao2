@@ -3,8 +3,10 @@ package cn.a10miaomiao.bilimiao.download
 import bilibili.app.view.v1.ViewOuterClass.DM
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -26,20 +28,22 @@ class DownloadManager(
         .writeTimeout(120, TimeUnit.SECONDS)
         .build()
 
-    suspend fun start(file: File, downloadedLength: Long = 0) {
-        create(downloadInfo, file, downloadedLength).run {
-            throttleFirst(200)
-        }.catch { e ->
-            callback.onTaskError(
-                downloadInfo.copy(status = CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD),
-                e,
-            )
-        }.onCompletion {
-            callback.onTaskComplete(
-                downloadInfo.copy(status = CurrentDownloadInfo.STATUS_COMPLETED),
-            )
-        }.collect {
-            callback.onTaskRunning(it)
+    fun start(file: File, downloadedLength: Long = 0) {
+        scope.launch {
+            create(downloadInfo, file, downloadedLength).run {
+                throttleFirst(200)
+            }.catch { e ->
+                downloadInfo.status = CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
+                callback.onTaskError(downloadInfo, e)
+            }.onCompletion {
+                if (downloadInfo.status == CurrentDownloadInfo.STATUS_COMPLETED) {
+                    callback.onTaskComplete(downloadInfo)
+                }
+            }.collect {
+                if (it.status == CurrentDownloadInfo.STATUS_DOWNLOADING) {
+                    callback.onTaskRunning(it)
+                }
+            }
         }
     }
 
@@ -69,10 +73,12 @@ class DownloadManager(
         }
         var downloadLength = info.progress //已经下载好的长度
         val request = Request.Builder()
-            .url(info.url.replace("http://", "https://"))
-        DebugMiao.log("addHeader", "RANGE", "bytes=$downloadLength-${info.size}")
+            .url(UrlUtil.autoHttps(info.url))
         if (downloadLength > 0 && info.size != 0L) {
-            DebugMiao.log("addHeader2", "RANGE", "bytes=$downloadLength-${info.size}")
+            if (info.size == downloadLength) {
+                downloadInfo.status = CurrentDownloadInfo.STATUS_COMPLETED
+                return@flow
+            }
             request.addHeader("RANGE", "bytes=$downloadLength-${info.size}")
         }
         downloadLength += downloadedLength
@@ -104,6 +110,8 @@ class DownloadManager(
         }
         if (downloadInfo.status == CurrentDownloadInfo.STATUS_PAUSE) {
             call.cancel()
+        } else {
+            downloadInfo.status = CurrentDownloadInfo.STATUS_COMPLETED
         }
         fileOutputStream.flush()
     }

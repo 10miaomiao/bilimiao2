@@ -69,7 +69,7 @@ class LocalPlayerSource(
                 return emptyPlayerSourceInfo
             }
         } else {
-//            val mediaInfo = Gson().fromJson(videoIndexJson, BiliDownloadMediaFileInfo.Type2::class.java)
+            val mediaInfo = Gson().fromJson(videoIndexJson, BiliDownloadMediaFileInfo.Type2::class.java)
             val videoFile = File(videoDir, "video.m4s")
             val audioFile = File(videoDir, "audio.m4s")
             val url = Uri.fromFile(videoFile).toString()
@@ -77,6 +77,8 @@ class LocalPlayerSource(
                 val audioUrl = Uri.fromFile(audioFile).toString()
                 val mergingUrl = "[local-merging]\n$url\n$audioUrl"
                 return PlayerSourceInfo().also {
+                    it.height = mediaInfo.video[0].height
+                    it.width = mediaInfo.video[0].width
                     it.url = mergingUrl
                     it.quality = 0
                     it.acceptList = acceptList
@@ -84,6 +86,8 @@ class LocalPlayerSource(
                 }
             } else {
                 return PlayerSourceInfo().also {
+                    it.height = mediaInfo.video[0].height
+                    it.width = mediaInfo.video[0].width
                     it.url = url
                     it.quality = 0
                     it.acceptList = acceptList

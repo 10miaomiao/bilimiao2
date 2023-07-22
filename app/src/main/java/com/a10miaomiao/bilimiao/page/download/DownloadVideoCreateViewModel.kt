@@ -31,6 +31,8 @@ class DownloadVideoCreateViewModel(
     var acceptDescription = listOf<String>()
     var acceptQuality = listOf<Int>()
     var quality = 64
+    val qualityIndex get() = acceptQuality.indexOf(quality)
+    val qualityDescription get() = acceptDescription[qualityIndex] ?: "未知"
     val selectedList = mutableListOf<String>()
     var downloadedList = mutableListOf<BiliDownloadEntryInfo>()
 
@@ -76,6 +78,12 @@ class DownloadVideoCreateViewModel(
         }
     }
 
+    fun selectedQuality(value: Int) {
+        ui.setState {
+            quality = value
+        }
+    }
+
     fun startDownload () {
         if (selectedList.size == 0) {
             context.toast("请选择分P")
@@ -91,7 +99,7 @@ class DownloadVideoCreateViewModel(
         selectedList.clear()
     }
 
-    fun selectedItem (item: DownloadVideoCreateParam.Page) {
+    fun selectedItem(item: DownloadVideoCreateParam.Page) {
         val index = selectedList.indexOf(item.cid)
         ui.setState {
             if (index == -1) {
@@ -128,6 +136,7 @@ class DownloadVideoCreateViewModel(
             type_tag = quality.toString(),
             cover = video.pic,
             prefered_video_quality = quality,
+            quality_pithy_description = qualityDescription,
             guessed_total_bytes = 0,
             total_time_milli = 0,
             danmaku_count = 1000,

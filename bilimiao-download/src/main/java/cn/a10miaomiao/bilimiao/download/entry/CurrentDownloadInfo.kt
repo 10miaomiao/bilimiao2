@@ -1,8 +1,10 @@
 package cn.a10miaomiao.bilimiao.download.entry
 
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import java.text.DecimalFormat
 
 data class CurrentDownloadInfo(
+    val taskId: Long,
     val parentId: String,
     val id: Long,
     val name: String,
@@ -21,6 +23,9 @@ data class CurrentDownloadInfo(
             val fnum = DecimalFormat("##0.00")
             "正在下载 ${fnum.format(progress * 1.0 / size * 100.0)}%"
         }
+        STATUS_AUDIO_DOWNLOADING -> {
+            "正在下载音频"
+        }
         STATUS_COMPLETED -> "下载完成"
         STATUS_PAUSE -> "暂停中"
         STATUS_GET_DANMAKU -> "获取弹幕"
@@ -33,6 +38,7 @@ data class CurrentDownloadInfo(
 
     companion object {
         const val STATUS_DOWNLOADING = 100
+        const val STATUS_AUDIO_DOWNLOADING = 101
         const val STATUS_COMPLETED = 200
         const val STATUS_PAUSE = 201
         const val STATUS_GET_DANMAKU = 102
