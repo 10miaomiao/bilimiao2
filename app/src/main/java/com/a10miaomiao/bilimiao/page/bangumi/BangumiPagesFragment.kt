@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.page.bangumi
 
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.Gravity
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavType
@@ -15,7 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
+import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerParamInfo
@@ -125,15 +129,43 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
             _isEnabled = !isSelect
 
             views {
-                +textView {
-                    textColorResource = com.a10miaomiao.bilimiao.R.color.text_black
-                    _text = "第${item.index}集"
-                    _textColorResource = if (isSelect) {
-                        config.themeColorResource
-                    } else {
-                        com.a10miaomiao.bilimiao.R.color.text_black
+                +horizontalLayout {
+                    views {
+                        +textView {
+                            textColorResource = R.color.text_black
+                            _text = "第${item.index}集"
+                            _textColorResource = if (isSelect) {
+                                config.themeColorResource
+                            } else {
+                                R.color.text_black
+                            }
+                        }
+
+                        +textView {
+                            textColorResource = R.color.white
+                            _text = item.badge
+                            _show = item.badge.isNotBlank()
+                            miaoEffect(item.badge_info.bg_color) {
+                                val radius = dip(5f)
+                                val drawable = GradientDrawable()
+                                drawable.cornerRadii = floatArrayOf(
+                                    radius, radius,
+                                    radius, radius,
+                                    radius, radius,
+                                    radius, radius
+                                )
+                                drawable.setColor(it.toColorInt())
+                                drawable.setStroke(0, 0)
+                                background = drawable
+                            }
+                            horizontalPadding = dip(4)
+                            verticalPadding = dip(2)
+                        }..lParams {
+                            leftMargin = config.dividerSize
+                        }
                     }
                 }
+
 
                 +textView {
                     textColorResource = com.a10miaomiao.bilimiao.R.color.text_black

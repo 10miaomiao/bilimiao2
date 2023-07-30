@@ -18,5 +18,14 @@ data class BangumiPagesParam(
         val ep_id: String,
         val index: String,
         val index_title: String,
+        val badge: String,
+        val badge_info: EpisodeBadgeInfo,
     ): Parcelable
+
+    @Parcelize
+    data class EpisodeBadgeInfo(
+        val bg_color: String,
+        val bg_color_night: String,
+        val text: String,
+    ) : Parcelable
 }

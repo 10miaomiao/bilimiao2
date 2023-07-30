@@ -14,7 +14,7 @@ data class BangumiInfo (
     val rating: BangumiRatingInfo,
     val record: String,
     val rights: BangumiRightsInfo,
-    val season_id: Int,
+    val season_id: String,
     val season_status: Int,
     val season_title: String,
     val season_type: Int,
