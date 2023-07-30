@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextAlign
@@ -200,6 +201,7 @@ fun QrCodeLoginPage() {
                 .fillMaxWidth()
                 .padding(top = 50.dp),
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
         )
         Box(
             modifier = Modifier
@@ -213,6 +215,8 @@ fun QrCodeLoginPage() {
                     modifier = Modifier
                         .size(240.dp)
                         .align(Alignment.Center)
+                        .background(Color.White)
+                        .padding(5.dp)
                 )
                 if (isScaned) {
                     Box(
@@ -222,6 +226,7 @@ fun QrCodeLoginPage() {
                         Text(
                             text = "扫描成功\n\n请在扫码端确认登录",
                             textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 20.sp,
                             modifier = Modifier.fillMaxWidth()
                                 .align(Alignment.Center)
@@ -244,6 +249,7 @@ fun QrCodeLoginPage() {
                         .fillMaxWidth()
                         .align(Alignment.Center),
                     textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.outline,
                 )
                 Button(
                     onClick = {
@@ -252,7 +258,9 @@ fun QrCodeLoginPage() {
                     modifier = Modifier
                         .align(Alignment.BottomCenter),
                 ) {
-                    Text(text = "重新加载")
+                    Text(
+                        text = "重新加载"
+                    )
                 }
             }
         }
