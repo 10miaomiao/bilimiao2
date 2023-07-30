@@ -14,6 +14,7 @@ object ComposeFragmentNavigatorBuilder: FragmentNavigatorBuilder() {
             type = NavType.StringType
             nullable = true
         }
+        deepLink("bilimiao://compose?url={url}")
     }
 
     fun createArguments(

@@ -9,6 +9,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.TestPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.QrCodeLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
+import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
@@ -61,6 +62,13 @@ object PageRoute {
             val path = it.arguments?.getString("path") ?: ""
             DownloadDetailPage(path)
         }
+
+        val bangumiCreate = "bilimiao://download/bangumi/create?id={id}" arguments listOf(
+            navArgument("id") { type = NavType.StringType },
+        )  content {
+            val id = it.arguments?.getString("id") ?: ""
+            DownloadBangumiCreatePage(id)
+        }
     }
 
     object Time {
@@ -98,7 +106,6 @@ object PageRoute {
         clazz.methods.forEach {
             if (it.returnType.name == typeName) {
                 (it.invoke(t) as? NavDestinationBuilder)?.let { obj ->
-//                    DebugMiao.log(obj.route)
                     addDestination(obj.build(provider))
                 }
             }

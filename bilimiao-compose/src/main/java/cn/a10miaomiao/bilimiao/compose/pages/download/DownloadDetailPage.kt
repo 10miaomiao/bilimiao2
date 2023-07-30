@@ -112,11 +112,7 @@ class DownloadDetailPageViewModel(
                 epid = ep.episode_id
                 cid = source.cid
                 type = DownloadType.BANGUMI
-                itemTitle = if (ep.index_title.isNotBlank()) {
-                    ep.index_title
-                } else {
-                    ep.index
-                }
+                itemTitle = ep.index + ep.index_title
             }
             val item = DownloadItemInfo(
                 dir_path = it.entryDirPath,
@@ -213,6 +209,7 @@ fun DownloadDetailPage(
     val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     LaunchedEffect(viewModel, dirPath) {
+        DebugMiao.log(dirPath)
         viewModel.loadDownloadDetail(dirPath)
     }
 

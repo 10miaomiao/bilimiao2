@@ -201,10 +201,11 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         val danmakuXMLFile = File(entryDir, "danmaku.xml")
         val entry = biliDownInfo.entry
         val parentId = entry.season_id ?: entry.avid?.toString() ?: ""
-        val id = entry.page_data?.cid ?: entry.ep?.episode_id ?: 0L
+        val id = entry.page_data?.cid ?: entry.source?.cid ?: 0L
         currentTaskId = idCounter++
         val currentDownloadInfo = CurrentDownloadInfo(
             taskId = currentTaskId,
+            parentDirPath = entryDir.parent,
             parentId = parentId,
             id = id,
             name = entry.name,
@@ -291,6 +292,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                     if (audio != null && audio.isNotEmpty()) {
                         audioDownloadManager = DownloadManager(this, CurrentDownloadInfo(
                             taskId = currentDownloadInfo.taskId,
+                            parentDirPath = currentDownloadInfo.parentDirPath,
                             parentId = currentDownloadInfo.parentId,
                             id = currentDownloadInfo.id,
                             name = entry.name,
@@ -410,7 +412,11 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         if (waitDownloadQueue.isNotEmpty()) {
             val next = waitDownloadQueue[0]
             waitDownloadQueue.removeAt(0)
-            startDownload(next)
+            if (downloadList.indexOfFirst { it.entry.key == next.entry.key } != -1) {
+                startDownload(next)
+            } else {
+                nextDownload()
+            }
         }
     }
 
@@ -426,6 +432,18 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                     it.video[0].size = info.size
                     val mediaJsonStr = Gson().toJson(it)
                     curMediaFile?.writeText(mediaJsonStr)
+                    val entryAndPathInfo = downloadList.find {
+                        info.id == it.entry.key
+                    }
+                    if (entryAndPathInfo != null) {
+                        entryAndPathInfo.entry.total_bytes = info.size
+                        entryAndPathInfo.entry.downloaded_bytes = info.progress
+                        updateBiliDownloadEntryJson(
+                            entryAndPathInfo.entryDirPath,
+                            entryAndPathInfo.entry,
+                        )
+                        downloadListVersion.value++
+                    }
                 }
             }
         }

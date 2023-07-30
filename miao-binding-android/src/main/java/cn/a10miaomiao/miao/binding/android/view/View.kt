@@ -1,5 +1,6 @@
 package cn.a10miaomiao.miao.binding.android.view
 
+import android.graphics.drawable.Drawable
 import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.Px
@@ -29,6 +30,12 @@ inline var View._tag: Any
     @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
     set(value) = miaoEffect(value) {
         tag = it
+    }
+
+inline var View._background: Drawable
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(value) = miaoEffect(value) {
+        background = value
     }
 
 inline var View._backgroundColor: Int

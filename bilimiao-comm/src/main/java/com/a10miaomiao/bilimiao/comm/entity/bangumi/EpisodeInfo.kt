@@ -8,6 +8,7 @@ data class EpisodeInfo(
     val aid: String,
     val badge: String,
     val badge_type: Int,
+    val badge_info: EpisodeBadgeInfo,
     val cid: String,
     val cover: String,
     val dimension: DimensionXInfo,
@@ -26,4 +27,12 @@ data class EpisodeInfo(
     val status: Int,
     val title: String,
     val vid: String
-) : Parcelable
+) : Parcelable {
+
+    @Parcelize
+    data class EpisodeBadgeInfo(
+        val bg_color: String,
+        val bg_color_night: String,
+        val text: String,
+    ) : Parcelable
+}

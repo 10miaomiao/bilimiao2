@@ -12,8 +12,10 @@ import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.page.video.VideoInfoViewModel
 import splitties.toast.toast
 
@@ -41,7 +43,7 @@ class BangumiMorePopupMenu (
             add(Menu.FIRST, 5, 0, "分享番剧")
         }
         add(Menu.FIRST, 2, 0, "复制链接")
-//        add(Menu.FIRST, 4, 0, "下载视频")
+        add(Menu.FIRST, 4, 0, "下载番剧")
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {
@@ -67,16 +69,16 @@ class BangumiMorePopupMenu (
                 }
             }
             4 -> {
-//                val info = viewModel.detailInfo
-//                if (info != null) {
-//                    val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-//                    val args = bundleOf(
-//                        MainNavArgs.video to info
-//                    )
-//                    nav.navigate(MainNavGraph.action.global_to_downloadVideoCreate, args)
-//                } else {
-//                    activity.toast("请等待信息加载完成")
-//                }
+                val info = viewModel.detailInfo
+                if (info != null) {
+                    val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+                    val url = PageRoute.Download.bangumiCreate.url(mapOf(
+                        "id" to info.season_id
+                    ))
+                    nav.navigateToCompose(url)
+                } else {
+                    activity.toast("请等待信息加载完成")
+                }
             }
             5 -> {
                 val info = viewModel.detailInfo

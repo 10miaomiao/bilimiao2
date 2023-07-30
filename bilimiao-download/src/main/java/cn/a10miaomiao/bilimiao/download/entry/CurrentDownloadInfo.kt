@@ -5,6 +5,7 @@ import java.text.DecimalFormat
 
 data class CurrentDownloadInfo(
     val taskId: Long,
+    val parentDirPath: String,
     val parentId: String,
     val id: Long,
     val name: String,
