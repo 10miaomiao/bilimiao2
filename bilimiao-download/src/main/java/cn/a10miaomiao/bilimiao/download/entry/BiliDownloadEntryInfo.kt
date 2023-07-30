@@ -30,15 +30,7 @@ data class BiliDownloadEntryInfo(
 
     val key: Long
         get() {
-            val e = ep
-            if (e != null) {
-                return e.episode_id
-            }
-            val p = page_data
-            if (p != null) {
-                return p.cid
-            }
-            return avid!!
+            return source?.cid ?: page_data?.cid ?: avid!!
         }
 
     val name: String

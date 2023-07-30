@@ -383,6 +383,7 @@ class HomeFragment : Fragment(), DIAware {
 //                    text = "测试"
 //                    setOnClickListener {
 //                        val nav = it.findNavController()
+//                        nav.navigateToCompose(PageRoute.Auth.qr_login.url())
 //                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
 //                            MainNavArgs.url to PageRoute.Auth.login.url()
 //                        ))
