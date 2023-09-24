@@ -116,7 +116,6 @@ object MainNavGraph {
     ) {
         val id = if (builder.id == 0) _id else builder.id
         val actionId = if (builder.actionId == 0) id_counter++ else builder.actionId
-        DebugMiao.log(builder.name, id, actionId)
         destination(
             FragmentNavigatorDestinationBuilder(
                 provider[FragmentNavigator::class],
