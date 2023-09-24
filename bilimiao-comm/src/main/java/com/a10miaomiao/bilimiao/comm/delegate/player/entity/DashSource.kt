@@ -1,7 +1,6 @@
-package com.a10miaomiao.bilimiao.comm.delegate.player.model
+package com.a10miaomiao.bilimiao.comm.delegate.player.entity
 
 import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 
 class DashSource(

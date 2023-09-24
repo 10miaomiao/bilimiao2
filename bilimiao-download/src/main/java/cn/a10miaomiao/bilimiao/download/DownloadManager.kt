@@ -95,6 +95,7 @@ class DownloadManager(
         val body = response.body!!
         if (info.size == 0L) {
             info.size = body.contentLength()
+            emit(info)
         }
         val `is` = response.body!!.byteStream()
         val bis = BufferedInputStream(`is`)
