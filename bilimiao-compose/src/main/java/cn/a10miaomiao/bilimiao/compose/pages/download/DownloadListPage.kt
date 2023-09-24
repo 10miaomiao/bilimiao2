@@ -3,9 +3,10 @@ package cn.a10miaomiao.bilimiao.compose.pages.download
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -18,6 +19,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadListItem
 import cn.a10miaomiao.bilimiao.download.DownloadService
+import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -36,7 +38,7 @@ class DownloadListPageViewModel(
     private val composeNav by instance<NavHostController>()
 
     var downloadListVersion = 0
-    val downloadList = MutableStateFlow(emptyList<DownloadInfo>())
+    val downloadList = MutableStateFlow(emptyList<BiliDownloadEntryAndPathInfo>())
     val curDownload = MutableStateFlow<CurrentDownloadInfo?>(null)
 
     init {
@@ -62,8 +64,23 @@ class DownloadListPageViewModel(
     private fun _loadDownloadList(
         service: DownloadService,
     ) {
-        val list = mutableListOf<DownloadInfo>()
-        service.downloadList.forEach {
+        downloadList.value = service.downloadList
+    }
+
+    fun filterDownloadList(
+        list: List<BiliDownloadEntryAndPathInfo>,
+        status: Int,
+    ): List<DownloadInfo> {
+        val result = mutableListOf<DownloadInfo>()
+        list.filter {
+            if (status == 1) {
+                !it.entry.is_completed
+            } else if (status == 2) {
+                it.entry.is_completed
+            } else {
+                true
+            }
+        }.forEach {
             val biliEntry = it.entry
             var indexTitle = ""
             var itemTitle = ""
@@ -108,16 +125,17 @@ class DownloadListPageViewModel(
                 epid = epid,
                 index_title = indexTitle,
             )
-            val last = list.lastOrNull()
+            val last = result.lastOrNull()
             if (last != null
                 && last.type == item.type
-                && last.id == item.id) {
+                && last.id == item.id
+            ) {
                 if (last.is_completed && !item.is_completed) {
                     last.is_completed = false
                 }
                 last.items.add(item)
             } else {
-                list.add(
+                result.add(
                     DownloadInfo(
                         dir_path = it.pageDirPath,
                         media_type = biliEntry.media_type,
@@ -135,20 +153,22 @@ class DownloadListPageViewModel(
                 )
             }
         }
-        downloadList.value = list
+        return result
     }
 
     fun toDetailPage(item: DownloadInfo) {
         composeNav.navigate(
-            PageRoute.Download.detail.url(mapOf(
-                "path" to item.dir_path
-            ))
+            PageRoute.Download.detail.url(
+                mapOf(
+                    "path" to item.dir_path
+                )
+            )
         )
     }
 }
 
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloadListPage() {
     PageConfig(
@@ -160,33 +180,69 @@ fun DownloadListPage() {
     val windowInsets = windowState.getContentInsets(localContainerView())
     val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
+    var status by remember { mutableStateOf(0) }
     val downloadList by viewModel.downloadList.collectAsState()
     val curDownload by viewModel.curDownload.collectAsState()
+    val list = remember(downloadList, status) {
+        viewModel.filterDownloadList(downloadList, status)
+    }
 
-    Column() {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = windowInsets.leftDp.dp, end = windowInsets.rightDp.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
-            }
-            items(
-                downloadList,
-                key = { it.cid },
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = windowInsets.leftDp.dp, end = windowInsets.rightDp.dp)
+    ) {
+        item {
+            Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
+        }
+        item {
+            Row(
+                modifier = Modifier.padding(horizontal = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                DownloadListItem(
-                    curDownload = curDownload,
-                    item = it,
+                FilterChip(
+                    selected = status == 0,
                     onClick = {
-                        viewModel.toDetailPage(it)
+                        status = 0
+                    },
+                    label = {
+                        Text(text = "全部")
+                    }
+                )
+                FilterChip(
+                    selected = status == 1,
+                    onClick = {
+                        status = 1
+                    },
+                    label = {
+                        Text(text = "下载中")
+                    }
+                )
+                FilterChip(
+                    selected = status == 2,
+                    onClick = {
+                        status = 2
+                    },
+                    label = {
+                        Text(text = "下载完成")
                     }
                 )
             }
-            item {
-                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
-            }
+        }
+        items(
+            list,
+            key = { it.cid },
+        ) {
+            DownloadListItem(
+                curDownload = curDownload,
+                item = it,
+                onClick = {
+                    viewModel.toDetailPage(it)
+                }
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
         }
     }
 

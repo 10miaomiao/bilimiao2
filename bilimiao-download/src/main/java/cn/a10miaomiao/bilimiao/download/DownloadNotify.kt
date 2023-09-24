@@ -20,10 +20,8 @@ class DownloadNotify(val context: Context) {
 
     val builder = NotificationBuilder(context, channelId).apply {
         val pageUrl = "bilimiao://download/list"
-        val intent = Intent(Intent.ACTION_VIEW).also {
-            it.data = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
-        }
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+        val uri = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
+        val pendingIntent = getPendingIntent(uri)
         setContentIntent(pendingIntent)
         setSmallIcon(android.R.drawable.stat_sys_download)
         priority = NotificationCompat.PRIORITY_DEFAULT
@@ -36,8 +34,6 @@ class DownloadNotify(val context: Context) {
             val mChannel = NotificationChannel(channelId, "DownloadControl", NotificationManager.IMPORTANCE_DEFAULT)
             manager.createNotificationChannel(mChannel)
         }
-
-
     }
 
     fun notifyData(info: CurrentDownloadInfo) {
@@ -59,10 +55,8 @@ class DownloadNotify(val context: Context) {
             notificationID + info.taskId.toInt(),
             NotificationCompat.Builder(context, channelId).apply {
                 val pageUrl = "bilimiao://download/detail?path=${info.parentDirPath}"
-                val intent = Intent(Intent.ACTION_VIEW).also {
-                    it.data = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
-                }
-                val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+                val uri = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
+                val pendingIntent = getPendingIntent(uri)
                 setContentIntent(pendingIntent)
                 setContentTitle(info.name)
                 setContentText("下载完成")
@@ -76,10 +70,8 @@ class DownloadNotify(val context: Context) {
             notificationID + info.taskId.toInt(),
             NotificationCompat.Builder(context, channelId).apply {
                 val pageUrl = "bilimiao://download/detail?path=${info.parentDirPath}"
-                val intent = Intent(Intent.ACTION_VIEW).also {
-                    it.data = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
-                }
-                val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+                val uri = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
+                val pendingIntent = getPendingIntent(uri)
                 setContentIntent(pendingIntent)
                 setContentTitle(info.name)
                 setContentText("下载出错")
@@ -90,6 +82,19 @@ class DownloadNotify(val context: Context) {
 
     fun cancel() {
         manager.cancel(notificationID)
+    }
+
+    private fun getPendingIntent(
+        uri: Uri,
+    ): PendingIntent {
+        val intent = Intent(Intent.ACTION_VIEW).also {
+            it.data = uri
+        }
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        } else {
+            PendingIntent.getActivity(context, 0, intent, 0)
+        }
     }
 
     class NotificationBuilder(

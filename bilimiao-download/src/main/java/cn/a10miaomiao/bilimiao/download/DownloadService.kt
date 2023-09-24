@@ -303,6 +303,19 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                         ), audioDownloadManagerCallback)
                         audioDownloadManager?.start(File(videoDir, "audio.m4s"))
                     }
+                    entry.page_data?.let {
+                        entry.page_data = it.copy(
+                            height = mediaFileInfo.video[0].height,
+                            width = mediaFileInfo.video[0].width,
+                        )
+                    }
+                    entry.ep?.let {
+                        entry.ep = it.copy(
+                            height = mediaFileInfo.video[0].height,
+                            width = mediaFileInfo.video[0].width,
+                        )
+                    }
+                    updateBiliDownloadEntryJson(biliDownInfo.entryDirPath, entry)
                 }
                 else -> {
 
@@ -432,19 +445,18 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                     it.video[0].size = info.size
                     val mediaJsonStr = Gson().toJson(it)
                     curMediaFile?.writeText(mediaJsonStr)
-                    val entryAndPathInfo = downloadList.find {
-                        info.id == it.entry.key
-                    }
-                    if (entryAndPathInfo != null) {
-                        entryAndPathInfo.entry.total_bytes = info.size
-                        entryAndPathInfo.entry.downloaded_bytes = info.progress
-                        updateBiliDownloadEntryJson(
-                            entryAndPathInfo.entryDirPath,
-                            entryAndPathInfo.entry,
-                        )
-                        downloadListVersion.value++
-                    }
                 }
+            }
+            val entryAndPathInfo = downloadList.find {
+                info.id == it.entry.key
+            }
+            if (entryAndPathInfo != null) {
+                entryAndPathInfo.entry.total_bytes = info.size
+                updateBiliDownloadEntryJson(
+                    entryAndPathInfo.entryDirPath,
+                    entryAndPathInfo.entry,
+                )
+                downloadListVersion.value++
             }
         }
         curDownload.value = info.copy()
@@ -480,6 +492,18 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             status = CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
         )
         downloadNotify.showErrorStatusNotify(info)
+        val entryAndPathInfo = downloadList.find {
+            info.id == it.entry.key
+        }
+        if (entryAndPathInfo != null) {
+            entryAndPathInfo.entry.total_bytes = info.size
+            entryAndPathInfo.entry.downloaded_bytes = info.progress
+            updateBiliDownloadEntryJson(
+                entryAndPathInfo.entryDirPath,
+                entryAndPathInfo.entry,
+            )
+            downloadListVersion.value++
+        }
     }
 
     private fun updateBiliDownloadEntryJson(
@@ -505,7 +529,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         var pageDirName = ""
         val ep = biliEntry.ep
         if (ep != null) {
-            dirName = biliEntry.season_id!!
+            dirName = "s_" + biliEntry.season_id!!
             pageDirName = ep.episode_id.toString()
         }
         val page = biliEntry.page_data
