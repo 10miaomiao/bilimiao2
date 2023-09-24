@@ -10,5 +10,7 @@ data class SeasonInfo(
     val season_title: String,
     val title: String,
 
-    val is_jump: Int,
+    val is_jump: Int = 0,
+    val cover: String,
+    val horizontal_cover: String,
 ) : Parcelable

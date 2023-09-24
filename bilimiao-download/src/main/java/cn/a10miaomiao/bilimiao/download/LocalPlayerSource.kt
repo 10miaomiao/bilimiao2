@@ -6,6 +6,7 @@ import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadMediaFileInfo
 import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.google.gson.Gson
@@ -29,8 +30,9 @@ class LocalPlayerSource(
     override val ownerName: String
         get() = "本地视频"
 
+    private val entry = getEntryFileInfo()
+
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
-        val entry = getEntryFileInfo()
         val duration = entry.total_time_milli
         val acceptList = listOf(
             PlayerSourceInfo.AcceptInfo(0, "本地")
@@ -95,6 +97,15 @@ class LocalPlayerSource(
                 }
             }
         }
+    }
+
+    override fun getSourceIds(): PlayerSourceIds {
+        return PlayerSourceIds(
+            cid = id,
+            sid = entry.season_id ?: "",
+            epid = entry.ep?.episode_id?.toString() ?: "",
+            aid = entry.avid?.toString() ?: "",
+        )
     }
 
     override suspend fun getDanmakuParser(): BaseDanmakuParser? {

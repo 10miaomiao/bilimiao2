@@ -2,15 +2,13 @@ package com.a10miaomiao.bilimiao.comm.mypage
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.*
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 class MyPageConfig(
     private val fragment: Fragment,
     private val getConfigInfo: (() -> MyPageConfigInfo),
-): LifecycleObserver {
+): DefaultLifecycleObserver {
 
     var setConfig: ((MyPageConfigInfo) -> Unit)? = null
 
@@ -20,8 +18,9 @@ class MyPageConfig(
         fragment.lifecycle.addObserver(this)
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    fun onStart() {
+//    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
         if (setConfig == null) {
             // 无奈之取，activity重启后fragment自动恢复后不会经过onAttachFragment方法，setConfig为空
             val fragmentManager = fragment.parentFragmentManager
@@ -32,8 +31,9 @@ class MyPageConfig(
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun onResume() {
+//    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
         notifyConfigChanged()
     }
 

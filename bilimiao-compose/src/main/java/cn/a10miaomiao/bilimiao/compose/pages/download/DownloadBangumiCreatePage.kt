@@ -354,6 +354,7 @@ fun DownloadBangumiCreatePage(
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
+    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
     val windowInsets = windowState.getContentInsets(localContainerView())
 
     val viewModel: DownloadBangumiCreatePageViewModel = diViewModel()
@@ -476,6 +477,7 @@ fun DownloadBangumiCreatePage(
             ) {
                 Text(text = "开始下载(${checkedSet.size})")
             }
+            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp + 10.dp))
         }
     }
 
