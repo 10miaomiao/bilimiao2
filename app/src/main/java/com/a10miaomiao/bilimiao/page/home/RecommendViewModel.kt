@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.page.home
 
 import android.content.Context
 import android.os.Build
+import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,6 +36,7 @@ class RecommendViewModel(
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
     val filterStore: FilterStore by instance()
+    var listStyle = "0"
 
     private val _idx get() = if (list.data.size == 0) {
         0
@@ -45,9 +47,14 @@ class RecommendViewModel(
     var triggered = false
 
     init {
+        getListStyle()
         loadData(0)
     }
 
+    private fun getListStyle() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        listStyle = prefs.getString("home_recommend_list_style", "0")!!
+    }
 
     private fun loadData(
         idx: Long = _idx
