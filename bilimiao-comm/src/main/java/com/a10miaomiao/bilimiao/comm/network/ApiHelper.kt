@@ -13,8 +13,8 @@ import java.util.*
  */
 object ApiHelper {
 
-    const val BUILD_VERSION = 1390002
-    const val BILI_APP_VERSION = "1.39.0"
+    const val BUILD_VERSION = 1441100
+    const val BILI_APP_VERSION = "1.44.1"
 
     // 用哪个APP_KEY登录后，之后的请求之后只能用同一个APP_KEY，现统一使用HD版的APP_KEY，APP版的APP_KEY无法使用二维码登录
     // Android APP
