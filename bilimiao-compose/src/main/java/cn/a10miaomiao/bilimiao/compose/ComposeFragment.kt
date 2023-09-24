@@ -51,7 +51,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
-        pageConfigInfo.onMenuItemClick?.invoke(menuItem)
+        pageConfigInfo.onMenuItemClick?.invoke(view, menuItem)
     }
 
     private val url by lazy {

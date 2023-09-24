@@ -77,6 +77,7 @@ class VideoCommentListFragment : Fragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "video.comment.list"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://video/comment/{id}")
             argument(MainNavArgs.id) {
                 type = NavType.StringType
                 nullable = false

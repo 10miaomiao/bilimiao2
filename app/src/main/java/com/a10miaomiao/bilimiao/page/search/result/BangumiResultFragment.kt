@@ -8,12 +8,14 @@ import androidx.core.os.bundleOf
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchBangumiInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.commponents.bangumi.bangumiItem
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -79,8 +81,14 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = BangumiDetailFragment.createArguments(item.param)
-        Navigation.findNavController(view).navigate(BangumiDetailFragment.actionId, args)
+        val url = PageRoute.Bangumi.detail.url(
+            mapOf(
+                "id" to item.param,
+                "epid" to ""
+            )
+        )
+        Navigation.findNavController(view)
+            .navigateToCompose(url)
     }
 
     val itemUi = miaoBindingItemUi<SearchBangumiInfo> { item, index ->

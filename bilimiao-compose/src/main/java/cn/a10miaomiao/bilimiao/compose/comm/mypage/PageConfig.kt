@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.comm.mypage
 
+import android.view.View
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -12,7 +13,7 @@ class PageConfigInfo(
 ) {
     var title: String = ""
     var menus: List<MenuItemPropInfo>? = null
-    var onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+    var onMenuItemClick: ((view: View, menuItem: MenuItemPropInfo) -> Unit)? = null
 }
 
 internal val LocalPageConfigInfo: ProvidableCompositionLocal<PageConfigInfo?> =
@@ -44,7 +45,7 @@ fun PageConfig(
 
 @Composable
 fun PageMenuItemClick(
-    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+    onMenuItemClick: ((view: View, menuItem: MenuItemPropInfo) -> Unit)
 ) {
     val pageConfigInfo = LocalPageConfigInfo.current
     LaunchedEffect(onMenuItemClick) {
@@ -56,10 +57,23 @@ fun PageMenuItemClick(
 //        }
 //    }
 }
+
+@Composable
+fun PageMenuItemClick(
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)
+) {
+    val pageConfigInfo = LocalPageConfigInfo.current
+    LaunchedEffect(onMenuItemClick) {
+        pageConfigInfo?.onMenuItemClick = { _, menuItem ->
+            onMenuItemClick(menuItem)
+        }
+    }
+}
+
 @Composable
 fun PageMenuItemClick(
     key1: Any?,
-    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+    onMenuItemClick: ((view: View, menuItem: MenuItemPropInfo) -> Unit)
 ) {
     val pageConfigInfo = LocalPageConfigInfo.current
     LaunchedEffect(key1, onMenuItemClick) {
@@ -71,15 +85,33 @@ fun PageMenuItemClick(
 //        }
 //    }
 }
+
+@Composable
+fun PageMenuItemClick(
+    key1: Any?,
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)
+) {
+    val pageConfigInfo = LocalPageConfigInfo.current
+    LaunchedEffect(key1, onMenuItemClick) {
+        pageConfigInfo?.onMenuItemClick = { _, menuItem ->
+            onMenuItemClick(menuItem)
+        }
+    }
+//    DisposableEffect(LocalLifecycleOwner.current) {
+//        onDispose {
+//            pageConfigInfo?.onMenuItemClick = null
+//        }
+//    }
+}
 @Composable
 fun PageMenuItemClick(
     key1: Any?,
     key2: Any?,
-    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit),
 ) {
     val pageConfigInfo = LocalPageConfigInfo.current
-    LaunchedEffect(key1, key2, onMenuItemClick) {
-        pageConfigInfo?.onMenuItemClick = onMenuItemClick
+    pageConfigInfo?.onMenuItemClick = { _, menuItem ->
+        onMenuItemClick(menuItem)
     }
 }
 @Composable
@@ -87,17 +119,12 @@ fun PageMenuItemClick(
     key1: Any?,
     key2: Any?,
     key3: Any?,
-    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit),
 ) {
     val pageConfigInfo = LocalPageConfigInfo.current
-    LaunchedEffect(key1, key2, onMenuItemClick) {
-        pageConfigInfo?.onMenuItemClick = onMenuItemClick
+    pageConfigInfo?.onMenuItemClick = { _, menuItem ->
+        onMenuItemClick(menuItem)
     }
-//    DisposableEffect(LocalLifecycleOwner.current) {
-//        onDispose {
-//            pageConfigInfo?.onMenuItemClick = null
-//        }
-//    }
 }
 @Composable
 fun PageMenuItemClick(
@@ -105,15 +132,12 @@ fun PageMenuItemClick(
     key2: Any?,
     key3: Any?,
     key4: Any?,
-    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit),
 ) {
     val pageConfigInfo = LocalPageConfigInfo.current
     LaunchedEffect(key1, key2, key3, key4, onMenuItemClick) {
-        pageConfigInfo?.onMenuItemClick = onMenuItemClick
+        pageConfigInfo?.onMenuItemClick = { _, menuItem ->
+            onMenuItemClick(menuItem)
+        }
     }
-//    DisposableEffect(LocalLifecycleOwner.current) {
-//        onDispose {
-//            pageConfigInfo?.onMenuItemClick = null
-//        }
-//    }
 }

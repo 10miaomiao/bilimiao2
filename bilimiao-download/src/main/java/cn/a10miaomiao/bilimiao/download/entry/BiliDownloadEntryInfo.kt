@@ -22,10 +22,10 @@ data class BiliDownloadEntryInfo(
     val spid: Long,
     val bvid: String?,
     val owner_id: Long,
-    val page_data: PageInfo?,
+    var page_data: PageInfo?,
     val season_id: String?,
     val source: SourceInfo?,
-    val ep: EpInfo?,
+    var ep: EpInfo?,
 ) {
 
     val key: Long

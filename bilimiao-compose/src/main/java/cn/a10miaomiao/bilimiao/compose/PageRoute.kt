@@ -9,6 +9,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.TestPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.QrCodeLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
@@ -40,6 +41,17 @@ object PageRoute {
             val requestId = it.arguments?.getString("request_id") ?: ""
             val source = it.arguments?.getString("source") ?: ""
             TelVerifyPage(code, requestId, source)
+        }
+    }
+
+    object Bangumi {
+        val detail = "bilimiao://bangumi/detail/{id}?epid={epid}" arguments listOf(
+            navArgument("id") { type = NavType.StringType },
+            navArgument("epid") { type = NavType.StringType },
+        ) content {
+            val id = it.arguments?.getString("id") ?: ""
+            val epid = it.arguments?.getString("epid") ?: ""
+            BangumiDetailPage(id, epid)
         }
     }
 
@@ -95,6 +107,7 @@ object PageRoute {
         autoBuild(Download, Download::class.java)
         autoBuild(Time, Time::class.java)
         autoBuild(Setting, Setting::class.java)
+        autoBuild(Bangumi, Bangumi::class.java)
     }
     
     inline fun <reified T> NavGraphBuilder.autoBuild(t: T) {

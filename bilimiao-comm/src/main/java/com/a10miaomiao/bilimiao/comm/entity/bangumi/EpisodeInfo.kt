@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.bangumi
 
 import android.os.Parcelable
+import com.a10miaomiao.bilimiao.comm.entity.comm.bili.BadgeInfo
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -8,7 +9,7 @@ data class EpisodeInfo(
     val aid: String,
     val badge: String,
     val badge_type: Int,
-    val badge_info: EpisodeBadgeInfo,
+    val badge_info: BadgeInfo,
     val cid: String,
     val cover: String,
     val dimension: DimensionXInfo,
@@ -27,12 +28,4 @@ data class EpisodeInfo(
     val status: Int,
     val title: String,
     val vid: String
-) : Parcelable {
-
-    @Parcelize
-    data class EpisodeBadgeInfo(
-        val bg_color: String,
-        val bg_color_night: String,
-        val text: String,
-    ) : Parcelable
-}
+) : Parcelable

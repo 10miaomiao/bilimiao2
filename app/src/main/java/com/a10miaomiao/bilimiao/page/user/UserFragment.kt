@@ -13,6 +13,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -254,7 +255,6 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     Navigation.findNavController(view)
                         .navigate(UserFavouriteDetailFragment.actionId, args)
                 }
-                // 跳转番剧
                 is UpperChannelInfo -> {
                     val args = UserChannelDetailFragment.createArguments(
                         id = item.cid,
@@ -266,9 +266,14 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 }
                 // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
-                    val args = BangumiDetailFragment.createArguments(item.param)
+                    val url = PageRoute.Bangumi.detail.url(
+                        mapOf(
+                            "id" to item.param,
+                            "epid" to ""
+                        )
+                    )
                     Navigation.findNavController(view)
-                        .navigate(BangumiDetailFragment.actionId, args)
+                        .navigateToCompose(url)
                 }
             }
         }

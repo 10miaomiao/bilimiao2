@@ -5,13 +5,16 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.*
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
@@ -119,9 +122,14 @@ class VideoInfoViewModel(
     private fun jumpSeason(info: VideoInfo) {
         info.season?.let {
             if (it.is_jump == 1) {
-                val nav = fragment.findNavController()
-                val args = BangumiDetailFragment.createArguments(it.season_id)
-                nav.navigate(BangumiDetailFragment.actionId, args)
+                val url = PageRoute.Bangumi.detail.url(
+                    mapOf(
+                        "id" to it.season_id,
+                        "epid" to ""
+                    )
+                )
+                fragment.findNavController()
+                    .navigateToCompose(url)
             }
         }
     }
