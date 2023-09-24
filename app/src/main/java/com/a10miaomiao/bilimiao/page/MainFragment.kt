@@ -12,6 +12,9 @@ import android.widget.Space
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -28,7 +31,9 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.home.*
+import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.SettingFragment
@@ -39,6 +44,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.dsl.core.*
@@ -223,7 +229,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
             space.visibility = View.VISIBLE
             tabLayout.visibility = View.GONE
         }
-        if  (viewPager.adapter == null) {
+        if (viewPager.adapter == null) {
             viewModel.navList = newNavList
             val mAdapter = object : FragmentStateAdapter(childFragmentManager, lifecycle) {
                 override fun getItemCount() = viewModel.navList.size
@@ -263,8 +269,15 @@ class MainFragment : Fragment(), DIAware, MyPage {
     val ui = miaoBindingUi {
         val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
         val contentInsets = windowStore.getContentInsets(parentView)
+        connectStore(viewLifecycleOwner, userStore)
         miaoEffect(userStore.isLogin()) {
             pageConfig.notifyConfigChanged()
+            HomeSettingFragment.homeSettingVersion++
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    parentView?.let(::initView)
+                }
+            }
         }
         verticalLayout {
             views {

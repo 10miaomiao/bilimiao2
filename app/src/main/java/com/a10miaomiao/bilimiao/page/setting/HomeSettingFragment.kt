@@ -26,10 +26,13 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.categoryHeader
 import de.Maxr1998.modernpreferences.helpers.screen
+import de.Maxr1998.modernpreferences.helpers.singleChoice
 import de.Maxr1998.modernpreferences.helpers.switch
+import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -90,9 +93,29 @@ class HomeSettingFragment : Fragment(), DIAware, MyPage
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        if ("home" in key) {
+        if (key.startsWith("home")) {
             homeSettingVersion++
         }
+        if (key == "home_recommend_list_style") {
+            showRebootAppDialog()
+        }
+    }
+
+    private fun showRebootAppDialog() {
+        MaterialAlertDialogBuilder(requireContext()).apply {
+            setTitle("提示")
+            setMessage("修改推荐列表样式，需重新打开APP后生效")
+            setNeutralButton("立即重新打开") { _, _ ->
+                val ctx = requireContext()
+                val packageManager = ctx.packageManager
+                val intent = packageManager.getLaunchIntentForPackage(ctx.packageName)!!
+                val componentName = intent.component
+                val mainIntent = Intent.makeRestartActivityTask(componentName)
+                ctx.startActivity(mainIntent)
+                Runtime.getRuntime().exit(0)
+            }
+            setNegativeButton("稍后手动", null)
+        }.show()
     }
 
     val ui = miaoBindingUi {
@@ -142,6 +165,20 @@ class HomeSettingFragment : Fragment(), DIAware, MyPage
             title = "个性化热门列表"
             summary = "修改后需手动刷新列表"
             defaultValue = true
+        }
+
+        categoryHeader("recommend") {
+            title = "推荐设置"
+        }
+
+        val recommendListStyleSelection = listOf(
+            SelectionItem(key = "0", title = "详情为主"),
+            SelectionItem(key = "1", title = "封面为主"),
+        )
+        singleChoice("home_recommend_list_style", recommendListStyleSelection) {
+            title = "列表样式"
+            summary = "修改后需重启APP"
+            initialSelection = "0"
         }
 
     }

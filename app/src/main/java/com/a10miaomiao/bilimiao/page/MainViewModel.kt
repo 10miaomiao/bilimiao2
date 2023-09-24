@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.home.DynamicFragment
 import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.HomeFragment
@@ -33,6 +34,7 @@ class MainViewModel(
     private var curHomeSettingVersion = -1
 
     fun readNavList(): List<KClass<out Fragment>> {
+        DebugMiao.log(curHomeSettingVersion, HomeSettingFragment.homeSettingVersion)
         if (curHomeSettingVersion == HomeSettingFragment.homeSettingVersion) {
             return navList
         }

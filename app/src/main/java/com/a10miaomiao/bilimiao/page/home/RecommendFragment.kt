@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
+import com.a10miaomiao.bilimiao.commponents.video.miniVideoItem
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
@@ -95,6 +96,50 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
             damukuNum = item.cover_left_text_2,
         )
     }
+
+    val miniItemUi = miaoBindingItemUi<RecommendCardInfo> { item, index ->
+        miniVideoItem (
+            title = item.title,
+            pic =item.cover,
+            upperName = item.args.up_name,
+            playNum = item.cover_left_text_1,
+            damukuNum = item.cover_left_text_2,
+            duration = item.cover_right_text,
+        )
+    }
+
+    private fun RecyclerView.createAdapter(): MiaoBindingAdapter<RecommendCardInfo> {
+        val mAdapter = if (viewModel.listStyle == "1") {
+            mLayoutManager = _miaoLayoutManage(
+                GridAutofitLayoutManager(requireContext(), dip(150))
+            )
+            _miaoAdapter(
+                items = viewModel.list.data,
+                itemUi = miniItemUi,
+            ) {
+                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                setOnItemClickListener(handleItemClick)
+                loadMoreModule.setOnLoadMoreListener {
+                    viewModel.loadMode()
+                }
+            }
+        } else {
+            mLayoutManager = _miaoLayoutManage(
+                GridAutofitLayoutManager(requireContext(), dip(300))
+            )
+            _miaoAdapter(
+                items = viewModel.list.data,
+                itemUi = itemUi,
+            ) {
+                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                setOnItemClickListener(handleItemClick)
+                loadMoreModule.setOnLoadMoreListener {
+                    viewModel.loadMode()
+                }
+            }
+        }
+        return mAdapter
+    }
     
     val ui = miaoBindingUi {
         val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
@@ -109,20 +154,8 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
             views {
                 +recyclerviewAtViewPager2 {
                     backgroundColor = config.windowBackgroundColor
-                    mLayoutManager = _miaoLayoutManage(
-                        GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
-                    )
 
-                    val mAdapter = _miaoAdapter(
-                        items = viewModel.list.data,
-                        itemUi = itemUi,
-                    ) {
-                        stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-                        setOnItemClickListener(handleItemClick)
-                        loadMoreModule.setOnLoadMoreListener {
-                            viewModel.loadMode()
-                        }
-                    }
+                    val mAdapter = createAdapter()
                     footerViews(mAdapter) {
                         +listStateView(
                             when {
