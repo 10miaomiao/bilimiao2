@@ -330,8 +330,21 @@ class PlayerController(
      * 播放结束
      */
     override fun onAutoCompletion() {
-        delegate.completionBoxController.show()
         delegate.historyReport()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        val nextPlayerSourceInfo = delegate.playerSource?.next()
+        if (nextPlayerSourceInfo is VideoPlayerSource) {
+            if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_NEXT_VIDEO, true)) {
+                delegate.openPlayer(nextPlayerSourceInfo)
+                return
+            }
+        } else if (nextPlayerSourceInfo is BangumiPlayerSource) {
+            if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_NEXT_BANGUMI, true)) {
+                delegate.openPlayer(nextPlayerSourceInfo)
+                return
+            }
+        }
+        delegate.completionBoxController.show()
     }
 
     override fun onVideoPause() {

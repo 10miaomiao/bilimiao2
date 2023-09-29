@@ -19,6 +19,8 @@ abstract class BasePlayerSource() {
     open suspend fun getDanmakuParser(): BaseDanmakuParser? = null
     open suspend fun historyReport(progress: Long) {}
 
+    open fun next(): BasePlayerSource? = null
+
     var proxyServer: ProxyServerInfo? = null
     var uposHost: String = ""
 }

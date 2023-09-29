@@ -67,6 +67,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
         const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
 
+        const val PLAYER_AUTO_NEXT_VIDEO = "player_auto_next_video"
+        const val PLAYER_AUTO_NEXT_BANGUMI = "player_auto_next_bangumi"
+
         const val PLAYER_SUBTITLE_SHOW = "player_subtitle_show"
         const val PLAYER_AI_SUBTITLE_SHOW = "player_ai_subtitle_show"
 
@@ -262,6 +265,18 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             title = "横屏时播放器默认全屏播放"
             summary = ""
             defaultValue = false
+        }
+
+        switch(PLAYER_AUTO_NEXT_VIDEO) {
+            title = "视频自动播放下一P"
+            summary = ""
+            defaultValue = true
+        }
+
+        switch(PLAYER_AUTO_NEXT_BANGUMI) {
+            title = "番剧自动播放下一集"
+            summary = ""
+            defaultValue = true
         }
 
         categoryHeader("3") {
