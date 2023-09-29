@@ -287,7 +287,14 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     id = cid,
                     ownerId = info.owner.mid,
                     ownerName = info.owner.name,
-                )
+                ).apply {
+                    pages = viewModel.pages.map {
+                        VideoPlayerSource.PageInfo(
+                            cid = it.cid,
+                            title = it.part,
+                        )
+                    }
+                }
             )
 //            basePlayerDelegate.playVideo(info.aid.toString(), cid, title)
         }

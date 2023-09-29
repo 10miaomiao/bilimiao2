@@ -26,6 +26,8 @@ class VideoPlayerSource(
     override val ownerName: String,
 ): BasePlayerSource() {
 
+    var pages = emptyList<PageInfo>()
+
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
 //        val req = Playurl.PlayURLReq.newBuilder()
 //            .setAid(aid.toLong())
@@ -148,5 +150,29 @@ class VideoPlayerSource(
             e.printStackTrace()
         }
     }
+
+    override fun next(): BasePlayerSource? {
+        val index = pages.indexOfFirst { it.cid == id }
+        val nextIndex = index + 1
+        if (nextIndex in pages.indices) {
+            val nextPage = pages[nextIndex]
+            val nextPlayerSource = VideoPlayerSource(
+                title = nextPage.title,
+                coverUrl = coverUrl,
+                aid = aid,
+                id = nextPage.cid,
+                ownerId = ownerId,
+                ownerName = ownerName,
+            )
+            nextPlayerSource.pages = pages
+            return nextPlayerSource
+        }
+        return null
+    }
+
+    data class PageInfo(
+        val cid: String,
+        val title: String,
+    )
 
 }

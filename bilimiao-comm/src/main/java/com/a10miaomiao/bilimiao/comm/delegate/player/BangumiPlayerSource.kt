@@ -31,6 +31,8 @@ class BangumiPlayerSource(
     override val ownerName: String,
 ): BasePlayerSource() {
 
+    var episodes = emptyList<EpisodeInfo>()
+
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
         val res = proxyServer?.let {
             BiliApiService.playerAPI.getBangumiUrl(
@@ -159,4 +161,33 @@ class BangumiPlayerSource(
             e.printStackTrace()
         }
     }
+
+    override fun next(): BasePlayerSource? {
+        val index = episodes.indexOfFirst { it.cid == id }
+        val nextIndex = index + 1
+        if (nextIndex in episodes.indices) {
+            val nextEpisode = episodes[nextIndex]
+            val nextPlayerSource = BangumiPlayerSource(
+                sid = sid,
+                epid = nextEpisode.epid,
+                aid = nextEpisode.aid,
+                id = nextEpisode.cid,
+                title = nextEpisode.title,
+                coverUrl = nextEpisode.coverUrl,
+                ownerId = ownerId,
+                ownerName = ownerName,
+            )
+            nextPlayerSource.episodes = episodes
+            return nextPlayerSource
+        }
+        return null
+    }
+
+    data class EpisodeInfo(
+        val epid: String,
+        val aid: String,
+        val cid: String,
+        val title: String,
+        val coverUrl: String,
+    )
 }

@@ -103,6 +103,12 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
             ownerId = video.ownerId,
             ownerName = video.ownerName,
         )
+        playerSource.pages = pages.map {
+            VideoPlayerSource.PageInfo(
+                cid = it.cid,
+                title = it.part,
+            )
+        }
         basePlayerDelegate.openPlayer(playerSource)
 //        Navigation.findNavController(view).popBackStack()
     }

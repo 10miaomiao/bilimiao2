@@ -239,7 +239,7 @@ class BangumiDetailPageViewModel(
         fragment.requireActivity().startActivity(Intent.createChooser(shareIntent, "分享"))
     }
 
-    fun startPlayBangumi(item: EpisodeInfo) {
+    fun startPlayBangumi(episodes: List<EpisodeInfo>, item: EpisodeInfo) {
         val seasonDetail = detailInfo.value ?: return
         val playerSource = BangumiPlayerSource(
             sid = seasonDetail.season_id,
@@ -251,6 +251,13 @@ class BangumiDetailPageViewModel(
             ownerId = "",
             ownerName = seasonDetail.season_title
         )
+        playerSource.episodes = episodes.map {
+            BangumiPlayerSource.EpisodeInfo(
+                epid = it.id, aid = it.aid, cid = it.cid,
+                coverUrl = it.cover,
+                title = it.long_title.ifBlank { item.title },
+            )
+        }
         basePlayerDelegate.openPlayer(playerSource)
     }
 
@@ -520,7 +527,7 @@ fun BangumiDetailPage(
                     item = item,
                     playerState = playerState,
                     onClick = {
-                        viewModel.startPlayBangumi(item)
+                        viewModel.startPlayBangumi(episodes, item)
                     },
                     onCommentClick = {
                         viewModel.toCommentListPage(item)

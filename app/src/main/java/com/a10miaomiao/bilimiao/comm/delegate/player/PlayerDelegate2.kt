@@ -103,8 +103,8 @@ class PlayerDelegate2(
     var speed = 1f // 播放速度
     private var lastPosition = 0L
     private val playerCoroutineScope = PlayerCoroutineScope()
-    private var playerSource: BasePlayerSource? = null
-        set(value) {
+    var playerSource: BasePlayerSource? = null
+        private set(value) {
             field = value
             if (value != null) {
                 playerStore.setPlayerSource(value)
