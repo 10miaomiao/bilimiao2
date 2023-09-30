@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -278,16 +279,20 @@ class MainActivity
         val top = statusBarHelper.getStatusBarHeight()
         val bottom = displayMetrics.heightPixels - rectangle.bottom - rectangle.top
         val right = displayMetrics.widthPixels - rectangle.right
-        setWindowInsets(0, top, right, bottom)
+        setWindowInsets(0, top, right, bottom, null)
     }
     fun setWindowInsets (insets: WindowInsets) {
         val left = insets.systemWindowInsetLeft
         val top = insets.systemWindowInsetTop
         val right = insets.stableInsetRight
         val bottom = insets.systemWindowInsetBottom
-        setWindowInsets(left, top, right, bottom)
+        var displayCutout: DisplayCutout? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            displayCutout = insets.displayCutout
+        }
+        setWindowInsets(left, top, right, bottom, displayCutout)
     }
-    fun setWindowInsets (left: Int, top: Int, right: Int, bottom: Int) {
+    fun setWindowInsets (left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?) {
         val windowStore = store.windowStore
         windowStore.setWindowInsets(
             left, top, right, bottom,
@@ -337,7 +342,7 @@ class MainActivity
                 0, 0, 0, 0
             )
         }
-        basePlayerDelegate.setWindowInsets(left, top, right, bottom)
+        basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
