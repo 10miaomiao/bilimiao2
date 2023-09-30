@@ -111,6 +111,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // 倍数播放提示图标
     private val mSpeedTipsIV: ImageView by lazy { findViewById(R.id.speed_tips_icon) }
 
+    // 拓展按钮布局
+    private val mExpandBtnLayout: LinearLayout by lazy { findViewById(R.id.expand_btn_layout) }
+
+    // 拓展按钮文本
+    private val mExpandBtnTV: TextView by lazy { findViewById(R.id.expand_btn_text) }
 
     // 弹幕时间与播放器时间同步
     private val mDanmakuTime = object : DanmakuTimer() {
@@ -597,6 +602,22 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
      */
     private fun addDanmaku(danmaku: BaseDanmaku) {
         mDanmakuView.addDanmaku(danmaku)
+    }
+
+    /**
+     * 控制器拓展按钮
+     */
+    fun setExpandButtonText(text: String) {
+        mExpandBtnTV.text = text
+    }
+    fun showExpandButton() {
+        mExpandBtnLayout.visibility = View.VISIBLE
+    }
+    fun hideExpandButton() {
+        mExpandBtnLayout.visibility = View.GONE
+    }
+    fun setExpandButtonOnClickListener(l: OnClickListener) {
+        mExpandBtnLayout.setOnClickListener(l)
     }
 
     override fun showBrightnessDialog(percent: Float) {

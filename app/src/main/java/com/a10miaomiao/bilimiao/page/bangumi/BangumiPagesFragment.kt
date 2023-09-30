@@ -110,6 +110,20 @@ class BangumiPagesFragment : Fragment(), DIAware, MyPage {
             ownerId = "",
             ownerName = bangumi.title
         )
+        playerSource.episodes = episodes.map {
+            BangumiPlayerSource.EpisodeInfo(
+                epid = it.ep_id, aid = it.aid, cid = it.cid,
+                cover = it.cover,
+                index = it.index,
+                index_title = it.index_title,
+                badge = it.badge,
+                badge_info = BangumiPlayerSource.EpisodeBadgeInfo(
+                    text = it.badge_info.text,
+                    bg_color = it.badge_info.bg_color,
+                    bg_color_night = it.badge_info.bg_color_night,
+                ),
+            )
+        }
         basePlayerDelegate.openPlayer(playerSource)
     }
 

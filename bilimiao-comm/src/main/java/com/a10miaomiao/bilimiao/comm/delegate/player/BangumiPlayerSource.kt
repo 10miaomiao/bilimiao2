@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 
+import android.os.Parcelable
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
@@ -14,6 +15,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import kotlinx.android.parcel.Parcelize
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.danmaku.parser.BiliDanmukuParser
@@ -172,8 +174,8 @@ class BangumiPlayerSource(
                 epid = nextEpisode.epid,
                 aid = nextEpisode.aid,
                 id = nextEpisode.cid,
-                title = nextEpisode.title,
-                coverUrl = nextEpisode.coverUrl,
+                title = nextEpisode.index_title.ifBlank { nextEpisode.index },
+                coverUrl = nextEpisode.cover,
                 ownerId = ownerId,
                 ownerName = ownerName,
             )
@@ -187,7 +189,16 @@ class BangumiPlayerSource(
         val epid: String,
         val aid: String,
         val cid: String,
-        val title: String,
-        val coverUrl: String,
+        val cover: String,
+        val index: String,
+        val index_title: String,
+        val badge: String,
+        val badge_info: EpisodeBadgeInfo,
+    )
+
+    data class EpisodeBadgeInfo(
+        val bg_color: String,
+        val bg_color_night: String,
+        val text: String,
     )
 }

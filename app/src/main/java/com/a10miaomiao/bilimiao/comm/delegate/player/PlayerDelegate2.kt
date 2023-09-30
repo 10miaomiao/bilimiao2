@@ -515,6 +515,15 @@ class PlayerDelegate2(
 
         // 播放器是否默认全屏播放
         controller.checkIsPlayerDefaultFull()
+        if (source is VideoPlayerSource && source.pages.size > 1) {
+            views.videoPlayer.setExpandButtonText("分P")
+            views.videoPlayer.showExpandButton()
+        } else if (source is BangumiPlayerSource && source.episodes.size > 1) {
+            views.videoPlayer.setExpandButtonText("剧集")
+            views.videoPlayer.showExpandButton()
+        } else {
+            views.videoPlayer.hideExpandButton()
+        }
     }
 
     override fun closePlayer() {
@@ -524,6 +533,7 @@ class PlayerDelegate2(
         playerSource = null
 
         views.videoPlayer.release()
+        views.videoPlayer.hideExpandButton()
         lastPosition = 0L
 
         // 设置通知栏控制器
