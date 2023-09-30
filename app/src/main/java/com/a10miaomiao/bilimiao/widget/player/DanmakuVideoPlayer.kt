@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.widget.player
 
 import android.app.Dialog
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
@@ -133,6 +134,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             return lastInterval
         }
     }
+
+    private var mDisplayCutout: DisplayCutout? = null
 
     // 字幕源列表
     var subtitleSourceList = emptyList<SubtitleSourceInfo>()
@@ -293,13 +296,31 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 } else {
                     mDragBar.visibility = GONE
                 }
+                updateDanmakuMargin()
             }
             PlayerMode.FULL -> {
                 mFullModeBottomContainer.visibility = VISIBLE
                 mPlaySpeedName.visibility = VISIBLE
                 mBackButton.setImageResource(R.drawable.bili_player_back_button)
                 mDragBar.visibility = GONE
+                updateDanmakuMargin()
             }
+        }
+    }
+
+    /**
+     * 竖屏全屏时，防止挖孔屏挡住弹幕
+     */
+    private fun updateDanmakuMargin() {
+        val danmakuViewLP = mDanmakuView.layoutParams as MarginLayoutParams
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+            && mode == PlayerMode.FULL
+            && resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        ) {
+            danmakuViewLP.topMargin = mDisplayCutout?.safeInsetTop ?: 0
+        } else {
+            danmakuViewLP.topMargin = 0
         }
     }
 
@@ -659,7 +680,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mPlaySpeedValue.text = "x$speed"
     }
 
-    fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
+    fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?) {
         if (mode == PlayerMode.FULL) {
             mTopContainer.setPadding(left, top, right, 0)
             mBottomContainer.setPadding(left, 0, right, 0)
@@ -673,6 +694,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             mBottomContainer.setPadding(0, 0, 0, 0)
             mLockContainer.setPadding(0, 0, 0, 0)
         }
+        mDisplayCutout = displayCutout
+        updateDanmakuMargin()
     }
 
     fun hideController() {

@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.DisplayCutout
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.annotation.OptIn
@@ -546,8 +547,8 @@ class PlayerDelegate2(
         return views.videoPlayer.isInPlayingState
     }
 
-    override fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
-        views.videoPlayer.setWindowInsets(left, top, right, bottom)
+    override fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?) {
+        views.videoPlayer.setWindowInsets(left, top, right, bottom, displayCutout)
     }
 
     override fun updateDanmukuSetting() {
