@@ -265,6 +265,26 @@
             android:textSize="18sp" />
 
         <LinearLayout
+            android:id="@+id/expand_btn_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginHorizontal="10dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/expand_btn_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="选集"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/play_speed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -254,8 +254,15 @@ class BangumiDetailPageViewModel(
         playerSource.episodes = episodes.map {
             BangumiPlayerSource.EpisodeInfo(
                 epid = it.id, aid = it.aid, cid = it.cid,
-                coverUrl = it.cover,
-                title = it.long_title.ifBlank { item.title },
+                cover = it.cover,
+                index = it.title,
+                index_title = it.long_title,
+                badge = it.badge,
+                badge_info = BangumiPlayerSource.EpisodeBadgeInfo(
+                    text = it.badge_info.text,
+                    bg_color = it.badge_info.bg_color,
+                    bg_color_night = it.badge_info.bg_color_night,
+                ),
             )
         }
         basePlayerDelegate.openPlayer(playerSource)

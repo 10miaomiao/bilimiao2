@@ -16,7 +16,11 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
+import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
+import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
+import com.a10miaomiao.bilimiao.page.video.VideoPagesParam
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
@@ -74,6 +78,7 @@ class PlayerController(
         qualityView.setOnClickListener(that::showQualityPopupMenu)
         speedView.setOnClickListener(that::showSpeedPopupMenu)
         moreBtn.setOnClickListener(that::showMoreMenu)
+        setExpandButtonOnClickListener(that::showPagesOrEpisodes)
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)
         updatePlayerMode(activity.resources.configuration)
@@ -263,6 +268,54 @@ class PlayerController(
         popupMenu.inflate(R.menu.player_top_more)
         popupMenu.setOnMenuItemClickListener(this::moreMenuItemClick)
         popupMenu.show()
+    }
+
+    fun showPagesOrEpisodes(view: View) {
+        val playerSource = delegate.playerSource
+        val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
+        if (playerSource is VideoPlayerSource) {
+            val pages = playerSource.pages.map {
+                VideoPagesParam.Page(cid = it.cid, part = it.title)
+            }
+            val args = VideoPagesFragment.createArguments(
+                VideoPagesParam(
+                    aid = playerSource.aid,
+                    pic = playerSource.coverUrl,
+                    title = playerSource.title,
+                    ownerId = playerSource.ownerId,
+                    ownerName = playerSource.ownerName,
+                    pages= pages,
+                )
+            )
+            nav.navigate(VideoPagesFragment.actionId, args)
+        }
+        if (playerSource is BangumiPlayerSource) {
+            val episodes = playerSource.episodes.map {
+                BangumiPagesParam.Episode(
+                    aid = it.aid,
+                    cid = it.cid,
+                    cover = it.cover,
+                    ep_id = it.epid,
+                    index = it.index,
+                    index_title = it.index_title,
+                    badge = it.badge,
+                    badge_info = BangumiPagesParam.EpisodeBadgeInfo(
+                        bg_color = it.badge_info.bg_color,
+                        bg_color_night = it.badge_info.bg_color_night,
+                        text = it.badge_info.text,
+                    ),
+                )
+            }
+            val args = BangumiPagesFragment.createArguments(
+                BangumiPagesParam(
+                    sid = playerSource.sid,
+                    title = "",
+                    episodes= episodes,
+                )
+            )
+            nav.navigate(BangumiPagesFragment.actionId, args)
+        }
+
     }
 
     private fun moreMenuItemClick(item: MenuItem): Boolean {
