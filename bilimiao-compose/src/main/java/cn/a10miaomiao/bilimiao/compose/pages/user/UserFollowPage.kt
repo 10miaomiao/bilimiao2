@@ -227,7 +227,6 @@ fun UserFollowPage(
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(LocalView.current)
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
@@ -423,7 +422,7 @@ fun UserFollowPage(
                 }
             }
             item {
-                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
+                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
             }
         }
     }

@@ -5,10 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
@@ -18,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.comm.*
 import cn.a10miaomiao.bilimiao.compose.comm.LocalContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.LocalFragment
 import cn.a10miaomiao.bilimiao.compose.comm.LocalFragmentNavController
@@ -69,8 +74,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
         fragmentNav = findNavController()
         return ComposeView(requireContext()).apply {
             setContent {
-                // TODO: 嵌套滚动
-                rememberNestedScrollInteropConnection(container ?: LocalView.current)
+                val connection = rememberMyNestedScrollInteropConnection(container ?: LocalView.current)
                 composeNav = rememberNavController()
                 CompositionLocalProvider(
                     LocalContainerView provides container,
@@ -81,7 +85,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
                 ) {
                     withDI(di = di) {
                         BilimiaoTheme {
-                            MyNavHost(composeNav, url)
+                            MyNavHost(composeNav, connection, url)
                         }
                     }
                 }
@@ -113,13 +117,18 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
 @Composable
 fun MyNavHost(
     navController: NavHostController,
+    connection: NestedScrollConnection,
     startRoute: String,
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = PageRoute.start.url(),
-        builder = PageRoute::builder
-    )
+    Box(
+        modifier = Modifier.nestedScroll(connection),
+    ) {
+        NavHost(
+            navController = navController,
+            startDestination = PageRoute.start.url(),
+            builder = PageRoute::builder
+        )
+    }
     LaunchedEffect(startRoute) {
         navController.navigate(startRoute) {
             popUpTo(0) {
