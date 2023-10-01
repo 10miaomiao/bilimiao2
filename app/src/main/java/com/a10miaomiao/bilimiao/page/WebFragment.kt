@@ -24,6 +24,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.web.NestedScrollWebView
 import com.google.gson.Gson
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -225,10 +226,11 @@ class WebFragment : Fragment(), DIAware, MyPage {
             _leftPadding = contentInsets.left
             _rightPadding = contentInsets.right
 //            _topPadding = contentInsets.top
-            _bottomPadding = contentInsets.bottom + windowStore.bottomAppBarHeight
+            _bottomPadding = contentInsets.bottom
+//            _bottomPadding = contentInsets.bottom + windowStore.bottomAppBarHeight
 
             views {
-                +view<WebView>(ID_webView) {
+                +view<NestedScrollWebView>(ID_webView) {
                     backgroundColor = config.windowBackgroundColor
                 }..lParams(matchParent, matchParent)
 
