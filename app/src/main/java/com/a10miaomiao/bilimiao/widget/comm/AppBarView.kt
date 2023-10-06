@@ -10,10 +10,12 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.core.view.forEach
+import androidx.fragment.app.FragmentContainerView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarVerticalUi
@@ -83,6 +85,15 @@ class AppBarView @JvmOverloads constructor(
     init {
         backgroundColor = Color.WHITE
         updateProp()
+        addView(
+            inflate<FragmentContainerView>(R.layout.left_fragment) {
+                backgroundColor = config.windowBackgroundColor
+            },
+            lParams {
+                width = matchParent
+                height = matchParent
+            }
+        )
         setView(mUi.root)
     }
 
@@ -108,11 +119,19 @@ class AppBarView @JvmOverloads constructor(
     }
 
     fun setView(view: View) {
-        removeAllViews()
-        addView(view, lParams {
+        if (childCount > 1) {
+            removeViewAt(1)
+        }
+        addView(view, 1, lParams {
             width = matchParent
             height = matchParent
         })
+    }
+
+    fun setAalpha(alpha: Float) {
+        if (childCount > 1) {
+            getChildAt(1).alpha = alpha
+        }
     }
 
     fun cleanProp() {

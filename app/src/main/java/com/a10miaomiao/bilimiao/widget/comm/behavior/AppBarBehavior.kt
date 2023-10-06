@@ -5,14 +5,18 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.TimeInterpolator
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import androidx.annotation.Dimension
+import androidx.collection.SimpleArrayMap
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
@@ -37,9 +41,10 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
     var appBarMenuHeight = 0
     var showPlayer = false
 
+
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        appBarHeight = context.dip(70)
-        appBarWidth = context.dip(120)
+        appBarHeight = context.config.appBarHeight
+        appBarWidth = context.config.appBarMenuWidth
         appBarMenuHeight = context.config.appBarMenuHeight
         init()
     }
@@ -50,37 +55,56 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
 
     var parentRef: ScaffoldView? = null
     var viewRef: View? = null
+    var behaviorDelegate: AppBarBehaviorDelegate? = null
 
     override fun onLayoutChild(parent: CoordinatorLayout, child: View, layoutDirection: Int): Boolean {
-        val height = appBarHeight + child.paddingBottom
-        val width = appBarWidth + child.paddingLeft
+        this.viewRef = child
         if (parent is ScaffoldView) {
-            val orientation = parent.orientation
+            this.parentRef = parent
+            if (behaviorDelegate == null && child is AppBarView) {
+                behaviorDelegate = AppBarBehaviorDelegate(parent, child)
+            }
             if (parent.fullScreenPlayer) {
                 child.layout(0, 0, 0, 0)
-            } else if (orientation == ScaffoldView.HORIZONTAL) {
-                currentState = STATE_SCROLLED_UP
-                child.translationY = 0f
-                child.layout(0, 0, width, parent.measuredHeight)
-                child.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-                child.layoutParams.width = width
-            } else if (orientation == ScaffoldView.VERTICAL) {
-                child.layout(0, parent.measuredHeight - height, parent.measuredWidth, parent.measuredHeight)
-                child.layoutParams.height = height
-                child.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            } else {
+                if (currentState == STATE_SCROLLED_DOWN
+                    && parent.orientation == ScaffoldView.HORIZONTAL) {
+                    currentState = STATE_SCROLLED_UP
+                    child.translationY = 0f
+                }
+                behaviorDelegate?.onLayoutChild()
             }
-            if (parent.appBarHeight != height
-                || parent.appBarWidth != width) {
-                parent.appBarHeight = height
-                parent.appBarWidth = width
-                parent.content?.requestLayout()
-            }
-            this.parentRef = parent
         } else {
+            val height = appBarHeight + child.paddingBottom
+            val width = appBarWidth + child.paddingLeft
             child.layout(0, parent.measuredHeight - height, parent.measuredWidth, parent.measuredHeight)
         }
-        this.viewRef = child
         return true
+    }
+
+    override fun onTouchEvent(parent: CoordinatorLayout, child: View, ev: MotionEvent): Boolean {
+        return behaviorDelegate?.onTouchEvent(ev) ?: true
+    }
+
+    override fun onInterceptTouchEvent(
+        parent: CoordinatorLayout,
+        child: View,
+        ev: MotionEvent
+    ): Boolean {
+        return behaviorDelegate?.onInterceptTouchEvent(ev) ?: false
+    }
+
+
+    fun openDrawer() {
+        behaviorDelegate?.openDrawer()
+    }
+
+    fun closeDrawer() {
+        behaviorDelegate?.closeDrawer()
+    }
+
+    fun isDrawerOpen(): Boolean {
+        return behaviorDelegate?.isDrawerOpen() ?: false
     }
 
     /**
@@ -104,7 +128,7 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
         nestedScrollAxes: Int,
         type: Int
     ): Boolean {
-        return nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
+        return viewRef?.top != 0 && nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
     }
 
     override fun onNestedScroll(

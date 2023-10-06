@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import splitties.dimensions.dip
+import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.imageDrawable
 
@@ -96,7 +97,7 @@ class AppBarVerticalUi(
 //    }
 
     override val root = frameLayout {
-        layoutParams = ViewGroup.LayoutParams(matchParent, matchParent)
+        backgroundColor = config.blockBackgroundColor
 
         addView(mTitle, lParams {
             width = matchParent

@@ -54,8 +54,7 @@ class AppBarHorizontalUi(
         gravity = Gravity.CENTER_HORIZONTAL
     }
 
-    override val root = verticalLayout {
-
+    val mNavigationLayout = verticalLayout {
         addView(mNavigationIconLayout, lParams {
             width = matchParent
             height = wrapContent
@@ -68,6 +67,16 @@ class AppBarHorizontalUi(
             width = matchParent
             height = matchParent
             weight = 1f
+        })
+    }
+
+    override val root = frameLayout {
+        backgroundColor = config.blockBackgroundColor
+
+        addView(mNavigationLayout, lParams {
+            width = config.appBarMenuWidth
+            height = matchParent
+            gravity = Gravity.RIGHT
         })
     }
 

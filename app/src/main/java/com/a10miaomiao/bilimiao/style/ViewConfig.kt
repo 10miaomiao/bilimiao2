@@ -51,6 +51,7 @@ class ViewConfig(val context: Context) {
     val appBarHeight get() = context.dip(70)
     val appBarTitleHeight get() = context.dip(20)
     val appBarMenuHeight get() = context.dip(50)
+    val appBarMenuWidth = context.dip(120)
 }
 
 inline val Context.config get() = ViewConfig(this)
