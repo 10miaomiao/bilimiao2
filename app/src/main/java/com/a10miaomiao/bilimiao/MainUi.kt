@@ -25,12 +25,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
-import splitties.views.dsl.constraintlayout.bottomOfParent
-import splitties.views.dsl.constraintlayout.constraintLayout
-import splitties.views.dsl.constraintlayout.lParams
-import splitties.views.dsl.constraintlayout.parentId
 import splitties.views.dsl.core.*
-import splitties.views.dsl.recyclerview.recyclerView
 
 
 //inline infix fun View.
@@ -38,17 +33,21 @@ import splitties.views.dsl.recyclerview.recyclerView
 class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
 
-    val leftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
+//    val leftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
+//        backgroundColor = config.windowBackgroundColor
+//    }
+
+    val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
         backgroundColor = config.windowBackgroundColor
     }
 
-    val mContainerView = view<DrawerLayout> {
-        addView(inflate(R.layout.container_fragment))
-        addView(leftContainerView, DrawerLayout.LayoutParams(matchParent, matchParent).apply {
-            gravity = Gravity.LEFT
-        })
-        backgroundColor = config.windowBackgroundColor
-    }
+//    val mContainerView = view<DrawerLayout> {
+//        addView(inflate(R.layout.container_fragment))
+//        addView(leftContainerView, DrawerLayout.LayoutParams(matchParent, matchParent).apply {
+//            gravity = Gravity.LEFT
+//        })
+//        backgroundColor = config.windowBackgroundColor
+//    }
 
     val mBottomSheetView = inflate<FragmentContainerView>(R.layout.bottom_sheet_fragment) {
         backgroundColor = config.windowBackgroundColor
@@ -140,7 +139,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         addView(mAppBar, lParams {
             behavior = AppBarBehavior(ctx, null)
             width = matchParent
-            height = wrapContent
+            height = matchParent
         })
         addView(bottomSheetMaskView, lParams {
             height = matchParent
@@ -159,7 +158,11 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             behavior = b
             this@MainUi.bottomSheetBehavior = b
         })
-
+//        addView(leftContainerView, lParams {
+//            behavior = DrawerBehavior()
+//            width = matchParent
+//            height = matchParent
+//        })
     }
 
     fun setNavigationTitle(

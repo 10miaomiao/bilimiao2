@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.navigation.NavController
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
+import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 
@@ -16,10 +17,10 @@ fun NavController.navigateToCompose(url: String) = navigate(
 
 fun ScaffoldView.openSearchDrawer() {
     openDrawer()
-    (drawerFragment as? SearchStartFragment)?.showSoftInput()
+    (drawerFragment as? StartFragment)?.showSoftInput()
 }
 
 fun ScaffoldView.closeSearchDrawer() {
-    (drawerFragment as? SearchStartFragment)?.hideSoftInput()
+    (drawerFragment as? StartFragment)?.hideSoftInput()
     closeDrawer()
 }
