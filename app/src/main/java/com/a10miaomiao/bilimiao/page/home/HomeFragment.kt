@@ -8,15 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
-import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -26,14 +23,11 @@ import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.MiaoEncryptDecrypt
-import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.setting.DensitySettingActivity
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
-import com.a10miaomiao.bilimiao.page.video.comment.ReplyDetailParam
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
@@ -47,7 +41,6 @@ import splitties.dimensions.dip
 import splitties.views.*
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
-import java.nio.charset.Charset
 
 class HomeFragment : Fragment(), DIAware {
 
@@ -261,7 +254,19 @@ class HomeFragment : Fragment(), DIAware {
                 // 背景图片
                 +imageView {
                     scaleType = ImageView.ScaleType.CENTER_CROP
-                    imageResource = com.a10miaomiao.bilimiao.R.drawable.home_header_img
+//                    imageDrawable = resources.getDrawable(R.drawable.home_header_img)
+                    miaoEffect(Unit) {
+                        Glide.with(context)
+                            .load(R.drawable.top_bg1)
+                            .into(this)
+                    }
+//                    imageResource = R.drawable.top_bg1
+                }..lParams(matchParent, dip(120))
+
+                // 渐变白
+                +imageView {
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+                    imageResource = R.drawable.home_header_gradient
                 }..lParams(matchParent, dip(120))
 
                 val userInfo = viewModel.userStore.state.info
@@ -382,6 +387,8 @@ class HomeFragment : Fragment(), DIAware {
 //                +button {
 //                    text = "测试"
 //                    setOnClickListener {
+//                        val intent = Intent(requireContext(), DensitySettingActivity::class.java)
+//                        requireContext().startActivity(intent)
 //                        val nav = it.findNavController()
 //                        nav.navigateToCompose(PageRoute.Auth.qr_login.url())
 //                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
@@ -393,12 +400,19 @@ class HomeFragment : Fragment(), DIAware {
 //
 //                        【不當哥哥了！（僅限港澳台地區）】https://www.bilibili.com/bangumi/play/ep719017?vd_source=2bcb4ee461719ac7def0c91f553096a3
 //                         https://www.bilibili.com/bangumi/play/ss44493
-//                        nav.navigate(MainNavGraph.action.global_to_bangumiDetail, bundleOf(
+//                        nav.navigate(BangumiDetailFragment.actionId, bundleOf(
 //                            MainNavArgs.id to "44493"
+//                        ))
+//                        nav.navigateToCompose(PageRoute.test.url())
+//                        nav.navigateToCompose(PageRoute.Bangumi.detail.url(
+//                            mapOf(
+//                                "id" to "44493",
+//                                "epid" to "",
+//                            )
 //                        ))
 //                    }
 //                }
-
+//
             }
 
         }.wrapInLimitedFrameLayout {

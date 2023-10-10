@@ -198,12 +198,12 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "常规"
         }
 
-        switch("is_bili_player") {
-            title = "使用外部播放器"
-            summary = "奇迹和魔法并不存在"
-            defaultValue = false
-            enabled = false
-        }
+//        switch("is_bili_player") {
+//            title = "使用外部播放器"
+//            summary = "奇迹和魔法并不存在"
+//            defaultValue = false
+//            enabled = false
+//        }
 
         switch("is_best_region") {
             title = "使用旧版分区"
@@ -211,11 +211,11 @@ class SettingFragment : Fragment(), DIAware, MyPage
             defaultValue = false
         }
 
-        singleChoice("fragment_animator", listOf(SelectionItem("key", "title"))) {
-            title = "请选择动画效果"
-            summary = "每段四季，每轮星移，时光长旅，漫漫行迹..."
-            enabled = false
-        }
+//        singleChoice("fragment_animator", listOf(SelectionItem("key", "title"))) {
+//            title = "请选择动画效果"
+//            summary = "每段四季，每轮星移，时光长旅，漫漫行迹..."
+//            enabled = false
+//        }
 
         pref("theme") {
             title = "切换主题"
@@ -223,6 +223,16 @@ class SettingFragment : Fragment(), DIAware, MyPage
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                 nav.navigate(ThemeSettingFragment.actionId)
+                true
+            }
+        }
+
+        pref("dpi") {
+            title = "应用内DPI设置"
+            summary = "当屏幕过大或过小时，可以尝试调整一下"
+            onClick {
+                val intent = Intent(requireContext(), DensitySettingActivity::class.java)
+                requireContext().startActivity(intent)
                 true
             }
         }
@@ -272,6 +282,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             summary = "已经没有什么好害怕的了"
             defaultValue = true
         }
+
 
         pref("glide_image_cache") {
             title = "图片缓存"

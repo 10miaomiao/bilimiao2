@@ -64,6 +64,27 @@
         <item name="navigationViewStyle">@style/Widget.Bilimaio.Material3.NavigationView</item>
     </style>
 
+    <style name="Theme.ShowActionBar.Bilimiao" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="themeName">@string/app_name</item>
+        <item name="isLightTheme">@bool/light_theme</item>
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/theme_color_primary</item>
+        <item name="colorPrimaryVariant">@color/theme_color_primary_dark</item>
+        <item name="colorOnPrimary">@color/theme_color_primary_trans</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/theme_color_secondary</item>
+        <item name="colorSecondaryVariant">@color/theme_color_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_secondary_container_color</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <item name="blockBackground">@color/blockBackgroundColor</item>
+        <item name="foregroundColor">@color/foregroundColor</item>
+        <item name="lineColor">@color/lineColor</item>
+        <item name="defaultBackgroundColor">@color/windowBackgroundColor</item>
+
+        <item name="navigationViewStyle">@style/Widget.Bilimaio.Material3.NavigationView</item>
+    </style>
+
 
     <!--透明activity-->
     <style name="Theme.TranslucentTheme" parent="Theme.Bilimiao">
@@ -79,6 +100,11 @@
         <!-- color used by navigation icon and overflow icon -->
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorOnSurface">@color/white</item>
+    </style>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Bilimiao" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
 
