@@ -11,23 +11,20 @@ import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
-import androidx.annotation.CallSuper
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
@@ -41,20 +38,16 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
-import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
-import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.store.*
 import com.a10miaomiao.bilimiao.widget.comm.*
-import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
+import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -90,6 +83,7 @@ class MainActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        getCustomDensityDpi()
         themeDelegate.onCreate(savedInstanceState)
         ui = MainUi(this)
         setContentView(ui.root)
@@ -97,6 +91,7 @@ class MainActivity
         bottomSheetDelegate.onCreate(savedInstanceState)
         store.onCreate(savedInstanceState)
         ui.root.showPlayer = basePlayerDelegate.isPlaying()
+        ui.root.onDrawerStateChanged = ::onDrawerStateChanged
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ui.root.rootWindowInsets?.let {
                 setWindowInsets(it)
@@ -127,6 +122,11 @@ class MainActivity
         (supportFragmentManager.findFragmentByTag(getString(R.string.tag_left_fragment)) as? StartFragment)?.let {
             leftFragment = it
             ui.root.drawerFragment = it
+//            if (leftFragment.isVisible) {
+//                supportFragmentManager.beginTransaction()
+//                    .hide(leftFragment)
+//                    .commit()
+//            }
         }
 
         ui.mAppBar.onBackClick = this.onBackClick
@@ -209,7 +209,6 @@ class MainActivity
             title = config.title
             menus = config.menus
         }
-        ui.setNavigationTitle(config.title)
         ui.root.slideUpBottomAppBar()
         leftFragment.setConfig(config.search)
     }
@@ -244,6 +243,23 @@ class MainActivity
                 }
             }
         }
+    }
+
+    fun onDrawerStateChanged(state: Int) {
+        if (state == AppBarBehaviorDelegate.STATE_COLLAPSED) {
+            leftFragment.hideSoftInput()
+            ui.mAppBar.clearFocus()
+        }
+        // 太麻烦
+//        supportFragmentManager.beginTransaction().also {
+//            if (state == AppBarBehaviorDelegate.STATE_COLLAPSED
+//                && leftFragment.isVisible) {
+//                leftFragment.hideSoftInput()
+//                it.hide(leftFragment)
+//            } else if (leftFragment.isHidden) {
+//                it.show(leftFragment)
+//            }
+//        }.commit()
     }
 
     fun searchSelfPage(keyword: String) {
@@ -289,6 +305,7 @@ class MainActivity
                 behavior.setWindowInsets(left, top, right, bottom)
             }
         }
+        ui.mAppBar.setWindowInsets(left, top, right, bottom)
         ui.mBottomSheetLayout.setPadding(left, top, right, 0)
         val showPlayer = ui.root.showPlayer
         val fullScreenPlayer = ui.root.fullScreenPlayer
@@ -303,23 +320,14 @@ class MainActivity
                 )
             }
             windowStore.setBottomAppBarHeight(config.appBarMenuHeight)
-            ui.mAppBar.setPadding(
-                left, 0, right, bottom
-            )
             ui.mPlayerLayout.setPadding(
                 0, if (fullScreenPlayer) 0 else top, 0, 0
             )
         } else {
-//            windowStore.setContentInsets(
-//                0, top, if (showPlayer) 0 else right, bottom,
-//            )
             windowStore.setContentInsets(
                 left, top, right, bottom,
             )
             windowStore.setBottomAppBarHeight(0)
-            ui.mAppBar.setPadding(
-                left, top, 0, bottom
-            )
             ui.mPlayerLayout.setPadding(
                 0, 0, 0, 0
             )
@@ -448,6 +456,15 @@ class MainActivity
             setWindowInsetsAndroidL()
         }
     }
+
+    private fun getCustomDensityDpi() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val dpi = prefs.getInt("app_dpi", 0)
+        if (dpi != 0) {
+            Bilimiao.app.setCustomDensityDpi(this, dpi)
+        }
+    }
+
 
     override fun onBackPressed() {
         if (ui.root.isDrawerOpen()) {

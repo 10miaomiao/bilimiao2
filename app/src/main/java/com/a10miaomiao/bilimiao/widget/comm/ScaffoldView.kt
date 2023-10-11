@@ -27,6 +27,7 @@ class ScaffoldView @JvmOverloads constructor(
     }
 
     var onPlayerChanged: ((show: Boolean) -> Unit)? = null
+    var onDrawerStateChanged: ((state: Int) -> Unit)? = null
 
     var orientation = VERTICAL
         set(value) {
@@ -114,6 +115,10 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun closeDrawer() {
         appBarBehavior?.closeDrawer()
+    }
+
+    fun changedDrawerState(state: Int) {
+        onDrawerStateChanged?.invoke(state)
     }
 
     fun slideUpBottomAppBar() {

@@ -34,7 +34,6 @@ class MainViewModel(
     private var curHomeSettingVersion = -1
 
     fun readNavList(): List<KClass<out Fragment>> {
-        DebugMiao.log(curHomeSettingVersion, HomeSettingFragment.homeSettingVersion)
         if (curHomeSettingVersion == HomeSettingFragment.homeSettingVersion) {
             return navList
         }

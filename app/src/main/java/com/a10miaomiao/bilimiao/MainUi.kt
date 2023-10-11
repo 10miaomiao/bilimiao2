@@ -136,6 +136,13 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             width = matchParent
             height = matchParent
         })
+
+        addView(mPlayerLayout, lParams {
+            behavior = PlayerBehavior(ctx, null)
+            width = wrapContent
+            height = wrapContent
+        })
+
         addView(mAppBar, lParams {
             behavior = AppBarBehavior(ctx, null)
             width = matchParent
@@ -145,11 +152,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             height = matchParent
             width = matchParent
         })
-        addView(mPlayerLayout, lParams {
-            behavior = PlayerBehavior(ctx, null)
-            width = wrapContent
-            height = wrapContent
-        })
+
         addView(mBottomSheetLayout, lParams {
             height = matchParent
             width = matchParent
@@ -158,19 +161,6 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             behavior = b
             this@MainUi.bottomSheetBehavior = b
         })
-//        addView(leftContainerView, lParams {
-//            behavior = DrawerBehavior()
-//            width = matchParent
-//            height = matchParent
-//        })
     }
 
-    fun setNavigationTitle(
-        title: String,
-    ) {
-//        leftNavigationAdapter.setData(0, NavigationListAdapter.NavigationItem(
-//            title = "当前页面",
-//            subtitle = title.replace("\n", " "),
-//        ))
-    }
 }

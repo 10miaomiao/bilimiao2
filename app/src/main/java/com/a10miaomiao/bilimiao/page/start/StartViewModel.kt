@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.db.SearchHistoryDB
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.closeSearchDrawer
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -35,6 +36,7 @@ class StartViewModel(
     var historyList = mutableListOf<String>()
     var suggestList = mutableListOf<SuggestInfo>()
 
+    var config: SearchConfigInfo? = null
     var searchMode = 0 // 0为全站搜索，1为页面自身搜索
 
     private val searchHistoryDB = SearchHistoryDB(activity, SearchHistoryDB.DB_NAME, null, 1)
