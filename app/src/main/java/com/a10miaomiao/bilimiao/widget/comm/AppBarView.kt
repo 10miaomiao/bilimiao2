@@ -82,13 +82,14 @@ class AppBarView @JvmOverloads constructor(
 
     private var mUi = createUi()
 
+    private val startFragmentContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
+        backgroundColor = config.blockBackgroundColor
+    }
+
     init {
-        backgroundColor = Color.WHITE
         updateProp()
         addView(
-            inflate<FragmentContainerView>(R.layout.left_fragment) {
-                backgroundColor = config.windowBackgroundColor
-            },
+            startFragmentContainerView,
             lParams {
                 width = matchParent
                 height = matchParent
@@ -96,7 +97,6 @@ class AppBarView @JvmOverloads constructor(
         )
         setView(mUi.root)
     }
-
 
     fun createUi (): AppBarUi {
         return if (orientation == ScaffoldView.HORIZONTAL) {
@@ -131,6 +131,20 @@ class AppBarView @JvmOverloads constructor(
     fun setAalpha(alpha: Float) {
         if (childCount > 1) {
             getChildAt(1).alpha = alpha
+        }
+    }
+
+    fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
+        if (orientation == ScaffoldView.VERTICAL) {
+            startFragmentContainerView.setPadding(0, top, 0, 0)
+            setPadding(
+                left, 0, right, bottom
+            )
+        } else {
+            startFragmentContainerView.setPadding(0, 0, right, 0)
+            setPadding(
+                left, top, 0, bottom
+            )
         }
     }
 

@@ -112,6 +112,7 @@ class AppBarBehaviorDelegate(
             val top = appbarView.top
             if (
                 ev.action == MotionEvent.ACTION_DOWN
+                && appbarView.translationY == 0f
                 && ev.y > top
             ) {
                 val initialY = ev.y
@@ -132,6 +133,11 @@ class AppBarBehaviorDelegate(
                 && abs(initialY - ev.y) > dragger.touchSlop
             ) {
                 dragger.captureChildView(appbarView, ev.getPointerId(ev.actionIndex))
+            } else if (
+                ev.action == MotionEvent.ACTION_CANCEL
+                || ev.action == MotionEvent.ACTION_UP
+            ) {
+                this.initialY = 0f
             }
         } else {
             val right = appbarView.right
@@ -152,6 +158,11 @@ class AppBarBehaviorDelegate(
                 && abs(initialX - ev.x) > dragger.touchSlop
             ) {
                 dragger.captureChildView(appbarView, ev.getPointerId(ev.actionIndex))
+            } else if (
+                ev.action == MotionEvent.ACTION_CANCEL
+                || ev.action == MotionEvent.ACTION_UP
+            ) {
+                this.initialX = 0f
             }
         }
 
@@ -171,6 +182,7 @@ class AppBarBehaviorDelegate(
         } else {
             state
         }
+        parent.changedDrawerState(dragState)
         if (dragState == STATE_COLLAPSED) {
             appbarView.setAalpha(1f)
         } else if (dragState == STATE_EXPANDED) {

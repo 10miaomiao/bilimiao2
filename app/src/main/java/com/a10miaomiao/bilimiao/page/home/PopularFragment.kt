@@ -141,8 +141,8 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
         val contentInsets = windowStore.getContentInsets(parentView)
 
         verticalLayout {
-            _leftPadding = contentInsets.left
-            _rightPadding = contentInsets.right
+//            _leftPadding = contentInsets.left
+//            _rightPadding = contentInsets.right
 //            _topPadding = config.pagePadding
 //            _bottomPadding = contentInsets.bottom
 

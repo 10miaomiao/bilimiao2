@@ -149,6 +149,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     }
 
     fun setConfig(config: SearchConfigInfo?) {
+        viewModel.config = config
         if (config == null) {
             mEditText.setText("")
             mAllRadioButton.isChecked = true
@@ -180,6 +181,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     override fun onResume() {
         super.onResume()
+        setConfig(viewModel.config)
 //        supportHelper.showSoftInput(mEditText)
     }
 
@@ -346,17 +348,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
-        val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
-        val contentInsets = windowStore.getContentInsets(parentView)
-
         verticalLayout {
-            _leftPadding = contentInsets.left
-            _rightPadding = contentInsets.right
-//            _bottomPadding = contentInsets.bottom
-
             views {
                 +flexboxLayout {
-                    _topPadding = contentInsets.top
                     horizontalPadding = config.pagePadding
                     flexDirection = FlexDirection.ROW
                     flexWrap = FlexWrap.WRAP
@@ -376,6 +370,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                 +secrchBoxView()..lParams(width = matchParent)
 
                 +verticalLayout {
+
                     views {
                         +recyclerView {
                             isNestedScrollingEnabled = false
@@ -440,6 +435,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                         }
                     }
                 }.wrapInNestedScrollView {
+                    backgroundColor = config.windowBackgroundColor
                 }..lParams(matchParent, matchParent) {
                     weight = 1f
                 }
