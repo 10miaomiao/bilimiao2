@@ -79,6 +79,7 @@ fun BangumiEpisodeItem(
                 maxLines = 2,
                 modifier = Modifier.weight(1f),
                 overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -96,9 +97,13 @@ fun BangumiEpisodeItem(
                 }
                 Box() {
                     IconButton(
-                        onClick = { expandedMoreMenu = true }
+                        onClick = { expandedMoreMenu = true },
                     ) {
-                        Icon(Icons.Filled.MoreVert, null)
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            null,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                        )
                     }
                     DropdownMenu(
                         expanded = expandedMoreMenu,
