@@ -68,7 +68,7 @@ class TimeSettingPageViewMode(
         val dateModel = timeSettingStore.state.timeFrom.copy()
         dateModel.date = 1 // 当月第一天
         timeFrom.set(dateModel)
-        dateModel.date = getMonthDayNum(dateModel.year, dateModel.year) // 当月最后一天
+        dateModel.date = getMonthDayNum(dateModel.year, dateModel.month) // 当月最后一天
         timeTo.set(dateModel)
     })
 
