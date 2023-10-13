@@ -49,16 +49,17 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.layout.SideSlideLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.chad.library.adapter.base.listener.OnItemLongClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kongzue.dialogx.dialogs.PopTip
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
-import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.core.editText
@@ -72,7 +73,6 @@ import splitties.views.dsl.core.radioButton
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.verticalLayout
 import splitties.views.dsl.core.verticalMargin
-import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
@@ -252,12 +252,29 @@ class StartFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleHistoryTagItemLongClick = OnItemLongClickListener { adapter, view, position ->
+        val item = adapter.data[position]
+        if (item is String) {
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setTitle("确认删除，喵？")
+                setMessage("将删除搜索历史关键字“${item}”")
+                setNegativeButton("确定") { dialog, which ->
+                    viewModel.deleteSearchHistory(item)
+                    PopTip.show("已删除”${item}“")
+                }
+                setPositiveButton("取消", null)
+            }.show()
+        }
+        true
+    }
+
     private val handleDeleteHistoryClick = View.OnClickListener {
         MaterialAlertDialogBuilder(requireContext()).apply {
-            setTitle("确定清空搜索历史，喵？")
+            setTitle("确认清空，喵？")
+            setMessage("将清空搜索历史关键字")
             setNegativeButton("确定清空") { dialog, which ->
                 viewModel.deleteAllSearchHistory()
-                toast("已清空了喵")
+                PopTip.show("已清空了喵")
             }
             setPositiveButton("取消", null)
         }.show()
@@ -428,6 +445,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                                 itemUi = itemHistoryTagUi,
                             ) {
                                 setOnItemClickListener(handleHistoryTagItemClick)
+                                setOnItemLongClickListener(handleHistoryTagItemLongClick)
                             }
                         }..lParams(matchParent, wrapContent) {
                             horizontalMargin = config.pagePadding
