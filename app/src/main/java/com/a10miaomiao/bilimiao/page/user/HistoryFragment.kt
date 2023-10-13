@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.interfaces.v1.HistoryOuterClass
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -28,6 +29,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -43,6 +45,8 @@ import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.chad.library.adapter.base.listener.OnItemLongClickListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -154,15 +158,31 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
                     .navigate(VideoInfoFragment.actionId, args)
             }
             "pgc" -> {
-                val args = bundleOf(
-                    MainNavArgs.id to item.kid.toString()
+                val pageUrl = PageRoute.Bangumi.detail.url(
+                    mapOf(
+                        "id" to item.kid.toString(),
+                        "epid" to ""
+                    )
                 )
-//                nav.navigate(MainNavGraph.action.history_to_bangumiDetail, args)
+                nav.navigateToCompose(pageUrl)
             }
             else -> {
                 toast("未知跳转类型")
             }
         }
+    }
+
+    private val handleItemLongClick = OnItemLongClickListener { adapter, view, position ->
+        val item = viewModel.list.data[position]
+        MaterialAlertDialogBuilder(requireContext()).apply {
+            setTitle("确认删除，喵？")
+            setMessage("将历史记录“${item.title}”")
+            setNegativeButton("确定") { dialog, which ->
+                viewModel.deleteHistory(position)
+            }
+            setPositiveButton("取消", null)
+        }.show()
+        true
     }
 
     val itemUi = miaoBindingItemUi<HistoryOuterClass.CursorItem> { item, index ->
@@ -217,6 +237,7 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
             ) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 setOnItemClickListener(handleItemClick)
+                setOnItemLongClickListener(handleItemLongClick)
                 loadMoreModule.setOnLoadMoreListener {
                     viewModel.loadMode()
                 }
