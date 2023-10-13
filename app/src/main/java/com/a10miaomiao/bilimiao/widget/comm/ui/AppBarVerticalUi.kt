@@ -7,17 +7,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
 import splitties.dimensions.dip
+import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
+import splitties.views.gravityBottom
 import splitties.views.imageDrawable
 
 class AppBarVerticalUi(
@@ -64,7 +68,7 @@ class AppBarVerticalUi(
     }
 
     val mNavigationMemuLayout = horizontalLayout {
-        gravity = Gravity.CENTER_HORIZONTAL
+//        gravity = Gravity.CENTER_HORIZONTAL
         val layoutTransition = LayoutTransition()
 
         //View出現的動畫
@@ -96,6 +100,7 @@ class AppBarVerticalUi(
 //        layoutManager = lm
 //    }
 
+    @OptIn(InternalSplittiesApi::class)
     override val root = frameLayout {
         backgroundColor = config.blockBackgroundColor
 
@@ -103,11 +108,23 @@ class AppBarVerticalUi(
             width = matchParent
             height = mTitleHeight
         })
-        addView(mNavigationMemuLayout, lParams {
-            topMargin = mTitleHeight
-            width = matchParent
-            height = mMenuHeight
-        })
+        addView(
+            view<HorizontalScrollView> {
+                scrollBarSize = 0
+                addView(
+                    mNavigationMemuLayout, lParams {
+                        topMargin = mTitleHeight
+                        width = matchParent
+                        height = mMenuHeight
+                    }
+                )
+            },
+            lParams {
+                gravity = Gravity.CENTER_HORIZONTAL
+                width = wrapContent
+                height = wrapContent
+            }
+        )
     }
 
 
