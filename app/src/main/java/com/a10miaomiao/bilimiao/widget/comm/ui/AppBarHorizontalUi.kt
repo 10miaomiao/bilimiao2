@@ -73,7 +73,9 @@ class AppBarHorizontalUi(
     override val root = frameLayout {
         backgroundColor = config.blockBackgroundColor
 
-        addView(mNavigationLayout, lParams {
+        addView(mNavigationLayout.wrapInScrollView {
+            scrollBarSize = 0
+        }, lParams {
             width = config.appBarMenuWidth
             height = matchParent
             gravity = Gravity.RIGHT
