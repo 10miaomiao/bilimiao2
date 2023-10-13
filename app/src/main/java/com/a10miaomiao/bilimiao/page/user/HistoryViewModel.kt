@@ -16,8 +16,10 @@ import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -31,7 +33,7 @@ class HistoryViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-//    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text) }
+    //    val keyword by lazy { fragment.requireArguments().getString(MainNavArgs.text) }
     var keyword = ""
 
     var triggered = false
@@ -48,7 +50,7 @@ class HistoryViewModel(
 
     private fun loadData(
         maxId: Long = _maxId
-    ) = viewModelScope.launch(Dispatchers.IO){
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             ui.setState {
                 list.loading = true
@@ -87,7 +89,7 @@ class HistoryViewModel(
         val res = HistoryGrpc.getCursorV2Method()
             .request(req)
             .awaitCall()
-        if (maxId == 0L){
+        if (maxId == 0L) {
             list.data = mutableListOf()
         }
         ui.setState {
@@ -112,7 +114,7 @@ class HistoryViewModel(
         val res = HistoryGrpc.getSearchMethod()
             .request(req)
             .awaitCall()
-        if (pageNum == 1L){
+        if (pageNum == 1L) {
             list.data = mutableListOf()
         }
         ui.setState {
@@ -120,6 +122,32 @@ class HistoryViewModel(
             _maxId = res.page.pn
             if (!res.hasMore) {
                 list.finished = true
+            }
+        }
+    }
+
+    fun deleteHistory(position: Int) = viewModelScope.launch(Dispatchers.IO) {
+        val item = list.data[position]
+        try {
+            val req = HistoryOuterClass.DeleteReq.newBuilder().apply {
+                hisInfo = HistoryOuterClass.HisInfo.newBuilder().apply {
+                    business = item.business
+                    kid = item.kid
+                }.build()
+            }.build()
+            HistoryGrpc.getDeleteMethod()
+                .request(req)
+                .awaitCall()
+            withContext(Dispatchers.Main) {
+                ui.setState {
+                    list.data.removeAt(position)
+                }
+                PopTip.show("删除成功")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                PopTip.show("删除失败:$e")
             }
         }
     }
