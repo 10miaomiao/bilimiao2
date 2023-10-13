@@ -11,6 +11,7 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat.offsetLeftAndRight
 import androidx.core.view.ViewCompat.offsetTopAndBottom
 import androidx.core.view.get
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import splitties.dimensions.dip
@@ -45,7 +46,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
     }
 
     var viewRef: View? = null
-    var parentRef: CoordinatorLayout? = null
+    var parentRef: ScaffoldView? = null
 
     fun init() {
 
@@ -257,8 +258,11 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
     private fun resetPosition(event: MotionEvent, child: View) {
         val measuredWidth = parentRef?.measuredWidth ?: 0
         val measuredHeight = parentRef?.measuredHeight ?: 0
-        if (child.x < windowInsets.left) {
-            playerX = windowInsets.left
+        val left = if (parentRef?.orientation == ScaffoldView.HORIZONTAL) {
+            windowInsets.left + child.context.config.appBarMenuWidth
+        } else { windowInsets.left }
+        if (child.x < left) {
+            playerX = left
             child.animate().setInterpolator(DecelerateInterpolator())
                 .setDuration(200)
                 .x(playerX.toFloat())
