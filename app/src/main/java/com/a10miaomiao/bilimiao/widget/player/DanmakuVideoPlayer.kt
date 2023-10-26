@@ -370,7 +370,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             && !mChangePosition && !mChangeVolume && !mBrightness) {
             isSpeedPlaying = true
             lastSpeed = speed
-            speed = 2f
+            speed *= 2
             mSpeedTips.visibility = View.VISIBLE
             mTouchingProgressBar = false
             (mSpeedTipsIV.drawable as? AnimationDrawable)?.start()
