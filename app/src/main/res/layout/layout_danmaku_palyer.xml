@@ -412,7 +412,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2倍速播放中"
+            android:text="倍速播放中"
             android:textColor="@color/white"/>
     </LinearLayout>
 
