@@ -8,6 +8,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
@@ -40,7 +41,7 @@ class AppBarBehaviorDelegate(
         }
     }
 
-    private val dragger = ViewDragHelper.create(parent, this).apply {
+    private val dragger = ViewDragHelper.create(parent, 0.2f,this).apply {
     }
 
     init {
@@ -83,23 +84,42 @@ class AppBarBehaviorDelegate(
     override fun onViewReleased(releasedChild: View, xvel: Float, yvel: Float) {
         initialY = 0f
         initialX = 0f
+        val touchSlop = dragger.touchSlop * 5
         if (parent.orientation == ScaffoldView.VERTICAL) {
-            if (yvel > 0) {
-                val h = parent.measuredHeight
-                targetState = STATE_COLLAPSED
-                dragger.settleCapturedViewAt(0, h - appBarHeight - appbarView.paddingBottom)
-            } else {
+            if (
+                targetState == STATE_COLLAPSED
+                && yvel < -touchSlop
+            ) {
                 targetState = STATE_EXPANDED
+            } else if (
+                targetState == STATE_EXPANDED
+                && yvel > touchSlop
+            ) {
+                targetState = STATE_COLLAPSED
+            }
+            if (targetState == STATE_EXPANDED) {
                 dragger.settleCapturedViewAt(0, 0)
+            } else {
+                val h = parent.measuredHeight
+                dragger.settleCapturedViewAt(0, h - appBarHeight - appbarView.paddingBottom)
             }
         } else {
-            if (xvel < 0) {
-                val w = parent.measuredWidth
-                targetState = STATE_COLLAPSED
-                dragger.settleCapturedViewAt(appBarWidth + appbarView.paddingLeft - w, 0)
-            } else {
+            if (
+                targetState == STATE_COLLAPSED
+                && yvel > touchSlop
+            ) {
                 targetState = STATE_EXPANDED
+            } else if (
+                targetState == STATE_EXPANDED
+                && yvel < -touchSlop
+            ) {
+                targetState = STATE_COLLAPSED
+            }
+            if (targetState == STATE_EXPANDED) {
                 dragger.settleCapturedViewAt(0, 0)
+            } else {
+                val w = parent.measuredWidth
+                dragger.settleCapturedViewAt(appBarWidth + appbarView.paddingLeft - w, 0)
             }
         }
 
