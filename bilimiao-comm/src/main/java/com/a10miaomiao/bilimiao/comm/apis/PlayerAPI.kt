@@ -138,6 +138,32 @@ class PlayerAPI {
         }
     }
 
+    fun sendDamaku(
+        msg: String,
+        aid: String,
+        oid: String,
+        progress: Long,
+        color: Int,
+        fontsize: Int,
+        mode: Int, // 1：普通弹幕, 4：底部弹幕, 5：顶部弹幕, 7：高级弹幕, 9：BAS弹幕（pool必须为2）
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/v2/dm/post"
+        )
+        formBody = mapOf(
+            "msg" to msg,
+            "type" to "1",
+            "aid" to aid,
+            "oid" to oid,
+            "progress" to progress.toString(),
+            "color" to color.toString(),
+            "fontsize" to fontsize.toString(),
+            "mode" to mode.toString(),
+            "rnd" to System.currentTimeMillis().toString(),
+        )
+        method = MiaoHttp.POST
+    }
+
     data class PlayurlData(
         val accept_description: List<String>,
         val accept_format: String,

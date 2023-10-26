@@ -11,9 +11,12 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
@@ -73,6 +76,12 @@ class PlayerController(
         fullscreenButton.setOnLongClickListener {
             showFullModeMenu(it)
             true
+        }
+        sendDanmakuView.setOnClickListener {
+            val nav = Navigation.findNavController(
+                activity, R.id.nav_bottom_sheet_fragment
+            )
+            nav.navigateToCompose(PageRoute.Player.sendDanmaku.url())
         }
         danmakuContext = that.danmakuContext
         qualityView.setOnClickListener(that::showQualityPopupMenu)
@@ -350,6 +359,14 @@ class PlayerController(
             }
         }
         return true
+    }
+
+    /**
+     * 创建弹幕
+     * type: 1从右至左滚动弹幕|6从左至右滚动弹幕|5顶端固定弹幕|4底端固定弹幕|7高级弹幕|8脚本弹幕
+     */
+    fun createDanmaku(type: Int): BaseDanmaku {
+        return danmakuContext.mDanmakuFactory.createDanmaku(type, danmakuContext)
     }
 
     fun onBackClick() {

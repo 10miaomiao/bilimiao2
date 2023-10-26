@@ -79,6 +79,13 @@
                 android:textColor="#ffffff" />
 
             <ImageView
+                android:id="@+id/send_danmaku"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:paddingRight="8dp"
+                android:src="@drawable/ic_danmaku" />
+
+            <ImageView
                 android:id="@+id/fullscreen"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
