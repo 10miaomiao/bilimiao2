@@ -8,7 +8,13 @@ import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.os.Build
 import android.util.AttributeSet
-import android.view.*
+import android.view.DisplayCutout
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -78,6 +84,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // 弹幕开关文字
     private val mDanmakuSwitchTV: TextView by lazy { findViewById(R.id.danmaku_switch_text) }
+
+    private val mSendDanmakuIV: ImageView by lazy { findViewById(R.id.send_danmaku) }
 
     // 清晰度
     private val mQuality: ViewGroup by lazy { findViewById(R.id.quality) }
@@ -214,6 +222,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     val speedView: View get() = mPlaySpeed
     val speedValueTextView: View get() = mPlaySpeedValue
     val moreBtn: View get() = mMoreBtn
+    val sendDanmakuView: View get() = mSendDanmakuIV
 
     // 是否处于锁定状态
     var isLock: Boolean = false
@@ -493,6 +502,19 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (
+            id == com.shuyu.gsyvideoplayer.R.id.surface_container
+            && event.action == MotionEvent.ACTION_CANCEL
+            ) {
+            if (mHideKey && mShowVKey) {
+                return true
+            }
+            touchSurfaceUp()
+        }
+        return super.onTouchEvent(event)
+    }
+
     override fun onPrepared() {
         super.onPrepared()
         onPrepareDanmaku(this)
@@ -503,7 +525,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         super.onAutoCompletion()
         videoPlayerCallBack?.onAutoCompletion()
         releaseDanmaku()
-        DebugMiao.log("onAutoCompletion")
     }
 
     override fun onVideoPause() {
@@ -621,7 +642,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     /**
      * 添加弹幕
      */
-    private fun addDanmaku(danmaku: BaseDanmaku) {
+    fun addDanmaku(danmaku: BaseDanmaku) {
         mDanmakuView.addDanmaku(danmaku)
     }
 

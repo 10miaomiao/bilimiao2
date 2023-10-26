@@ -13,6 +13,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
+import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
@@ -87,6 +88,12 @@ object PageRoute {
         val setting = "bilimiao://time/setting" content { TimeSettingPage() }
     }
 
+    object Player {
+        val sendDanmaku = "bilimiao://player/danmaku/send" content {
+            SendDanmakuPage()
+        }
+    }
+
     object Setting {
         val proxySetting = "bilimiao://setting/proxy" content { ProxySettingPage() }
         val proxy_addProxyServer = "bilimiao://setting/proxy/add" content { AddProxyServerPage() }
@@ -106,6 +113,7 @@ object PageRoute {
         autoBuild(User, User::class.java)
         autoBuild(Download, Download::class.java)
         autoBuild(Time, Time::class.java)
+        autoBuild(Player, Player::class.java)
         autoBuild(Setting, Setting::class.java)
         autoBuild(Bangumi, Bangumi::class.java)
     }

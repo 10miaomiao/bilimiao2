@@ -25,6 +25,7 @@ import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
@@ -580,6 +581,32 @@ class PlayerDelegate2(
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         controller.updatePlayerMode(newConfig)
+    }
+
+    override fun getSourceIds(): PlayerSourceIds {
+        return playerSource?.getSourceIds() ?: PlayerSourceIds()
+    }
+
+    override fun currentPosition(): Long {
+        return views.videoPlayer.currentPosition
+    }
+
+    override fun sendDanmaku(
+        type: Int,
+        danmakuText: String,
+        danmakuTextSize: Float,
+        danmakuTextColor: Int,
+        danmakuPosition: Long,
+    ) {
+        val dispDensity = activity.resources.displayMetrics.density
+        val danmaku = controller.createDanmaku(type).apply {
+            text = danmakuText
+            textColor = danmakuTextColor
+            textSize = danmakuTextSize * (dispDensity - 0.6f);
+            time = danmakuPosition
+            borderColor = 0xFFFFFFFF.toInt()
+        }
+        views.videoPlayer.addDanmaku(danmaku)
     }
 
     override fun setProxy(proxyServer: ProxyServerInfo, uposHost: String) {
