@@ -20,13 +20,17 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 
 class VideoCommentListViewModel(
     override val di: DI,
@@ -38,18 +42,21 @@ class VideoCommentListViewModel(
     val userStore: UserStore by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
+    val title by lazy { fragment.requireArguments().getString(MainNavArgs.title, "") }
+    val cover by lazy { fragment.requireArguments().getString(MainNavArgs.cover, "") }
+    val name by lazy { fragment.requireArguments().getString(MainNavArgs.name, "") }
 
     var sortOrder = 3
 
     var triggered = false
-    var list = PaginationInfo<ReplyOuterClass.ReplyInfo>()
+    var list = PaginationInfo<VideoCommentViewInfo>()
     private var _cursor: ReplyOuterClass.CursorReply? = null
 
     init {
         loadData()
     }
 
-    private fun loadData() = viewModelScope.launch(Dispatchers.IO){
+    private fun loadData() = viewModelScope.launch(Dispatchers.IO) {
         try {
             ui.setState {
                 list.loading = true
@@ -68,23 +75,33 @@ class VideoCommentListViewModel(
             }.build()
             val res = ReplyGrpc.getMainListMethod().request(req)
                 .awaitCall()
-            if (_cursor == null){
+            if (_cursor == null) {
                 list.data = mutableListOf()
                 when {
                     res.upTop != null && res.upTop.id != 0L -> {
-                        list.data.add(res.upTop)
+                        list.data.add(
+                            VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.upTop)
+                        )
                     }
+
                     res.adminTop != null && res.adminTop.id != 0L -> {
-                        list.data.add(res.adminTop)
+                        list.data.add(
+                            VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.adminTop)
+                        )
                     }
-                    res.voteTop != null && res.voteTop.id != 0L-> {
-                        list.data.add(res.voteTop)
+
+                    res.voteTop != null && res.voteTop.id != 0L -> {
+                        list.data.add(
+                            VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.voteTop)
+                        )
                     }
                 }
             }
             ui.setState {
                 if (res.repliesList != null) {
-                    list.data.addAll(res.repliesList)
+                    list.data.addAll(res.repliesList.map(
+                        VideoCommentViewAdapter::convertToVideoCommentViewInfo
+                    ))
                 }
                 _cursor = res.cursor
                 if (res.cursor.isEnd) {
@@ -104,7 +121,7 @@ class VideoCommentListViewModel(
         }
     }
 
-    fun loadMode () {
+    fun loadMode() {
         val (loading, finished) = this.list
         if (!finished && !loading) {
             loadData()
@@ -122,39 +139,36 @@ class VideoCommentListViewModel(
 
     fun setLike(
         index: Int,
-        updateView: (item: ReplyOuterClass.ReplyInfo) -> Unit,
-    ) = viewModelScope.launch(Dispatchers.IO){
+        updateView: (item: VideoCommentViewInfo) -> Unit,
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val item = list.data[index]
-            val newAction = if (item.replyControl.action == 1L) {
+            val newAction = if (item.isLike) {
                 0
-            } else { 1 }
+            } else {
+                1
+            }
             val res = BiliApiService.commentApi
                 .action(1, item.oid.toString(), item.id.toString(), newAction)
                 .awaitCall()
                 .gson<MessageInfo>()
             if (res.isSuccess) {
-                val replyControl = item.replyControl.toBuilder()
-                    .setAction(newAction.toLong())
-                    .build()
-                val newItem = item.toBuilder()
-                    .setReplyControl(replyControl)
-                    .setLike(item.like - 1 + newAction * 2)
-                    .build()
+                val newItem = item.copy(
+                    isLike = newAction == 1
+                )
                 withContext(Dispatchers.Main) {
                     updateView(newItem)
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    context.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                context.toast("喵喵被搞坏了:" + e.message ?: e.toString())
+                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }
-    
 }

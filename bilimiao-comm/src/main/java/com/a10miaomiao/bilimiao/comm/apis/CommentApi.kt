@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.comm.apis
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 class CommentApi() {
 
@@ -66,6 +67,60 @@ class CommentApi() {
             "rpid" to rpid,
             "action" to action.toString(),
         )
+    }
+
+    fun emoteList() = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/emote/user/panel",
+            "business" to "reply"
+        )
+    }
+
+    fun emoteList(
+        ids: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/emote/package",
+            "business" to "reply",
+            "ids" to ids,
+        )
+    }
+
+    fun add(
+        message: String,
+        oid: String,
+        root: String? = null,
+        parent: String? = null,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v2/reply/add")
+        method = MiaoHttp.POST
+        val params = mutableMapOf<String, String?>(
+            "type" to "1",
+            "oid" to oid,
+            "message" to message,
+            "plat" to "2",
+        )
+        // 二级评论以上使用
+        root?.let { params.put("root", root) }
+        // 二级评论同根评论id
+        // 大于二级评论为要回复的评论id
+        parent?.let { params.put("parent", parent) }
+        formBody = ApiHelper.createParams(params)
+        DebugMiao.log("formBody", formBody)
+    }
+
+    fun del(
+        oid: String,
+        rpid: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v2/reply/del")
+        method = MiaoHttp.POST
+        val params = mutableMapOf<String, String?>(
+            "type" to "1",
+            "oid" to oid,
+            "rpid" to rpid,
+        )
+        formBody = ApiHelper.createParams(params)
     }
 
 

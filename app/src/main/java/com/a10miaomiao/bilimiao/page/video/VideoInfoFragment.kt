@@ -186,7 +186,12 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 // 评论
                 if (info != null) {
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = VideoCommentListFragment.createArguments(info.aid)
+                    val args = VideoCommentListFragment.createArguments(
+                        info.aid,
+                        info.title,
+                        info.pic,
+                        info.owner.name,
+                    )
                     nav.navigate(VideoCommentListFragment.actionId, args)
                 }
             }
@@ -788,7 +793,6 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         connectStore(viewLifecycleOwner, windowStore)
         connectStore(viewLifecycleOwner, playerStore)
         val contentInsets = windowStore.getContentInsets(parentView)
-        DebugMiao.log("VideoInfoFragmentContentInsets", contentInsets)
         val info = viewModel.info
         // 监听info改变，修改页面标题
         miaoEffect(listOf(info, info?.req_user, info?.staff)) {

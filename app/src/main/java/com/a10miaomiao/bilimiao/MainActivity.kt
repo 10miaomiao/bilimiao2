@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
@@ -38,6 +39,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.start.StartFragment
@@ -48,6 +50,8 @@ import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -246,10 +250,7 @@ class MainActivity
     }
 
     fun onDrawerStateChanged(state: Int) {
-        if (state == AppBarBehaviorDelegate.STATE_COLLAPSED) {
-            leftFragment.hideSoftInput()
-            ui.mAppBar.clearFocus()
-        }
+        leftFragment.onDrawerStateChanged(state)
         // 太麻烦
 //        supportFragmentManager.beginTransaction().also {
 //            if (state == AppBarBehaviorDelegate.STATE_COLLAPSED
@@ -448,6 +449,7 @@ class MainActivity
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
+        getCustomDensityDpi()
         super.onConfigurationChanged(newConfig)
         basePlayerDelegate.onConfigurationChanged(newConfig)
         ui.root.orientation = newConfig.orientation

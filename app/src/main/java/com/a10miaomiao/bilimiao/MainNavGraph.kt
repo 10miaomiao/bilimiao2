@@ -71,6 +71,7 @@ object MainNavGraph {
             addFragment(VideoCommentListFragment::class, VideoCommentListFragment.Companion)
             addFragment(VideoCommentDetailFragment::class, VideoCommentDetailFragment.Companion)
             addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
+            addFragment(SendCommentFragment::class, SendCommentFragment.Companion)
 
             addFragment(BangumiDetailFragment::class, BangumiDetailFragment.Companion)
             addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)

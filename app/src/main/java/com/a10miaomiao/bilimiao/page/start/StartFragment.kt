@@ -46,6 +46,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.layout.SideSlideLayout
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -189,6 +190,16 @@ class StartFragment : Fragment(), DIAware, MyPage {
         super.onPause()
 //        supportHelper.hideSoftInput(mEditText)
     }
+
+    fun onDrawerStateChanged(state: Int) {
+        if (state == AppBarBehaviorDelegate.STATE_COLLAPSED) {
+            hideSoftInput()
+            mEditText.isEnabled = false
+        } else {
+            mEditText.isEnabled = true
+        }
+    }
+
 
     private val handleEditorAction = TextView.OnEditorActionListener { v, actionId, event ->
         if (actionId == EditorInfo.IME_ACTION_UNSPECIFIED
