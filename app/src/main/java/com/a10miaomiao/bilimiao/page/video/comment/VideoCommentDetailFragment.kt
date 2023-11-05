@@ -27,13 +27,17 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.*
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -54,26 +58,33 @@ import net.mikaelzero.mojito.impl.NumIndicator
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import splitties.fragments.show
 import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 
-class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
+class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
 
     companion object : FragmentNavigatorBuilder() {
         override val name = "video.comment.detail"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            argument(MainNavArgs.index) {
+                type = NavType.IntType
+                nullable = false
+            }
             argument(MainNavArgs.reply) {
-                type = NavType.ParcelableType(VideoCommentDetailParam::class.java)
+                type = NavType.ParcelableType(VideoCommentViewInfo::class.java)
                 nullable = false
             }
         }
 
         fun createArguments(
-            reply: VideoCommentDetailParam
+            index: Int,
+            reply: VideoCommentViewInfo
         ): Bundle {
             return bundleOf(
+                MainNavArgs.index to index,
                 MainNavArgs.reply to reply,
             )
         }
@@ -81,6 +92,49 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         title = "评论详情"
+
+        menus = listOf(
+            myMenuItem {
+                key = MenuKeys.send
+                iconResource = R.drawable.ic_baseline_send_24
+                title = "回复评论"
+            },
+            myMenuItem {
+                key = MenuKeys.delete
+                iconResource = R.drawable.ic_baseline_delete_outline_24
+                title = "删除评论"
+                visibility = if (viewModel.isSelfReply()) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            }
+        )
+    }
+
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
+            MenuKeys.send -> {
+                val replyParams = viewModel.reply
+                val content = replyParams.content.message.split("\n")[0]
+                val params = SendCommentParam(
+                    type = 2,
+                    oid = replyParams.oid.toString(),
+                    root = "0",
+                    parent = replyParams.id.toString(),
+                    content = content,
+                    image = replyParams.avatar,
+                    name = replyParams.uname,
+                    title = ""
+                )
+                val args = SendCommentFragment.createArguments(params)
+                findNavController().navigate(SendCommentFragment.actionId, args)
+            }
+            MenuKeys.delete -> {
+                viewModel.delete()
+            }
+        }
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
@@ -91,7 +145,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
 
     private val themeDelegate by instance<ThemeDelegate>()
 
-    private var mAdapter: MiaoBindingAdapter<ReplyOuterClass.ReplyInfo>? = null
+    private var mAdapter: MiaoBindingAdapter<VideoCommentViewInfo>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -106,27 +160,34 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
         lifecycle.coroutineScope.launch {
             windowStore.connectUi(ui)
         }
-        // 页面返回回调
-        requireActivity().onBackPressedDispatcher
-            .addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    val nav = findNavController()
-                    nav.previousBackStackEntry?.let {
-                        it.savedStateHandle[MainNavArgs.reply] = viewModel.reply
-                    }
-                    nav.popBackStack()
+
+        // 页面返回回调数据接收
+        findNavController().currentBackStackEntry?.let {
+            val savedStateHandle = it.savedStateHandle
+            savedStateHandle.get<Any>(MainNavArgs.reply)?.let {
+                if (it is VideoCommentReplyInfo) {
+//                    viewModel.sortOrder = 2
+//                    viewModel.refreshList()
+//                    pageConfig.notifyConfigChanged()
+                    mAdapter?.addData(
+                        0,
+                        VideoCommentViewAdapter.convertToVideoCommentViewInfo(it)
+                    )
+                    toListTop()
                 }
-            })
+                savedStateHandle[MainNavArgs.reply] = null
+            }
+        }
     }
 
-    private fun toSelfLink (view: View, url: String) {
+    private fun toSelfLink(view: View, url: String) {
         val urlInfo = BiliUrlMatcher.findIDByUrl(url)
         val urlType = urlInfo[0]
         var urlId = urlInfo[1]
         if (urlType == "BV") {
             urlId = "BV$urlId"
         }
-        when(urlType){
+        when (urlType) {
             "AV", "BV" -> {
                 val args = VideoInfoFragment.createArguments(urlId)
                 Navigation.findNavController(view)
@@ -153,53 +214,15 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
 
     private val handleHeaderLongClick = View.OnLongClickListener {
         val reply = viewModel.reply
-        val replyParam = ReplyDetailParam(
-            index = 0,
-            oid = reply.oid,
-            rpid = reply.rpid,
-            mid = reply.mid,
-            uname = reply.uname,
-            avatar = reply.avatar,
-            ctime = reply.ctime,
-            floor = reply.floor,
-            location = reply.location,
-            content = reply.content,
-            like = reply.like,
-            count = reply.count,
-            action = reply.action,
-        )
-        val args = ReplyDetailFragment.createArguments(replyParam)
+        val args = ReplyDetailFragment.createArguments(reply)
         Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             .navigate(ReplyDetailFragment.actionId, args)
         true
     }
 
     private val handleItemLongClick = OnItemLongClickListener { adapter, view, position ->
-        val item = adapter.getItem(position) as ReplyOuterClass.ReplyInfo
-        val reply = ReplyDetailParam(
-            index = position,
-            oid = item.oid,
-            rpid = item.id,
-            mid = item.member.mid,
-            uname = item.member.name,
-            avatar = item.member.face,
-            ctime = item.ctime,
-            floor = 0,
-            location = item.replyControl.location,
-            content = VideoCommentViewContent(
-                message = item.content.message,
-                emote = item.content.emoteMap.values.map {
-                    VideoCommentViewContent.Emote(
-                        it.id, it.text, it.url
-                    )
-                },
-                picturesList = item.content.picturesList.map { UrlUtil.autoHttps(it.imgSrc) },
-            ),
-            like = item.like,
-            count = item.count,
-            action = item.replyControl.action,
-        )
-        val args = ReplyDetailFragment.createArguments(reply)
+        val item = adapter.getItem(position) as VideoCommentViewInfo
+        val args = ReplyDetailFragment.createArguments(item)
         Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             .navigate(ReplyDetailFragment.actionId, args)
         true
@@ -219,27 +242,30 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    private val handleLinkClickListener = ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
-        when (linkType) {
-            LinkType.LINK_TYPE -> {
-                val url = content
-                val re = BiliNavigation.navigationTo(view, url)
-                if (!re) {
-                    if (url.indexOf("bilibili://") == 0) {
-                        toast("不支持打开的链接：$url")
-                    } else {
-                        BiliUrlMatcher.toUrlLink(view, url)
+    private val handleLinkClickListener =
+        ExpandableTextView.OnLinkClickListener { view, linkType, content, selfContent -> //根据类型去判断
+            when (linkType) {
+                LinkType.LINK_TYPE -> {
+                    val url = content
+                    val re = BiliNavigation.navigationTo(view, url)
+                    if (!re) {
+                        if (url.indexOf("bilibili://") == 0) {
+                            toast("不支持打开的链接：$url")
+                        } else {
+                            BiliUrlMatcher.toUrlLink(view, url)
+                        }
                     }
                 }
-            }
-            LinkType.MENTION_TYPE -> {
+
+                LinkType.MENTION_TYPE -> {
 //                toast("你点击了@用户 内容是：$content")
-            }
-            LinkType.SELF -> {
-                toSelfLink(view, selfContent)
+                }
+
+                LinkType.SELF -> {
+                    toSelfLink(view, selfContent)
+                }
             }
         }
-    }
 
     private val handleImageItemClick = object : OnImageItemClickListener {
         override fun onClick(
@@ -269,28 +295,9 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    val itemUi = miaoBindingItemUi<ReplyOuterClass.ReplyInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<VideoCommentViewInfo> { item, index ->
         videoCommentView(
-            index = index,
-            mid = item.mid,
-            uname = item.member.name,
-            avatar = item.member.face,
-            time = NumberUtil.converCTime(item.ctime),
-            location = item.replyControl.location,
-            floor = 0,
-            content = VideoCommentViewContent(
-                message = item.content.message,
-                emote = item.content.emoteMap.values.map {
-                    VideoCommentViewContent.Emote(
-                        it.id, it.text, it.url
-                    )
-                },
-                picturesList = item.content.picturesList.map { UrlUtil.autoHttps(it.imgSrc) },
-            ),
-            like = item.like,
-            count = item.count,
-            isLike = item.replyControl.action == 1L,
-            textIsSelectable = true,
+            viewInfo = item,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
             onLikeClick = handleLikeClick,
@@ -308,7 +315,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             _rightPadding = contentInsets.right
 
             backgroundColor = config.windowBackgroundColor
-            _miaoLayoutManage(
+            mLayoutManager = _miaoLayoutManage(
                 LinearLayoutManager(requireContext())
             )
 
@@ -316,7 +323,8 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
                 items = viewModel.list.data,
                 itemUi = itemUi,
             ) {
-                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                stateRestorationPolicy =
+                    RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 setOnItemClickListener(handleItemClick)
                 setOnItemLongClickListener(handleItemLongClick)
                 loadMoreModule.setOnLoadMoreListener {
@@ -327,16 +335,7 @@ class VideoCommentDetailFragment : Fragment(), DIAware, MyPage {
             headerViews(mAdapter!!) {
                 val reply = viewModel.reply
                 +videoCommentView(
-                    mid = reply.mid,
-                    uname = reply.uname,
-                    avatar = reply.avatar,
-                    time = NumberUtil.converCTime(reply.ctime),
-                    location = reply.location,
-                    floor = reply.floor,
-                    content = reply.content,
-                    like = reply.like,
-                    count = reply.count,
-                    isLike = reply.action == 1L,
+                    viewInfo = reply,
                     textIsSelectable = true,
                     onUpperClick = handleUserClick,
                     onLinkClick = handleLinkClickListener,

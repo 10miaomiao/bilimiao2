@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.rcImageView
@@ -39,13 +40,13 @@ class ReplyDetailFragment : Fragment(), DIAware, MyPage {
         override val name = "video.comment.reply"
         override fun FragmentNavigatorDestinationBuilder.init() {
             argument(MainNavArgs.reply) {
-                type = NavType.ParcelableType(ReplyDetailParam::class.java)
+                type = NavType.ParcelableType(VideoCommentViewInfo::class.java)
                 nullable = false
             }
         }
 
         fun createArguments(
-            reply: ReplyDetailParam
+            reply: VideoCommentViewInfo
         ): Bundle {
             return bundleOf(
                 MainNavArgs.reply to reply,
@@ -117,7 +118,7 @@ class ReplyDetailFragment : Fragment(), DIAware, MyPage {
                 }
 
                 +textView {
-                    _text = "发表于" + NumberUtil.converCTime(viewModel.reply.ctime)
+                    _text = "发表于" + viewModel.reply.time
                     setTextIsSelectable(true)
                     setTextColor(config.foregroundAlpha45Color)
                 }..lParams {

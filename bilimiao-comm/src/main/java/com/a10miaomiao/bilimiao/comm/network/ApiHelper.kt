@@ -143,5 +143,20 @@ object ApiHelper {
         params["sign"] = getSing(params, APP_SECRET)
         return params
     }
+    fun createParams(params: MutableMap<String, String?>): MutableMap<String, String?>{
+        params.putAll(mapOf(
+            "appkey" to APP_KEY,
+            "build" to BUILD_VERSION.toString(),
+            "buvid" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+            "mobi_app" to "android",
+            "platform" to "android",
+            "ts" to getTimeSpen().toString()
+        ))
+        if (params["notoken"]?.isEmpty() != false) {
+            addAccessKeyAndMidToParams(params)
+        }
+        params["sign"] = getSing(params, APP_SECRET)
+        return params
+    }
 
 }

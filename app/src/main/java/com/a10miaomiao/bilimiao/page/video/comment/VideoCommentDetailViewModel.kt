@@ -4,17 +4,24 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import bilibili.main.community.reply.v1.ReplyGrpc
 import bilibili.main.community.reply.v1.ReplyOuterClass
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,30 +40,31 @@ class VideoCommentDetailViewModel(
     val userStore: UserStore by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
-    var reply: VideoCommentDetailParam
+    val index by lazy { fragment.requireArguments().getInt(MainNavArgs.index, -1) }
+    var reply: VideoCommentViewInfo
 
     // 0：按时间，1：按点赞数，2：按回复数
     var sortOrder = 2
 
     var triggered = false
-    var list = PaginationInfo<ReplyOuterClass.ReplyInfo>()
+    var list = PaginationInfo<VideoCommentViewInfo>()
     private var _cursor: ReplyOuterClass.CursorReply? = null
 
     init {
-        reply = fragment.requireArguments().getParcelable<VideoCommentDetailParam>("reply")!!
+        reply = fragment.requireArguments().getParcelable<VideoCommentViewInfo>(MainNavArgs.reply)!!
         loadData()
     }
 
     private fun loadData(
         pageNum: Int = list.pageNum
-    ) = viewModelScope.launch(Dispatchers.IO){
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             ui.setState {
                 list.loading = true
             }
             val req = ReplyOuterClass.DetailListReq.newBuilder().apply {
                 oid = reply.oid
-                root = reply.rpid
+                root = reply.id
                 type = 1
                 scene = ReplyOuterClass.DetailListScene.REPLY
                 _cursor?.let {
@@ -69,11 +77,15 @@ class VideoCommentDetailViewModel(
             }.build()
             val res = ReplyGrpc.getDetailListMethod().request(req)
                 .awaitCall()
-            if (_cursor == null){
+            if (_cursor == null) {
                 list.data = mutableListOf()
             }
             ui.setState {
-                list.data.addAll(res.root.repliesList)
+                list.data.addAll(
+                    res.root.repliesList.map(
+                        VideoCommentViewAdapter::convertToVideoCommentViewInfo
+                    )
+                )
                 _cursor = res.cursor
                 if (res.cursor.isEnd) {
                     list.finished = true
@@ -96,7 +108,7 @@ class VideoCommentDetailViewModel(
         loadData()
     }
 
-    fun loadMode () {
+    fun loadMode() {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
             loadData(pageNum = pageNum + 1)
@@ -112,72 +124,111 @@ class VideoCommentDetailViewModel(
         }
     }
 
-    fun setRootLike() = viewModelScope.launch(Dispatchers.IO){
+    fun setRootLike() = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val newAction = if (reply.action == 1L) {
+            val newAction = if (reply.isLike) {
                 0
-            } else { 1 }
+            } else {
+                1
+            }
             val res = BiliApiService.commentApi
-                .action(1, reply.oid.toString(), reply.rpid.toString(), newAction)
+                .action(1, reply.oid.toString(), reply.id.toString(), newAction)
                 .awaitCall()
                 .gson<MessageInfo>()
             if (res.isSuccess) {
+                val newReply = reply.copy(
+                    isLike = newAction == 1,
+                    like = reply.like - 1 + newAction * 2
+                )
                 ui.setState {
-                    reply = reply.copy(
-                        action = newAction.toLong(),
-                        like = reply.like - 1 + newAction * 2
-                    )
+                    reply = newReply
+                }
+                val navController = fragment.findNavController()
+                navController.previousBackStackEntry?.savedStateHandle?.let {
+                    it[MainNavArgs.index] = index
+                    it[MainNavArgs.reply] = newReply
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    context.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                context.toast("喵喵被搞坏了:" + e.message ?: e.toString())
+                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }
 
     fun setLike(
         index: Int,
-        updateView: (item: ReplyOuterClass.ReplyInfo) -> Unit,
-    ) = viewModelScope.launch(Dispatchers.IO){
+        updateView: (item: VideoCommentViewInfo) -> Unit,
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val item = list.data[index]
-            val newAction = if (item.replyControl.action == 1L) {
+            val newAction = if (item.isLike) {
                 0
-            } else { 1 }
+            } else {
+                1
+            }
             val res = BiliApiService.commentApi
                 .action(1, item.oid.toString(), item.id.toString(), newAction)
                 .awaitCall()
                 .gson<MessageInfo>()
             if (res.isSuccess) {
-                val replyControl = item.replyControl.toBuilder()
-                    .setAction(newAction.toLong())
-                    .build()
-                val newItem = item.toBuilder()
-                    .setReplyControl(replyControl)
-                    .setLike(item.like - 1 + newAction * 2)
-                    .build()
+                val newItem = item.copy(
+                    isLike = newAction == 1
+                )
                 withContext(Dispatchers.Main) {
                     updateView(newItem)
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    context.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                context.toast("喵喵被搞坏了:" + e.message ?: e.toString())
+                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }
 
+
+    fun delete() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.commentApi
+                .del(
+                    reply.oid.toString(),
+                    reply.id.toString()
+                )
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.isSuccess) {
+                withContext(Dispatchers.Main) {
+                    PopTip.show("已删除该条评论")
+                    // 回调到列表移除
+                    fragment.findNavController()
+                        .popBackStack()
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    PopTip.show(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
+            }
+        }
+    }
+
+    fun isSelfReply(): Boolean {
+        return userStore.isSelf(reply.mid.toString())
+    }
 
 
 }

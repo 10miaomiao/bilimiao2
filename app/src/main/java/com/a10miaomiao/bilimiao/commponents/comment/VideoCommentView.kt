@@ -40,6 +40,22 @@ import splitties.views.dsl.core.*
 import splitties.views.padding
 
 @Parcelize
+data class VideoCommentViewInfo(
+    val oid: Long,
+    val id: Long,
+    val mid: Long,
+    val uname: String,
+    val avatar: String,
+    val time: String,
+    val location: String,
+    val floor: Int,
+    val content: VideoCommentViewContent,
+    val like: Long,
+    val count: Long,
+    val isLike: Boolean = false,
+): Parcelable
+
+@Parcelize
 data class VideoCommentViewContent(
 //        val device: String,
     val message: String,
@@ -275,4 +291,33 @@ fun MiaoUI.videoCommentView(
         }
 
     }
+}
+
+inline fun MiaoUI.videoCommentView(
+    viewInfo: VideoCommentViewInfo,
+    index: Int = -1,
+    textIsSelectable: Boolean = false,
+    onUpperClick: View.OnClickListener? = null,
+    onLinkClick: ExpandableTextView.OnLinkClickListener? = null,
+    onLikeClick: View.OnClickListener? = null,
+    onImageItemClick: OnImageItemClickListener? = null,
+): View {
+    return videoCommentView(
+        index = index,
+        mid = viewInfo.mid,
+        uname = viewInfo.uname,
+        avatar = viewInfo.avatar,
+        time = viewInfo.time,
+        location = viewInfo.location,
+        floor = viewInfo.floor,
+        content = viewInfo.content,
+        like = viewInfo.like,
+        count = viewInfo.count,
+        isLike = viewInfo.isLike,
+        textIsSelectable = textIsSelectable,
+        onUpperClick = onUpperClick,
+        onLinkClick = onLinkClick,
+        onLikeClick = onLikeClick,
+        onImageItemClick = onImageItemClick,
+    )
 }

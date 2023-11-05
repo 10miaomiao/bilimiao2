@@ -13,16 +13,16 @@ data class VideoCommentReplyInfo(
     val assist: Int,
     val attr: Int,
     val content: Content,
-    val count: Int,
+    val count: Long,
     val ctime: Long,
     val dialog: Long,
     val dialog_str: String,
     val fansgrade: Int,
     val floor: Int,
-    val like: Int,
+    val like: Long,
     val member: MemberInfo,
-    val mid: String,
-    val oid: String, //--
+    val mid: Long,
+    val oid: Long, //--
     val parent: Long,
     val parent_str: String,
     val rcount: Long,
@@ -46,7 +46,7 @@ data class VideoCommentReplyInfo(
 
     @Parcelize
     data class Emote(
-        val id: Int,
+        val id: Long,
         val text: String,
         val url: String
     ) : Parcelable

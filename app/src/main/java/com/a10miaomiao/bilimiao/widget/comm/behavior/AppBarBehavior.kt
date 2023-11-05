@@ -128,7 +128,7 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
         nestedScrollAxes: Int,
         type: Int
     ): Boolean {
-        return viewRef?.top != 0 && nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
+        return viewRef?.top != 0 && target.tag != false && nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
     }
 
     override fun onNestedScroll(

@@ -5,8 +5,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -20,10 +22,5 @@ class ReplyDetailViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val reply by lazy { fragment.requireArguments().getParcelable<ReplyDetailParam>("reply")!! }
-
-
-    init {
-        DebugMiao.log(reply)
-    }
+    val reply by lazy { fragment.requireArguments().getParcelable<VideoCommentViewInfo>(MainNavArgs.reply)!! }
 }
