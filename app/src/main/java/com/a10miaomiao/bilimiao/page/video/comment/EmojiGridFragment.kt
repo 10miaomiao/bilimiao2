@@ -35,7 +35,6 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.config.config
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.material.card.MaterialCardView
-import com.shuyu.textutillib.EmojiLayout
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware

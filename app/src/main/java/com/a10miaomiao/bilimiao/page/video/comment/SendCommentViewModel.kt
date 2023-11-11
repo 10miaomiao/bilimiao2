@@ -18,6 +18,8 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.kongzue.dialogx.dialogs.PopTip
+import com.kongzue.dialogx.dialogs.TipDialog
+import com.kongzue.dialogx.dialogs.WaitDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -86,9 +88,16 @@ class SendCommentViewModel(
         message: String,
     ) = viewModelScope.launch {
         try {
+            withContext(Dispatchers.Main) {
+                WaitDialog.show("发送中")
+            }
             val res = BiliApiService.commentApi
                 .add(
-                    message = message,
+                    message = if (params.type == 3) {
+                        "回复 ${params.name} :$message"
+                    } else {
+                        message
+                    },
                     oid = params.oid,
                     root = params.root,
                     parent = params.parent,
@@ -103,16 +112,17 @@ class SendCommentViewModel(
                         MainNavArgs.reply, result.reply
                     )
                     navController.popBackStack()
-                    PopTip.show(result.success_toast)
+                    TipDialog.show(result.success_toast, WaitDialog.TYPE.SUCCESS)
                 } else {
-                    PopTip.show(res.message)
+                    TipDialog.show(res.message, WaitDialog.TYPE.WARNING)
                 }
             }
         } catch (e: Exception) {
             DebugMiao.log(e)
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                PopTip.show(e.message ?: e.toString())
+                TipDialog.show("发送失败", WaitDialog.TYPE.ERROR)
+//                PopTip.show(e.message ?: e.toString())
             }
         }
     }

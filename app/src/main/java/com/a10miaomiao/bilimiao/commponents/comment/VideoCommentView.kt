@@ -53,6 +53,7 @@ data class VideoCommentViewInfo(
     val like: Long,
     val count: Long,
     val isLike: Boolean = false,
+    val isDelete: Boolean = false,
 ): Parcelable
 
 @Parcelize

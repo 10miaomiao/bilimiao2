@@ -85,7 +85,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // 弹幕开关文字
     private val mDanmakuSwitchTV: TextView by lazy { findViewById(R.id.danmaku_switch_text) }
 
-    private val mSendDanmakuIV: ImageView by lazy { findViewById(R.id.send_danmaku) }
+    private val mMiniSendDanmakuIV: ImageView by lazy { findViewById(R.id.send_danmaku_mini) }
+    private val mSendDanmakuTV: TextView by lazy { findViewById(R.id.send_danmaku) }
 
     // 清晰度
     private val mQuality: ViewGroup by lazy { findViewById(R.id.quality) }
@@ -222,7 +223,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     val speedView: View get() = mPlaySpeed
     val speedValueTextView: View get() = mPlaySpeedValue
     val moreBtn: View get() = mMoreBtn
-    val sendDanmakuView: View get() = mSendDanmakuIV
 
     // 是否处于锁定状态
     var isLock: Boolean = false
@@ -299,6 +299,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             PlayerMode.SMALL_TOP, PlayerMode.SMALL_FLOAT -> {
                 mFullModeBottomContainer.visibility = GONE
                 mPlaySpeedName.visibility = GONE
+                mMiniSendDanmakuIV.visibility = VISIBLE
+                mSendDanmakuTV.visibility = GONE
                 mBackButton.setImageResource(R.drawable.video_small_close)
                 if (mode == PlayerMode.SMALL_FLOAT) {
                     mDragBar.visibility = mTopContainer.visibility
@@ -310,6 +312,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             PlayerMode.FULL -> {
                 mFullModeBottomContainer.visibility = VISIBLE
                 mPlaySpeedName.visibility = VISIBLE
+                mMiniSendDanmakuIV.visibility = GONE
+                mSendDanmakuTV.visibility = VISIBLE
                 mBackButton.setImageResource(R.drawable.bili_player_back_button)
                 mDragBar.visibility = GONE
                 updateDanmakuMargin()
@@ -660,6 +664,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
     fun setExpandButtonOnClickListener(l: OnClickListener) {
         mExpandBtnLayout.setOnClickListener(l)
+    }
+
+    fun setSendDanmakuButtonOnClickListener(l: OnClickListener) {
+        mMiniSendDanmakuIV.setOnClickListener(l)
+        mSendDanmakuTV.setOnClickListener(l)
     }
 
     override fun showBrightnessDialog(percent: Float) {

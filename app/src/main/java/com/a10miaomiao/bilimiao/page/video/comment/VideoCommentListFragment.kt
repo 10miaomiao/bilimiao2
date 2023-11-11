@@ -13,6 +13,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
@@ -120,15 +121,15 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
         title = "评论列表"
         menus = listOf(
             myMenuItem {
+                key = MenuKeys.send
+                iconResource = R.drawable.ic_baseline_send_24
+                title = "发布评论"
+            },
+            myMenuItem {
                 key = 0
                 iconResource = R.drawable.ic_baseline_filter_list_grey_24
                 title = SortOrderPopupMenu.getText(viewModel.sortOrder)
             },
-            myMenuItem {
-                key = MenuKeys.send
-                iconResource = R.drawable.ic_baseline_send_24
-                title = "发布评论"
-            }
         )
     }
 
@@ -193,26 +194,31 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
         }
 
         // 页面返回回调数据接收
-        findNavController().currentBackStackEntry?.let {
-            val savedStateHandle = it.savedStateHandle
-            savedStateHandle.get<Any>(MainNavArgs.reply)?.let {
-                if (it is VideoCommentViewInfo) {
-                    val index = savedStateHandle.get<Int>(MainNavArgs.index)
-                    if (index != null
-                        && index in viewModel.list.data.indices) {
-                        viewModel.list.data[index] = it
-                        mAdapter?.setData(index, it)
-                    }
-                } else if (it is VideoCommentReplyInfo) {
-                    mAdapter?.addData(
-                        0,
-                        VideoCommentViewAdapter.convertToVideoCommentViewInfo(it)
-                    )
-                    toListTop()
+        findNavController().currentBackStackEntry?.let(::onNavBackStackEntry)
+    }
+
+    private fun onNavBackStackEntry(navBackStackEntry: NavBackStackEntry) {
+        val savedStateHandle = navBackStackEntry.savedStateHandle
+        val reply = savedStateHandle.get<Any>(MainNavArgs.reply)
+        if (reply is VideoCommentViewInfo) {
+            val index = savedStateHandle.get<Int>(MainNavArgs.index)
+            if (index != null
+                && index in viewModel.list.data.indices) {
+                if (reply.isDelete) {
+                    mAdapter?.removeAt(index)
+                } else {
+                    viewModel.list.data[index] = reply
+                    mAdapter?.setData(index, reply)
                 }
-                savedStateHandle[MainNavArgs.reply] = null
             }
+        } else if (reply is VideoCommentReplyInfo) {
+            mAdapter?.addData(
+                0,
+                VideoCommentViewAdapter.convertToVideoCommentViewInfo(reply)
+            )
+            toListTop()
         }
+        savedStateHandle[MainNavArgs.reply] = null
     }
 
     private fun toSelfLink(view: View, url: String) {
