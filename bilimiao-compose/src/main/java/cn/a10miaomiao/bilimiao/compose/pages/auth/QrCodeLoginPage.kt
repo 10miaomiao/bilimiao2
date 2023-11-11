@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.auth
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,8 +67,9 @@ class QrCodeLoginPageViewModel(
 
     val loading = MutableStateFlow(false)
     val qrImage = MutableStateFlow<Drawable?>(null)
-    var error = MutableStateFlow("")
-    var isScaned = MutableStateFlow(false)
+    val error = MutableStateFlow("")
+    val isScaned = MutableStateFlow(false)
+//    val isFullScreenQrcode = MutableStateFlow(false)
 
     fun loadQrImage() = viewModelScope.launch(Dispatchers.IO) {
         try {
@@ -182,89 +187,116 @@ fun QrCodeLoginPage() {
     val error by viewModel.error.collectAsState()
     val qrImage by viewModel.qrImage.collectAsState()
     val isScaned by viewModel.isScaned.collectAsState()
+//    val isFullScreenQrcode by viewModel.isScaned.collectAsState()
 
+    var isFullScreenQrcode by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.loadQrImage()
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(scrollState)
-            .padding(horizontal = 10.dp)
+    if (
+        isFullScreenQrcode
+        && !isScaned
+        && qrImage != null
     ) {
-        Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
-        Text(
-            text = "请使用哔哩哔哩客户端扫码登录",
+        Image(
+            painter = rememberDrawablePainter(drawable = qrImage),
+            contentDescription = "",
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 50.dp),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onBackground,
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(5.dp)
+                .clickable {
+                    isFullScreenQrcode = false
+                }
         )
-        Box(
+    } else {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 10.dp)
         ) {
-            if (qrImage != null) {
-                Image(
-                    painter = rememberDrawablePainter(drawable = qrImage),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .size(240.dp)
-                        .align(Alignment.Center)
-                        .background(Color.White)
-                        .padding(5.dp)
-                )
-                if (isScaned) {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
+            Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
+            Text(
+                text = "请使用哔哩哔哩客户端扫码登录",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 50.dp),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .clickable {
+                        isFullScreenQrcode = true
+                    },
+            ) {
+                if (qrImage != null) {
+                    Image(
+                        painter = rememberDrawablePainter(drawable = qrImage),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(240.dp)
+                            .align(Alignment.Center)
+                            .background(Color.White)
+                            .padding(5.dp)
+                    )
+                    if (isScaned) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
+                        ) {
+                            Text(
+                                text = "扫描成功\n\n请在扫码端确认登录",
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    }
+                }
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.Center),
+                        strokeWidth = 3.dp,
+                    )
+                }
+                if (error.isNotBlank()) {
+                    Text(
+                        text = error,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                    Button(
+                        onClick = {
+                            viewModel.loadQrImage()
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter),
                     ) {
                         Text(
-                            text = "扫描成功\n\n请在扫码端确认登录",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontSize = 20.sp,
-                            modifier = Modifier.fillMaxWidth()
-                                .align(Alignment.Center)
+                            text = "重新加载"
                         )
                     }
                 }
             }
-            if (loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .align(Alignment.Center),
-                    strokeWidth = 3.dp,
-                )
-            }
-            if (error.isNotBlank()) {
-                Text(
-                    text = error,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline,
-                )
-                Button(
-                    onClick = {
-                        viewModel.loadQrImage()
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter),
-                ) {
-                    Text(
-                        text = "重新加载"
-                    )
-                }
-            }
         }
-
-
     }
+
 }
