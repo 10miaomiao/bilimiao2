@@ -1,15 +1,16 @@
 package com.a10miaomiao.bilimiao.page.video.comment
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
@@ -17,12 +18,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -36,7 +35,6 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.*
-import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -51,6 +49,7 @@ import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
 import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.chad.library.adapter.base.listener.OnItemLongClickListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
@@ -58,7 +57,6 @@ import net.mikaelzero.mojito.impl.NumIndicator
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.fragments.show
 import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -121,7 +119,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
                 val params = SendCommentParam(
                     type = 2,
                     oid = replyParams.oid.toString(),
-                    root = "0",
+                    root = replyParams.id.toString(),
                     parent = replyParams.id.toString(),
                     content = content,
                     image = replyParams.avatar,
@@ -162,22 +160,30 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         }
 
         // 页面返回回调数据接收
-        findNavController().currentBackStackEntry?.let {
-            val savedStateHandle = it.savedStateHandle
-            savedStateHandle.get<Any>(MainNavArgs.reply)?.let {
-                if (it is VideoCommentReplyInfo) {
-//                    viewModel.sortOrder = 2
-//                    viewModel.refreshList()
-//                    pageConfig.notifyConfigChanged()
-                    mAdapter?.addData(
-                        0,
-                        VideoCommentViewAdapter.convertToVideoCommentViewInfo(it)
-                    )
-                    toListTop()
+        findNavController().currentBackStackEntry?.let(::onNavBackStackEntry)
+    }
+
+    private fun onNavBackStackEntry(navBackStackEntry: NavBackStackEntry) {
+        val savedStateHandle = navBackStackEntry.savedStateHandle
+        val reply = savedStateHandle.get<Any>(MainNavArgs.reply)
+        if (reply is VideoCommentReplyInfo) {
+            val parentId = reply.parent
+            var position = 0
+            if (parentId != viewModel.reply.id) {
+                val index = viewModel.list.data.indexOfFirst { it.id == parentId }
+                if (index in viewModel.list.data.indices) {
+                    position = index + 1
                 }
-                savedStateHandle[MainNavArgs.reply] = null
+            }
+            mAdapter?.addData(
+                position,
+                VideoCommentViewAdapter.convertToVideoCommentViewInfo(reply)
+            )
+            if (position == 0) {
+                toListTop()
             }
         }
+        savedStateHandle[MainNavArgs.reply] = null
     }
 
     private fun toSelfLink(view: View, url: String) {
@@ -196,6 +202,22 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         }
     }
 
+    private fun toSendCommentPage(reply: VideoCommentViewInfo) {
+        val content = reply.content.message.split("\n")[0]
+        val params = SendCommentParam(
+            type = 3,
+            oid = reply.oid.toString(),
+            root = viewModel.reply.id.toString(),
+            parent = reply.id.toString(),
+            content = content,
+            image = reply.avatar,
+            name = reply.uname,
+            title = ""
+        )
+        val args = SendCommentFragment.createArguments(params)
+        findNavController().navigate(SendCommentFragment.actionId, args)
+    }
+
     private val handleUserClick = View.OnClickListener {
         val id = it.tag
         if (id != null && id is String) {
@@ -210,6 +232,29 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
     }
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
+        val item = adapter.getItem(position) as VideoCommentViewInfo
+        MaterialAlertDialogBuilder(requireContext()).apply {
+//            setTitle("评论操作")
+            val menuItems = if (viewModel.isSelfReply(item)) {
+                arrayOf<CharSequence>("回复评论", "删除评论",)
+            } else {
+                arrayOf<CharSequence>("回复评论",)
+            }
+            setItems(
+                menuItems
+            ) { _, i ->
+                when (i) {
+                    0 -> toSendCommentPage(item)
+                    1 -> {
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            if (viewModel.delete(item)) {
+                                mAdapter?.removeAt(position)
+                            }
+                        }
+                    }
+                }
+            }
+        }.show()
     }
 
     private val handleHeaderLongClick = View.OnLongClickListener {

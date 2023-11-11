@@ -77,17 +77,12 @@ class PlayerController(
             showFullModeMenu(it)
             true
         }
-        sendDanmakuView.setOnClickListener {
-            val nav = Navigation.findNavController(
-                activity, R.id.nav_bottom_sheet_fragment
-            )
-            nav.navigateToCompose(PageRoute.Player.sendDanmaku.url())
-        }
         danmakuContext = that.danmakuContext
         qualityView.setOnClickListener(that::showQualityPopupMenu)
         speedView.setOnClickListener(that::showSpeedPopupMenu)
         moreBtn.setOnClickListener(that::showMoreMenu)
         setExpandButtonOnClickListener(that::showPagesOrEpisodes)
+        setSendDanmakuButtonOnClickListener(that::showSendDanmakuPage)
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)
         updatePlayerMode(activity.resources.configuration)
@@ -325,6 +320,19 @@ class PlayerController(
             nav.navigate(BangumiPagesFragment.actionId, args)
         }
 
+    }
+
+    private fun showSendDanmakuPage(view: View) {
+        if (
+            views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
+            && delegate.isPlaying()) {
+            views.videoPlayer.onVideoPause()
+            views.videoPlayer.hideController()
+        }
+        val nav = Navigation.findNavController(
+            activity, R.id.nav_bottom_sheet_fragment
+        )
+        nav.navigateToCompose(PageRoute.Player.sendDanmaku.url())
     }
 
     private fun moreMenuItemClick(item: MenuItem): Boolean {

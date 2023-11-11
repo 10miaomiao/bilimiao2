@@ -52,6 +52,7 @@ import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManag
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
+import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -217,6 +218,7 @@ class PlayerDelegate2(
                         .createMediaSource(audioMedia)
                 )
             }
+
             "[merging]" -> {
                 // 音视频分离
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
@@ -232,6 +234,7 @@ class PlayerDelegate2(
                         .createMediaSource(audioMedia)
                 )
             }
+
             "[concatenating]" -> {
                 // 视频拼接
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
@@ -247,6 +250,7 @@ class PlayerDelegate2(
                     }
                 }
             }
+
             "[dash-mpd]" -> {
                 // Create a data source factory.
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
@@ -289,7 +293,7 @@ class PlayerDelegate2(
 
     internal fun historyReport() {
         val progress = views.videoPlayer.currentPosition / 1000
-        DebugMiao.log("historyReport",progress)
+        DebugMiao.log("historyReport", progress)
         playerSource?.let {
             activity.lifecycleScope.launch(Dispatchers.IO) {
                 it.historyReport(progress)
@@ -545,10 +549,18 @@ class PlayerDelegate2(
     }
 
     override fun isPlaying(): Boolean {
-        return views.videoPlayer.isInPlayingState
+//        return views.videoPlayer.isInPlayingState
+        return views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PLAYING ||
+                views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PLAYING_BUFFERING_START
     }
 
-    override fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?) {
+    override fun setWindowInsets(
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+        displayCutout: DisplayCutout?
+    ) {
         views.videoPlayer.setWindowInsets(left, top, right, bottom, displayCutout)
     }
 
@@ -607,6 +619,9 @@ class PlayerDelegate2(
             borderColor = 0xFFFFFFFF.toInt()
         }
         views.videoPlayer.addDanmaku(danmaku)
+        if (!isPlaying()) {
+            views.videoPlayer.onVideoResume()
+        }
     }
 
     override fun setProxy(proxyServer: ProxyServerInfo, uposHost: String) {

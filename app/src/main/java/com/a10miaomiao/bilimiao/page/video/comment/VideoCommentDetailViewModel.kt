@@ -22,6 +22,8 @@ import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.kongzue.dialogx.dialogs.PopTip
+import com.kongzue.dialogx.dialogs.TipDialog
+import com.kongzue.dialogx.dialogs.WaitDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -199,6 +201,9 @@ class VideoCommentDetailViewModel(
 
     fun delete() = viewModelScope.launch(Dispatchers.IO) {
         try {
+            withContext(Dispatchers.Main) {
+                WaitDialog.show("正在删除")
+            }
             val res = BiliApiService.commentApi
                 .del(
                     reply.oid.toString(),
@@ -208,26 +213,69 @@ class VideoCommentDetailViewModel(
                 .gson<MessageInfo>()
             if (res.isSuccess) {
                 withContext(Dispatchers.Main) {
-                    PopTip.show("已删除该条评论")
+                    TipDialog.show("已删除", WaitDialog.TYPE.SUCCESS)
                     // 回调到列表移除
-                    fragment.findNavController()
-                        .popBackStack()
+                    val navController = fragment.findNavController()
+                    navController.previousBackStackEntry?.savedStateHandle?.let {
+                        it[MainNavArgs.index] = index
+                        it[MainNavArgs.reply] = reply.copy(
+                            isDelete = true,
+                        )
+                    }
+                    navController.popBackStack()
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    PopTip.show(res.message)
+                    TipDialog.show(res.message, WaitDialog.TYPE.WARNING)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
+                TipDialog.show("删除失败", WaitDialog.TYPE.ERROR)
+//                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }
 
+    suspend fun delete(reply: VideoCommentViewInfo): Boolean {
+        try {
+            withContext(Dispatchers.Main) {
+                WaitDialog.show("正在删除")
+            }
+            val res = BiliApiService.commentApi
+                .del(
+                    reply.oid.toString(),
+                    reply.id.toString()
+                )
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.isSuccess) {
+                withContext(Dispatchers.Main) {
+                    TipDialog.show("已删除", WaitDialog.TYPE.SUCCESS)
+                }
+                return true
+            } else {
+                withContext(Dispatchers.Main) {
+                    TipDialog.show(res.message, WaitDialog.TYPE.WARNING)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                TipDialog.show("删除失败", WaitDialog.TYPE.ERROR)
+//                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
+            }
+        }
+        return false
+    }
+
     fun isSelfReply(): Boolean {
-        return userStore.isSelf(reply.mid.toString())
+        return isSelfReply(reply)
+    }
+
+    fun isSelfReply(info: VideoCommentViewInfo): Boolean {
+        return userStore.isSelf(info.mid.toString())
     }
 
 

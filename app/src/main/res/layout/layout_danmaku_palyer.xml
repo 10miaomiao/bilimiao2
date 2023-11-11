@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -79,11 +80,12 @@
                 android:textColor="#ffffff" />
 
             <ImageView
-                android:id="@+id/send_danmaku"
+                android:id="@+id/send_danmaku_mini"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:paddingRight="8dp"
-                android:src="@drawable/ic_danmaku" />
+                android:src="@drawable/ic_baseline_send_24"
+                app:tint="@color/white"/>
 
             <ImageView
                 android:id="@+id/fullscreen"
@@ -108,16 +110,25 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginRight="20dp"
                 android:background="@null"
                 android:gravity="center"
                 android:src="@drawable/bili_player_play_can_play" />
 
-            <FrameLayout
+            <TextView
+                android:id="@+id/send_danmaku"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:layout_weight="1"
-                android:orientation="horizontal"></FrameLayout>
+                android:text="发送弹幕"
+                android:background="@drawable/shape_send_danmaku_bg"
+                android:gravity="center" />
+
+<!--            <FrameLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_weight="1"-->
+<!--                android:orientation="horizontal"></FrameLayout>-->
 
             <LinearLayout
                 android:id="@+id/subtitle_switch"
