@@ -363,12 +363,14 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // start 长按倍速播放
     private var touchSurfaceDownTime = Long.MAX_VALUE
     private var isSpeedPlaying = false
+    private var lastSpeed = 0f  // init an invalid value
     private val longClickControlTask = Runnable {
         if (System.currentTimeMillis() - touchSurfaceDownTime >= 500
             && mCurrentState == CURRENT_STATE_PLAYING
             && !mChangePosition && !mChangeVolume && !mBrightness) {
             isSpeedPlaying = true
-            speed = 2f
+            lastSpeed = speed
+            speed *= 2
             mSpeedTips.visibility = View.VISIBLE
             mTouchingProgressBar = false
             (mSpeedTipsIV.drawable as? AnimationDrawable)?.start()
@@ -394,7 +396,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         if (isSpeedPlaying) {
             mSpeedTips.visibility = View.GONE
             isSpeedPlaying = false
-            speed = 1f
+            speed = lastSpeed
             (mSpeedTipsIV.drawable as? AnimationDrawable)?.stop()
         } else {
             super.touchSurfaceUp()
