@@ -36,6 +36,7 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "user.follow"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://user/follow?id={id}&type={type}&name={name}")
             argument(MainNavArgs.id) {
                 type = NavType.StringType
                 nullable = false

@@ -49,6 +49,7 @@ class MyBangumiFragment: Fragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "user.bangumi.myself"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://user/bangumi")
         }
     }
 

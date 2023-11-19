@@ -53,7 +53,7 @@ class AppBarBehaviorDelegate(
 
     override fun clampViewPositionHorizontal(child: View, left: Int, dx: Int): Int {
         return if (parent.orientation == ScaffoldView.HORIZONTAL) {
-            left
+            if (left > 0) 0 else left
         } else {
             0
         }
@@ -61,7 +61,7 @@ class AppBarBehaviorDelegate(
 
     override fun clampViewPositionVertical(child: View, top: Int, dy: Int): Int {
         return if (parent.orientation == ScaffoldView.VERTICAL) {
-            top
+            if (top < 0) 0 else top
         } else {
             0
         }
@@ -106,12 +106,12 @@ class AppBarBehaviorDelegate(
         } else {
             if (
                 targetState == STATE_COLLAPSED
-                && yvel > touchSlop
+                && xvel > touchSlop
             ) {
                 targetState = STATE_EXPANDED
             } else if (
                 targetState == STATE_EXPANDED
-                && yvel < -touchSlop
+                && xvel < -touchSlop
             ) {
                 targetState = STATE_COLLAPSED
             }
@@ -138,14 +138,17 @@ class AppBarBehaviorDelegate(
                 val initialY = ev.y
                 val initialX = ev.x
                 val scroll = nestedScrollingChildRef?.get()
-                if (scroll != null && parent.isPointInChildBounds(
-                        scroll,
-                        initialX.toInt(),
-                        initialY.toInt()
-                    )
-                ) {
-                    return false
-                }
+
+//                if (scroll != null
+//                    && parent.isPointInChildBounds(
+//                        scroll,
+//                        initialX.toInt(),
+//                        initialY.toInt()
+//                    )
+////                    && !scroll.canScrollVertically(-1)
+//                ) {
+//                    return false
+//                }
                 this.initialY = initialY
             } else if (
                 ev.action == MotionEvent.ACTION_MOVE
@@ -205,8 +208,10 @@ class AppBarBehaviorDelegate(
         parent.changedDrawerState(dragState)
         if (dragState == STATE_COLLAPSED) {
             appbarView.setAalpha(1f)
+            appbarView.requestLayout()
         } else if (dragState == STATE_EXPANDED) {
             appbarView.setAalpha(0f)
+            appbarView.requestLayout()
         }
     }
 

@@ -171,4 +171,7 @@ class VideoCommentListViewModel(
             }
         }
     }
+
+    fun isLogin() = userStore.isLogin()
+
 }

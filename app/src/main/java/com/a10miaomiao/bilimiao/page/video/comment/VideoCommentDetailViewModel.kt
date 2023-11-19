@@ -278,5 +278,6 @@ class VideoCommentDetailViewModel(
         return userStore.isSelf(info.mid.toString())
     }
 
+    fun isLogin() = userStore.isLogin()
 
 }
