@@ -64,6 +64,7 @@ import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.chad.library.adapter.base.listener.OnItemLongClickListener
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
@@ -145,8 +146,11 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
                 pm.setOnMenuItemClickListener(handleMenuItemClickListener)
                 pm.show()
             }
-
             MenuKeys.send -> {
+                if (!viewModel.isLogin()) {
+                    PopTip.show("请先登录")
+                    return
+                }
                 val params = SendCommentParam(
                     type = 1,
                     oid = viewModel.id,

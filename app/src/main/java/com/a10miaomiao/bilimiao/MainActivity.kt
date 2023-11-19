@@ -469,6 +469,9 @@ class MainActivity
 
 
     override fun onBackPressed() {
+        if (leftFragment.onBackPressed()) {
+            return
+        }
         if (ui.root.isDrawerOpen()) {
             ui.root.closeDrawer()
             return

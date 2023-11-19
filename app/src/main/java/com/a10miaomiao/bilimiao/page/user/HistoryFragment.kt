@@ -63,6 +63,7 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "history"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://history")
             argument(MainNavArgs.text) {
                 type = NavType.StringType
                 nullable = true

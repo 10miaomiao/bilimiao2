@@ -323,6 +323,10 @@ class PlayerController(
     }
 
     private fun showSendDanmakuPage(view: View) {
+        if (!userStore.isLogin()) {
+            PopTip.show("请先登录")
+            return
+        }
         if (
             views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
             && delegate.isPlaying()) {

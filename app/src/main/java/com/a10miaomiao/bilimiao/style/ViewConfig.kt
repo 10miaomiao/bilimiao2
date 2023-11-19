@@ -15,6 +15,8 @@ class ViewConfig(val context: Context) {
     val bottomSheetTitleHeight = context.dip(30)
 
     val smallPadding get() = context.dip(5)
+    val largePadding get() = context.dip(20)
+
     val dividerSize get() = context.dip(8)
     val regionIconSize get() = context.dip(24)
 

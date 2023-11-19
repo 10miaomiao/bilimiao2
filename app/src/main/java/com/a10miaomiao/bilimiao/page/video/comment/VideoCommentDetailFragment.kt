@@ -50,6 +50,7 @@ import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.chad.library.adapter.base.listener.OnItemLongClickListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.impl.DefaultPercentProgress
@@ -114,6 +115,10 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         super.onMenuItemClick(view, menuItem)
         when (menuItem.key) {
             MenuKeys.send -> {
+                if (!viewModel.isLogin()) {
+                    PopTip.show("请先登录")
+                    return
+                }
                 val replyParams = viewModel.reply
                 val content = replyParams.content.message.split("\n")[0]
                 val params = SendCommentParam(
@@ -203,6 +208,10 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
     }
 
     private fun toSendCommentPage(reply: VideoCommentViewInfo) {
+        if (!viewModel.isLogin()) {
+            PopTip.show("请先登录")
+            return
+        }
         val content = reply.content.message.split("\n")[0]
         val params = SendCommentParam(
             type = 3,

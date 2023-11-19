@@ -208,7 +208,7 @@ fun QrCodeLoginPage() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(5.dp)
+                .padding(20.dp)
                 .clickable {
                     isFullScreenQrcode = false
                 }

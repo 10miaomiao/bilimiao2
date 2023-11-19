@@ -49,6 +49,7 @@ class UserFavouriteListFragment : Fragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "user.favourite.list"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://user/fav/list?mid={id}&name={name}")
             argument(MainNavArgs.id) {
                 type = NavType.StringType
                 nullable = false

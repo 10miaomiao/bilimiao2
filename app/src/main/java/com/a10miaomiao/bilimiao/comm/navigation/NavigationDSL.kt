@@ -17,10 +17,9 @@ fun NavController.navigateToCompose(url: String) = navigate(
 
 fun ScaffoldView.openSearchDrawer() {
     openDrawer()
-    (drawerFragment as? StartFragment)?.showSoftInput()
+    (drawerFragment as? StartFragment)?.openSearchView()
 }
 
 fun ScaffoldView.closeSearchDrawer() {
-//    (drawerFragment as? StartFragment)?.hideSoftInput()
     closeDrawer()
 }
