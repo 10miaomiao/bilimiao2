@@ -1,11 +1,21 @@
 package cn.a10miaomiao.bilimiao.compose.pages.download
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.DocumentsContract
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -17,12 +27,15 @@ import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
 import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadListItem
 import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -40,6 +53,7 @@ class DownloadListPageViewModel(
     var downloadListVersion = 0
     val downloadList = MutableStateFlow(emptyList<BiliDownloadEntryAndPathInfo>())
     val curDownload = MutableStateFlow<CurrentDownloadInfo?>(null)
+    var downloadPath = ""
 
     init {
         loadDownloadList()
@@ -47,6 +61,7 @@ class DownloadListPageViewModel(
 
     private fun loadDownloadList() = viewModelScope.launch {
         val service = DownloadService.getService(fragment.requireContext())
+        downloadPath = service.getDownloadPath()
         _loadDownloadList(service)
         launch {
             service.downloadListVersion.collect {
@@ -165,6 +180,24 @@ class DownloadListPageViewModel(
             )
         )
     }
+
+    fun openBiliDownOutGithubWebsite() {
+        val uri = Uri.parse("https://github.com/10miaomiao/bili-down-out")
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = uri
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        fragment.requireContext().startActivity(intent)
+    }
+
+    fun copyDownloadPathToClipboard() {
+        val context = fragment.requireContext()
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboardManager.setPrimaryClip(ClipData.newPlainText("", downloadPath))
+        // 安卓13(33)以上操作剪切板会自动提示，无需手动toast
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
+            PopTip.show("已复制路径到剪切板")
+        }
+    }
 }
 
 
@@ -172,7 +205,14 @@ class DownloadListPageViewModel(
 @Composable
 fun DownloadListPage() {
     PageConfig(
-        title = "下载列表"
+        title = "下载列表",
+        menus = listOf(
+            MenuItemPropInfo(
+                key = 0,
+                iconFileName = "ic_baseline_lightbulb_24",
+                title = "提示",
+            )
+        )
     )
     val viewModel: DownloadListPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
@@ -186,6 +226,60 @@ fun DownloadListPage() {
     val list = remember(downloadList, status) {
         viewModel.filterDownloadList(downloadList, status)
     }
+
+    var showHelpDialog by remember { mutableStateOf(false) }
+    PageMenuItemClick(
+        onMenuItemClick = { menuItem ->
+            when(menuItem.key) {
+                0 -> showHelpDialog = true
+            }
+        }
+    )
+
+    if (showHelpDialog) {
+        val downloadPath = viewModel.downloadPath
+        AlertDialog(
+            onDismissRequest = { showHelpDialog = false },
+            title = { Text(text = "导出文件夹") },
+            text = {
+                Column() {
+                    Text(text = "视频输出文件夹为：${downloadPath}")
+                    Text(text = "目录结构与B站官方客户端保持一致，可与B站官方客户端相互复制缓存文件")
+                    Text(text = "如需导出视频文件可使用BiliDownOut导出")
+                }
+            },
+            confirmButton = {
+                Row() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                        TextButton(
+                            onClick = {
+                                viewModel.openBiliDownOutGithubWebsite()
+                                showHelpDialog = false
+                            },
+                        ) {
+                            Text("下载BiliDownOut")
+                        }
+                    }
+                    TextButton(
+                        onClick = {
+                            viewModel.copyDownloadPathToClipboard()
+                            showHelpDialog = false
+                        },
+                    ) {
+                        Text("复制路径")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showHelpDialog = false },
+                ) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+
 
     LazyColumn(
         modifier = Modifier
