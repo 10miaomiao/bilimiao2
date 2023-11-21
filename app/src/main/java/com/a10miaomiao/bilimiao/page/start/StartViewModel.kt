@@ -105,11 +105,24 @@ class StartViewModel(
         return "bilimiao://compose?url=${Uri.encode(url)}"
     }
 
-    fun initSuggestData(keyword: String) {
+    private fun showSearchKeywordHistory() {
+        DebugMiao.log(historyList)
+        ui.setState {
+            suggestList = historyList.map {
+                SuggestInfo(
+                    text = it,
+                    value = it,
+                    type = SuggestType.HISTORY
+                )
+            }.toMutableList()
+        }
+    }
+
+    private fun initSuggestData(keyword: String) {
         suggestList = mutableListOf(
             SuggestInfo(
                 text = "直接搜索“${keyword}”",
-                type = "SEARCH",
+                type = SuggestType.SEARCH,
                 value = keyword,
             )
         )
@@ -117,14 +130,14 @@ class StartViewModel(
             suggestList.add(
                 SuggestInfo(
                     text = "查看视频“AV${keyword}”",
-                    type = "AV",
+                    type = SuggestType.AV,
                     value = keyword,
                 )
             )
             suggestList.add(
                 SuggestInfo(
                     text = "查看番剧“SS${keyword}”",
-                    type = "SS",
+                    type = SuggestType.SS,
                     value = keyword,
                 )
             )
@@ -136,9 +149,7 @@ class StartViewModel(
      */
     fun loadSuggestData(keyword: String, editText: EditText) = viewModelScope.launch(Dispatchers.IO) {
         if (keyword.isEmpty()) {
-            ui.setState {
-                suggestList.clear()
-            }
+            showSearchKeywordHistory()
             return@launch
         }
         ui.setState {
@@ -157,7 +168,7 @@ class StartViewModel(
                         suggestList.add(SuggestInfo(
                             text = value,
                             value = value,
-                            type = "TEXT"
+                            type = SuggestType.TEXT
                         ))
                     }
                 }
@@ -220,9 +231,17 @@ class StartViewModel(
         return s.toCharArray().all { Character.isDigit(it) }
     }
 
+    enum class SuggestType {
+        TEXT, // 普通文字
+        SEARCH, // 直接搜索
+        AV, // 视频ID，AV号跳转
+        SS, // 番剧ID，SS号跳转
+        HISTORY, // 历史搜索
+    }
+
     data class SuggestInfo(
         val text: String, // 显示文字
-        val type: String, // 类型：TEXT:普通文字、SEARCH:直接搜索、AV:视频ID、SS:番剧ID
+        val type: SuggestType,
         val value: String,
     )
 
