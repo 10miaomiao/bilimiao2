@@ -11,6 +11,7 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.inputmethod.EditorInfo
@@ -27,11 +28,13 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import bilibili.app.dynamic.v1.DynamicOuterClass.SVideoItem
 import cn.a10miaomiao.miao.binding.android.view._backgroundColor
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._imageResource
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -58,25 +61,19 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.shadowLayout
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
-import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
-import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
-import com.a10miaomiao.bilimiao.widget.layout.SideSlideLayout
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.chad.library.adapter.base.listener.OnItemLongClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
@@ -90,7 +87,6 @@ import splitties.views.bottomPadding
 import splitties.views.dsl.core.editText
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
-import splitties.views.dsl.core.horizontalMargin
 import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.margin
@@ -108,7 +104,9 @@ import splitties.views.gravityBottomCenter
 import splitties.views.gravityCenter
 import splitties.views.horizontalPadding
 import splitties.views.imageResource
+import splitties.views.leftPadding
 import splitties.views.padding
+import splitties.views.rightPadding
 import splitties.views.verticalPadding
 
 class StartFragment : Fragment(), DIAware, MyPage {
@@ -150,7 +148,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private lateinit var mSearchCloseIconView: ImageView
     private lateinit var mSuggestRecycler: RecyclerView
 
-    private val viewModel by diViewModel<StartViewModel>(di)
+    private val viewModel by lazy { StartViewModel(di) }
     private val supportHelper by instance<SupportHelper>()
     private val themeDelegate by instance<ThemeDelegate>()
     private val scaffoldApp by lazy { requireActivity().getScaffoldView() }
@@ -280,7 +278,18 @@ class StartFragment : Fragment(), DIAware, MyPage {
         (mSearchView.layoutParams as MarginLayoutParams).let {
             it.margin = config.largePadding
         }
+    }
 
+    private fun showDeleteAllHistoryDialog() {
+        MaterialAlertDialogBuilder(requireContext()).apply {
+            setTitle("确认清空，喵？")
+            setMessage("将清空搜索历史关键字")
+            setPositiveButton("确定清空") { _, _ ->
+                viewModel.deleteAllSearchHistory()
+                PopTip.show("已清空了喵")
+            }
+            setNegativeButton("取消", null)
+        }.show()
     }
 
     private val handleEditorAction = TextView.OnEditorActionListener { v, actionId, event ->
@@ -343,67 +352,40 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val item = adapter.data[position]
         if (item is StartViewModel.SuggestInfo) {
             when (item.type) {
-                "SEARCH" -> {
-                    val keyword = item.value
-                    viewModel.startSearch(keyword, view)
-                }
-
-                "AV" -> {
+                StartViewModel.SuggestType.AV -> {
                     scaffoldApp.closeSearchDrawer()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = VideoInfoFragment.createArguments(item.value)
                     nav.navigate(VideoInfoFragment.actionId, args)
                 }
-
-                "SS" -> {
+                StartViewModel.SuggestType.SS -> {
                     scaffoldApp.closeSearchDrawer()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = BangumiDetailFragment.createArguments(item.value)
                     nav.navigate(BangumiDetailFragment.actionId, args)
                 }
-
                 else -> {
-                    val keyword = item.text
+                    val keyword = item.value
                     viewModel.startSearch(keyword, view)
                 }
             }
         }
     }
 
-    private val handleHistoryTagItemClick = OnItemClickListener { adapter, view, position ->
-        val item = adapter.data[position]
-        if (item is String) {
-            viewModel.startSearch(item, view)
-        }
-    }
-
-    private val handleHistoryTagItemLongClick = OnItemLongClickListener { adapter, view, position ->
-        val item = adapter.data[position]
-        if (item is String) {
-            MaterialAlertDialogBuilder(requireContext()).apply {
-                setTitle("确认删除，喵？")
-                setMessage("将删除搜索历史关键字“${item}”")
-                setNegativeButton("确定") { dialog, which ->
-                    viewModel.deleteSearchHistory(item)
-                    PopTip.show("已删除”${item}“")
-                }
-                setPositiveButton("取消", null)
-            }.show()
-        }
-        true
-    }
-
-    private val handleDeleteHistoryClick = View.OnClickListener {
+    private val handleHistoryDeleteItemClick = OnClickListener { view ->
+        val text = view.tag as? String ?: return@OnClickListener
         MaterialAlertDialogBuilder(requireContext()).apply {
-            setTitle("确认清空，喵？")
-            setMessage("将清空搜索历史关键字")
-            setNegativeButton("确定清空") { dialog, which ->
-                viewModel.deleteAllSearchHistory()
-                PopTip.show("已清空了喵")
+            setTitle("确认删除，喵？")
+            setMessage("将删除搜索历史关键字“${text}”")
+            setPositiveButton("确定") { _, _ ->
+                viewModel.deleteSearchHistory(text)
+                PopTip.show("已删除”${text}“")
             }
-            setPositiveButton("取消", null)
+            setNegativeButton("取消", null)
+            setNeutralButton("清空全部") { _, _ ->
+                showDeleteAllHistoryDialog()
+            }
         }.show()
-
     }
 
     private val handleCheckedChange = CompoundButton.OnCheckedChangeListener { compoundButton, b ->
@@ -428,11 +410,27 @@ class StartFragment : Fragment(), DIAware, MyPage {
             setBackgroundResource(config.selectableItemBackground)
             horizontalPadding = config.pagePadding
             verticalPadding = config.largePadding
+            gravity = Gravity.CENTER_VERTICAL
 
             views {
+                +imageView {
+                    _show = item.type == StartViewModel.SuggestType.HISTORY
+                    imageResource = R.drawable.ic_history_gray_24dp
+                    rightPadding = config.pagePadding
+                }
                 +textView {
                     _text = item.text
                     textSize = 16f
+                    rightPadding = config.pagePadding
+                }..lParams(matchParent, wrapContent) {
+                    weight = 1f
+                }
+                +imageView {
+                    _show = item.type == StartViewModel.SuggestType.HISTORY
+                    _tag = item.value
+                    imageResource = R.drawable.ic_baseline_delete_outline_24
+                    setBackgroundResource(config.selectableItemBackgroundBorderless)
+                    setOnClickListener(handleHistoryDeleteItemClick)
                 }
             }
         }

@@ -136,9 +136,8 @@ class AppBarBehaviorDelegate(
                 && ev.y > top
             ) {
                 val initialY = ev.y
-                val initialX = ev.x
-                val scroll = nestedScrollingChildRef?.get()
-
+//                val initialX = ev.x
+//                val scroll = nestedScrollingChildRef?.get()
 //                if (scroll != null
 //                    && parent.isPointInChildBounds(
 //                        scroll,
@@ -154,6 +153,8 @@ class AppBarBehaviorDelegate(
                 ev.action == MotionEvent.ACTION_MOVE
                 && initialY > 0f
                 && abs(initialY - ev.y) > dragger.touchSlop
+                // 展开状态时，不响应上拉操作
+                && (targetState != STATE_EXPANDED || initialY < ev.y)
             ) {
                 dragger.captureChildView(appbarView, ev.getPointerId(ev.actionIndex))
             } else if (
