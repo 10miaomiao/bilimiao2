@@ -516,7 +516,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         entryJsonFile.writeText(entryJsonStr)
     }
 
-    private fun getDownloadPath(): String {
+    fun getDownloadPath(): String {
         var file = File(getExternalFilesDir(null), "../download")
         if (!file.exists()) {
             file.mkdir()
