@@ -43,6 +43,8 @@ class ViewConfig(val context: Context) {
     val foregroundColor get() = context.resources.getColor(foregroundColorResource)
     val foregroundAlpha45Color get() = (foregroundColor and 0x00FFFFFF) or 0x71000000
 
+    private val isLightThemeResource get() = context.attr(R.attr.isLightTheme)
+    val isLightTheme get() = context.resources.getBoolean(isLightThemeResource)
 
     val lineColorResource get() = context.attr(R.attr.lineColor)
     val lineColor get() = context.resources.getColor(lineColorResource)
