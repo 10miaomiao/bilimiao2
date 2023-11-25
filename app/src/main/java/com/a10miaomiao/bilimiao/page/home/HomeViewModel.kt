@@ -15,6 +15,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.RegionStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
@@ -24,10 +25,7 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 import java.io.IOException
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.util.*
 
 class HomeViewModel(
@@ -52,6 +50,29 @@ class HomeViewModel(
         return state.timeFrom.getValue("-") + " 至 " + state.timeTo.getValue("-")
     }
 
+    private suspend fun getMiaoInitData(version: String): MiaoAdInfo {
+        val sp = context.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
+        val calendar = GregorianCalendar()
+        val curDate = version + calendar.get(Calendar.YEAR) +
+                calendar.get(Calendar.MONTH) +
+                calendar.get(Calendar.DATE)
+        val lastDate = sp.getString("miao_init_request_date", "")
+        if (curDate == lastDate) {
+            // 同一天不重复请求init接口，节省服务器资源
+            val inputStream = context.openFileInput("miaoInit.json")
+            val jsonStr = inputStream.reader().readText()
+            return Gson().fromJson(jsonStr, MiaoAdInfo::class.java)
+        }
+        val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$version"
+        val res = MiaoHttp.request(url).awaitCall().gson<MiaoAdInfo>()
+        val cacheJsonStr = Gson().toJson(res)
+        sp.edit().putString("miao_init_request_date", curDate).apply()
+        val outputStream = context.openFileOutput("miaoInit.json", Context.MODE_PRIVATE);
+        outputStream.write(cacheJsonStr.toByteArray());
+        outputStream.close();
+        return res
+    }
+
     /**
      * 加载广告信息
      */
@@ -64,8 +85,7 @@ class HomeViewModel(
             } else {
                 info.versionCode.toLong()
             }
-            val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$longVersionCode"
-            val res = MiaoHttp.request(url).call().gson<MiaoAdInfo>()
+            val res = getMiaoInitData(longVersionCode.toString())
             if (res.code == 0) {
                 ui.setState {
                     adInfo = res.data.ad
