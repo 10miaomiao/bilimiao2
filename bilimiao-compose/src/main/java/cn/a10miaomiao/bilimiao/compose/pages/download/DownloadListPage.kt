@@ -240,10 +240,10 @@ fun DownloadListPage() {
         val downloadPath = viewModel.downloadPath
         AlertDialog(
             onDismissRequest = { showHelpDialog = false },
-            title = { Text(text = "导出文件夹") },
+            title = { Text(text = "下载路径") },
             text = {
                 Column() {
-                    Text(text = "视频输出文件夹为：${downloadPath}")
+                    Text(text = "视频下载文件夹为：${downloadPath}")
                     Text(text = "目录结构与B站官方客户端保持一致，可与B站官方客户端相互复制缓存文件")
                     Text(text = "如需导出视频文件可使用BiliDownOut导出")
                 }

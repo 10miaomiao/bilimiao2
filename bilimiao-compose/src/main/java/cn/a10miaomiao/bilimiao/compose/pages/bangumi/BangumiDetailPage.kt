@@ -224,7 +224,10 @@ class BangumiDetailPageViewModel(
 
     fun toCommentListPage(item: EpisodeInfo) {
         val id = item.aid
-        val uri = Uri.parse("bilimiao://video/comment/$id")
+        val title = Uri.encode(item.title + if (item.long_title.isBlank()) "" else "_" + item.long_title)
+        val cover = Uri.encode(item.cover)
+        val name = Uri.encode(detailInfo.value?.season_title ?: "")
+        val uri = Uri.parse("bilimiao://video/comment/$id?title=$title&cover=$cover&name=$name")
         fragment.findNavController().navigate(uri)
     }
 
