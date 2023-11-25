@@ -253,6 +253,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     private fun initView() {
+        mSeekRatio = 2f
         isShowDragProgressTextOnSeekBar = true
         enlargeImageRes = R.drawable.ic_player_portrait_fullscreen
         shrinkImageRes = R.drawable.ic_player_portrait_fullscreen
