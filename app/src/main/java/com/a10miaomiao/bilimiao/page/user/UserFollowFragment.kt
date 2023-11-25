@@ -13,8 +13,8 @@ import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.miao.binding.android.view.*
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
@@ -22,6 +22,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.web.NestedScrollWebView
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -80,6 +81,8 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
 
     private val userStore by instance<UserStore>()
 
+    private val themeDelegate by instance<ThemeDelegate>()
+
     private val type by lazy { requireArguments().getString(MainNavArgs.type) }
     private val mid by lazy { requireArguments().getString(MainNavArgs.id) }
     private val name by lazy { requireArguments().getString(MainNavArgs.name) }
@@ -111,15 +114,15 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
                     .navigate(UserFragment.actionId, args)
                 return true
             }
-//            if (night){
-//                url += if("?" in url){
-//                    "&night=1"
-//                }else{
-//                    "?night=1"
-//                }
-//                view.loadUrl(url)
-//                return true
-//            }
+            if (isNightTheme()){
+                url += if("?" in url){
+                    "&night=1"
+                }else{
+                    "?night=1"
+                }
+                view.loadUrl(url)
+                return true
+            }
             return false
         }
 
@@ -148,12 +151,14 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
             webView.settings.apply {
                 javaScriptEnabled = true
             }
-            var url = ""
-//      if (night) url += "&night=1"
-            webView.loadUrl("https://space.bilibili.com/h5/follow?type=$type&mid=$mid")
+            var url = "https://space.bilibili.com/h5/follow?type=$type&mid=$mid"
+            if (isNightTheme()) url += "&night=1"
+            webView.loadUrl(url)
             mWebView = webView
         }
     }
+
+    private fun isNightTheme() = !requireContext().config.isLightTheme
 
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
@@ -164,10 +169,10 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
             _leftPadding = contentInsets.left
             _rightPadding = contentInsets.right
             _topPadding = contentInsets.top
-            _bottomPadding = contentInsets.bottom + windowStore.bottomAppBarHeight
+            _bottomPadding = contentInsets.bottom
 
             views {
-                +view<WebView>(ID_webView) {
+                +view<NestedScrollWebView>(ID_webView) {
                     backgroundColor = config.windowBackgroundColor
                 }..lParams(matchParent, matchParent)
 
