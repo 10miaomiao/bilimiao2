@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.widget.player
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.res.Configuration
@@ -24,6 +25,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
+import com.shuyu.gsyvideoplayer.utils.CommonUtil
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
@@ -380,8 +382,21 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     override fun touchSurfaceDown(x: Float, y: Float) {
         super.touchSurfaceDown(x, y)
-        touchSurfaceDownTime = System.currentTimeMillis()
-        postDelayed(longClickControlTask, 500)
+        val edgeSize = context.dip(40)
+        var curWidth = 0
+        var curHeight = 0
+        if (activityContext != null) {
+            curWidth =
+                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenHeight else mScreenWidth
+            curHeight =
+                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenWidth else mScreenHeight
+        }
+        if (x.toInt() in edgeSize..(curWidth - edgeSize)
+            && y.toInt() in edgeSize..(curHeight - edgeSize)) {
+            // 屏幕边缘不触发长按倍数
+            touchSurfaceDownTime = System.currentTimeMillis()
+            postDelayed(longClickControlTask, 500)
+        }
     }
 
     override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {

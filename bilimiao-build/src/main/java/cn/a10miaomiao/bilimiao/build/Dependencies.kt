@@ -26,7 +26,7 @@ object Versions {
     const val gson = "2.10.1"
     const val glide = "4.13.2"
 
-    const val gsyVideoPlayer = "v8.3.5-release-jitpack"
+    const val gsyVideoPlayer = "v8.4.0-release-jitpack"
 }
 
 object Libraries {
