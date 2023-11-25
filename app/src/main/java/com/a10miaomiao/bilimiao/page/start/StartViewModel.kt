@@ -106,7 +106,6 @@ class StartViewModel(
     }
 
     private fun showSearchKeywordHistory() {
-        DebugMiao.log(historyList)
         ui.setState {
             suggestList = historyList.map {
                 SuggestInfo(
@@ -198,24 +197,19 @@ class StartViewModel(
         } else {
             (activity as? MainActivity)?.searchSelfPage(keyword)
         }
-        ui.setState {
-            historyList = searchHistoryDB.queryAllHistory()
-        }
-
+        historyList = searchHistoryDB.queryAllHistory()
     }
 
     fun deleteSearchHistory(text: String){
         searchHistoryDB.deleteHistory(text)
-        ui.setState {
-            historyList = searchHistoryDB.queryAllHistory()
-        }
+        historyList = searchHistoryDB.queryAllHistory()
+        showSearchKeywordHistory()
     }
 
     fun deleteAllSearchHistory(){
         searchHistoryDB.deleteAllHistory()
-        ui.setState {
-            historyList.clear()
-        }
+        historyList.clear()
+        showSearchKeywordHistory()
     }
 
     fun setSearchFocusState(focus: Boolean) {

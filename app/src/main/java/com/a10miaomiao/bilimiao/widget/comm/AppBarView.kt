@@ -128,9 +128,15 @@ class AppBarView @JvmOverloads constructor(
         })
     }
 
-    fun setAalpha(alpha: Float) {
+    fun setMenuAlpha(alpha: Float) {
         if (childCount > 1) {
             getChildAt(1).alpha = alpha
+        }
+    }
+
+    fun setMenuVisibility(visibility: Int) {
+        if (childCount > 1) {
+            getChildAt(1).visibility = visibility
         }
     }
 

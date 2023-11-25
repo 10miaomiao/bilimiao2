@@ -72,11 +72,11 @@ class AppBarBehaviorDelegate(
             if (parent.orientation == ScaffoldView.VERTICAL) {
                 val height = appbarView.measuredHeight - appbarView.paddingBottom
                 val top = appbarView.top
-                appbarView.setAalpha(top.toFloat() / height.toFloat())
+                appbarView.setMenuAlpha(top.toFloat() / height.toFloat())
             } else {
                 val width = appbarView.measuredWidth - appbarView.paddingLeft
                 val left = appbarView.left
-                appbarView.setAalpha(-left.toFloat() / width.toFloat())
+                appbarView.setMenuAlpha(-left.toFloat() / width.toFloat())
             }
         }
     }
@@ -207,11 +207,15 @@ class AppBarBehaviorDelegate(
             state
         }
         parent.changedDrawerState(dragState)
-        if (dragState == STATE_COLLAPSED) {
-            appbarView.setAalpha(1f)
+        if (dragState == STATE_DRAGGING) {
+            appbarView.setMenuVisibility(View.VISIBLE)
+        } else if (dragState == STATE_COLLAPSED) {
+            appbarView.setMenuAlpha(1f)
+            appbarView.setMenuVisibility(View.VISIBLE)
             appbarView.requestLayout()
         } else if (dragState == STATE_EXPANDED) {
-            appbarView.setAalpha(0f)
+            appbarView.setMenuAlpha(0f)
+            appbarView.setMenuVisibility(View.GONE)
             appbarView.requestLayout()
         }
     }
@@ -231,10 +235,12 @@ class AppBarBehaviorDelegate(
                     parent.measuredHeight + parent.measuredHeight + height
                 )
             }
-            appbarView.setAalpha(1f)
+            appbarView.setMenuAlpha(1f)
+            appbarView.setMenuVisibility(View.VISIBLE)
         } else if (dragState == STATE_EXPANDED) {
             appbarView.layout(0, 0, parent.measuredWidth, parent.measuredHeight)
-            appbarView.setAalpha(0f)
+            appbarView.setMenuAlpha(0f)
+            appbarView.setMenuVisibility(View.GONE)
         }
 
         nestedScrollingChildRef = WeakReference(findScrollingChild(appbarView))
