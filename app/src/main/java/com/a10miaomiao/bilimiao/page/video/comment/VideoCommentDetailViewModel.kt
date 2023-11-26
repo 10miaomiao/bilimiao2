@@ -180,6 +180,7 @@ class VideoCommentDetailViewModel(
                 .gson<MessageInfo>()
             if (res.isSuccess) {
                 val newItem = item.copy(
+                    like = item.like - 1 + newAction * 2,
                     isLike = newAction == 1
                 )
                 withContext(Dispatchers.Main) {
