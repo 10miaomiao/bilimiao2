@@ -244,17 +244,29 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         val item = adapter.getItem(position) as VideoCommentViewInfo
         MaterialAlertDialogBuilder(requireContext()).apply {
 //            setTitle("评论操作")
-            val menuItems = if (viewModel.isSelfReply(item)) {
-                arrayOf<CharSequence>("回复评论", "删除评论",)
+            val item = viewModel.list.data[position]
+            val likeText = if (item.isLike) {
+                "取消点赞"
             } else {
-                arrayOf<CharSequence>("回复评论",)
+                "点赞评论"
+            }
+            val menuItems = if (viewModel.isSelfReply(item)) {
+                arrayOf<CharSequence>(likeText, "回复评论", "删除评论",)
+            } else {
+                arrayOf<CharSequence>(likeText, "回复评论",)
             }
             setItems(
                 menuItems
             ) { _, i ->
                 when (i) {
-                    0 -> toSendCommentPage(item)
-                    1 -> {
+                    0 -> {
+                        viewModel.setLike(position) { item ->
+                            viewModel.list.data[position] = item
+                            mAdapter?.setData(position, item)
+                        }
+                    }
+                    1 -> toSendCommentPage(item)
+                    2 -> {
                         viewLifecycleOwner.lifecycleScope.launch {
                             if (viewModel.delete(item)) {
                                 mAdapter?.removeAt(position)
@@ -351,6 +363,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
 
     val itemUi = miaoBindingItemUi<VideoCommentViewInfo> { item, index ->
         videoCommentView(
+            index = index,
             viewInfo = item,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
