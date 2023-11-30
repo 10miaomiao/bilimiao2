@@ -35,6 +35,7 @@ import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
+import kotlin.math.min
 
 
 class DanmakuVideoPlayer : StandardGSYVideoPlayer {
@@ -237,6 +238,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mLockContainer.visibility = GONE
             }
         }
+    // 全屏状态下显示底部进度条
+    var showBottomProgressBarInFullMode = true
+    // 小屏状态下显示底部进度条
+    var showBottomProgressBarInSmallMode = true
 
     constructor(context: Context?, fullFlag: Boolean?) : super(context, fullFlag) {
         initView()
@@ -382,15 +387,19 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     override fun touchSurfaceDown(x: Float, y: Float) {
         super.touchSurfaceDown(x, y)
-        val edgeSize = context.dip(40)
-        var curWidth = 0
-        var curHeight = 0
-        if (activityContext != null) {
-            curWidth =
-                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenHeight else mScreenWidth
-            curHeight =
-                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenWidth else mScreenHeight
+        val curWidth = measuredWidth
+        val curHeight = measuredHeight
+        val edgeSize = context.dip(80).let {
+            min(min(curWidth, curHeight), it) / 2
         }
+//        var curWidth = 0
+//        var curHeight = 0
+//        if (activityContext != null) {
+//            curWidth =
+//                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenHeight else mScreenWidth
+//            curHeight =
+//                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenWidth else mScreenHeight
+//        }
         if (x.toInt() in edgeSize..(curWidth - edgeSize)
             && y.toInt() in edgeSize..(curHeight - edgeSize)) {
             // 屏幕边缘不触发长按倍数
@@ -485,6 +494,19 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mBottomSubtitleTV.visibility = VISIBLE
                 break
             }
+        }
+    }
+
+    override fun hideAllWidget() {
+        setViewShowState(mBottomContainer, INVISIBLE)
+        setViewShowState(mTopContainer, INVISIBLE)
+        setViewShowState(mStartButton, INVISIBLE)
+        if (mode == PlayerMode.FULL && showBottomProgressBarInFullMode) {
+            setViewShowState(mBottomProgressBar, VISIBLE)
+        } else if ((mode == PlayerMode.SMALL_FLOAT || mode == PlayerMode.SMALL_TOP) && showBottomProgressBarInSmallMode) {
+            setViewShowState(mBottomProgressBar, VISIBLE)
+        } else {
+            setViewShowState(mBottomProgressBar, INVISIBLE)
         }
     }
 
