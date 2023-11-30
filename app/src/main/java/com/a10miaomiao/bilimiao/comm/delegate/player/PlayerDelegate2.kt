@@ -125,7 +125,6 @@ class PlayerDelegate2(
         }
         controller.initController()
         controller.initDanmakuContext()
-        controller.initVideoPlayerSetting()
         views.videoPlayer.subtitleLoader = this::loadSubtitleData
         views.videoPlayer.subtitleSourceSelector = this::selectSourceSubtitle
 
@@ -567,10 +566,6 @@ class PlayerDelegate2(
 
     override fun updateDanmukuSetting() {
         controller.initDanmakuContext()
-    }
-
-    override fun updateVideoSetting() {
-        controller.initVideoPlayerSetting()
     }
 
     override fun onPictureInPictureModeChanged(

@@ -186,18 +186,6 @@ class PlayerController(
         views.videoPlayer.isShowDanmaKu = danmakuShow
     }
 
-    fun initVideoPlayerSetting() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        views.videoPlayer.showBottomProgressBarInFullMode = prefs.getBoolean(
-            VideoSettingFragment.PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR,
-            true
-        )
-        views.videoPlayer.showBottomProgressBarInSmallMode = prefs.getBoolean(
-            VideoSettingFragment.PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR,
-            true
-        )
-    }
-
     /**
      * 播放器是否默认全屏播放
      */
