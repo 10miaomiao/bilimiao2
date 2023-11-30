@@ -22,7 +22,6 @@ import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.connectUi
-import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -68,9 +67,6 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
         const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
 
-        const val PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR = "player_full_show_bottom_progress_bar"
-        const val PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR = "player_small_show_bottom_progress_bar"
-
         const val PLAYER_AUTO_NEXT_VIDEO = "player_auto_next_video"
         const val PLAYER_AUTO_NEXT_BANGUMI = "player_auto_next_bangumi"
 
@@ -98,8 +94,6 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
     override val di: DI by lazyUiDi(ui = { ui })
 
     private val windowStore by instance<WindowStore>()
-
-    private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     private var mAdapter: PreferencesAdapter? = null
 
@@ -158,10 +152,6 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
                     PlayerFactory.setPlayManager(Media3ExoPlayerManager::class.java)
                 }
             }
-        }
-        if (key == PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR ||
-            key == PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR) {
-            basePlayerDelegate.updateVideoSetting()
         }
     }
 
@@ -285,18 +275,6 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         switch(PLAYER_AUTO_NEXT_BANGUMI) {
             title = "番剧自动播放下一集"
-            summary = ""
-            defaultValue = true
-        }
-
-        switch(PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR) {
-            title = "全屏时显示底部进度条"
-            summary = ""
-            defaultValue = true
-        }
-
-        switch(PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR) {
-            title = "小屏时显示底部进度条"
             summary = ""
             defaultValue = true
         }
