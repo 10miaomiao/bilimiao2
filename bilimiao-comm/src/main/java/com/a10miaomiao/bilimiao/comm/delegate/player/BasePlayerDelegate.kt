@@ -11,6 +11,7 @@ interface BasePlayerDelegate: BaseDelegate {
     fun openPlayer(source: BasePlayerSource)
     fun closePlayer()
     fun updateDanmukuSetting()
+    fun updateVideoSetting()
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?)
     fun isPlaying(): Boolean
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?)
