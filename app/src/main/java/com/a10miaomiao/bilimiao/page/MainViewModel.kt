@@ -29,42 +29,52 @@ class MainViewModel(
 
     var position = -1
 
-    var navList = listOf<KClass<out Fragment>>()
+    var navList = listOf<HomeNav>()
 
     private var curHomeSettingVersion = -1
 
-    fun readNavList(): List<KClass<out Fragment>> {
+    fun readNavList(): List<HomeNav> {
         if (curHomeSettingVersion == HomeSettingFragment.homeSettingVersion) {
             return navList
         }
         curHomeSettingVersion = HomeSettingFragment.homeSettingVersion
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val list = mutableListOf<KClass<out Fragment>>(
-            HomeFragment::class
+        val list = mutableListOf<HomeNav>(
+            HomeNav.Home
         )
         if (prefs.getBoolean("home_recommend_show", true)) {
-            list.add(RecommendFragment::class)
+            list.add(HomeNav.Recommend)
         }
         if (prefs.getBoolean("home_popular_show", true)) {
-            list.add(PopularFragment::class)
+            list.add(HomeNav.Popular)
         }
         if (userStore.isLogin()) {
-            list.add(DynamicFragment::class)
+            list.add(HomeNav.Dynamic)
         }
         return list
     }
 
-    fun equalsNavList(oldList: List<KClass<out Fragment>>, newList: List<KClass<out Fragment>>): Boolean {
+    fun equalsNavList(oldList: List<HomeNav>, newList: List<HomeNav>): Boolean {
         if (oldList.size != newList.size) {
             return false
         }
         for (i in oldList.indices) {
-            if (oldList[i] != newList[i]) {
+            if (oldList[i].id != newList[i].id) {
                 return false
             }
         }
         return true
     }
 
+    sealed class HomeNav(
+        val id: Long,
+        val title: String,
+        val createFragment: () -> Fragment,
+    ) {
+        object Home : HomeNav(1L, "首页", HomeFragment::newFragmentInstance)
+        object Recommend : HomeNav(2L, "推荐", RecommendFragment::newFragmentInstance)
+        object Popular : HomeNav(3L, "热门", PopularFragment::newFragmentInstance)
+        object Dynamic : HomeNav(4L, "动态", DynamicFragment::newFragmentInstance)
+    }
 
 }
