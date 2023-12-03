@@ -31,7 +31,6 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.home.*
 import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
@@ -128,19 +127,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     private var backKeyPressedTimes = 0L
 
-    private val fragmentMap: Map<KClass<out Fragment>, () -> Fragment> = mapOf(
-        HomeFragment::class to HomeFragment::newFragmentInstance,
-        RecommendFragment::class to RecommendFragment::newFragmentInstance,
-        PopularFragment::class to PopularFragment::newFragmentInstance,
-        DynamicFragment::class to DynamicFragment::newFragmentInstance,
-    )
-    private val titleMap: Map<KClass<out Fragment>, String> = mapOf(
-        HomeFragment::class to "首页",
-        RecommendFragment::class to "推荐",
-        PopularFragment::class to "热门",
-        DynamicFragment::class to "动态"
-    )
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -234,13 +220,21 @@ class MainFragment : Fragment(), DIAware, MyPage {
             val mAdapter = object : FragmentStateAdapter(childFragmentManager, lifecycle) {
                 override fun getItemCount() = viewModel.navList.size
 
+                override fun getItemId(position: Int): Long {
+                    return viewModel.navList[position].id
+                }
+
+                override fun containsItem(itemId: Long): Boolean {
+                    return viewModel.navList.indexOfFirst { it.id == itemId } != -1
+                }
+
                 override fun createFragment(position: Int): Fragment {
-                    return fragmentMap[viewModel.navList[position]]?.invoke() ?: TemplateFragment()
+                    return viewModel.navList[position].createFragment()
                 }
             }
             viewPager.adapter = mAdapter
             TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                tab.text = titleMap[viewModel.navList[position]] ?: ""
+                tab.text = viewModel.navList[position].title
             }.attach()
             tabLayout.addOnDoubleClickTabListener {
                 val itemId = mAdapter.getItemId(it.position)
@@ -252,7 +246,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
             }
             viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    val title = titleMap[viewModel.navList[position]] ?: ""
+                    val title = viewModel.navList[position].title
                     pageTitle = "bilimiao\n-\n$title"
                     pageConfig.notifyConfigChanged()
                 }
