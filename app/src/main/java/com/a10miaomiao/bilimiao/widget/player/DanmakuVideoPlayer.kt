@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.widget.player
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -24,6 +25,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
@@ -269,11 +271,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         initDanmakuContext()
         mButtomPlay.setOnClickListener {
             clickStartIcon()
-        }
-        mDanmakuSwitch.setOnClickListener {
-            isShowDanmaKu = !isShowDanmaKu
-            cancelDismissControlViewTimer()
-            startDismissControlViewTimer()
         }
         mSubtitleSwitch.setOnClickListener {
             val menus = mutableListOf<CheckPopupMenu.MenuItemInfo<SubtitleSourceInfo?>>()
@@ -693,6 +690,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     /**
      * 控制器拓展按钮
      */
+    fun setDanmakuSwitchOnClickListener(l: OnClickListener) {
+        mDanmakuSwitch.setOnClickListener {
+            startDismissControlViewTimer()
+            l.onClick(it)
+        }
+    }
+
     fun setExpandButtonText(text: String) {
         mExpandBtnTV.text = text
     }

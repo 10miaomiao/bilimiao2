@@ -38,6 +38,7 @@ class ViewConfig(val context: Context) {
 
     val blockBackgroundResource get() = context.attr(R.attr.blockBackground)
     val blockBackgroundColor get() = context.resources.getColor(blockBackgroundResource)
+    val blockBackgroundAlpha45Color get() = (blockBackgroundColor and 0x00FFFFFF) or 0x71000000
 
     val foregroundColorResource get() = context.attr(R.attr.foregroundColor)
     val foregroundColor get() = context.resources.getColor(foregroundColorResource)

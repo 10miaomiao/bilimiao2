@@ -319,6 +319,15 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             defaultValue = false
         }
 
+        categoryHeader("其它") {
+            title = "其它"
+        }
+        switch(DanmakuSettingFragment.KEY_DANMAKU_TIME_SYNC) {
+            title = "弹幕时间校准"
+            summary = "如果弹幕抖动厉害可以关掉，修改后重新播放视频生效"
+            defaultValue = true
+        }
+
 
     }
 

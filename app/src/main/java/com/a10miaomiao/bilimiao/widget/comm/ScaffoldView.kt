@@ -57,10 +57,10 @@ class ScaffoldView @JvmOverloads constructor(
 
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
+
+    var smallModePlayerHeight = context.dip(200) // 小屏模式下的播放器高度
     var playerHeight = -3
     var playerWidth = -3
-    var _playerHeight = dip(200)
-    var _playerWidth = dip(300)
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null
