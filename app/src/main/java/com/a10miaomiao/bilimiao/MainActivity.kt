@@ -40,6 +40,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.start.StartFragment
@@ -105,7 +106,8 @@ class MainActivity
                 insets
             }
             ui.root.onPlayerChanged = {
-                statusBarHelper.isLightStatusBar = !it || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
+                statusBarHelper.isLightStatusBar =
+                    !it || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
                 setWindowInsets(ui.root.rootWindowInsets)
             }
         } else {
@@ -166,9 +168,17 @@ class MainActivity
 
         // 安卓13开始手动申请通知权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 //2、申请权限: 参数二：权限的数组；参数三：请求码
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1
+                )
             }
         }
 //        DebugMiao.log(IMiaoNavList.navList)
@@ -238,10 +248,10 @@ class MainActivity
             goBackHome()
         }
     }
-    
+
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            when(intent?.action) {
+            when (intent?.action) {
                 PlayerService.ACTION_CREATED -> {
                     PlayerService.selfInstance?.videoPlayerView = findViewById(R.id.video_player)
                 }
@@ -280,7 +290,8 @@ class MainActivity
         val right = displayMetrics.widthPixels - rectangle.right
         setWindowInsets(0, top, right, bottom, null)
     }
-    fun setWindowInsets (insets: WindowInsets) {
+
+    fun setWindowInsets(insets: WindowInsets) {
         val left = insets.systemWindowInsetLeft
         val top = insets.systemWindowInsetTop
         val right = insets.stableInsetRight
@@ -291,7 +302,14 @@ class MainActivity
         }
         setWindowInsets(left, top, right, bottom, displayCutout)
     }
-    fun setWindowInsets (left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?) {
+
+    fun setWindowInsets(
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+        displayCutout: DisplayCutout?
+    ) {
         val windowStore = store.windowStore
         windowStore.setWindowInsets(
             left, top, right, bottom,
@@ -313,7 +331,7 @@ class MainActivity
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
             if (showPlayer) {
                 windowStore.setContentInsets(
-                    left, 0, right, bottom + config.appBarTitleHeight + ui.root.playerHeight,
+                    left, 0, right, bottom + config.appBarTitleHeight + ui.root.smallModePlayerHeight,
                 )
             } else {
                 windowStore.setContentInsets(
@@ -415,7 +433,7 @@ class MainActivity
             setTitle("请求授权”通知权限“")
             setMessage("从Android13开始，需要您授予通知权限，在您向该应用授予该权限之前，该应用都将无法发送通知。\n受影响的功能：通知栏播放器控制器、下载进度通知")
             setCancelable(false)
-            setPositiveButton("去授权"){ dialog, _ ->
+            setPositiveButton("去授权") { dialog, _ ->
                 jumpNotificationSetting()
             }
             setNegativeButton("拒绝", null)
@@ -426,7 +444,11 @@ class MainActivity
      * 判断授权的方法  授权成功直接调用写入方法  这是监听的回调
      * 参数  上下文   授权结果的数组   申请授权的数组
      */
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1) {
             val i = permissions.indexOf(Manifest.permission.POST_NOTIFICATIONS)
@@ -438,7 +460,10 @@ class MainActivity
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         basePlayerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
@@ -453,7 +478,8 @@ class MainActivity
         super.onConfigurationChanged(newConfig)
         basePlayerDelegate.onConfigurationChanged(newConfig)
         ui.root.orientation = newConfig.orientation
-        statusBarHelper.isLightStatusBar = !ui.root.showPlayer || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
+        statusBarHelper.isLightStatusBar =
+            !ui.root.showPlayer || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             setWindowInsetsAndroidL()
         }

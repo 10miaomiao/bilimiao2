@@ -11,6 +11,7 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat.offsetLeftAndRight
 import androidx.core.view.ViewCompat.offsetTopAndBottom
 import androidx.core.view.get
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
@@ -40,6 +41,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         playerHeight = context.dip(200)
         playertWidth = context.dip(300)
+
         minPadding = context.dip(10)
         dragAreaHeight = context.dip(30)
         init()
@@ -115,7 +117,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         child: View,
     ) {
         if (parent.showPlayer) {
-            height = playerHeight + child.paddingTop
+            height = parent.smallModePlayerHeight + child.paddingTop
             width = parent.measuredWidth
             child.layout(0, 0, width, height)
 //            playerX = -1
@@ -162,6 +164,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         }
         // 内容区域布局尺寸校正
         if (parent.playerHeight != height || parent.playerWidth != width) {
+            DebugMiao.log(scaffoldView.fullScreenPlayer, height, width)
             parent.playerHeight = height
             parent.playerWidth = width
             parent.content?.requestLayout()

@@ -16,11 +16,13 @@ import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.PageRoute
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
+import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesParam
@@ -56,7 +58,10 @@ class PlayerController(
 
     private fun getFullMode(): String {
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        return prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_AUTO)!!
+        return prefs.getString(
+            VideoSettingFragment.PLAYER_FULL_MODE,
+            VideoSettingFragment.KEY_AUTO
+        )!!
     }
 
     fun initController() = views.videoPlayer.run {
@@ -81,6 +86,7 @@ class PlayerController(
         qualityView.setOnClickListener(that::showQualityPopupMenu)
         speedView.setOnClickListener(that::showSpeedPopupMenu)
         moreBtn.setOnClickListener(that::showMoreMenu)
+        setDanmakuSwitchOnClickListener(that::danmakuSwitchClick)
         setExpandButtonOnClickListener(that::showPagesOrEpisodes)
         setSendDanmakuButtonOnClickListener(that::showSendDanmakuPage)
         videoPlayerCallBack = that
@@ -111,10 +117,13 @@ class PlayerController(
                     ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 }
             }
+
             else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
         statusBarHelper.isShowStatus = views.videoPlayer.topContainer.visibility == View.VISIBLE
         statusBarHelper.isShowNavigation = false
+
+        initDanmakuContext()
     }
 
     /**
@@ -127,6 +136,8 @@ class PlayerController(
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         statusBarHelper.isShowStatus = true
         statusBarHelper.isShowNavigation = true
+
+        initDanmakuContext()
     }
 
     fun updatePlayerMode(config: Configuration) {
@@ -140,50 +151,149 @@ class PlayerController(
     }
 
     fun initDanmakuContext() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        var scaleTextSize = prefs.getString("danmaku_fontsize", "1")?.toFloatOrNull() ?: 1f
-        val danmakuSpeed = prefs.getString("danmaku_speed", "1")?.toFloatOrNull() ?: 1f
-        val danmakuTransparent = prefs.getInt("danmaku_transparent", 100)
-        val danmakuShow = prefs.getBoolean("danmaku_show", true)
-        val danmakuR2LShow = prefs.getBoolean("danmaku_r2l_show", true)
-        val danmakuFTShow = prefs.getBoolean("danmaku_ft_show", true)
-        val danmakuFBShow = prefs.getBoolean("danmaku_fb_show", true)
-        val danmakuSpecialShow = prefs.getBoolean("danmaku_special_show", true)
-        //设置最大显示行数
-        var maxLinesPair = mapOf<Int, Int>()
-        //设置是否禁止重叠
-        val overlappingEnablePair = mapOf(
-            BaseDanmaku.TYPE_SCROLL_RL to true,
-            BaseDanmaku.TYPE_FIX_TOP to true
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && activity.isInPictureInPictureMode) {
-            scaleTextSize *= 0.6f
-            maxLinesPair = mapOf(
-                BaseDanmaku.TYPE_SCROLL_RL to 4,
-                BaseDanmaku.TYPE_FIX_TOP to 2,
-                BaseDanmaku.TYPE_FIX_BOTTOM to 2
-            )
+        val mode: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            activity.isInPictureInPictureMode
+        ) {
+            DanmakuSettingFragment.MODE_PIC_IN_PIC
+        } else when (views.videoPlayer.mode) {
+            DanmakuVideoPlayer.PlayerMode.SMALL_TOP -> DanmakuSettingFragment.MODE_SMALL
+            DanmakuVideoPlayer.PlayerMode.SMALL_FLOAT -> DanmakuSettingFragment.MODE_SMALL
+            DanmakuVideoPlayer.PlayerMode.FULL -> DanmakuSettingFragment.MODE_FULL
         }
-//        else if (isMiniPlayer.value === true) {
-//            maxLinesPair = mapOf(
-//                BaseDanmaku.TYPE_SCROLL_RL to 5
-//            )
-//        }
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        val danmakuShow = prefs.getBoolean(DanmakuSettingFragment.KEY_DANMAKU_SHOW, true) &&
+                prefs.getBoolean(
+                    DanmakuSettingFragment.generateKey(
+                        DanmakuSettingFragment.KEY_DANMAKU_SHOW, mode
+                    ),
+                    true
+                )
+        views.videoPlayer.isShowDanmaKu = danmakuShow
+
+        // 滚动弹幕显示
+        val danmakuR2LShow = prefs.getBoolean(
+            DanmakuSettingFragment.generateKey(DanmakuSettingFragment.KEY_DANMAKU_R2L_SHOW, mode),
+            true
+        )
+        // 顶部弹幕显示
+        val danmakuFTShow = prefs.getBoolean(
+            DanmakuSettingFragment.generateKey(DanmakuSettingFragment.KEY_DANMAKU_FT_SHOW, mode),
+            true
+        )
+        // 底部弹幕显示
+        val danmakuFBShow = prefs.getBoolean(
+            DanmakuSettingFragment.generateKey(DanmakuSettingFragment.KEY_DANMAKU_FB_SHOW, mode),
+            true
+        )
+        // 高级弹幕显示
+        val danmakuSpecialShow = prefs.getBoolean(
+            DanmakuSettingFragment.generateKey(
+                DanmakuSettingFragment.KEY_DANMAKU_SPECIAL_SHOW,
+                mode
+            ),
+            true
+        )
+        // 字体大小
+        var scaleTextSize = prefs.getString(
+            DanmakuSettingFragment.generateKey(DanmakuSettingFragment.KEY_DANMAKU_FONTSIZE, mode),
+            "1"
+        )?.toFloatOrNull() ?: 1f
+        // 弹幕速度
+        val danmakuSpeed = prefs.getString(
+            DanmakuSettingFragment.generateKey(DanmakuSettingFragment.KEY_DANMAKU_SPEED, mode),
+            "1"
+        )?.toFloatOrNull() ?: 1f
+        // 字体透明度
+        val danmakuTransparent = prefs.getInt(
+            DanmakuSettingFragment.generateKey(
+                DanmakuSettingFragment.KEY_DANMAKU_TRANSPARENT,
+                mode
+            ),
+            100
+        )
+
+        // 滚动弹幕最大行数
+        val danmakuR2LMaxLine = prefs.getInt(
+            DanmakuSettingFragment.generateKey(
+                DanmakuSettingFragment.KEY_DANMAKU_R2L_MAX_LINE,
+                mode
+            ), 0
+        ).let { if (it > 0) it else null }
+        // 顶部弹幕最大行数
+        val danmakuFTMaxLine = prefs.getInt(
+            DanmakuSettingFragment.generateKey(
+                DanmakuSettingFragment.KEY_DANMAKU_FT_MAX_LINE,
+                mode
+            ),0
+        ).let { if (it > 0) it else null }
+        // 底部弹幕最大行数
+        val danmakuFBMaxLine = prefs.getInt(
+            DanmakuSettingFragment.generateKey(
+                DanmakuSettingFragment.KEY_DANMAKU_FB_MAX_LINE,
+                mode
+            ),0
+        ).let { if (it > 0) it else null }
+        // 设置最大显示行数
+        val maxLinesPair = mapOf(
+            BaseDanmaku.TYPE_SCROLL_RL to danmakuR2LMaxLine,
+            BaseDanmaku.TYPE_FIX_TOP to danmakuFTMaxLine,
+            BaseDanmaku.TYPE_FIX_BOTTOM to danmakuFBMaxLine,
+        )
+
         //设置弹幕样式
         danmakuContext?.apply {
             ftDanmakuVisibility = danmakuFTShow
             fbDanmakuVisibility = danmakuFBShow
             r2LDanmakuVisibility = danmakuR2LShow
             specialDanmakuVisibility = danmakuSpecialShow
-//            setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3f)
-//            isDuplicateMergingEnabled = false
             setScrollSpeedFactor(danmakuSpeed)
             setScaleTextSize(scaleTextSize)
             setMaximumLines(maxLinesPair)
             setDanmakuTransparency(danmakuTransparent / 100f)
-//            preventOverlapping(overlappingEnablePair)
         }
-        views.videoPlayer.isShowDanmaKu = danmakuShow
+    }
+
+    private fun danmakuSwitchClick(view: View) {
+        val show = !views.videoPlayer.isShowDanmaKu
+        if (show) {
+            val mode = when (views.videoPlayer.mode) {
+                DanmakuVideoPlayer.PlayerMode.SMALL_TOP -> DanmakuSettingFragment.MODE_SMALL
+                DanmakuVideoPlayer.PlayerMode.SMALL_FLOAT -> DanmakuSettingFragment.MODE_SMALL
+                DanmakuVideoPlayer.PlayerMode.FULL -> DanmakuSettingFragment.MODE_FULL
+            }
+            val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+            val showInCurMode = prefs.getBoolean(
+                DanmakuSettingFragment.generateKey(
+                    DanmakuSettingFragment.KEY_DANMAKU_SHOW, mode
+                ),
+                true
+            )
+            if (showInCurMode) {
+                views.videoPlayer.isShowDanmaKu = true
+                DanmakuSettingFragment.setDanmaKuShow(activity, true)
+            } else {
+                PopTip.show("当前模式的弹幕已关闭，请手动打开", "打开")
+                    .showTop()
+                    .setButton{_, _ ->
+                        prefs.edit().also {
+                            it.putBoolean(
+                                DanmakuSettingFragment.generateKey(DanmakuSettingFragment.KEY_DANMAKU_SHOW, mode),
+                                true,
+                            )
+                            it.putBoolean(
+                                DanmakuSettingFragment.KEY_DANMAKU_SHOW,
+                                true,
+                            )
+                        }.apply()
+                        views.videoPlayer.isShowDanmaKu = true
+                        false
+                    }
+            }
+        } else {
+            views.videoPlayer.isShowDanmaKu = false
+            DanmakuSettingFragment.setDanmaKuShow(activity, false)
+        }
     }
 
     fun initVideoPlayerSetting() {
@@ -205,16 +315,24 @@ class PlayerController(
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         onlyFull = false
         if (scaffoldApp.orientation == ScaffoldView.VERTICAL) {
-            val isPlayerVerticalDefaultFull = prefs.getBoolean(VideoSettingFragment.PLAYER_VERTICAL_DEFAULT_FULL, false)
+            val isPlayerVerticalDefaultFull =
+                prefs.getBoolean(VideoSettingFragment.PLAYER_VERTICAL_DEFAULT_FULL, false)
             if (isPlayerVerticalDefaultFull) {
-                val fullMode = prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
+                val fullMode = prefs.getString(
+                    VideoSettingFragment.PLAYER_FULL_MODE,
+                    VideoSettingFragment.KEY_SENSOR_LANDSCAPE
+                )!!
                 fullScreen(fullMode)
                 onlyFull = true
             }
         } else {
-            val isPlayerHorizontalDefaultFull = prefs.getBoolean(VideoSettingFragment.PLAYER_HORIZONTAL_DEFAULT_FULL, false)
+            val isPlayerHorizontalDefaultFull =
+                prefs.getBoolean(VideoSettingFragment.PLAYER_HORIZONTAL_DEFAULT_FULL, false)
             if (isPlayerHorizontalDefaultFull) {
-                val fullMode = prefs.getString(VideoSettingFragment.PLAYER_FULL_MODE, VideoSettingFragment.KEY_SENSOR_LANDSCAPE)!!
+                val fullMode = prefs.getString(
+                    VideoSettingFragment.PLAYER_FULL_MODE,
+                    VideoSettingFragment.KEY_SENSOR_LANDSCAPE
+                )!!
                 fullScreen(fullMode)
                 onlyFull = true
             }
@@ -300,7 +418,7 @@ class PlayerController(
                     title = playerSource.title,
                     ownerId = playerSource.ownerId,
                     ownerName = playerSource.ownerName,
-                    pages= pages,
+                    pages = pages,
                 )
             )
             nav.navigate(VideoPagesFragment.actionId, args)
@@ -326,7 +444,7 @@ class PlayerController(
                 BangumiPagesParam(
                     sid = playerSource.sid,
                     title = "",
-                    episodes= episodes,
+                    episodes = episodes,
                 )
             )
             nav.navigate(BangumiPagesFragment.actionId, args)
@@ -341,7 +459,8 @@ class PlayerController(
         }
         if (
             views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
-            && delegate.isPlaying()) {
+            && delegate.isPlaying()
+        ) {
             views.videoPlayer.onVideoPause()
             views.videoPlayer.hideController()
         }
@@ -373,10 +492,12 @@ class PlayerController(
                     PopTip.show("小窗播放功能需要安卓8.0及以上版本")
                 }
             }
+
             R.id.video_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://setting/video"))
             }
+
             R.id.danmuku_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://setting/danmaku"))
@@ -452,7 +573,8 @@ class PlayerController(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && it.isInPictureInPictureMode) {
                 try {
                     it.updatePictureInPictureActions(state)
-                } catch (e: Exception) { }
+                } catch (e: Exception) {
+                }
             }
         }
         PlayerService.selfInstance?.playerState = state
