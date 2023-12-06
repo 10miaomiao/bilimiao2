@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.page.search.result
 
 import android.content.Context
+import android.net.Uri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -51,7 +52,7 @@ class BangumiResultViewModel (
 
             val res = BiliApiService.searchApi
                 .searchBangumi(
-                    keyword = keyword,
+                    keyword = Uri.encode(keyword),
                     pageNum = pageNum,
                     pageSize = list.pageSize
                 )
