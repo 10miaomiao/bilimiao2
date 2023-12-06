@@ -8,7 +8,7 @@ import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 
 class PlayerAPI {
 
@@ -69,7 +69,7 @@ class PlayerAPI {
         }
         val res = MiaoHttp.request {
             url = BiliApiService.biliApi("x/player/playurl", *params.toList().toTypedArray())
-            headers = getVideoHeaders(avid)
+            headers.putAll(getVideoHeaders(avid))
         }.awaitCall().gson<ResultInfo<PlayurlData>>()
         if (res.code == 0) {
             return res.data
@@ -85,9 +85,7 @@ class PlayerAPI {
         epid: String,
         cid: String,
         qn: Int = 64,
-        fnval: Int = 4048,
-        noToken: Boolean = false,
-        proxyHost: String? = null,
+        fnval: Int = 4048
     ): PlayurlData {
         val params = mutableMapOf<String, String?>(
             "ep_id" to epid,
@@ -107,21 +105,65 @@ class PlayerAPI {
         if (fnval > 2) {
             params["fourk"] = "1"
         }
-        if (noToken) {
-            params["notoken"] = "1"
-        }
         val res = MiaoHttp.request {
             url = BiliApiService.biliApi(
                 "pgc/player/api/playurl",
                 *params.toList().toTypedArray()
-            ).let {
-                if (proxyHost != null) {
-                    UrlUtil.replaceHost(it, proxyHost)
-                } else {
-                    it
+            )
+        }.awaitCall().gson<PlayurlData>()
+        if (res.code == 0) {
+            return res
+        } else if (res.code == -10403) {
+            throw AreaLimitException()
+        } else {
+            throw Exception(res.message)
+        }
+    }
+
+    suspend fun getProxyBangumiUrl(
+        epid: String,
+        cid: String,
+        qn: Int = 64,
+        fnval: Int = 4048,
+        proxyServer: ProxyServerInfo,
+    ): PlayurlData {
+        val params = mutableMapOf<String, String?>(
+            "ep_id" to epid,
+            "cid" to cid,
+            "fnval" to fnval.toString(),
+            "fnver" to "0",
+            "force_host" to "2", // 强制音视频返回 https
+            "module" to "bangumi",
+            "qn" to qn.toString(),
+            "season_type" to "1",
+            "session" to ApiHelper.getMD5((System.currentTimeMillis() - SystemClock.currentThreadTimeMillis()).toString()),
+            "track_path" to "",
+            "device" to "android",
+            "mobi_app" to "android",
+            "platform" to "android",
+        )
+        if (fnval > 2) {
+            params["fourk"] = "1"
+        }
+        if (!proxyServer.isTrust) {
+            params["notoken"] = "1"
+        }
+        val res = MiaoHttp.request {
+            if (proxyServer.enableAdvanced == true) {
+                // 启用高级设置，自定义请求参数和请求头
+//                headers["x-from-biliroaming"] = "1.6.12"
+//                params["area"] = "hk
+                proxyServer.queryArgs?.forEach {
+                    if (it.enable) params[it.key] = it.value
+                }
+                proxyServer.headers?.forEach {
+                    if (it.enable) headers[it.name] = it.value
                 }
             }
-
+            url = BiliApiService.createUrl(
+                "https://${proxyServer.host}/pgc/player/api/playurl",
+                *params.toList().toTypedArray()
+            )
         }.awaitCall().gson<PlayurlData>()
         if (res.code == 0) {
             return res
@@ -203,7 +245,7 @@ class PlayerAPI {
         val superscript: String
     )
 
-    data class Dash (
+    data class Dash(
         // 时长，秒
         val duration: Long,
         val min_buffer_time: Double,
