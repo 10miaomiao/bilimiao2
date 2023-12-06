@@ -37,10 +37,8 @@ class BangumiPlayerSource(
 
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
         val res = proxyServer?.let {
-            BiliApiService.playerAPI.getBangumiUrl(
-                epid, id, quality, fnval,
-                noToken = !it.isTrust,
-                proxyHost = it.host
+            BiliApiService.playerAPI.getProxyBangumiUrl(
+                epid, id, quality, fnval, it
             )
         } ?: BiliApiService.playerAPI.getBangumiUrl(
             epid, id, quality, fnval

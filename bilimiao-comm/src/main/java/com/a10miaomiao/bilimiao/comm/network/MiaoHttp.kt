@@ -23,7 +23,7 @@ class MiaoHttp(var url: String? = null) {
 
     var client = OkHttpClient()
     val requestBuilder = Request.Builder()
-    var headers = mapOf<String, String>()
+    val headers = mutableMapOf<String, String>()
     var method = GET
 
     var body: RequestBody? = null
@@ -35,6 +35,7 @@ class MiaoHttp(var url: String? = null) {
         }
         requestBuilder.addHeader("user-agent", ApiHelper.USER_AGENT)
         requestBuilder.addHeader("referer",ApiHelper.REFERER)
+        requestBuilder.addHeader("build", ApiHelper.BUILD_VERSION.toString())
 
         if (url?.let { "bilibili.com" in it } == true) {
             requestBuilder.addHeader("env", "prod")

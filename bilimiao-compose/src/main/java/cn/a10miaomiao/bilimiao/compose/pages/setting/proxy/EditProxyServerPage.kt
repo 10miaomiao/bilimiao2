@@ -19,11 +19,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.KeyValueInputStateCarrier
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerForm
+import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerFormState
+import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.rememberProxyServerFormState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -37,53 +41,60 @@ class EditProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
     private val fragment by instance<Fragment>()
-
+    private val composeNav by instance<NavHostController>()
     var index = -1
-        set(value) {
-            field = value
-            val serverList = ProxyHelper.serverList(fragment.requireContext())
-            if (index in 0 until serverList.size) {
-                val item = serverList[index]
-                setName(item.name)
-                setHost(item.host)
-                setIsTrust(item.isTrust)
-            }
+
+    fun getProxyServer(): ProxyServerInfo? {
+        val serverList = ProxyHelper.serverList(fragment.requireContext())
+        if (index in 0 until serverList.size) {
+            return serverList[index]
         }
+        return null
+    }
 
-    val name = MutableStateFlow("")
-    val host = MutableStateFlow("")
-    val isTrust = MutableStateFlow(false)
-
-    fun setName(value: String) { name.value = value }
-    fun setHost(value: String) { host.value = value }
-    fun setIsTrust(value: Boolean) { isTrust.value = value }
-
-    fun editProxyServer(): Boolean {
-        if (name.value.isBlank()) {
+    fun editProxyServer(
+        formState: ProxyServerFormState
+    ) {
+        if (formState.name.isBlank()) {
             Toast.makeText(fragment.requireActivity(), "请填写服务器名称", Toast.LENGTH_SHORT)
                 .show()
-            return false
+            return
         }
-        if (host.value.isBlank()) {
+        if (formState.host.isBlank()) {
             Toast.makeText(fragment.requireActivity(), "请填写服务器地址", Toast.LENGTH_SHORT)
                 .show()
-            return false
+            return
         }
         ProxyHelper.saveServer(
             fragment.requireActivity(),
             ProxyServerInfo(
-                name = name.value,
-                host = host.value,
-                isTrust = isTrust.value,
+                name = formState.name,
+                host = formState.host,
+                isTrust = formState.isTrust,
+                enableAdvanced = formState.enableAdvanced,
+                queryArgs = formState.queryArgStates.map {
+                    ProxyServerInfo.HttpQueryArg(
+                        enable = true,
+                        key = it.key,
+                        value = it.value,
+                    )
+                },
+                headers = formState.headerStates.map {
+                    ProxyServerInfo.HttpHeader(
+                        enable = true,
+                        name = it.key,
+                        value = it.value,
+                    )
+                }
             ),
             index,
         )
         Toast.makeText(fragment.requireActivity(), "修改成功", Toast.LENGTH_SHORT)
             .show()
-        return true
+        composeNav.popBackStack()
     }
 
-    fun deleteProxyServer(): Boolean {
+    fun deleteProxyServer() {
         ProxyHelper.saveServer(
             fragment.requireActivity(),
             null,
@@ -91,7 +102,7 @@ class EditProxyServerPageViewModel(
         )
         Toast.makeText(fragment.requireActivity(), "删除成功", Toast.LENGTH_SHORT)
             .show()
-        return true
+        composeNav.popBackStack()
     }
 }
 
@@ -110,32 +121,22 @@ fun EditProxyServerPage(
 
     val scrollState = rememberScrollState()
 
-    val name by viewModel.name.collectAsState()
-    val host by viewModel.host.collectAsState()
-    val isTrust by viewModel.isTrust.collectAsState()
-
-    val nav = localNavController()
-
-    val addClick = remember(viewModel) {
-        {
-            if (viewModel.editProxyServer()) {
-                nav.popBackStack()
-            }
-            Unit
-        }
-    }
-
-    val delClick = remember(viewModel) {
-        {
-            if (viewModel.deleteProxyServer()) {
-                nav.popBackStack()
-            }
-            Unit
-        }
-    }
+    val formState = rememberProxyServerFormState()
 
     LaunchedEffect(viewModel, index) {
         viewModel.index = index
+        viewModel.getProxyServer()?.let { server ->
+            formState.changeName(server.name)
+            formState.changeHost(server.host)
+            formState.changeIsTrust(server.isTrust)
+            formState.changeEnableAdvanced(server.enableAdvanced ?: false)
+            formState.initQueryArgStates(server.queryArgs?.map {
+                KeyValueInputStateCarrier(it.key, it.value)
+            } ?: listOf())
+            formState.initHeaderStates(server.headers?.map {
+                KeyValueInputStateCarrier(it.name, it.value)
+            } ?: listOf())
+        }
     }
 
     Column(
@@ -151,15 +152,10 @@ fun EditProxyServerPage(
             )
     ) {
         ProxyServerForm(
-            name = name,
-            onNameChange = viewModel::setName,
-            host = host,
-            onHostChange = viewModel::setHost,
-            isTrust = isTrust,
-            onIsTrustChange = viewModel::setIsTrust,
+            state = formState,
         )
         Button(
-            onClick = delClick,
+            onClick = viewModel::deleteProxyServer,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Red
@@ -168,7 +164,9 @@ fun EditProxyServerPage(
             Text(text = "删除服务器")
         }
         Button(
-            onClick = addClick,
+            onClick = {
+                viewModel.editProxyServer(formState)
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "保存修改")
