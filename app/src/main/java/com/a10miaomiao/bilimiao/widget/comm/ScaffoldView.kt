@@ -11,6 +11,8 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.ContentBehavior
+import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
+import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
@@ -75,7 +77,17 @@ class ScaffoldView @JvmOverloads constructor(
     var bottomSheet: View? = null
     var bottomSheetBehavior: BottomSheetBehavior<View>? = null
 
-    override fun addView(child: View?, params: ViewGroup.LayoutParams?) {
+    var drawerView: View? = null
+    var drawerBehavior: DrawerBehavior? = null
+
+    var maskView: View? = null
+    var maskBehavior: MaskBehavior? = null
+
+    override fun addView(
+        child: View?,
+        index: Int,
+        params: ViewGroup.LayoutParams?
+    ) {
         if (params is LayoutParams) {
             when (val behavior = params.behavior) {
                 is AppBarBehavior -> {
@@ -97,24 +109,29 @@ class ScaffoldView @JvmOverloads constructor(
                     this.bottomSheet = child
                     this.bottomSheetBehavior = behavior
                 }
-            }
-            if (child is DrawerLayout) {
-//                this.drawerLayout = child
+                is DrawerBehavior -> {
+                    this.drawerView = child
+                    this.drawerBehavior = behavior
+                }
+                is MaskBehavior -> {
+                    this.maskView = child
+                    this.maskBehavior = behavior
+                }
             }
         }
-        super.addView(child, params)
+        super.addView(child, index, params)
     }
 
     fun isDrawerOpen(): Boolean {
-        return appBarBehavior?.isDrawerOpen() ?: false
+        return drawerBehavior?.isDrawerOpen() ?: false
     }
 
     fun openDrawer() {
-        appBarBehavior?.openDrawer()
+        drawerBehavior?.openDrawer()
     }
 
     fun closeDrawer() {
-        appBarBehavior?.closeDrawer()
+        drawerBehavior?.closeDrawer()
     }
 
     fun changedDrawerState(state: Int) {
@@ -127,6 +144,14 @@ class ScaffoldView @JvmOverloads constructor(
                 appBarBehavior?.slideUp(it)
             }
         }
+    }
+
+    fun setMaskViewVisibility(visibility: Int) {
+        maskView?.visibility = visibility
+    }
+
+    fun setMaskViewAlpha(alpha: Float) {
+        maskView?.alpha = alpha
     }
 
     fun slideDownBottomAppBar() {

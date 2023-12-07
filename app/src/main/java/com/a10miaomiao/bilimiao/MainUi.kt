@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentContainerView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,8 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetUi
 import com.a10miaomiao.bilimiao.comm.shadowLayout
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlayerService
+import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
+import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.shadow.ShadowLayout
@@ -33,9 +36,10 @@ import splitties.views.dsl.core.*
 class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
 
-//    val leftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
-//        backgroundColor = config.windowBackgroundColor
-//    }
+    val mLeftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
+        backgroundColor = config.windowBackgroundColor
+        elevation = dip(20).toFloat()
+    }
 
     val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
         backgroundColor = config.windowBackgroundColor
@@ -81,7 +85,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         addView(areaLimitView, lParams(matchParent, matchParent))
     }
 
-    override var bottomSheetTitleView = textView {
+    var mBottomSheetTitleView = textView {
         gravity = Gravity.CENTER
     }
 
@@ -118,9 +122,9 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         })
     }
 
-    override var bottomSheetBehavior: BottomSheetBehavior<View>? = null
+    var mBottomSheetBehavior: BottomSheetBehavior<View>? = null
 
-    override var bottomSheetMaskView = view<View> {
+    var mMaskView = view<View> {
         setBackgroundResource(R.color.black)
         elevation = dip(20).toFloat()
         alpha = 0f
@@ -148,7 +152,9 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             width = matchParent
             height = matchParent
         })
-        addView(bottomSheetMaskView, lParams {
+
+        addView(mMaskView, lParams {
+            behavior = MaskBehavior(ctx, null)
             height = matchParent
             width = matchParent
         })
@@ -159,8 +165,17 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             val b = BottomSheetBehavior<View>(ctx, null)
 
             behavior = b
-            this@MainUi.bottomSheetBehavior = b
+            this@MainUi.mBottomSheetBehavior = b
+        })
+
+        addView(mLeftContainerView, lParams {
+            height = matchParent
+            width = matchParent
+            behavior = DrawerBehavior(ctx, null)
         })
     }
+    override val bottomSheetBehavior get() = mBottomSheetBehavior
+    override val bottomSheetTitleView get() = mBottomSheetTitleView
+    override val bottomSheetMaskView get() = mMaskView
 
 }

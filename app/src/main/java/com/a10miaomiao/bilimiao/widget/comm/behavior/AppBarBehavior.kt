@@ -55,15 +55,11 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
 
     var parentRef: ScaffoldView? = null
     var viewRef: View? = null
-    var behaviorDelegate: AppBarBehaviorDelegate? = null
 
     override fun onLayoutChild(parent: CoordinatorLayout, child: View, layoutDirection: Int): Boolean {
         this.viewRef = child
         if (parent is ScaffoldView) {
             this.parentRef = parent
-            if (behaviorDelegate == null && child is AppBarView) {
-                behaviorDelegate = AppBarBehaviorDelegate(parent, child)
-            }
             if (parent.fullScreenPlayer) {
                 child.layout(0, 0, 0, 0)
             } else {
@@ -72,7 +68,18 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
                     currentState = STATE_SCROLLED_UP
                     child.translationY = 0f
                 }
-                behaviorDelegate?.onLayoutChild()
+                if (parent.orientation == ScaffoldView.HORIZONTAL) {
+                    val width = appBarWidth + child.paddingLeft
+                    child.layout(width - parent.measuredWidth, 0, width, parent.measuredHeight)
+                } else {
+                    val height = appBarHeight + child.paddingBottom
+                    child.layout(
+                        0,
+                        parent.measuredHeight - height,
+                        parent.measuredWidth,
+                        parent.measuredHeight + parent.measuredHeight + height
+                    )
+                }
             }
         } else {
             val height = appBarHeight + child.paddingBottom
@@ -80,31 +87,6 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
             child.layout(0, parent.measuredHeight - height, parent.measuredWidth, parent.measuredHeight)
         }
         return true
-    }
-
-    override fun onTouchEvent(parent: CoordinatorLayout, child: View, ev: MotionEvent): Boolean {
-        return behaviorDelegate?.onTouchEvent(ev) ?: true
-    }
-
-    override fun onInterceptTouchEvent(
-        parent: CoordinatorLayout,
-        child: View,
-        ev: MotionEvent
-    ): Boolean {
-        return behaviorDelegate?.onInterceptTouchEvent(ev) ?: false
-    }
-
-
-    fun openDrawer() {
-        behaviorDelegate?.openDrawer()
-    }
-
-    fun closeDrawer() {
-        behaviorDelegate?.closeDrawer()
-    }
-
-    fun isDrawerOpen(): Boolean {
-        return behaviorDelegate?.isDrawerOpen() ?: false
     }
 
     /**
