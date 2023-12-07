@@ -1,8 +1,5 @@
 package com.a10miaomiao.bilimiao.page.start
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -19,31 +16,28 @@ import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.RadioButton
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavOptions
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import bilibili.app.dynamic.v1.DynamicOuterClass.SVideoItem
-import cn.a10miaomiao.miao.binding.android.view._backgroundColor
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import cn.a10miaomiao.miao.binding.android.widget._imageResource
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm.connectStore
+import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.flexboxLayout
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.loadImageUrl
@@ -61,22 +55,22 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehaviorDelegate
+import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
-import com.chad.library.adapter.base.listener.OnItemLongClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -95,16 +89,12 @@ import splitties.views.dsl.core.radioButton
 import splitties.views.dsl.core.space
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.verticalLayout
-import splitties.views.dsl.core.verticalMargin
 import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.core.wrapInHorizontalScrollView
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.gravityBottomCenter
-import splitties.views.gravityCenter
 import splitties.views.horizontalPadding
 import splitties.views.imageResource
-import splitties.views.leftPadding
 import splitties.views.padding
 import splitties.views.rightPadding
 import splitties.views.verticalPadding
@@ -151,6 +141,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val viewModel by lazy { StartViewModel(di) }
     private val supportHelper by instance<SupportHelper>()
     private val themeDelegate by instance<ThemeDelegate>()
+    private val windowStore by instance<WindowStore>()
     private val scaffoldApp by lazy { requireActivity().getScaffoldView() }
 
     override fun onCreateView(
@@ -164,6 +155,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         mSearchView = view.findViewById(ID_searchView)
         mSearchEditText = view.findViewById(ID_searchEditText)
         mSearchTextView = view.findViewById(ID_searchTextView)
@@ -246,9 +238,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
     }
 
     fun onDrawerStateChanged(state: Int) {
-        if (state == AppBarBehaviorDelegate.STATE_COLLAPSED) {
+        if (state == DrawerBehaviorDelegate.STATE_COLLAPSED) {
             closeSearchView()
-        } else if (state == AppBarBehaviorDelegate.STATE_EXPANDED) {
+        } else if (state == DrawerBehaviorDelegate.STATE_EXPANDED) {
             if (viewModel.searchFocus) {
                 showSoftInput()
             }
@@ -548,10 +540,12 @@ class StartFragment : Fragment(), DIAware, MyPage {
     }
 
     fun MiaoUI.userView(): View {
+        val contentInsets = windowStore.state.windowInsets
         val userInfo = viewModel.userStore.state.info
         return verticalLayout {
             backgroundColor = config.blockBackgroundColor
             padding = config.largePadding
+            _topPadding = config.largePadding + contentInsets.top
 
             views {
                 +horizontalLayout {
@@ -664,7 +658,15 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, viewModel.userStore)
+        val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
+        val contentInsets = windowStore.state.windowInsets
+
         frameLayout {
+            _leftPadding = contentInsets.left
+            _rightPadding = contentInsets.right
+            _bottomPadding = contentInsets.bottom
+
             views {
 
                 +recyclerView {

@@ -5,7 +5,7 @@ import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 interface BottomSheetUi {
-    var bottomSheetBehavior: BottomSheetBehavior<View>?
-    var bottomSheetTitleView: TextView
-    var bottomSheetMaskView: View
+    val bottomSheetBehavior: BottomSheetBehavior<View>?
+    val bottomSheetTitleView: TextView
+    val bottomSheetMaskView: View
 }
