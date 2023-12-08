@@ -10,7 +10,7 @@ data class VideoRelateInfo (
     val card_index: Int,
     val cid: Double,
 //    val client_ip: String,
-    val duration: Int,
+    val duration: Long,
     val goto: String,
     val is_ad_loc: Boolean,
     val owner: VideoOwnerInfo?,

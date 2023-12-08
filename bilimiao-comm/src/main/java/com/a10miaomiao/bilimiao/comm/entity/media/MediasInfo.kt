@@ -4,6 +4,7 @@ data class MediasInfo(
     val id: String,
     val cover: String,
     val ctime: Long,
+    val duration: Long,
     val title: String,
     val upper: UpperInfo,
     val cnt_info: CntInfo

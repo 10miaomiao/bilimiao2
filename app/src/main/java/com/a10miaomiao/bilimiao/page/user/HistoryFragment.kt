@@ -199,6 +199,11 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
                 item.cardUgc.name
             },
             remark = NumberUtil.converCTime(item.viewAt),
+            duration = NumberUtil.converDuration(if (item.hasCardOgv()) {
+                item.cardOgv.duration
+            } else {
+                item.cardUgc.duration
+            }),
             isHtml = true,
         )
     }

@@ -94,6 +94,7 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
             upperName = item.args.up_name,
             playNum = item.cover_left_text_1,
             damukuNum = item.cover_left_text_2,
+            duration = item.cover_right_text,
         )
     }
 

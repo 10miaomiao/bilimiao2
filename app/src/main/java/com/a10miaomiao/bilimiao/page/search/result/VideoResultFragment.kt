@@ -153,6 +153,7 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
             upperName = item.author,
             playNum = item.play,
             damukuNum = item.danmaku,
+            duration = item.duration,
         )
     }
 

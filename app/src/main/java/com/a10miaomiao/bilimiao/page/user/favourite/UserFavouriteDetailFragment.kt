@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
@@ -115,6 +116,7 @@ class UserFavouriteDetailFragment : Fragment(), DIAware, MyPage {
             upperName = item.upper.name,
             playNum = item.cnt_info.play,
             damukuNum = item.cnt_info.danmaku,
+            duration = NumberUtil.converDuration(item.duration),
         )
     }
 
