@@ -18,5 +18,5 @@ data class RegionTypeDetailsInfo(
     var play: String,
     var title: String,
     var video_review: String,
-    var duration: Int,
+    var duration: Long,
 )

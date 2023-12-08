@@ -191,6 +191,7 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
             remark = NumberUtil.converCTime(item.ctime),
             playNum = item.play,
             damukuNum = item.danmaku,
+            duration = NumberUtil.converDuration(item.duration),
         )
     }
 

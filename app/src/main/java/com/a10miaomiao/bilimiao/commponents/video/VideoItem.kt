@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -19,9 +20,12 @@ import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import splitties.dimensions.dip
+import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
+import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding
+import splitties.views.verticalPadding
 
 fun MiaoUI.videoItem (
     title: String? = null,
@@ -30,6 +34,7 @@ fun MiaoUI.videoItem (
     remark: String? = null,
     playNum: String? = null,
     damukuNum: String? = null,
+    duration: String? = null,
     isHtml: Boolean = false,
 ): View {
     return horizontalLayout {
@@ -39,9 +44,36 @@ fun MiaoUI.videoItem (
 
         views {
             // 封面
-            +rcImageView {
-                radius = dip(5)
-                _network(pic, "@672w_378h_1c_")
+
+            +frameLayout {
+                apply(ViewStyle.roundRect(dip(5)))
+                views {
+                    +imageView {
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+
+                        _network(pic, "@672w_378h_1c_")
+                    }..lParams(matchParent, matchParent)
+
+                    +frameLayout {
+                        horizontalPadding = dip(5)
+                        verticalPadding = dip(2)
+                        apply(ViewStyle.roundRect(dip(5)))
+                        _show = duration != null
+                        backgroundColor = 0x99000000.toInt()
+//                        setBackgroundResource(R.drawable.gradient_reverse)
+
+                        views {
+                            +textView {
+                                textSize = 12f
+                                setTextColor(0xFFFFFFFF.toInt())
+                                _text = duration ?: ""
+                            }
+                        }
+                    }..lParams(wrapContent, wrapContent) {
+                        gravity = Gravity.BOTTOM or Gravity.END
+                        margin = dip(5)
+                    }
+                }
             }..lParams {
                 width = dip(140)
                 height = dip(85)

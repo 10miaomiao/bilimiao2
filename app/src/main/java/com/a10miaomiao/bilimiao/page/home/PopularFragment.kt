@@ -133,6 +133,7 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
             pic =item.base.cover,
             upperName = item.rightDesc1,
             remark = item.rightDesc2,
+            duration = item.coverRightText1,
         )
     }
 

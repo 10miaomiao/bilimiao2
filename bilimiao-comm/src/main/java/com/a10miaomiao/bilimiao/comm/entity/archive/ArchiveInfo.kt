@@ -55,7 +55,7 @@ class ArchiveInfo(
     val ctime: Long,
 //    val cursor_attr: CursorAttr,
     val danmaku: String,
-    val duration: Int,
+    val duration: Long,
     val first_cid: Int,
     val goto: String,
     val icon_type: Int,

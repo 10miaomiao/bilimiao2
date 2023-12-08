@@ -156,6 +156,7 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
             remark = NumberUtil.converCTime(item.ctime),
             playNum = item.stat.view.toString(),
             damukuNum = item.stat.danmaku.toString(),
+            duration = NumberUtil.converDuration(item.duration),
             isHtml = true,
         )
     }
