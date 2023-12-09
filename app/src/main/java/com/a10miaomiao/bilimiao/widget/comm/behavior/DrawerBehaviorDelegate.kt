@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.lang.ref.WeakReference
 import kotlin.math.abs
 
@@ -94,7 +95,10 @@ class DrawerBehaviorDelegate(
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         if (dragState == STATE_COLLAPSED) {
             // 折叠状态
-            if (ev.action == MotionEvent.ACTION_DOWN) {
+            if (
+                ev.action == MotionEvent.ACTION_DOWN
+                && parent.bottomSheetState() == BottomSheetBehavior.STATE_HIDDEN
+            ) {
                 this.initialX = if (
                     (parent.orientation == ScaffoldView.VERTICAL
                             && ev.y > (parent.appBar?.top ?: parent.measuredHeight))

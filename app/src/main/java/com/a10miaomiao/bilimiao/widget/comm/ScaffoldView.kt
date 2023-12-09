@@ -122,6 +122,10 @@ class ScaffoldView @JvmOverloads constructor(
         super.addView(child, index, params)
     }
 
+    fun bottomSheetState(): Int {
+        return bottomSheetBehavior?.state ?: BottomSheetBehavior.STATE_HIDDEN
+    }
+
     fun isDrawerOpen(): Boolean {
         return drawerBehavior?.isDrawerOpen() ?: false
     }
