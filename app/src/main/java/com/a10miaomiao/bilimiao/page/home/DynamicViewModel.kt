@@ -143,6 +143,7 @@ class DynamicViewModel(
                     title = dynArchive.title,
                     pic = dynArchive.cover,
                     remark = dynArchive.coverLeftText2 + "    " + dynArchive.coverLeftText3,
+                    duration = dynArchive.coverLeftText1,
                 )
             }
             ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc -> {
@@ -174,5 +175,6 @@ class DynamicViewModel(
         val title: String = "",
         val pic: String = "",
         val remark: String? = null,
+        val duration: String? = null,
     )
 }
