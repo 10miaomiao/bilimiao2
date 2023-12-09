@@ -151,6 +151,7 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
                 title = item.dynamicContent.title,
                 pic = item.dynamicContent.pic,
                 remark = item.dynamicContent.remark,
+                duration = item.dynamicContent.duration,
             ).apply {
                 _tag = index
                 miaoEffect(null) {
