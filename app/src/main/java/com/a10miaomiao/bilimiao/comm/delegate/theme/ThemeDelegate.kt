@@ -1,10 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.delegate.theme
 
-import android.app.Application
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LifecycleOwner
@@ -12,9 +10,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.google.android.material.color.DynamicColors
+import com.kongzue.dialogx.DialogX
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 
@@ -46,10 +44,13 @@ class ThemeDelegate(
                     .putInt(KEY_NIGHT, mode)
                     .apply()
                 if (mode == 0) {
+                    DialogX.globalTheme = DialogX.THEME.AUTO
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
                 } else if (mode == 1) {
+                    DialogX.globalTheme = DialogX.THEME.LIGHT
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                 } else if (mode == 2) {
+                    DialogX.globalTheme = DialogX.THEME.DARK
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 }
             }
