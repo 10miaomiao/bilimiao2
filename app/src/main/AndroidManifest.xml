@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:name=".Bilimiao"
@@ -20,22 +21,28 @@
         <!-- 您从百度网站获取的APP KEY，根据实际您的APP申请的APP_KEY进行修改 -->
         <meta-data
             android:name="BaiduMobAd_STAT_ID"
-            android:value="ddd50be117" /> <!-- 渠道商编号 -->
+            android:value="ddd50be117" />
+        <!-- 渠道商编号 -->
         <meta-data
             android:name="BaiduMobAd_CHANNEL"
-            android:value="${APP_CHANNEL_VALUE}" /> <!-- 是否开启错误日志统计，默认为false -->
+            android:value="${APP_CHANNEL_VALUE}" />
+        <!-- 是否开启错误日志统计，默认为false -->
         <meta-data
             android:name="BaiduMobAd_EXCEPTION_LOG"
-            android:value="true" /> <!-- 日志仅在wifi网络下发送，默认为false -->
+            android:value="true" />
+        <!-- 日志仅在wifi网络下发送，默认为false -->
         <meta-data
             android:name="BaiduMobAd_ONLY_WIFI"
-            android:value="false" /> <!-- 是否获取基站位置信息 ,默认为true -->
+            android:value="false" />
+        <!-- 是否获取基站位置信息 ,默认为true -->
         <meta-data
             android:name="BaiduMobAd_CELL_LOCATION"
-            android:value="false" /> <!-- 是否获取GPS位置信息，默认为true -->
+            android:value="false" />
+        <!-- 是否获取GPS位置信息，默认为true -->
         <meta-data
             android:name="BaiduMobAd_GPS_LOCATION"
-            android:value="false" /> <!-- 是否获取WIFI位置信息，默认为true -->
+            android:value="false" />
+        <!-- 是否获取WIFI位置信息，默认为true -->
         <meta-data
             android:name="BaiduMobAd_WIFI_LOCATION"
             android:value="false" />

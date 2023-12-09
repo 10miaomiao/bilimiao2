@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.widget.player
 
 import android.app.Activity
 import android.app.Dialog
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -9,6 +10,8 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.AttributeSet
 import android.view.DisplayCutout
 import android.view.Gravity
@@ -21,6 +24,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -366,9 +370,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     // start 长按倍速播放
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private val vibrator = context.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+
     private var touchSurfaceDownTime = Long.MAX_VALUE
     private var isSpeedPlaying = false
     private var lastSpeed = 0f  // init an invalid value
+
     private val longClickControlTask = Runnable {
         if (System.currentTimeMillis() - touchSurfaceDownTime >= 500
             && mCurrentState == CURRENT_STATE_PLAYING
@@ -379,6 +387,15 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             mSpeedTips.visibility = View.VISIBLE
             mTouchingProgressBar = false
             (mSpeedTipsIV.drawable as? AnimationDrawable)?.start()
+            // 震动效果
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                vibrator.vibrate(
+                    VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                )
+            } else {
+                // 这种震动不舒服不自然
+                // vibrator.vibrate(longArrayOf(0, 50), -1)
+            }
         }
     }
 
