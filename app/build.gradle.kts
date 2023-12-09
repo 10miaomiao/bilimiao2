@@ -16,8 +16,8 @@ android {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 21
         targetSdk = 33
-        versionCode = 90
-        versionName = "2.3.0"
+        versionCode = 91
+        versionName = "2.3.1"
 
         flavorDimensions("default")
 
@@ -108,6 +108,7 @@ dependencies {
     implementation(Libraries.drawer)
     implementation(Libraries.modernAndroidPreferences)
     implementation(Libraries.dialogX)
+//    implementation(files("../app/libs/DialogX-release.aar"))
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
 //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")
