@@ -325,7 +325,7 @@ class MainActivity
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
             if (showPlayer) {
                 windowStore.setContentInsets(
-                    left, 0, right, bottom + config.appBarTitleHeight + ui.root.smallModePlayerHeight,
+                    left, 0, right, bottom + top + config.appBarTitleHeight + ui.root.smallModePlayerHeight,
                 )
             } else {
                 windowStore.setContentInsets(
