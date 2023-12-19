@@ -54,21 +54,16 @@ fun MiaoUI.videoItem (
                         _network(pic, "@672w_378h_1c_")
                     }..lParams(matchParent, matchParent)
 
-                    +frameLayout {
+                    +textView {
                         horizontalPadding = dip(5)
                         verticalPadding = dip(2)
                         apply(ViewStyle.roundRect(dip(5)))
                         _show = duration != null
                         backgroundColor = 0x99000000.toInt()
-//                        setBackgroundResource(R.drawable.gradient_reverse)
+                        textSize = 12f
+                        setTextColor(0xFFFFFFFF.toInt())
+                        _text = duration ?: ""
 
-                        views {
-                            +textView {
-                                textSize = 12f
-                                setTextColor(0xFFFFFFFF.toInt())
-                                _text = duration ?: ""
-                            }
-                        }
                     }..lParams(wrapContent, wrapContent) {
                         gravity = Gravity.BOTTOM or Gravity.END
                         margin = dip(5)
