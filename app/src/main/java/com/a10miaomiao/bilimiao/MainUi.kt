@@ -141,22 +141,28 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             height = matchParent
         })
 
-        addView(mPlayerLayout, lParams {
-            behavior = PlayerBehavior(ctx, null)
-            width = wrapContent
-            height = wrapContent
-        })
-
         addView(mAppBar, lParams {
             behavior = AppBarBehavior(ctx, null)
             width = matchParent
             height = matchParent
         })
 
+        addView(mPlayerLayout, lParams {
+            behavior = PlayerBehavior(ctx, null)
+            width = wrapContent
+            height = wrapContent
+        })
+
         addView(mMaskView, lParams {
             behavior = MaskBehavior(ctx, null)
             height = matchParent
             width = matchParent
+        })
+
+        addView(mLeftContainerView, lParams {
+            height = matchParent
+            width = matchParent
+            behavior = DrawerBehavior(ctx, null)
         })
 
         addView(mBottomSheetLayout, lParams {
@@ -166,12 +172,6 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
             behavior = b
             this@MainUi.mBottomSheetBehavior = b
-        })
-
-        addView(mLeftContainerView, lParams {
-            height = matchParent
-            width = matchParent
-            behavior = DrawerBehavior(ctx, null)
         })
     }
     override val bottomSheetBehavior get() = mBottomSheetBehavior

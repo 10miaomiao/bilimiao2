@@ -159,7 +159,7 @@ class DrawerBehaviorDelegate(
             drawerView.visibility = View.VISIBLE
             parent.setMaskViewVisibility(View.VISIBLE)
         } else if (dragState == STATE_COLLAPSED) {
-            drawerView.visibility = View.GONE
+            drawerView.visibility = View.INVISIBLE
             parent.setMaskViewVisibility(View.GONE)
         } else if (dragState == STATE_EXPANDED) {
             drawerView.visibility = View.VISIBLE
