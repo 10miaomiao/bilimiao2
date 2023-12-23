@@ -286,7 +286,12 @@ fun UserFollowPage(
         state = rememberSwipeRefreshState(isRefreshing),
         onRefresh = { viewModel.refresh() },
     ) {
-        LazyColumn() {
+        LazyColumn(
+            modifier = Modifier.padding(
+                start = windowInsets.leftDp.dp,
+                end = windowInsets.rightDp.dp,
+            )
+        ) {
             item(key = "top") {
                 Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
             }

@@ -74,7 +74,12 @@ fun ProxySettingPage() {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = windowInsets.leftDp.dp,
+                end = windowInsets.rightDp.dp,
+            )
     ) {
         Row(
             modifier = Modifier
