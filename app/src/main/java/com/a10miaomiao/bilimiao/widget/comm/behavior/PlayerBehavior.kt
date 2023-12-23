@@ -11,6 +11,7 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat.offsetLeftAndRight
 import androidx.core.view.ViewCompat.offsetTopAndBottom
 import androidx.core.view.get
+import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
@@ -38,6 +39,8 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
     private var currentOrientation = ScaffoldView.VERTICAL
 
+    private var behaviorDelegate: PlayerBehaviorDelegate? = null
+
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         playerHeight = context.dip(200)
         playertWidth = context.dip(300)
@@ -46,9 +49,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         dragAreaHeight = context.dip(30)
         init()
     }
-
-    var viewRef: View? = null
-    var parentRef: ScaffoldView? = null
 
     fun init() {
 
@@ -63,237 +63,53 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         )
     }
 
-    /**
-     * 全屏播放布局
-     */
-    private fun onFullScreenLayoutChild(
-        parent: ScaffoldView,
-        child: View,
-    ) {
-        height = parent.measuredHeight
-        width = parent.measuredWidth
-//      playerX = -1
-//      playerY = -1
-        child.layout(0, 0, width, height)
-        child.translationX = 0f
-        child.translationY = 0f
-    }
-
-    /**
-     * 横向屏幕下布局
-     */
-    private fun onHorizontalScreenLayoutChild(
-        parent: ScaffoldView,
-        child: View,
-    ) {
-        if (parent.showPlayer) {
-            height = playerHeight
-            width = playertWidth
-            val left = if (playerX == -1) {
-                parent.measuredWidth - windowInsets.right - width
-            } else {
-                playerX
-            }
-            val top = if (playerY == -1) {
-                windowInsets.top
-            } else {
-                playerY
-            }
-            child.layout(left, top, left + width, top + height)
-        } else {
-            height = 0
-            width = 0
-//            playerX = -1
-//            playerY = -1
-//            child.layout(0, 0, 0, 0)
-        }
-    }
-
-    /**
-     * 竖直屏幕下布局
-     */
-    private fun onVerticalScreenLayoutChild(
-        parent: ScaffoldView,
-        child: View,
-    ) {
-        if (parent.showPlayer) {
-            height = parent.smallModePlayerHeight + child.paddingTop
-            width = parent.measuredWidth
-            child.layout(0, 0, width, height)
-//            playerX = -1
-//            playerY = -1
-        } else {
-            height = 0
-            width = 0
-//            playerX = -1
-//            playerY = -1
-//            child.layout(0, 0, 0, 0)
-        }
-    }
-
     override fun onLayoutChild(
         parent: CoordinatorLayout,
         child: View,
         layoutDirection: Int
     ): Boolean {
-        if (isMove) {
-            return true
-        }
-        val scaffoldView = parent as? ScaffoldView ?: return false
+        if (parent is ScaffoldView) {
+            if (behaviorDelegate == null) {
+                behaviorDelegate = PlayerBehaviorDelegate(
+                    parent,
+                    child,
+                    object : PlayerBehaviorDelegate.Insets{
+                        override val top = windowInsets.top
+                        override val bottom = windowInsets.bottom
+                        override val left = windowInsets.left
+                        override val right = windowInsets.right
+                    }
+                )
+            }
+            behaviorDelegate?.onLayoutChild()
 
-        if (scaffoldView.fullScreenPlayer) {
-            // 全屏
-            onFullScreenLayoutChild(scaffoldView, child)
-        } else if (scaffoldView.orientation == ScaffoldView.HORIZONTAL) {
-            // 横向屏幕
-            onHorizontalScreenLayoutChild(scaffoldView, child)
+            // 显示隐藏动画控制
+            if (parent.showPlayer && !isShowChild) {
+                isShowChild = true
+                child.translationX = 0f
+                child.translationY = 0f
+                startShowAnimation(child)
+            } else if (!parent.showPlayer && isShowChild) {
+                isShowChild = false
+                startHideAnimation(child)
+            }
+
         } else {
-            // 竖向屏幕
-            onVerticalScreenLayoutChild(scaffoldView, child)
+            child.layout(0, 0, 0, 0)
         }
-        if (scaffoldView.orientation != currentOrientation) {
-            child.translationX = 0f
-            child.translationY = 0f
-        }
-        currentOrientation = scaffoldView.orientation
-        // 播放器尺寸校正
-        if (child.layoutParams.height != height || child.layoutParams.width != width) {
-            child.layoutParams.height = height
-            child.layoutParams.width = width
-            child.requestLayout()
-        }
-        // 内容区域布局尺寸校正
-        if (parent.playerHeight != height || parent.playerWidth != width) {
-            DebugMiao.log(scaffoldView.fullScreenPlayer, height, width)
-            parent.playerHeight = height
-            parent.playerWidth = width
-            parent.content?.requestLayout()
-        }
-        // 显示隐藏动画控制
-        if (parent.showPlayer && !isShowChild) {
-            isShowChild = true
-            child.translationX = 0f
-            child.translationY = 0f
-            startShowAnimation(child)
-        } else if (!parent.showPlayer && isShowChild) {
-            isShowChild = false
-            startHideAnimation(child)
-        }
-        this.viewRef = child
-        this.parentRef = parent
         return true
     }
 
-    private var mDownX = 0F
-    private var mDownY = 0F
-    private var mFirstY: Int = 0
-    private var mFirstX: Int = 0
-    private var isMove = false
+    override fun onTouchEvent(parent: CoordinatorLayout, child: View, ev: MotionEvent): Boolean {
+        return behaviorDelegate?.onTouchEvent(ev) ?: true
+    }
 
     override fun onInterceptTouchEvent(
         parent: CoordinatorLayout,
         child: View,
-        event: MotionEvent
+        ev: MotionEvent
     ): Boolean {
-        val x = event.x
-        val y = event.y
-        return parent is ScaffoldView && parent.showPlayer && !parent.fullScreenPlayer
-                && currentOrientation == ScaffoldView.HORIZONTAL
-                && child.x < x
-                && child.y < y
-                && child.x + width > x
-                && child.y + dragAreaHeight > y
-    }
-
-    override fun onTouchEvent(parent: CoordinatorLayout, child: View, event: MotionEvent): Boolean {
-        val x = event.x
-        val y = event.y
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (child.x < x
-                    && child.y < y
-                    && child.x + width > x
-                    && child.y + dragAreaHeight > y
-                ) {
-                    isMove = true
-                    mDownX = x
-                    mDownY = y
-                    // 记录第一次在屏幕上坐标，用于计算初始位置
-                    mFirstY = event.rawY.roundToInt()
-                    mFirstX = event.rawX.roundToInt()
-                }
-//                if (child is DanmakuVideoPlayer) {
-//                    child.showSmallDargBar()
-//                }
-                (child as? ViewGroup)?.getChildAt(0)?.let {
-                    if (it is DanmakuVideoPlayer) it.showSmallDargBar()
-                }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                if (isMove) {
-                    offsetTopAndBottom(child, (y - mDownY).toInt())
-                    offsetLeftAndRight(child, (x - mDownX).toInt())
-                    playerX = child.x.toInt()
-                    playerY = child.y.toInt()
-                    mDownX = x
-                    mDownY = y
-                }
-            }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (isMove) {
-                    isMove = false
-                    resetPosition(event, child)
-//                    if (child is DanmakuVideoPlayer) {
-//                        child.hideSmallDargBar()
-//                    }
-                    (child as? ViewGroup)?.getChildAt(0)?.let {
-                        if (it is DanmakuVideoPlayer) it.hideSmallDargBar()
-                    }
-                }
-            }
-        }
-        return true
-    }
-
-    /**
-     * 拖拽超出屏幕，则左右吸边或上下吸边
-     */
-    private fun resetPosition(event: MotionEvent, child: View) {
-        val measuredWidth = parentRef?.measuredWidth ?: 0
-        val measuredHeight = parentRef?.measuredHeight ?: 0
-        val left = if (parentRef?.orientation == ScaffoldView.HORIZONTAL) {
-            windowInsets.left + child.context.config.appBarMenuWidth
-        } else { windowInsets.left }
-        if (child.x < left) {
-            playerX = left
-            child.animate().setInterpolator(DecelerateInterpolator())
-                .setDuration(200)
-                .x(playerX.toFloat())
-                .start()
-        } else if (child.x > measuredWidth - width - windowInsets.right) {
-            playerX = measuredWidth - width - windowInsets.right
-            child.animate().setInterpolator(DecelerateInterpolator())
-                .setDuration(200)
-                .x(playerX.toFloat())
-                .start()
-        } else {
-            playerX = child.x.toInt()
-        }
-        if (child.y < windowInsets.top) {
-            playerY = windowInsets.top
-            child.animate().setInterpolator(DecelerateInterpolator())
-                .setDuration(200)
-                .y(playerY.toFloat())
-                .start()
-        } else if (child.y > measuredHeight - height - windowInsets.bottom) {
-            playerY = measuredHeight - height - windowInsets.bottom
-            child.animate().setInterpolator(DecelerateInterpolator())
-                .setDuration(200)
-                .y(playerY.toFloat())
-                .start()
-        } else {
-            playerY = child.y.toInt()
-        }
+        return behaviorDelegate?.onInterceptTouchEvent(ev) ?: false
     }
 
     // 显示动画
@@ -334,16 +150,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
     private fun startShowAnimation(child: View) {
         child.startAnimation(showAnimation)
-//        showAnimation.setAnimationListener(object : Animation.AnimationListener {
-//            override fun onAnimationStart(animation: Animation) {
-//                child.visibility = View.VISIBLE
-//            }
-//
-//            override fun onAnimationEnd(animation: Animation) {
-//            }
-//
-//            override fun onAnimationRepeat(animation: Animation) {}
-//        })
     }
 
     private fun startHideAnimation(child: View) {
