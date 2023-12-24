@@ -2,9 +2,6 @@ package com.a10miaomiao.bilimiao
 
 import android.app.Activity
 import android.app.Application
-import android.content.ComponentCallbacks
-import android.content.res.Configuration
-import android.preference.PreferenceManager
 import android.util.DisplayMetrics
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -44,18 +41,7 @@ class Bilimiao: Application() {
             resources.displayMetrics.density,
             resources.displayMetrics.scaledDensity,
         )
-        registerComponentCallbacks(object : ComponentCallbacks {
-            override fun onConfigurationChanged(newConfig: Configuration) {
-                if (newConfig.fontScale > 0) {
-                    mNoncompatDensityAndScaledDensity = mNoncompatDensityAndScaledDensity.copy(
-                        second = resources.displayMetrics.scaledDensity
-                    )
-                }
-            }
-            override fun onLowMemory() {}
-        })
     }
-
 
     fun setCustomDensityDpi(activity: Activity, dpi: Int) {
         val appDisplayMetrics = resources.displayMetrics
