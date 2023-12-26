@@ -87,12 +87,12 @@ class StartViewModel(
             iconRes = R.drawable.ic_nav_history,
             isNeedAuth = true,
         ),
-//        StartNavInfo(
-//            title = "稍后看",
-//            pageUrl = "",
-//            iconRes = R.drawable.ic_nav_watchlater,
-//            isNeedAuth = true,
-//        ),
+        StartNavInfo(
+            title = "稍后看",
+            pageUrl = "bilimiao://watchlater",
+            iconRes = R.drawable.ic_nav_watchlater,
+            isNeedAuth = true,
+        ),
     )
 
     private val searchHistoryDB = SearchHistoryDB(activity, SearchHistoryDB.DB_NAME, null, 1)

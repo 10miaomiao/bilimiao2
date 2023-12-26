@@ -13,7 +13,7 @@ data class VideoInfo(
 //    val cm_config: CmConfig,
 //    val cms: List<Cm>,
     val copyright: Int,
-    val ctime: Double,
+    val ctime: Long,
     var desc: String,
 //    val dimension: Dimension,
 //    val dislike_reasons: List<DislikeReason>,

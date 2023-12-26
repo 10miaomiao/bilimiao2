@@ -88,6 +88,7 @@ object MainNavGraph {
             addFragment(UserChannelDetailFragment::class, UserChannelDetailFragment.Companion)
             addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
             addFragment(HistoryFragment::class, HistoryFragment.Companion)
+            addFragment(WatchLaterFragment::class, WatchLaterFragment.Companion)
 
             addFragment(SearchStartFragment::class, SearchStartFragment.Companion)
             addFragment(SearchResultFragment::class, SearchResultFragment.Companion)

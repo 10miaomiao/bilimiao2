@@ -1,14 +1,11 @@
 package com.a10miaomiao.bilimiao.page.video
 
 import android.content.Context
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.PageRoute
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -18,15 +15,14 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 
 class VideoInfoViewModel(
     override val di: DI,
@@ -119,6 +115,9 @@ class VideoInfoViewModel(
         }
     }
 
+    /**
+     * 跳转番剧
+     */
     private fun jumpSeason(info: VideoInfo) {
         info.season?.let {
             if (it.is_jump == 1) {
@@ -134,6 +133,9 @@ class VideoInfoViewModel(
         }
     }
 
+    /**
+     * 点赞/取消点赞
+     */
     fun requestLike() = viewModelScope.launch(Dispatchers.IO) {
         try {
             val curInfo = info ?: return@launch
@@ -162,17 +164,20 @@ class VideoInfoViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    context.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                context.toast(e.toString())
+                PopTip.show(e.toString())
             }
         }
     }
 
+    /**
+     * 投币
+     */
     fun requestCoin(coinNum: Int) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val curInfo = info ?: return@launch
@@ -190,21 +195,24 @@ class VideoInfoViewModel(
                     curInfo.stat = stat
                 }
                 withContext(Dispatchers.Main) {
-                    context.toast("感谢投币")
+                    PopTip.show("感谢投币")
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    context.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                context.toast(e.toString())
+                PopTip.show(e.toString())
             }
         }
     }
 
+    /**
+     * 收藏
+     */
     fun requestFavorite(
         favIds: List<String>,
         addIds: List<String>,
@@ -238,15 +246,42 @@ class VideoInfoViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    context.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                context.toast(e.toString())
+                PopTip.show(e.toString())
             }
         }
     }
 
+
+    /**
+     * 添加至稍后再看
+     */
+    fun addVideoHistoryToview() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val curInfo = info ?: return@launch
+            val res = BiliApiService.userApi
+                .videoHistoryToviewAdd(curInfo.aid)
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.code == 0) {
+                withContext(Dispatchers.Main) {
+                    PopTip.show("已添加至稍后再看")
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    PopTip.show(res.message)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                PopTip.show(e.toString())
+            }
+        }
+    }
 }

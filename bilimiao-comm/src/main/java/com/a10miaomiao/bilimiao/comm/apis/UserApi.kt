@@ -164,19 +164,43 @@ class UserApi {
     }
 
     /**
-     * web端历史记录
-     * 不支持token，需要cookie
+     * 稍后再看
      */
-    fun webVideoHistory(
-        max: Long,
-        viewAt: Long,
+    fun videoHistoryToview(
+        pageNum: Int,
+        pageSize: Int,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
-            "x/web-interface/history/cursor",
-            "business" to "archive",
-            "max" to max.toString(),
-            "view_at" to viewAt.toString(),
+            "x/v2/history/toview",
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
         )
+    }
+
+    /**
+     * 视频添加稍后再看
+     */
+    fun videoHistoryToviewAdd(
+        aid: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v2/history/toview/add")
+        formBody = ApiHelper.createParams(
+            "aid" to aid,
+        )
+        method = MiaoHttp.POST
+    }
+
+    /**
+     * 删除稍后再看视频
+     */
+    fun videoHistoryToviewDel(
+        aid: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v2/history/toview/del")
+        formBody = ApiHelper.createParams(
+            "aid" to aid,
+        )
+        method = MiaoHttp.POST
     }
 
     /**
