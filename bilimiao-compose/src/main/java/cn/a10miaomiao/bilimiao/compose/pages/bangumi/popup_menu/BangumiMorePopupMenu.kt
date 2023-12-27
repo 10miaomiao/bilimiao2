@@ -11,8 +11,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.navigation.NavHostController
-import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.BottomSheetNavigation
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonV2Info
 import com.kongzue.dialogx.dialogs.PopTip
 
@@ -66,7 +66,7 @@ class BangumiMorePopupMenu (
                     val url = PageRoute.Download.bangumiCreate.url(mapOf(
                         "id" to info.season_id
                     ))
-                    navController.navigate(url)
+                    BottomSheetNavigation.navigate(activity, url)
                 } else {
                     PopTip.show("请等待信息加载完成")
                 }
