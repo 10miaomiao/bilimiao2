@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,11 +17,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.comm.*
 import cn.a10miaomiao.bilimiao.compose.comm.LocalContainerView
@@ -40,6 +44,39 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.compose.withDI
 
 class ComposeFragment : Fragment(), MyPage, DIAware {
+
+    companion object {
+        const val KEY_URL = "url"
+
+        var id: Int = 0
+            private set
+        var actionId: Int = 0
+            private set
+
+        fun initFragmentNavigatorDestinationBuilder(
+            builder: FragmentNavigatorDestinationBuilder,
+            destinationId: Int,
+            actionId: Int
+        ) {
+            this.id = destinationId
+            this.actionId = actionId
+            builder.run {
+                argument(KEY_URL) {
+                    type = NavType.StringType
+                    nullable = true
+                }
+                deepLink("bilimiao://compose?url={url}")
+            }
+        }
+
+        fun createArguments(
+            url: String
+        ): Bundle {
+            return bundleOf(
+                KEY_URL to url
+            )
+        }
+    }
 
     override val di: DI = subDI(closestDI()) {
         bindSingleton { this@ComposeFragment }

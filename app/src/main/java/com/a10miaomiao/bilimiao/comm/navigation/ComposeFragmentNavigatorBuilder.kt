@@ -4,24 +4,21 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.navigation.NavType
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 
 object ComposeFragmentNavigatorBuilder: FragmentNavigatorBuilder() {
     override val name: String = "compose"
 
     override fun FragmentNavigatorDestinationBuilder.init() {
-        argument(MainNavArgs.url) {
-            type = NavType.StringType
-            nullable = true
-        }
-        deepLink("bilimiao://compose?url={url}")
+        ComposeFragment.initFragmentNavigatorDestinationBuilder(
+            this, id, actionId
+        )
     }
 
     fun createArguments(
         url: String
     ): Bundle {
-        return bundleOf(
-            MainNavArgs.url to url
-        )
+        return ComposeFragment.createArguments(url)
     }
 }

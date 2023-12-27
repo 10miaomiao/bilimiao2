@@ -28,10 +28,12 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.BangumiInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonSectionInfo
+import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonV2Info
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -64,7 +66,7 @@ class DownloadBangumiCreatePageViewModel(
     val downloadedSet = MutableStateFlow(setOf<String>()) // 已下载
 
     private var _sid = ""
-    private var _bangumiDetail: BangumiInfo? = null
+    private var _seasonDetail: SeasonV2Info? = null
 
     /**
      * 剧集信息
@@ -133,11 +135,10 @@ class DownloadBangumiCreatePageViewModel(
         id: String
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val res = BiliApiService.bangumiAPI.seasonInfo(id).awaitCall()
-                .gson<ResultInfo2<BangumiInfo>>()
+            val res = BiliApiService.bangumiAPI.seasonInfoV2(id).awaitCall()
+                .gson<ResultInfo<SeasonV2Info>>()
             if (res.code == 0) {
-                val result = res.result
-                _bangumiDetail = result
+                _seasonDetail = res.data
             } else {
                 withContext(Dispatchers.Main) {
                     PopTip.show(res.message)
@@ -176,7 +177,7 @@ class DownloadBangumiCreatePageViewModel(
     }
 
     fun startDownload() {
-        if (_bangumiDetail == null) {
+        if (_seasonDetail == null) {
             PopTip.show("番剧信息未加载")
             return
         }
@@ -240,7 +241,7 @@ class DownloadBangumiCreatePageViewModel(
             is_completed = false,
             total_bytes = 0,
             downloaded_bytes = 0,
-            title = _bangumiDetail!!.title,
+            title = _seasonDetail!!.season_title,
             type_tag = qualityInfo.quality.toString(),
             cover = episode.cover,
             prefered_video_quality = qualityInfo.quality,
@@ -477,7 +478,7 @@ fun DownloadBangumiCreatePage(
             ) {
                 Text(text = "开始下载(${checkedSet.size})")
             }
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp + 10.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + 10.dp))
         }
     }
 
