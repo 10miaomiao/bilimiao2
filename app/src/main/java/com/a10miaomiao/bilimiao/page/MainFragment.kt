@@ -28,7 +28,7 @@ import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
+import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.page.home.*
@@ -36,7 +36,6 @@ import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.template.SettingFragment
-import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -47,7 +46,6 @@ import kotlinx.coroutines.launch
 import org.kodein.di.*
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.dsl.core.*
-import kotlin.reflect.KClass
 
 
 class MainFragment : Fragment(), DIAware, MyPage {
@@ -105,7 +103,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
             MenuKeys.search -> {
 //                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
 //                bsNav.navigate(SearchStartFragment.actionId)
-                scaffoldApp.openSearchDrawer()
+//                scaffoldApp.openSearchDrawer()
+                requireActivity().openSearch(view)
             }
         }
     }

@@ -2,6 +2,7 @@
     <string name="app_name">bilimiao</string>
     <string name="tag_left_fragment">left_fragment</string>
 
+    <string name="search">搜索</string>
     <string name="density_setting">DIP设置</string>
     <string name="view_cover" tools:ignore="ExtraTranslation">查看b站封面</string>
 

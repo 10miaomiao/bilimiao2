@@ -26,7 +26,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.navigation.closeSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
@@ -180,7 +179,7 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
     private val handleCloseClick = View.OnClickListener {
         val text = mEditText.text.toString()
         if (text.isEmpty()) {
-            scaffoldApp.closeSearchDrawer()
+//            scaffoldApp.closeSearchDrawer()
 //            findNavController().popBackStack()
         } else {
             mEditText.setText("")
@@ -196,14 +195,14 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                     viewModel.startSearch(keyword, view)
                 }
                 "AV" -> {
-                    scaffoldApp.closeSearchDrawer()
+//                    scaffoldApp.closeSearchDrawer()
 //                    Navigation.findNavController(view).popBackStack()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = VideoInfoFragment.createArguments(item.value)
                     nav.navigate(VideoInfoFragment.actionId, args)
                 }
                 "SS" -> {
-                    scaffoldApp.closeSearchDrawer()
+//                    scaffoldApp.closeSearchDrawer()
 //                    Navigation.findNavController(view).popBackStack()
                     val nav = requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = BangumiDetailFragment.createArguments(item.value)

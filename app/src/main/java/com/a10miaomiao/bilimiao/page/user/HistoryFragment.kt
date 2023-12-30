@@ -23,6 +23,7 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.user.WebVideoHistoryInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
@@ -30,7 +31,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
+import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -105,7 +106,7 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
         super.onMenuItemClick(view, menuItem)
         when (menuItem.key) {
             MenuKeys.search -> {
-                requireActivity().getScaffoldView().openSearchDrawer()
+                requireActivity().openSearch(view)
             }
         }
     }

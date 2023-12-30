@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.net.Uri
@@ -22,14 +23,17 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -38,8 +42,11 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
+import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
@@ -79,6 +86,9 @@ class MainActivity
     private lateinit var leftFragment: StartFragment
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
+
+    var pageConfig: MyPageConfigInfo? = null
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -175,7 +185,7 @@ class MainActivity
                 )
             }
         }
-//        DebugMiao.log(IMiaoNavList.navList)
+
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -213,6 +223,7 @@ class MainActivity
     }
 
     fun setMyPageConfig(config: MyPageConfigInfo) {
+        pageConfig = config
         ui.mAppBar.setProp {
             title = config.title
             menus = config.menus
@@ -254,7 +265,6 @@ class MainActivity
     }
 
     fun onDrawerStateChanged(state: Int) {
-        leftFragment.onDrawerStateChanged(state)
         // 太麻烦
 //        supportFragmentManager.beginTransaction().also {
 //            if (state == AppBarBehaviorDelegate.STATE_COLLAPSED
@@ -392,6 +402,36 @@ class MainActivity
         basePlayerDelegate.onStop()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (resultCode) {
+            SearchActivity.REQUEST_CODE -> {
+                val arguments = data?.extras ?: Bundle()
+                if (arguments.containsKey(SearchActivity.KEY_URL)) {
+                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)
+                    val navOptions = NavOptions.Builder()
+                        .setEnterAnim(R.anim.miao_fragment_open_enter)
+                        .setExitAnim(R.anim.miao_fragment_open_exit)
+                        .setPopEnterAnim(R.anim.miao_fragment_close_enter)
+                        .setPopExitAnim(R.anim.miao_fragment_close_exit)
+                        .build()
+                    navController.navigate(Uri.parse(pageUrl), navOptions)
+                    return
+                }
+                val mode = arguments.getInt(SearchActivity.KEY_MODE)
+                val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
+                if (mode == 0) {
+                    navController.navigate(
+                        SearchResultFragment.actionId,
+                        SearchResultFragment.createArguments(keyword),
+                    )
+                } else {
+
+                }
+            }
+        }
+    }
+
     /**
      * 通知权限设置界面跳转
      */
@@ -486,7 +526,6 @@ class MainActivity
             Bilimiao.app.setCustomDensityDpi(this, dpi)
         }
     }
-
 
     override fun onBackPressed() {
         if (leftFragment.onBackPressed()) {

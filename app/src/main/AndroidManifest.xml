@@ -72,7 +72,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".page.setting.DensitySettingActivity"
+            android:name=".activity.SearchActivity"
+            android:label="@string/search"></activity>
+        <activity
+            android:name=".activity.DensitySettingActivity"
             android:label="@string/density_setting"
             android:theme="@style/Theme.ShowActionBar.Bilimiao"></activity>
         <activity
