@@ -1,41 +1,33 @@
 package com.a10miaomiao.bilimiao.page.start
 
+
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.Gravity
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
-import android.view.inputmethod.EditorInfo
 import android.widget.CompoundButton
-import android.widget.EditText
-import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.Observer
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._show
-import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm.connectStore
-import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.flexboxLayout
@@ -48,7 +40,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.navigation.closeSearchDrawer
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -116,10 +107,6 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
         private val ID_searchView = View.generateViewId()
         private val ID_searchTextView = View.generateViewId()
-        private val ID_searchEditText = View.generateViewId()
-        private val ID_searchCloseIcon = View.generateViewId()
-        private val ID_suggestRecycler = View.generateViewId()
-
         private val ID_radioButton_all = View.generateViewId()
         private val ID_radioButton_self = View.generateViewId()
     }
@@ -133,10 +120,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private lateinit var mAllRadioButton: RadioButton
     private lateinit var mSelfRadioButton: RadioButton
     private lateinit var mSearchView: MaterialCardView
-    private lateinit var mSearchEditText: EditText
     private lateinit var mSearchTextView: TextView
-    private lateinit var mSearchCloseIconView: ImageView
-    private lateinit var mSuggestRecycler: RecyclerView
 
     private val viewModel by lazy { StartViewModel(di) }
     private val supportHelper by instance<SupportHelper>()
@@ -157,45 +141,37 @@ class StartFragment : Fragment(), DIAware, MyPage {
         super.onViewCreated(view, savedInstanceState)
 
         mSearchView = view.findViewById(ID_searchView)
-        mSearchEditText = view.findViewById(ID_searchEditText)
         mSearchTextView = view.findViewById(ID_searchTextView)
-        mSearchCloseIconView = view.findViewById(ID_searchCloseIcon)
-        mSuggestRecycler = view.findViewById(ID_suggestRecycler)
-
         mAllRadioButton = view.findViewById(ID_radioButton_all)
         mSelfRadioButton = view.findViewById(ID_radioButton_self)
-        mSearchEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
 
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                val text = p0.toString()
-                viewModel.loadSuggestData(text, mSearchEditText)
-            }
-        })
         mAllRadioButton.setOnCheckedChangeListener(handleCheckedChange)
         mSelfRadioButton.setOnCheckedChangeListener(handleCheckedChange)
-//        val text = arguments?.getString(MainNavArgs.text)
-//        if (text != null) {
-//            mSearchTextView.setText(text)
-//        }
+
+        themeDelegate.observeTheme(this, Observer {
+            // 切换主题时，颜色随之改变
+            val colorStateList = ColorStateList(
+                arrayOf(
+                    intArrayOf(-android.R.attr.state_checked),
+                    intArrayOf(android.R.attr.state_checked)
+                ),
+                intArrayOf(config.foregroundAlpha45Color, config.themeColor)
+            )
+            mAllRadioButton.buttonTintList = colorStateList
+            mSelfRadioButton.buttonTintList = colorStateList
+        })
     }
 
     fun setConfig(config: SearchConfigInfo?) {
         viewModel.config = config
         if (config == null) {
-            mSearchEditText.setText("")
             mAllRadioButton.isChecked = true
             mSelfRadioButton.visibility = View.GONE
             viewModel.searchMode = 0
         } else {
-            mSearchEditText.setText(config.keyword)
-            mSearchEditText.setSelection(config.keyword.length)
+            mSearchTextView.text = config.keyword.ifBlank {
+                "请输入ID或关键字"
+            }
             if (config.name.isNotBlank()) {
                 viewModel.searchMode = 1
                 mSelfRadioButton.visibility = View.VISIBLE
@@ -209,108 +185,31 @@ class StartFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    private fun showSoftInput() {
-        supportHelper.showSoftInput(mSearchEditText)
-    }
-
-    private fun hideSoftInput() {
-        supportHelper.hideSoftInput(mSearchEditText)
-    }
-
 
     override fun onResume() {
         super.onResume()
         setConfig(viewModel.config)
-//        supportHelper.showSoftInput(mEditText)
     }
 
     override fun onPause() {
         super.onPause()
-//        supportHelper.hideSoftInput(mEditText)
     }
 
     fun onBackPressed(): Boolean {
-        if (viewModel.searchFocus) {
-            closeSearchView()
-            return true
-        }
         return false
     }
 
-    fun onDrawerStateChanged(state: Int) {
-        if (state == DrawerBehaviorDelegate.STATE_COLLAPSED) {
-            closeSearchView()
-        } else if (state == DrawerBehaviorDelegate.STATE_EXPANDED) {
-            if (viewModel.searchFocus) {
-                showSoftInput()
-            }
-        }
-    }
-
-    fun openSearchView() {
-        viewModel.searchFocus = true
-        mSuggestRecycler.visibility = View.VISIBLE
-        mSearchEditText.visibility = View.VISIBLE
-        mSearchCloseIconView.visibility = View.VISIBLE
-        mSearchTextView.visibility = View.GONE
-        (mSearchView.layoutParams as MarginLayoutParams).let {
-            it.setMargins(0, 0, 0, 0)
-        }
-        mSearchView.radius = 0f
-    }
-
-    private fun closeSearchView() {
-        hideSoftInput()
-        viewModel.searchFocus = false
-        mSuggestRecycler.visibility = View.GONE
-        mSearchEditText.visibility = View.GONE
-        mSearchCloseIconView.visibility = View.GONE
-        mSearchTextView.visibility = View.VISIBLE
-        mSearchView.radius = requireContext().dip(10f)
-        (mSearchView.layoutParams as MarginLayoutParams).let {
-            it.margin = config.largePadding
-        }
-    }
-
-    private fun showDeleteAllHistoryDialog() {
-        MaterialAlertDialogBuilder(requireContext()).apply {
-            setTitle("确认清空，喵？")
-            setMessage("将清空搜索历史关键字")
-            setPositiveButton("确定清空") { _, _ ->
-                viewModel.deleteAllSearchHistory()
-                PopTip.show("已清空了喵")
-            }
-            setNegativeButton("取消", null)
-        }.show()
-    }
-
-    private val handleEditorAction = TextView.OnEditorActionListener { v, actionId, event ->
-        if (actionId == EditorInfo.IME_ACTION_UNSPECIFIED
-            && event.action == KeyEvent.ACTION_DOWN
-        ) {
-            handleSearchClick.onClick(v)
-            return@OnEditorActionListener true
-        }
-        return@OnEditorActionListener false
-    }
-    private val handleSearchClick = View.OnClickListener {
-        val keyword = mSearchEditText.text.toString()
-        viewModel.startSearch(keyword, it)
-    }
-
-    private val handleCloseClick = View.OnClickListener {
-        val text = mSearchEditText.text.toString()
-        if (text.isEmpty()) {
-            closeSearchView()
-//            scaffoldApp.closeSearchDrawer()
-        } else {
-            mSearchEditText.setText("")
-        }
-    }
-
     private val handleStartSearchClick = View.OnClickListener {
-        openSearchView()
-        showSoftInput()
+        val activity = requireActivity()
+        val scaffoldView = activity.getScaffoldView()
+        SearchActivity.launch(
+            activity,
+            "",
+            if (mSelfRadioButton.isChecked) 1 else 0,
+            viewModel.config?.name,
+            mSearchView,
+        )
+        scaffoldView.closeDrawer()
     }
 
     private val handleNavItemClick = OnItemClickListener { adapter, view, position ->
@@ -322,6 +221,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             .setPopExitAnim(R.anim.miao_fragment_close_exit)
             .build()
         val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val scaffoldView = requireActivity().getScaffoldView()
         if (item.isNeedAuth) {
             val userInfo = viewModel.userStore.state.info
             if (userInfo == null) {
@@ -332,52 +232,12 @@ class StartFragment : Fragment(), DIAware, MyPage {
                 .replace("{mid}", userInfo.mid.toString())
                 .replace("{name}", userInfo.name)
             nav.navigate(Uri.parse(pageUrl), navOptions)
-            scaffoldApp.closeSearchDrawer()
+            scaffoldView.closeDrawer()
         } else {
             val pageUrl = item.pageUrl
             nav.navigate(Uri.parse(pageUrl), navOptions)
-            scaffoldApp.closeSearchDrawer()
+            scaffoldView.closeDrawer()
         }
-    }
-
-    private val handleSuggestTagItemClick = OnItemClickListener { adapter, view, position ->
-        val item = adapter.data[position]
-        if (item is StartViewModel.SuggestInfo) {
-            when (item.type) {
-                StartViewModel.SuggestType.AV -> {
-                    scaffoldApp.closeSearchDrawer()
-                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = VideoInfoFragment.createArguments(item.value)
-                    nav.navigate(VideoInfoFragment.actionId, args)
-                }
-                StartViewModel.SuggestType.SS -> {
-                    scaffoldApp.closeSearchDrawer()
-                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = BangumiDetailFragment.createArguments(item.value)
-                    nav.navigate(BangumiDetailFragment.actionId, args)
-                }
-                else -> {
-                    val keyword = item.value
-                    viewModel.startSearch(keyword, view)
-                }
-            }
-        }
-    }
-
-    private val handleHistoryDeleteItemClick = OnClickListener { view ->
-        val text = view.tag as? String ?: return@OnClickListener
-        MaterialAlertDialogBuilder(requireContext()).apply {
-            setTitle("确认删除，喵？")
-            setMessage("将删除搜索历史关键字“${text}”")
-            setPositiveButton("确定") { _, _ ->
-                viewModel.deleteSearchHistory(text)
-                PopTip.show("已删除”${text}“")
-            }
-            setNegativeButton("取消", null)
-            setNeutralButton("清空全部") { _, _ ->
-                showDeleteAllHistoryDialog()
-            }
-        }.show()
     }
 
     private val handleCheckedChange = CompoundButton.OnCheckedChangeListener { compoundButton, b ->
@@ -392,65 +252,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    val itemHistoryTagUi = miaoBindingItemUi<String> { item, index ->
-        tagItem(item)
-    }
 
-    val itemSuggestTagUi = miaoBindingItemUi<StartViewModel.SuggestInfo> { item, index ->
-        horizontalLayout {
-            layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
-            setBackgroundResource(config.selectableItemBackground)
-            horizontalPadding = config.pagePadding
-            verticalPadding = config.largePadding
-            gravity = Gravity.CENTER_VERTICAL
-
-            views {
-                +imageView {
-                    _show = item.type == StartViewModel.SuggestType.HISTORY
-                    imageResource = R.drawable.ic_history_gray_24dp
-                    rightPadding = config.pagePadding
-                }
-                +textView {
-                    _text = item.text
-                    textSize = 16f
-                    rightPadding = config.pagePadding
-                }..lParams(matchParent, wrapContent) {
-                    weight = 1f
-                }
-                +imageView {
-                    _show = item.type == StartViewModel.SuggestType.HISTORY
-                    _tag = item.value
-                    imageResource = R.drawable.ic_baseline_delete_outline_24
-                    setBackgroundResource(config.selectableItemBackgroundBorderless)
-                    setOnClickListener(handleHistoryDeleteItemClick)
-                }
-            }
-        }
-    }
-
-    fun MiaoUI.tagItem(
-        text: String,
-    ): View {
-        return frameLayout {
-            views {
-                +frameLayout {
-                    apply(ViewStyle.roundRect(dip(5)))
-                    setBackgroundResource(config.selectableItemBackground)
-
-                    views {
-                        +textView {
-                            backgroundColor = config.blockBackgroundColor
-                            padding = dip(5)
-                            _text = text
-                        }
-                    }
-                }..lParams {
-                    rightMargin = dip(8)
-                    bottomMargin = dip(5)
-                }
-            }
-        }
-    }
 
     @OptIn(InternalSplittiesApi::class)
     fun MiaoUI.searchBoxView(): View {
@@ -489,19 +291,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                         +frameLayout {
 
                             views {
-                                +editText(ID_searchEditText) {
-                                    _show = viewModel.searchFocus
-                                    textSize = 18f
-                                    hint = "请输入ID或关键字"
-                                    horizontalPadding = iconSize + dip(15)
-                                    setBackgroundResource(0)
-                                    imeOptions = EditorInfo.IME_ACTION_SEARCH
-                                    isSingleLine = true
-                                    inputType = EditorInfo.TYPE_CLASS_TEXT
-                                    setOnEditorActionListener(handleEditorAction)
-                                }..lParams(matchParent, dip(60))
                                 +textView(ID_searchTextView) {
-                                    _show = !viewModel.searchFocus
                                     text = "请输入ID或关键字"
                                     setTextColor(config.foregroundAlpha45Color)
                                     horizontalPadding = iconSize + dip(15)
@@ -512,24 +302,13 @@ class StartFragment : Fragment(), DIAware, MyPage {
                                     gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
                                 }
 
-                                +imageView(ID_searchCloseIcon) {
-                                    setImageResource(R.drawable.ic_close_grey_24dp)
-                                    setBackgroundResource(config.selectableItemBackgroundBorderless)
-                                    setOnClickListener(handleCloseClick)
-                                }..lParams(iconSize, iconSize) {
-                                    rightMargin = config.pagePadding
-                                    gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
-                                }
-
                                 +imageView {
-//                            imageTintList = ColorStateList.valueOf(config.white80)
                                     setImageResource(R.drawable.ic_search_24dp)
                                     setBackgroundResource(config.selectableItemBackgroundBorderless)
                                     setOnClickListener(handleStartSearchClick)
                                 }..lParams(iconSize, iconSize) {
                                     leftMargin = config.pagePadding
                                     gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
-//                            setOnClickListener(handleSearchClick)
                                 }
                             }
                         }..lParams(matchParent, dip(60))
@@ -695,23 +474,6 @@ class StartFragment : Fragment(), DIAware, MyPage {
                     }
                     footerViews(mAdapter) {
 
-                    }
-                }..lParams(matchParent, matchParent)
-
-                +recyclerView(ID_suggestRecycler) {
-                    backgroundColor = config.windowBackgroundColor
-                    visibility = View.GONE
-                    bottomPadding = dip(100)
-
-                    _miaoLayoutManage(
-                        LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, true)
-                    )
-                    _miaoAdapter(
-                        items = viewModel.suggestList,
-                        itemUi = itemSuggestTagUi,
-                        depsAry = viewModel.suggestList.toTypedArray(),
-                    ) {
-                        setOnItemClickListener(handleSuggestTagItemClick)
                     }
                 }..lParams(matchParent, matchParent)
 

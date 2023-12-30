@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
+import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerDraggableBehavior
 import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.shadow.ShadowLayout
@@ -45,14 +46,6 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         backgroundColor = config.windowBackgroundColor
     }
 
-//    val mContainerView = view<DrawerLayout> {
-//        addView(inflate(R.layout.container_fragment))
-//        addView(leftContainerView, DrawerLayout.LayoutParams(matchParent, matchParent).apply {
-//            gravity = Gravity.LEFT
-//        })
-//        backgroundColor = config.windowBackgroundColor
-//    }
-
     val mBottomSheetView = inflate<FragmentContainerView>(R.layout.bottom_sheet_fragment) {
         backgroundColor = config.windowBackgroundColor
         setOnClickListener {  }
@@ -63,7 +56,6 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         backgroundColor = config.blockBackgroundColor
         elevation = dip(20).toFloat()
     }
-
 
     val mPlayerLayout = frameLayout {
         backgroundColor = 0xFF000000.toInt()
@@ -147,17 +139,24 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             height = matchParent
         })
 
+        addView(mMaskView, lParams {
+            behavior = MaskBehavior(ctx, null)
+            height = matchParent
+            width = matchParent
+        })
+
         addView(mPlayerLayout, lParams {
             behavior = PlayerBehavior(ctx, null)
             width = wrapContent
             height = wrapContent
         })
 
-        addView(mMaskView, lParams {
-            behavior = MaskBehavior(ctx, null)
-            height = matchParent
-            width = matchParent
-        })
+//        addView(frameLayout {
+//            backgroundColor = config.blockBackgroundColor
+//            elevation = dip(20).toFloat()
+//        }, lParams {
+//            behavior = PlayerDraggableBehavior(ctx, null)
+//        })
 
         addView(mLeftContainerView, lParams {
             height = matchParent

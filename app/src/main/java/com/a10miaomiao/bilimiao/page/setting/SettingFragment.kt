@@ -18,8 +18,8 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.activity.DensitySettingActivity
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
@@ -38,8 +38,6 @@ import com.google.gson.reflect.TypeToken
 import de.Maxr1998.modernpreferences.Preference
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
-import de.Maxr1998.modernpreferences.preferences.SwitchPreference
-import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import org.kodein.di.*
 import splitties.toast.toast
 import splitties.views.dsl.core.*

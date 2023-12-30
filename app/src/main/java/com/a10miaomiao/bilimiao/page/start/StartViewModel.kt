@@ -16,7 +16,6 @@ import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.db.SearchHistoryDB
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.navigation.closeSearchDrawer
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -40,11 +39,6 @@ class StartViewModel(
     val ui: MiaoBindingUi by instance()
 
     val userStore: UserStore by instance()
-
-    var historyList = mutableListOf<String>()
-    var suggestList = mutableListOf<SuggestInfo>()
-
-    var searchFocus = false
 
     var config: SearchConfigInfo? = null
     var searchMode = 0 // 0为全站搜索，1为页面自身搜索
@@ -95,149 +89,9 @@ class StartViewModel(
         ),
     )
 
-    private val searchHistoryDB = SearchHistoryDB(activity, SearchHistoryDB.DB_NAME, null, 1)
-
-    init {
-        historyList = searchHistoryDB.queryAllHistory()
-    }
-
     private fun composePageUrl(url: String): String {
         return "bilimiao://compose?url=${Uri.encode(url)}"
     }
-
-    private fun showSearchKeywordHistory() {
-        ui.setState {
-            suggestList = historyList.map {
-                SuggestInfo(
-                    text = it,
-                    value = it,
-                    type = SuggestType.HISTORY
-                )
-            }.toMutableList()
-        }
-    }
-
-    private fun initSuggestData(keyword: String) {
-        suggestList = mutableListOf(
-            SuggestInfo(
-                text = "直接搜索“${keyword}”",
-                type = SuggestType.SEARCH,
-                value = keyword,
-            )
-        )
-        if (isNumeric(keyword)) {
-            suggestList.add(
-                SuggestInfo(
-                    text = "查看视频“AV${keyword}”",
-                    type = SuggestType.AV,
-                    value = keyword,
-                )
-            )
-            suggestList.add(
-                SuggestInfo(
-                    text = "查看番剧“SS${keyword}”",
-                    type = SuggestType.SS,
-                    value = keyword,
-                )
-            )
-        }
-    }
-
-    /**
-     * 加载搜索提示
-     */
-    fun loadSuggestData(keyword: String, editText: EditText) = viewModelScope.launch(Dispatchers.IO) {
-        if (keyword.isEmpty()) {
-            showSearchKeywordHistory()
-            return@launch
-        }
-        ui.setState {
-            initSuggestData(keyword)
-        }
-        try {
-            val res = BiliApiService.searchApi.suggestList(keyword).awaitCall()
-            val jsonStr = res.body!!.string()
-            val jsonParser = JSONTokener(jsonStr)
-            val jsonArray = (jsonParser.nextValue() as JSONObject).getJSONObject("result").getJSONArray("tag")
-            if (keyword == editText.text.toString()) {
-                ui.setState {
-                    initSuggestData(keyword)
-                    for (i in 0 until jsonArray.length()) {
-                        val value = jsonArray.getJSONObject(i).getString("value")
-                        suggestList.add(SuggestInfo(
-                            text = value,
-                            value = value,
-                            type = SuggestType.TEXT
-                        ))
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * 开始搜索
-     */
-    fun startSearch(keyword: String, view: View) {
-        if (keyword.isEmpty()) {
-            PopTip.show("请输入ID或关键字")
-            return
-        }
-        searchHistoryDB.deleteHistory(keyword)
-        searchHistoryDB.insertHistory(keyword)
-        activity.getScaffoldView().closeSearchDrawer()
-        if (searchMode == 0) {
-            val nav = activity.findNavController(R.id.nav_host_fragment)
-            val args = bundleOf(
-                MainNavArgs.text to keyword
-            )
-            nav.navigate(SearchResultFragment.actionId, args)
-        } else {
-            (activity as? MainActivity)?.searchSelfPage(keyword)
-        }
-        historyList = searchHistoryDB.queryAllHistory()
-    }
-
-    fun deleteSearchHistory(text: String){
-        searchHistoryDB.deleteHistory(text)
-        historyList = searchHistoryDB.queryAllHistory()
-        showSearchKeywordHistory()
-    }
-
-    fun deleteAllSearchHistory(){
-        searchHistoryDB.deleteAllHistory()
-        historyList.clear()
-        showSearchKeywordHistory()
-    }
-
-    fun setSearchFocusState(focus: Boolean) {
-        ui.setState {
-            searchFocus = focus
-        }
-    }
-
-    /**
-     * 字符串是否为数字
-     */
-    fun isNumeric(s: String): Boolean {
-        return s.toCharArray().all { Character.isDigit(it) }
-    }
-
-    enum class SuggestType {
-        TEXT, // 普通文字
-        SEARCH, // 直接搜索
-        AV, // 视频ID，AV号跳转
-        SS, // 番剧ID，SS号跳转
-        HISTORY, // 历史搜索
-    }
-
-    data class SuggestInfo(
-        val text: String, // 显示文字
-        val type: SuggestType,
-        val value: String,
-    )
 
     data class StartNavInfo(
         val title: String,

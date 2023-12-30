@@ -16,13 +16,14 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.navigation.openSearchDrawer
+import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.page.search.result.VideoResultFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
@@ -75,7 +76,7 @@ class SearchResultFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChange
 //                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
 //                val args = SearchStartFragment.createArguments(viewModel.keyword ?: "")
 //                bsNav.navigate(SearchStartFragment.actionId, args)
-                requireActivity().getScaffoldView().openSearchDrawer()
+                requireActivity().openSearch(view)
             }
             else -> {
                 viewModel.curFragment?.onMenuItemClick(view, menuItem)
