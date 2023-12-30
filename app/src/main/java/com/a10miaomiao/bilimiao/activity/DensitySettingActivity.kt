@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.page.setting
+package com.a10miaomiao.bilimiao.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.preference.PreferenceManager
 import android.text.InputType
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.R
