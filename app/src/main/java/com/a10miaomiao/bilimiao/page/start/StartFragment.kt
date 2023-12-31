@@ -204,7 +204,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val scaffoldView = activity.getScaffoldView()
         SearchActivity.launch(
             activity,
-            "",
+            viewModel.config?.keyword ?: "",
             if (mSelfRadioButton.isChecked) 1 else 0,
             viewModel.config?.name,
             mSearchView,

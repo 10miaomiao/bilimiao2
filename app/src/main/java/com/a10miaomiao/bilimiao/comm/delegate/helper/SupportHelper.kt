@@ -9,16 +9,18 @@ class SupportHelper(
     val activity: AppCompatActivity
 ) {
 
-    private val SHOW_SPACE = 200L
+    private val SHOW_SPACE = 500L
 
     /**
      * 显示软键盘
      */
     fun showSoftInput(view: View) {
         val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        view.requestFocus()
         view.postDelayed(
-            { imm.showSoftInput(view, InputMethodManager.SHOW_FORCED) },
+            {
+                view.requestFocus()
+                imm.showSoftInput(view, InputMethodManager.SHOW_FORCED)
+            },
             SHOW_SPACE
         )
     }
