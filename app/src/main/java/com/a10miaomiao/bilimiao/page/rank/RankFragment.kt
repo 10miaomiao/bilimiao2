@@ -26,6 +26,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -72,8 +73,9 @@ class RankFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChangeListener
         super.onMenuItemClick(view, menuItem)
         when (menuItem.key) {
             MenuKeys.search -> {
-                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-                bsNav.navigate(SearchStartFragment.actionId)
+//                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+//                bsNav.navigate(SearchStartFragment.actionId)
+                requireActivity().openSearch(view)
             }
         }
     }
