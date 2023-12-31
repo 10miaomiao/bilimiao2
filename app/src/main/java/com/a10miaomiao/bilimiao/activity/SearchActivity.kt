@@ -246,13 +246,13 @@ class SearchActivity : AppCompatActivity() {
                 when (item.type) {
                     SearchViewModel.SuggestType.AV -> {
                         val intent = Intent()
-                        intent.putExtra(KEY_URL, "bilimiao://video/${item.text}")
+                        intent.putExtra(KEY_URL, "bilimiao://video/${item.value}")
                         setResult(REQUEST_CODE, intent)
                         finishAfterTransition()
                     }
                     SearchViewModel.SuggestType.SS -> {
                         val intent = Intent()
-                        val url = "bilimiao://compose?url=bilimiao%3A%2F%2Fbangumi%2Fdetail%2F${item.text}%3Fepid%3D"
+                        val url = "bilimiao://compose?url=bilimiao%3A%2F%2Fbangumi%2Fdetail%2F${item.value}%3Fepid%3D"
                         intent.putExtra(KEY_URL, url)
                         setResult(REQUEST_CODE, intent)
                         finishAfterTransition()
