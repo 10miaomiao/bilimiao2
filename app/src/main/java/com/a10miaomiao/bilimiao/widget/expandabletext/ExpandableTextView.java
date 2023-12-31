@@ -1,8 +1,6 @@
 package com.a10miaomiao.bilimiao.widget.expandabletext;
 
 
-import static androidx.core.util.PatternsCompat.AUTOLINK_WEB_URL;
-
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -79,6 +77,9 @@ public class ExpandableTextView extends AppCompatTextView {
     //匹配自定义链接的正则表达式
 //    public static final String self_regex = "\\[([\\w\\p{InCJKUnifiedIdeographs}-]*)]\\([\\w\\p{InCJKUnifiedIdeographs}-]*\\)";
     public static final String self_regex = "\\[([^\\[]*)\\]\\(([^\\(]*)\\)";
+
+    // 匹配网址不匹配汉字
+    public static final String link_regex = "(https|http)\\:\\/\\/[a-zA-Z0-9\\-\\.]+\\.[a-zA-Z]{2,}(:[0-9]{1,5})?(\\/[a-zA-Z0-9%&=#_\\-\\/\\?\\.]*)?";
 
     private TextPaint mPaint;
 
@@ -299,7 +300,7 @@ public class ExpandableTextView extends AppCompatTextView {
         mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         //初始化link的图片
-//        mLinkDrawable.setBounds(0, 0, 30, 30); //必须设置图片大小，否则不显示
+        mLinkDrawable.setBounds(0, 0, 40, 40); //必须设置图片大小，否则不显示
     }
 
     private SpannableStringBuilder setRealContent(CharSequence content) {
@@ -576,9 +577,9 @@ public class ExpandableTextView extends AppCompatTextView {
                     if (mNeedExpend && ignoreMore) {
                         int fitPosition = ssb.length() - getHideEndContent().length();
                         if (data.getStart() < fitPosition) {
-                            SelfImageSpan imageSpan = new SelfImageSpan(mLinkDrawable, ImageSpan.ALIGN_BASELINE);
-                            //设置链接图标
-                            ssb.setSpan(imageSpan, data.getStart(), data.getStart() + 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+//                            SelfImageSpan imageSpan = new SelfImageSpan(mLinkDrawable, ImageSpan.ALIGN_BASELINE);
+//                            //设置链接图标
+//                            ssb.setSpan(imageSpan, data.getStart(), data.getStart() + 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                             //设置链接文字样式
                             int endPosition = data.getEnd();
                             if (currentLines < mLineCount) {
@@ -591,9 +592,9 @@ public class ExpandableTextView extends AppCompatTextView {
                             }
                         }
                     } else {
-                        SelfImageSpan imageSpan = new SelfImageSpan(mLinkDrawable, ImageSpan.ALIGN_BASELINE);
+//                        SelfImageSpan imageSpan = new SelfImageSpan(mLinkDrawable, ImageSpan.ALIGN_BASELINE);
                         //设置链接图标
-                        ssb.setSpan(imageSpan, data.getStart(), data.getStart() + 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+//                        ssb.setSpan(imageSpan, data.getStart(), data.getStart() + 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                         addUrl(ssb, data, data.getEnd());
                     }
                 } else if (data.getType().equals(LinkType.MENTION_TYPE)) {
@@ -735,7 +736,7 @@ public class ExpandableTextView extends AppCompatTextView {
                 ds.setColor(mLinkTextColor);
                 ds.setUnderlineText(false);
             }
-        }, data.getStart() + 1, endPosition, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+        }, data.getStart(), endPosition, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
     }
 
     /**
@@ -869,7 +870,7 @@ public class ExpandableTextView extends AppCompatTextView {
         temp = 0;
 
         if (mNeedLink) {
-            pattern = AUTOLINK_WEB_URL;
+            pattern = Pattern.compile(link_regex, Pattern.CASE_INSENSITIVE);;
             matcher = pattern.matcher(content);
             while (matcher.find()) {
                 start = matcher.start();
@@ -882,14 +883,15 @@ public class ExpandableTextView extends AppCompatTextView {
                 } else {
                     String result = matcher.group();
                     String key = UUIDUtils.getUuid(result.length());
-                    datas.add(new FormatData.PositionData(newResult.length(), newResult.length() + 2 + key.length(), result, LinkType.LINK_TYPE));
+                    datas.add(new FormatData.PositionData(newResult.length(), newResult.length() + key.length(), result, LinkType.LINK_TYPE));
                     convert.put(key, result);
-                    newResult.append(" " + key + " ");
+                    newResult.append(key);
                 }
                 temp = end;
             }
         }
         newResult.append(content.toString().substring(end, content.toString().length()));
+
         //对@用户 进行正则匹配
         if (mNeedMention) {
             pattern = Pattern.compile(regexp_mention, Pattern.CASE_INSENSITIVE);
