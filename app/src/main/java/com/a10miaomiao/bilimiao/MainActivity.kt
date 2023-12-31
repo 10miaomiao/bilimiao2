@@ -426,7 +426,7 @@ class MainActivity
                         SearchResultFragment.createArguments(keyword),
                     )
                 } else {
-
+                    searchSelfPage(keyword)
                 }
             }
         }

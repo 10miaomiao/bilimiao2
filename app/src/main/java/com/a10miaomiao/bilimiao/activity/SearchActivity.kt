@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.inputmethod.EditorInfo
+import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -132,7 +133,22 @@ class SearchActivity : AppCompatActivity() {
         finishAfterTransition()
     }
 
+    private val handleCheckedChange = CompoundButton.OnCheckedChangeListener { compoundButton, b ->
+        if (b) {
+            if (compoundButton == ui.allRadioButton) {
+                ui.selfRadioButton.isChecked = false
+                viewModel.searchMode = 0
+            } else {
+                ui.allRadioButton.isChecked = false
+                viewModel.searchMode = 1
+            }
+        }
+    }
+
+
     private fun initSearchBoxView() {
+        ui.allRadioButton.setOnCheckedChangeListener(handleCheckedChange)
+        ui.selfRadioButton.setOnCheckedChangeListener(handleCheckedChange)
         ui.searchEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
 
