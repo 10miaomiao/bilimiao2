@@ -152,12 +152,18 @@ class PlayerAPI {
             if (proxyServer.enableAdvanced == true) {
                 // 启用高级设置，自定义请求参数和请求头
 //                headers["x-from-biliroaming"] = "1.6.12"
-//                params["area"] = "hk
+//                params["area"] = "hk"
                 proxyServer.queryArgs?.forEach {
-                    if (it.enable) params[it.key] = it.value
+                    if (it.enable && it.key.isNotBlank()) {
+                        params[it.key] = it.value
+                    }
                 }
                 proxyServer.headers?.forEach {
-                    if (it.enable) headers[it.name] = it.value
+                    if (it.enable
+                        && it.name.isNotBlank()
+                        && it.value.isNotBlank()) {
+                        headers[it.name] = it.value
+                    }
                 }
             }
             url = BiliApiService.createUrl(
