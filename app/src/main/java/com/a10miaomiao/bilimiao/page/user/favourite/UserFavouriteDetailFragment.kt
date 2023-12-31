@@ -1,15 +1,18 @@
 package com.a10miaomiao.bilimiao.page.user.favourite
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -17,12 +20,18 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -32,6 +41,7 @@ import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -59,22 +69,70 @@ class UserFavouriteDetailFragment : Fragment(), DIAware, MyPage {
                 type = NavType.StringType
                 nullable = false
             }
+            argument(MainNavArgs.text) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = ""
+            }
         }
         fun createArguments(
             id: String,
             name: String,
+            keyword: String = "",
         ): Bundle {
             return bundleOf(
                 MainNavArgs.id to id,
                 MainNavArgs.name to name,
+                MainNavArgs.text to keyword,
             )
         }
     }
 
-    private val name by lazy { requireArguments().getString(MainNavArgs.name, "") }
-
     override val pageConfig = myPageConfig {
-        title = name
+        var searchTitle = "搜索"
+        if (viewModel.keyword?.isBlank() == true) {
+            title = viewModel.name
+        } else {
+            title = "搜索\n-\n${viewModel.name}\n-\n${viewModel.keyword}"
+            searchTitle = "继续搜索"
+        }
+        search = SearchConfigInfo(
+            name = "搜索${viewModel.name}",
+            keyword = viewModel.keyword ?: "",
+        )
+        menus = listOf(
+            myMenuItem {
+                key = MenuKeys.search
+                title = searchTitle
+                iconResource = R.drawable.ic_search_gray
+            },
+        )
+    }
+
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when (menuItem.key) {
+            MenuKeys.search -> {
+                requireActivity().openSearch(view)
+            }
+        }
+    }
+
+    override fun onSearchSelfPage(context: Context, keyword: String) {
+        if (viewModel.keyword.isBlank()) {
+            findNavController().navigate(
+                UserFavouriteDetailFragment.actionId,
+                UserFavouriteDetailFragment.createArguments(
+                    viewModel.id,
+                    viewModel.name,
+                    keyword
+                )
+            )
+        } else {
+            viewModel.keyword = keyword
+            pageConfig.notifyConfigChanged()
+            viewModel.refreshList()
+        }
     }
 
     override val di: DI by lazyUiDi(ui = { ui })

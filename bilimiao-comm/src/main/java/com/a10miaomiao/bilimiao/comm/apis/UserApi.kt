@@ -113,10 +113,12 @@ class UserApi {
         media_id: String,
         pageNum: Int,
         pageSize: Int,
+        keyword: String = "",
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
             "x/v3/fav/resource/list",
             "media_id" to media_id,
+            "keyword" to keyword,
             "pn" to pageNum.toString(),
             "ps" to pageSize.toString(),
         )

@@ -36,11 +36,15 @@ class UserFavouriteDetailViewModel(
     val userStore: UserStore by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
+    val name by lazy { fragment.requireArguments().getString(MainNavArgs.name, "") }
+
+    var keyword = ""
 
     var triggered = false
     var list = PaginationInfo<MediasInfo>()
 
     init {
+        keyword = fragment.requireArguments().getString(MainNavArgs.text, "")
         loadData(1)
     }
 
@@ -54,6 +58,7 @@ class UserFavouriteDetailViewModel(
             val res = BiliApiService.userApi
                 .mediaDetail(
                     media_id = id,
+                    keyword = keyword,
                     pageNum = pageNum,
                     pageSize = list.pageSize
                 )
