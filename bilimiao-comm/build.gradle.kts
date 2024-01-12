@@ -37,6 +37,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    namespace = "com.a10miaomiao.bilimiao.comm"
 
     sourceSets["main"].proto {
         srcDir("src/main/proto") // 模块下的proto文件夹
@@ -60,14 +61,8 @@ protobuf {
     generateProtoTasks {
         all().forEach {
             it.builtins {
-                if (contains(java)) {
-                    named("java") {
-                        option("lite")
-                    }
-                } else {
-                    create("java") {
-                        option("lite")
-                    }
+                register("java") {
+                    option("lite")
                 }
             }
             it.plugins {
@@ -90,7 +85,10 @@ dependencies {
     implementation(Libraries.kodeinDi)
     implementation(Libraries.glide)
     implementation(Libraries.dialogX)
-    implementation(Libraries.dialogXMaterialYou)
+//    implementation(files("../app/libs/DialogX-release.aar")) // 新版DialogX，解决一些bug，作者未发布到mavenCentral，故先本地编译
+    implementation(Libraries.dialogXMaterialYou) {
+        exclude("com.kongzue.dialogx", "DialogX")
+    }
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
