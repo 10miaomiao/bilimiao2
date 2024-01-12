@@ -42,6 +42,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.3.0"
     }
+    namespace = "cn.a10miaomiao.bilimiao.compose"
 //    packagingOptions {
 //        resources {
 //            excludes += '/META-INF/{AL2.0,LGPL2.1}'
@@ -79,7 +80,8 @@ dependencies {
     implementation(Libraries.glideCompose)
     implementation(Libraries.qrGenerator)
 
-    implementation(Libraries.dialogX)
+//    implementation(Libraries.dialogX)
+    implementation(files("../app/libs/DialogX-release.aar"))
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))

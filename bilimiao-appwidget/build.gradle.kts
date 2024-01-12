@@ -38,6 +38,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    namespace = "cn.a10miaomiao.bilimiao.appwidget"
 }
 
 dependencies {

@@ -85,6 +85,7 @@ android {
         isCheckReleaseBuilds = false
         isAbortOnError = false
     }
+    namespace = "com.a10miaomiao.bilimiao"
 }
 
 dependencies {

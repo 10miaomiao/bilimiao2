@@ -22,9 +22,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion rootProject.ext.target_sdk_version
-        versionCode 1
-        versionName '1.0.0'
     }
+    namespace 'master.flame.danmaku'
 }
 
 dependencies {
