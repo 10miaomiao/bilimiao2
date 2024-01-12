@@ -8,14 +8,13 @@ plugins {
 }
 
 android {
-    compileSdk = 33
-
-//    buildToolsVersion "30.0.3"
+    namespace = "com.a10miaomiao.bilimiao"
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 92
         versionName = "2.3.2"
 
@@ -81,11 +80,11 @@ android {
         jvmTarget = "1.8"
     }
 
-    lintOptions {
-        isCheckReleaseBuilds = false
-        isAbortOnError = false
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
     }
-    namespace = "com.a10miaomiao.bilimiao"
 }
 
 dependencies {
