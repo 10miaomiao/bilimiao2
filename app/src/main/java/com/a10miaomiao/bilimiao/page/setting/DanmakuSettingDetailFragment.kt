@@ -112,8 +112,8 @@ class DanmakuSettingDetailFragment : Fragment(), DIAware, MyPage,
         prefs.unregisterOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        if ("danmaku" in key) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if ("danmaku" in key ?: "") {
             basePlayerDelegate.updateDanmukuSetting()
         }
     }

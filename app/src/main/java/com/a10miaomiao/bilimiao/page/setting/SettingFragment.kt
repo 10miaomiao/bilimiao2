@@ -158,7 +158,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
         prefs.unregisterOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             "is_best_region" -> {
                 regionStore.loadRegionData(requireContext())
