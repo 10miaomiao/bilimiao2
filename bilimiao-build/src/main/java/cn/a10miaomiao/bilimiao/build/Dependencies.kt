@@ -11,7 +11,7 @@ object Versions {
     const val material = "1.8.0"
     const val lifecycle = "2.5.1"
     const val navigation = "2.5.3"
-    const val compose = "1.3.3"
+    const val compose = "1.5.4"
     const val media = "1.6.0"
     const val media3 = "1.0.0-rc01"
 
@@ -49,9 +49,9 @@ object Libraries {
     // compose基础组件
     const val composeUi = "androidx.compose.ui:ui:${Versions.compose}"
     const val composeUiToolingPreview = "androidx.compose.ui:ui-tooling-preview:${Versions.compose}"
-    const val composeMaterial3 = "androidx.compose.material3:material3:1.0.1"
-    const val composeMaterial3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:1.0.1"
-    const val activityCompose = "androidx.activity:activity-compose:1.3.1"
+    const val composeMaterial3 = "androidx.compose.material3:material3:1.1.2"
+    const val composeMaterial3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:1.1.2"
+    const val activityCompose = "androidx.activity:activity-compose:${Versions.compose}"
     const val navigationCompose = "androidx.navigation:navigation-compose:${Versions.navigation}"
     const val composeMaterialIconsExtended = "androidx.compose.material:material-icons-extended:$${Versions.compose}"
     const val glideCompose = "com.github.skydoves:landscapist-glide:2.0.0"
@@ -78,7 +78,7 @@ object Libraries {
     const val foregroundCompat = "me.zhanghai.android.foregroundcompat:library:1.0.2"
     const val drawer = "com.drakeet.drawer:drawer:1.0.3"
     const val modernAndroidPreferences = "de.maxr1998:modernandroidpreferences:2.2.0"
-    const val dialogX = "com.kongzue.dialogx:DialogX:0.0.48"
+    const val dialogX = "com.kongzue.dialogx:DialogX:0.0.49"
     const val dialogXMaterialYou = "com.kongzue.dialogx.style:DialogXMaterialYouStyle:0.0.48"
 
     const val gsyVideoPlayer = "com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${Versions.gsyVideoPlayer}"
