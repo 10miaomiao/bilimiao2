@@ -23,7 +23,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-//            abiFilters "arm64-v8a", "armeabi-v7a", "armeabi", "x86", "x86_64"
             abiFilters.add("arm64-v8a")
             abiFilters.add("armeabi-v7a")
             abiFilters.add("armeabi")
@@ -39,6 +38,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        create("benchmark") {
+            initWith(buildTypes.getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
         }
     }
 
@@ -96,6 +101,7 @@ dependencies {
     implementation(Libraries.navigationFragment)
     implementation(Libraries.navigationUi)
     implementation(Libraries.media)
+    implementation("androidx.profileinstaller:profileinstaller:1.3.1")
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi) // 依赖注入
@@ -140,7 +146,6 @@ dependencies {
     implementation(project(":miao-binding-android"))
     // 弹幕引擎
     implementation(project(":DanmakuFlameMaster"))
-
 
     // 百度统计
     implementation(Libraries.baiduMobstat)
