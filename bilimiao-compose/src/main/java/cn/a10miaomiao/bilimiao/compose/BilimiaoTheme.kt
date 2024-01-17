@@ -31,7 +31,6 @@ fun BilimiaoTheme(content: @Composable () -> Unit) {
     val context = LocalContext.current
     val themeColor = remember { getThemeColor(context) }
     val isLightTheme = remember { isLightTheme(context) }
-    DebugMiao.log("BilimiaoTheme", isLightTheme)
     MaterialTheme(
         colorScheme = if (isLightTheme) {
             lightColorScheme(

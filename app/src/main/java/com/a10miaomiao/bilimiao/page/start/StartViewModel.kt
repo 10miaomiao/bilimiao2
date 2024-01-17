@@ -17,6 +17,7 @@ import com.a10miaomiao.bilimiao.comm.db.SearchHistoryDB
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
@@ -39,6 +40,7 @@ class StartViewModel(
     val ui: MiaoBindingUi by instance()
 
     val userStore: UserStore by instance()
+    val messageStore: MessageStore by instance()
 
     var config: SearchConfigInfo? = null
     var searchMode = 0 // 0为全站搜索，1为页面自身搜索
@@ -88,6 +90,19 @@ class StartViewModel(
             isNeedAuth = true,
         ),
     )
+
+    fun showUnreadBadge(): Boolean {
+        val unreadCount = messageStore.getUnreadCount()
+        return unreadCount > 0
+    }
+
+    fun getUnreadCountText(): String {
+        val unreadCount = messageStore.getUnreadCount()
+        if (unreadCount > 99) {
+            return "99+"
+        }
+        return unreadCount.toString()
+    }
 
     private fun composePageUrl(url: String): String {
         return "bilimiao://compose?url=${Uri.encode(url)}"

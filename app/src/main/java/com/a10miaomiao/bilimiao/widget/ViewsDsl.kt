@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.widget.recycler.ViewPager2Container
 import com.a10miaomiao.bilimiao.widget.picker.DatePickerView
 import com.a10miaomiao.bilimiao.widget.picker.MonthPickerView
 import com.a10miaomiao.bilimiao.widget.recycler.RecyclerviewAtViewPager2
+import com.a10miaomiao.bilimiao.widget.text.BadgeTextView
 import splitties.views.dsl.core.*
 
 inline fun View.rcImageView(
@@ -102,3 +103,12 @@ inline fun View.nineGridImageView(
 ): NineGridImageView {
     return view({ NineGridImageView(it) }, id).apply(initView)
 }
+
+inline fun View.badgeTextView(
+    @IdRes id: Int = View.NO_ID,
+    @StyleRes theme: Int = NO_THEME,
+    initView: BadgeTextView.() -> Unit = {}
+): BadgeTextView {
+    return view({ BadgeTextView(it) }, id).apply(initView)
+}
+

@@ -609,7 +609,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     override fun onCompletion() {
         super.onCompletion()
         releaseDanmaku()
-        DebugMiao.log("onCompletion")
     }
 
     override fun release() {
@@ -794,19 +793,15 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     fun showSmallDargBar() {
-        post {
-            if (mode == PlayerMode.SMALL_FLOAT) {
-                mDragBar.visibility = VISIBLE
-            } else {
-                mDragBar.visibility = GONE
-            }
+        if (mode == PlayerMode.SMALL_FLOAT) {
+            mDragBar.visibility = VISIBLE
+        } else {
+            mDragBar.visibility = GONE
         }
     }
 
     fun hideSmallDargBar() {
-        post {
-            mDragBar.visibility = mTopContainer.visibility
-        }
+        mDragBar.visibility = mTopContainer.visibility
     }
 
     private fun setDialogVolumeProgressBar(context: Context) {
