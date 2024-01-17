@@ -43,11 +43,11 @@ android {
         kotlinCompilerExtensionVersion = "1.3.0"
     }
     namespace = "cn.a10miaomiao.bilimiao.compose"
-//    packagingOptions {
-//        resources {
-//            excludes += '/META-INF/{AL2.0,LGPL2.1}'
-//        }
-//    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
@@ -64,6 +64,7 @@ dependencies {
     implementation(Libraries.kodeinDiCompose) // 依赖注入
 
     implementation(Libraries.composeUi)
+    implementation(Libraries.composeMaterial)
     implementation(Libraries.composeMaterialIconsExtended)
     implementation(Libraries.composeMaterial3)
     implementation(Libraries.composeMaterial3WindowSizeClass)
@@ -71,7 +72,6 @@ dependencies {
     implementation(Libraries.activityCompose)
     implementation(Libraries.navigationCompose)
 
-    implementation(Libraries.accompanistSwipeRefresh)
     implementation(Libraries.accompanistDrawablePainter)
 
     implementation(Libraries.gson)
@@ -85,8 +85,13 @@ dependencies {
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
+    implementation(platform("androidx.compose:compose-bom:2023.10.00"))
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.espresso)
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

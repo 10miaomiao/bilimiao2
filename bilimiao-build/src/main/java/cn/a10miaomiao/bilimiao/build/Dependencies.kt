@@ -10,7 +10,7 @@ object Versions {
     const val appcompat = "1.6.1"
     const val material = "1.8.0"
     const val lifecycle = "2.5.1"
-    const val navigation = "2.5.3"
+    const val navigation = "2.7.6"
     const val compose = "1.5.4"
     const val media = "1.6.0"
     const val media3 = "1.0.0-rc01"
@@ -49,6 +49,7 @@ object Libraries {
     // compose基础组件
     const val composeUi = "androidx.compose.ui:ui:${Versions.compose}"
     const val composeUiToolingPreview = "androidx.compose.ui:ui-tooling-preview:${Versions.compose}"
+    const val composeMaterial = "androidx.compose.material:material:1.5.4"
     const val composeMaterial3 = "androidx.compose.material3:material3:1.1.2"
     const val composeMaterial3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:1.1.2"
     const val activityCompose = "androidx.activity:activity-compose:${Versions.compose}"
@@ -56,7 +57,6 @@ object Libraries {
     const val composeMaterialIconsExtended = "androidx.compose.material:material-icons-extended:$${Versions.compose}"
     const val glideCompose = "com.github.skydoves:landscapist-glide:2.0.0"
     // compose控件
-    const val accompanistSwipeRefresh = "com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}"
     const val accompanistDrawablePainter = "com.google.accompanist:accompanist-drawablepainter:${Versions.accompanist}"
 
     // 通用库

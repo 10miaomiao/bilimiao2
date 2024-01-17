@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -40,18 +41,21 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.badgeTextView
 import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.bumptech.glide.Glide
@@ -197,6 +201,14 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     fun onBackPressed(): Boolean {
         return false
+    }
+
+    private val handleMessageClick = View.OnClickListener {
+        val scaffoldView = requireActivity().getScaffoldView()
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val url = PageRoute.Message.message.url()
+        nav.navigateToCompose(url)
+        scaffoldView.closeDrawer()
     }
 
     private val handleStartSearchClick = View.OnClickListener {
@@ -349,6 +361,31 @@ class StartFragment : Fragment(), DIAware, MyPage {
                             height = dip(60)
                             width = dip(60)
                         }
+
+                        +frameLayout {
+                        }..lParams {
+                            weight = 1f
+                        }
+
+                        +frameLayout {
+                            setOnClickListener(handleMessageClick)
+
+                            views {
+                                +imageView {
+                                    imageResource = R.drawable.ic_message
+                                }..lParams(dip(40), dip(40)) {
+                                    gravity = Gravity.CENTER
+                                }
+                                +badgeTextView {
+                                    _show = viewModel.showUnreadBadge()
+                                    _text = viewModel.getUnreadCountText()
+                                    setTextColor(0xFFFFFFFF.toInt())
+                                }..lParams {
+                                    gravity = Gravity.TOP or Gravity.RIGHT
+                                }
+                            }
+                        }..lParams(dip(60), dip(60))
+
                     }
                 }..lParams(matchParent, wrapContent) {
                     bottomMargin = config.pagePadding
@@ -437,8 +474,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
+        connectStore(viewLifecycleOwner, windowStore)
         connectStore(viewLifecycleOwner, viewModel.userStore)
-        val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
+        connectStore(viewLifecycleOwner, viewModel.messageStore)
         val contentInsets = windowStore.state.windowInsets
 
         frameLayout {

@@ -5,6 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,6 +36,9 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
 import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceDialog
 import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceItem
 import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.rememberDialogState
+import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
+import cn.a10miaomiao.bilimiao.compose.commponents.list.LoadMoreListHandler
+import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
@@ -39,8 +47,6 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.kongzue.dialogx.dialogs.PopTip
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
@@ -219,6 +225,57 @@ class UserFollowPageViewModel(
 }
 
 @Composable
+fun UserInfoCard(
+    name: String,
+    face: String,
+    sign: String,
+    onClick: () -> Unit,
+    actionContent: @Composable RowScope.() -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable { onClick() }
+                .padding(10.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            GlideImage(
+                imageModel = UrlUtil.autoHttps(face) + "@200w_200h",
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp)
+                    .padding(horizontal = 5.dp),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = name,
+                    maxLines = 1,
+                    modifier = Modifier.padding(bottom = 5.dp),
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = sign,
+                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.outline,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            actionContent()
+        }
+    }
+}
+
+@Composable
 fun UserFollowPage(
     mid: String,
     viewModel: UserFollowPageViewModel = diViewModel()
@@ -282,153 +339,113 @@ fun UserFollowPage(
         selected = orderType,
         onChange = viewModel::changeOrderType
     )
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing),
+
+    SwipeToRefresh(
+        refreshing = isRefreshing,
         onRefresh = { viewModel.refresh() },
     ) {
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(400.dp),
             modifier = Modifier.padding(
                 start = windowInsets.leftDp.dp,
                 end = windowInsets.rightDp.dp,
             )
         ) {
-            item(key = "top") {
+
+            item(
+                span = {
+                    GridItemSpan(maxLineSpan)
+                }
+            ) {
                 Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
             }
+
             items(list.size, { list[it].mid }) {
                 val item = list[it]
                 Box(
                     modifier = Modifier.padding(5.dp),
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.background
+                    UserInfoCard(
+                        name = item.uname,
+                        face = item.face,
+                        sign = item.sign,
+                        onClick = {
+                            toUserDatailPage(item.mid)
+                        }
                     ) {
-                        Row(
+                        Button(
+                            onClick = { viewModel.attention(it) },
                             modifier = Modifier
-                                .clickable { toUserDatailPage(item.mid) }
-                                .padding(10.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            GlideImage(
-                                imageModel = UrlUtil.autoHttps(item.face) + "@200w_200h",
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .clip(CircleShape)
-                            )
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(50.dp)
-                                    .padding(horizontal = 5.dp),
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                Text(
-                                    text = item.uname,
-                                    maxLines = 1,
-                                    modifier = Modifier.padding(bottom = 5.dp),
-                                    overflow = TextOverflow.Ellipsis,
+                                .padding(0.dp)
+                                .size(65.dp, 30.dp),
+                            contentPadding = PaddingValues(0.dp),
+                            shape = RoundedCornerShape(5.dp),
+                            enabled = isLogin,
+                            colors = if (item.isFollowing) {
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Color.Gray
                                 )
-                                Text(
-                                    text = item.sign,
-                                    maxLines = 1,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
+                            } else {
+                                ButtonDefaults.buttonColors()
                             }
-                            Button(
-                                onClick = { viewModel.attention(it) },
-                                modifier = Modifier
-                                    .padding(0.dp)
-                                    .size(65.dp, 30.dp),
-                                contentPadding = PaddingValues(0.dp),
-                                shape = RoundedCornerShape(5.dp),
-                                enabled = isLogin,
-                                colors = if (item.isFollowing) {
-                                    ButtonDefaults.buttonColors(
-                                        containerColor = Color.Gray
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (!isLogin) {
+                                    Text(
+                                        text = "未登录",
+                                        fontSize = 12.sp,
+                                    )
+                                } else if (item.isFollowing) {
+                                    Text(
+                                        text = "已关注",
+                                        fontSize = 12.sp,
                                     )
                                 } else {
-                                    ButtonDefaults.buttonColors()
+                                    Icon(
+                                        modifier = Modifier.size(15.dp),
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = null,
+                                    )
+                                    Text(
+                                        text = "关注",
+                                        fontSize = 12.sp,
+                                    )
                                 }
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    if (!isLogin) {
-                                        Text(
-                                            text = "未登录",
-                                            fontSize = 12.sp,
-                                        )
-                                    } else if (item.isFollowing) {
-                                        Text(
-                                            text = "已关注",
-                                            fontSize = 12.sp,
-                                        )
-                                    } else {
-                                        Icon(
-                                            modifier = Modifier.size(15.dp),
-                                            imageVector = Icons.Filled.Add,
-                                            contentDescription = null,
-                                        )
-                                        Text(
-                                            text = "关注",
-                                            fontSize = 12.sp,
-                                        )
-                                    }
-
-                                }
-
                             }
                         }
                     }
                 }
             }
 
-            item(key = "bottom") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                ListStateBox(
+                    modifier = Modifier.padding(
+                        bottom = windowInsets.bottomDp.dp
+                    ),
+                    loading = listLoading,
+                    finished = listFinished,
+                    fail = listFail,
+                    listData = list,
                 ) {
-                    if (listFinished) {
-                        Text(
-                            "下面没有了",
-                            modifier = Modifier.padding(start = 5.dp),
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                    } else if (listFail.isNotBlank()) {
-                        Text(
-                            listFail,
-                            modifier = Modifier.padding(start = 5.dp),
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                    } else {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 3.dp,
-                        )
-                        Text(
-                            "加载中",
-                            modifier = Modifier.padding(start = 5.dp),
-                            color = MaterialTheme.colorScheme.outline,
-                            fontSize = 14.sp,
-                        )
-                    }
-                }
-                LaunchedEffect(Unit) {
                     viewModel.loadMore()
                 }
             }
-            item {
-                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
-            }
         }
+//        LazyColumn(
+//            modifier = Modifier.padding(
+//                start = windowInsets.leftDp.dp,
+//                end = windowInsets.rightDp.dp,
+//            )
+//        ) {
+//            item(key = "top") {
+//                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
+//            }
+//
+//
+//        }
     }
 }

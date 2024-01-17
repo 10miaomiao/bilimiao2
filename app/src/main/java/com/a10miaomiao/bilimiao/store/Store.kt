@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -20,6 +21,7 @@ class Store (
         val windowStore: WindowStore by activity.diViewModel(di)
         val playerStore: PlayerStore by activity.diViewModel(di)
         val userStore: UserStore by activity.diViewModel(di)
+        val messageStore: MessageStore by activity.diViewModel(di)
         val timeSettingStore: TimeSettingStore by activity.diViewModel(di)
         val filterStore: FilterStore by activity.diViewModel(di)
         val regionStore: RegionStore by activity.diViewModel(di)
@@ -28,6 +30,7 @@ class Store (
                 bindSingleton { windowStore }
                 bindSingleton { playerStore }
                 bindSingleton { userStore }
+                bindSingleton { messageStore }
                 bindSingleton { timeSettingStore }
                 bindSingleton { filterStore }
                 bindSingleton { regionStore }
@@ -38,6 +41,7 @@ class Store (
                 windowStore.init(activity)
                 playerStore.init(activity)
                 userStore.init(activity)
+                messageStore.init(activity)
                 timeSettingStore.init(activity)
                 filterStore.init(activity)
                 regionStore.init(activity)

@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -34,11 +35,14 @@ class UserStore(override val di: DI) :
 
     private val activity: AppCompatActivity by instance()
 
+    private val messageStore: MessageStore by instance()
+
     override fun init(context: Context) {
         super.init(context)
         if (BilimiaoCommApp.commApp.loginInfo != null)  {
             readUserInfo()
             loadInfo()
+            messageStore.getUnreadMessage()
         }
     }
 
@@ -47,6 +51,9 @@ class UserStore(override val di: DI) :
             info = userInfo
         }
         seveUserInfo(userInfo)
+        if (userInfo != null) {
+            messageStore.getUnreadMessage()
+        }
     }
 
     fun logout () {
@@ -94,12 +101,12 @@ class UserStore(override val di: DI) :
                 seveUserInfo(res.data)
             } else {
                 withContext(Dispatchers.Main) {
-                    activity.toast("登录失效，请重新登录")
+                    PopTip.show("登录失效，请重新登录")
                 }
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                activity.toast("无法连接到御坂网络")
+                PopTip.show("无法连接到御坂网络")
             }
             e.printStackTrace()
         }
@@ -122,9 +129,5 @@ class UserStore(override val di: DI) :
     fun isLogin() = state.info != null
 
     fun isVip() = (state.info?.vip_type ?: 0) > 0
-
-    fun Activity.toast(msg: String) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG)
-    }
 
 }
