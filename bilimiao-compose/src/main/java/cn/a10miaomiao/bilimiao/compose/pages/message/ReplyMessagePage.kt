@@ -106,8 +106,7 @@ internal class ReplyMessagePageModel(
     fun loadMore() {
         if (
             !list.finished.value &&
-            !list.loading.value &&
-            list.fail.value.isBlank()
+            !list.loading.value
         ) {
             _cursor?.let {
                 loadData(it.id, it.time)
