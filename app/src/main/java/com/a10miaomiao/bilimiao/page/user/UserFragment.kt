@@ -18,11 +18,9 @@ import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -39,7 +37,7 @@ import com.a10miaomiao.bilimiao.commponents.season.miniSeasonItemView
 import com.a10miaomiao.bilimiao.commponents.video.mediaItemView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
+import com.a10miaomiao.bilimiao.page.user.archive.UserArchiveListFragment
 import com.a10miaomiao.bilimiao.page.user.bangumi.MyBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
@@ -51,10 +49,7 @@ import com.a10miaomiao.bilimiao.widget.wrapInLimitedFrameLayout
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
-import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.ext.mojito
-import net.mikaelzero.mojito.impl.DefaultPercentProgress
-import net.mikaelzero.mojito.impl.NumIndicator
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -62,7 +57,6 @@ import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
 import splitties.views.backgroundColor
-import splitties.views.bottomPadding
 import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding

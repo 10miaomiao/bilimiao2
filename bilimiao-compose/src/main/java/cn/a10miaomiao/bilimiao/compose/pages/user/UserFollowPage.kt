@@ -157,7 +157,7 @@ class UserFollowPageViewModel(
     }
 
     fun loadMore() {
-        if (!list.finished.value && !list.loading.value && list.fail.value.isBlank()) {
+        if (!list.finished.value && !list.loading.value) {
             loadData(list.pageNum + 1)
         }
     }

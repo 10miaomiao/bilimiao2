@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.page.user
+package com.a10miaomiao.bilimiao.page.user.archive
 
 import android.content.Context
 import android.os.Bundle
@@ -8,25 +8,26 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
-import androidx.navigation.NavType
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.space.v1.SpaceOuterClass
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
-import cn.a10miaomiao.miao.binding.android.view._topPadding
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.activity.SearchActivity
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.connectUi
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
-import com.a10miaomiao.bilimiao.comm.mypage.*
-import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
@@ -34,13 +35,14 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.search.result.BaseResultFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import kotlinx.coroutines.launch
@@ -50,62 +52,37 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
-class UserArchiveListFragment : Fragment(), DIAware, MyPage {
+class UserArchiveDetailFragment : BaseResultFragment(), DIAware {
 
-    companion object : FragmentNavigatorBuilder() {
-        override val name = "user.archive"
-        override fun FragmentNavigatorDestinationBuilder.init() {
-            argument(MainNavArgs.id) {
-                type = NavType.StringType
-                nullable = false
-            }
-            argument(MainNavArgs.name) {
-                type = NavType.StringType
-                nullable = false
-            }
-        }
-        fun createArguments(
+    companion object {
+        fun newInstance(
             id: String,
-            name: String
-        ): Bundle {
-            return bundleOf(
+            name: String,
+        ): UserArchiveDetailFragment {
+            val fragment = UserArchiveDetailFragment()
+            val bundle = bundleOf(
                 MainNavArgs.id to id,
                 MainNavArgs.name to name,
             )
+            fragment.arguments = bundle
+            return fragment
         }
     }
-
-    override val pageConfig = myPageConfig {
-        var searchTitle = "搜索"
-        title = "${viewModel.name}\n的\n投稿列表"
-        menus = listOf(
-            myMenuItem {
-                key = MenuKeys.search
-                title = searchTitle
-                iconResource = R.drawable.ic_search_gray
-            },
-            myMenuItem {
-                key = MenuKeys.filter
-                title = viewModel.rankOrder.title
-                iconResource = R.drawable.ic_baseline_filter_list_grey_24
-            },
-//            myMenuItem {
-//                key = MenuKeys.region
-//                title = viewModel.region.title
-//                iconResource = R.drawable.ic_baseline_grid_on_gray_24
-//            },
-        )
-        search = SearchConfigInfo(
-            name = "搜索投稿列表",
-            keyword = "",
-        )
-    }
+    override val title get() = "全部投稿"
+    override val menus get() = listOf(
+        myMenuItem {
+            key = MenuKeys.filter
+            title = viewModel.rankOrder.title
+            iconResource = R.drawable.ic_baseline_filter_list_grey_24
+        },
+    )
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
-        when(menuItem.key) {
+        when (menuItem.key) {
             MenuKeys.region -> {
                 val pm = CheckPopupMenu(
                     context = requireActivity(),
@@ -116,10 +93,11 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
                 pm.onMenuItemClick = {
                     viewModel.region = it
                     viewModel.refreshList()
-                    pageConfig.notifyConfigChanged()
+                    notifyConfigChanged()
                 }
                 pm.show()
             }
+
             MenuKeys.filter -> {
                 val pm = CheckPopupMenu(
                     context = requireActivity(),
@@ -130,32 +108,16 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
                 pm.onMenuItemClick = {
                     viewModel.rankOrder = it
                     viewModel.refreshList()
-                    pageConfig.notifyConfigChanged()
+                    notifyConfigChanged()
                 }
                 pm.show()
-            }
-            MenuKeys.search -> {
-                requireActivity().openSearch(view)
             }
         }
     }
 
-    override fun onSearchSelfPage(context: Context, keyword: String) {
-        findNavController().navigate(
-            UserSearchArchiveListFragment.actionId,
-            UserSearchArchiveListFragment.createArguments(
-                viewModel.id,
-                viewModel.name ?: "",
-                keyword,
-            )
-        )
-    }
+    override val di: DI by lazyUiDi(ui = { ui })
 
-    override val di: DI by lazyUiDi(ui = { ui }) {
-        bindSingleton<MyPage> { this@UserArchiveListFragment }
-    }
-
-    private val viewModel by diViewModel<UserArchiveListViewModel>(di)
+    private val viewModel by diViewModel<UserArchiveDetailViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
 
@@ -186,7 +148,7 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
     }
 
     val itemUi = miaoBindingItemUi<ArchiveInfo> { item, index ->
-        videoItem (
+        videoItem(
             title = item.title,
             pic = item.cover,
             remark = NumberUtil.converCTime(item.ctime),
@@ -208,9 +170,9 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
                 GridAutofitLayoutManager(requireContext(), requireContext().dip(300))
             )
 
-            val headerView = frameLayout {
-                _topPadding = contentInsets.top
-            }
+//            val headerView = frameLayout {
+//                _topPadding = contentInsets.top
+//            }
             val footerView = listStateView(
                 when {
                     viewModel.triggered -> ListState.NORMAL
@@ -228,12 +190,13 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
                 items = viewModel.list.data,
                 itemUi = itemUi,
             ) {
-                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                stateRestorationPolicy =
+                    RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 setOnItemClickListener(handleItemClick)
                 loadMoreModule.setOnLoadMoreListener {
                     viewModel.loadMode()
                 }
-                addHeaderView(headerView)
+//                addHeaderView(headerView)
                 addFooterView(footerView)
             }
         }.wrapInSwipeRefreshLayout {

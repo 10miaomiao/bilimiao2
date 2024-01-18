@@ -1,27 +1,19 @@
-package com.a10miaomiao.bilimiao.page.user
+package com.a10miaomiao.bilimiao.page.user.archive
 
 import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bilibili.app.space.v1.SpaceGrpc
-import bilibili.app.space.v1.SpaceOuterClass
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo2
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,11 +23,10 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.toast.toast
 
-class UserArchiveListViewModel(
+class UserArchiveDetailViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val myPage: MyPage by instance()
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
@@ -62,76 +53,10 @@ class UserArchiveListViewModel(
     private var _aid: String = ""
 
     init {
-//        loadData(1)
-        loadData2("")
+        loadData("")
     }
 
-//    private fun loadData(
-//        pageNum: Int = list.pageNum
-//    ) = viewModelScope.launch(Dispatchers.IO){
-//        try {
-//            ui.setState {
-//                list.loading = true
-//            }
-//            val res = BiliApiService.userApi
-//                .upperVideoList(
-//                    mid = id,
-//                    tid = region.value,
-//                    order = rankOrder.value,
-//                    pageNum = pageNum,
-//                    pageSize = list.pageSize,
-//                )
-//                .awaitCall()
-//                .gson<ResultInfo<SubmitVideosInfo>>()
-//            if (res.code == 0) {
-//                val vlist = res.data.list.vlist
-//                if (vlist.size < list.pageSize) {
-//                    ui.setState { list.finished = true }
-//                }
-//                ui.setState {
-//                    if (pageNum == 1) {
-//                        list.data = arrayListOf()
-//                    }
-//                    list.data.addAll(vlist)
-//                }
-//                if (region.value == 0) {
-//                    total = res.data.page.count
-//                }
-//                res.data.list.tlist?.let {
-//                    regionList = listOf(
-//                        CheckPopupMenu.MenuItemInfo("全部(${total})", 0),
-//                        *it.values.map {
-//                            CheckPopupMenu.MenuItemInfo("${it.name}(${it.count})", it.tid)
-//                        }.toTypedArray()
-//                    )
-//                    if (region.value == 0) {
-//                        region = regionList[0]
-//                    }
-//                    withContext(Dispatchers.Main) {
-//                        myPage.pageConfig.notifyConfigChanged()
-//                    }
-//                }
-//                list.pageNum = pageNum
-//            } else {
-//                withContext(Dispatchers.Main) {
-//                    context.toast(res.message)
-//                }
-//                throw Exception(res.message)
-//            }
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            ui.setState {
-//                list.fail = true
-//            }
-//        } finally {
-//            ui.setState {
-//                list.loading = false
-//                triggered = false
-//            }
-//        }
-//    }
-
-    private fun loadData2(
+    private fun loadData(
         aid: String = _aid
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
@@ -139,7 +64,7 @@ class UserArchiveListViewModel(
                 list.loading = true
             }
             val res = BiliApiService.userApi
-                .upperVideoList2(
+                .upperVideoList(
                     vmid = id,
 //                    tid = region.value,
                     order = rankOrder.value,
@@ -183,13 +108,13 @@ class UserArchiveListViewModel(
     }
 
     private fun _loadData() {
-        loadData2()
+        loadData()
     }
 
     fun loadMode () {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
-            loadData2(
+            loadData(
                 _aid
             )
         }
@@ -199,7 +124,7 @@ class UserArchiveListViewModel(
         ui.setState {
             list = PaginationInfo()
             triggered = true
-            loadData2("")
+            loadData("")
         }
     }
 

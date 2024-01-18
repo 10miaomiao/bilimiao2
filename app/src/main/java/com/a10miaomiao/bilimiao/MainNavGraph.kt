@@ -7,7 +7,6 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.MainFragment
 import com.a10miaomiao.bilimiao.page.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
@@ -24,6 +23,9 @@ import com.a10miaomiao.bilimiao.page.setting.*
 import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.user.*
+import com.a10miaomiao.bilimiao.page.user.archive.UserArchiveListFragment
+import com.a10miaomiao.bilimiao.page.user.archive.UserSearchArchiveListFragment
+import com.a10miaomiao.bilimiao.page.user.archive.UserSeriesDetailFragment
 import com.a10miaomiao.bilimiao.page.user.bangumi.MyBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
@@ -86,6 +88,7 @@ object MainNavGraph {
             addFragment(UserArchiveListFragment::class, UserArchiveListFragment.Companion)
             addFragment(UserSearchArchiveListFragment::class, UserSearchArchiveListFragment.Companion)
             addFragment(UserChannelDetailFragment::class, UserChannelDetailFragment.Companion)
+            addFragment(UserSeriesDetailFragment::class, UserSeriesDetailFragment.Companion)
             addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
             addFragment(HistoryFragment::class, HistoryFragment.Companion)
             addFragment(WatchLaterFragment::class, WatchLaterFragment.Companion)

@@ -35,31 +35,6 @@ class UserApi {
      * 获取up主的视频投稿
      */
     fun upperVideoList(
-        mid: String,
-        pageNum: Int,
-        pageSize: Int,
-        tid: Int = 0,
-        keyword: String = "",
-        order: String = "pubdate",
-    ) = MiaoHttp.request {
-        url = BiliApiService.biliApi(
-            "x/space/wbi/arc/search",
-            "mid" to mid,
-            "pn" to pageNum.toString(),
-            "ps" to pageSize.toString(),
-            "tid" to tid.toString(),
-            "keyword" to keyword,
-            "order" to order,
-            "notoken" to "1", // 不带token,匿名访问
-        )
-    }
-
-    // https://app.bilibili.com/x/v2/space/series?appkey=1d8b6e7d45233436&build=6740400&c_locale=zh-Hans_CN&channel=bili&disable_rcmd=0&fnval=16&fnver=0&force_host=0&fourk=0&mobi_app=android&next=0&platform=android&player_net=1&ps=10&qn=32&s_locale=zh-Hans_CN&series_id=931536&sort=desc&statistics=%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%226.74.0%22%2C%22abtest%22%3A%22%22%7D&ts=1683944381&vmid=546195&sign=64a1160021d6563a84e96bd97ac655f0
-
-    /**
-     * 获取up主的视频投稿
-     */
-    fun upperVideoList2(
         vmid: String,
         aid: String,
         pageSize: Int,
@@ -76,6 +51,33 @@ class UserApi {
         )
     }
 
+    // https://app.bilibili.com/x/v2/space/series?appkey=1d8b6e7d45233436&build=6740400&c_locale=zh-Hans_CN&channel=bili&disable_rcmd=0&fnval=16&fnver=0&force_host=0&fourk=0&mobi_app=android&next=0&platform=android&player_net=1&ps=10&qn=32&s_locale=zh-Hans_CN&series_id=931536&sort=desc&statistics=%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%226.74.0%22%2C%22abtest%22%3A%22%22%7D&ts=1683944381&vmid=546195&sign=64a1160021d6563a84e96bd97ac655f0
+
+    /**
+     * 获取up主的合集列表
+     */
+    fun upperSeriesList(
+        mid: String,
+        pageNum: Int,
+        pageSize: Int,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApp(
+            "x/polymer/space/seasons_series_list_mobile",
+            "mid" to mid,
+            "page_num" to pageNum.toString(),
+            "page_size" to pageSize.toString(),
+        )
+    }
+
+    fun upperSeriesDetail(
+        seasonId: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApp(
+            "x/v2/space/season/videos",
+            "season_id" to seasonId,
+
+        )
+    }
 
     /**
      * 收藏夹列表
