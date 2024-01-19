@@ -11,6 +11,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.edit
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.PageRoute
@@ -32,6 +33,7 @@ import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
+import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoView
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
@@ -64,6 +66,14 @@ class PlayerController(
         )!!
     }
 
+    private fun getScreenType(): Int {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        return prefs.getInt(
+            VideoSettingFragment.PLAYER_SCREEN_TYPE,
+            GSYVideoType.SCREEN_TYPE_DEFAULT
+        )
+    }
+
     fun initController() = views.videoPlayer.run {
         val that = this@PlayerController
         statusBarHelper = that.statusBarHelper
@@ -92,6 +102,8 @@ class PlayerController(
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)
         updatePlayerMode(activity.resources.configuration)
+
+        GSYVideoType.setShowType(getScreenType())
     }
 
     /**
@@ -400,6 +412,15 @@ class PlayerController(
     fun showMoreMenu(view: View) {
         val popupMenu = PopupMenu(activity, view)
         popupMenu.inflate(R.menu.player_top_more)
+        val checkMenuId = when (GSYVideoType.getShowType()) {
+            GSYVideoType.SCREEN_TYPE_DEFAULT -> R.id.scale_1
+            GSYVideoType.SCREEN_TYPE_16_9 -> R.id.scale_2
+            GSYVideoType.SCREEN_TYPE_4_3 -> R.id.scale_3
+            GSYVideoType.SCREEN_TYPE_FULL -> R.id.scale_4
+            GSYVideoType.SCREEN_MATCH_FULL -> R.id.scale_5
+            else -> R.id.scale_1
+        }
+        popupMenu.menu.findItem(checkMenuId).isChecked = true
         popupMenu.setOnMenuItemClickListener(this::moreMenuItemClick)
         popupMenu.show()
     }
@@ -492,15 +513,32 @@ class PlayerController(
                     PopTip.show("小窗播放功能需要安卓8.0及以上版本")
                 }
             }
-
             R.id.video_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://setting/video"))
             }
-
             R.id.danmuku_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
                 nav.navigate(Uri.parse("bilimiao://setting/danmaku"))
+            }
+            R.id.scale_1,
+            R.id.scale_2,
+            R.id.scale_3,
+            R.id.scale_4,
+            R.id.scale_5 -> {
+                val type = when(item.itemId) {
+                    R.id.scale_1 -> GSYVideoType.SCREEN_TYPE_DEFAULT
+                    R.id.scale_2 -> GSYVideoType.SCREEN_TYPE_16_9
+                    R.id.scale_3 -> GSYVideoType.SCREEN_TYPE_4_3
+                    R.id.scale_4 -> GSYVideoType.SCREEN_TYPE_FULL
+                    R.id.scale_5 -> GSYVideoType.SCREEN_MATCH_FULL
+                    else -> GSYVideoType.SCREEN_TYPE_DEFAULT
+                }
+                GSYVideoType.setShowType(type)
+                views.videoPlayer.updateTextureViewShowType()
+                PreferenceManager.getDefaultSharedPreferences(activity).edit {
+                    putInt(VideoSettingFragment.PLAYER_SCREEN_TYPE, type)
+                }
             }
         }
         return true
