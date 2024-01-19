@@ -815,6 +815,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         setDialogProgressBar(draw)
     }
 
+    fun updateTextureViewShowType() {
+        changeTextureViewShowType()
+    }
+
     fun updateThemeColor(
         context: Context,
         themeColor: Int,

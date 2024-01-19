@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:title="播放设置"
         android:id="@+id/video_setting" />
@@ -10,4 +11,26 @@
     <item android:title="小窗播放"
         android:id="@+id/mini_window" />
 
+    <item android:id="@+id/player_scale"
+        android:title="画面比例"
+        android:orderInCategory="1"
+        app:showAsAction="withText">
+        <menu>
+            <group android:id="@+id/group_single"
+                android:checkableBehavior="single"
+                android:menuCategory="container">
+                <item android:id="@+id/scale_1"
+                    android:title="默认比例"
+                    android:checked="true"/>
+                <item android:id="@+id/scale_2"
+                    android:title="16:9"/>
+                <item android:id="@+id/scale_3"
+                    android:title="4:3"/>
+                <item android:id="@+id/scale_4"
+                    android:title="全屏裁减"/>
+                <item android:id="@+id/scale_5"
+                    android:title="全屏拉伸"/>
+            </group>
+        </menu>
+    </item>
 </menu>

@@ -67,6 +67,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_FULL_MODE = "player_full_mode"
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
         const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
+        const val PLAYER_SCREEN_TYPE = "player_screen_type"
 
         const val PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR = "player_full_show_bottom_progress_bar"
         const val PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR = "player_small_show_bottom_progress_bar"

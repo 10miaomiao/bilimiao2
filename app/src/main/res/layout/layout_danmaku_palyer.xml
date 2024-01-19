@@ -6,13 +6,13 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/surface_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center">
 
-    </RelativeLayout>
+    </FrameLayout>
 
     <master.flame.danmaku.ui.widget.DanmakuView
         android:id="@+id/danmaku_view"
