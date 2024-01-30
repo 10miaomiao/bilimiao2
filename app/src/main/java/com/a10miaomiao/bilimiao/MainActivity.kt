@@ -165,7 +165,7 @@ class MainActivity
         val intentFilter = IntentFilter().apply {
             addAction(PlayerService.ACTION_CREATED)
         }
-        registerReceiver(broadcastReceiver, intentFilter)
+        ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
         if (PlayerService.selfInstance == null) {
             startService(Intent(this, PlayerService::class.java))
         }
