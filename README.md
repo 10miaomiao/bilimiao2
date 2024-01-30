@@ -12,6 +12,8 @@
 <div align="center">
 
 [更新日志](CHANGELOG.md)
+&bull;
+[QQ频道交流](https://pd.qq.com/s/hn9hmg)
 
 </div>
 
