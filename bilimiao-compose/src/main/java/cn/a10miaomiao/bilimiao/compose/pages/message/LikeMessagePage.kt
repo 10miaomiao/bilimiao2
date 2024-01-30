@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,8 @@ internal class LikeMessagePageModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val messageStore by instance<MessageStore>()
+
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<LikeMessageInfo>()
     var _cursor: MessageCursorInfo? = null
@@ -60,6 +63,7 @@ internal class LikeMessagePageModel(
                 .awaitCall()
                 .gson<ResultInfo<LikeMessageResponseInfo>>()
             if (res.isSuccess) {
+                messageStore.clearLikeUnread()
                 val total = res.data.total
                 _cursor = total.cursor
                 if (id == 0L) {

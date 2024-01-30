@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,7 @@ internal class AtMessagePageModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val messageStore by instance<MessageStore>()
 
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<AtMessageInfo>()
@@ -61,6 +63,7 @@ internal class AtMessagePageModel(
                 .awaitCall()
                 .gson<ResultInfo<MessageResponseInfo<AtMessageInfo>>>()
             if (res.isSuccess) {
+                messageStore.clearAtUnread()
                 _cursor = res.data.cursor
                 if (id == 0L) {
                     list.data.value = res.data.items

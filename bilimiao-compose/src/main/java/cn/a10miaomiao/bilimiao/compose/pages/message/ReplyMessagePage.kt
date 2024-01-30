@@ -44,6 +44,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
@@ -62,6 +63,7 @@ internal class ReplyMessagePageModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val messageStore by instance<MessageStore>()
 
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<ReplyMessageInfo>()
@@ -82,6 +84,7 @@ internal class ReplyMessagePageModel(
                 .awaitCall()
                 .gson<ResultInfo<MessageResponseInfo<ReplyMessageInfo>>>()
             if (res.isSuccess) {
+                messageStore.clearReplyUnread()
                 _cursor = res.data.cursor
                 if (id == 0L) {
                     list.data.value = res.data.items

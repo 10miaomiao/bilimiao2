@@ -59,9 +59,33 @@ class MessageStore(override val di: DI) :
         }
     }
 
+    fun clearReplyUnread() {
+        setState {
+            unread = unread?.copy(
+                reply = 0
+            )
+        }
+    }
+
+    fun clearLikeUnread() {
+        setState {
+            unread = unread?.copy(
+                like = 0
+            )
+        }
+    }
+
+    fun clearAtUnread() {
+        setState {
+            unread = unread?.copy(
+                at = 0
+            )
+        }
+    }
+
     fun getUnreadCount(): Int {
         return state.unread?.let { unread ->
-            unread.reply + unread.at + unread.like + unread.sys_msg
+            unread.reply + unread.at + unread.like // + unread.sys_msg
         } ?: 0
     }
 }
