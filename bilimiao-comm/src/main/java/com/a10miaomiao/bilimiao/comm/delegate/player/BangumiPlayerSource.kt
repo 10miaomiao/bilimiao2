@@ -85,6 +85,7 @@ class BangumiPlayerSource(
             cid = id,
             sid = sid,
             epid = epid,
+            aid = aid,
         )
     }
 
