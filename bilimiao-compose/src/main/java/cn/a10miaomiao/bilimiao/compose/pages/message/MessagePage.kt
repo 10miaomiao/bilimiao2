@@ -4,11 +4,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Badge
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -57,19 +60,15 @@ internal class MessagePageViewModel(
             id = 2,
             name = "收到的赞",
         ),
-//        MessagePageTabInfo(
-//            id = 3,
-//            name = "系统通知",
-//        )
     )
 
     init {
-        messageStore.clearUnread()
+//        messageStore.clearUnread()
     }
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MessagePage() {
     PageConfig(
@@ -77,9 +76,14 @@ fun MessagePage() {
     )
     val scope = rememberCoroutineScope()
     val viewModel: MessagePageViewModel = diViewModel()
+
+    val messageStore: MessageStore by rememberInstance()
+    val messageState = messageStore.stateFlow.collectAsState().value
+
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
+
 
     val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
     Column(
@@ -99,7 +103,28 @@ fun MessagePage() {
         ) {
             viewModel.tabs.forEachIndexed { index, tab ->
                 Tab(
-                    text = { Text(text = tab.name) },
+                    text = {
+                        Row() {
+                            Text(text = tab.name)
+                            val unreadCount: Int = messageState.unread?.let {
+                                when (index) {
+                                    0 -> it.reply
+                                    1 -> it.at
+                                    2 -> it.like
+                                    else -> 0
+                                }
+                            } ?: 0
+                            if (unreadCount > 0) {
+                                Badge(
+                                    modifier = Modifier.padding(
+                                        start = 5.dp
+                                    )
+                                ) {
+                                    Text(unreadCount.toString())
+                                }
+                            }
+                        }
+                    },
                     selected = pagerState.currentPage == index,
                     onClick = {
                         scope.launch {
