@@ -18,7 +18,7 @@
 </div>
 
 ### 关于本项目
-bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在每个时间段的热门视频列表，具体用法详见 [bilimiaos时光机使用方法](doc/时光机.md)，后经不断改进，功能不断完善，形成了一款安卓上的[哔哩哔哩](https://www.bilibili.com/)的第三方APP。
+bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在每个时间段的热门视频列表，具体用法详见 [bilimiao时光机使用方法](doc/时光机.md)，后经不断改进，功能不断完善，形成了一款安卓上的[哔哩哔哩](https://www.bilibili.com/)的第三方APP。
 
 本项目使用安卓原生技术开发，后续UI将逐步改用Jetpack Compose。
 
@@ -27,7 +27,7 @@ bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在
 1. [从10miaomiao.cn下载](https://10miaomiao.cn/project/1)
 2. [从GithubRelease下载](https://github.com/10miaomiao/bilimiao2/releases)
 3. [从GiteeRelease下载下载](https://gitee.com/10miaomiao/bilimiao2/releases)
-### 使用说明
+#### 使用说明
 1. [手表使用说明](doc/手表使用说明.md)
 2. [时光机](doc/时光机.md)
 3. [列表屏蔽关键字及up主屏蔽](doc/列表屏蔽关键字及up主屏蔽.md)
