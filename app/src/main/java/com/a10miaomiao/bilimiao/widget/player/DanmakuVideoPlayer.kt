@@ -4,15 +4,16 @@ import android.app.Activity
 import android.app.Dialog
 import android.app.Service
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
+import android.media.AudioManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
+import android.util.Log
 import android.view.DisplayCutout
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -29,7 +30,6 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
@@ -266,7 +266,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     private fun initView() {
-        mSeekRatio = 2f
+        mSeekRatio = 0.01f
         isShowDragProgressTextOnSeekBar = true
         enlargeImageRes = R.drawable.ic_player_portrait_fullscreen
         shrinkImageRes = R.drawable.ic_player_portrait_fullscreen
@@ -426,7 +426,42 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         if (isSpeedPlaying) {
             return
         }
-        super.touchSurfaceMove(deltaX, deltaY, y)
+        var curWidth = 0
+        var curHeight = 0
+        if (activityContext != null) {
+            curWidth =
+                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenHeight else mScreenWidth
+            curHeight =
+                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenWidth else mScreenHeight
+        }
+        if (mChangePosition) {
+            //
+            val totalTimeDuration = duration
+            DebugMiao.log("deltaX", deltaX, context.dip(1))
+            mSeekTimePosition =
+                (mDownPosition + deltaX / context.dip(1) / mSeekRatio).toLong()
+            if (mSeekTimePosition < 0) {
+                mSeekTimePosition = 0
+            }
+            if (mSeekTimePosition > totalTimeDuration) mSeekTimePosition = totalTimeDuration
+            val seekTime = CommonUtil.stringForTime(mSeekTimePosition)
+            val totalTime = CommonUtil.stringForTime(totalTimeDuration)
+            showProgressDialog(deltaX, seekTime, mSeekTimePosition, totalTime, totalTimeDuration)
+        } else if (mChangeVolume) {
+            val deltaY = -deltaY
+            val max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val deltaV = (max * deltaY * 3 / curHeight).toInt()
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mGestureDownVolume + deltaV, 0)
+            val volumePercent =
+                (mGestureDownVolume * 100 / max + deltaY * 3 * 100 / curHeight).toInt()
+            showVolumeDialog(-deltaY, volumePercent)
+        } else if (mBrightness) {
+            if (Math.abs(deltaY) > mThreshold) {
+                val percent = -deltaY / curHeight
+                onBrightnessSlide(percent)
+                mDownY = y
+            }
+        }
     }
 
     override fun touchSurfaceUp() {
