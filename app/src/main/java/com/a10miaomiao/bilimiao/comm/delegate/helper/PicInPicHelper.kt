@@ -12,6 +12,7 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Rational
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 //import cn.a10miaomiao.player.callback.MediaPlayerListener
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
@@ -110,7 +111,12 @@ class PicInPicHelper(
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         this.isInPictureInPictureMode = isInPictureInPictureMode
         if (isInPictureInPictureMode) {
-            activity.registerReceiver(broadcastReceiver, IntentFilter(ACTION_MEDIA_CONTROL))
+            ContextCompat.registerReceiver(
+                activity,
+                broadcastReceiver,
+                IntentFilter(ACTION_MEDIA_CONTROL),
+                ContextCompat.RECEIVER_EXPORTED
+            )
         } else {
             activity.unregisterReceiver(broadcastReceiver)
         }
