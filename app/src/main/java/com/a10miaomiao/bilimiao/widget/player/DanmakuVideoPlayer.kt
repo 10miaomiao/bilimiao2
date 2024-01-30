@@ -13,22 +13,22 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
-import android.util.Log
 import android.view.DisplayCutout
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
@@ -406,14 +406,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         val edgeSize = context.dip(80).let {
             min(min(curWidth, curHeight), it) / 2
         }
-//        var curWidth = 0
-//        var curHeight = 0
-//        if (activityContext != null) {
-//            curWidth =
-//                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenHeight else mScreenWidth
-//            curHeight =
-//                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenWidth else mScreenHeight
-//        }
         if (x.toInt() in edgeSize..(curWidth - edgeSize)
             && y.toInt() in edgeSize..(curHeight - edgeSize)) {
             // 屏幕边缘不触发长按倍数
@@ -426,20 +418,16 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         if (isSpeedPlaying) {
             return
         }
-        var curWidth = 0
         var curHeight = 0
         if (activityContext != null) {
-            curWidth =
-                if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenHeight else mScreenWidth
             curHeight =
                 if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenWidth else mScreenHeight
         }
         if (mChangePosition) {
             //
             val totalTimeDuration = duration
-            DebugMiao.log("deltaX", deltaX, context.dip(1))
-            mSeekTimePosition =
-                (mDownPosition + deltaX / context.dip(1) / mSeekRatio).toLong()
+            val offsetPosition = deltaX / context.dip(1) / mSeekRatio
+            mSeekTimePosition = (mDownPosition + offsetPosition).toLong()
             if (mSeekTimePosition < 0) {
                 mSeekTimePosition = 0
             }
@@ -764,6 +752,79 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     fun setSendDanmakuButtonOnClickListener(l: OnClickListener) {
         mMiniSendDanmakuIV.setOnClickListener(l)
         mSendDanmakuTV.setOnClickListener(l)
+    }
+
+    private var mDialogOffsetText: TextView? = null
+    override fun showProgressDialog(
+        deltaX: Float,
+        seekTime: String?,
+        seekTimePosition: Long,
+        totalTime: String,
+        totalTimeDuration: Long
+    ) {
+        if (mProgressDialog == null) {
+            val localView = LayoutInflater.from(activityContext).inflate(
+                R.layout.layout_video_progress_dialog, null
+            )
+            mDialogProgressBar = localView.findViewById(progressDialogProgressId)
+            if (mDialogProgressBarDrawable != null) {
+                mDialogProgressBar.progressDrawable = mDialogProgressBarDrawable
+            }
+            mDialogProgressBar = localView.findViewById(progressDialogProgressId)
+            if (mDialogProgressBarDrawable != null) {
+                mDialogProgressBar.progressDrawable = mDialogProgressBarDrawable
+            }
+            mDialogSeekTime = localView.findViewById(progressDialogCurrentDurationTextId)
+            mDialogTotalTime = localView.findViewById(progressDialogAllDurationTextId)
+            mDialogIcon = localView.findViewById(progressDialogImageId)
+            mDialogOffsetText = localView.findViewById(R.id.tv_offset)
+
+            mProgressDialog = Dialog(activityContext, R.style.video_style_dialog_progress)
+            mProgressDialog.setContentView(localView)
+            mProgressDialog.window!!.addFlags(Window.FEATURE_ACTION_BAR)
+            mProgressDialog.window!!.addFlags(32)
+            mProgressDialog.window!!.addFlags(16)
+            mProgressDialog.window!!.setLayout(width, height)
+            if (mDialogProgressNormalColor != -11 && mDialogTotalTime != null) {
+                mDialogTotalTime.setTextColor(mDialogProgressNormalColor)
+            }
+            if (mDialogProgressHighLightColor != -11 && mDialogSeekTime != null) {
+                mDialogSeekTime.setTextColor(mDialogProgressHighLightColor)
+            }
+            val localLayoutParams = mProgressDialog.window!!
+                .attributes
+            localLayoutParams.gravity = Gravity.TOP
+            localLayoutParams.width = width
+            localLayoutParams.height = height
+            val location = IntArray(2)
+            getLocationOnScreen(location)
+            localLayoutParams.x = location[0]
+            localLayoutParams.y = location[1]
+            mProgressDialog.window!!.attributes = localLayoutParams
+        }
+        if (!mProgressDialog.isShowing) {
+            mProgressDialog.show()
+        }
+        if (mDialogSeekTime != null) {
+            mDialogSeekTime.text = seekTime
+        }
+        if (mDialogTotalTime != null) {
+            mDialogTotalTime.text = " / $totalTime"
+        }
+        if (totalTimeDuration > 0) if (mDialogProgressBar != null) {
+            mDialogProgressBar.progress = (seekTimePosition * 100 / totalTimeDuration).toInt()
+        }
+        val offset = ((mSeekTimePosition - currentPositionWhenPlaying) / 1000.0).toInt()
+        mDialogOffsetText?.text = if (offset > 0) "+${offset}s" else "${offset}s"
+        if (deltaX > 0) {
+            if (mDialogIcon != null) {
+                mDialogIcon.setBackgroundResource(com.shuyu.gsyvideoplayer.R.drawable.video_forward_icon)
+            }
+        } else {
+            if (mDialogIcon != null) {
+                mDialogIcon.setBackgroundResource(com.shuyu.gsyvideoplayer.R.drawable.video_backward_icon)
+            }
+        }
     }
 
     override fun showBrightnessDialog(percent: Float) {
