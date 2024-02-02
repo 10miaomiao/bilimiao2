@@ -21,10 +21,8 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
-import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerDraggableBehavior
 import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
-import com.a10miaomiao.bilimiao.widget.shadow.ShadowLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
@@ -32,7 +30,6 @@ import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 
 
-//inline infix fun View.
 @OptIn(InternalSplittiesApi::class)
 class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 

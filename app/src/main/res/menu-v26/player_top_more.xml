@@ -8,9 +8,6 @@
     <item android:title="弹幕设置"
         android:id="@+id/danmuku_setting" />
 
-    <item android:title="小窗播放"
-        android:id="@+id/mini_window" />
-
     <item android:id="@+id/player_scale"
         android:title="画面比例"
         android:orderInCategory="1"
@@ -33,4 +30,8 @@
             </group>
         </menu>
     </item>
+
+    <item android:title="小窗播放"
+        android:id="@+id/mini_window" />
+
 </menu>

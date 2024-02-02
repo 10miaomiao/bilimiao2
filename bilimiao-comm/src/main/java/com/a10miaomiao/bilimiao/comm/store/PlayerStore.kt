@@ -25,6 +25,7 @@ class PlayerStore(override val di: DI) :
         var epid: String = "",
         var sid: String = "",
         var title: String = "",
+        var cover: String = "",
     )
 
     override val stateFlow = MutableStateFlow(State())
@@ -35,6 +36,7 @@ class PlayerStore(override val di: DI) :
         this.setState {
             cid = source.id
             title = source.title
+            cover = source.coverUrl
             if (ids.sid.isNotBlank() && ids.epid.isNotBlank()) {
                 type = BANGUMI
                 sid = ids.sid

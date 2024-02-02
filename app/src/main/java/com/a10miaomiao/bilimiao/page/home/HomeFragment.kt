@@ -25,7 +25,6 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.setting.DensitySettingActivity
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -388,15 +387,11 @@ class HomeFragment : Fragment(), DIAware {
 //                    text = "测试"
 //                    setOnClickListener {
 //                        val intent = Intent(requireContext(), DensitySettingActivity::class.java)
-//                        requireContext().startActivity(intent)
+//                        requireContext().startActivitynav(intent)
 //                        val nav = it.findNavController()
-//                        nav.navigateToCompose(PageRoute.Auth.qr_login.url())
-//                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-//                            MainNavArgs.url to PageRoute.Auth.login.url()
-//                        ))
-//                        nav.navigate(MainNavGraph.action.global_to_compose, bundleOf(
-//                            MainNavArgs.url to "bilimiao://setting/proxy"
-//                        ))
+//                        nav.navigate(VideoInfoFragment.actionId, VideoInfoFragment.createArguments("1011706"))
+//                        nav.navigate(VideoInfoFragment.actionId, VideoInfoFragment.createArguments("567194598"))
+//                        nav.navigateToCompose(PageRoute.Setting.proxySetting.url())
 //
 //                        【不當哥哥了！（僅限港澳台地區）】https://www.bilibili.com/bangumi/play/ep719017?vd_source=2bcb4ee461719ac7def0c91f553096a3
 //                         https://www.bilibili.com/bangumi/play/ss44493
@@ -412,7 +407,7 @@ class HomeFragment : Fragment(), DIAware {
 //                        ))
 //                    }
 //                }
-//
+
             }
 
         }.wrapInLimitedFrameLayout {
