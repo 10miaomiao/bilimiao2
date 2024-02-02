@@ -22,11 +22,11 @@ bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在
 
 本项目使用安卓原生技术开发，后续UI将逐步改用Jetpack Compose。
 
-### 下载及使用此项目
+### 下载及使用
 #### 下载 
-1. [从10miaomiao.cn下载](https://10miaomiao.cn/project/1)
-2. [从GithubRelease下载](https://github.com/10miaomiao/bilimiao2/releases)
-3. [从GiteeRelease下载下载](https://gitee.com/10miaomiao/bilimiao2/releases)
+1. 从[10miaomiao.cn](https://10miaomiao.cn/project/1)下载
+2. 从[GithubRelease](https://github.com/10miaomiao/bilimiao2/releases)下载
+3. 从[GiteeRelease](https://gitee.com/10miaomiao/bilimiao2/releases)下载
 #### 使用说明
 1. [手表使用说明](doc/手表使用说明.md)
 2. [时光机](doc/时光机.md)
@@ -47,6 +47,8 @@ bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在
 * [GSYVideoPlayer](https://github.com/CarGuo/GSYVideoPlayer)
 * [DanmakuFlameMaster](https://github.com/bilibili/DanmakuFlameMaster)
 * [mojito](https://github.com/mikaelzero/mojito)
+* [DialogX](https://github.com/kongzue/DialogX)
+
 
 ### 关于我
 * 个人网站 [10喵喵](https://10miaomiao.cn/)
