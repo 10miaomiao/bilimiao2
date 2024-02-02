@@ -4,6 +4,7 @@ package com.a10miaomiao.bilimiao.page.start
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.widget.CompoundButton
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -28,8 +30,10 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.flexboxLayout
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
@@ -53,15 +57,18 @@ import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
+import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.badgeTextView
 import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
@@ -92,6 +99,7 @@ import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding
 import splitties.views.rightPadding
+import splitties.views.textColorResource
 import splitties.views.verticalPadding
 
 class StartFragment : Fragment(), DIAware, MyPage {
@@ -129,6 +137,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val viewModel by lazy { StartViewModel(di) }
     private val supportHelper by instance<SupportHelper>()
     private val themeDelegate by instance<ThemeDelegate>()
+    private val playerDelegate by instance<BasePlayerDelegate>()
     private val windowStore by instance<WindowStore>()
     private val scaffoldApp by lazy { requireActivity().getScaffoldView() }
 
@@ -203,6 +212,43 @@ class StartFragment : Fragment(), DIAware, MyPage {
         return false
     }
 
+    private val handlePlayerCardDetailClick = View.OnClickListener {
+        val playerState = viewModel.playerStore.state
+        val scaffoldView = requireActivity().getScaffoldView()
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        if (playerState.sid.isNotBlank()) {
+            val url = PageRoute.Bangumi.detail.url(mapOf(
+                "id" to playerState.sid,
+                "epid" to playerState.epid,
+            ))
+            nav.navigateToCompose(url)
+            scaffoldView.closeDrawer()
+        } else if (playerState.aid.isNotBlank()) {
+            val args = VideoInfoFragment.createArguments(playerState.aid)
+            nav.navigate(VideoInfoFragment.actionId, args)
+            scaffoldView.closeDrawer()
+        }
+    }
+
+    private val handlePlayerCardCloseClick = View.OnClickListener {
+        playerDelegate.closePlayer()
+    }
+
+    private val handleUserClick = View.OnClickListener {
+        val scaffoldView = requireActivity().getScaffoldView()
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val userStore = viewModel.userStore
+        if (userStore.isLogin()) {
+            val mid = userStore.state.info?.mid ?: return@OnClickListener
+            val args = UserFragment.createArguments(mid.toString())
+            nav.navigate(UserFragment.actionId, args)
+        } else {
+            val url = PageRoute.Auth.login.url()
+            nav.navigateToCompose(url)
+        }
+        scaffoldView.closeDrawer()
+    }
+
     private val handleMessageClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
         val nav = requireActivity().findNavController(R.id.nav_host_fragment)
@@ -264,7 +310,92 @@ class StartFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    @InternalSplittiesApi
+    fun MiaoUI.playerStateCard(): View {
+        val playerState = viewModel.playerStore.state
+        return horizontalLayout {
+            apply(ViewStyle.roundRect(dip(10)))
+            padding = dip(10)
+            backgroundColor = config.blockBackgroundColor
 
+            _show = playerState.cid.isNotBlank()
+
+            views {
+                +rcImageView {
+                    radius = dip(10)
+                    _network(playerState.cover, "@300w_300h_1c_")
+                }..lParams {
+                    width = dip(60)
+                    height = dip(60)
+                    rightMargin = dip(10)
+                }
+                +verticalLayout {
+                    views {
+                        +horizontalLayout {
+                            views {
+                                +textView {
+                                    text = "正在播放："
+                                    setTextColor(config.foregroundColor)
+                                    textSize = 16f
+                                    gravity = Gravity.CENTER_VERTICAL
+                                }..lParams(wrapContent,  dip(20))
+                                +textView {
+                                    _text = if (playerState.sid.isNotBlank()) {
+                                        "SS${playerState.sid} / EP${playerState.epid}"
+                                    } else {
+                                        "AV${playerState.aid}"
+                                    }
+                                    ellipsize = TextUtils.TruncateAt.END
+                                    maxLines = 1
+                                    setTextColor(config.foregroundAlpha45Color)
+                                    textSize = 14f
+                                    gravity = Gravity.BOTTOM
+                                }..lParams(wrapContent,  dip(20))
+                            }
+                        }..lParams(matchParent, wrapContent)
+                        +textView {
+                            _text = playerState.title
+                            setTextColor(config.foregroundAlpha45Color)
+                            textSize = 16f
+                            ellipsize = TextUtils.TruncateAt.END
+                            maxLines = 2
+//                            gravity = Gravity.CENTER_VERTICAL
+                        }..lParams(matchParent, wrapContent) {
+                            topMargin = dip(2)
+                        }
+
+                        +horizontalLayout {
+                            views {
+                                +view<MaterialButton> {
+                                    text = "关闭播放"
+                                    cornerRadius = dip(10)
+                                    backgroundColor = config.blockBackgroundColor
+                                    textColorResource = config.themeColorResource
+                                    strokeColor = ColorStateList.valueOf(config.themeColor)
+                                    strokeWidth = dip(1.5f).toInt()
+                                    setOnClickListener(handlePlayerCardCloseClick)
+                                    textSize = 14f
+                                    padding = 0
+                                }..lParams(dip(100), dip(40)) {
+                                    rightMargin = dip(5)
+                                }
+                                +view<MaterialButton> {
+                                    text = "查看详情"
+                                    cornerRadius = dip(10)
+                                    setTextColor(0xFFFFFFFF.toInt())
+                                    setOnClickListener(handlePlayerCardDetailClick)
+                                    textSize = 14f
+                                    padding = 0
+                                }..lParams(dip(100), dip(40))
+                            }
+                        }
+                    }
+                }..lParams {
+                    weight = 1f
+                }
+            }
+        }
+    }
 
     @OptIn(InternalSplittiesApi::class)
     fun MiaoUI.searchBoxView(): View {
@@ -344,6 +475,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
                     views {
                         +imageView {
+                            setOnClickListener(handleUserClick)
                             miaoEffect(userInfo) {
                                 if (it == null) {
                                     Glide.with(context)
@@ -362,12 +494,12 @@ class StartFragment : Fragment(), DIAware, MyPage {
                             width = dip(60)
                         }
 
-                        +frameLayout {
-                        }..lParams {
+                        +space()..lParams {
                             weight = 1f
                         }
 
                         +frameLayout {
+                            _show = viewModel.userStore.isLogin()
                             setOnClickListener(handleMessageClick)
 
                             views {
@@ -477,6 +609,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
         connectStore(viewLifecycleOwner, windowStore)
         connectStore(viewLifecycleOwner, viewModel.userStore)
         connectStore(viewLifecycleOwner, viewModel.messageStore)
+        connectStore(viewLifecycleOwner, viewModel.playerStore)
         val contentInsets = windowStore.state.windowInsets
 
         frameLayout {
@@ -508,6 +641,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
                     headerViews(mAdapter) {
                         +userView()..lParams(width = matchParent) {
                             bottomMargin = config.smallPadding
+                        }
+                        +playerStateCard()..lParams(width = matchParent) {
+                            margin = config.smallPadding
                         }
                     }
                     footerViews(mAdapter) {
