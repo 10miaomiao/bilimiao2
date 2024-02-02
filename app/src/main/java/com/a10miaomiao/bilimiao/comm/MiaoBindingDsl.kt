@@ -46,7 +46,9 @@ fun ImageView._network(
     url: String?,
     suffix: String = "",
 ) = miaoEffect(url) {
-    if (url != null) {
+    if (url.isNullOrBlank()) {
+        this.imageResource = 0
+    } else {
         Glide.with(context)
             .loadImageUrl(url, suffix)
             .centerCrop()
@@ -54,8 +56,6 @@ fun ImageView._network(
             .placeholder(R.drawable.bili_default_image_tv)
             .dontAnimate()
             .into(this)
-    } else {
-        this.imageResource = 0
     }
 }
 
