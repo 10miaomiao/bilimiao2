@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.message
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
@@ -21,6 +23,7 @@ import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.commponents.MessageItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.AtMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
@@ -103,6 +106,12 @@ internal class AtMessagePageModel(
         _cursor = null
         loadData()
     }
+
+    fun toUserPage(item: AtMessageInfo) {
+        val mid = item.user.mid
+        val uri = Uri.parse("bilimiao://user/$mid")
+        fragment.findNavController().navigate(uri)
+    }
 }
 
 
@@ -142,6 +151,9 @@ fun AtMessagePage() {
                         title = item.item.title,
                         sourceContent = item.item.source_content,
                         time = item.at_time,
+                        onUserClick = {
+                            viewModel.toUserPage(item)
+                        },
                     )
                 }
             }

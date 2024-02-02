@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.message
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
@@ -104,6 +106,12 @@ internal class LikeMessagePageModel(
         _cursor = null
         loadData()
     }
+
+    fun toUserPage(item: LikeMessageInfo) {
+        val mid = item.users[0].mid
+        val uri = Uri.parse("bilimiao://user/$mid")
+        fragment.findNavController().navigate(uri)
+    }
 }
 
 
@@ -158,6 +166,9 @@ fun LikeMessagePage() {
                         title = item.item.title,
                         sourceContent = "",
                         time = item.like_time,
+                        onUserClick = {
+                            viewModel.toUserPage(item)
+                        },
                     )
                 }
             }

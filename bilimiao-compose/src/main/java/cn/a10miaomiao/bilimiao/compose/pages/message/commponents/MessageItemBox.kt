@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.message.commponents
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ internal fun MessageItemBox(
     title: String,
     sourceContent: String,
     time: Long,
+    onUserClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -42,6 +44,7 @@ internal fun MessageItemBox(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
+                .clickable(onClick = onUserClick)
         )
         Column(
             modifier = Modifier
