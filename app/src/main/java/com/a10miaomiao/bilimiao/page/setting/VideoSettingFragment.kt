@@ -13,6 +13,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -225,8 +226,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
             onClick {
                 val nav = findNavController()
-                val url = "bilimiao://setting/proxy"
-                nav.navigateToCompose(url)
+                nav.navigateToCompose(SelectProxyServerPage())
                 true
             }
         }

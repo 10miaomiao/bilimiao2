@@ -28,7 +28,7 @@ import kotlin.math.abs
 import kotlin.math.min
 
 @Composable
-fun monthStr(y: Int, m: Int): String {
+internal fun MonthText(y: Int, m: Int): String {
     if (m > 12) {
         return "${y+1}年1月"
     } else if (m < 1) {
@@ -38,7 +38,7 @@ fun monthStr(y: Int, m: Int): String {
     }
 }
 
-enum class TextBoxStatus {
+internal enum class TextBoxStatus {
     Enable,
     Start,
     Middle,
@@ -47,7 +47,7 @@ enum class TextBoxStatus {
 }
 
 @Composable
-fun TextBox(
+internal fun TextBox(
     modifier: Modifier,
     text: String,
     textColor: Color = Color.Unspecified,
@@ -125,7 +125,7 @@ fun MonthTextBox(
                 )
             }
             Text(
-                text = monthStr(year, month),
+                text = MonthText(year, month),
                 fontSize = 16.sp,
                 color = textColor,
             )
@@ -233,7 +233,7 @@ fun Header(
 }
 
 @Composable
-fun CustomTime(
+internal fun CustomTime(
     viewModel: TimeSettingPageViewMode
 ) {
     val customTime = viewModel.customTime.collectAsState()

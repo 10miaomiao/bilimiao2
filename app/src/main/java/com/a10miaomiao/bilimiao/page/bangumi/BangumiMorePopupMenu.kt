@@ -10,13 +10,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
-import cn.a10miaomiao.bilimiao.compose.PageRoute
-import com.a10miaomiao.bilimiao.MainNavGraph
+import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.page.video.VideoInfoViewModel
 import splitties.toast.toast
 
 class BangumiMorePopupMenu (
@@ -72,10 +69,9 @@ class BangumiMorePopupMenu (
                 val info = viewModel.detailInfo
                 if (info != null) {
                     val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                    val url = PageRoute.Download.bangumiCreate.url(mapOf(
-                        "id" to info.season_id
-                    ))
-                    nav.navigateToCompose(url)
+                    nav.navigateToCompose(DownloadBangumiCreatePage()) {
+                        id set info.season_id
+                    }
                 } else {
                     activity.toast("请等待信息加载完成")
                 }

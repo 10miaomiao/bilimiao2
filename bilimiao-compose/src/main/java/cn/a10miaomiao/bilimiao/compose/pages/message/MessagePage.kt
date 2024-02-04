@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.message
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -34,6 +37,17 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+class MessagePage : ComposePage() {
+    override val route: String
+        get() = "message"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: MessagePageViewModel = diViewModel()
+        MessagePageContent(viewModel)
+    }
+
+}
 
 internal data class MessagePageTabInfo(
     val id: Int,
@@ -70,12 +84,13 @@ internal class MessagePageViewModel(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MessagePage() {
+internal fun MessagePageContent(
+    viewModel: MessagePageViewModel
+) {
     PageConfig(
         title = "消息通知"
     )
     val scope = rememberCoroutineScope()
-    val viewModel: MessagePageViewModel = diViewModel()
 
     val messageStore: MessageStore by rememberInstance()
     val messageState = messageStore.stateFlow.collectAsState().value

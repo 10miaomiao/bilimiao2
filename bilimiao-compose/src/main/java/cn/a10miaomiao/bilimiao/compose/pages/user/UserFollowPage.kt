@@ -1,6 +1,8 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.app.Activity
+import android.os.Bundle
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +29,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.PageArg
+import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
@@ -39,12 +47,14 @@ import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.rememberDialogState
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.LoadMoreListHandler
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPageViewMode
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -55,10 +65,33 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.android.subDI
+import org.kodein.di.compose.localDI
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-data class FollowingItemInfo(
+
+
+
+class UserFollowPage() : ComposePage() {
+
+    val id = stringPageArg("id")
+
+    override val route: String
+        get() = "user/${id}/follow"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel = diViewModel<UserFollowPageViewModel>()
+        val mid = navEntry.arguments?.get(id) ?: ""
+        LaunchedEffect(mid) {
+            viewModel.mid = mid
+        }
+        UserFollowPageContent(viewModel = viewModel)
+    }
+}
+
+internal data class FollowingItemInfo(
     val mid: String,
     val attribute: Int, // 关注属性: 0：未关注, 2：已关注, 6：已互粉
     val mtime: Long,
@@ -72,13 +105,13 @@ data class FollowingItemInfo(
     val isFollowing get() = attribute == 2 || attribute == 6
 }
 
-data class FollowingsInfo(
+internal data class FollowingsInfo(
     val list: List<FollowingItemInfo>,
     val re_version: Int,
     val total: Int,
 )
 
-class UserFollowPageViewModel(
+internal class UserFollowPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -86,7 +119,7 @@ class UserFollowPageViewModel(
 
     private val userStore by instance<UserStore>()
 
-    var mid = ""
+    var mid = "0"
         set(value) {
             if (field != value) {
                 field = value
@@ -225,7 +258,7 @@ class UserFollowPageViewModel(
 }
 
 @Composable
-fun UserInfoCard(
+internal fun UserInfoCard(
     name: String,
     face: String,
     sign: String,
@@ -276,9 +309,8 @@ fun UserInfoCard(
 }
 
 @Composable
-fun UserFollowPage(
-    mid: String,
-    viewModel: UserFollowPageViewModel = diViewModel()
+internal fun UserFollowPageContent(
+    viewModel: UserFollowPageViewModel,
 ) {
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
@@ -307,12 +339,8 @@ fun UserFollowPage(
         }
     }
 
-    LaunchedEffect(mid) {
-        viewModel.mid = mid
-    }
-
     PageConfig(
-        title = if (userStore.isSelf(mid)) {
+        title = if (userStore.isSelf(viewModel.mid)) {
             "我的关注"
         } else {
             "Ta的关注"

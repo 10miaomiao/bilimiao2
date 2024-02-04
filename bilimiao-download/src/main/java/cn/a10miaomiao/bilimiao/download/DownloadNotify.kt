@@ -19,7 +19,7 @@ class DownloadNotify(val context: Context) {
     val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     val builder = NotificationBuilder(context, channelId).apply {
-        val pageUrl = "bilimiao://download/list"
+        val pageUrl = "download/list"
         val uri = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
         val pendingIntent = getPendingIntent(uri)
         setContentIntent(pendingIntent)
@@ -54,7 +54,7 @@ class DownloadNotify(val context: Context) {
         manager.notify(
             notificationID + info.taskId.toInt(),
             NotificationCompat.Builder(context, channelId).apply {
-                val pageUrl = "bilimiao://download/detail?path=${info.parentDirPath}"
+                val pageUrl = "download/detail?path=${info.parentDirPath}"
                 val uri = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
                 val pendingIntent = getPendingIntent(uri)
                 setContentIntent(pendingIntent)
@@ -69,7 +69,7 @@ class DownloadNotify(val context: Context) {
         manager.notify(
             notificationID + info.taskId.toInt(),
             NotificationCompat.Builder(context, channelId).apply {
-                val pageUrl = "bilimiao://download/detail?path=${info.parentDirPath}"
+                val pageUrl = "download/detail?path=${info.parentDirPath}"
                 val uri = Uri.parse("bilimiao://compose?url=${Uri.encode(pageUrl)}")
                 val pendingIntent = getPendingIntent(uri)
                 setContentIntent(pendingIntent)

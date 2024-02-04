@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.bangumi
 import android.content.Intent
 import android.net.Uri
 import android.view.View
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -30,8 +31,11 @@ import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -70,8 +74,27 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+class BangumiDetailPage : ComposePage() {
 
-class BangumiDetailPageViewModel(
+    val id = stringPageArg("id")
+    val epId = stringPageArg("epid", "")
+
+    override val route: String
+        get() = "bangumi/${id}/detail/${epId}"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: BangumiDetailPageViewModel = diViewModel()
+        BangumiDetailPageContent(
+            id = navEntry.arguments?.get(id) ?: "",
+            epid = navEntry.arguments?.get(epId) ?: "",
+            viewModel = viewModel,
+        )
+    }
+
+}
+
+internal class BangumiDetailPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -293,11 +316,11 @@ class BangumiDetailPageViewModel(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BangumiDetailPage(
+internal fun BangumiDetailPageContent(
     id: String,
-    epid: String
+    epid: String,
+    viewModel: BangumiDetailPageViewModel,
 ) {
-    val viewModel: BangumiDetailPageViewModel = diViewModel()
     val playerStore: PlayerStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val playerState = playerStore.stateFlow.collectAsState().value

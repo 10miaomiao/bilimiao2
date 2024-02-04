@@ -13,13 +13,14 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.widget.CompoundButton
 import android.widget.RadioButton
 import android.widget.TextView
-import androidx.core.graphics.toColorInt
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
-import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -39,7 +40,6 @@ import com.a10miaomiao.bilimiao.comm.flexboxLayout
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.loadImageUrl
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
-import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -52,16 +52,13 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.badgeTextView
-import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.bumptech.glide.Glide
@@ -70,9 +67,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -80,7 +75,6 @@ import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
-import splitties.views.dsl.core.editText
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageView
@@ -98,9 +92,7 @@ import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding
-import splitties.views.rightPadding
 import splitties.views.textColorResource
-import splitties.views.verticalPadding
 
 class StartFragment : Fragment(), DIAware, MyPage {
 
@@ -217,11 +209,10 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val scaffoldView = requireActivity().getScaffoldView()
         val nav = requireActivity().findNavController(R.id.nav_host_fragment)
         if (playerState.sid.isNotBlank()) {
-            val url = PageRoute.Bangumi.detail.url(mapOf(
-                "id" to playerState.sid,
-                "epid" to playerState.epid,
-            ))
-            nav.navigateToCompose(url)
+            nav.navigateToCompose(BangumiDetailPage()) {
+                id set playerState.sid
+                epId set playerState.epid
+            }
             scaffoldView.closeDrawer()
         } else if (playerState.aid.isNotBlank()) {
             val args = VideoInfoFragment.createArguments(playerState.aid)
@@ -243,8 +234,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             val args = UserFragment.createArguments(mid.toString())
             nav.navigate(UserFragment.actionId, args)
         } else {
-            val url = PageRoute.Auth.login.url()
-            nav.navigateToCompose(url)
+            nav.navigateToCompose(LoginPage())
         }
         scaffoldView.closeDrawer()
     }
@@ -252,8 +242,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handleMessageClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
         val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-        val url = PageRoute.Message.message.url()
-        nav.navigateToCompose(url)
+        nav.navigateToCompose(MessagePage())
         scaffoldView.closeDrawer()
     }
 

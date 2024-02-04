@@ -14,13 +14,12 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.edit
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
-import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
@@ -488,7 +487,7 @@ class PlayerController(
         val nav = Navigation.findNavController(
             activity, R.id.nav_bottom_sheet_fragment
         )
-        nav.navigateToCompose(PageRoute.Player.sendDanmaku.url())
+        nav.navigateToCompose(SendDanmakuPage())
     }
 
     private fun moreMenuItemClick(item: MenuItem): Boolean {

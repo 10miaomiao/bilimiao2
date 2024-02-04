@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting.proxy
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,7 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavHostController
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
@@ -37,13 +42,25 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+class SelectProxyServerPage : ComposePage() {
+    override val route: String
+        get() = "setting/proxy/select"
 
-class SelectProxyServerPageViewModel(
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: SelectProxyServerPageViewModel = diViewModel()
+        SelectProxyServerPageContent(viewModel)
+    }
+
+}
+
+internal class SelectProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
+    private val composeNav by instance<NavHostController>()
 
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())
     var selectedServerIndex = MutableStateFlow(-1)
@@ -114,14 +131,27 @@ class SelectProxyServerPageViewModel(
         basePlayerDelegate.setProxy(proxyServer, uposHost)
         fragment.findNavController().popBackStack()
     }
+
+    fun toAddPage() {
+        composeNav.navigate(AddProxyServerPage())
+    }
+
+    fun toEditPage(
+        index: Int
+    ) {
+        composeNav.navigate(EditProxyServerPage()) {
+            this.index set index
+        }
+    }
 }
 
 @Composable
-fun SelectProxyServerPage() {
+internal fun SelectProxyServerPageContent(
+    viewModel: SelectProxyServerPageViewModel
+) {
     PageConfig(
         title = "区域限制-选择代理"
     )
-    val viewModel: SelectProxyServerPageViewModel = diViewModel()
     val basePlayerDelegate: BasePlayerDelegate by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -132,22 +162,6 @@ fun SelectProxyServerPage() {
 
     val serverList by viewModel.serverList.collectAsState()
     val selectedServerIndex by viewModel.selectedServerIndex.collectAsState()
-
-    val nav = localNavController()
-    val addClick = remember(nav) {
-        {
-            nav.navigate("bilimiao://setting/proxy/add")
-            Unit
-        }
-    }
-    val editClick = remember(viewModel, nav) {
-        {
-            val index = selectedServerIndex
-            viewModel.selectedServer(-1)
-            nav.navigate("bilimiao://setting/proxy/edit/$index")
-            Unit
-        }
-    }
 
     LaunchedEffect(viewModel, ProxyHelper.version) {
         viewModel.readServerList()
@@ -169,7 +183,7 @@ fun SelectProxyServerPage() {
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            Button(onClick = addClick) {
+            Button(onClick = viewModel::toAddPage) {
                 Text(text = "添加服务器")
             }
         }
@@ -236,7 +250,9 @@ fun SelectProxyServerPage() {
                             style = MaterialTheme.typography.titleMedium
                         )
                         TextButton(
-                            onClick = editClick,
+                            onClick = {
+                                viewModel.toEditPage(selectedServerIndex)
+                            },
                         ) {
                             Text("编辑服务器")
                         }

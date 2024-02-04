@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
 import android.graphics.drawable.Drawable
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,7 +30,9 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -56,7 +59,19 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class QrCodeLoginPageViewModel(
+class QrCodeLoginPage : ComposePage() {
+    override val route: String
+        get() = "auth/qr_login"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: QrCodeLoginPageViewModel = diViewModel()
+        QrCodeLoginPageContent(viewModel)
+    }
+
+}
+
+internal class QrCodeLoginPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -69,7 +84,6 @@ class QrCodeLoginPageViewModel(
     val qrImage = MutableStateFlow<Drawable?>(null)
     val error = MutableStateFlow("")
     val isScaned = MutableStateFlow(false)
-//    val isFullScreenQrcode = MutableStateFlow(false)
 
     fun loadQrImage() = viewModelScope.launch(Dispatchers.IO) {
         try {
@@ -171,11 +185,12 @@ class QrCodeLoginPageViewModel(
 
 
 @Composable
-fun QrCodeLoginPage() {
+internal fun QrCodeLoginPageContent(
+    viewModel: QrCodeLoginPageViewModel
+) {
     PageConfig(
         title = "二微码登录"
     )
-    val viewModel: QrCodeLoginPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())

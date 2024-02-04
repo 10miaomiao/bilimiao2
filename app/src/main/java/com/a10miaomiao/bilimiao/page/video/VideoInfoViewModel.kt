@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -121,14 +121,10 @@ class VideoInfoViewModel(
     private fun jumpSeason(info: VideoInfo) {
         info.season?.let {
             if (it.is_jump == 1) {
-                val url = PageRoute.Bangumi.detail.url(
-                    mapOf(
-                        "id" to it.season_id,
-                        "epid" to ""
-                    )
-                )
                 fragment.findNavController()
-                    .navigateToCompose(url)
+                    .navigateToCompose(BangumiDetailPage()) {
+                        id set it.season_id
+                    }
             }
         }
     }

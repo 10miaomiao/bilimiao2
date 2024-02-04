@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TimeCard(
+internal fun TimeCard(
     title: String,
     active: Boolean = true,
     onActiveChange: (active: Boolean) -> Unit,

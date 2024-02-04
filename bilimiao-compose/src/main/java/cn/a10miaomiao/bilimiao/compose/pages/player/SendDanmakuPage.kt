@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.player
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,7 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -49,13 +52,23 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+class SendDanmakuPage : ComposePage() {
+    override val route: String
+        get() = "player/danmaku/send"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: SendDanmakuViewModel = diViewModel()
+        SendDanmakuPageContent(viewModel)
+    }
+}
 
 internal data class SelectItemInfo<T>(
     val label: String,
     val value: T,
 )
 
-class SendDanmakuViewModel(
+internal class SendDanmakuViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -171,11 +184,12 @@ class SendDanmakuViewModel(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun SendDanmakuPage() {
+internal fun SendDanmakuPageContent(
+    viewModel: SendDanmakuViewModel
+) {
     PageConfig(
         title = "发送弹幕"
     )
-    val viewModel: SendDanmakuViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())

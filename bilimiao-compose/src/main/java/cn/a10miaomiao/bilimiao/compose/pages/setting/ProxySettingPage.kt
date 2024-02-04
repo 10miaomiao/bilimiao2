@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,11 +15,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavHostController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerCard
+import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -28,46 +36,56 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class ProxySettingPageViewModel(
+class ProxySettingPage : ComposePage() {
+    override val route: String
+        get() = "setting/proxy"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: ProxySettingPageViewModel = diViewModel()
+        ProxySettingPageContent(viewModel)
+    }
+
+}
+internal class ProxySettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val composeNav by instance<NavHostController>()
 
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())
-
 
     fun readServerList() {
         serverList.value = ProxyHelper.serverList(fragment.requireContext())
     }
+
+    fun toAddPage() {
+        composeNav.navigate(AddProxyServerPage())
+    }
+
+    fun toEditPage(
+        index: Int
+    ) {
+        composeNav.navigate(EditProxyServerPage()) {
+            this.index set index
+        }
+    }
 }
 
 @Composable
-fun ProxySettingPage() {
+internal fun ProxySettingPageContent(
+    viewModel: ProxySettingPageViewModel
+) {
     PageConfig(
         title = "区域限制\n-\n代理设置"
     )
-    val viewModel: ProxySettingPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
     val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
     val serverList by viewModel.serverList.collectAsState()
-
-    val nav = localNavController()
-    val addClick = remember(nav) {
-        {
-            nav.navigate("bilimiao://setting/proxy/add")
-            Unit
-        }
-    }
-    val editClick = remember(nav) {
-        { index: Int ->
-            nav.navigate("bilimiao://setting/proxy/edit/$index")
-            Unit
-        }
-    }
 
     LaunchedEffect(viewModel, ProxyHelper.version) {
         viewModel.readServerList()
@@ -94,7 +112,7 @@ fun ProxySettingPage() {
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            Button(onClick = addClick) {
+            Button(onClick = viewModel::toAddPage) {
                 Text(text = "添加服务器")
             }
         }
@@ -111,7 +129,7 @@ fun ProxySettingPage() {
                     name = item.name,
                     host = item.host,
                     isTrust = item.isTrust,
-                    onClick = { editClick(it) }
+                    onClick = { viewModel.toEditPage(it) }
                 )
             }
 
