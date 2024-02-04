@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting.proxy
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
@@ -37,7 +40,19 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class AddProxyServerPageViewModel(
+class AddProxyServerPage : ComposePage() {
+    override val route: String
+        get() = "setting/proxy/add"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: AddProxyServerPageViewModel = diViewModel()
+        AddProxyServerPageContent(viewModel)
+    }
+
+}
+
+internal class AddProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
     private val fragment by instance<Fragment>()
@@ -85,12 +100,13 @@ class AddProxyServerPageViewModel(
 }
 
 @Composable
-fun AddProxyServerPage() {
+internal fun AddProxyServerPageContent(
+    viewModel: AddProxyServerPageViewModel
+) {
     PageConfig(
         title = "添加代理服务器"
     )
 
-    val viewModel: AddProxyServerPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())

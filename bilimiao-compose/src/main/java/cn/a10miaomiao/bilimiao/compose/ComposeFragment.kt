@@ -33,9 +33,11 @@ import cn.a10miaomiao.bilimiao.compose.comm.LocalFragmentNavController
 import cn.a10miaomiao.bilimiao.compose.comm.LocalNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfigInfo
+import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.subDI
@@ -162,9 +164,11 @@ fun MyNavHost(
     ) {
         NavHost(
             navController = navController,
-            startDestination = PageRoute.start.url(),
-            builder = PageRoute::builder
-        )
+            startDestination = BlankPage().url(),
+        ) {
+            PageRouteBuilder(this)
+                .initRoute()
+        }
     }
     LaunchedEffect(startRoute) {
         navController.navigate(startRoute) {

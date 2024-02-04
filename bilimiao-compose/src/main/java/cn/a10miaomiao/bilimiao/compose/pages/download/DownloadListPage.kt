@@ -6,8 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.provider.DocumentsContract
-import android.widget.Toast
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,8 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
-import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -33,7 +34,6 @@ import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +43,19 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class DownloadListPageViewModel(
+class DownloadListPage : ComposePage() {
+    override val route: String
+        get() = "download/list"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: DownloadListPageViewModel = diViewModel()
+        DownloadListPageContent(viewModel)
+    }
+
+}
+
+internal class DownloadListPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -172,13 +184,9 @@ class DownloadListPageViewModel(
     }
 
     fun toDetailPage(item: DownloadInfo) {
-        composeNav.navigate(
-            PageRoute.Download.detail.url(
-                mapOf(
-                    "path" to item.dir_path
-                )
-            )
-        )
+        composeNav.navigate(DownloadDetailPage()) {
+            path set item.dir_path
+        }
     }
 
     fun openBiliDownOutGithubWebsite() {
@@ -203,7 +211,9 @@ class DownloadListPageViewModel(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DownloadListPage() {
+internal fun DownloadListPageContent(
+    viewModel: DownloadListPageViewModel
+) {
     PageConfig(
         title = "下载列表",
         menus = listOf(
@@ -214,7 +224,6 @@ fun DownloadListPage() {
             )
         )
     )
-    val viewModel: DownloadListPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())

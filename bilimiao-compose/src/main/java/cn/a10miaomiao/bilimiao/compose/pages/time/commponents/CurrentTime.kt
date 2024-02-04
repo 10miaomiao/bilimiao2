@@ -14,7 +14,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPageViewMode
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 
 @Composable
-fun CurrentTime(
+internal fun CurrentTime(
     viewModel: TimeSettingPageViewMode
 ) {
     val currentTime = viewModel.currentTime.collectAsState()

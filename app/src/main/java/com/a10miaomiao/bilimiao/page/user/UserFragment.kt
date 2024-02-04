@@ -13,7 +13,8 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
-import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -198,16 +199,10 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         .navigate(UserFavouriteListFragment.actionId, args)
                 }
                 "attention" -> {
-//                    val args = bundleOf(
-//                        MainNavArgs.id to viewModel.id,
-//                        MainNavArgs.name to info.card.name,
-//                        MainNavArgs.type to "follow",
-//                    )
-//                    Navigation.findNavController(it)
-//                        .navigate(MainNavGraph.action.user_to_userFollow, args)
                     val nav = it.findNavController()
-                    val url = "bilimiao://user/${viewModel.id}/follow"
-                    nav.navigateToCompose(url)
+                    nav.navigateToCompose(UserFollowPage()) {
+                        id set viewModel.id
+                    }
                 }
                 "fans" -> {
                     val args = UserFollowFragment.createArguments(
@@ -260,14 +255,10 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 }
                 // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
-                    val url = PageRoute.Bangumi.detail.url(
-                        mapOf(
-                            "id" to item.param,
-                            "epid" to ""
-                        )
-                    )
                     Navigation.findNavController(view)
-                        .navigateToCompose(url)
+                        .navigateToCompose(BangumiDetailPage()) {
+                            id set item.param
+                        }
                 }
             }
         }

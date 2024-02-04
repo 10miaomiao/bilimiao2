@@ -23,7 +23,7 @@ import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 @Composable
-fun TextBox(
+internal fun TextBox(
     text: String,
     active: Boolean,
     onClick: () -> Unit,
@@ -48,7 +48,7 @@ fun TextBox(
 }
 
 @Composable
-fun MonthTime(
+internal fun MonthTime(
     viewModel: TimeSettingPageViewMode,
 ) {
     val monthTime = viewModel.monthTime.collectAsState()

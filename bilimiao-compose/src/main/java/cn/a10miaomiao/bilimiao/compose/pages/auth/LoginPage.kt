@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.auth
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -25,13 +26,13 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavHostController
 import androidx.navigation.fragment.findNavController
-import bilibili.main.community.reply.v1.ReplyOuterClass.Url
-import cn.a10miaomiao.bilimiao.compose.PageRoute
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
-import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -59,7 +60,19 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-class LoginPageViewModel(
+class LoginPage : ComposePage() {
+    override val route: String
+        get() = "auth/login"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: LoginPageViewModel = diViewModel()
+        LoginPageContent(viewModel)
+    }
+
+}
+
+internal class LoginPageViewModel(
     override val di: DI,
 ): ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
 
@@ -69,8 +82,9 @@ class LoginPageViewModel(
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
 
+    private val composeNav by instance<NavHostController>()
+
     private val biliGeetestUtil = BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
-    private var tmpNavController: NavController? = null
 
     val loading = MutableStateFlow(false)
     val userName = MutableStateFlow("")
@@ -85,7 +99,6 @@ class LoginPageViewModel(
     }
 
     fun stringLogin(
-        navController: NavController,
         gt3Result: BiliGeetestUtil.GT3ResultBean? = null,
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
@@ -137,9 +150,11 @@ class LoginPageViewModel(
                             setNegativeButton("取消", null)
                             setPositiveButton("请往验证") { _, _ ->
                                 val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
-                                params["code"] = params["tmp_token"]!!
-                                params.remove("tmp_token")
-                                navController.navigate(PageRoute.Auth.telVerify.url(params))
+                                composeNav.navigate(TelVerifyPage()) {
+                                    code set params["tmp_token"]!!
+                                    requestId set params["request_id"]!!
+                                    source set params["source"]!!
+                                }
                             }
 //                            setNeutralButton("使用原始网页") { _, _ ->
 //                                fragment.findNavController().navigate(
@@ -161,7 +176,6 @@ class LoginPageViewModel(
                         }
                     }
                 } else if (res.code == -105 && gt3Result == null) {
-                    tmpNavController = navController
                     verifyUrl = res.data.url ?: ""
                     biliGeetestUtil.startCustomFlow()
                 } else {
@@ -223,9 +237,7 @@ class LoginPageViewModel(
     override suspend fun onGTDialogResult(
         result: BiliGeetestUtil.GT3ResultBean
     ): Boolean {
-        tmpNavController?.let {
-            stringLogin(it, result)
-        }
+        stringLogin(result)
         return true
     }
 
@@ -248,16 +260,17 @@ class LoginPageViewModel(
         fragment.findNavController()
             .navigate(Uri.parse("bilimiao://auth/h5"))
     }
+
+    fun toQrLogin() {
+        composeNav.navigate(QrCodeLoginPage())
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPage(
-
+internal fun LoginPageContent(
+    viewModel: LoginPageViewModel
 ) {
     PageConfig(title = "登录BILIBILI")
-
-    val viewModel: LoginPageViewModel = diViewModel()
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -272,13 +285,6 @@ fun LoginPage(
     val passwordFocusRequester = remember { FocusRequester() }
     var passwordIsFocus by remember { mutableStateOf(false) }
 
-    val nav = localNavController()
-    val startLoginClick = remember(nav) {
-        {
-            viewModel.stringLogin(nav)
-            Unit
-        }
-    }
     val usernameKeyboardActions = remember(passwordFocusRequester) {
         KeyboardActions(
             onNext = {
@@ -286,10 +292,10 @@ fun LoginPage(
             }
         )
     }
-    val passwordKeyboardActions = remember(startLoginClick) {
+    val passwordKeyboardActions = remember(viewModel) {
         KeyboardActions(
             onDone = {
-                startLoginClick()
+                viewModel.stringLogin()
             }
         )
     }
@@ -381,7 +387,7 @@ fun LoginPage(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Button(
-                onClick = startLoginClick,
+                onClick = viewModel::stringLogin,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !loading,
             ) {
@@ -406,9 +412,7 @@ fun LoginPage(
                     Text(text = "网页登录")
                 }
                 Spacer(modifier = Modifier.width(20.dp))
-                TextButton(onClick = {
-                    nav.navigate(PageRoute.Auth.qr_login.url())
-                }) {
+                TextButton(onClick = viewModel::toQrLogin) {
                     Text(text = "二微码登录")
                 }
             }

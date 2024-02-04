@@ -1,11 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
-import android.content.Intent
-import android.net.Uri
-import android.view.View
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,22 +10,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
@@ -57,8 +51,35 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+class TelVerifyPage : ComposePage() {
 
-class TelVerifyPageViewModel(
+    val code = stringPageArg("code")
+
+    val requestId = stringPageArg("request_id")
+
+    val source = stringPageArg("source")
+
+    override val route: String
+        get() = "auth/tel_verify?code=${code}&request_id=${requestId}&source=${source}"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: TelVerifyPageViewModel = diViewModel()
+        val code = navEntry.arguments?.get(code) ?: ""
+        val requestId = navEntry.arguments?.get(requestId) ?: ""
+        val source = navEntry.arguments?.get(source) ?: ""
+        LaunchedEffect(code, requestId, source) {
+            viewModel.code = code
+            viewModel.requestId = requestId
+            viewModel.source = source
+            viewModel.getTmpUserInfo()
+        }
+        TelVerifyPageCompose(viewModel)
+    }
+
+}
+
+internal class TelVerifyPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
 
@@ -341,12 +362,9 @@ class TelVerifyPageViewModel(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TelVerifyPage(
-    code: String,
-    requestId: String,
-    source: String,
+internal fun TelVerifyPageCompose(
+    viewModel: TelVerifyPageViewModel
 ) {
     PageConfig(title = "帐号验证")
 
@@ -370,15 +388,9 @@ fun TelVerifyPage(
 
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(code, requestId, source) {
-        viewModel.code = code
-        viewModel.requestId = requestId
-        viewModel.source = source
-        viewModel.getTmpUserInfo()
-    }
-
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         Column(

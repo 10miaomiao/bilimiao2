@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.time
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,7 +16,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -30,8 +33,19 @@ import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.util.*
 
+class TimeSettingPage : ComposePage() {
+    override val route: String
+        get() = "time/setting"
 
-class TimeSettingPageViewMode(
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel = diViewModel<TimeSettingPageViewMode>()
+        TimeSettingPageContent(viewModel)
+    }
+
+}
+
+internal class TimeSettingPageViewMode(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -143,8 +157,8 @@ class TimeSettingPageViewMode(
 }
 
 @Composable
-fun TimeSettingPage(
-    viewModel: TimeSettingPageViewMode = diViewModel()
+internal fun TimeSettingPageContent(
+    viewModel: TimeSettingPageViewMode,
 ) {
     PageConfig(title = "时光姬-时间线设置")
 
@@ -209,12 +223,6 @@ fun TimeSettingPage(
 
     }
 
-}
-
-@Preview
-@Composable
-fun TimeSettingPagePreview() {
-    TimeSettingPage()
 }
 
 

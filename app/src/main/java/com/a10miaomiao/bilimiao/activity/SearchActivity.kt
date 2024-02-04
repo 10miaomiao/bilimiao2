@@ -100,6 +100,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        window.setBackgroundDrawableResource(R.drawable.gradient_reverse)
         window.requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         window.enterTransition = Slide()
         window.exitTransition = Slide()
@@ -268,7 +269,7 @@ class SearchActivity : AppCompatActivity() {
                     }
                     SearchViewModel.SuggestType.SS -> {
                         val intent = Intent()
-                        val url = "bilimiao://compose?url=bilimiao%3A%2F%2Fbangumi%2Fdetail%2F${item.value}%3Fepid%3D"
+                        val url = "bilimiao://compose?url=bangumi%2F${item.value}%2Fdetail%2F"
                         intent.putExtra(KEY_URL, url)
                         setResult(REQUEST_CODE, intent)
                         finishAfterTransition()

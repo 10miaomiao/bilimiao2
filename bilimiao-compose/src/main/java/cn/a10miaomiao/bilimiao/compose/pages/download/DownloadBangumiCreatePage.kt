@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.download
 
 import android.net.Uri
 import android.preference.PreferenceManager
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +20,10 @@ import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.ColorUtils
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
@@ -49,7 +53,25 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class DownloadBangumiCreatePageViewModel(
+class DownloadBangumiCreatePage : ComposePage() {
+
+    val id = stringPageArg("id")
+    override val route: String
+        get() = "download/bangumi/create?id=${id}"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: DownloadBangumiCreatePageViewModel = diViewModel()
+        val id = navEntry.arguments?.get(id) ?: ""
+        LaunchedEffect(id) {
+            viewModel.loadEpisodeList(id)
+        }
+        DownloadBangumiCreatePageContent(viewModel)
+    }
+
+}
+
+internal class DownloadBangumiCreatePageViewModel(
     override val di: DI
 ) : ViewModel(), DIAware {
 
@@ -282,7 +304,7 @@ class DownloadBangumiCreatePageViewModel(
 }
 
 @Composable
-fun EpisodeItem(
+internal fun EpisodeItem(
     episode: EpisodeInfo,
     enabled: Boolean,
     checked: Boolean,
@@ -349,8 +371,8 @@ fun EpisodeItem(
 }
 
 @Composable
-fun DownloadBangumiCreatePage(
-    id: String,
+internal fun DownloadBangumiCreatePageContent(
+    viewModel: DownloadBangumiCreatePageViewModel,
 ) {
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
@@ -371,12 +393,10 @@ fun DownloadBangumiCreatePage(
 
     var expandedQualityMenu by remember { mutableStateOf(false) }
 
-    LaunchedEffect(id) {
-        viewModel.loadEpisodeList(id)
-    }
     PageConfig(
         title = "创建下载任务"
     )
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {

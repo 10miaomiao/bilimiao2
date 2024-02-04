@@ -83,6 +83,8 @@ class SearchActivityUi(
         // 默认值
         setText(keyword)
         setSelection(keyword.length)
+        isFocusable = true
+        isFocusableInTouchMode = true
     }
 
     val searchIcon = imageView {
@@ -140,6 +142,7 @@ class SearchActivityUi(
 
     override val root = verticalLayout {
 //        transitionName = "shareElement"
+        backgroundColor = config.windowBackgroundColor
         fitsSystemWindows = true
         clipToPadding = true
 

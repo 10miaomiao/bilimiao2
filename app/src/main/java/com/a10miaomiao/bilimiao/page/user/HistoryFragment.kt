@@ -2,7 +2,6 @@ package com.a10miaomiao.bilimiao.page.user
 
 import android.content.Context
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,17 +15,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.interfaces.v1.HistoryOuterClass
-import cn.a10miaomiao.bilimiao.compose.PageRoute
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.entity.user.WebVideoHistoryInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
@@ -43,7 +38,6 @@ import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.chad.library.adapter.base.listener.OnItemLongClickListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -159,13 +153,9 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
                     .navigate(VideoInfoFragment.actionId, args)
             }
             "pgc" -> {
-                val pageUrl = PageRoute.Bangumi.detail.url(
-                    mapOf(
-                        "id" to item.kid.toString(),
-                        "epid" to ""
-                    )
-                )
-                nav.navigateToCompose(pageUrl)
+                nav.navigateToCompose(BangumiDetailPage()) {
+                    id set item.kid.toString()
+                }
             }
             else -> {
                 toast("未知跳转类型")

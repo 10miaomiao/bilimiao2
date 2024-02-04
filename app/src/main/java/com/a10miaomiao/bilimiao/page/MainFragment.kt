@@ -18,6 +18,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
@@ -98,7 +99,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 nav.navigate(HistoryFragment.actionId)
             }
             MenuKeys.download -> {
-                nav.navigateToCompose("bilimiao://download/list")
+                nav.navigateToCompose(DownloadListPage())
             }
             MenuKeys.search -> {
 //                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)

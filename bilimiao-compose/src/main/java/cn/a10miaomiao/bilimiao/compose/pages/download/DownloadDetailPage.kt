@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.download
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -48,8 +52,24 @@ import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.io.File
 
+class DownloadDetailPage : ComposePage() {
 
-class DownloadDetailPageViewModel(
+    val path = stringPageArg("path")
+
+    override val route: String
+        get() = "download/detail?path=${path}"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: DownloadDetailPageViewModel = diViewModel()
+        DownloadDetailPageContent(
+            navEntry.arguments?.get(path) ?: "",
+            viewModel
+        )
+    }
+
+}
+internal class DownloadDetailPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -196,26 +216,26 @@ class DownloadDetailPageViewModel(
 }
 
 @Composable
-fun DownloadDetailPage(
+internal fun DownloadDetailPageContent(
     dirPath: String,
+    viewModel: DownloadDetailPageViewModel,
 ) {
     PageConfig(
         title = "下载详情"
     )
-    val viewModel: DownloadDetailPageViewModel = diViewModel()
+
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
     val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
 
-    LaunchedEffect(viewModel, dirPath) {
-        DebugMiao.log(dirPath)
-        viewModel.loadDownloadDetail(dirPath)
-    }
-
     val downloadInfo by viewModel.downloadInfo.collectAsState()
     val downloadItems by viewModel.downloadItems.collectAsState()
     val curDownload by viewModel.curDownload.collectAsState()
+
+    LaunchedEffect(viewModel, dirPath) {
+        viewModel.loadDownloadDetail(dirPath)
+    }
 
     Column() {
         LazyColumn(

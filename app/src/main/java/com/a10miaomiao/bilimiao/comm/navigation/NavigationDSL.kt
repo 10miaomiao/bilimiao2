@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.view.View
 import androidx.navigation.NavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
@@ -17,6 +18,16 @@ fun NavController.navigateToCompose(url: String) = navigate(
     ComposeFragmentNavigatorBuilder.actionId,
     ComposeFragmentNavigatorBuilder.createArguments(url)
 )
+
+fun NavController.navigateToCompose(page: ComposePage) = navigate(
+    ComposeFragmentNavigatorBuilder.actionId,
+    ComposeFragmentNavigatorBuilder.createArguments(page.url())
+)
+
+inline fun <T : ComposePage> NavController.navigateToCompose(
+    page: T,
+    initArgs: T.() -> Unit,
+) = navigateToCompose(page.also(initArgs))
 
 fun Activity.openSearch(view: View) {
     val searchConfig = (this as? MainActivity)?.pageConfig?.search

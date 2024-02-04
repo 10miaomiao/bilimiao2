@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -20,7 +23,18 @@ import org.kodein.di.compose.rememberDI
 import org.kodein.di.instance
 
 
-class TestPageViewModel(
+class TestPage : ComposePage() {
+    override val route: String
+        get() = "test"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: TestPageViewModel = diViewModel()
+        TestPageContent(viewModel)
+    }
+}
+
+internal class TestPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -28,9 +42,8 @@ class TestPageViewModel(
 
 }
 
-
 @Composable
-fun ColorBox(
+internal fun ColorBox(
     name: String,
     color: Color,
 ) {
@@ -48,8 +61,9 @@ fun ColorBox(
 }
 
 @Composable
-fun TestPage() {
-    val viewModel: TestPageViewModel = diViewModel()
+internal fun TestPageContent(
+    viewModel: TestPageViewModel,
+) {
     val windowStore: WindowStore by rememberDI { instance() }
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.windowInsets
