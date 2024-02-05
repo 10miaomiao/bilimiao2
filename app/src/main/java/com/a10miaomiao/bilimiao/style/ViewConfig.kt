@@ -30,12 +30,17 @@ class ViewConfig(val context: Context) {
     val colorSurfaceResource get() = context.attr(com.google.android.material.R.attr.colorSurface)
     val colorSurface get() = context.resources.getColor(colorSurfaceResource)
 
+    val colorSurfaceVariantResource get() = context.attr(com.google.android.material.R.attr.colorSurfaceVariant)
+    val colorSurfaceVariant get() = context.resources.getColor(colorSurfaceVariantResource)
+
+
     val themeColorResource get() = context.attr(android.R.attr.colorPrimary)
     val themeColor get() = context.resources.getColor(themeColorResource)
 
     val windowBackgroundResource get() = context.attr(R.attr.defaultBackgroundColor)
     val windowBackgroundColor get() = context.resources.getColor(windowBackgroundResource)
 
+//    val blockBackgroundResource get() = context.attr(com.google.android.material.R.attr.colorSurface)
     val blockBackgroundResource get() = context.attr(R.attr.blockBackground)
     val blockBackgroundColor get() = context.resources.getColor(blockBackgroundResource)
     val blockBackgroundAlpha45Color get() = (blockBackgroundColor and 0x00FFFFFF) or 0x71000000

@@ -34,6 +34,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
+import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -57,6 +58,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
+import splitties.views.backgroundColor
 
 
 class MainActivity
@@ -186,6 +188,10 @@ class MainActivity
             }
         }
 
+        themeDelegate.observeTheme(this, Observer {
+            ui.mAppBar.backgroundColor = ((config.colorSurfaceVariant) and 0x00FFFFFF) or (0xF8000000).toInt()
+            ui.mAppBar.updateTheme()
+        })
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -343,19 +349,22 @@ class MainActivity
                 )
             }
             windowStore.setBottomAppBarHeight(config.appBarMenuHeight)
+            ui.mContainerView.setPadding(0, 0, 0, 0)
             ui.mPlayerLayout.setPadding(
                 0, if (fullScreenPlayer) 0 else top, 0, 0
             )
         } else {
             windowStore.setContentInsets(
-                left, top, right, bottom,
+                0, top, right, bottom,
             )
             windowStore.setBottomAppBarHeight(0)
+            ui.mContainerView.setPadding(left, 0, 0, 0)
             ui.mPlayerLayout.setPadding(
                 0, 0, 0, 0
             )
         }
         basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
+        ui.root.requestLayout()
     }
 
     @RequiresApi(Build.VERSION_CODES.P)

@@ -22,17 +22,8 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/pink</item>
         <item name="colorSecondaryVariant">@color/pink</item>
-    </style>
 
-    <style name="PinkTheme.DayNight" parent="Theme.DayNight.Bilimiao">
-        <item name="themeName">@string/theme_pink_DayNight</item>
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/pink</item>
-        <item name="colorPrimaryVariant">@color/pink</item>
-        <item name="colorOnPrimary">@color/pink</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/pink</item>
-        <item name="colorSecondaryVariant">@color/pink</item>
+        <item name="colorSurfaceVariant">@color/pink_surface</item>
     </style>
 
     <style name="RedTheme" parent="Theme.Bilimiao">
@@ -43,16 +34,8 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/red</item>
         <item name="colorSecondaryVariant">@color/red</item>
-    </style>
 
-    <style name="RedTheme.DayNight" parent="Theme.DayNight.Bilimiao">
-        <item name="themeName">@string/theme_red_DayNight</item>
-        <item name="colorPrimary">@color/red</item>
-        <item name="colorPrimaryVariant">@color/red</item>
-        <item name="colorOnPrimary">@color/red</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/red</item>
-        <item name="colorSecondaryVariant">@color/red</item>
+        <item name="colorSurfaceVariant">@color/red_surface</item>
     </style>
 
     <style name="YellowTheme" parent="Theme.Bilimiao">
@@ -63,16 +46,8 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/orange</item>
         <item name="colorSecondaryVariant">@color/orange</item>
-    </style>
 
-    <style name="YellowTheme.DayNight" parent="Theme.DayNight.Bilimiao">
-        <item name="themeName">@string/theme_yellow_DayNight</item>
-        <item name="colorPrimary">@color/orange</item>
-        <item name="colorPrimaryVariant">@color/orange</item>
-        <item name="colorOnPrimary">@color/orange</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/orange</item>
-        <item name="colorSecondaryVariant">@color/orange</item>
+        <item name="colorSurfaceVariant">@color/yellow_surface</item>
     </style>
 
     <style name="GreenTheme" parent="Theme.Bilimiao">
@@ -83,16 +58,8 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/green_light</item>
         <item name="colorSecondaryVariant">@color/green_light</item>
-    </style>
 
-    <style name="GreenTheme.DayNight" parent="Theme.DayNight.Bilimiao">
-        <item name="themeName">@string/theme_green_DayNight</item>
-        <item name="colorPrimary">@color/green_light</item>
-        <item name="colorPrimaryVariant">@color/green_light</item>
-        <item name="colorOnPrimary">@color/green_light</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/green_light</item>
-        <item name="colorSecondaryVariant">@color/green_light</item>
+        <item name="colorSurfaceVariant">@color/green_light_surface</item>
     </style>
 
     <style name="BlueTheme" parent="Theme.Bilimiao">
@@ -103,16 +70,8 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/blue</item>
         <item name="colorSecondaryVariant">@color/blue</item>
-    </style>
 
-    <style name="BlueTheme.DayNight" parent="Theme.DayNight.Bilimiao">
-        <item name="themeName">@string/theme_blue_DayNight</item>
-        <item name="colorPrimary">@color/blue</item>
-        <item name="colorPrimaryVariant">@color/blue</item>
-        <item name="colorOnPrimary">@color/blue</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/blue</item>
-        <item name="colorSecondaryVariant">@color/blue</item>
+        <item name="colorSurfaceVariant">@color/blue_surface</item>
     </style>
 
     <style name="PurpleTheme" parent="Theme.Bilimiao">
@@ -123,23 +82,12 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/purple</item>
         <item name="colorSecondaryVariant">@color/purple</item>
+
+        <item name="colorSurfaceVariant">@color/purple_surface</item>
     </style>
 
-    <style name="PurpleTheme.DayNight" parent="Theme.DayNight.Bilimiao">
-        <item name="themeName">@string/theme_purple_DayNight</item>
-        <item name="colorPrimary">@color/purple</item>
-        <item name="colorPrimaryVariant">@color/purple</item>
-        <item name="colorOnPrimary">@color/purple</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/purple</item>
-        <item name="colorSecondaryVariant">@color/purple</item>
-    </style>
 
     <style name="MaterialYouTheme" parent="Theme.Bilimiao">
     </style>
-
-    <style name="MaterialYouTheme.DayNight" parent="Theme.DayNight.Bilimiao">
-    </style>
-
 
 </resources>
