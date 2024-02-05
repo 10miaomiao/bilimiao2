@@ -1,9 +1,14 @@
 package com.a10miaomiao.bilimiao.widget.comm.ui
 
+import android.animation.Animator
+import android.animation.LayoutTransition
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
@@ -52,9 +57,23 @@ class AppBarHorizontalUi(
 
     val mNavigationMemuLayout = verticalLayout {
         gravity = Gravity.CENTER_HORIZONTAL
+
+        val layoutTransition = LayoutTransition()
+        //View出現的動畫
+        layoutTransition.setAnimator(LayoutTransition.APPEARING, getInAnim())
+        //元素在容器中消失時需要動畫顯示
+        layoutTransition.setAnimator(LayoutTransition.DISAPPEARING, getOutAnim())
+        setLayoutTransition(layoutTransition)
     }
 
     val mNavigationLayout = verticalLayout {
+        val layoutTransition = LayoutTransition()
+        //View出現的動畫
+        layoutTransition.setAnimator(LayoutTransition.APPEARING, getInAnim())
+        //元素在容器中消失時需要動畫顯示
+        layoutTransition.setAnimator(LayoutTransition.DISAPPEARING, getOutAnim())
+        setLayoutTransition(layoutTransition)
+
         addView(mNavigationIconLayout, lParams {
             width = matchParent
             height = wrapContent
@@ -70,14 +89,19 @@ class AppBarHorizontalUi(
         })
     }
 
-    override val root = frameLayout {
-        backgroundColor = config.blockBackgroundColor
+    private val lineView = textView {
+        backgroundColor = ctx.config.colorSurfaceVariant
+    }
 
+    override val root = frameLayout {
         addView(mNavigationLayout.wrapInScrollView {
             scrollBarSize = 0
         }, lParams {
             width = config.appBarMenuWidth
             height = matchParent
+            gravity = Gravity.RIGHT
+        })
+        addView(lineView, lParams(dip(1), matchParent) {
             gravity = Gravity.RIGHT
         })
     }
@@ -128,5 +152,23 @@ class AppBarHorizontalUi(
                 }
             }
         }
+    }
+
+    override fun updateTheme() {
+        lineView.backgroundColor = ctx.config.colorSurfaceVariant
+    }
+
+    private fun View.getInAnim(): Animator {
+        val scaleX = PropertyValuesHolder.ofFloat("scaleX", 0f, 1f)
+        val scaleY = PropertyValuesHolder.ofFloat("scaleY", 0f, 1f)
+        val trAlpha = PropertyValuesHolder.ofFloat("alpha", 0f, 1f)
+        return ObjectAnimator.ofPropertyValuesHolder(this, scaleX, scaleY, trAlpha)
+    }
+
+    private fun View.getOutAnim(): Animator {
+        val scaleX = PropertyValuesHolder.ofFloat("scaleX", 1f, 0f)
+        val scaleY = PropertyValuesHolder.ofFloat("scaleY", 1f, 0f)
+        val trAlpha = PropertyValuesHolder.ofFloat("alpha", 1f, 0f)
+        return ObjectAnimator.ofPropertyValuesHolder(this, scaleX, scaleY, trAlpha)
     }
 }

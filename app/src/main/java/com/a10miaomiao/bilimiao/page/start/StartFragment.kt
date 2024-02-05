@@ -32,6 +32,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
+import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -164,6 +165,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             )
             mAllRadioButton.buttonTintList = colorStateList
             mSelfRadioButton.buttonTintList = colorStateList
+            mSearchView.setCardBackgroundColor(config.blockBackgroundColor)
         })
     }
 

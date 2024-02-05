@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="pink_surface">#514346</color>
+
+    <color name="blue_surface">#43474E</color>
+
+    <color name="purple_surface">#49454E</color>
+
+    <color name="green_surface">#424940</color>
+
+    <color name="green_light_surface">#44483D</color>
+
+    <color name="yellow_surface">#4B4739</color>
+    
+    <color name="orange_surface">#51453A</color>
+
+    <color name="red_surface">#534341</color>
+
+</resources>

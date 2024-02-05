@@ -58,34 +58,43 @@
     <color name="pink">#fb7299</color>
     <color name="pink_dark">#b85671</color>
     <color name="pink_trans">#99f0486c</color>
+    <color name="pink_surface">#F3DDE0</color>
 
     <color name="blue">#2196F3</color>
     <color name="blue_dark">#1565C0</color>
     <color name="blue_trans">#B41A78C3</color>
+    <color name="blue_surface">#DFE2EB</color>
 
     <color name="purple">#673AB7</color>
     <color name="purple_dark">#311B92</color>
     <color name="purple_trans">#99673AB7</color>
+    <color name="purple_surface">#E7E0EB</color>
 
     <color name="green">#4CAF50</color>
     <color name="green_dark">#2E7D32</color>
     <color name="green_trans">#994CAF50</color>
+    <color name="green_surface">#DEE5D8</color>
 
     <color name="green_light">#8BC34A</color>
     <color name="green_light_dark">#558B2F</color>
     <color name="green_light_trans">#998BC34A</color>
+    <color name="green_light_surface">#E1E4D5</color>
 
     <color name="yellow">#FDD835</color>
     <color name="yellow_dark">#FBC02D</color>
     <color name="yellow_trans">#99FDD835</color>
+    <color name="yellow_surface">#EAE2CF</color>4B4739
 
     <color name="orange">#FF9800</color>
     <color name="orange_dark">#EF6C00</color>
     <color name="orange_trans">#99FF9800</color>
+    <color name="orange_surface">#F2DFD1</color>
 
     <color name="red">#F44336</color>
     <color name="red_dark">#C62828</color>
     <color name="red_trans">#99F44336</color>
+    <color name="red_surface">#F5DDDA</color>
+
 
     <color name="nightColorPrimary">#3b3b3b</color>
     <color name="nightColorPrimaryDark">#383838</color>

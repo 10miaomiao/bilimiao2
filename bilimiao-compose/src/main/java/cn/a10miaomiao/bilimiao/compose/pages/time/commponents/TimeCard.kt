@@ -31,7 +31,7 @@ internal fun TimeCard(
             .padding(10.dp, 0.dp, 10.dp, 10.dp)
             .alpha(alpha),
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
             modifier = Modifier.clickable(
@@ -42,7 +42,7 @@ internal fun TimeCard(
             Text(
                 text = title,
                 modifier = Modifier.padding(vertical = 5.dp),
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             AnimatedVisibility(
                 visible = active,

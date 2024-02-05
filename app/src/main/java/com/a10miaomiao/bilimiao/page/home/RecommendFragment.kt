@@ -112,7 +112,7 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
     private fun RecyclerView.createAdapter(): MiaoBindingAdapter<RecommendCardInfo> {
         val mAdapter = if (viewModel.listStyle == "1") {
             mLayoutManager = _miaoLayoutManage(
-                GridAutofitLayoutManager(requireContext(), dip(150))
+                GridAutofitLayoutManager(requireContext(), dip(180))
             )
             _miaoAdapter(
                 items = viewModel.list.data,

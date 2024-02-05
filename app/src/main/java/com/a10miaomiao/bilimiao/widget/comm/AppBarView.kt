@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.widget.comm
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.Menu
@@ -19,6 +20,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
 import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarVerticalUi
+import com.google.android.material.card.MaterialCardView
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -109,12 +111,16 @@ class AppBarView @JvmOverloads constructor(
 
     fun setView(view: View) {
         if (childCount > 0) {
-            removeViewAt(0)
+            removeAllViews()
         }
         addView(view, 0, lParams {
             width = matchParent
             height = matchParent
         })
+    }
+
+    fun updateTheme() {
+        mUi.updateTheme()
     }
 
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {

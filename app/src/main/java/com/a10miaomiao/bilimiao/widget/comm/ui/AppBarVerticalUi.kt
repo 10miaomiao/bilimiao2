@@ -102,7 +102,6 @@ class AppBarVerticalUi(
 
     @OptIn(InternalSplittiesApi::class)
     override val root = frameLayout {
-        backgroundColor = config.blockBackgroundColor
 
         addView(mTitle, lParams {
             width = matchParent
@@ -182,6 +181,8 @@ class AppBarVerticalUi(
             }
         }
     }
+
+    override fun updateTheme() {}
 
     //向上位移显示动画  从自身位置的最下端向上滑动了自身的高度
     private val translateAniShow = TranslateAnimation(
