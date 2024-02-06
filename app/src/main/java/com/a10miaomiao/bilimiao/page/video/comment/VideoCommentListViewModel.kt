@@ -50,6 +50,7 @@ class VideoCommentListViewModel(
 
     var triggered = false
     var list = PaginationInfo<VideoCommentViewInfo>()
+    var upMid = -1L
     private var _cursor: ReplyOuterClass.CursorReply? = null
 
     init {
@@ -98,6 +99,7 @@ class VideoCommentListViewModel(
                 }
             }
             ui.setState {
+                upMid = res.subjectControl.upMid
                 if (res.repliesList != null) {
                     list.data.addAll(res.repliesList.map(
                         VideoCommentViewAdapter::convertToVideoCommentViewInfo

@@ -50,10 +50,13 @@ class VideoCommentDetailViewModel(
 
     var triggered = false
     var list = PaginationInfo<VideoCommentViewInfo>()
+    var upMid = 0L
     private var _cursor: ReplyOuterClass.CursorReply? = null
 
     init {
-        reply = fragment.requireArguments().getParcelable<VideoCommentViewInfo>(MainNavArgs.reply)!!
+        val arguments = fragment.requireArguments()
+        reply = arguments.getParcelable<VideoCommentViewInfo>(MainNavArgs.reply)!!
+        upMid = arguments.getLong(MainNavArgs.id, -1L)
         loadData()
     }
 
@@ -83,6 +86,7 @@ class VideoCommentDetailViewModel(
                 list.data = mutableListOf()
             }
             ui.setState {
+                upMid = res.subjectControl.upMid
                 list.data.addAll(
                     res.root.repliesList.map(
                         VideoCommentViewAdapter::convertToVideoCommentViewInfo
