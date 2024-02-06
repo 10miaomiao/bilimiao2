@@ -80,10 +80,12 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
 
         fun createArguments(
             index: Int,
+            upMid: Long,
             reply: VideoCommentViewInfo
         ): Bundle {
             return bundleOf(
                 MainNavArgs.index to index,
+                MainNavArgs.id to upMid,
                 MainNavArgs.reply to reply,
             )
         }
@@ -365,6 +367,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         videoCommentView(
             index = index,
             viewInfo = item,
+            upMid = viewModel.upMid,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
             onLikeClick = handleLikeClick,
@@ -403,6 +406,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
                 val reply = viewModel.reply
                 +videoCommentView(
                     viewInfo = reply,
+                    upMid = viewModel.upMid,
                     textIsSelectable = true,
                     onUpperClick = handleUserClick,
                     onLinkClick = handleLinkClickListener,

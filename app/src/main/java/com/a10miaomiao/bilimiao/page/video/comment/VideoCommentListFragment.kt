@@ -256,7 +256,7 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.getItem(position) as VideoCommentViewInfo
-        val args = VideoCommentDetailFragment.createArguments(position, item)
+        val args = VideoCommentDetailFragment.createArguments(position, viewModel.upMid, item)
         Navigation.findNavController(view)
             .navigate(VideoCommentDetailFragment.actionId, args)
     }
@@ -347,6 +347,8 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
             like = item.like,
             count = item.count,
             isLike = item.isLike,
+            upMid = viewModel.upMid,
+            cardLabels = item.cardLabels,
             onUpperClick = handleUserClick,
             onLinkClick = handleLinkClickListener,
             onLikeClick = handleLikeClick,

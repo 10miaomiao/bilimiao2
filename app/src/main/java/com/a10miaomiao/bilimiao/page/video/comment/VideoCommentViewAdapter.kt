@@ -31,6 +31,7 @@ object VideoCommentViewAdapter {
             ),
             like = reply.like,
             count = reply.count,
+            cardLabels = reply.replyControl.cardLabelsList.map { it.textContent },
             isLike = reply.replyControl.action == 1L,
         )
     }
@@ -58,6 +59,7 @@ object VideoCommentViewAdapter {
             ),
             like = reply.like,
             count = reply.count,
+            cardLabels = listOf(),
             isLike = false,
         )
     }

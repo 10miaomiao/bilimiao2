@@ -3,11 +3,13 @@ package com.a10miaomiao.bilimiao.commponents.comment
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Parcelable
 import android.text.Spannable
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
+import androidx.core.graphics.toColorInt
 import androidx.core.view.marginBottom
 import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._show
@@ -37,7 +39,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.parcel.Parcelize
 import splitties.dimensions.dip
 import splitties.views.dsl.core.*
+import splitties.views.horizontalPadding
 import splitties.views.padding
+import splitties.views.textColorResource
+import splitties.views.verticalPadding
 
 @Parcelize
 data class VideoCommentViewInfo(
@@ -52,6 +57,7 @@ data class VideoCommentViewInfo(
     val content: VideoCommentViewContent,
     val like: Long,
     val count: Long,
+    val cardLabels: List<String>,
     val isLike: Boolean = false,
     val isDelete: Boolean = false,
 ): Parcelable
@@ -135,6 +141,8 @@ fun MiaoUI.videoCommentView(
     content: VideoCommentViewContent,
     like: Long,
     count: Long,
+    upMid: Long = -1,
+    cardLabels: List<String> = listOf(),
     textIsSelectable: Boolean = false,
     isLike: Boolean = false,
     onUpperClick: View.OnClickListener? = null,
@@ -167,15 +175,44 @@ fun MiaoUI.videoCommentView(
 
             +verticalLayout {
                 views {
-                    +textView {
-                        setTextColor(config.foregroundColor)
-                        textSize = 16f
-                        _tag = mid
-                        onUpperClick?.let {
-                            setOnClickListener(onUpperClick)
-                        }
+                    +horizontalLayout {
+                        gravity = Gravity.CENTER_VERTICAL
+                        views {
+                            +textView {
+                                setTextColor(config.foregroundColor)
+                                textSize = 16f
+                                _tag = mid
+                                onUpperClick?.let {
+                                    setOnClickListener(onUpperClick)
+                                }
 
-                        _text = uname
+                                _text = uname
+                            }
+
+                            +textView {
+                                _show = upMid == mid
+                                setTextColor(config.foregroundColor)
+                                textSize = 12f
+                                text = "UP主"
+                                textColorResource = R.color.white
+                                background = GradientDrawable().apply {
+                                    val radius = dip(5f)
+                                    cornerRadii = floatArrayOf(
+                                        radius, radius,
+                                        radius, radius,
+                                        radius, radius,
+                                        radius, radius
+                                    )
+                                    setColor(config.themeColor)
+                                    setStroke(0, 0)
+                                }
+
+                                horizontalPadding = dip(4)
+                                verticalPadding = dip(2)
+                            }..lParams {
+                                leftMargin = dip(5)
+                            }
+                        }
                     }
 
                     +horizontalLayout {
@@ -297,6 +334,7 @@ fun MiaoUI.videoCommentView(
 inline fun MiaoUI.videoCommentView(
     viewInfo: VideoCommentViewInfo,
     index: Int = -1,
+    upMid: Long = -1,
     textIsSelectable: Boolean = false,
     onUpperClick: View.OnClickListener? = null,
     onLinkClick: ExpandableTextView.OnLinkClickListener? = null,
@@ -315,6 +353,7 @@ inline fun MiaoUI.videoCommentView(
         like = viewInfo.like,
         count = viewInfo.count,
         isLike = viewInfo.isLike,
+        upMid = upMid,
         textIsSelectable = textIsSelectable,
         onUpperClick = onUpperClick,
         onLinkClick = onLinkClick,
