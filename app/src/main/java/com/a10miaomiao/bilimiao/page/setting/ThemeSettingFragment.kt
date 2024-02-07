@@ -69,6 +69,15 @@ class ThemeSettingFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleAppBarTypeSelectedListener = object : AdapterView.OnItemSelectedListener {
+        override fun onNothingSelected(p0: AdapterView<*>?) {
+        }
+
+        override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+            themeDelegate.setAppBarType(p2)
+        }
+    }
+
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.getItemOrNull(position)
         if (item is ThemeDelegate.ThemeInfo) {
@@ -136,27 +145,52 @@ class ThemeSettingFragment : Fragment(), DIAware, MyPage {
             }
 
             headerViews(mAdapter) {
-                +horizontalLayout {
-                    horizontalPadding = config.pagePadding
-                    verticalPadding = config.dividerSize
-
+                +verticalLayout {
                     views {
-                        +textView{
-                            _text = "夜间模式："
+                        +horizontalLayout {
+                            horizontalPadding = config.pagePadding
+                            verticalPadding = config.dividerSize
+
+                            views {
+                                +textView{
+                                    _text = "夜间模式："
+                                }
+                                +spinner {
+                                    miaoEffect(null) {
+                                        val mAdapter = ArrayAdapter<String>(context, R.layout.simple_spinner_item
+                                            , arrayOf("跟随系统", "关闭", "打开"))
+                                        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                        adapter = mAdapter
+                                        setSelection(ThemeDelegate.getNightMode(requireContext()))
+                                        onItemSelectedListener = handleItemSelectedListener
+                                    }
+                                }
+                            }
+
                         }
-                        +spinner {
-                            miaoEffect(null) {
-                                val mAdapter = ArrayAdapter<String>(context, R.layout.simple_spinner_item
-                                    , arrayOf("跟随系统", "关闭", "打开"))
-                                mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                                adapter = mAdapter
-                                setSelection(ThemeDelegate.getNightMode(requireContext()))
-                                onItemSelectedListener = handleItemSelectedListener
+
+                        +horizontalLayout {
+                            horizontalPadding = config.pagePadding
+                            verticalPadding = config.dividerSize
+                            views {
+                                +textView{
+                                    _text = "应用操作栏背景颜色："
+                                }
+                                +spinner {
+                                    miaoEffect(null) {
+                                        val mAdapter = ArrayAdapter<String>(context, R.layout.simple_spinner_item
+                                            , arrayOf("主题颜色", "纯色"))
+                                        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                        adapter = mAdapter
+                                        setSelection(themeDelegate.getAppBarType())
+                                        onItemSelectedListener = handleAppBarTypeSelectedListener
+                                    }
+                                }
                             }
                         }
                     }
-
                 }
+
             }
 
         }
