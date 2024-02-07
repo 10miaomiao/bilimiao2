@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.db.FilterWordDB
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
@@ -54,10 +55,9 @@ class FilterStore(override val di: DI) :
 
     fun filterWord(text: String): Boolean {
         state.filterWordList.forEach {
-            if (it.length > 2 && it[0] == '/' && it[it.length - 1] == '/') {
-                val regEx = it.substring(1, it.length - 1)
-                val pattern = Pattern.compile(regEx)
-                if (pattern.matcher(text).matches())
+            if (it.length > 2 && it.startsWith('/')  && it.endsWith('/')) {
+                val regEx = it.substring(1, it.length - 1).toRegex()
+                if (regEx.containsMatchIn(text))
                     return false
             } else {
                 if (it in text)
