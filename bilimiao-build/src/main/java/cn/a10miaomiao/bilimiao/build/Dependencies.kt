@@ -50,7 +50,7 @@ object Libraries {
     const val composeUi = "androidx.compose.ui:ui:${Versions.compose}"
     const val composeUiToolingPreview = "androidx.compose.ui:ui-tooling-preview:${Versions.compose}"
     const val composeMaterial = "androidx.compose.material:material:1.5.4"
-    const val composeMaterial3 = "androidx.compose.material3:material3:1.1.2"
+    const val composeMaterial3 = "androidx.compose.material3:material3:1.2.0-rc01"
     const val composeMaterial3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:1.1.2"
     const val activityCompose = "androidx.activity:activity-compose:${Versions.compose}"
     const val navigationCompose = "androidx.navigation:navigation-compose:${Versions.navigation}"

@@ -51,7 +51,6 @@ abstract class ComposePage {
         return this::class.java.methods.filter {
             it.returnType.name == typeName
         }.mapNotNull {
-            DebugMiao.log(it.name)
             (it.invoke(this) as? PageArg<*>)?.namedNavArgument
         }
     }

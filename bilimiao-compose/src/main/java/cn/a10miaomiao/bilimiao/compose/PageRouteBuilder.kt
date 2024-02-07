@@ -14,6 +14,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
+import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
@@ -44,6 +45,9 @@ class PageRouteBuilder (
         +DownloadListPage()
         +DownloadDetailPage()
         +DownloadBangumiCreatePage()
+
+        // filter
+        +FilterSettingPage()
 
         // message
         +MessagePage()

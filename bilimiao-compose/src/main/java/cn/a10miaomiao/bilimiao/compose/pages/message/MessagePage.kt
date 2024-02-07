@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.BottomNavigation
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -104,7 +107,7 @@ internal fun MessagePageContent(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        TabRow(
+        PrimaryTabRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
@@ -113,14 +116,20 @@ internal fun MessagePageContent(
                     start = windowInsets.leftDp.dp,
                     end = windowInsets.rightDp.dp,
                 ),
-            contentColor = MaterialTheme.colorScheme.onBackground,
             selectedTabIndex = pagerState.currentPage,
         ) {
             viewModel.tabs.forEachIndexed { index, tab ->
                 Tab(
                     text = {
                         Row() {
-                            Text(text = tab.name)
+                            Text(
+                                text = tab.name,
+                                color = if (index == pagerState.currentPage) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground
+                                }
+                            )
                             val unreadCount: Int = messageState.unread?.let {
                                 when (index) {
                                     0 -> it.reply

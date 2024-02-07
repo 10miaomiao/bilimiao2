@@ -14,6 +14,7 @@ import androidx.navigation.NavType
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.viewpager.widget.ViewPager
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
@@ -98,8 +99,7 @@ class RegionFragment : Fragment(), DIAware, MyPage {
             MenuKeys.time -> {
                 val nav =
                     requireActivity().findNavController(com.a10miaomiao.bilimiao.R.id.nav_bottom_sheet_fragment)
-                val url = "bilimiao://time/setting"
-                nav.navigateToCompose(url)
+                nav.navigateToCompose(TimeSettingPage())
             }
         }
     }

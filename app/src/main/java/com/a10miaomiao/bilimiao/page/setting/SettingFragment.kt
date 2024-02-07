@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -26,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
 import com.a10miaomiao.bilimiao.page.filter.FilterListFragment
@@ -267,10 +269,10 @@ class SettingFragment : Fragment(), DIAware, MyPage
 
         pref("filter") {
             title = "屏蔽管理"
-            summary = "只对时光机生效"
+            summary = "对时光机、首页推荐和热门生效"
             onClick {
                 val nav = requireActivity().findNavController(R.id.nav_host_fragment)
-                nav.navigate(FilterListFragment.actionId)
+                nav.navigateToCompose(FilterSettingPage())
                 true
             }
         }
