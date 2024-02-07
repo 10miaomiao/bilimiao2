@@ -3,6 +3,8 @@ package com.a10miaomiao.bilimiao.comm.delegate.theme
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LifecycleOwner
@@ -25,7 +27,11 @@ class ThemeDelegate(
     companion object {
         private const val KEY_THEME = "theme_name"
         private const val KEY_NIGHT = "night"
+        private const val KEY_APP_BAR_TYPE = "app_bar_type"
         private const val NAME_MATERIAL_YOU_THEME = "MaterialYouTheme"
+
+        private const val APP_BAR_TYPE_COLORFUL = 0 // 主题彩色
+        private const val APP_BAR_TYPE_SOLID = 1 // 纯色
 
         fun getNightMode (context: Context): Int {
             val sp = context.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
@@ -58,6 +64,8 @@ class ThemeDelegate(
     }
 
     private val theme = MutableLiveData<String>()
+
+    private val handler = Handler(Looper.getMainLooper())
 
     val themeList = arrayListOf(
         ThemeInfo("哔哩粉", activity.resources.getColor(R.color.pink), "PinkTheme"),
@@ -93,10 +101,9 @@ class ThemeDelegate(
 
     fun setTheme() {
         val themeName = getThemeName(activity)
+        activity.setTheme(getThemeResId(themeName))
         if (themeName == NAME_MATERIAL_YOU_THEME) {
             DynamicColors.applyIfAvailable(activity)
-        } else {
-            activity.setTheme(getThemeResId(themeName))
         }
         theme.value = themeName
     }
@@ -107,6 +114,28 @@ class ThemeDelegate(
             .putString(KEY_THEME, newTheme)
             .apply()
         setTheme()
+    }
+
+    fun getAppBarType(): Int {
+        return activity.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
+            .getInt(KEY_APP_BAR_TYPE, 0)
+    }
+
+    fun setAppBarType(type: Int) {
+        activity.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(KEY_APP_BAR_TYPE, type)
+            .apply()
+        setTheme()
+    }
+
+    fun getAppBarBgColor(): Int {
+        val bgColor = if (getAppBarType() == 0) {
+            activity.config.colorSurfaceVariant
+        } else {
+            activity.config.blockBackgroundColor
+        }
+        return (bgColor and 0x00FFFFFF) or (0xF8000000).toInt()
     }
 
     fun observeTheme(owner: LifecycleOwner, observer: Observer<String>) = theme.observe(owner, observer)

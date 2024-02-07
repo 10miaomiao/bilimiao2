@@ -99,6 +99,9 @@ class AppBarVerticalUi(
 //        scrollBarSize = 0
 //        layoutManager = lm
 //    }
+    private val lineView = textView {
+        backgroundColor = ctx.config.colorSurfaceVariant
+    }
 
     @OptIn(InternalSplittiesApi::class)
     override val root = frameLayout {
@@ -124,6 +127,7 @@ class AppBarVerticalUi(
                 height = wrapContent
             }
         )
+        addView(lineView, lParams(matchParent, dip(1)))
     }
 
 
@@ -182,7 +186,9 @@ class AppBarVerticalUi(
         }
     }
 
-    override fun updateTheme() {}
+    override fun updateTheme() {
+        lineView.backgroundColor = ctx.config.colorSurfaceVariant
+    }
 
     //向上位移显示动画  从自身位置的最下端向上滑动了自身的高度
     private val translateAniShow = TranslateAnimation(

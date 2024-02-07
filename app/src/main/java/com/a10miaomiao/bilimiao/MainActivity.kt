@@ -189,7 +189,7 @@ class MainActivity
         }
 
         themeDelegate.observeTheme(this, Observer {
-            ui.mAppBar.backgroundColor = ((config.colorSurfaceVariant) and 0x00FFFFFF) or (0xF8000000).toInt()
+            ui.mAppBar.backgroundColor = themeDelegate.getAppBarBgColor()
             ui.mAppBar.updateTheme()
         })
     }
