@@ -5,16 +5,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo2
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +18,6 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.dimensions.dip
 import splitties.toast.toast
 
 class RegionDetailsViewModel(

@@ -11,7 +11,6 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -22,7 +21,7 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.flow.FlowLayoutManager
 import kotlinx.coroutines.launch

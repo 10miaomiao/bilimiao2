@@ -1,14 +1,14 @@
-package com.a10miaomiao.bilimiao.store
+package com.a10miaomiao.bilimiao.comm.store
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.db.FilterWordDB
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import org.kodein.di.instance
-import splitties.toast.toast
 import java.util.regex.Pattern
 
 class FilterStore(override val di: DI) :
@@ -70,7 +70,7 @@ class FilterStore(override val di: DI) :
     fun addWord(keyword: String) {
         filterWordDB.insert(keyword)
         queryFilterWord()
-        activity.toast("添加成功")
+        PopTip.show("添加成功")
     }
 
     fun setWord(oldWord: String, newWord: String) {
@@ -82,7 +82,7 @@ class FilterStore(override val di: DI) :
         val keyword = state.filterWordList[index]
         filterWordDB.deleteByKeyword(keyword)
         queryFilterWord()
-        activity.toast("删除成功")
+        PopTip.show("删除成功")
     }
 
     fun deleteWord(keywordList: List<String>) {
@@ -90,19 +90,19 @@ class FilterStore(override val di: DI) :
             filterWordDB.deleteByKeyword(it)
         }
         queryFilterWord()
-        activity.toast("删除成功")
+        PopTip.show("删除成功")
     }
 
     fun addUpper(mid: Long, name: String) {
         filterUpperDB.insert(mid, name)
         queryFilterUpper()
-        activity.toast("已添加屏蔽")
+        PopTip.show("已添加屏蔽")
     }
 
     fun deleteUpper(mid: Long) {
         filterUpperDB.deleteByMid(mid)
         queryFilterUpper()
-        activity.toast("已取消屏蔽")
+        PopTip.show("已取消屏蔽")
     }
 
     fun deleteUpper(midList: List<Long>) {
@@ -110,7 +110,7 @@ class FilterStore(override val di: DI) :
             filterUpperDB.deleteByMid(it)
         }
         queryFilterUpper()
-        activity.toast("删除成功")
+        PopTip.show("删除成功")
     }
 
     fun filterUpper(mid: String) = filterUpper(mid.toLong())

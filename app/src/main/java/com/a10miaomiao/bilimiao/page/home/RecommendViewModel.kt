@@ -1,15 +1,10 @@
 package com.a10miaomiao.bilimiao.page.home
 
 import android.content.Context
-import android.os.Build
 import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bilibili.app.card.v1.CardOuterClass
-import bilibili.app.card.v1.Single
-import bilibili.app.show.v1.PopularGrpc
-import bilibili.app.show.v1.PopularOuterClass
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
@@ -17,9 +12,7 @@ import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.network.request
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,14 +60,17 @@ class RecommendViewModel(
                 idx = idx,
             ).awaitCall().gson<ResultInfo<HomeRecommendInfo>>()
             if (res.isSuccess) {
-                val itemsList = res.data.items.filter {
-                   it.goto?.isNotEmpty() ?: false
+                val itemsList = res.data.items
+                val filterList = itemsList.filter {
+                    (it.goto?.isNotEmpty() ?: false)
+                            && filterStore.filterWord(it.title)
+                            && filterStore.filterUpper(it.args.up_id)
                 }
                 ui.setState {
                     if (idx == 0L) {
-                        list.data = itemsList.toMutableList()
+                        list.data = filterList.toMutableList()
                     } else {
-                        list.data.addAll(itemsList)
+                        list.data.addAll(filterList)
                     }
                     if (itemsList.isEmpty()) {
                         list.finished = true
