@@ -187,7 +187,10 @@ internal fun FilterWordListPage() {
                                 }
                             }
                         )
-                        Text(text = word)
+                        Text(
+                            text = word,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
                     }
                 }
 
