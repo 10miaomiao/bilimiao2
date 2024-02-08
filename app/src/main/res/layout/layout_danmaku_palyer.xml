@@ -363,7 +363,7 @@
         android:paddingLeft="10dp"
         android:paddingTop="10dp"
         android:scaleType="centerInside"
-        android:src="@drawable/video_small_close"
+        android:src="@drawable/ic_close_white_24dp"
         android:visibility="gone" />
 
     <ImageView

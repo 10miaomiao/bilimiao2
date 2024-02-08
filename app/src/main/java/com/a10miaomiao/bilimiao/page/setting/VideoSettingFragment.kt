@@ -328,6 +328,12 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             summary = "如果弹幕抖动厉害可以关掉，修改后重新播放视频生效"
             defaultValue = true
         }
+        switch(DanmakuSettingFragment.KEY_DANMAKU_SYS_FONT) {
+            title = "弹幕使用系统字体"
+            summary = "修改后需重启APP生效"
+            defaultValue = false
+        }
+
 
 
     }

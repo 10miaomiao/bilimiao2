@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager
@@ -12,6 +13,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.edit
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
@@ -34,6 +36,8 @@ import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import org.kodein.di.DI
@@ -57,8 +61,9 @@ class PlayerController(
 
     private var preparedRunQueue = mutableListOf<Pair<String, Runnable>>()
 
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+
     private fun getFullMode(): String {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         return prefs.getString(
             VideoSettingFragment.PLAYER_FULL_MODE,
             VideoSettingFragment.KEY_AUTO
@@ -66,7 +71,6 @@ class PlayerController(
     }
 
     private fun getScreenType(): Int {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         return prefs.getInt(
             VideoSettingFragment.PLAYER_SCREEN_TYPE,
             GSYVideoType.SCREEN_TYPE_DEFAULT
@@ -92,6 +96,7 @@ class PlayerController(
             true
         }
         danmakuContext = that.danmakuContext
+
         qualityView.setOnClickListener(that::showQualityPopupMenu)
         speedView.setOnClickListener(that::showSpeedPopupMenu)
         moreBtn.setOnClickListener(that::showMoreMenu)
@@ -103,6 +108,14 @@ class PlayerController(
         updatePlayerMode(activity.resources.configuration)
 
         GSYVideoType.setShowType(getScreenType())
+        if (!prefs.getBoolean(DanmakuSettingFragment.KEY_DANMAKU_SYS_FONT, false)) {
+            that.danmakuContext.setTypeface(
+                Typeface.createFromAsset(
+                    activity.assets,
+                    "fonts/danmaku.ttf"
+                )
+            )
+        }
     }
 
     /**
@@ -172,7 +185,6 @@ class PlayerController(
             DanmakuVideoPlayer.PlayerMode.FULL -> DanmakuSettingFragment.MODE_FULL
         }
 
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         val danmakuShow = prefs.getBoolean(DanmakuSettingFragment.KEY_DANMAKU_SHOW, true) &&
                 prefs.getBoolean(
                     DanmakuSettingFragment.generateKey(
@@ -254,6 +266,7 @@ class PlayerController(
 
         //设置弹幕样式
         danmakuContext?.apply {
+
             ftDanmakuVisibility = danmakuFTShow
             fbDanmakuVisibility = danmakuFBShow
             r2LDanmakuVisibility = danmakuR2LShow
@@ -273,7 +286,6 @@ class PlayerController(
                 DanmakuVideoPlayer.PlayerMode.SMALL_FLOAT -> DanmakuSettingFragment.MODE_SMALL
                 DanmakuVideoPlayer.PlayerMode.FULL -> DanmakuSettingFragment.MODE_FULL
             }
-            val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
             val showInCurMode = prefs.getBoolean(
                 DanmakuSettingFragment.generateKey(
                     DanmakuSettingFragment.KEY_DANMAKU_SHOW, mode
@@ -308,7 +320,6 @@ class PlayerController(
     }
 
     fun initVideoPlayerSetting() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         views.videoPlayer.showBottomProgressBarInFullMode = prefs.getBoolean(
             VideoSettingFragment.PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR,
             true
@@ -323,7 +334,6 @@ class PlayerController(
      * 播放器是否默认全屏播放
      */
     fun checkIsPlayerDefaultFull() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         onlyFull = false
         if (scaffoldApp.orientation == ScaffoldView.VERTICAL) {
             val isPlayerVerticalDefaultFull =
@@ -582,8 +592,7 @@ class PlayerController(
      * 播放结束
      */
     override fun onAutoCompletion() {
-        delegate.historyReport()
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        delegate.historyReport(views.videoPlayer.currentPosition / 1000)
         val nextPlayerSourceInfo = delegate.playerSource?.next()
         if (nextPlayerSourceInfo is VideoPlayerSource) {
             if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_NEXT_VIDEO, true)) {
@@ -632,7 +641,7 @@ class PlayerController(
         currentPosition: Long,
         duration: Long
     ) {
-
+        delegate.historyReport(progress)
         PlayerService.selfInstance?.setProgress(
             duration,
             currentPosition

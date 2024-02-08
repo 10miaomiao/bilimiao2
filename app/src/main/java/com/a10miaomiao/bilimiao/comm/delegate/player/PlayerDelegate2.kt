@@ -292,10 +292,15 @@ class PlayerDelegate2(
         return header
     }
 
-    internal fun historyReport() {
-        val progress = views.videoPlayer.currentPosition / 1000
-        DebugMiao.log("historyReport", progress)
+    private var lastReportProgress = 0L
+    internal fun historyReport(progress: Long) {
         playerSource?.let {
+            // 5秒记录一次
+            if (progress > 0 && progress - lastReportProgress < 5) {
+                return@let
+            }
+            lastReportProgress = progress
+            DebugMiao.log("progress", progress)
             activity.lifecycleScope.launch(Dispatchers.IO) {
                 it.historyReport(progress)
             }
@@ -367,7 +372,7 @@ class PlayerDelegate2(
                     } else if (
                         sourceInfo.lastPlayCid == source.id
                         && sourceInfo.lastPlayTime > 0L
-                        && sourceInfo.lastPlayTime < sourceInfo.duration - 1
+                        && sourceInfo.lastPlayTime < sourceInfo.duration - 10000
                     ) {
                         views.videoPlayer.seekOnStart = sourceInfo.lastPlayTime
                         lastPosition = 0L
@@ -383,8 +388,6 @@ class PlayerDelegate2(
                         }
                     }
                     views.videoPlayer.startPlayLogic()
-
-                    historyReport()
 
                     if (isChangedQuality) {
                         if (sourceInfo.quality == quality) {
@@ -488,7 +491,6 @@ class PlayerDelegate2(
         areaLimitBoxController.hide()
         lastPosition = 0L
         if (playerSource != null) {
-            historyReport()
             playerCoroutineScope.onStop()
             views.videoPlayer.release()
         }
@@ -536,7 +538,6 @@ class PlayerDelegate2(
     override fun closePlayer() {
         scaffoldApp.showPlayer = false
         playerCoroutineScope.onStop()
-        historyReport()
         playerSource = null
 
         views.videoPlayer.release()
@@ -577,21 +578,23 @@ class PlayerDelegate2(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
     ) {
-        picInPicHelper?.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
-            // 隐藏视频控制器
-            views.videoPlayer.hideController()
-            //
-            views.videoPlayer.isPicInPicMode = true
-            // 视频组件全屏
-            scaffoldApp.fullScreenPlayer = true
-            // 调整弹幕样式，调小字体，限制行数
-            controller.initDanmakuContext()
-        } else {
-            scaffoldApp.fullScreenPlayer =
-                views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
-            views.videoPlayer.isPicInPicMode = false
-            controller.initDanmakuContext()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            picInPicHelper?.onPictureInPictureModeChanged(isInPictureInPictureMode)
+            if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
+                // 隐藏视频控制器
+                views.videoPlayer.hideController()
+                //
+                views.videoPlayer.isPicInPicMode = true
+                // 视频组件全屏
+                scaffoldApp.fullScreenPlayer = true
+                // 调整弹幕样式，调小字体，限制行数
+                controller.initDanmakuContext()
+            } else {
+                scaffoldApp.fullScreenPlayer =
+                    views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL
+                views.videoPlayer.isPicInPicMode = false
+                controller.initDanmakuContext()
+            }
         }
     }
 
