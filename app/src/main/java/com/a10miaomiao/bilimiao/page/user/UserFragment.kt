@@ -467,7 +467,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
 
     val ui = miaoBindingUi {
         val contentInsets = windowStore.getContentInsets(parentView)
-        recyclerView {
+        val contentView = recyclerView {
             _leftPadding = contentInsets.left
             _rightPadding = contentInsets.right
 
@@ -654,12 +654,23 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     _topPadding = contentInsets.bottom + config.pagePadding
                 }
             }
-        }.wrapInLimitedFrameLayout {
-            maxWidth = config.containerWidth
         }.wrapInSwipeRefreshLayout {
             setColorSchemeResources(config.themeColorResource)
             setOnRefreshListener { viewModel.loadData() }
             _isRefreshing = viewModel.loading
+        }.wrapInLimitedFrameLayout {
+            maxWidth = config.containerWidth
+        }
+
+        // rootLayout
+        frameLayout {
+            views {
+                +contentView..lParams {
+                    width = matchParent
+                    height = matchParent
+                    gravity = Gravity.CENTER_HORIZONTAL
+                }
+            }
         }
     }
 
