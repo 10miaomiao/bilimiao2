@@ -150,7 +150,10 @@ internal fun FilterUpperListPage() {
                                 }
                             }
                         )
-                        Text(text = upper.name + "(UID:${upper.mid})")
+                        Text(
+                            text = upper.name + "(UID:${upper.mid})",
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
                 if (filterUpperList.size == 0) {
