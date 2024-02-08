@@ -314,7 +314,7 @@ internal fun CustomTime(
         )
 
         Column(
-            modifier = Modifier.height(270.dp)
+//            modifier = Modifier.height(350.dp)
         ) {
             var total = monthDayNum + monthStartWeek
             var num = 0
@@ -368,7 +368,7 @@ internal fun CustomTime(
                                 } else {
                                     MaterialTheme.colorScheme.outline
                                 },
-                                height = 34.dp,
+                                height = 48.dp,
                                 status = status,
                                 onClick = {
                                     itemClick(day)

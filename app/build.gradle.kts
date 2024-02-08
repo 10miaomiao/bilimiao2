@@ -15,8 +15,8 @@ android {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 21
         targetSdk = 34
-        versionCode = 92
-        versionName = "2.3.2"
+        versionCode = 93
+        versionName = "2.3.3"
 
         flavorDimensions("default")
 
