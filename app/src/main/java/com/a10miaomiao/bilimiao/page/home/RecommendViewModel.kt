@@ -13,6 +13,7 @@ import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,7 +65,7 @@ class RecommendViewModel(
                 val filterList = itemsList.filter {
                     (it.goto?.isNotEmpty() ?: false)
                             && filterStore.filterWord(it.title)
-                            && filterStore.filterUpper(it.args.up_id)
+                            && filterStore.filterUpper(it.args.up_id ?: "-1")
                 }
                 ui.setState {
                     if (idx == 0L) {

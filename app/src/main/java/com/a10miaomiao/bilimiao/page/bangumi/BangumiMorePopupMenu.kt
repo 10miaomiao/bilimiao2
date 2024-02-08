@@ -14,6 +14,7 @@ import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import splitties.toast.toast
 
 class BangumiMorePopupMenu (
@@ -47,10 +48,8 @@ class BangumiMorePopupMenu (
         when (item?.itemId) {
             0 -> {
                 val id = viewModel.id
-                var intent = Intent(Intent.ACTION_VIEW)
                 var url = "https://www.bilibili.com/bangumi/play/ss$id"
-                intent.data = Uri.parse(url)
-                activity.startActivity(intent)
+                BiliUrlMatcher.toUrlLink(activity, url)
             }
             2 -> {
                 val info = viewModel.detailInfo
@@ -79,7 +78,7 @@ class BangumiMorePopupMenu (
             5 -> {
                 val info = viewModel.detailInfo
                 if (info != null) {
-                    var shareIntent = Intent().apply {
+                    val shareIntent = Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
                         putExtra(Intent.EXTRA_SUBJECT, "bilibili番剧分享")

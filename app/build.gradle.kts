@@ -101,6 +101,7 @@ dependencies {
     implementation(Libraries.navigationFragment)
     implementation(Libraries.navigationUi)
     implementation(Libraries.media)
+    implementation(Libraries.browser)
     implementation("androidx.profileinstaller:profileinstaller:1.3.1")
 
     implementation(Libraries.kotlinxCoroutinesAndroid)

@@ -45,6 +45,7 @@ object Libraries {
     const val media3Decoder = "androidx.media3:media3-decoder:${Versions.media3}"
     const val media3ExoPlayer = "androidx.media3:media3-exoplayer:${Versions.media3}"
     const val media3ExoPlayerDash = "androidx.media3:media3-exoplayer-dash:${Versions.media3}"
+    const val browser = "androidx.browser:browser:1.7.0"
 
     // compose基础组件
     const val composeUi = "androidx.compose.ui:ui:${Versions.compose}"
@@ -79,7 +80,7 @@ object Libraries {
     const val drawer = "com.drakeet.drawer:drawer:1.0.3"
     const val modernAndroidPreferences = "de.maxr1998:modernandroidpreferences:2.2.0"
     const val dialogX = "com.kongzue.dialogx:DialogX:0.0.49"
-    const val dialogXMaterialYou = "com.kongzue.dialogx.style:DialogXMaterialYouStyle:0.0.48"
+    const val dialogXMaterialYou = "com.kongzue.dialogx.style:DialogXMaterialYouStyle:0.0.49"
 
     const val gsyVideoPlayer = "com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${Versions.gsyVideoPlayer}"
 
