@@ -89,6 +89,7 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
         const val KEY_DANMAKU_R2L_MAX_LINE = "danmaku_r2l_max_line"
         const val KEY_DANMAKU_FT_MAX_LINE = "danmaku_ft_smax_line"
         const val KEY_DANMAKU_FB_MAX_LINE = "danmaku_fb_max_line"
+        const val KEY_DANMAKU_SYS_FONT = "danmaku_sys_font"
         fun generateKey(key: String, mode: Int): String {
             return "${key}__${mode}__"
         }

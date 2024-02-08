@@ -310,7 +310,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mPlaySpeedName.visibility = GONE
                 mMiniSendDanmakuIV.visibility = VISIBLE
                 mSendDanmakuTV.visibility = GONE
-                mBackButton.setImageResource(R.drawable.video_small_close)
+                mBackButton.setImageResource(R.drawable.ic_close_white_24dp)
                 if (mode == PlayerMode.SMALL_FLOAT) {
                     mDragBar.visibility = mTopContainer.visibility
                 } else {
@@ -323,7 +323,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mPlaySpeedName.visibility = VISIBLE
                 mMiniSendDanmakuIV.visibility = GONE
                 mSendDanmakuTV.visibility = VISIBLE
-                mBackButton.setImageResource(R.drawable.bili_player_back_button)
+                mBackButton.setImageResource(R.drawable.ic_arrow_back_white_24dp)
                 mDragBar.visibility = GONE
                 updateDanmakuMargin()
             }
