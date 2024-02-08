@@ -67,6 +67,7 @@ dependencies {
     implementation(Libraries.composeMaterial)
     implementation(Libraries.composeMaterialIconsExtended)
     implementation(Libraries.composeMaterial3)
+//    implementation(Libraries.composeMaterial3Android)
     implementation(Libraries.composeMaterial3WindowSizeClass)
     implementation(Libraries.composeUiToolingPreview)
     implementation(Libraries.activityCompose)
@@ -80,8 +81,8 @@ dependencies {
     implementation(Libraries.glideCompose)
     implementation(Libraries.qrGenerator)
 
-//    implementation(Libraries.dialogX)
-    implementation(files("../app/libs/DialogX-release.aar"))
+    implementation(Libraries.dialogX)
+//    implementation(files("../app/libs/DialogX-release.aar"))
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))

@@ -12,7 +12,6 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.HtmlTagHandler
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.views
@@ -86,7 +85,6 @@ fun MiaoUI.videoItem (
                         textSize = 14f
                         if (isHtml) {
                             miaoEffect(title) {
-                                DebugMiao.log(it)
                                 text = HtmlTagHandler.fromHtml( "<html><body>$it</body></html>")
                             }
                         } else {

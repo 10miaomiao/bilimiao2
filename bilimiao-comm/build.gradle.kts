@@ -80,6 +80,7 @@ dependencies {
     implementation(Libraries.material)
     implementation(Libraries.lifecycle)
     implementation(Libraries.lifecycleViewModel)
+    implementation(Libraries.browser)
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi)

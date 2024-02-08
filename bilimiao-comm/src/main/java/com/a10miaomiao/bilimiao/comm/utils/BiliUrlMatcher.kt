@@ -1,8 +1,17 @@
 package com.a10miaomiao.bilimiao.comm.utils
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.TypedValue
 import android.view.View
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsClient
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.CustomTabsIntent.ACTIVITY_HEIGHT_FIXED
+import androidx.browser.customtabs.CustomTabsService
+import androidx.core.content.ContextCompat
+import java.util.Collections
 import java.util.regex.Pattern
 
 object BiliUrlMatcher {
@@ -98,29 +107,38 @@ object BiliUrlMatcher {
     }
 
     fun toUrlLink (view: View, url: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(
+        toUrlLink(view.context, url)
+    }
+
+    fun toUrlLink (context: Context, url: String) {
+        val uri = Uri.parse(
             if ("://" in url) {
                 url
             } else {
                 "http://$url"
             }
         )
-        view.context.startActivity(intent)
-    }
-//    fun toLink(context: Context, link: String){
-//        val urlInfo = BiliUrlMatcher.findIDByUrl(link)
-//        val urlType = urlInfo[0]
-//        val urlId = urlInfo[1]
-//        when(urlType){
-//            "AV" -> MainActivity.of(context).start(VideoInfoFragment.newInstance(urlInfo[1]))
-//            "BV" -> MainActivity.of(context).start(VideoInfoFragment.newInstanceByBvid(urlInfo[1]))
-//            else -> {
-//                val intent = Intent(Intent.ACTION_VIEW)
-//                intent.data = Uri.parse(link)
-//                context.startActivity(intent)
-//            }
+
+//        if (isChromeSupported(context)) {
+            val typedValue = TypedValue()
+            val attrId = com.google.android.material.R.attr.colorSurfaceVariant
+            context.theme.resolveAttribute(attrId, typedValue, true)
+            val intent = CustomTabsIntent.Builder()
+                .setDefaultColorSchemeParams(
+                    CustomTabColorSchemeParams.Builder()
+                        .setToolbarColor(ContextCompat.getColor(context, typedValue.resourceId))
+                        .build()
+                )
+                .build()
+            intent.launchUrl(context, uri)
+//        } else {
+//            context.startActivity(Intent(Intent.ACTION_VIEW, uri))
 //        }
+    }
+
+//    private fun isChromeSupported(context: Context): Boolean {
+//        val packageName = CustomTabsClient.getPackageName(context, Collections.emptyList())
+//        return packageName == null
 //    }
 
 

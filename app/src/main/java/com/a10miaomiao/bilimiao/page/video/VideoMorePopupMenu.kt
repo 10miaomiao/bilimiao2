@@ -10,9 +10,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.findNavController
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateParam
 import com.kongzue.dialogx.dialogs.PopTip
@@ -50,10 +52,8 @@ class VideoMorePopupMenu(
         when (item?.itemId) {
             0 -> {
                 val id = viewModel.id
-                var intent = Intent(Intent.ACTION_VIEW)
-                var url = "http://www.bilibili.com/video/av$id"
-                intent.data = Uri.parse(url)
-                activity.startActivity(intent)
+                val url = "http://www.bilibili.com/video/av$id"
+                BiliUrlMatcher.toUrlLink(activity, url)
             }
             2, 3 -> {
                 val info = viewModel.info

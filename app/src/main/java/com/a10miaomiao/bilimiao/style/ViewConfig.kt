@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.config
 import android.content.Context
 import android.graphics.Color
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.attr
@@ -20,33 +21,33 @@ class ViewConfig(val context: Context) {
     val dividerSize get() = context.dip(8)
     val regionIconSize get() = context.dip(24)
 
-    val blackAlpha45 get() = context.resources.getColor(R.color.black_alpha_45)
-    val black80 get() = context.resources.getColor(R.color.black_80)
+    val blackAlpha45 get() = getColor(R.color.black_alpha_45)
+    val black80 get() = getColor(R.color.black_80)
 
     val white80 get() = 0xAAFFFFFF.toInt()
 
     val themeName get() = context.resources.getString(context.attr(R.attr.themeName))
 
     val colorSurfaceResource get() = context.attr(com.google.android.material.R.attr.colorSurface)
-    val colorSurface get() = context.resources.getColor(colorSurfaceResource)
+    val colorSurface get() = getColor(colorSurfaceResource)
 
     val colorSurfaceVariantResource get() = context.attr(com.google.android.material.R.attr.colorSurfaceVariant)
-    val colorSurfaceVariant get() = context.resources.getColor(colorSurfaceVariantResource)
+    val colorSurfaceVariant get() = getColor(colorSurfaceVariantResource)
 
 
     val themeColorResource get() = context.attr(android.R.attr.colorPrimary)
-    val themeColor get() = context.resources.getColor(themeColorResource)
+    val themeColor get() = getColor(themeColorResource)
 
     val windowBackgroundResource get() = context.attr(R.attr.defaultBackgroundColor)
-    val windowBackgroundColor get() = context.resources.getColor(windowBackgroundResource)
+    val windowBackgroundColor get() = getColor(windowBackgroundResource)
 
 //    val blockBackgroundResource get() = context.attr(com.google.android.material.R.attr.colorSurface)
     val blockBackgroundResource get() = context.attr(R.attr.blockBackground)
-    val blockBackgroundColor get() = context.resources.getColor(blockBackgroundResource)
+    val blockBackgroundColor get() = getColor(blockBackgroundResource)
     val blockBackgroundAlpha45Color get() = (blockBackgroundColor and 0x00FFFFFF) or 0x71000000
 
     val foregroundColorResource get() = context.attr(R.attr.foregroundColor)
-    val foregroundColor get() = context.resources.getColor(foregroundColorResource)
+    val foregroundColor get() = getColor(foregroundColorResource)
     val foregroundAlpha45Color get() = (foregroundColor and 0x00FFFFFF) or 0x71000000
 
     val foregroundAlpha80Color get() = (foregroundColor and 0x00FFFFFF) or 0xCC000000.toInt()
@@ -55,7 +56,7 @@ class ViewConfig(val context: Context) {
     val isLightTheme get() = context.resources.getBoolean(isLightThemeResource)
 
     val lineColorResource get() = context.attr(R.attr.lineColor)
-    val lineColor get() = context.resources.getColor(lineColorResource)
+    val lineColor get() = getColor(lineColorResource)
 
     val selectableItemBackground get() = context.attr(android.R.attr.selectableItemBackground)
     val selectableItemBackgroundBorderless get() = context.attr(android.R.attr.selectableItemBackgroundBorderless)
@@ -64,9 +65,12 @@ class ViewConfig(val context: Context) {
     val appBarTitleHeight get() = context.dip(20)
     val appBarMenuHeight get() = context.dip(50)
     val appBarMenuWidth = context.dip(120)
+
+    internal fun getColor(resId: Int): Int {
+        return ContextCompat.getColor(context, resId)
+    }
 }
 
 inline val Context.config get() = ViewConfig(this)
 inline val Fragment.config get() = requireContext().config
 inline val View.config get() = context.config
-

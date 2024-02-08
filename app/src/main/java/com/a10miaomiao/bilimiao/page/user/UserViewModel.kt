@@ -119,6 +119,10 @@ class UserViewModel(
         }
     }
 
+    fun getUserSpaceUrl (): String {
+        return "https://space.bilibili.com/${id}"
+    }
+
     fun logout() {
         MaterialAlertDialogBuilder(activity).apply {
             setTitle("确定退出登录，喵？")
