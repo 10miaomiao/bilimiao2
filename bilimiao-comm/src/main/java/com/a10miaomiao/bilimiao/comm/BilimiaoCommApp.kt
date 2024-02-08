@@ -33,7 +33,7 @@ class BilimiaoCommApp(
         readAuthInfo()
 
         DialogX.init(app)
-        DialogX.implIMPLMode = DialogX.IMPL_MODE.VIEW
+        DialogX.implIMPLMode = DialogX.IMPL_MODE.DIALOG_FRAGMENT
         DialogX.globalStyle = MaterialYouStyle.style()
     }
 

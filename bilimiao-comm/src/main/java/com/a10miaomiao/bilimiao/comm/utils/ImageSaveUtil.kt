@@ -18,7 +18,11 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kongzue.dialogx.dialogs.BottomMenu
+import com.kongzue.dialogx.dialogs.PopMenu
+import com.kongzue.dialogx.dialogs.PopNotification
 import com.kongzue.dialogx.dialogs.PopTip
+import com.kongzue.dialogx.interfaces.OnMenuItemClickListener
 import java.io.File
 import java.io.FileOutputStream
 
@@ -35,14 +39,14 @@ class ImageSaveUtil(
     )
 
     fun showMemu(context: Context = activity) {
-        MaterialAlertDialogBuilder(context)
-            .setItems(menuItems) { _, i ->
-                when(i) {
+        BottomMenu.show(menuItems)
+            .setOnMenuItemClickListener { _, _, index ->
+                when(index) {
                     0 -> downloadAndSaveImage()
                     1 -> copyImageUrl()
                 }
+                false
             }
-            .show()
     }
 
     /**
