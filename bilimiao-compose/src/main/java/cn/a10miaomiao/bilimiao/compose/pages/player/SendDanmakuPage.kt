@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -210,17 +212,35 @@ internal fun SendDanmakuPageContent(
             .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
             TextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(0.77F),
                 value = danmakuText,
                 onValueChange = viewModel::setDanmakuTextValue,
                 label = {
                     Text(text = "弹幕内容")
                 }
             )
+            Spacer(modifier = Modifier.padding(3.dp))
+            Button(
+                modifier = Modifier.fillMaxWidth().height(58.dp),
+                onClick = viewModel::sendDanmaku,
+                enabled = !loading,
+            ) {
+                if (loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(30.dp).wrapContentSize(Alignment.Center),
+                        strokeWidth = 3.dp
+                    )
+                } else {
+                    Text(
+                        modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center),
+                        text = "发送"
+                    )
+                }
+            }
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -296,24 +316,6 @@ internal fun SendDanmakuPageContent(
                         }
                     )
                 }
-            }
-        }
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = viewModel::sendDanmaku,
-            enabled = !loading,
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(15.dp),
-                        strokeWidth = 2.dp,
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                }
-                Text(text = "发送弹幕")
             }
         }
     }
