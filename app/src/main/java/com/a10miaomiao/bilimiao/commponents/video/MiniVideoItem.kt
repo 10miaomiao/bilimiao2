@@ -118,7 +118,7 @@ fun MiaoUI.miniVideoItem(
                             +miniVideoItemCover(
                                 pic = pic,
                                 playNum = playNum,
-                                damukuNum = playNum,
+                                damukuNum = damukuNum,
                                 duration = duration,
                             )..lParams(matchParent, dip(120))
 
