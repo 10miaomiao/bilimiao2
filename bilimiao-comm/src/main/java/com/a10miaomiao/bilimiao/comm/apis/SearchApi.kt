@@ -34,7 +34,7 @@ class SearchApi {
         pageNum: Int,
         pageSize: Int
     ) = MiaoHttp.request{
-        url = "https://app.bilibili.com/x/v2/search/type?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3710&device=phone&mobi_app=iphone&platform=ios&type=1&keyword=$keyword&pn=$pageNum&ps=$pageSize"
+        url = "https://app.bilibili.com/x/v2/search/type?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3710&device=phone&mobi_app=iphone&platform=ios&type=7&keyword=$keyword&pn=$pageNum&ps=$pageSize"
     }
 
     /**
