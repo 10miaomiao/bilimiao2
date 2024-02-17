@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -171,7 +172,11 @@ class MainActivity
         if (PlayerService.selfInstance == null) {
             startService(Intent(this, PlayerService::class.java))
         }
-
+        //耳机检测
+        val intentFilterEarphone = IntentFilter().apply {
+            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        }
+        ContextCompat.registerReceiver(this, earphoneReceiver, intentFilterEarphone, ContextCompat.RECEIVER_NOT_EXPORTED)
         // 安卓13开始手动申请通知权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -266,6 +271,16 @@ class MainActivity
                 PlayerService.ACTION_CREATED -> {
                     PlayerService.selfInstance?.videoPlayerView = findViewById(R.id.video_player)
                 }
+            }
+        }
+    }
+
+    val earphoneReceiver =object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            val action = intent.action
+            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == action) {
+                //暂停播放
+                basePlayerDelegate.onEarphonePull()
             }
         }
     }
@@ -398,6 +413,7 @@ class MainActivity
         navController.removeOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
         unregisterReceiver(broadcastReceiver)
+        unregisterReceiver(earphoneReceiver)
         super.onDestroy()
     }
 

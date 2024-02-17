@@ -21,4 +21,5 @@ interface BasePlayerDelegate: BaseDelegate {
     fun sendDanmaku(type: Int, danmakuText: String, danmakuTextSize: Float, danmakuTextColor: Int, danmakuPosition: Long)
 
     fun setProxy(proxyServer: ProxyServerInfo, uposHost: String, )
+    fun onEarphonePull()
 }
