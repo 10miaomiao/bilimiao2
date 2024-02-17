@@ -12,4 +12,10 @@ data class SearchBangumiInfo(
     var newest_season: String,
     var cat_desc: String,
     var total_count: Int,
+
+    var season_id: Int,
+    var style: String,
+    var styles_v2: String,
+    var rating: Float,
+    var vote: Int,
 )
