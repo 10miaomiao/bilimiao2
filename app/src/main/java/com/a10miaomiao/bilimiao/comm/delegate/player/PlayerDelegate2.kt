@@ -640,4 +640,8 @@ class PlayerDelegate2(
         }
     }
 
+    override fun onEarphonePull() {
+        if(isPlaying())
+            views.videoPlayer.onVideoPause()
+    }
 }
