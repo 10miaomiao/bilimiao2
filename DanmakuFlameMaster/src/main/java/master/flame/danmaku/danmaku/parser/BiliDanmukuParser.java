@@ -2,6 +2,7 @@ package master.flame.danmaku.danmaku.parser;
 
 import android.graphics.Color;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -113,7 +114,9 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
                         item.setTime(time);
                         item.textSize = textSize * (mDispDensity - 0.6f);
                         item.textColor = color;
-                        item.textShadowColor = color <= Color.BLACK ? Color.WHITE : Color.BLACK;
+                        float[] hsv = new float[3];
+                        Color.colorToHSV(color,hsv);
+                        item.textShadowColor = hsv[2]<0.1 ? Color.WHITE : Color.BLACK;
                     }
                 }
             }
