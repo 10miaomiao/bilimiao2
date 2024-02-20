@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
+import splitties.views.dsl.core.viewFactory
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.material.hidden
 
@@ -60,7 +61,7 @@ class ScaffoldView @JvmOverloads constructor(
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
 
-    var smallModePlayerHeight = context.dip(200) // 小屏模式下的播放器高度
+    var smallModePlayerHeight = -3// 小屏模式下的播放器高度
     var playerHeight = -3
     var playerWidth = -3
 
