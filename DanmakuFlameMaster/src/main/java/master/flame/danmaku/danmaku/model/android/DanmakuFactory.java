@@ -150,12 +150,13 @@ public class DanmakuFactory {
         if (sizeChanged && viewportWidth > 0) {
             updateMaxDanmakuDuration();
             if (oldDispWidth > 0 && oldDispHeight > 0) {
-                scaleX = viewportWidth / (float) oldDispWidth;
-                scaleY = viewportHeight / (float) oldDispHeight;
+                scaleX = 1;//viewportWidth / (float) oldDispWidth;
+                scaleY = 1;//viewportHeight / (float) oldDispHeight;
             }
-            updateScaleFactor((int) viewportWidth, (int) viewportHeight, scaleX, scaleY);
+            //updateScaleFactor((int) viewportWidth, (int) viewportHeight, scaleX, scaleY);
+            updateScaleFactor((int)BILI_PLAYER_WIDTH, (int) BILI_PLAYER_HEIGHT,1,1);
             if (viewportHeight > 0) {
-                updateSpecialDanmakusDate((int) viewportWidth, (int) viewportHeight, scaleX, scaleY);
+                //updateSpecialDanmakusDate((int) viewportWidth, (int) viewportHeight, scaleX, scaleY);
             }
         }
 
@@ -175,7 +176,7 @@ public class DanmakuFactory {
                 break;
             case 7: // 特殊弹幕
                 instance = new SpecialDanmaku();
-                updateScaleFactor((int) viewportWidth, (int) viewportHeight, scaleX, scaleY);
+                updateScaleFactor((int)BILI_PLAYER_WIDTH, (int) BILI_PLAYER_HEIGHT,1,1);
                 ((SpecialDanmaku) instance).setScaleFactor(mScaleFactor);
                 break;
         }
@@ -251,8 +252,8 @@ public class DanmakuFactory {
                                     float scaleX, float scaleY) {
         if (item.getType() != BaseDanmaku.TYPE_SPECIAL)
             return;
-        ((SpecialDanmaku) item).setTranslationData(beginX * scaleX, beginY * scaleY, endX * scaleX,
-                endY * scaleY, translationDuration, translationStartDelay);
+        ((SpecialDanmaku) item).setTranslationData(beginX * 1, beginY * 1, endX * 1,
+                endY * 1, translationDuration, translationStartDelay);
         updateSpecicalDanmakuDuration(item);
     }
 

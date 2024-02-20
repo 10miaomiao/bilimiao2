@@ -16,6 +16,8 @@
 
 package master.flame.danmaku.danmaku.model;
 
+import android.util.Log;
+
 public class SpecialDanmaku extends BaseDanmaku {
 
     public static class ScaleFactor {
@@ -255,6 +257,8 @@ public class SpecialDanmaku extends BaseDanmaku {
 
     @Override
     public float getLeft() {
+        beginX=beginX;
+        endX=endX;
         return currStateValues[0];
     }
 
