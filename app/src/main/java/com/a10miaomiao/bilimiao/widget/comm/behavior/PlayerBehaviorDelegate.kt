@@ -15,6 +15,7 @@ import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import java.lang.ref.WeakReference
+import kotlin.math.ceil
 
 class PlayerBehaviorDelegate(
     private val parent: ScaffoldView,
@@ -26,6 +27,8 @@ class PlayerBehaviorDelegate(
     private val playerHeight = parent.dip(200)
     private val playertWidth = parent.dip(300)
     private val minPadding = parent.dip(10)
+    private val widthHeightRatio = 16f/9f
+
     @DragState
     var dragState = ViewDragHelper.STATE_IDLE
         private set
@@ -160,6 +163,10 @@ class PlayerBehaviorDelegate(
             parent.playerWidth = width
             parent.content?.requestLayout()
         }
+        //小屏模式下播放器高度校正
+        if(parent.smallModePlayerHeight != ceil(width/widthHeightRatio).toInt()){
+            parent.smallModePlayerHeight= ceil(width/widthHeightRatio).toInt()
+        }
     }
 
     /**
@@ -202,6 +209,7 @@ class PlayerBehaviorDelegate(
      */
     private fun onVerticalScreenLayoutChild() {
         if (parent.showPlayer) {
+            parent.smallModePlayerHeight= ceil(parent.measuredWidth/widthHeightRatio).toInt()
             height = parent.smallModePlayerHeight + playerView.paddingTop
             width = parent.measuredWidth
             playerView.layout(0, 0, width, height)
