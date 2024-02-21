@@ -332,6 +332,7 @@ class MainActivity
             val behavior = playerLP.behavior
             if (behavior is PlayerBehavior) {
                 behavior.setWindowInsets(left, top, right, bottom)
+                behavior.playerDelegate=basePlayerDelegate as PlayerDelegate2
             }
         }
         ui.mAppBar.setWindowInsets(left, top, right, bottom)

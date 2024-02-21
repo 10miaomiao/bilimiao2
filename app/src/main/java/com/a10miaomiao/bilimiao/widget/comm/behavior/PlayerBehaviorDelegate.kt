@@ -3,19 +3,15 @@ package com.a10miaomiao.bilimiao.widget.comm.behavior
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
 import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
-import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
-import java.lang.ref.WeakReference
 import kotlin.math.ceil
+import kotlin.math.sqrt
 
 class PlayerBehaviorDelegate(
     private val parent: ScaffoldView,
@@ -24,10 +20,12 @@ class PlayerBehaviorDelegate(
 ) : ViewDragHelper.Callback() {
 
     private val dragAreaHeight = parent.dip(30)
-    private val playerHeight = parent.dip(200)
-    private val playertWidth = parent.dip(300)
+//    private val playerHeight = parent.dip(200)
+//    private val playertWidth = parent.dip(300)
     private val minPadding = parent.dip(10)
-    private val widthHeightRatio = 16f/9f
+    var widthHeightRatio = 16f/9f
+    //横屏时小屏播放区域，控制面积为其dip平方
+    var onSmallShowArea=400
 
     @DragState
     var dragState = ViewDragHelper.STATE_IDLE
@@ -163,10 +161,6 @@ class PlayerBehaviorDelegate(
             parent.playerWidth = width
             parent.content?.requestLayout()
         }
-        //小屏模式下播放器高度校正
-        if(parent.smallModePlayerHeight != ceil(width/widthHeightRatio).toInt()){
-            parent.smallModePlayerHeight= ceil(width/widthHeightRatio).toInt()
-        }
     }
 
     /**
@@ -185,8 +179,8 @@ class PlayerBehaviorDelegate(
      */
     private fun onHorizontalScreenLayoutChild() {
         if (parent.showPlayer) {
-            height = playerHeight
-            width = playertWidth
+            height = (parent.dip(onSmallShowArea)/sqrt(widthHeightRatio)).toInt()
+            width = (parent.dip(onSmallShowArea)*sqrt(widthHeightRatio)).toInt()
             val left = if (playerX == -1) {
                 parent.measuredWidth - windowInsets.right - width
             } else {
@@ -210,6 +204,8 @@ class PlayerBehaviorDelegate(
     private fun onVerticalScreenLayoutChild() {
         if (parent.showPlayer) {
             parent.smallModePlayerHeight= ceil(parent.measuredWidth/widthHeightRatio).toInt()
+            if(parent.smallModePlayerHeight>parent.measuredHeight*3/4)//防止超出屏幕
+                parent.smallModePlayerHeight=parent.measuredHeight*3/4
             height = parent.smallModePlayerHeight + playerView.paddingTop
             width = parent.measuredWidth
             playerView.layout(0, 0, width, height)

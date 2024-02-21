@@ -653,7 +653,7 @@ class PlayerDelegate2(
         }
     }
 
-    val earphoneReceiver =object : BroadcastReceiver() {
+    private val earphoneReceiver =object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == action) {
@@ -664,4 +664,12 @@ class PlayerDelegate2(
         }
     }
 
+    fun getVideoRatio(): Float{
+        return playerSourceInfo?.screenProportion ?: 0f
+    }
+
+    fun getSmallShowArea():Int{
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        return prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA,400)
+    }
 }
