@@ -162,8 +162,15 @@ class PlayerBehaviorDelegate(
             heightSmall=(parent.dip(onSmallShowArea) / sqrt(widthHeightRatio)).toInt()
             widthSmall=(parent.dip(onSmallShowArea) * sqrt(widthHeightRatio)).toInt()
             parent.smallModePlayerHeight= ceil(parent.measuredWidth/widthHeightRatio).toInt()
-            if(parent.smallModePlayerHeight>parent.measuredHeight*3/4)//防止超出屏幕
+            //防止竖屏时超出屏幕下边缘
+            if(parent.smallModePlayerHeight>parent.measuredHeight*3/4)
                 parent.smallModePlayerHeight=parent.measuredHeight*3/4
+            //防止横屏时比例变化超出屏幕边缘
+            if (parent.orientation == ScaffoldView.HORIZONTAL)
+                if(parent.holdUpPlayer)
+                    resetPosition(widthHold,heightHold)
+                else
+                    resetPosition(widthSmall,heightSmall)
         }
         if (parent.fullScreenPlayer) {
             // 全屏
