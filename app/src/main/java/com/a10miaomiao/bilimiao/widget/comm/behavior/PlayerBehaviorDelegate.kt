@@ -166,11 +166,12 @@ class PlayerBehaviorDelegate(
             if(parent.smallModePlayerHeight>parent.measuredHeight*3/4)
                 parent.smallModePlayerHeight=parent.measuredHeight*3/4
             //防止横屏时比例变化超出屏幕边缘
-            if (parent.orientation == ScaffoldView.HORIZONTAL)
-                if(parent.holdUpPlayer)
-                    resetPosition(widthHold,heightHold)
+            if (parent.orientation == ScaffoldView.HORIZONTAL && height!=0) {
+                if (parent.holdUpPlayer)
+                    resetPosition(widthHold, heightHold)
                 else
-                    resetPosition(widthSmall,heightSmall)
+                    resetPosition(widthSmall, heightSmall)
+            }
         }
         if (parent.fullScreenPlayer) {
             // 全屏
