@@ -40,6 +40,7 @@ class MiaoHttp(var url: String? = null) {
         if (url?.let { "bilibili.com" in it } == true) {
             requestBuilder.addHeader("env", "prod")
             requestBuilder.addHeader("app-key", "android")
+//            requestBuilder.addHeader("X-Requested-With", "tv.danmaku.bilibilihd")
             requestBuilder.addHeader("x-bili-aurora-eid", "UlMFQVcABlAH")
             requestBuilder.addHeader("x-bili-aurora-zone", "sh001")
             BilimiaoCommApp.commApp.loginInfo?.token_info?.let{

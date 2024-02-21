@@ -22,12 +22,15 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
+import com.a10miaomiao.bilimiao.page.web.WebFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.web.NestedScrollWebView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,7 +44,9 @@ import splitties.toast.toast
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.view
+import splitties.views.topPadding
 
 class H5LoginFragment : Fragment(), DIAware, MyPage {
 
@@ -62,6 +67,9 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
                 MainNavArgs.url to url,
             )
         }
+
+        private val ID_webView = View.generateViewId()
+        private val ID_root = View.generateViewId()
     }
 
     override val pageConfig = myPageConfig {
@@ -70,77 +78,89 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
 
     override val di: DI by lazyUiDi(ui = { ui })
 
-    private val ID_webView = 101
+    private var mWebView: WebView? = null
+    private var mRootView: View? = null
 
     private val viewModel by diViewModel<H5LoginViewModel>(di)
 
     private val windowStore by instance<WindowStore>()
 
     private fun requestThird(view: WebView) {
-        val nav = findNavController()
-        nav.popBackStack(MainNavGraph.dest.main, true)
+        try {
+            val nav = findNavController()
+            nav.popBackStack(MainNavGraph.dest.main, true)
+        } catch (e: Exception) {
+        }
     }
 
     private val mWebViewClient = object : WebViewClient() {
-
-        override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-//            return BilibiliRouter.gotoUrl(context!!, url)
-            DebugMiao.log("shouldOverrideUrlLoading", url)
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            var url = request.url.toString()
+            if (
+                url.startsWith("https://www.bilibili.com/")
+                || url.startsWith("https://m.bilibili.com/")
+                || url.startsWith("https://bilibili.com/")
+            ){
+                viewModel.getQrCodeUrl(view)
+                return true
+            }
+            val re = BiliNavigation.navigationTo(view, url)
+            if (re) {
+                return true
+            }
+            if (url.indexOf("bilibili://") == 0) {
+                toast("不支持打开的链接：$url")
+                return true
+            }
             return false
         }
 
-        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            var url = request.url.toString()
-            DebugMiao.log("shouldOverrideUrlLoading2", url)
-            return this.shouldOverrideUrlLoading(view, url)
-        }
-
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
             viewModel.updateLoading(true)
-            DebugMiao.log("onPageStarted", url)
-//            loading set true
+            if (url.indexOf("navhide=1") != -1) {
+                mRootView?.topPadding = 0
+            } else  {
+                mRootView?.topPadding = windowStore.getContentInsets(view).top
+            }
+            view.evaluateJavascript("""
+                (function(){
+                    window.BiliJsBridge = {
+                        sendTasks: [],
+                        callbacks: [],
+                        selfCallbackId: 0,
+                        newVersion: true,
+                        inited: true,
+                    };
+                    window.BiliJsBridge.biliInject = {
+                        postMessage: function(e) {
+                            window._BiliJsBridge.postMessage(e);
+                        },
+                        biliCallbackReceived: function(t, e, n) {
+                            var r = window.BiliJsBridge.callbacks.map((function(t) {
+                                return t.callbackId
+                            })).indexOf(Number(t));
+                            console.log(r)
+                            r >= 0 && window.BiliJsBridge.callbacks[r].callback && window.BiliJsBridge.callbacks[r].callback(n || e)
+                        }
+                    }
+                })()
+            """.trimIndent()) {
+//                DebugMiao.log("callback", it)
+            }
         }
 
         override fun onPageFinished(view: WebView, url: String) {
             super.onPageFinished(view, url)
             viewModel.updateLoading(false)
-            DebugMiao.log("onPageFinished", url)
-            if (url.contains("passport.bilibili.com/tv/passport/#/common/success")) {
-                lifecycleScope.launch(Dispatchers.Main) {
-                    viewModel.checkQRCode(isPolling = false)
-                }
-            } else if (url.contains("bilibili.com")) {
-                val js = """javascript:(function() {
-                        var parent = document.getElementsByTagName('head').item(0);
-                        var style = document.createElement('style');
-                        style.type = 'text/css';
-                        style.innerHTML = '#internationalHeader,.international-footer,.bili-footer,#cannot-check,.open-app{display: none !important;}';
-                        parent.appendChild(style);
-                    })()
-                """
-                view.loadUrl(js)
-            }
         }
-
-        override fun onReceivedError(
-            view: WebView,
-            request: WebResourceRequest,
-            error: WebResourceError?
-        ) {
-            super.onReceivedError(view, request, error)
-            request?.url?.toString()?.let { url ->
-                DebugMiao.log("onReceivedError", url)
-//                if (url.contains("access_key=") && url.contains("mid=")) {
-//                    viewModel.resolveUrl(view, url)
-//                }
-            }
-        }
-
     }
 
     private val mWebChromeClient = object : WebChromeClient() {
-
+        override fun onReceivedTitle(view: WebView, title: String) {
+            super.onReceivedTitle(view, title)
+//            setPageTitle(title)
+        }
     }
 
 
@@ -154,39 +174,48 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val webView = view.findViewById<WebView>(ID_webView)
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
-        webView.webViewClient = mWebViewClient
-        webView.webChromeClient = mWebChromeClient
-        webView.settings.apply {
-            javaScriptEnabled = true
-        }
-
-        var url = requireArguments().getString(MainNavArgs.url, "")
-        if (url.isBlank()) {
-            viewModel.getQrCodeUrl(webView)
-        } else {
-            webView.loadUrl(Uri.decode(url))
-        }
-
-        lifecycle.coroutineScope.launch {
-            windowStore.connectUi(ui)
+        mRootView = view.findViewById<View>(ID_root)
+        if (mWebView == null) {
+            val webView = view.findViewById<WebView>(ID_webView)
+            val biliJsBridge = BiliJsBridge(this, webView)
+            CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
+            webView.webViewClient = mWebViewClient
+            webView.webChromeClient = mWebChromeClient
+            webView.settings.apply {
+                javaScriptEnabled = true
+                var defaultUserAgentString = userAgentString
+                if ("Mobile" !in defaultUserAgentString) {
+                    defaultUserAgentString += " Mobile"
+                }
+                userAgentString = "$defaultUserAgentString ${WebFragment.userAgent}"
+            }
+            webView.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
+//            webView.addJavascriptInterface(InJavaScriptLocalObj2(), "java_obj.test")
+            val url = requireArguments().getString(MainNavArgs.url, "")
+            if (url.isBlank()) {
+                webView.loadUrl("https://passport.bilibili.com/h5-app/passport/login")
+            } else {
+                webView.loadUrl(url.replace("http://", "https://"))
+            }
+            mWebView = webView
         }
     }
 
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
-        frameLayout {
-            val contentInsets = windowStore.getContentInsets(parentView)
-            _topPadding = contentInsets.top
-            _bottomPadding = contentInsets.bottom + windowStore.bottomAppBarHeight
+        connectStore(viewLifecycleOwner, windowStore)
+        val contentInsets = windowStore.getContentInsets(parentView)
+        frameLayout(ID_root) {
+            setBackgroundColor(config.blockBackgroundColor)
             _leftPadding = contentInsets.left
             _rightPadding = contentInsets.right
+            _topPadding = contentInsets.top
+            _bottomPadding = contentInsets.bottom + windowStore.bottomAppBarHeight
 
             views {
                 +view<WebView>(ID_webView) {
                     backgroundColor = config.windowBackgroundColor
-                }
+                }..lParams(matchParent, matchParent)
 
                 +progressBar {
                     _show = viewModel.loading
@@ -196,6 +225,8 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
                     gravity = Gravity.CENTER
                 }
             }
+
+
         }
 
     }
