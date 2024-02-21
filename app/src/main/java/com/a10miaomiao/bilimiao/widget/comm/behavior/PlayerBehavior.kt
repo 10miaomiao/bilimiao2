@@ -4,21 +4,13 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.*
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.Insets
-import androidx.core.view.ViewCompat.offsetLeftAndRight
-import androidx.core.view.ViewCompat.offsetTopAndBottom
-import androidx.core.view.get
-import androidx.customview.widget.ViewDragHelper
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import splitties.dimensions.dip
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
@@ -40,6 +32,9 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
     private var currentOrientation = ScaffoldView.VERTICAL
 
     private var behaviorDelegate: PlayerBehaviorDelegate? = null
+
+    var playerDelegate:PlayerDelegate2?=null
+
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         playerHeight = context.dip(200)
@@ -81,6 +76,13 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                     }
                 )
             }
+            //播放器长宽比设置
+            behaviorDelegate?.widthHeightRatio= playerDelegate?.getVideoRatio() ?: (16f / 9f)
+            if(behaviorDelegate?.widthHeightRatio==0f)
+                behaviorDelegate?.widthHeightRatio=16f/9f
+            //横屏小窗面积设置
+            behaviorDelegate?.onSmallShowArea=playerDelegate?.getSmallShowArea() ?: 400
+
             behaviorDelegate?.onLayoutChild()
 
             // 显示隐藏动画控制

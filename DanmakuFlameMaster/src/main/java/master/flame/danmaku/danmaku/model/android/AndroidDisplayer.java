@@ -32,6 +32,7 @@ import java.util.Map;
 import master.flame.danmaku.danmaku.model.AbsDisplayer;
 import master.flame.danmaku.danmaku.model.AlphaValue;
 import master.flame.danmaku.danmaku.model.BaseDanmaku;
+import master.flame.danmaku.danmaku.model.SpecialDanmaku;
 import master.flame.danmaku.danmaku.renderer.IRenderer;
 
 public class AndroidDisplayer extends AbsDisplayer<Canvas, Typeface> {
@@ -409,6 +410,10 @@ public class AndroidDisplayer extends AbsDisplayer<Canvas, Typeface> {
     public int draw(BaseDanmaku danmaku) {
         float top = danmaku.getTop();
         float left = danmaku.getLeft();
+        if(danmaku instanceof SpecialDanmaku){
+            top*=height/DanmakuFactory.BILI_PLAYER_HEIGHT;
+            left*=width/DanmakuFactory.BILI_PLAYER_WIDTH;
+        }
         if (canvas != null) {
 
             Paint alphaPaint = null;
