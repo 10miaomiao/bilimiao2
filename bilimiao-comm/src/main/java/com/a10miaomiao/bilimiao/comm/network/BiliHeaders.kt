@@ -9,6 +9,7 @@ object BiliHeaders {
     const val UserAgent = "User-Agent";
     const val Referer = "Referer";
     const val AppKey = "APP-KEY";
+    const val RequestedWith = "X-Requested-With"
     const val BiliMeta = "x-bili-metadata-bin";
     const val Authorization = "authorization";
     const val BiliDevice = "x-bili-device-bin";
