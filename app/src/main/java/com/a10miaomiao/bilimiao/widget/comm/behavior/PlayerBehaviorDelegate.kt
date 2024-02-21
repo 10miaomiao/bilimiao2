@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.widget.comm.behavior
 
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -125,6 +126,25 @@ class PlayerBehaviorDelegate(
         }
     }
 
+    private fun resetPositionOnSizeChanged(width:Int,height:Int) {
+        val measuredWidth = parent.measuredWidth
+        val measuredHeight = parent.measuredHeight
+        playerX = if (playerX< windowInsets.left) {
+            windowInsets.left
+        } else if (playerX > measuredWidth - width - windowInsets.right) {
+            measuredWidth - width - windowInsets.right
+        } else {
+            playerX
+        }
+        playerY = if (playerY < windowInsets.top) {
+            windowInsets.top
+        } else if (playerY > measuredHeight - height - windowInsets.bottom) {
+            measuredHeight - height - windowInsets.bottom
+        } else {
+            playerY
+        }
+    }
+
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_DOWN
             && parent.showPlayer
@@ -153,24 +173,37 @@ class PlayerBehaviorDelegate(
         if (dragState == ViewDragHelper.STATE_DRAGGING) {
             return
         }
-        //同步小窗口参数
+        //小窗口参数变化时，同步小窗口参数
         if(widthHeightRatio!=parent.widthHeightRatio||onSmallShowArea!=parent.onSmallShowArea){
             parent.widthHeightRatio=widthHeightRatio
             parent.onSmallShowArea=onSmallShowArea
+            //比例变化以右上角为基准
+            if(height!=0 && width!=0) {
+                if(parent.holdUpPlayer)
+                    playerX += widthHold - (parent.dip(100) * sqrt(widthHeightRatio)).toInt()
+                else
+                    playerX += widthSmall - (parent.dip(onSmallShowArea) * sqrt(widthHeightRatio)).toInt()
+            }
             heightHold=(parent.dip(100) / sqrt(widthHeightRatio)).toInt()
             widthHold=(parent.dip(100) * sqrt(widthHeightRatio)).toInt()
-            heightSmall=(parent.dip(onSmallShowArea) / sqrt(widthHeightRatio)).toInt()
-            widthSmall=(parent.dip(onSmallShowArea) * sqrt(widthHeightRatio)).toInt()
+            if(onSmallShowArea != 0){
+                heightSmall = (parent.dip(onSmallShowArea) / sqrt(widthHeightRatio)).toInt()
+                widthSmall = (parent.dip(onSmallShowArea) * sqrt(widthHeightRatio)).toInt()
+            }
             parent.smallModePlayerHeight= ceil(parent.measuredWidth/widthHeightRatio).toInt()
             //防止竖屏时超出屏幕下边缘
-            if(parent.smallModePlayerHeight>parent.measuredHeight*3/4)
-                parent.smallModePlayerHeight=parent.measuredHeight*3/4
+            if(parent.smallModePlayerHeight>parent.measuredHeight*3/4 && parent.smallModePlayerHeight>parent.measuredWidth*3/4)
+                parent.smallModePlayerHeight=
+                    if(parent.measuredHeight>parent.measuredWidth)
+                        parent.measuredHeight*3/4
+                    else
+                        parent.measuredWidth*3/4
             //防止横屏时比例变化超出屏幕边缘
-            if (parent.orientation == ScaffoldView.HORIZONTAL && height!=0) {
+            if (parent.orientation == ScaffoldView.HORIZONTAL && height!=0 && width!=0) {
                 if (parent.holdUpPlayer)
-                    resetPosition(widthHold, heightHold)
+                    resetPositionOnSizeChanged(widthHold, heightHold)
                 else
-                    resetPosition(widthSmall, heightSmall)
+                    resetPositionOnSizeChanged(widthSmall, heightSmall)
             }
         }
         if (parent.fullScreenPlayer) {
