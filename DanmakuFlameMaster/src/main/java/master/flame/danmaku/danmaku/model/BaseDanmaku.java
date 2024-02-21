@@ -20,7 +20,7 @@ import android.util.SparseArray;
 
 public abstract class BaseDanmaku {
 
-    public final static String DANMAKU_BR_CHAR = "/n";
+    public final static String DANMAKU_BR_CHAR = "\n";
 
     public final static int TYPE_SCROLL_RL = 1;
 

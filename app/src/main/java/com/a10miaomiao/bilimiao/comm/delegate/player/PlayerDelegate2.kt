@@ -1,6 +1,11 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +15,8 @@ import android.view.WindowManager
 import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.registerReceiver
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
@@ -134,6 +141,12 @@ class PlayerDelegate2(
             val themeColor = activity.config.themeColor
             views.videoPlayer.updateThemeColor(activity, themeColor)
         })
+        //耳机检测
+        val intentFilterEarphone = IntentFilter().apply {
+            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+            addAction(Intent.ACTION_MEDIA_BUTTON)
+        }
+        registerReceiver(activity,earphoneReceiver, intentFilterEarphone,ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     override fun onResume() {
@@ -640,4 +653,23 @@ class PlayerDelegate2(
         }
     }
 
+    private val earphoneReceiver =object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            val action = intent.action
+            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == action) {
+                //暂停播放
+                if(isPlaying())
+                    views.videoPlayer.onVideoPause()
+            }
+        }
+    }
+
+    fun getVideoRatio(): Float{
+        return playerSourceInfo?.screenProportion ?: 0f
+    }
+
+    fun getSmallShowArea():Int{
+        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
+        return prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA,400)
+    }
 }

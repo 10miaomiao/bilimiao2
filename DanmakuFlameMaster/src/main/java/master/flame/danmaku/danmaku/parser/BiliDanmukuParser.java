@@ -2,6 +2,7 @@ package master.flame.danmaku.danmaku.parser;
 
 import android.graphics.Color;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,9 +33,6 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
     static {
         System.setProperty("org.xml.sax.driver", "org.xmlpull.v1.sax2.Driver");
     }
-
-    protected float mDispScaleX;
-    protected float mDispScaleY;
 
     @Override
     public Danmakus parse() {
@@ -113,7 +111,9 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
                         item.setTime(time);
                         item.textSize = textSize * (mDispDensity - 0.6f);
                         item.textColor = color;
-                        item.textShadowColor = color <= Color.BLACK ? Color.WHITE : Color.BLACK;
+                        float[] hsv = new float[3];
+                        Color.colorToHSV(color,hsv);
+                        item.textShadowColor = hsv[2]<0.1 ? Color.WHITE : Color.BLACK;
                     }
                 }
             }
@@ -208,7 +208,7 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
                     item.rotationZ = rotateZ;
                     item.rotationY = rotateY;
                     mContext.mDanmakuFactory.fillTranslationData(item, beginX,
-                            beginY, endX, endY, translationDuration, translationStartDelay, mDispScaleX, mDispScaleY);
+                            beginY, endX, endY, translationDuration, translationStartDelay);
                     mContext.mDanmakuFactory.fillAlphaData(item, beginAlpha, endAlpha, alphaDuraion);
 
                     if (textArr.length >= 12) {
@@ -239,8 +239,7 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
                                             points[i][1] = parseFloat(pointArray[1]);
                                         }
                                     }
-                                    mContext.mDanmakuFactory.fillLinePathData(item, points, mDispScaleX,
-                                            mDispScaleY);
+                                    mContext.mDanmakuFactory.fillLinePathData(item, points);
                                 }
                             }
                         }
@@ -295,13 +294,5 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
         } catch (NumberFormatException e) {
             return 0;
         }
-    }
-
-    @Override
-    public BaseDanmakuParser setDisplayer(IDisplayer disp) {
-        super.setDisplayer(disp);
-        mDispScaleX = mDispWidth / DanmakuFactory.BILI_PLAYER_WIDTH;
-        mDispScaleY = mDispHeight / DanmakuFactory.BILI_PLAYER_HEIGHT;
-        return this;
     }
 }

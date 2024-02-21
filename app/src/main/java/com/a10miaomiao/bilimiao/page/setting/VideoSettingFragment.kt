@@ -33,6 +33,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment.Companion.generateKey
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
@@ -91,6 +92,8 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val KEY_LANDSCAPE = "LANDSCAPE"
         const val KEY_REVERSE_LANDSCAPE = "REVERSE_LANDSCAPE"
         const val KEY_UNSPECIFIED = "UNSPECIFIED"
+
+        const val PLAYER_SMALL_SHOW_AREA = "player_small_show_area"
     }
 
     override val pageConfig = myPageConfig {
@@ -300,6 +303,14 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             title = "小屏时显示底部进度条"
             summary = ""
             defaultValue = true
+        }
+
+        seekBar(PLAYER_SMALL_SHOW_AREA) {
+            title = "横屏时小屏播放面积"
+            default = 400
+            max = 600
+            min = 150
+            formatter = { it.toString() }
         }
 
         categoryHeader("3") {

@@ -16,33 +16,10 @@
 
 package master.flame.danmaku.danmaku.model;
 
+import android.util.Log;
+
 public class SpecialDanmaku extends BaseDanmaku {
 
-    public static class ScaleFactor {
-        int flag = 0;
-        float scaleX;
-        float scaleY;
-        int width;
-        int height;
-
-        public ScaleFactor(int width, int height, float scaleX, float scaleY) {
-            update(width, height, scaleX, scaleY);
-        }
-
-        public void update(int width, int height, float scaleX, float scaleY) {
-            if (Float.compare(this.scaleX, scaleX) != 0 || Float.compare(this.scaleY, scaleY) != 0) {
-                flag++;
-            }
-            this.width = width;
-            this.height = height;
-            this.scaleX = scaleX;
-            this.scaleY = scaleY;
-        }
-
-        public boolean isUpdated(int flag, int width, int height) {
-            return this.flag != flag && (this.width != width || this.height != height);
-        }
-    }
 
     private class Point {
         float x, y;
@@ -99,8 +76,6 @@ public class SpecialDanmaku extends BaseDanmaku {
 
     public long translationStartDelay;
 
-    private ScaleFactor mScaleFactor;
-
     private int mScaleFactorChangedFlag;
 
     private int mCurrentWidth = 0;
@@ -147,28 +122,17 @@ public class SpecialDanmaku extends BaseDanmaku {
 
         if (!isMeasured())
             return null;
-
-        if (mScaleFactor.isUpdated(this.mScaleFactorChangedFlag, mCurrentWidth, mCurrentHeight)) {
-            float scaleX = mScaleFactor.scaleX;
-            float scaleY = mScaleFactor.scaleY;
-            setTranslationData(beginX * scaleX, beginY * scaleY, endX * scaleX, endY * scaleY, translationDuration, translationStartDelay);
-            if (linePaths != null && linePaths.length > 0) {
-                int length = linePaths.length;
-                float[][] points = new float[length + 1][2];
-                for (int j = 0; j < length; j++) {
-                    points[j] = linePaths[j].getBeginPoint();
-                    points[j + 1] = linePaths[j].getEndPoint();
-                }
-                for (int i = 0; i < points.length; i++) {
-                    points[i][0] *= scaleX;
-                    points[i][1] *= scaleY;
-                }
-                setLinePathData(points);
+        setTranslationData(beginX , beginY , endX , endY , translationDuration, translationStartDelay);
+        if (linePaths != null && linePaths.length > 0) {
+            int length = linePaths.length;
+            float[][] points = new float[length + 1][2];
+            for (int j = 0; j < length; j++) {
+                points[j] = linePaths[j].getBeginPoint();
+                points[j + 1] = linePaths[j].getEndPoint();
             }
-            this.mScaleFactorChangedFlag = mScaleFactor.flag;
-            this.mCurrentWidth = mScaleFactor.width;
-            this.mCurrentHeight = mScaleFactor.height;
+            setLinePathData(points);
         }
+
 
         long deltaTime = currTime - getActualTime();
 
@@ -328,11 +292,6 @@ public class SpecialDanmaku extends BaseDanmaku {
 
             }
         }
-    }
-
-    public void setScaleFactor(ScaleFactor scaleFactor) {
-        this.mScaleFactor = scaleFactor;
-        this.mScaleFactorChangedFlag = scaleFactor.flag;
     }
 
 }

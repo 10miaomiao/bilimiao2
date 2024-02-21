@@ -80,7 +80,8 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
         val item = viewModel.list.data[position]
         Navigation.findNavController(view)
             .navigateToCompose(BangumiDetailPage()) {
-                id set item.param
+                //api原因，从param改为season_id.toString()
+                id set item.season_id.toString()
             }
     }
 
@@ -89,12 +90,14 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
             title = item.title,
             cover = item.cover,
             desc = item.cat_desc,
-            statusText = if (item.finish == 1) {
-                // 是否完结
-                "${item.newest_season}，${item.total_count}话全"
-            } else {
-                "${item.newest_season}，更新至第${item.total_count}话"
-            },
+            statusText ="投票人数${item.vote}，评分${item.rating}\n" + item.styles_v2 + '\n' + item.style
+   //api读不到这些参数，暂时换掉
+//            if (item.finish == 1) {
+//                // 是否完结
+//                "${item.newest_season}，${item.total_count}话全"
+//            } else {
+//                "${item.newest_season}，更新至第${item.total_count}话"
+//            },
         ).apply {
             layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
         }

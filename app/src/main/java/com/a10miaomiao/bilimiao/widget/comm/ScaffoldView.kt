@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
+import splitties.views.dsl.core.viewFactory
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.material.hidden
 
@@ -31,6 +32,13 @@ class ScaffoldView @JvmOverloads constructor(
     var onPlayerChanged: ((show: Boolean) -> Unit)? = null
     var onDrawerStateChanged: ((state: Int) -> Unit)? = null
 
+    var holdUpPlayer = false
+        set(value) {
+            if (field != value) {
+                field = value
+                requestLayout()
+            }
+        }
     var orientation = VERTICAL
         set(value) {
             if (field != value) {
@@ -60,9 +68,11 @@ class ScaffoldView @JvmOverloads constructor(
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
 
-    var smallModePlayerHeight = context.dip(200) // 小屏模式下的播放器高度
+    var smallModePlayerHeight = -3// 小屏模式下的播放器高度
     var playerHeight = -3
     var playerWidth = -3
+    var widthHeightRatio = 0f//播放器比例
+    var onSmallShowArea = 0//横屏小窗大小
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null
