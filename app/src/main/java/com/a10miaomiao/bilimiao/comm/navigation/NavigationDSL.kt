@@ -13,6 +13,16 @@ import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import java.lang.Exception
+
+fun NavController.tryPopBackStack(): Boolean {
+    return try {
+        popBackStack()
+        true
+    } catch (e: Exception) {
+        false
+    }
+}
 
 fun NavController.navigateToCompose(url: String) = navigate(
     ComposeFragmentNavigatorBuilder.actionId,

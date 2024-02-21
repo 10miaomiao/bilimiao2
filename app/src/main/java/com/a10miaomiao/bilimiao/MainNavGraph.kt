@@ -8,7 +8,8 @@ import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.page.MainFragment
-import com.a10miaomiao.bilimiao.page.WebFragment
+//import com.a10miaomiao.bilimiao.page.TestFragment
+import com.a10miaomiao.bilimiao.page.web.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
@@ -61,6 +62,7 @@ object MainNavGraph {
             addFragment(TemplateFragment::class, TemplateFragment.Companion, dest.template)
             addFragment(WebFragment::class, WebFragment.Companion, dest.web)
             addFragment(ComposeFragment::class, ComposeFragmentNavigatorBuilder, dest.compose)
+//            addFragment(TestFragment::class, TestFragment.Companion)
 
             addFragment(RegionFragment::class, RegionFragment.Companion)
             addFragment(RankFragment::class, RankFragment.Companion)
