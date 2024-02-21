@@ -32,6 +32,13 @@ class ScaffoldView @JvmOverloads constructor(
     var onPlayerChanged: ((show: Boolean) -> Unit)? = null
     var onDrawerStateChanged: ((state: Int) -> Unit)? = null
 
+    var holdUpPlayer = false
+        set(value) {
+            if (field != value) {
+                field = value
+                requestLayout()
+            }
+        }
     var orientation = VERTICAL
         set(value) {
             if (field != value) {
@@ -64,6 +71,8 @@ class ScaffoldView @JvmOverloads constructor(
     var smallModePlayerHeight = -3// 小屏模式下的播放器高度
     var playerHeight = -3
     var playerWidth = -3
+    var widthHeightRatio = 0f//播放器比例
+    var onSmallShowArea = 0//横屏小窗大小
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null
