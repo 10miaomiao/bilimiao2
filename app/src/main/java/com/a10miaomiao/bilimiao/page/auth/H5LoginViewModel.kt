@@ -58,13 +58,14 @@ class H5LoginViewModel(
             val res = BiliApiService.authApi
                 .qrCode()
                 .awaitCall()
-                .gson<ResultInfo<QRLoginInfo>>(isDebug = true)
+                .gson<ResultInfo<QRLoginInfo>>()
             if (res.isSuccess) {
                 _authUrl = res.data.url
                 _authCode = res.data.auth_code
                 launch(Dispatchers.Main) { checkQRCode(res.data.auth_code) }
                 withContext(Dispatchers.Main) {
                     webView.loadUrl(res.data.url)
+                    alert("为获取BiliAPP登录凭证(token)，需模拟一次扫码登录，请在接下来的页面中点击确认登录。( *・ω・)")
                 }
             } else {
                 withContext(Dispatchers.Main) {
@@ -151,9 +152,10 @@ class H5LoginViewModel(
         }
     }
 
-    private fun alert(title: String) {
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle(title)
+    private fun alert(message: String) {
+        val builder = MaterialAlertDialogBuilder(context)
+        builder.setTitle("提示")
+        builder.setMessage(message)
         builder.setNegativeButton("确定", null)
         builder.show()
     }
