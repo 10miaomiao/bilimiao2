@@ -280,6 +280,7 @@ public class DrawHandler extends Handler {
                 }
 //                break;
             case UPDATE:
+            if (mContext != null){
                 if (mContext.updateMethod == 0) {
                     updateInChoreographer();
                 } else if (mContext.updateMethod == 1) {
@@ -287,6 +288,7 @@ public class DrawHandler extends Handler {
                 } else if (mContext.updateMethod == 2) {
                     updateInCurrentThread();
                 }
+            }
                 break;
             case NOTIFY_DISP_SIZE_CHANGED:
                 mContext.mDanmakuFactory.notifyDispSizeChanged(mContext);
