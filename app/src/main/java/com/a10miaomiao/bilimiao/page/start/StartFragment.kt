@@ -1,9 +1,14 @@
 package com.a10miaomiao.bilimiao.page.start
 
 
+import android.Manifest
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -15,7 +20,11 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.withStarted
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
@@ -28,11 +37,14 @@ import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
+import cn.mtjsoft.barcodescanning.ScanningManager
+import cn.mtjsoft.barcodescanning.config.ScanType
+import cn.mtjsoft.barcodescanning.interfaces.ScanResultListener
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
+import com.a10miaomiao.bilimiao.comm.BiliNavigation
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
-import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -53,6 +65,8 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
@@ -68,12 +82,18 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
+import splitties.experimental.ExperimentalSplittiesApi
 import splitties.experimental.InternalSplittiesApi
+import splitties.permissions.PermissionRequestResult
+import splitties.permissions.hasPermission
+import splitties.permissions.requestPermission
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
 import splitties.views.dsl.core.frameLayout
@@ -94,6 +114,7 @@ import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding
 import splitties.views.textColorResource
+
 
 class StartFragment : Fragment(), DIAware, MyPage {
 
@@ -206,6 +227,60 @@ class StartFragment : Fragment(), DIAware, MyPage {
         return false
     }
 
+    private fun showCameraPermissionDialog() {
+        MaterialAlertDialogBuilder(requireActivity()).apply {
+            setTitle("请授予相机权限")
+            setMessage("扫码功能需授予相机(摄像头)权限，(￣▽￣)\"")
+            setNegativeButton("取消", null)
+            setNeutralButton("手动设置") { dialog, i ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.setData(Uri.parse("package:" + requireActivity().packageName))
+                requireActivity().startActivity(intent)
+            }
+        }.show()
+    }
+
+    private fun openQrScanning() {
+        val activity = requireActivity()
+        ScanningManager.instance.openScanningActivity(
+            activity,
+            cn.mtjsoft.barcodescanning.config.Config(
+                true,
+                ScanType.QR_CODE,
+                null,
+                object : ScanResultListener {
+                    override fun onSuccessListener(value: String?) {
+                        if (value == null) {
+                            PopTip.show("二维码内容为空")
+                            return
+                        }
+                        if (
+                            !value.startsWith("http://")
+                            && !value.startsWith("https://")
+                            && !value.startsWith("://")
+                        ) {
+                            PopTip.show("扫描内容：$value")
+                            return
+                        }
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            withStarted {
+                                val nav = activity.findNavController(R.id.nav_host_fragment)
+                                if (!BiliNavigation.navigationTo(nav, value)) {
+                                    BiliNavigation.navigationToWeb(activity, value)
+                                }
+                            }
+                        }
+                    }
+                    override fun onFailureListener(error: String) {
+                        PopTip.show("扫码失败：$error")
+                    }
+                    override fun onCompleteListener(value: String?) {}
+                })
+        )
+        val scaffoldView = activity.getScaffoldView()
+        scaffoldView.closeDrawer()
+    }
+
     private val handlePlayerCardDetailClick = View.OnClickListener {
         val playerState = viewModel.playerStore.state
         val scaffoldView = requireActivity().getScaffoldView()
@@ -259,6 +334,22 @@ class StartFragment : Fragment(), DIAware, MyPage {
             mSearchView,
         )
         scaffoldView.closeDrawer()
+    }
+
+    @OptIn(ExperimentalSplittiesApi::class)
+    private val handleStartScanClick = View.OnClickListener {
+        if (hasPermission(Manifest.permission.CAMERA)) {
+            openQrScanning()
+        } else {
+            viewLifecycleOwner.lifecycleScope.launch  {
+                val result = requestPermission(Manifest.permission.CAMERA)
+                if (result is PermissionRequestResult.Granted) {
+                    openQrScanning()
+                } else if (result is PermissionRequestResult.Denied) {
+                    showCameraPermissionDialog()
+                }
+            }
+        }
     }
 
     private val handleNavItemClick = OnItemClickListener { adapter, view, position ->
@@ -443,6 +534,15 @@ class StartFragment : Fragment(), DIAware, MyPage {
                                 }..lParams(iconSize, iconSize) {
                                     leftMargin = config.pagePadding
                                     gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
+                                }
+
+                                +imageView {
+                                    setImageResource(R.drawable.ic_baseline_qr_code_scanner_24)
+                                    setBackgroundResource(config.selectableItemBackgroundBorderless)
+                                    setOnClickListener(handleStartScanClick)
+                                }..lParams(iconSize, iconSize) {
+                                    rightMargin = config.pagePadding
+                                    gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
                                 }
                             }
                         }..lParams(matchParent, dip(60))

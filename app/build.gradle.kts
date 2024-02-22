@@ -115,7 +115,7 @@ dependencies {
     implementation(Libraries.drawer)
     implementation(Libraries.modernAndroidPreferences)
     implementation(Libraries.dialogX)
-//    implementation(files("../app/libs/DialogX-release.aar"))
+    implementation("com.github.mtjsoft:CameraXBarcodeScanning:1.3.1")
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
 //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")
