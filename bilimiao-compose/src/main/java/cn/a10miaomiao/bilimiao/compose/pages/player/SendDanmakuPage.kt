@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.player
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -22,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -212,36 +215,37 @@ internal fun SendDanmakuPageContent(
             .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-            Row(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-            TextField(
-                modifier = Modifier.fillMaxWidth(0.77F),
-                value = danmakuText,
-                onValueChange = viewModel::setDanmakuTextValue,
-                label = {
-                    Text(text = "弹幕内容")
-                }
-            )
-            Spacer(modifier = Modifier.padding(3.dp))
-            Button(
-                modifier = Modifier.fillMaxWidth().height(58.dp),
-                onClick = viewModel::sendDanmaku,
-                enabled = !loading,
-            ) {
-                if (loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(30.dp).wrapContentSize(Alignment.Center),
-                        strokeWidth = 3.dp
-                    )
-                } else {
-                    Text(
-                        modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center),
-                        text = "发送"
-                    )
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = danmakuText,
+            onValueChange = viewModel::setDanmakuTextValue,
+            label = {
+                Text(text = "弹幕内容")
+            },
+            trailingIcon = {
+                Box(
+                    modifier = Modifier.padding(end = 5.dp)
+                ) {
+                    Button(
+                        modifier = Modifier.width(80.dp),
+                        onClick = viewModel::sendDanmaku,
+                        enabled = !loading,
+                    ) {
+                        if (loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(30.dp),
+                                strokeWidth = 3.dp
+                            )
+                        } else {
+                            Text(
+                                text = "发送",
+                                maxLines = 1,
+                            )
+                        }
+                    }
                 }
             }
-        }
+        )
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
