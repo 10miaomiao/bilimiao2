@@ -179,6 +179,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // 是否处于画中画模式
     var isPicInPicMode = false
 
+    var isHoldUp = false
+
     // 是否显示当面
     var isShowDanmaKu = true
         set(value) {
@@ -418,7 +420,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         if (isSpeedPlaying) {
             return
         }
-        if (mDownY<dip(25)){
+        if (isHoldUp) {
+            return
+        }
+        if (mDownY<context.dip(25)){
             return
         }
         var curHeight = 0
@@ -565,6 +570,12 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         if (isPicInPicMode) {
             if (view.id == mStartButton.id || view.id == mBottomProgressBar.id) {
                 view.visibility = visibility
+            }
+        } else if (isHoldUp){
+            if (view.id == mBottomProgressBar.id) {
+                view.visibility = visibility
+            } else {
+                view.visibility = GONE
             }
         } else {
             super.setViewShowState(view, visibility)
@@ -903,6 +914,24 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mDragBar.visibility = mTopContainer.visibility
     }
 
+    fun setHoldStatus(isHold:Boolean){
+        if(isHold){
+            mDanmakuView.pause()
+            setViewShowState(mBottomLayout, GONE)
+            setViewShowState(mDanmakuView, GONE)
+            setViewShowState(mTopContainer, GONE)
+            setViewShowState(mStartButton, GONE)
+            isHoldUp=true
+        } else {
+            isHoldUp=false
+            setViewShowState(mBottomLayout, VISIBLE)
+            setViewShowState(mDanmakuView, VISIBLE)
+            setViewShowState(mTopContainer, VISIBLE)
+            setViewShowState(mStartButton, VISIBLE)
+            mDanmakuView.resume()
+        }
+
+    }
     private fun setDialogVolumeProgressBar(context: Context) {
         val draw = context.getDrawable(R.drawable.shape_video_volume_progress)
         setDialogVolumeProgressBar(draw)

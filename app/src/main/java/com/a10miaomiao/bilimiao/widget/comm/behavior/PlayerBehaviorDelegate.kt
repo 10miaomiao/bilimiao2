@@ -7,8 +7,10 @@ import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import com.google.android.material.transition.Hold
 import splitties.dimensions.dip
 import kotlin.math.ceil
 import kotlin.math.sqrt
@@ -28,6 +30,8 @@ class PlayerBehaviorDelegate(
     var onSmallShowArea= 0
     //挂起时面积
     val onHoldShowArea = 100
+
+    var playerDelegate: PlayerDelegate2?=null
 
     @DragState
     var dragState = ViewDragHelper.STATE_IDLE
@@ -95,15 +99,12 @@ class PlayerBehaviorDelegate(
             if(playerView.x > parent.measuredWidth - widthHold - windowInsets.right)//拉至右边缘
                 resetPosition(widthHold,heightHold)
             else {
-                parent.holdUpPlayer = false
-                resetPosition(widthSmall,heightSmall)
+                holdStatusFalse()
             }
         } else {
             if(playerView.x > parent.measuredWidth - widthSmall*3/4 - windowInsets.right)//拉至右边缘
             {
-                parent.holdUpPlayer = true
-                resetPosition(widthHold,heightHold)
-                playerX=parent.measuredWidth - widthHold - windowInsets.right
+                holdStatusTrue()
             } else {
                 resetPosition(widthSmall,heightSmall)
             }
@@ -113,6 +114,19 @@ class PlayerBehaviorDelegate(
         super.onViewReleased(releasedChild, xvel, yvel)
     }
 
+    fun holdStatusTrue(){
+        parent.holdUpPlayer = true
+        danmakuVideoPlayer?.setHoldStatus(true)
+        playerDelegate?.setHoldStatus(true)
+        resetPosition(widthHold,heightHold)
+        playerX=parent.measuredWidth - widthHold - windowInsets.right
+    }
+    fun holdStatusFalse(){
+        parent.holdUpPlayer = false
+        danmakuVideoPlayer?.setHoldStatus(false)
+        playerDelegate?.setHoldStatus(false)
+        resetPosition(widthSmall,heightSmall)
+    }
     /**
      * 拖拽超出屏幕，则左右吸边或上下吸边
      */
@@ -163,7 +177,7 @@ class PlayerBehaviorDelegate(
             if (playerView.x < x
                 && playerView.y < y
                 && playerView.x + width > x
-                && playerView.y + dragAreaHeight > y
+                && playerView.y + (if(parent.holdUpPlayer) height else dragAreaHeight) > y
             ) {
                 dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
             }
@@ -180,7 +194,16 @@ class PlayerBehaviorDelegate(
         if (dragState == ViewDragHelper.STATE_DRAGGING) {
             return
         }
-        //小窗口参数变化时，同步小窗口参数
+        //播放器长宽比设置
+        if(widthHeightRatio != (playerDelegate?.getVideoRatio() ?: (16f / 9f))) {
+            widthHeightRatio = playerDelegate?.getVideoRatio() ?: (16f / 9f)
+            if (widthHeightRatio == 0f)
+                widthHeightRatio = 16f / 9f
+        }
+        //横屏小窗面积设置
+        if(onSmallShowArea != (playerDelegate?.getSmallShowArea() ?: 400))
+            onSmallShowArea = playerDelegate?.getSmallShowArea() ?: 400
+        //小窗口参数变化时，同步其他参数
         if((widthHeightRatio!=parent.widthHeightRatio||onSmallShowArea!=parent.onSmallShowArea||(shortSide!=parent.measuredWidth&&shortSide!=parent.measuredHeight)) && onSmallShowArea != 0 && widthHeightRatio != 0f){
             parent.widthHeightRatio=widthHeightRatio
             parent.onSmallShowArea=onSmallShowArea

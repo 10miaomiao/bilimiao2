@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="#222222"
     android:id="@+id/completion_layout"
     android:visibility="gone">
 
@@ -22,6 +22,17 @@
         android:textSize="20sp"
         android:layout_above="@id/center"
         android:layout_marginBottom="40dp"/>
+
+    <TextView
+        android:id="@+id/completion_text_hold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="播放完成"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:layout_above="@id/center"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/completion_retry_btn"

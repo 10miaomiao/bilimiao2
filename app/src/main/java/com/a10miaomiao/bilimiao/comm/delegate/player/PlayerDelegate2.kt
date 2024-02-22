@@ -672,4 +672,8 @@ class PlayerDelegate2(
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
         return prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA,400)
     }
+
+    fun setHoldStatus(isHold:Boolean){
+        completionBoxController.setHoldStatus(isHold)
+    }
 }
