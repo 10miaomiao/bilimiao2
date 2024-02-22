@@ -178,6 +178,7 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         if (mWebView == null) {
             val webView = view.findViewById<WebView>(ID_webView)
             val biliJsBridge = BiliJsBridge(this, webView)
+            biliJsBridge.canCloseBrowser = false
             CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
             webView.webViewClient = mWebViewClient
             webView.webChromeClient = mWebChromeClient

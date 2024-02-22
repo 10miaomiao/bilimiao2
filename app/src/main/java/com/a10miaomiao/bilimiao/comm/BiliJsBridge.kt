@@ -17,6 +17,8 @@ class BiliJsBridge(
     val webView: WebView,
 ) {
 
+    var canCloseBrowser = true
+
     private val activity get() = fragment.requireActivity()
 
     private val allSupportMethod = listOf<String>(
@@ -78,8 +80,10 @@ class BiliJsBridge(
             "global.closeBrowser",
             "view.closeBrowser",
             "view.goBack" -> {
-                activity.runOnUiThread {
-                    findNavController().tryPopBackStack()
+                if (canCloseBrowser) {
+                    activity.runOnUiThread {
+                        findNavController().tryPopBackStack()
+                    }
                 }
             }
             "view.refresh" -> {
