@@ -75,13 +75,8 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                         override val right = windowInsets.right
                     }
                 )
+                behaviorDelegate?.playerDelegate = playerDelegate
             }
-            //播放器长宽比设置
-            behaviorDelegate?.widthHeightRatio= playerDelegate?.getVideoRatio() ?: (16f / 9f)
-            if(behaviorDelegate?.widthHeightRatio==0f)
-                behaviorDelegate?.widthHeightRatio=16f/9f
-            //横屏小窗面积设置
-            behaviorDelegate?.onSmallShowArea=playerDelegate?.getSmallShowArea() ?: 400
 
             behaviorDelegate?.onLayoutChild()
 
