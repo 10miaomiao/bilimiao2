@@ -44,6 +44,7 @@ import com.a10miaomiao.bilimiao.page.search.result.BaseResultFragment
 import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -104,7 +105,15 @@ class UserSeriesListFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = UserSeriesDetailFragment.createArguments(item.param, item.title)
+        val type = when(item.type) {
+            "series" -> "5"
+            "season" -> "8"
+            else -> {
+                PopTip.show("未知类型：" + item.type)
+                return@OnItemClickListener
+            }
+        }
+        val args = UserSeriesDetailFragment.createArguments(item.param, type, item.title)
         Navigation.findNavController(view)
             .navigate(UserSeriesDetailFragment.actionId, args)
     }

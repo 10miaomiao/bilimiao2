@@ -10,6 +10,8 @@ import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveSeasonVideosInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
+import com.a10miaomiao.bilimiao.comm.entity.media.MediaListV2Info
+import com.a10miaomiao.bilimiao.comm.entity.media.MediaResponseV2Info
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -34,10 +36,11 @@ class UserSeriesDetailViewModel(
     val userStore: UserStore by instance()
 
     val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
+    val type by lazy { fragment.requireArguments().getString(MainNavArgs.type, "") }
     val name by lazy { fragment.requireArguments().getString(MainNavArgs.name, "") }
 
     var triggered = false
-    var list = PaginationInfo<ArchiveInfo>()
+    var list = PaginationInfo<MediaListV2Info>()
 
     init {
         loadData(1)
@@ -51,15 +54,17 @@ class UserSeriesDetailViewModel(
                 list.loading = true
             }
             val res = BiliApiService.userApi
-                .upperSeriesDetail(
-                    seasonId = id,
+                .medialistResourceList(
+                    bizId = id,
+                    type = type,
                 )
                 .awaitCall()
-                .gson<ResultInfo<ArchiveSeasonVideosInfo>>()
+                .gson<ResultInfo<MediaResponseV2Info>>()
             if (res.code == 0) {
-                val result = res.data.item
-                ui.setState {
-                    list.data = result.toMutableList()
+                res.data.media_list?.let {
+                    ui.setState {
+                        list.data = it.toMutableList()
+                    }
                 }
                 list.pageNum = pageNum
                 list.finished = true

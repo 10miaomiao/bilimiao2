@@ -23,6 +23,7 @@ import com.a10miaomiao.bilimiao.comm._isRefreshing
 import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
+import com.a10miaomiao.bilimiao.comm.entity.media.MediaListV2Info
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
@@ -70,6 +71,10 @@ class UserSeriesDetailFragment : Fragment(), DIAware, MyPage {
                 type = NavType.StringType
                 nullable = false
             }
+            argument(MainNavArgs.type) {
+                type = NavType.StringType
+                nullable = false
+            }
             argument(MainNavArgs.name) {
                 type = NavType.StringType
                 nullable = false
@@ -77,10 +82,12 @@ class UserSeriesDetailFragment : Fragment(), DIAware, MyPage {
         }
         fun createArguments(
             id: String,
+            type: String,
             name: String,
         ): Bundle {
             return bundleOf(
                 MainNavArgs.id to id,
+                MainNavArgs.type to type,
                 MainNavArgs.name to name,
             )
         }
@@ -117,18 +124,18 @@ class UserSeriesDetailFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = VideoInfoFragment.createArguments(item.param)
+        val args = VideoInfoFragment.createArguments(item.id)
         Navigation.findNavController(view)
             .navigate(VideoInfoFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<ArchiveInfo> { item, index ->
+    val itemUi = miaoBindingItemUi<MediaListV2Info> { item, index ->
         videoItem(
             title = item.title,
             pic = item.cover,
-            remark = NumberUtil.converCTime(item.ctime),
-            playNum = item.play,
-            damukuNum = item.danmaku,
+            remark = NumberUtil.converCTime(item.pubtime),
+            playNum = item.cnt_info.play.toString(),
+            damukuNum = item.cnt_info.danmaku.toString(),
             duration = NumberUtil.converDuration(item.duration),
         )
     }
