@@ -69,13 +69,14 @@ class UserApi {
         )
     }
 
-    fun upperSeriesDetail(
-        seasonId: String,
+    fun medialistResourceList(
+        bizId: String,
+        type: String, // 5为系列系列(series)，8为合集(seasons)，其它暂时未知
     ) = MiaoHttp.request {
-        url = BiliApiService.biliApp(
-            "x/v2/space/season/videos",
-            "season_id" to seasonId,
-
+        url = BiliApiService.biliApi(
+            "x/v2/medialist/resource/list",
+            "biz_id" to bizId,
+            "type" to type,
         )
     }
 
