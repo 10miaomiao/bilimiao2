@@ -14,7 +14,6 @@ import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
-import com.a10miaomiao.bilimiao.page.filter.*
 import com.a10miaomiao.bilimiao.page.rank.RankFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
@@ -107,12 +106,6 @@ object MainNavGraph {
             addFragment(SettingFragment::class, SettingFragment.Companion)
             addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
             addFragment(VideoSettingFragment::class, VideoSettingFragment.Companion)
-
-            addFragment(FilterListFragment::class, FilterListFragment.Companion)
-            addFragment(FilterWordListFragment::class, FilterWordListFragment.Companion)
-            addFragment(FilterUpperListFragment::class, FilterUpperListFragment.Companion)
-            addFragment(FilterAddWordFragment::class, FilterAddWordFragment.Companion)
-            addFragment(FilterEditWorldFragment::class, FilterEditWorldFragment.Companion)
         }
     }
 
