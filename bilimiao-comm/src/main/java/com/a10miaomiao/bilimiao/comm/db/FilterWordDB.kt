@@ -10,7 +10,7 @@ class FilterWordDB(context: Context) :
     SQLiteOpenHelper(context, "filter_db", null, 1) {
 
     private val DB_NAME = "filter_db"
-    private val TABLE_NAME = "filter_world"
+    private val TABLE_NAME = "filter_world" //TODO fix typo
 
     private val CREATE_TABLE = """create table if not exists $TABLE_NAME
         |(id integer primary key autoincrement,
