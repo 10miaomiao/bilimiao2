@@ -75,7 +75,7 @@ internal fun FilterSettingPageContent(
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(pageCount = { 3 })
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -127,6 +127,25 @@ internal fun FilterSettingPageContent(
                     }
                 },
             )
+
+            Tab(
+                text = {
+                    Text(
+                        text = "屏蔽标签",
+                        color = if (2 == pagerState.currentPage) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onBackground
+                        }
+                    )
+                },
+                selected = pagerState.currentPage == 2,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(2)
+                    }
+                },
+            )
         }
         HorizontalPager(
             modifier = Modifier
@@ -144,6 +163,9 @@ internal fun FilterSettingPageContent(
                 }
                 1 -> {
                     FilterUpperListPage()
+                }
+                2 -> {
+                    FilterTagListPage()
                 }
             }
         }
