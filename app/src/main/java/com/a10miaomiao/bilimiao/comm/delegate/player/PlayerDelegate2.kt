@@ -146,7 +146,12 @@ class PlayerDelegate2(
             addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
             addAction(Intent.ACTION_MEDIA_BUTTON)
         }
-        registerReceiver(activity,earphoneReceiver, intentFilterEarphone,ContextCompat.RECEIVER_NOT_EXPORTED)
+        registerReceiver(
+            activity,
+            earphoneReceiver,
+            intentFilterEarphone,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
     }
 
     override fun onResume() {
@@ -552,6 +557,7 @@ class PlayerDelegate2(
         scaffoldApp.showPlayer = false
         playerCoroutineScope.onStop()
         playerSource = null
+        playerSourceInfo = null
 
         views.videoPlayer.release()
         views.videoPlayer.hideExpandButton()
@@ -653,27 +659,23 @@ class PlayerDelegate2(
         }
     }
 
-    private val earphoneReceiver =object : BroadcastReceiver() {
+    private val earphoneReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
             if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == action) {
                 //暂停播放
-                if(isPlaying())
+                if (isPlaying())
                     views.videoPlayer.onVideoPause()
             }
         }
     }
 
-    fun getVideoRatio(): Float{
-        return playerSourceInfo?.screenProportion ?: 0f
+    fun getVideoRatio(): Float? {
+        return playerSourceInfo?.screenProportion
     }
 
-    fun getSmallShowArea():Int{
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        return prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA,400)
-    }
-
-    fun setHoldStatus(isHold:Boolean){
+    fun setHoldStatus(isHold: Boolean) {
+        views.videoPlayer.setHoldStatus(isHold)
         completionBoxController.setHoldStatus(isHold)
     }
 }

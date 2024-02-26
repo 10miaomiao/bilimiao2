@@ -1,14 +1,18 @@
 package com.a10miaomiao.bilimiao.widget.comm
 
 import android.content.Context
+import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
@@ -31,18 +35,44 @@ class ScaffoldView @JvmOverloads constructor(
 
     var onPlayerChanged: ((show: Boolean) -> Unit)? = null
     var onDrawerStateChanged: ((state: Int) -> Unit)? = null
+    var playerDelegate: PlayerDelegate2? = null
 
-    var holdUpPlayer = false
+    /**
+     * 横盘时小窗大小
+     */
+    var playerSmallShowArea: Int = 400
+        private set
+
+    /**
+     * 播放器比例
+     */
+    val playerVideoRatio: Float get() {
+        return playerDelegate?.getVideoRatio() ?: (16f / 9f)
+    }
+
+    /**
+     * 播放器视图尺寸状态
+     */
+    var playerViewSizeStatus: PlayerViewSizeStatus = PlayerViewSizeStatus.NORMAL
         set(value) {
             if (field != value) {
                 field = value
+                playerDelegate?.setHoldStatus(isHoldUpPlayer)
                 requestLayout()
             }
         }
+
+    val isFoldPlayer: Boolean
+        get() = playerViewSizeStatus == PlayerViewSizeStatus.FOLD
+
+    val isHoldUpPlayer: Boolean
+        get() = playerViewSizeStatus == PlayerViewSizeStatus.HOLD_UP
+
     var orientation = VERTICAL
         set(value) {
             if (field != value) {
                 field = value
+                playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 this.appBar?.orientation = orientation
                 requestLayout()
             }
@@ -51,6 +81,10 @@ class ScaffoldView @JvmOverloads constructor(
     var showPlayer = false
         set(value) {
             if (field != value) {
+                if (!value) {
+                    smallModePlayerHeight = smallModePlayerMinHeight
+                    playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
+                }
                 field = value
                 requestLayout()
                 onPlayerChanged?.invoke(field)
@@ -68,11 +102,12 @@ class ScaffoldView @JvmOverloads constructor(
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
 
-    var smallModePlayerHeight = dip(200)// 小屏模式下的播放器高度 初始值
+    val smallModePlayerMinHeight = dip(200) // 小屏模式下的播放器最小高度
+    var smallModePlayerHeight = smallModePlayerMinHeight // 小屏模式下的播放器高度
+    var playerX = 0
+    var playerY = 0
     var playerHeight = -3
     var playerWidth = -3
-    var widthHeightRatio = 0f//播放器比例
-    var onSmallShowArea = 0//横屏小窗大小
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null
@@ -92,6 +127,15 @@ class ScaffoldView @JvmOverloads constructor(
 
     var maskView: View? = null
     var maskBehavior: MaskBehavior? = null
+
+    init {
+        updatePlayerSmallShowArea()
+    }
+
+    fun updatePlayerSmallShowArea() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        playerSmallShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA, 400)
+    }
 
     override fun addView(
         child: View?,
@@ -187,6 +231,15 @@ class ScaffoldView @JvmOverloads constructor(
 
     class LayoutParams(width: Int, height: Int) : CoordinatorLayout.LayoutParams(width, height) {
 
+    }
+
+    /**
+     * 播放器视图尺寸状态
+     */
+    enum class PlayerViewSizeStatus {
+        NORMAL, // 正常
+        FOLD, // 折叠，以展示内容区域为主
+        HOLD_UP, // 挂起，横屏状态挂在屏幕边缘
     }
 
 }

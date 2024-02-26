@@ -13,6 +13,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -35,6 +36,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment.Companion.generateKey
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
@@ -108,6 +110,8 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
     private var mAdapter: PreferencesAdapter? = null
 
+    private val scaffoldView by lazy { requireActivity().getScaffoldView() }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -164,10 +168,16 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
                 }
             }
         }
+        // 同步播放器底部进度条显示控制
         if (key == PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR ||
             key == PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR) {
             basePlayerDelegate.updateVideoSetting()
         }
+        // 同步横屏时小屏播放面积
+        if (key == PLAYER_SMALL_SHOW_AREA) {
+            scaffoldView.updatePlayerSmallShowArea()
+        }
+
     }
 
     val ui = miaoBindingUi {
@@ -229,7 +239,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
             onClick {
                 val nav = findNavController()
-                nav.navigateToCompose(SelectProxyServerPage())
+                nav.navigateToCompose(ProxySettingPage())
                 true
             }
         }

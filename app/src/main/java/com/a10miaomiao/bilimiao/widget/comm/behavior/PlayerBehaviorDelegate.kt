@@ -8,6 +8,7 @@ import androidx.annotation.RestrictTo
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.android.material.transition.Hold
@@ -22,16 +23,17 @@ class PlayerBehaviorDelegate(
 ) : ViewDragHelper.Callback() {
 
     private val dragAreaHeight = parent.dip(30)
-//    private val playerHeight = parent.dip(200)
+
+    //    private val playerHeight = parent.dip(200)
 //    private val playertWidth = parent.dip(300)
     private val minPadding = parent.dip(10)
+
+    var viewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
     var widthHeightRatio = 0f
     //横屏时小屏播放区域，控制面积为其dip平方
-    var onSmallShowArea= 0
+    var onSmallShowArea = 0
     //挂起时面积
     val onHoldShowArea = 100
-
-    var playerDelegate: PlayerDelegate2?=null
 
     @DragState
     var dragState = ViewDragHelper.STATE_IDLE
@@ -60,11 +62,11 @@ class PlayerBehaviorDelegate(
     private var widthSmall = 0
     private var heightHold = 0
     private var widthHold = 0
-    private var longSide = if(parent.orientation == ScaffoldView.HORIZONTAL)
+    private var longSide = if (parent.orientation == ScaffoldView.HORIZONTAL)
         parent.measuredWidth
     else
         parent.measuredHeight
-    private var shortSide = if(parent.orientation == ScaffoldView.HORIZONTAL)
+    private var shortSide = if (parent.orientation == ScaffoldView.HORIZONTAL)
         parent.measuredHeight
     else
         parent.measuredWidth
@@ -95,18 +97,19 @@ class PlayerBehaviorDelegate(
     override fun onViewReleased(releasedChild: View, xvel: Float, yvel: Float) {
         super.onViewReleased(releasedChild, xvel, yvel)
         danmakuVideoPlayer?.hideSmallDargBar()
-        if(parent.holdUpPlayer){
-            if(playerView.x > parent.measuredWidth - widthHold - windowInsets.right)//拉至右边缘
-                resetPosition(widthHold,heightHold)
-            else {
+        if (parent.isHoldUpPlayer) {
+            if (playerView.x > parent.measuredWidth - widthHold - windowInsets.right) {
+                //拉至右边缘
+                resetPosition(widthHold, heightHold)
+            } else {
                 holdStatusFalse()
             }
         } else {
-            if(playerView.x > parent.measuredWidth - widthSmall*3/4 - windowInsets.right)//拉至右边缘
-            {
+            if (playerView.x > parent.measuredWidth - widthSmall * 3 / 4 - windowInsets.right) {
+                //拉至右边缘
                 holdStatusTrue()
             } else {
-                resetPosition(widthSmall,heightSmall)
+                resetPosition(widthSmall, heightSmall)
             }
         }
         dragger.settleCapturedViewAt(playerX, playerY)
@@ -114,23 +117,21 @@ class PlayerBehaviorDelegate(
         super.onViewReleased(releasedChild, xvel, yvel)
     }
 
-    fun holdStatusTrue(){
-        parent.holdUpPlayer = true
-        danmakuVideoPlayer?.setHoldStatus(true)
-        playerDelegate?.setHoldStatus(true)
-        resetPosition(widthHold,heightHold)
-        playerX=parent.measuredWidth - widthHold - windowInsets.right
+    fun holdStatusTrue() {
+        parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
+        resetPosition(widthHold, heightHold)
+        playerX = parent.measuredWidth - widthHold - windowInsets.right
     }
-    fun holdStatusFalse(){
-        parent.holdUpPlayer = false
-        danmakuVideoPlayer?.setHoldStatus(false)
-        playerDelegate?.setHoldStatus(false)
-        resetPosition(widthSmall,heightSmall)
+
+    fun holdStatusFalse() {
+        parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
+        resetPosition(widthSmall, heightSmall)
     }
+
     /**
      * 拖拽超出屏幕，则左右吸边或上下吸边
      */
-    private fun resetPosition(width:Int,height:Int) {
+    private fun resetPosition(width: Int, height: Int) {
         val measuredWidth = parent.measuredWidth
         val measuredHeight = parent.measuredHeight
         playerX = if (playerView.x < windowInsets.left) {
@@ -149,8 +150,13 @@ class PlayerBehaviorDelegate(
         }
     }
 
-    private fun resetPositionOnSizeChanged(width:Int,height:Int,measuredWidth:Int,measuredHeight:Int) {
-        playerX = if (playerX< windowInsets.left) {
+    private fun resetPositionOnSizeChanged(
+        width: Int,
+        height: Int,
+        measuredWidth: Int,
+        measuredHeight: Int
+    ) {
+        playerX = if (playerX < windowInsets.left) {
             windowInsets.left
         } else if (playerX > measuredWidth - width - windowInsets.right) {
             measuredWidth - width - windowInsets.right
@@ -177,7 +183,7 @@ class PlayerBehaviorDelegate(
             if (playerView.x < x
                 && playerView.y < y
                 && playerView.x + width > x
-                && playerView.y + (if(parent.holdUpPlayer) height else dragAreaHeight) > y
+                && playerView.y + (if (parent.isHoldUpPlayer) height else dragAreaHeight) > y
             ) {
                 dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
             }
@@ -194,75 +200,89 @@ class PlayerBehaviorDelegate(
         if (dragState == ViewDragHelper.STATE_DRAGGING) {
             return
         }
-        //播放器长宽比设置
-        if(widthHeightRatio != (playerDelegate?.getVideoRatio() ?: (16f / 9f))) {
-            widthHeightRatio = playerDelegate?.getVideoRatio() ?: (16f / 9f)
-            if (widthHeightRatio == 0f)
-                widthHeightRatio = 16f / 9f
-        }
-        //横屏小窗面积设置
-        if(onSmallShowArea != (playerDelegate?.getSmallShowArea() ?: 400))
-            onSmallShowArea = playerDelegate?.getSmallShowArea() ?: 400
+        // 播放器视频长宽比
+        val _videoRatio = parent.playerVideoRatio
+        // 横屏时小屏播放区域，控制面积为其dip平方
+        val _smallShowArea = parent.playerSmallShowArea
+        // 竖屏时播放器视图状态
+        val _viewSizeStatus = parent.playerViewSizeStatus
         //小窗口参数变化时，同步其他参数
-        if((widthHeightRatio!=parent.widthHeightRatio||onSmallShowArea!=parent.onSmallShowArea||(shortSide!=parent.measuredWidth&&shortSide!=parent.measuredHeight)) && onSmallShowArea != 0 && widthHeightRatio != 0f){
-            parent.widthHeightRatio=widthHeightRatio
-            parent.onSmallShowArea=onSmallShowArea
+        if (_videoRatio != widthHeightRatio
+            || _smallShowArea != onSmallShowArea
+            || _viewSizeStatus != viewSizeStatus
+            || (shortSide != parent.measuredWidth && shortSide != parent.measuredHeight)
+        ) {
+            widthHeightRatio = _videoRatio
+            onSmallShowArea = _smallShowArea
+            viewSizeStatus = _viewSizeStatus
             val originLongSide = longSide
             val originWidthSmall = widthSmall
             val originWidthHold = widthHold
             //计算各参数的值
-            longSide = if(parent.orientation == ScaffoldView.HORIZONTAL)
+            longSide = if (parent.orientation == ScaffoldView.HORIZONTAL) {
                 parent.measuredWidth
-            else
+            } else {
                 parent.measuredHeight
-            shortSide = if(parent.orientation == ScaffoldView.HORIZONTAL)
+            }
+            shortSide = if (parent.orientation == ScaffoldView.HORIZONTAL) {
                 parent.measuredHeight
-            else
+            } else {
                 parent.measuredWidth
-            heightHold=(parent.dip(onHoldShowArea) / sqrt(widthHeightRatio)).toInt()
-            widthHold=(parent.dip(onHoldShowArea) * sqrt(widthHeightRatio)).toInt()
+            }
+            heightHold = (parent.dip(onHoldShowArea) / sqrt(widthHeightRatio)).toInt()
+            widthHold = (parent.dip(onHoldShowArea) * sqrt(widthHeightRatio)).toInt()
             heightSmall = (parent.dip(onSmallShowArea) / sqrt(widthHeightRatio)).toInt()
             widthSmall = (parent.dip(onSmallShowArea) * sqrt(widthHeightRatio)).toInt()
-            parent.smallModePlayerHeight= ceil(shortSide/widthHeightRatio).toInt()
             //防止参数设置过大超出屏幕上限
-            if(widthSmall > longSide - windowInsets.left - windowInsets.right){
-                val newShowAreaDip =(longSide - windowInsets.left - windowInsets.right)/sqrt(widthHeightRatio)
+            if (widthSmall > longSide - windowInsets.left - windowInsets.right) {
+                val newShowAreaDip =
+                    (longSide - windowInsets.left - windowInsets.right) / sqrt(widthHeightRatio)
                 heightSmall = (newShowAreaDip / sqrt(widthHeightRatio)).toInt()
                 widthSmall = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }
-            if(heightSmall > shortSide - windowInsets.top - windowInsets.bottom){
-                val newShowAreaDip =(shortSide - windowInsets.top - windowInsets.bottom)*sqrt(widthHeightRatio)
+            if (heightSmall > shortSide - windowInsets.top - windowInsets.bottom) {
+                val newShowAreaDip =
+                    (shortSide - windowInsets.top - windowInsets.bottom) * sqrt(widthHeightRatio)
                 heightSmall = (newShowAreaDip / sqrt(widthHeightRatio)).toInt()
                 widthSmall = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }
             //比例变化以右上角为基准
-            if(height!=0 && width!=0 && playerX != -1) {
+            if (height != 0 && width != 0 && playerX != -1) {
                 playerX += longSide - originLongSide
-                if(parent.holdUpPlayer)
+                if (parent.isHoldUpPlayer) {
                     playerX += originWidthHold - widthHold
-                else
+                } else {
                     playerX += originWidthSmall - widthSmall
+                }
             }
             //xy初始值
-            if(playerX == -1)
+            if (playerX == -1)
                 playerX = longSide - windowInsets.right
-            if(playerY == -1)
+            if (playerY == -1)
                 playerY = windowInsets.top
-            //防止竖屏时超出屏幕下边缘
-            if(parent.smallModePlayerHeight>longSide*3/4)
-                parent.smallModePlayerHeight=longSide*3/4
+
+            if (parent.isFoldPlayer) {
+                parent.smallModePlayerHeight = parent.smallModePlayerMinHeight
+            } else {
+                parent.smallModePlayerHeight = ceil(shortSide / widthHeightRatio).toInt()
+                //防止竖屏时超出屏幕下边缘
+                if (parent.smallModePlayerHeight > longSide * 3 / 4) {
+                    parent.smallModePlayerHeight = longSide * 3 / 4
+                }
+            }
             //防止参数变化时小窗超出屏幕边缘
-            if (parent.holdUpPlayer)
-                resetPositionOnSizeChanged(widthHold, heightHold,longSide,shortSide)
-            else
-                resetPositionOnSizeChanged(widthSmall, heightSmall,longSide,shortSide)
+            if (parent.isHoldUpPlayer) {
+                resetPositionOnSizeChanged(widthHold, heightHold, longSide, shortSide)
+            } else {
+                resetPositionOnSizeChanged(widthSmall, heightSmall, longSide, shortSide)
+            }
         }
         if (parent.fullScreenPlayer) {
             // 全屏
             onFullScreenLayoutChild()
         } else if (parent.orientation == ScaffoldView.HORIZONTAL) {
             // 横向屏幕
-            if(parent.holdUpPlayer)
+            if (parent.isHoldUpPlayer)
                 onHoldUpLayoutChild()// 挂起小窗
             else
                 onHorizontalScreenLayoutChild()
@@ -282,25 +302,30 @@ class PlayerBehaviorDelegate(
             playerView.layoutParams.width = width
             playerView.requestLayout()
         }
+        val measuredHeight = playerView.measuredHeight
+        val measuredWidth = playerView.measuredWidth
         // 内容区域布局尺寸校正
-        if (parent.playerHeight != height || parent.playerWidth != width) {
-            parent.playerHeight = height
-            parent.playerWidth = width
+        if (parent.playerHeight != measuredHeight || parent.playerWidth != measuredWidth) {
+            parent.playerHeight = measuredHeight
+            parent.playerWidth = measuredWidth
+            parent.playerX = playerX
+            parent.playerY = playerY
             parent.content?.requestLayout()
         }
     }
 
     //小窗挂起布局
-    private fun onHoldUpLayoutChild(){
+    private fun onHoldUpLayoutChild() {
         if (parent.showPlayer) {
-            height=heightHold
-            width=widthHold
+            height = heightHold
+            width = widthHold
             playerView.layout(playerX, playerY, playerX + width, playerY + height)
         } else {
             height = 0
             width = 0
         }
     }
+
     /**
      * 全屏播放布局
      */
@@ -317,8 +342,8 @@ class PlayerBehaviorDelegate(
      */
     private fun onHorizontalScreenLayoutChild() {
         if (parent.showPlayer) {
-            width=widthSmall
-            height=heightSmall
+            width = widthSmall
+            height = heightSmall
             playerView.layout(playerX, playerY, playerX + width, playerY + height)
         } else {
             height = 0

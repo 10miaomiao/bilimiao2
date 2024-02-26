@@ -102,6 +102,7 @@ class MainActivity
         bottomSheetDelegate.onCreate(savedInstanceState)
         store.onCreate(savedInstanceState)
         ui.root.showPlayer = basePlayerDelegate.isPlaying()
+        ui.root.playerDelegate = basePlayerDelegate as PlayerDelegate2
         ui.root.onDrawerStateChanged = ::onDrawerStateChanged
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ui.root.rootWindowInsets?.let {
@@ -332,7 +333,6 @@ class MainActivity
             val behavior = playerLP.behavior
             if (behavior is PlayerBehavior) {
                 behavior.setWindowInsets(left, top, right, bottom)
-                behavior.playerDelegate=basePlayerDelegate as PlayerDelegate2
             }
         }
         ui.mAppBar.setWindowInsets(left, top, right, bottom)

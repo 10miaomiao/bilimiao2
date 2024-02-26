@@ -7,7 +7,9 @@ import android.view.View
 import android.view.animation.*
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import splitties.dimensions.dip
 import kotlin.math.max
@@ -33,8 +35,9 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
     private var behaviorDelegate: PlayerBehaviorDelegate? = null
 
-    var playerDelegate:PlayerDelegate2?=null
-
+    var parentRef: ScaffoldView? = null
+    var viewRef: View? = null
+    private var scrollDy = 0
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         playerHeight = context.dip(200)
@@ -63,19 +66,23 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         child: View,
         layoutDirection: Int
     ): Boolean {
+        if (scrollDy > 0) {
+            return true
+        }
+        this.viewRef = child
         if (parent is ScaffoldView) {
+            this.parentRef = parent
             if (behaviorDelegate == null) {
                 behaviorDelegate = PlayerBehaviorDelegate(
                     parent,
                     child,
                     object : PlayerBehaviorDelegate.Insets{
-                        override val top = windowInsets.top
-                        override val bottom = windowInsets.bottom
-                        override val left = windowInsets.left
-                        override val right = windowInsets.right
+                        override val top get() = windowInsets.top
+                        override val bottom get() = windowInsets.bottom
+                        override val left get() = windowInsets.left
+                        override val right get() = windowInsets.right
                     }
                 )
-                behaviorDelegate?.playerDelegate = playerDelegate
             }
 
             behaviorDelegate?.onLayoutChild()
@@ -108,6 +115,96 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
     ): Boolean {
         return behaviorDelegate?.onInterceptTouchEvent(ev) ?: false
     }
+
+    override fun onStartNestedScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: View,
+        directTargetChild: View,
+        target: View,
+        nestedScrollAxes: Int,
+        type: Int
+    ): Boolean {
+        return parentRef?.orientation == ScaffoldView.VERTICAL
+                && target.tag != false
+                && nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
+    }
+
+    override fun onNestedPreScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: View,
+        target: View,
+        dx: Int,
+        dy: Int,
+        consumed: IntArray,
+        type: Int
+    ) {
+        val parent = parentRef ?: return
+        val playerView = viewRef ?: return
+        val contentView = parent.content ?: return
+        if (dy > 0 && parent.showPlayer
+            && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
+        ) {
+            val playerMinHeight = parent.smallModePlayerMinHeight + windowInsets.top
+            if (contentView.translationY > playerMinHeight) {
+                consumed[1] = dy
+                scrollDy = dy
+                val playerHeight = max(
+                    contentView.translationY.toInt() - dy,
+                    playerMinHeight,
+                )
+                contentView.translationY = playerHeight.toFloat()
+                playerView.layout(0, 0, parent.measuredWidth, playerHeight)
+            }
+        }
+    }
+
+    override fun onNestedScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: View,
+        target: View,
+        dxConsumed: Int,
+        dyConsumed: Int,
+        dxUnconsumed: Int,
+        dyUnconsumed: Int,
+        type: Int,
+        consumed: IntArray
+    ) {
+        val parent = parentRef ?: return
+        val playerView = viewRef ?: return
+        val contentView = parent.content ?: return
+        if (dyConsumed > 0 && parent.showPlayer
+            && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
+        ) {
+            val playerMinHeight = parent.smallModePlayerMinHeight + windowInsets.top
+            if (contentView.translationY > playerMinHeight) {
+                consumed[1] = dyConsumed
+                scrollDy = dyConsumed
+                val playerHeight = max(
+                    contentView.translationY.toInt() - dyConsumed,
+                    playerMinHeight,
+                )
+                contentView.translationY = playerHeight.toFloat()
+                playerView.layout(0, 0, parent.measuredWidth, playerHeight)
+            }
+        }
+    }
+
+
+    override fun onStopNestedScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: View,
+        target: View,
+        type: Int
+    ) {
+        val parent = parentRef ?: return
+        if (scrollDy > 0 && parent.showPlayer
+            && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
+        ) {
+            scrollDy = 0
+            parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.FOLD
+        }
+    }
+
 
     // 显示动画
     private val showAnimation = AnimationSet(true).apply {

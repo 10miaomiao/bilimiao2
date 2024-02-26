@@ -133,21 +133,26 @@ class PlayerService : Service() {
     }
 
     private fun updatePlayerState() {
-        if (!showNotification) {
-            return
+        try {
+            if (!showNotification) {
+                return
+            }
+            if (!isPlaying()) {
+                // 只更新暂停状态，播放状态走播放回调
+                val stateBuilder = PlaybackStateCompat.Builder()
+                    .setActions(PlayingNotification.MEDIA_SESSION_ACTIONS)
+                    .setState(
+                        PlaybackStateCompat.STATE_PAUSED,
+                        videoPlayerView?.currentPositionWhenPlaying ?: 0L,
+                        1.0f
+                    )
+                mediaSession.setPlaybackState(stateBuilder.build())
+            }
+            playingNotification.updateForPlaying()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        if (!isPlaying()) {
-            // 只更新暂停状态，播放状态走播放回调
-            val stateBuilder = PlaybackStateCompat.Builder()
-                .setActions(PlayingNotification.MEDIA_SESSION_ACTIONS)
-                .setState(
-                    PlaybackStateCompat.STATE_PAUSED,
-                    videoPlayerView?.currentPositionWhenPlaying ?: 0L,
-                    1.0f
-                )
-            mediaSession.setPlaybackState(stateBuilder.build())
-        }
-        playingNotification.updateForPlaying()
+
     }
 
     fun setProgress(max: Long, progress: Long) {
