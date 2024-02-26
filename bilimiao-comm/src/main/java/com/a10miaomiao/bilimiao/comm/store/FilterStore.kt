@@ -2,8 +2,10 @@ package com.a10miaomiao.bilimiao.comm.store
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
+import com.a10miaomiao.bilimiao.comm.db.FilterTagDB
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.db.FilterWordDB
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.kongzue.dialogx.dialogs.PopTip
@@ -18,6 +20,7 @@ class FilterStore(override val di: DI) :
     data class State (
         var filterWordList: MutableList<String> = mutableListOf(),
         var filterUpperList: MutableList<FilterUpperDB.Upper> = mutableListOf(),
+        var filterTagList: MutableList<String> = mutableListOf()
     )
 
     override val stateFlow = MutableStateFlow(State())
@@ -29,13 +32,17 @@ class FilterStore(override val di: DI) :
 
     private val filterUpperDB = FilterUpperDB(activity)
 
+    private val filterTagDB = FilterTagDB(activity)
+
     val filterWordCount get() = state.filterWordList.size
 
     val filterUpperCount get() = state.filterUpperList.size
 
+    val filterTagCount get() = state.filterTagList.size
     init {
         queryFilterWord()
         queryFilterUpper()
+        queryFilterTag()
     }
 
     fun queryFilterWord() {
@@ -52,6 +59,12 @@ class FilterStore(override val di: DI) :
         }
     }
 
+    fun queryFilterTag() {
+        val list = filterTagDB.queryAll()
+        setState {
+            filterTagList = list
+        }
+    }
 
     fun filterWord(text: String): Boolean {
         state.filterWordList.forEach {
@@ -121,4 +134,40 @@ class FilterStore(override val di: DI) :
         }
         return true
     }
+
+    fun filterTag(text: List<VideoTagInfo>): Boolean {
+        text.forEach {
+            if (!state.filterTagList.contains(it.tag_name)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    fun addTag(name: String) {
+        filterTagDB.insert(name)
+        queryFilterTag()
+        PopTip.show("添加成功")
+    }
+
+    fun setTag(old: String, new: String) {
+        filterTagDB.updateTagName(old, new)
+        queryFilterWord()
+    }
+
+    fun deleteTag(index: Int) {
+        val name = state.filterTagList[index]
+        filterTagDB.deleteByTagName(name)
+        queryFilterTag()
+        PopTip.show("删除成功")
+    }
+
+    fun deleteTag(tagList: List<String>) {
+        tagList.forEach {
+            filterTagDB.deleteByTagName(it)
+        }
+        queryFilterTag()
+        PopTip.show("删除成功")
+    }
+
 }

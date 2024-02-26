@@ -5,12 +5,18 @@ import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.Log.Logger
 import bilibili.app.card.v1.CardOuterClass
 import bilibili.app.card.v1.Single
 import bilibili.app.show.v1.PopularGrpc
 import bilibili.app.show.v1.PopularOuterClass
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.apis.VideoAPI
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +24,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import java.util.Locale
 
 class PopularViewModel(
     override val di: DI,
@@ -58,11 +65,18 @@ class PopularViewModel(
                 .awaitCall()
             val itemsList = result.itemsList
             val filterList = itemsList.filter {
-                it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
+                var notHide = it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
                         && it.smallCoverV5 != null
                         && it.smallCoverV5.base.cardGoto == "av"
                         && filterStore.filterWord(it.smallCoverV5.base.title)
                         && filterStore.filterUpper(it.smallCoverV5.up.id)
+                if (filterStore.filterTagCount != 0
+                    && it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
+                    && it.smallCoverV5 != null) {
+                    val res = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto.uppercase(Locale.ROOT)).call().gson<ResultInfo<VideoInfo>>().data
+                    notHide = notHide && filterStore.filterTag(res.tag)
+                }
+                notHide
             }.map {
                 it.smallCoverV5
             }
