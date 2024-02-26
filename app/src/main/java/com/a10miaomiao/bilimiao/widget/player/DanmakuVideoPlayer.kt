@@ -542,6 +542,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    override fun onClickUiToggle(e: MotionEvent?) {
+        super.onClickUiToggle(e)
+        videoPlayerCallBack?.onClickUiToggle(e)
+    }
+
     override fun hideAllWidget() {
         setViewShowState(mBottomContainer, INVISIBLE)
         setViewShowState(mTopContainer, INVISIBLE)

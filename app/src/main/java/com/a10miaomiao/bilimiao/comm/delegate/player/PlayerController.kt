@@ -8,6 +8,7 @@ import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Rational
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -633,6 +634,12 @@ class PlayerController(
 
     override fun onVideoClose() {
         delegate.closePlayer()
+    }
+
+    override fun onClickUiToggle(e: MotionEvent?) {
+        if (scaffoldApp.playerViewSizeStatus != ScaffoldView.PlayerViewSizeStatus.NORMAL) {
+            scaffoldApp.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
+        }
     }
 
     override fun onProgress(
