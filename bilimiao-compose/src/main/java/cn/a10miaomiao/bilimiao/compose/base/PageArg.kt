@@ -5,7 +5,7 @@ import androidx.navigation.navArgument
 
 class PageArg<T>(
     val name: String,
-    private val argType: NavType<T>,
+    val argType: NavType<T>,
     private val argDefaultValue: T,
 ) {
 

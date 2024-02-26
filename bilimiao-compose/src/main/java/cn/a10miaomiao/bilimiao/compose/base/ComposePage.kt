@@ -8,6 +8,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.NavDestinationBuilder
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
@@ -35,7 +36,19 @@ abstract class ComposePage {
     abstract fun AnimatedContentScope.Content(navEntry: NavBackStackEntry)
 
     fun <T> Bundle.get(arg: PageArg<T>): T {
-        return this.get(arg.name) as T
+        return when (arg.argType) {
+            NavType.IntType -> this.getInt(arg.name)
+            NavType.IntArrayType -> this.getIntArray(arg.name)
+            NavType.LongType -> this.getLong(arg.name)
+            NavType.LongArrayType -> this.getLongArray(arg.name)
+            NavType.FloatType -> this.getFloat(arg.name)
+            NavType.FloatArrayType -> this.getFloatArray(arg.name)
+            NavType.BoolType -> this.getBoolean(arg.name)
+            NavType.BoolArrayType -> this.getBooleanArray(arg.name)
+            NavType.StringType -> this.getString(arg.name)
+            NavType.StringArrayType -> this.getStringArray(arg.name)
+            else -> this.get(arg.name)
+        } as T
     }
 
     fun <T> Bundle.getOrNull(arg: PageArg<T>): T? {
