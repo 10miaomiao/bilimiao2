@@ -105,7 +105,10 @@ class PlayerBehaviorDelegate(
                 holdStatusFalse()
             }
         } else {
-            if (playerView.x > parent.measuredWidth - widthSmall * 3 / 4 - windowInsets.right) {
+            if(playerView.x.toInt() == playerX && playerView.y.toInt() == playerY){//点击回正
+                playerX = parent.measuredWidth - widthSmall - windowInsets.right
+                playerY = windowInsets.top
+            } else if (playerView.x > parent.measuredWidth - widthSmall * 3 / 4 - windowInsets.right) {
                 //拉至右边缘
                 holdStatusTrue()
             } else {
@@ -247,7 +250,7 @@ class PlayerBehaviorDelegate(
                 widthSmall = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }
             //比例变化以右上角为基准
-            if (height != 0 && width != 0 && playerX != -1) {
+            if (playerX != -1) {
                 playerX += longSide - originLongSide
                 if (parent.isHoldUpPlayer) {
                     playerX += originWidthHold - widthHold
@@ -276,6 +279,7 @@ class PlayerBehaviorDelegate(
             } else {
                 resetPositionOnSizeChanged(widthSmall, heightSmall, longSide, shortSide)
             }
+            setPlayerSpaceSize()
         }
         if (parent.fullScreenPlayer) {
             // 全屏
@@ -294,6 +298,7 @@ class PlayerBehaviorDelegate(
         if (parent.orientation != currentOrientation) {
             playerView.translationX = 0f
             playerView.translationY = 0f
+            setPlayerSpaceSize()
         }
         currentOrientation = parent.orientation
         // 播放器尺寸校正
@@ -301,6 +306,7 @@ class PlayerBehaviorDelegate(
             playerView.layoutParams.height = height
             playerView.layoutParams.width = width
             playerView.requestLayout()
+            setPlayerSpaceSize()
         }
         val measuredHeight = playerView.measuredHeight
         val measuredWidth = playerView.measuredWidth
@@ -312,6 +318,31 @@ class PlayerBehaviorDelegate(
             parent.playerY = playerY
             parent.content?.requestLayout()
         }
+        //取消视频页留白
+        if(!parent.showPlayer) {
+            setPlayerSpaceSize()
+        }
+    }
+
+    //设置视频页留白区域
+    private fun setPlayerSpaceSize(){
+        if(parent.isHoldUpPlayer||parent.orientation == ScaffoldView.VERTICAL||!parent.showPlayer) {
+            parent.playerDelegate?.setPlayerSpaceScale(0,0)
+            return
+        }
+        var width = widthSmall
+        var height = heightSmall
+        width += windowInsets.right
+        height += windowInsets.top
+        if(parent.measuredWidth - width < parent.dip(450)) {
+            //窗口过宽，水平不留白
+            width = 0
+        }
+        if(parent.measuredHeight - height < parent.dip(100)){
+            //窗口过高，竖直不留白
+            height = 0
+        }
+        parent.playerDelegate?.setPlayerSpaceScale(width,height)
     }
 
     //小窗挂起布局

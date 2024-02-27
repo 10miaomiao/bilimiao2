@@ -47,3 +47,9 @@ inline var View._rightPadding: Int
     set(@Px value) = miaoEffect(value) {
         setPadding(paddingLeft, paddingTop, value, paddingBottom)
     }
+
+inline var View._minHeight: Int
+    get() = minimumHeight
+    set(@Px value) = miaoEffect(value) {
+        setMinimumHeight(value)
+    }

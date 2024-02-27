@@ -28,6 +28,9 @@ class AreaLimitBoxController(
      * 区域限制
      */
     private fun initAreaLimitBox() {
+        areaLimitLayout.setOnClickListener(){
+            return@setOnClickListener
+        }
         areaLimitOkBtn.setOnClickListener {
             val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
             nav.navigateToCompose(SelectProxyServerPage())
