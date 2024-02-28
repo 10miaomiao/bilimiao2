@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.view.View
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
@@ -24,20 +25,29 @@ fun NavController.tryPopBackStack(): Boolean {
     }
 }
 
-fun NavController.navigateToCompose(url: String) = navigate(
+fun NavController.navigateToCompose(
+    url: String,
+    navOptions: NavOptions? = null,
+) = navigate(
     ComposeFragmentNavigatorBuilder.actionId,
-    ComposeFragmentNavigatorBuilder.createArguments(url)
+    ComposeFragmentNavigatorBuilder.createArguments(url),
+    navOptions,
 )
 
-fun NavController.navigateToCompose(page: ComposePage) = navigate(
+fun NavController.navigateToCompose(
+    page: ComposePage,
+    navOptions: NavOptions? = null,
+) = navigate(
     ComposeFragmentNavigatorBuilder.actionId,
-    ComposeFragmentNavigatorBuilder.createArguments(page.url())
+    ComposeFragmentNavigatorBuilder.createArguments(page.url()),
+    navOptions,
 )
 
 inline fun <T : ComposePage> NavController.navigateToCompose(
     page: T,
+    navOptions: NavOptions? = null,
     initArgs: T.() -> Unit,
-) = navigateToCompose(page.also(initArgs))
+) = navigateToCompose(page.also(initArgs), navOptions)
 
 fun Activity.openSearch(view: View) {
     val searchConfig = (this as? MainActivity)?.pageConfig?.search

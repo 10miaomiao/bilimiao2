@@ -1,20 +1,29 @@
 package com.a10miaomiao.bilimiao.page.video
 
 import android.content.Context
+import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.*
+import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
+import com.a10miaomiao.bilimiao.page.region.RegionFragment
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +40,7 @@ class VideoInfoViewModel(
     val context: Context by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
-
+    val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     //    val type by lazy { fragment.requireArguments().getString(MainNavArgs.type, "AV") }
     val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
@@ -94,7 +103,9 @@ class VideoInfoViewModel(
                     tags = tagData.toMutableList()
                 }
                 withContext(Dispatchers.Main) {
-                    jumpSeason(data)
+                    if (!jumpSeason(data)) {
+                        autoStartPlay(data)
+                    }
                 }
             } else {
                 ui.setState {
@@ -115,18 +126,64 @@ class VideoInfoViewModel(
         }
     }
 
+    private fun autoStartPlay(info: VideoInfo) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(fragment.requireActivity())
+        if (basePlayerDelegate.isPlaying()) {
+            // 自动替换正在播放的视频
+            if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_REPLACE, false)) {
+                playVideo(info, 0)
+            }
+        } else {
+            // 自动播放新视频
+            if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_START, false)) {
+                playVideo(info, 0)
+            }
+        }
+    }
+
+    private fun playVideo(info: VideoInfo, page: Int) {
+        val videoPages = pages
+        val title = videoPages[page].part
+        val cid = videoPages[page].cid
+        basePlayerDelegate.openPlayer(
+            VideoPlayerSource(
+                title = title,
+                coverUrl = info.pic,
+                aid = info.aid,
+                id = cid,
+                ownerId = info.owner.mid,
+                ownerName = info.owner.name,
+            ).apply {
+                pages = videoPages.map {
+                    VideoPlayerSource.PageInfo(
+                        cid = it.cid,
+                        title = it.part,
+                    )
+                }
+            }
+        )
+    }
+
     /**
      * 跳转番剧
      */
-    private fun jumpSeason(info: VideoInfo) {
+    private fun jumpSeason(info: VideoInfo): Boolean {
         info.season?.let {
             if (it.is_jump == 1) {
-                fragment.findNavController()
-                    .navigateToCompose(BangumiDetailPage()) {
-                        id set it.season_id
+                val nav = fragment.findNavController()
+                val previousId = nav.previousBackStackEntry?.destination?.id
+                nav.navigateToCompose(
+                    BangumiDetailPage(),
+                    navOptions {
+                        previousId?.let(::popUpTo)
                     }
+                ) {
+                    id set it.season_id
+                }
+                return true
             }
         }
+        return false
     }
 
     /**

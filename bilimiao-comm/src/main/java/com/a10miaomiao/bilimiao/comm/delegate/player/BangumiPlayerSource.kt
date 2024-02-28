@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 
-import android.os.Parcelable
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
@@ -15,7 +14,6 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import kotlinx.android.parcel.Parcelize
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.danmaku.parser.BiliDanmukuParser
