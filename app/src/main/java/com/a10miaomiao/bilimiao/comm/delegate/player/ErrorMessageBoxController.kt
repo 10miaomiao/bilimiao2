@@ -30,6 +30,9 @@ class ErrorMessageBoxController(
      */
     private fun initErrorMessageBox() {
         hide()
+        errorMessageLayout.setOnClickListener(){
+            return@setOnClickListener
+        }
         errorMessageRetryBtn.setOnClickListener {
             hide()
             delegate.reloadPlayer()

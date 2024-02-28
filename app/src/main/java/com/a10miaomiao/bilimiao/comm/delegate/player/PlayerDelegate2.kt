@@ -51,6 +51,7 @@ import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
+import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
@@ -98,6 +99,7 @@ class PlayerDelegate2(
 
     private val userStore by instance<UserStore>()
     private val playerStore by instance<PlayerStore>()
+    private val windowStore by instance<WindowStore>()
     private val themeDelegate by instance<ThemeDelegate>()
 
     var playerSourceInfo: PlayerSourceInfo? = null
@@ -685,5 +687,9 @@ class PlayerDelegate2(
     fun setHoldStatus(isHold: Boolean) {
         views.videoPlayer.setHoldStatus(isHold)
         completionBoxController.setHoldStatus(isHold)
+    }
+
+    fun setPlayerSpaceScale(width:Int, height:Int){
+        windowStore.setPlayerSpaceScale(width,height)
     }
 }
