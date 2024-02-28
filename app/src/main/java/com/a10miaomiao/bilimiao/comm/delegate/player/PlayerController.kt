@@ -593,7 +593,7 @@ class PlayerController(
      * 播放结束
      */
     override fun onAutoCompletion() {
-        delegate.historyReport(views.videoPlayer.currentPosition / 1000)
+        delegate.historyReport(views.videoPlayer.currentPosition)
         val nextPlayerSourceInfo = delegate.playerSource?.next()
         if (nextPlayerSourceInfo is VideoPlayerSource) {
             if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_NEXT_VIDEO, true)) {
@@ -648,7 +648,7 @@ class PlayerController(
         currentPosition: Long,
         duration: Long
     ) {
-        delegate.historyReport(progress)
+        delegate.historyReport(currentPosition)
         PlayerService.selfInstance?.setProgress(
             duration,
             currentPosition
