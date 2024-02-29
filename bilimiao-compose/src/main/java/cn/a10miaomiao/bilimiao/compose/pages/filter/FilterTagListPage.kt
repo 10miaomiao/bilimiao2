@@ -105,14 +105,23 @@ internal fun FilterTagListPage() {
         mutableStateOf("")
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(10.dp)
     ) {
+
+        Text(
+            text = "此功能为实验性功能，仅对首页推荐和热门列表生效，开启标签屏蔽后列表加载可能有性能问题",
+            textAlign = TextAlign.Center,
+            color = Color.Red,
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .weight(1f)
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(10.dp),
