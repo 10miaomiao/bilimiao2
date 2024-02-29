@@ -818,8 +818,8 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 +headerView().apply {
                     horizontalPadding = config.pagePadding
                     _topPadding = contentInsets.top + config.pagePadding
-                    _rightPadding = windowStore.state.playerWidth
-                    _minHeight = windowStore.state.playerHeight
+                    _rightPadding = windowStore.state.playerSpaceWidth
+                    _minHeight = windowStore.state.playerSpaceHeight
                 }..lParams(matchParent, wrapContent)
             }
             footerViews(mAdapter) {
