@@ -66,7 +66,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_FNVAL = "player_fnval"
         const val PLAYER_BACKGROUND = "player_background"
         const val PLAYER_PROXY = "player_proxy"
+        const val PLAYER_AUTO_START = "player_auto_start"
         const val PLAYER_AUTO_STOP = "player_auto_stop"
+        const val PLAYER_AUTO_REPLACE = "player_auto_replace"
         const val PLAYER_PLAYING_NOTIFICATION = "player_playing_notification"
         const val PLAYER_FULL_MODE = "player_full_mode"
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
@@ -254,8 +256,20 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             defaultValue = true
         }
 
+        switch(PLAYER_AUTO_START) {
+            title = "打开详情页时自动打开播放"
+            summary = "无正在播放视频，自动播放"
+            defaultValue = false
+        }
+
+        switch(PLAYER_AUTO_REPLACE) {
+            title = "打开新详情页时自动替换播放"
+            summary = "正在播放视频，自动替换正在播放的视频"
+            defaultValue = false
+        }
+
         switch(PLAYER_AUTO_STOP) {
-            title = "关闭详情页时同时关闭播放"
+            title = "关闭详情页时自动关闭播放"
             summary = "呐呐呐呐呐呐呐呐呐"
             defaultValue = false
         }
