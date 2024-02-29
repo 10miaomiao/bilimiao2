@@ -23,8 +23,8 @@ class WindowStore(
         var windowInsets: Insets = Insets(),
         var contentInsets: Insets = Insets(),
         var bottomSheetContentInsets: Insets = Insets(),
-        var playerWidth:Int = 0,
-        var playerHeight:Int = 0,
+        var playerSpaceWidth:Int = 0,
+        var playerSpaceHeight:Int = 0,
     ) {
         fun getContentInsets(view: View?): Insets {
             if (view != null && view.id == bottomSheetFragmentID) {
@@ -77,8 +77,8 @@ class WindowStore(
 
     fun setPlayerSpaceScale(width:Int, height:Int){
         this.setState{
-            this.playerWidth = width
-            this.playerHeight = height
+            playerSpaceWidth = width
+            playerSpaceHeight = height
         }
     }
     data class Insets(

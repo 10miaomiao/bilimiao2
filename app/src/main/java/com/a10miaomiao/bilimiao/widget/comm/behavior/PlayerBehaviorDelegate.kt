@@ -214,6 +214,7 @@ class PlayerBehaviorDelegate(
             || _smallShowArea != onSmallShowArea
             || _viewSizeStatus != viewSizeStatus
             || (shortSide != parent.measuredWidth && shortSide != parent.measuredHeight)
+            || (longSide != parent.measuredWidth && longSide != parent.measuredHeight)
         ) {
             widthHeightRatio = _videoRatio
             onSmallShowArea = _smallShowArea
@@ -328,6 +329,7 @@ class PlayerBehaviorDelegate(
     private fun setPlayerSpaceSize(){
         if(parent.isHoldUpPlayer||parent.orientation == ScaffoldView.VERTICAL||!parent.showPlayer) {
             parent.playerDelegate?.setPlayerSpaceScale(0,0)
+            parent.rightPlayerSpaceWidth = 0
             return
         }
         var width = widthSmall
@@ -338,9 +340,13 @@ class PlayerBehaviorDelegate(
             //窗口过宽，水平不留白
             width = 0
         }
-        if(parent.measuredHeight - height < parent.dip(100)){
-            //窗口过高，竖直不留白
+        if(height > parent.measuredHeight * 3 / 4){
+            //窗口过高，留白方式改为右侧统一留白
+            parent.rightPlayerSpaceWidth = width
             height = 0
+            width = 0
+        } else {
+            parent.rightPlayerSpaceWidth = 0
         }
         parent.playerDelegate?.setPlayerSpaceScale(width,height)
     }
