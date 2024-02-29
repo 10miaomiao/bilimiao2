@@ -41,9 +41,10 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 child.layout(0, 0, 0, 0)
             } else {
                 val left = if (orientation == ScaffoldView.HORIZONTAL) parent.appBarWidth else 0
-                child.layout(left, 0, parent.measuredWidth, parent.measuredHeight)
+                val right = parent.rightPlayerSpaceWidth
+                child.layout(left, 0, parent.measuredWidth - right, parent.measuredHeight)
                 height = parent.measuredHeight
-                width = parent.measuredWidth - left
+                width = parent.measuredWidth - left - right
 
                 if (orientation == ScaffoldView.VERTICAL) {
                     child.translationX = 0f
