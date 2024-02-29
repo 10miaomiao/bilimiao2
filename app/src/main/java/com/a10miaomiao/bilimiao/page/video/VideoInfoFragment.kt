@@ -46,6 +46,7 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -256,17 +257,12 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
     override fun onResume() {
         super.onResume()
-        viewModel.info?.let {
-            if (it.season?.is_jump == 1) {
-                findNavController().popBackStack()
-            }
-        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        if (prefs.getBoolean("player_auto_stop", false)
+        if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_STOP, false)
             && playerStore.state.aid == viewModel.id
         ) {
             basePlayerDelegate.closePlayer()

@@ -115,6 +115,9 @@ class PlayerDelegate2(
     var speed = 1f // 播放速度
     private var lastPosition = 0L
     private val playerCoroutineScope = PlayerCoroutineScope()
+
+    private var lastReportProgress = 0L // 最后记录的播放位置
+
     var playerSource: BasePlayerSource? = null
         private set(value) {
             field = value
@@ -312,18 +315,19 @@ class PlayerDelegate2(
         return header
     }
 
-    private var lastReportProgress = 0L
-    internal fun historyReport(progress: Long) {
-        playerSource?.let {
-            // 5秒记录一次
-            if (progress > 0 && progress - lastReportProgress < 5) {
-                return@let
-            }
-            lastReportProgress = progress
-            DebugMiao.log("progress", progress)
-            activity.lifecycleScope.launch(Dispatchers.IO) {
-                it.historyReport(progress)
-            }
+    internal fun historyReport(currentPosition: Long) {
+        DebugMiao.log("historyReport", currentPosition)
+        if (!userStore.isLogin()) {
+            return
+        }
+        // 5秒记录一次
+        if (currentPosition > 0 && currentPosition - lastReportProgress < 5000) {
+            return
+        }
+        DebugMiao.log("historyReport2", currentPosition)
+        lastReportProgress = currentPosition
+        activity.lifecycleScope.launch(Dispatchers.IO) {
+            playerSource?.historyReport(currentPosition / 1000)
         }
     }
 
@@ -406,7 +410,11 @@ class PlayerDelegate2(
                                     false
                                 }
                         }
+                    } else if (sourceInfo.lastPlayCid == source.id) {
+                        // 从进度0开始记录播放历史
+                        historyReport(0L)
                     }
+                    lastReportProgress = 0L
                     views.videoPlayer.startPlayLogic()
 
                     if (isChangedQuality) {
