@@ -15,8 +15,8 @@ android {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 21
         targetSdk = 34
-        versionCode = 93
-        versionName = "2.3.3"
+        versionCode = 94
+        versionName = "2.3.4"
 
         flavorDimensions("default")
 
@@ -54,9 +54,9 @@ android {
     )
 
     productFlavors {
-        create("coolapk") {
-            applicationId = "cn.a10miaomiao.bilimiao.dev"
-            val manifestPlaceholders = createManifestPlaceholders("Coolapk")
+        create("dev") {
+//            applicationId = "cn.a10miaomiao.bilimiao.dev"
+            val manifestPlaceholders = createManifestPlaceholders("Development")
             addManifestPlaceholders(manifestPlaceholders)
         }
         create("github") {
