@@ -14,6 +14,7 @@ interface BasePlayerDelegate: BaseDelegate {
     fun updateVideoSetting()
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?)
     fun isPlaying(): Boolean
+    fun isPause(): Boolean
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?)
     fun onConfigurationChanged(newConfig: Configuration)
     fun getSourceIds(): PlayerSourceIds

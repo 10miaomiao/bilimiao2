@@ -19,11 +19,13 @@ import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
+import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +43,7 @@ class VideoInfoViewModel(
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
     val basePlayerDelegate by instance<BasePlayerDelegate>()
+    val scaffoldApp by lazy { fragment.requireActivity().getScaffoldView() }
 
     //    val type by lazy { fragment.requireArguments().getString(MainNavArgs.type, "AV") }
     val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
@@ -128,10 +131,22 @@ class VideoInfoViewModel(
 
     private fun autoStartPlay(info: VideoInfo) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(fragment.requireActivity())
-        if (basePlayerDelegate.isPlaying()) {
-            // 自动替换正在播放的视频
-            if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_REPLACE, false)) {
-                playVideo(info, 0)
+        if (scaffoldApp.showPlayer) {
+            if (basePlayerDelegate.isPlaying()) {
+                // 自动替换正在播放的视频
+                if (prefs.getBoolean(VideoSettingFragment.PLAYER_PLAYING_AUTO_REPLACE, false)) {
+                    playVideo(info, 0)
+                }
+            } else if (basePlayerDelegate.isPause()) {
+                // 自动替换暂停的视频
+                if (prefs.getBoolean(VideoSettingFragment.PLAYER_PAUSE_AUTO_REPLACE, false)) {
+                    playVideo(info, 0)
+                }
+            } else {
+                // 自动替换完成的视频
+                if (prefs.getBoolean(VideoSettingFragment.PLAYER_COMPLETE_AUTO_REPLACE, false)) {
+                    playVideo(info, 0)
+                }
             }
         } else {
             // 自动播放新视频
@@ -143,8 +158,13 @@ class VideoInfoViewModel(
 
     private fun playVideo(info: VideoInfo, page: Int) {
         val videoPages = pages
+        val aid = info.aid
         val title = videoPages[page].part
         val cid = videoPages[page].cid
+        if (basePlayerDelegate.getSourceIds().aid == aid) {
+            // 同个视频不替换播放
+            return
+        }
         basePlayerDelegate.openPlayer(
             VideoPlayerSource(
                 title = title,
