@@ -89,7 +89,7 @@ class PlayerBehaviorDelegate(
     override fun onViewDragStateChanged(state: Int) {
         super.onViewDragStateChanged(state)
         dragState = state
-        if (state == ViewDragHelper.STATE_DRAGGING) {
+        if (state == ViewDragHelper.STATE_DRAGGING && !parent.isHoldUpPlayer) {
             danmakuVideoPlayer?.showSmallDargBar()
         }
     }
@@ -118,6 +118,26 @@ class PlayerBehaviorDelegate(
         dragger.settleCapturedViewAt(playerX, playerY)
         ViewCompat.postOnAnimation(parent, draggerSettle)
         super.onViewReleased(releasedChild, xvel, yvel)
+    }
+
+    /**
+     * 挂起到右上↗
+     */
+    fun holdUpTop() {
+        playerX = parent.measuredWidth - widthHold - windowInsets.right
+        playerY = windowInsets.top
+        if (dragger.smoothSlideViewTo(playerView, playerX, playerY)) {
+            ViewCompat.postInvalidateOnAnimation(parent)
+        }
+        ViewCompat.postOnAnimation(parent, object : Runnable {
+            override fun run() {
+                if (dragger.continueSettling(true)) {
+                    ViewCompat.postOnAnimation(parent, this)
+                } else {
+                    holdStatusTrue()
+                }
+            }
+        })
     }
 
     fun holdStatusTrue() {
@@ -185,7 +205,7 @@ class PlayerBehaviorDelegate(
             val y = ev.y
             if (playerView.x < x
                 && playerView.y < y
-                && playerView.x + width > x
+                && playerView.x + width - dragAreaHeight > x // 减去右侧挂起按钮宽度
                 && playerView.y + (if (parent.isHoldUpPlayer) height else dragAreaHeight) > y
             ) {
                 dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))

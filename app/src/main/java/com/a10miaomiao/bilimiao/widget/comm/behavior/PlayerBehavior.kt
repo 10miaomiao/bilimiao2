@@ -205,6 +205,10 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         }
     }
 
+    fun holdUpPlayer() {
+        behaviorDelegate?.holdUpTop()
+    }
+
 
     // 显示动画
     private val showAnimation = AnimationSet(true).apply {

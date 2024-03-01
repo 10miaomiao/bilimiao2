@@ -23,6 +23,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
@@ -104,6 +105,7 @@ class PlayerController(
         setDanmakuSwitchOnClickListener(that::danmakuSwitchClick)
         setExpandButtonOnClickListener(that::showPagesOrEpisodes)
         setSendDanmakuButtonOnClickListener(that::showSendDanmakuPage)
+        serHoldUpButtonOnClickListener(that::holdUpPlayer)
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)
         updatePlayerMode(activity.resources.configuration)
@@ -499,6 +501,10 @@ class PlayerController(
             activity, R.id.nav_bottom_sheet_fragment
         )
         nav.navigateToCompose(SendDanmakuPage())
+    }
+
+    fun holdUpPlayer(view: View) {
+        scaffoldApp.holdUpPlayer()
     }
 
     private fun moreMenuItemClick(item: MenuItem): Boolean {

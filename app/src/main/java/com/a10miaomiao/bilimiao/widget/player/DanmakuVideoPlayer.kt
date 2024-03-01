@@ -21,6 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -30,9 +31,13 @@ import androidx.annotation.RequiresApi
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
+import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer
+import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
+import com.shuyu.gsyvideoplayer.video.base.GSYVideoViewBridge
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
@@ -59,7 +64,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     private val mRootLayout: RelativeLayout by lazy { findViewById(R.id.root_layout) }
 
     // 小窗顶部拖动横条
+    private val mDragBarLayout: FrameLayout by lazy { findViewById(R.id.layout_drag_bar) }
     private val mDragBar: View by lazy { findViewById(R.id.drag_bar) }
+    private val mHoldUpBtn: View by lazy { findViewById(R.id.hold_up) }
 
     // 顶栏更多按钮
     private val mMoreBtn: View by lazy { findViewById(R.id.more) }
@@ -314,9 +321,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mSendDanmakuTV.visibility = GONE
                 mBackButton.setImageResource(R.drawable.ic_close_white_24dp)
                 if (mode == PlayerMode.SMALL_FLOAT) {
-                    mDragBar.visibility = mTopContainer.visibility
+                    mDragBarLayout.visibility = mTopContainer.visibility
                 } else {
-                    mDragBar.visibility = GONE
+                    mDragBarLayout.visibility = GONE
                 }
                 updateDanmakuMargin()
             }
@@ -326,7 +333,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mMiniSendDanmakuIV.visibility = GONE
                 mSendDanmakuTV.visibility = VISIBLE
                 mBackButton.setImageResource(R.drawable.ic_arrow_back_white_24dp)
-                mDragBar.visibility = GONE
+                mDragBarLayout.visibility = GONE
                 updateDanmakuMargin()
             }
         }
@@ -589,10 +596,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                     if (visibility == VISIBLE) 0f else dip(40).toFloat()
                 when (mode) {
                     PlayerMode.SMALL_FLOAT -> {
-                        mDragBar.visibility = visibility
+                        mDragBarLayout.visibility = visibility
                     }
                     PlayerMode.SMALL_TOP -> {
-                        mDragBar.visibility = View.GONE
+                        mDragBarLayout.visibility = View.GONE
                     }
                     PlayerMode.FULL -> {
                         statusBarHelper?.isShowStatus = visibility == View.VISIBLE
@@ -773,6 +780,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mSendDanmakuTV.setOnClickListener(l)
     }
 
+    fun serHoldUpButtonOnClickListener(l: OnClickListener) {
+        mHoldUpBtn.setOnClickListener(l)
+    }
+
     private var mDialogOffsetText: TextView? = null
     override fun showProgressDialog(
         deltaX: Float,
@@ -892,7 +903,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             mLockContainer.setPadding(left, 0, right, 0)
         } else {
             if (mode == PlayerMode.SMALL_FLOAT) {
-                mTopContainer.setPadding(0, dip(15), 0, 0)
+                mTopContainer.setPadding(0, dip(24), 0, 0)
             } else {
                 mTopContainer.setPadding(0, 0, 0, 0)
             }
@@ -909,14 +920,14 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     fun showSmallDargBar() {
         if (mode == PlayerMode.SMALL_FLOAT) {
-            mDragBar.visibility = VISIBLE
+            mDragBarLayout.visibility = VISIBLE
         } else {
-            mDragBar.visibility = GONE
+            mDragBarLayout.visibility = GONE
         }
     }
 
     fun hideSmallDargBar() {
-        mDragBar.visibility = mTopContainer.visibility
+        mDragBarLayout.visibility = mTopContainer.visibility
     }
 
     fun setHoldStatus(isHold:Boolean){

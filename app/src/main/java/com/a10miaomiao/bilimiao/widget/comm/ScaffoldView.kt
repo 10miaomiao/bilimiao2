@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -18,6 +19,7 @@ import com.a10miaomiao.bilimiao.widget.comm.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
+import com.a10miaomiao.bilimiao.widget.comm.behavior.RightHoldUpBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.views.dsl.core.viewFactory
@@ -220,6 +222,10 @@ class ScaffoldView @JvmOverloads constructor(
                 appBarBehavior?.slideDown(it)
             }
         }
+    }
+
+    fun holdUpPlayer() {
+        playerBehavior?.holdUpPlayer()
     }
 
     inline fun lParams(
