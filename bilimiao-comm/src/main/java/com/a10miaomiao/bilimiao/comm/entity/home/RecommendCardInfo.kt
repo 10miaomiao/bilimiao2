@@ -1,7 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.entity.home
 
 data class RecommendCardInfo (
+    // small_cover_v2
     val card_type: String,
+    // av/bv?/picture/bangumi/live
     val card_goto: String,
     val goto: String?,
     val param: String,

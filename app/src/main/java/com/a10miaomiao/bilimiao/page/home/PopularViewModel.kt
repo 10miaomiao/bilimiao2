@@ -73,8 +73,13 @@ class PopularViewModel(
                 if (filterStore.filterTagCount != 0
                     && it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
                     && it.smallCoverV5 != null) {
-                    val res = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto.uppercase(Locale.ROOT)).call().gson<ResultInfo<VideoInfo>>().data
-                    notHide = notHide && filterStore.filterTag(res.tag)
+                    notHide = notHide && when (it.smallCoverV5.base.cardGoto.lowercase()) {
+                        "av" -> {
+                            val tag = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto).call().gson<ResultInfo<VideoInfo>>().data.tag
+                            filterStore.filterTag(tag)
+                        }
+                        else -> true
+                    }
                 }
                 notHide
             }.map {

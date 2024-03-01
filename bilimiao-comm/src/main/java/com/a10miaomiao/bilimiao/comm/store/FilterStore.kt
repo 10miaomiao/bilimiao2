@@ -137,7 +137,7 @@ class FilterStore(override val di: DI) :
 
     fun filterTag(text: List<VideoTagInfo>): Boolean {
         text.forEach {
-            if (!state.filterTagList.contains(it.tag_name)) {
+            if (state.filterTagList.contains(it.tag_name)) {
                 return false
             }
         }
