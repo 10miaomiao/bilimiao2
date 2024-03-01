@@ -157,7 +157,7 @@ internal class DownloadBangumiCreatePageViewModel(
         id: String
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val res = BiliApiService.bangumiAPI.seasonInfoV2(id).awaitCall()
+            val res = BiliApiService.bangumiAPI.seasonInfoV2(id, "").awaitCall()
                 .gson<ResultInfo<SeasonV2Info>>()
             if (res.code == 0) {
                 _seasonDetail = res.data
