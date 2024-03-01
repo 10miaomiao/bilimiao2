@@ -403,13 +403,31 @@
 
     </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/drag_bar"
+    <FrameLayout
+        android:id="@+id/layout_drag_bar"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:src="@drawable/shape_small_drag_bar"
-        android:scaleType="center"
-        android:visibility="gone"/>
+        android:layout_height="24dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/drag_bar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/shape_small_drag_bar"
+            android:scaleType="center"
+            />
+
+        <ImageView
+            android:id="@+id/hold_up"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/shape_player_hold_up"
+            android:scaleType="center"
+            android:layout_marginEnd="2dp"
+            android:layout_gravity="end|center_vertical"/>
+
+    </FrameLayout>
+
 
     <LinearLayout
         android:id="@+id/speed_tips"
@@ -422,7 +440,7 @@
         android:visibility="gone">
         <ImageView
             android:id="@+id/speed_tips_icon"
-            android:layout_width="40dp"
+            android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginRight="5dp"
             android:src="@drawable/shape_player_speed_tips_icon"

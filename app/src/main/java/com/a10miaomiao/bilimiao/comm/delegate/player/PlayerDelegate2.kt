@@ -316,7 +316,6 @@ class PlayerDelegate2(
     }
 
     internal fun historyReport(currentPosition: Long) {
-        DebugMiao.log("historyReport", currentPosition)
         if (!userStore.isLogin()) {
             return
         }
@@ -324,7 +323,6 @@ class PlayerDelegate2(
         if (currentPosition > 0 && currentPosition - lastReportProgress < 5000) {
             return
         }
-        DebugMiao.log("historyReport2", currentPosition)
         lastReportProgress = currentPosition
         activity.lifecycleScope.launch(Dispatchers.IO) {
             playerSource?.historyReport(currentPosition / 1000)
