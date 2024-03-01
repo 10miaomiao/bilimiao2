@@ -70,9 +70,14 @@ class RecommendViewModel(
                             && filterStore.filterWord(it.title)
                             && filterStore.filterUpper(it.args.up_id ?: "-1")
                     if (filterStore.filterTagCount != 0) {
-                        val tag  = BiliApiService.videoAPI.info(it.param, it.card_goto.uppercase(
-                            Locale.ROOT)).call().gson<ResultInfo<VideoInfo>>().data.tag.joinToString { tag -> tag.tag_name }
-                        notHide = notHide && filterStore.filterWord(tag)
+                        notHide = notHide && when (it.card_goto) {
+                            "av" -> {
+                                val tag = BiliApiService.videoAPI.info(it.param, it.card_goto).call().gson<ResultInfo<VideoInfo>>().data.tag
+                                filterStore.filterTag(tag)
+                            }
+                            else -> true
+                        }
+
                     }
                     notHide
                 }
