@@ -131,6 +131,7 @@ class ThemeSettingFragment : Fragment(), DIAware, MyPage {
             _rightPadding = contentInsets.right + config.pagePadding
             _topPadding = contentInsets.top + config.pagePadding
             _bottomPadding = contentInsets.bottom
+            clipToPadding = true
 
             _miaoLayoutManage(GridAutofitLayoutManager(
                 requireContext(),

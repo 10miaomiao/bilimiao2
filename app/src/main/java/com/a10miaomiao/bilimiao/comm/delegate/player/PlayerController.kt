@@ -531,11 +531,13 @@ class PlayerController(
             }
             R.id.video_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                nav.navigate(Uri.parse("bilimiao://setting/video"))
+                nav.navigate(VideoSettingFragment.actionId)
             }
             R.id.danmuku_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                nav.navigate(Uri.parse("bilimiao://setting/danmaku"))
+                val tabIndex = if (scaffoldApp.fullScreenPlayer) 1 else 0
+                val args = DanmakuSettingFragment.createArguments(tabIndex)
+                nav.navigate(DanmakuSettingFragment.actionId, args)
             }
             R.id.scale_1,
             R.id.scale_2,
