@@ -18,9 +18,10 @@ class BangumiAPI {
     /**
      * 番剧信息V2
      */
-    fun seasonInfoV2(seasonId: String) = MiaoHttp.request {
+    fun seasonInfoV2(seasonId: String, epId: String) = MiaoHttp.request {
         url = BiliApiService.biliApi("pgc/view/v2/app/season",
-            "season_id" to seasonId
+            "season_id" to seasonId.ifBlank { null },
+            "ep_id" to epId.ifBlank { null },
         )
     }
 
@@ -29,7 +30,8 @@ class BangumiAPI {
      */
     fun seasonSection(seasonId: String) = MiaoHttp.request {
         url = BiliApiService.biliApi("pgc/web/season/section",
-            "season_id" to seasonId)
+            "season_id" to seasonId
+        )
     }
 
     /**

@@ -12,8 +12,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
@@ -47,15 +49,30 @@ object BiliNavigation {
                 val id = matcher.group(1)
                 val args = VideoInfoFragment.createArguments("BV$id")
                 nav.navigate(VideoInfoFragment.actionId, args)
-                DebugMiao.log(VideoInfoFragment.actionId, args)
                 return true
             }
             compile = Pattern.compile("ss(\\d+)")
             matcher = compile.matcher(url)
             if (matcher.find()) {
-                val id = matcher.group(1)
-                val args = BangumiDetailFragment.createArguments(id)
-                nav.navigate(BangumiDetailFragment.actionId, args)
+                nav.navigateToCompose(BangumiDetailPage()) {
+                    id set matcher.group(1)
+                }
+                return true
+            }
+            compile = Pattern.compile("ep(\\d+)")
+            matcher = compile.matcher(url)
+            if (matcher.find()) {
+                nav.navigateToCompose(BangumiDetailPage()) {
+                    epId set matcher.group(1)
+                }
+                return true
+            }
+            compile = Pattern.compile("md(\\d+)")
+            matcher = compile.matcher(url)
+            if (matcher.find()) {
+                nav.navigateToCompose(BangumiDetailPage()) {
+                    mediaId set matcher.group(1)
+                }
                 return true
             }
         }
@@ -111,7 +128,8 @@ object BiliNavigation {
         val host = uri.host ?: ""
         if ("bilibili.com" in host
             || "bilibili.tv" in host
-            || "b23.tv" in host) {
+            || "b23.tv" in host
+            || "b23.snm0516.aisee.tv" in host) {
             // b站网页使用内部浏览器打开
             val nav = activity.findNavController(R.id.nav_host_fragment)
             nav.navigate(

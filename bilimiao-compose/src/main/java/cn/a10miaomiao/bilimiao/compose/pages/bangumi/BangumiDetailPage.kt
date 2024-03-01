@@ -56,12 +56,14 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.gson.JsonObject
 import com.kongzue.dialogx.dialogs.PopTip
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
@@ -76,11 +78,13 @@ import org.kodein.di.instance
 
 class BangumiDetailPage : ComposePage() {
 
-    val id = stringPageArg("id")
+    // 三选其一
+    val id = stringPageArg("id", "")
     val epId = stringPageArg("epid", "")
+    val mediaId = stringPageArg("mediaid", "")
 
     override val route: String
-        get() = "bangumi/${id}/detail/${epId}"
+        get() = "bangumi/detail?id=${id}&epid=${epId}%mediaid=${mediaId}"
 
     @Composable
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
@@ -88,6 +92,7 @@ class BangumiDetailPage : ComposePage() {
         BangumiDetailPageContent(
             id = navEntry.arguments?.get(id) ?: "",
             epid = navEntry.arguments?.get(epId) ?: "",
+            mediaId = navEntry.arguments?.get(mediaId) ?: "",
             viewModel = viewModel,
         )
     }
@@ -106,8 +111,19 @@ internal class BangumiDetailPageViewModel(
         set(value) {
             if (field != value) {
                 field = value
-                loadData(seasonId)
-                loadEpisodeList(seasonId)
+                if (field.isNotBlank() && field != detailInfo.value?.season_id) {
+                    loadData()
+                    loadEpisodeList(field)
+                }
+            }
+        }
+    var epId = ""
+        set(value) {
+            if (field != value) {
+                field = value
+                if (field.isNotBlank() && seasonId.isBlank()) {
+                    loadData()
+                }
             }
         }
 
@@ -122,14 +138,14 @@ internal class BangumiDetailPageViewModel(
 
 //    val isFollow get() = detailInfo.value?.user_status?.follow == 1
 
-    fun loadData(
-        id: String,
-    ) = viewModelScope.launch(Dispatchers.IO) {
+    fun loadData() = viewModelScope.launch(Dispatchers.IO) {
         try {
             loading.value = true
             detailInfo.value = null
 
-            val res = BiliApiService.bangumiAPI.seasonInfoV2(id).awaitCall()
+            val res = BiliApiService.bangumiAPI.seasonInfoV2(
+                seasonId, epId
+            ).awaitCall()
                 .gson<ResultInfo<SeasonV2Info>>()
             if (res.code == 0) {
                 val result = res.data
@@ -139,6 +155,9 @@ internal class BangumiDetailPageViewModel(
                 }
                 seasons.value = seasonModule?.data?.seasons ?: emptyList()
                 isFollow.value = detailInfo.value?.user_status?.follow == 1
+                if (seasonId != result.season_id) {
+                    loadEpisodeList(result.season_id)
+                }
             } else {
                 withContext(Dispatchers.Main) {
                     PopTip.show(res.message)
@@ -314,11 +333,11 @@ internal class BangumiDetailPageViewModel(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun BangumiDetailPageContent(
     id: String,
     epid: String,
+    mediaId: String,
     viewModel: BangumiDetailPageViewModel,
 ) {
     val playerStore: PlayerStore by rememberInstance()
@@ -356,8 +375,9 @@ internal fun BangumiDetailPageContent(
 
     LaunchedEffect(seasonId.value) {
         viewModel.seasonId = seasonId.value
-//        viewModel.loadData(seasonId.value)
-//        viewModel.loadEpisodeList(seasonId.value)
+    }
+    LaunchedEffect(seasonEpId.value) {
+        viewModel.epId = seasonEpId.value
     }
 
     LaunchedEffect(seasons, seasonId.value) {
@@ -366,6 +386,33 @@ internal fun BangumiDetailPageContent(
         }
         if (index > 0) {
             seasonsListState.scrollToItem(index)
+        }
+    }
+
+    LaunchedEffect(mediaId) {
+        // 先通过mediaId拿到seasonId
+        if (mediaId.isNotBlank() && seasonId.value.isBlank()) {
+            try {
+                val res = withContext(Dispatchers.IO) {
+                    MiaoHttp.request {
+                        url = "https://api.bilibili.com/pgc/review/user?media_id=${mediaId}"
+                    }.awaitCall().gson<ResultInfo2<JsonObject>>()
+                }
+                if (res.isSuccess) {
+                    if (res.result.has("media")
+                        && res.result["media"].isJsonObject
+                    ) {
+                        val media = res.result["media"].asJsonObject
+                        if (media.has("season_id")) {
+                            seasonId.value = media["season_id"].asString
+                        }
+                    }
+                } else {
+                    PopTip.show(res.message)
+                }
+            } catch (e: Exception) {
+                PopTip.show("网络错误")
+            }
         }
     }
 
