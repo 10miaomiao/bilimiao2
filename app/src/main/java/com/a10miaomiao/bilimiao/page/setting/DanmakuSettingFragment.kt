@@ -13,8 +13,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.navigation.NavType
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -32,6 +34,7 @@ import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.tabLayout
 import com.a10miaomiao.bilimiao.comm.viewPager
@@ -67,6 +70,18 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
         override val name = "setting.danmaku"
         override fun FragmentNavigatorDestinationBuilder.init() {
             deepLink("bilimiao://setting/danmaku")
+            argument(MainNavArgs.index) {
+                type = NavType.IntType
+                defaultValue = 0
+            }
+        }
+
+        fun createArguments(
+            index: Int,
+        ): Bundle {
+            return bundleOf(
+                MainNavArgs.index to index,
+            )
         }
 
         private val ID_viewPager = View.generateViewId()
@@ -193,6 +208,10 @@ class DanmakuSettingFragment : Fragment(), DIAware, MyPage,
             TabLayoutMediator(tabLayout, viewPager) { tab, position ->
                 tab.text = modeList[position].second
             }.attach()
+
+            val tabIndex = requireArguments().getInt(MainNavArgs.index)
+            viewPager.setCurrentItem(tabIndex, false)
+            tabLayout.getTabAt(tabIndex)?.select()
         }
         update()
     }
