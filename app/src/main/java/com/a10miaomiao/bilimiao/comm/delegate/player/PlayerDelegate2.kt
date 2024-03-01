@@ -578,9 +578,13 @@ class PlayerDelegate2(
     }
 
     override fun isPlaying(): Boolean {
-//        return views.videoPlayer.isInPlayingState
         return views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PLAYING ||
+                views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PREPAREING ||
                 views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PLAYING_BUFFERING_START
+    }
+
+    override fun isPause(): Boolean {
+        return views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PAUSE
     }
 
     override fun setWindowInsets(

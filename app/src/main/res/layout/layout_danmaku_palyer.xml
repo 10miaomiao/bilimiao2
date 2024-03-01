@@ -440,7 +440,7 @@
         android:visibility="gone">
         <ImageView
             android:id="@+id/speed_tips_icon"
-            android:layout_width="20dp"
+            android:layout_width="30dp"
             android:layout_height="20dp"
             android:layout_marginRight="5dp"
             android:src="@drawable/shape_player_speed_tips_icon"

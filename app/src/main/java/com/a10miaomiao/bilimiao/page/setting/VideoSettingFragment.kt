@@ -68,7 +68,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_PROXY = "player_proxy"
         const val PLAYER_AUTO_START = "player_auto_start"
         const val PLAYER_AUTO_STOP = "player_auto_stop"
-        const val PLAYER_AUTO_REPLACE = "player_auto_replace"
+        const val PLAYER_PLAYING_AUTO_REPLACE = "player_playing_auto_replace"
+        const val PLAYER_PAUSE_AUTO_REPLACE = "player_pause_auto_replace"
+        const val PLAYER_COMPLETE_AUTO_REPLACE = "player_complete_auto_replace"
         const val PLAYER_PLAYING_NOTIFICATION = "player_playing_notification"
         const val PLAYER_FULL_MODE = "player_full_mode"
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
@@ -257,19 +259,32 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         }
 
         switch(PLAYER_AUTO_START) {
-            title = "打开详情页时自动打开播放"
+            title = "打开详情页时自动打开播放器"
             summary = "无正在播放视频，自动播放"
             defaultValue = false
         }
 
-        switch(PLAYER_AUTO_REPLACE) {
-            title = "打开新详情页时自动替换播放"
-            summary = "正在播放视频，自动替换正在播放的视频"
+        switch(PLAYER_PLAYING_AUTO_REPLACE) {
+            title = "自动替换播放中的视频"
+            summary = "正在播放视频时，打开新详情页自动开始播放新视频"
             defaultValue = false
         }
 
+        switch(PLAYER_PAUSE_AUTO_REPLACE) {
+            title = "自动替换暂停中的视频"
+            summary = "暂停播放视频时，打开新详情页自动开始播放新视频"
+            defaultValue = false
+        }
+
+        switch(PLAYER_COMPLETE_AUTO_REPLACE) {
+            title = "自动替换播放完成的视频"
+            summary = "完成视频播放时，打开新详情页自动开始播放新视频"
+            defaultValue = false
+        }
+
+
         switch(PLAYER_AUTO_STOP) {
-            title = "关闭详情页时自动关闭播放"
+            title = "关闭详情页时自动关闭播放器"
             summary = "呐呐呐呐呐呐呐呐呐"
             defaultValue = false
         }
