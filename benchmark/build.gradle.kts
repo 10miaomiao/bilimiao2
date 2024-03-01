@@ -38,7 +38,7 @@ android {
 
     flavorDimensions += listOf("default")
     productFlavors {
-        create("coolapk") { dimension = "default" }
+        create("dev") { dimension = "default" }
         create("github") { dimension = "default" }
         create("gitee") { dimension = "default" }
         create("qq") { dimension = "default" }
