@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -78,6 +79,9 @@ class RecommendViewModel(
                             else -> true
                         }
 
+                    }
+                    if (!notHide) {
+                        Log.debug { "Video ${it.title} was filtered" }
                     }
                     notHide
                 }

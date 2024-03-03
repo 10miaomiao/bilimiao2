@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -80,6 +81,9 @@ class PopularViewModel(
                         }
                         else -> true
                     }
+                }
+                if (!notHide && it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5) {
+                    Log.debug { "Video ${it.smallCoverV5.base.title} was filtered" }
                 }
                 notHide
             }.map {
