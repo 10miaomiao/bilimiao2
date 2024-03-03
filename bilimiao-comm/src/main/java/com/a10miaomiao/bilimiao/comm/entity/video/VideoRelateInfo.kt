@@ -5,12 +5,17 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class VideoRelateInfo (
+    // 0/1/2
     val ad_index: Int,
+    // av format avid
     val aid: String?,
+    // 0
     val card_index: Int,
     val cid: Double,
 //    val client_ip: String,
+    // seconds
     val duration: Long,
+    // av
     val goto: String,
     val is_ad_loc: Boolean,
     val owner: VideoOwnerInfo?,
