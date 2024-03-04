@@ -27,7 +27,7 @@ fun isLightTheme(context: Context): Boolean {
 }
 
 @Composable
-fun BilimiaoTheme(content: @Composable () -> Unit) {
+public fun BilimiaoTheme(content: @Composable () -> Unit) {
     val context = LocalContext.current
     val themeColor = remember { getThemeColor(context) }
     val isLightTheme = remember { isLightTheme(context) }

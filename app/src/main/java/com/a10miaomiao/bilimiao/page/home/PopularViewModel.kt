@@ -76,7 +76,7 @@ class PopularViewModel(
                     && it.smallCoverV5 != null) {
                     notHide = notHide && when (it.smallCoverV5.base.cardGoto.lowercase()) {
                         "av" -> {
-                            val tag = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto).call().gson<ResultInfo<VideoInfo>>().data.tag
+                            val tag = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto).awaitCall().gson<ResultInfo<VideoInfo>>().data.tag
                             filterStore.filterTag(tag)
                         }
                         else -> true

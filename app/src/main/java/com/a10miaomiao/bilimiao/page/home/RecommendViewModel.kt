@@ -18,13 +18,19 @@ import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.toast.toast
-import java.util.Locale
+
 
 class RecommendViewModel(
     override val di: DI,
@@ -42,6 +48,7 @@ class RecommendViewModel(
         list.data[list.data.size - 1].idx
     }
     var list = PaginationInfo<RecommendCardInfo>()
+
     var triggered = false
 
     init {
@@ -50,6 +57,7 @@ class RecommendViewModel(
     }
 
     private fun getListStyle() {
+
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         listStyle = prefs.getString("home_recommend_list_style", "0")!!
     }
@@ -57,6 +65,7 @@ class RecommendViewModel(
     private fun loadData(
         idx: Long = _idx
     ) = viewModelScope.launch(Dispatchers.IO){
+
         try {
             ui.setState {
                 list.loading = true
@@ -73,12 +82,11 @@ class RecommendViewModel(
                     if (filterStore.filterTagCount != 0) {
                         notHide = notHide && when (it.card_goto) {
                             "av" -> {
-                                val tag = BiliApiService.videoAPI.info(it.param, it.card_goto).call().gson<ResultInfo<VideoInfo>>().data.tag
+                                val tag = BiliApiService.videoAPI.info(it.param, it.card_goto).awaitCall().gson<ResultInfo<VideoInfo>>().data.tag
                                 filterStore.filterTag(tag)
                             }
                             else -> true
                         }
-
                     }
                     if (!notHide) {
                         Log.debug { "Video ${it.title} was filtered" }
@@ -136,4 +144,39 @@ class RecommendViewModel(
             loadData(0)
         }
     }
+}
+
+class BiliRecommend(idx: Long, val filterStore: FilterStore) {
+    val recommendList: Flow<RecommendCardInfo> = flow {
+        while (true) {
+            val result = BiliApiService.homeApi.recommendList(idx = idx,).awaitCall().gson<ResultInfo<HomeRecommendInfo>>()
+            if (result.isSuccess){
+                result.data.items.forEach {
+                    var notHide = (it.goto?.isNotEmpty() ?: false)
+                            && filterStore.filterWord(it.title)
+                            && filterStore.filterUpper(it.args.up_id ?: "-1")
+                    if (filterStore.filterTagCount != 0) {
+                        notHide = notHide && when (it.card_goto) {
+                            "av" -> {
+                                val tag = BiliApiService.videoAPI.info(it.param, it.card_goto).awaitCall().gson<ResultInfo<VideoInfo>>().data.tag
+                                filterStore.filterTag(tag)
+                            }
+                            else -> true
+                        }
+
+                    }
+                    if (!notHide) {
+                        Log.debug { "Video ${it.title} was filtered" }
+                    }
+                    if (notHide) {
+                        emit(it)
+                    }
+                }
+            } else {
+                TODO()
+            }
+            delay(1000)
+        }
+    }
+
 }

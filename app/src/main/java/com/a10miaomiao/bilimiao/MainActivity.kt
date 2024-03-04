@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.net.Uri
@@ -19,11 +18,12 @@ import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
@@ -33,8 +33,8 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import cn.a10miaomiao.bilimiao.compose.BilimiaoTheme
 import com.a10miaomiao.bilimiao.activity.SearchActivity
-import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -43,8 +43,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.compose.MiaoApp
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
@@ -61,7 +60,19 @@ import org.kodein.di.bindSingleton
 import splitties.views.backgroundColor
 
 
-class MainActivity
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            BilimiaoTheme {
+                MiaoApp()
+            }
+        }
+    }
+}
+class MainActivity2: PreviousMainActivity()
+open class PreviousMainActivity
     : AppCompatActivity(),
     DIAware,
     NavController.OnDestinationChangedListener,
@@ -70,7 +81,7 @@ class MainActivity
     lateinit var ui: MainUi
 
     override val di: DI = DI.lazy {
-        bindSingleton { this@MainActivity }
+        bindSingleton { this@PreviousMainActivity }
         store.loadStoreModules(this)
         bindSingleton { basePlayerDelegate }
         bindSingleton { themeDelegate }
@@ -251,7 +262,7 @@ class MainActivity
     val onBackLongClick = View.OnLongClickListener {
         if (ui.root.showPlayer) {
             MainBackPopupMenu(
-                this@MainActivity,
+                this@PreviousMainActivity,
                 it,
                 basePlayerDelegate
             ).show()

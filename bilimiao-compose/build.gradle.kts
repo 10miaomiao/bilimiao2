@@ -6,6 +6,9 @@ plugins {
     id("kotlin-parcelize")
     id("bilimiao-build")
 }
+kotlin {
+    jvmToolchain(8)
+}
 
 android {
     compileSdk = 33
@@ -35,12 +38,12 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.10"
+    }
 
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.0"
     }
     namespace = "cn.a10miaomiao.bilimiao.compose"
     packaging {
@@ -72,7 +75,6 @@ dependencies {
     implementation(Libraries.composeUiToolingPreview)
     implementation(Libraries.activityCompose)
     implementation(Libraries.navigationCompose)
-
     implementation(Libraries.accompanistDrawablePainter)
 
     implementation(Libraries.gson)
@@ -86,12 +88,12 @@ dependencies {
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
-    implementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    implementation(platform(Libraries.composeBOM))
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.espresso)
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    androidTestImplementation(platform(Libraries.composeBOM))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

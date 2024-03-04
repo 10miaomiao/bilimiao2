@@ -87,7 +87,7 @@ internal class FilterWordListPageViewModel(
 }
 
 @Composable
-internal fun FilterWordListPage() {
+fun FilterWordListPage() {
     val viewModel: FilterWordListPageViewModel = diViewModel()
 
     val state by viewModel.stateFlow.collectAsState()

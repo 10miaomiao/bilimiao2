@@ -60,7 +60,7 @@ internal class FilterUpperListPageViewModel(
 }
 
 @Composable
-internal fun FilterUpperListPage() {
+fun FilterUpperListPage() {
     val viewModel: FilterUpperListPageViewModel = diViewModel()
 
     val state by viewModel.stateFlow.collectAsState()

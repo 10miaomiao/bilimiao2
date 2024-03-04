@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import com.a10miaomiao.bilimiao.MainActivity
+
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
@@ -127,7 +127,7 @@ class SearchStartViewModel (
             )
             nav.navigate(SearchResultFragment.actionId, args)
         } else {
-            (activity as? MainActivity)?.searchSelfPage(keyword)
+            // (activity as? MainActivity)?.searchSelfPage(keyword)
         }
     }
 

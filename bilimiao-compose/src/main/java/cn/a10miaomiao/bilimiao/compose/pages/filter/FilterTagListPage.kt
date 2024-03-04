@@ -87,7 +87,7 @@ internal class FilterTagListPageViewModel(
 }
 
 @Composable
-internal fun FilterTagListPage() {
+fun FilterTagListPage() {
     val viewModel: FilterTagListPageViewModel = diViewModel()
 
     val state by viewModel.stateFlow.collectAsState()

@@ -5,6 +5,7 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-android")
     id("bilimiao-build")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -90,6 +91,13 @@ android {
         checkReleaseBuilds = false
         abortOnError = false
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.10"
+    }
+
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
@@ -150,6 +158,21 @@ dependencies {
 
     // 百度统计
     implementation(Libraries.baiduMobstat)
+
+    // Jetpack Compose
+    implementation(Libraries.composeUi)
+    implementation(Libraries.composeMaterial)
+    implementation(Libraries.composeMaterialIconsExtended)
+    implementation(Libraries.composeMaterial3)
+//    implementation(Libraries.composeMaterial3Android)
+    implementation(Libraries.composeMaterial3WindowSizeClass)
+    implementation(Libraries.composeUiToolingPreview)
+    implementation(Libraries.activityCompose)
+    implementation(Libraries.navigationCompose)
+    implementation(Libraries.composeDestinations)
+    ksp(Libraries.composeDestinationsKSP)
+    implementation(Libraries.accompanistDrawablePainter)
+
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)

@@ -20,14 +20,14 @@ class SearchHistoryDB(context: Context, name: String, factory: SQLiteDatabase.Cu
             |keyword text,
             |type CHAR(20) default 'video')""".trimMargin()
     }
-
+    override fun onOpen(db: SQLiteDatabase?) {
+        db?.execSQL(CREATE_TABLE)
+    }
     override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
-        sqLiteDatabase.execSQL(Companion.CREATE_TABLE)//创建表
+        sqLiteDatabase.execSQL(CREATE_TABLE)
     }
 
-    override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) {
-
-    }
+    override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) { }
 
     /**
      * 查询全部搜索记录

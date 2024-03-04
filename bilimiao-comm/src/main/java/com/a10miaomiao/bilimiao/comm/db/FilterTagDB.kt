@@ -25,9 +25,7 @@ class FilterTagDB(context: Context) :
         db?.execSQL(CREATE_TABLE)
     }
 
-    override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) {
-
-    }
+    override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) { }
 
     fun queryAll(): ArrayList<String> {
         val tags = ArrayList<String>()

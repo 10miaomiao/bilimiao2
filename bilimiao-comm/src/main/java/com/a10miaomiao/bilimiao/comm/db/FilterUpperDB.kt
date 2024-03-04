@@ -20,10 +20,10 @@ class FilterUpperDB(context: Context) :
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_TABLE)//创建表
     }
-
-    override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) {
-
+    override fun onOpen(db: SQLiteDatabase?) {
+        db?.execSQL(CREATE_TABLE)
     }
+    override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) { }
 
     /**
      * 查询全部记录

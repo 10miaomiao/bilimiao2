@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="self">我的</string>
+    <string name="home">主页</string>
+    <string name="settings">设置</string>
+</resources>

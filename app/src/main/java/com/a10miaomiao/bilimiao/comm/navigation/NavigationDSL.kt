@@ -6,7 +6,6 @@ import android.view.View
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
@@ -50,24 +49,24 @@ inline fun <T : ComposePage> NavController.navigateToCompose(
 ) = navigateToCompose(page.also(initArgs), navOptions)
 
 fun Activity.openSearch(view: View) {
-    val searchConfig = (this as? MainActivity)?.pageConfig?.search
-    if (searchConfig != null) {
-        SearchActivity.launch(
-            this,
-            searchConfig.keyword,
-            1,
-            searchConfig.name,
-            view,
-        )
-    } else {
-        SearchActivity.launch(
-            this,
-            "",
-            0,
-            null,
-            view,
-        )
-    }
+//    val searchConfig = (this as? MainActivity)?.pageConfig?.search
+//    if (searchConfig != null) {
+//        SearchActivity.launch(
+//            this,
+//            searchConfig.keyword,
+//            1,
+//            searchConfig.name,
+//            view,
+//        )
+//    } else {
+//        SearchActivity.launch(
+//            this,
+//            "",
+//            0,
+//            null,
+//            view,
+//        )
+//    }
 }
 
 //fun ScaffoldView.openSearchDrawer() {

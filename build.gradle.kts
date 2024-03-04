@@ -1,3 +1,4 @@
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
 
@@ -5,7 +6,7 @@ buildscript {
         set("compile_sdk_version", 32)
         set("build_tools_version", 32)
         set("target_sdk_version", 32)
-        set("kotlin_version", "1.7.10")
+        set("kotlin_version", "1.9.22")
     }
 
     repositories {
@@ -25,7 +26,9 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
-
+plugins {
+    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+}
 tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }
