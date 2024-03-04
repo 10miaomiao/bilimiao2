@@ -7,17 +7,18 @@ import android.database.sqlite.SQLiteOpenHelper
 import java.util.ArrayList
 
 class FilterTagDB(context: Context) :
-    SQLiteOpenHelper(context, "filter_db", null, 1) {
+    SQLiteOpenHelper(context, DB_NAME, null, 1) {
 
-    private val DB_NAME = "filter_db"
-    private val TABLE_NAME = "filter_tag"
-
-    private  val CREATE_TABLE = """create table if not exists $TABLE_NAME
+    companion object {
+        private const val DB_NAME = "filter_db"
+        private const val TABLE_NAME = "filter_tag"
+        private val CREATE_TABLE = """create table if not exists $TABLE_NAME
         |(id integer primary key autoincrement,
         |name text)""".trimMargin()
+    }
 
-    override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
-        sqLiteDatabase.execSQL(CREATE_TABLE)
+    override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL(CREATE_TABLE)
     }
 
     override fun onOpen(db: SQLiteDatabase?) {

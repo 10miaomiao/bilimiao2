@@ -7,17 +7,18 @@ import android.database.sqlite.SQLiteOpenHelper
 import java.util.ArrayList
 
 class FilterWordDB(context: Context) :
-    SQLiteOpenHelper(context, "filter_db", null, 1) {
+    SQLiteOpenHelper(context, DB_NAME, null, 1) {
 
-    private val DB_NAME = "filter_db"
-    private val TABLE_NAME = "filter_world" //TODO fix typo
+    companion object {
+        private const val DB_NAME = "filter_db"
+        private const val TABLE_NAME = "filter_world" //TODO fix typo
+        private val CREATE_TABLE = """create table if not exists $TABLE_NAME
+            |(id integer primary key autoincrement,
+            |keyword text)""".trimMargin()
+    }
 
-    private val CREATE_TABLE = """create table if not exists $TABLE_NAME
-        |(id integer primary key autoincrement,
-        |keyword text)""".trimMargin()
-
-    override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
-        sqLiteDatabase.execSQL(CREATE_TABLE)//创建表
+    override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL(CREATE_TABLE)//创建表
     }
 
     override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) {
