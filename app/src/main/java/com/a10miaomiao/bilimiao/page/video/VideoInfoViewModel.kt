@@ -23,7 +23,6 @@ import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.Log
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
@@ -88,7 +87,7 @@ class VideoInfoViewModel(
                 val staffData = data.staff ?: listOf()
                 val tagData = data.tag ?: listOf()
                 val relatesData = data.relates?.filter {
-                    Log.debug { "Checking related video ${it.title}" }
+                    DebugMiao.debug { "Checking related video ${it.title}" }
                     var notHide = filterStore.filterWord(it.title) && filterStore.filterUpper(it.owner?.mid ?: "-1")
                     // TODO performance improve
 //                    if (filterStore.filterTagCount != 0) {
@@ -101,7 +100,7 @@ class VideoInfoViewModel(
 //                        }
 //                    }
                     if (!notHide) {
-                        Log.debug { "Video ${it.title} was filtered" }
+                        DebugMiao.debug { "Video ${it.title} was filtered" }
                     }
                     notHide
                 } ?: emptyList()
