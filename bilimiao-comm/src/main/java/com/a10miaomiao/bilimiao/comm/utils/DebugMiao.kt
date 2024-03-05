@@ -4,12 +4,15 @@ import android.content.pm.ApplicationInfo
 import android.util.Log
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 
+typealias AndroidLog = android.util.Log
+
 /**
  * Created by 10喵喵 on 2018/2/22.
  */
 object DebugMiao {
 
     private const val TAG = "DebugMiao"
+    private val currentLevel: Int = AndroidLog.INFO
 
     private var _isDebug: Boolean? = null
     val isDebug: Boolean get() {
@@ -55,4 +58,14 @@ object DebugMiao {
     fun loge(vararg str: Any?) {
         Log.e(TAG, str.toString())
     }
+
+    fun info(msg: () -> String){
+        // todo level check for better performance
+        AndroidLog.i(msg::class.java.name.simpleName(), msg())
+    }
+    fun debug(msg: () -> String){
+        AndroidLog.d(msg::class.java.name.simpleName(), msg())
+    }
+    // nested class in kotlin dont have simple name
+    private fun String.simpleName() = substring(lastIndexOf('.')+1, indexOf("$"))
 }
