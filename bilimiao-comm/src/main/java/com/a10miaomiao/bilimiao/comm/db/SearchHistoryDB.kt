@@ -25,6 +25,10 @@ class SearchHistoryDB(context: Context, name: String, factory: SQLiteDatabase.Cu
         sqLiteDatabase.execSQL(Companion.CREATE_TABLE)//创建表
     }
 
+    override fun onOpen(db: SQLiteDatabase?) {
+        db?.execSQL(CREATE_TABLE)
+    }
+
     override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) {
 
     }

@@ -21,6 +21,10 @@ class FilterWordDB(context: Context) :
         db.execSQL(CREATE_TABLE)//创建表
     }
 
+    override fun onOpen(db: SQLiteDatabase?) {
+        db?.execSQL(CREATE_TABLE)
+    }
+
     override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) {
 
     }
