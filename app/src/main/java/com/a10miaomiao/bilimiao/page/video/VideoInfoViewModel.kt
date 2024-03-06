@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
@@ -59,6 +60,8 @@ class VideoInfoViewModel(
 
     var state = ""
 
+    val filterStore: FilterStore by instance()
+
     init {
         loadData()
     }
@@ -69,7 +72,6 @@ class VideoInfoViewModel(
                 state = ""
                 loading = true
             }
-//            val filterStore = Store.from(context).filterStore
             val type = if (id.indexOf("BV") == 0) {
                 VideoInfoFragment.TYPE_BV
             } else {
@@ -82,14 +84,26 @@ class VideoInfoViewModel(
             if (res.code == 0) {
                 val data = res.data
                 data.desc = BiliUrlMatcher.customString(data.desc)
-                val relatesData = data.relates ?: listOf()
                 val staffData = data.staff ?: listOf()
                 val tagData = data.tag ?: listOf()
-                //                val relatesData = data.relates.filter {
-//                    filterStore.filterWord(it.title)
-//                            && it.owner != null
-//                            && filterStore.filterUpper(it.owner.mid)
-//                }
+                val relatesData = data.relates?.filter {
+                    DebugMiao.debug { "Checking related video ${it.title}" }
+                    var notHide = filterStore.filterWord(it.title) && filterStore.filterUpper(it.owner?.mid ?: "-1")
+                    // TODO performance improve
+//                    if (filterStore.filterTagCount != 0) {
+//                        notHide = notHide && when (it.goto) {
+//                            "av" -> {
+//                                val tag = BiliApiService.videoAPI.info(it.param, it.goto).call().gson<ResultInfo<VideoInfo>>().data.tag
+//                                filterStore.filterTag(tag)
+//                            }
+//                            else -> true
+//                        }
+//                    }
+                    if (!notHide) {
+                        DebugMiao.debug { "Video ${it.title} was filtered" }
+                    }
+                    notHide
+                } ?: emptyList()
                 val pagesData = data.pages.map {
                     it.part = if (it.part.isNotEmpty()) {
                         it.part

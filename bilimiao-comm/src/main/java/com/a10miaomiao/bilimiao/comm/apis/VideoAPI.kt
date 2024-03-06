@@ -4,6 +4,7 @@ import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import java.util.Locale
 
 class VideoAPI {
 
@@ -12,7 +13,11 @@ class VideoAPI {
      */
     fun info(id: String, type: String = "AV",) = MiaoHttp.request {
         url = BiliApiService.biliApp("x/v2/view",
-            (if (type == "AV") "aid" else "bvid") to id,
+            when(type.lowercase()) {
+                "av" -> "aid" to id
+                "bv" -> "bvid" to id
+                else -> throw IllegalArgumentException("Unsupported video type $type")
+            },
             "autoplay" to "0",
             "qn" to "32"
         )

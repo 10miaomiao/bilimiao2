@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -73,8 +74,16 @@ class PopularViewModel(
                 if (filterStore.filterTagCount != 0
                     && it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
                     && it.smallCoverV5 != null) {
-                    val res = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto.uppercase(Locale.ROOT)).call().gson<ResultInfo<VideoInfo>>().data
-                    notHide = notHide && filterStore.filterTag(res.tag)
+                    notHide = notHide && when (it.smallCoverV5.base.cardGoto.lowercase()) {
+                        "av" -> {
+                            val tag = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto).call().gson<ResultInfo<VideoInfo>>().data.tag
+                            filterStore.filterTag(tag)
+                        }
+                        else -> true
+                    }
+                }
+                if (!notHide && it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5) {
+                    DebugMiao.debug { "Video ${it.smallCoverV5.base.title} was filtered" }
                 }
                 notHide
             }.map {
