@@ -19,7 +19,6 @@ import com.a10miaomiao.bilimiao.widget.comm.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
-import com.a10miaomiao.bilimiao.widget.comm.behavior.RightHoldUpBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.views.dsl.core.viewFactory

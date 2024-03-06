@@ -13,17 +13,20 @@ class SearchHistoryDB(context: Context, name: String, factory: SQLiteDatabase.Cu
     SQLiteOpenHelper(context, name, factory, version) {
 
     companion object {
-        val DB_NAME = "PreventKeyWord_db2"
-        val TABLE_NAME = "PreventKeyWord2"
+        const val DB_NAME = "PreventKeyWord_db2"
+        const val TABLE_NAME = "PreventKeyWord2"
+        private val CREATE_TABLE = """create table if not exists $TABLE_NAME
+            |(id integer primary key autoincrement,
+            |keyword text,
+            |type CHAR(20) default 'video')""".trimMargin()
     }
 
-    private val CREATE_TABLE = """create table if not exists $TABLE_NAME
-        |(id integer primary key autoincrement,
-        |keyword text,
-        |type CHAR(20) default 'video')""".trimMargin()
-
     override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
-        sqLiteDatabase.execSQL(CREATE_TABLE)//创建表
+        sqLiteDatabase.execSQL(Companion.CREATE_TABLE)//创建表
+    }
+
+    override fun onOpen(db: SQLiteDatabase?) {
+        db?.execSQL(CREATE_TABLE)
     }
 
     override fun onUpgrade(sqLiteDatabase: SQLiteDatabase, i: Int, i1: Int) {
@@ -95,7 +98,7 @@ class SearchHistoryDB(context: Context, name: String, factory: SQLiteDatabase.Cu
     fun deleteAllHistory() {
         val db = writableDatabase
         //删除全部数据
-        db.execSQL("delete from " + TABLE_NAME)
+        db.execSQL("delete from $TABLE_NAME")
         //关闭数据库
         db.close()
     }

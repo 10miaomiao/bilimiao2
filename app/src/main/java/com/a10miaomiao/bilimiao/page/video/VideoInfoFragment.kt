@@ -43,7 +43,6 @@ import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
@@ -92,9 +91,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             id: String
         ): Bundle {
             val type = if (id.indexOf("BV") == 0) {
-                VideoInfoFragment.TYPE_BV
+                TYPE_BV
             } else {
-                VideoInfoFragment.TYPE_AV
+                TYPE_AV
             }
             return bundleOf(
                 MainNavArgs.type to type,
