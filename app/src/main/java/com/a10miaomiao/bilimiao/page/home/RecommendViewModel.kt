@@ -66,23 +66,10 @@ class RecommendViewModel(
             if (res.isSuccess) {
                 val itemsList = res.data.items
                 val filterList = itemsList.filter {
-                    var notHide = (it.goto?.isNotEmpty() ?: false)
-                            && filterStore.filterWord(it.title)
-                            && filterStore.filterUpper(it.args.up_id ?: "-1")
-                    if (filterStore.filterTagCount != 0) {
-                        notHide = notHide && when (it.card_goto) {
-                            "av" -> {
-                                val tag = BiliApiService.videoAPI.info(it.param, it.card_goto).call().gson<ResultInfo<VideoInfo>>().data.tag
-                                filterStore.filterTag(tag)
-                            }
-                            else -> true
-                        }
-
-                    }
-                    if (!notHide) {
-                        DebugMiao.debug { "Video ${it.title} was filtered" }
-                    }
-                    notHide
+                    (it.goto?.isNotEmpty() ?: false)
+                        && filterStore.filterWord(it.title)
+                        && filterStore.filterUpper(it.args.up_id ?: "-1")
+                        && filterStore.filterTag(it.param, it.card_goto)
                 }
                 ui.setState {
                     if (idx == 0L) {
