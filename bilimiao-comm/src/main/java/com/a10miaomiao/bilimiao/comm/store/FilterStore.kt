@@ -5,7 +5,11 @@ import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.db.FilterTagDB
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.db.FilterWordDB
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.kongzue.dialogx.dialogs.PopTip
@@ -142,6 +146,26 @@ class FilterStore(override val di: DI) :
             }
         }
         return true
+    }
+
+    /**
+     * 根据av号或bv号筛选视频标签
+     */
+    suspend fun filterTag(
+        id: String, // av号或bv号
+        type: String, // "AV" | "BV"
+    ): Boolean {
+        if (state.filterTagList.isEmpty()) {
+            return true
+        }
+        val typeUpperCase = type.uppercase()
+        if (typeUpperCase != "AV" && typeUpperCase != "BV") {
+            return true
+        }
+        return BiliApiService.videoAPI.info(id, typeUpperCase)
+            .awaitCall()
+            .gson<ResultInfo<VideoInfo>>().data.tag
+            .let { filterTag(it) }
     }
 
     fun addTag(name: String) {

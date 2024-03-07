@@ -87,22 +87,9 @@ class VideoInfoViewModel(
                 val staffData = data.staff ?: listOf()
                 val tagData = data.tag ?: listOf()
                 val relatesData = data.relates?.filter {
-                    DebugMiao.debug { "Checking related video ${it.title}" }
-                    var notHide = filterStore.filterWord(it.title) && filterStore.filterUpper(it.owner?.mid ?: "-1")
-                    // TODO performance improve
-//                    if (filterStore.filterTagCount != 0) {
-//                        notHide = notHide && when (it.goto) {
-//                            "av" -> {
-//                                val tag = BiliApiService.videoAPI.info(it.param, it.goto).call().gson<ResultInfo<VideoInfo>>().data.tag
-//                                filterStore.filterTag(tag)
-//                            }
-//                            else -> true
-//                        }
-//                    }
-                    if (!notHide) {
-                        DebugMiao.debug { "Video ${it.title} was filtered" }
-                    }
-                    notHide
+                    filterStore.filterWord(it.title)
+                            && filterStore.filterUpper(it.owner?.mid ?: "-1")
+                            && filterStore.filterTag(it.param, it.goto)
                 } ?: emptyList()
                 val pagesData = data.pages.map {
                     it.part = if (it.part.isNotEmpty()) {

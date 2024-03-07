@@ -66,26 +66,12 @@ class PopularViewModel(
                 .awaitCall()
             val itemsList = result.itemsList
             val filterList = itemsList.filter {
-                var notHide = it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
-                        && it.smallCoverV5 != null
-                        && it.smallCoverV5.base.cardGoto == "av"
-                        && filterStore.filterWord(it.smallCoverV5.base.title)
-                        && filterStore.filterUpper(it.smallCoverV5.up.id)
-                if (filterStore.filterTagCount != 0
-                    && it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
-                    && it.smallCoverV5 != null) {
-                    notHide = notHide && when (it.smallCoverV5.base.cardGoto.lowercase()) {
-                        "av" -> {
-                            val tag = BiliApiService.videoAPI.info(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto).call().gson<ResultInfo<VideoInfo>>().data.tag
-                            filterStore.filterTag(tag)
-                        }
-                        else -> true
-                    }
-                }
-                if (!notHide && it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5) {
-                    DebugMiao.debug { "Video ${it.smallCoverV5.base.title} was filtered" }
-                }
-                notHide
+                it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
+                    && it.smallCoverV5 != null
+                    && it.smallCoverV5.base.cardGoto == "av"
+                    && filterStore.filterWord(it.smallCoverV5.base.title)
+                    && filterStore.filterUpper(it.smallCoverV5.up.id)
+                    && filterStore.filterTag(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto)
             }.map {
                 it.smallCoverV5
             }
