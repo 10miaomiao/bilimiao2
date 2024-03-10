@@ -9,7 +9,7 @@ data class VideoInfo(
     val aid: String,
     val attribute: Int,
     val bvid: String,
-    val cid: Long,
+    val cid: Long, // 视频1P cid
 //    val cm_config: CmConfig,
 //    val cms: List<Cm>,
     val copyright: Int,
@@ -23,9 +23,9 @@ data class VideoInfo(
 //    val elec: Elec,
     val owner: VideoOwnerInfo,
 //    val owner_ext: OwnerExt,
-    val pages: List<VideoPageInfo>,
+    val pages: List<VideoPageInfo>, // 视频分P列表
     val pic: String,
-    val pubdate: Long,
+    val pubdate: Long, // 稿件发布时间 秒级时间戳
     val relates: List<VideoRelateInfo>?,
     var req_user: VideoReqUserInfo,
 //    val rights: VideoRelateInfo,

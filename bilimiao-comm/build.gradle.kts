@@ -1,5 +1,6 @@
-import com.google.protobuf.gradle.*
-import cn.a10miaomiao.bilimiao.build.*
+import cn.a10miaomiao.bilimiao.build.Libraries
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.proto
 
 plugins {
     id("com.android.library")
@@ -10,11 +11,11 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 33
         version = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -83,13 +84,6 @@ dependencies {
     implementation(Libraries.browser)
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
-    implementation(Libraries.kodeinDi)
-    implementation(Libraries.glide)
-    implementation(Libraries.dialogX)
-//    implementation(files("../app/libs/DialogX-release.aar")) // 新版DialogX，解决一些bug，作者未发布到mavenCentral，故先本地编译
-    implementation(Libraries.dialogXMaterialYou) {
-        exclude("com.kongzue.dialogx", "DialogX")
-    }
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
@@ -100,9 +94,6 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:1.2")
 
     // 极验验证
-    implementation(Libraries.sensebot)
-
-    implementation(project(":DanmakuFlameMaster"))
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)

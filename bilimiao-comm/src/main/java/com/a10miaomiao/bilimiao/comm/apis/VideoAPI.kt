@@ -1,10 +1,14 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import java.util.Locale
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class VideoAPI {
 
@@ -21,6 +25,12 @@ class VideoAPI {
             "autoplay" to "0",
             "qn" to "32"
         )
+    }
+    suspend fun infoAwait(
+        id: String,
+        type: String = "AV"
+    ): ResultInfo<VideoInfo> = withContext(Dispatchers.IO){
+        return@withContext info(id, type).awaitCall().gson<ResultInfo<VideoInfo>>()
     }
 
     /**

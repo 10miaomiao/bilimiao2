@@ -1,23 +1,27 @@
 package com.a10miaomiao.bilimiao.comm.entity.player
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class PlayerV2Info(
     val aid: Int,
     val allow_bp: Boolean,
     val answer_status: Int,
-    val bgm_info: Any,
+    // val bgm_info: Any,
     val block_time: Int,
     val bvid: String,
     val cid: Int,
     val fawkes: Fawkes,
-    val guide_attention: List<Any>,
+    // val guide_attention: List<Any>,
     val has_next: Boolean,
     val ip_info: IpInfo,
     val is_owner: Boolean,
     val is_ugc_pay_preview: Boolean,
-    val jump_card: List<Any>,
+    // val jump_card: List<Any>,
     val last_play_cid: Int,
     val last_play_time: Int,
-    val level_info: LevelInfo,
+    // val level_info: LevelInfo,
     val login_mid: Int,
     val login_mid_hash: String,
     val max_limit: Int,
@@ -25,26 +29,28 @@ data class PlayerV2Info(
     val no_share: Boolean,
     val now_time: Int,
     val online_count: Int,
-    val online_switch: OnlineSwitch,
-    val operation_card: List<Any>,
-    val options: Options,
+    // val online_switch: OnlineSwitch,
+    // val operation_card: List<Any>,
+    // val options: Options,
     val page_no: Int,
-    val pcdn_loader: PcdnLoader,
+    // val pcdn_loader: PcdnLoader,
     val permission: String,
     val preview_toast: String,
     val role: String,
-    val show_switch: ShowSwitch,
+    // val show_switch: ShowSwitch,
     val subtitle: Subtitle,
     val toast_block: Boolean,
 //    val view_points: List<Any>,
-    val vip: Vip
-) {
+    // val vip: Vip
+) : Parcelable {
 
+    @Parcelize
     data class Fawkes(
         val config_version: Int,
         val ff_version: Int
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class IpInfo(
         val city: String,
         val country: String,
@@ -52,7 +58,7 @@ data class PlayerV2Info(
         val province: String,
         val zone_id: Int,
         val zone_ip: String
-    )
+    ) : Parcelable
 
     data class LevelInfo(
         val current_exp: Int,
@@ -83,12 +89,13 @@ data class PlayerV2Info(
         val long_progress: Boolean
     )
 
+    @Parcelize
     data class Subtitle(
         val allow_submit: Boolean,
         val lan: String,
         val lan_doc: String,
         val subtitles: List<SubtitleX>
-    )
+    ) : Parcelable
 
     data class Vip(
         val avatar_subscript: Int,
@@ -121,6 +128,7 @@ data class PlayerV2Info(
         val pcdn_video_type: String
     )
 
+    @Parcelize
     data class SubtitleX(
         val ai_status: Int,
         val ai_type: Int,
@@ -131,7 +139,7 @@ data class PlayerV2Info(
         val lan_doc: String,
         val subtitle_url: String,
         val type: Int
-    )
+    ) : Parcelable
 
     data class Label(
         val bg_color: String,

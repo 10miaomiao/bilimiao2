@@ -1,14 +1,18 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
+import android.os.Parcelable
 import android.os.SystemClock
-import android.widget.Toast
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayerV2Info
 import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 
 class PlayerAPI {
 
@@ -27,6 +31,12 @@ class PlayerAPI {
             "aid" to aid,
             "cid" to cid,
         )
+    }
+    suspend fun getPlayerInfoAsync(
+        aid: String,
+        cid: String,
+    ):ResultInfo<PlayerV2Info> = withContext(Dispatchers.IO) {
+        return@withContext getPlayerV2Info(aid, cid).awaitCall().gson<ResultInfo<PlayerV2Info>>()
     }
 
     fun getPlayerV2Info(
@@ -47,8 +57,9 @@ class PlayerAPI {
     /**
      * 获取视频播放地址
      * fnval: 976:flv,1:mp4,4048:dash
+     * quality https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/videostream_url.md#qn%E8%A7%86%E9%A2%91%E6%B8%85%E6%99%B0%E5%BA%A6%E6%A0%87%E8%AF%86
      */
-    suspend fun getVideoPalyUrl(
+    suspend fun getVideoPlayUrl(
         avid: String,
         cid: String,
         quality: Int = 64,
@@ -65,7 +76,7 @@ class PlayerAPI {
             "otype" to "json",
         )
         if (fnval > 2) {
-            params.put("fourk", "1")
+            params["fourk"] = "1"
         }
         val res = MiaoHttp.request {
             url = BiliApiService.biliApi("x/player/playurl", *params.toList().toTypedArray())
@@ -77,7 +88,6 @@ class PlayerAPI {
             throw Exception(res.message)
         }
     }
-
     /**
      * 获取番剧播放地址
      */
@@ -212,6 +222,7 @@ class PlayerAPI {
         method = MiaoHttp.POST
     }
 
+    @Parcelize
     data class PlayurlData(
         val accept_description: List<String>,
         val accept_format: String,
@@ -232,8 +243,9 @@ class PlayerAPI {
         val support_formats: List<SupportFormats>,
         val last_play_time: Long?,
         val last_play_cid: String?,
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class Durl(
         val ahead: String,
         val length: Long,
@@ -241,24 +253,27 @@ class PlayerAPI {
         val size: Long,
         val url: String,
         val vhead: String
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class SupportFormats(
         val quality: Int,
         val format: String,
         val new_description: String,
         val display_desc: String,
         val superscript: String
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class Dash(
         // 时长，秒
         val duration: Long,
         val min_buffer_time: Double,
         val video: List<DashItem>,
         val audio: List<DashItem>?,
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class DashItem(
         val id: Int,
         val bandwidth: Int,
@@ -271,11 +286,12 @@ class PlayerAPI {
         val height: Int,
         val frame_rate: String,
         val segment_base: SegmentBase,
-    )
+    ) : Parcelable
 
+    @Parcelize
     data class SegmentBase(
         val initialization: String,
         val index_range: String,
-    )
+    ) : Parcelable
 
 }

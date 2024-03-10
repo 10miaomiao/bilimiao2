@@ -1,4 +1,4 @@
-import cn.a10miaomiao.bilimiao.build.*
+import cn.a10miaomiao.bilimiao.build.Libraries
 
 plugins {
     id("com.android.library")
@@ -8,12 +8,10 @@ plugins {
 
 android {
     namespace = "cn.a10miaomiao.bilimiao.download"
-    compileSdk = 32
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 32
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -40,13 +38,9 @@ dependencies {
     implementation(Libraries.core)
     implementation(Libraries.appcompat)
     implementation(Libraries.material)
-
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
-
     implementation(project(":bilimiao-comm"))
-    implementation(project(":DanmakuFlameMaster"))
-
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.espresso)

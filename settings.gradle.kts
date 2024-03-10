@@ -7,18 +7,8 @@ pluginManagement {
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
     }
 }
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://jitpack.io")
-        maven("https://maven.aliyun.com/repository/public")
-    }
-}
+
 rootProject.name = "bilimiao"
 include(":app")
-include(":miao-binding", ":miao-binding-android")
-include(":bilimiao-comm", ":bilimiao-cover", ":bilimiao-download", "bilimiao-appwidget", "bilimiao-compose")
-include(":DanmakuFlameMaster")
-include(":benchmark")
+include(":bilimiao-comm", ":bilimiao-download")
+

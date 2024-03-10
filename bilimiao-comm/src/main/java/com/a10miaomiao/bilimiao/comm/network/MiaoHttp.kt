@@ -1,21 +1,22 @@
 package com.a10miaomiao.bilimiao.comm.network
 
-import android.content.pm.ApplicationInfo
-import android.util.Log
 import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class MiaoHttp(var url: String? = null) {
     private val TAG = "MiaoHttp"
@@ -55,13 +56,13 @@ class MiaoHttp(var url: String? = null) {
                 "application/x-www-form-urlencoded".toMediaType()
             )
         }
-        if (DebugMiao.isDebug) {
-            Log.d(TAG, "-----START-$method-----")
-            Log.d(TAG, "URL = $url")
+        if (Log.isDebug) {
+            Log.debug { "-----START-$method-----" }
+            Log.debug { "URL = $url" }
             formBody?.let {
-                Log.d(TAG, "BODY = $it")
+                Log.debug { "BODY = $it" }
             }
-            Log.d(TAG, "------END-$method------")
+            Log.debug { "------END-$method------" }
         }
         val req = requestBuilder.method(method, body)
             .url(url!!)
@@ -125,7 +126,7 @@ class MiaoHttp(var url: String? = null) {
         inline fun <reified T> Response.gson(isDebug: Boolean = false): T {
             val jsonStr = this.body!!.string()
             if (isDebug) {
-                DebugMiao.log(jsonStr)
+                Log.log(jsonStr)
             }
             return Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
         }

@@ -3,7 +3,7 @@ package com.a10miaomiao.bilimiao.comm.apis
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.Log
 
 class CommentApi() {
 
@@ -106,7 +106,7 @@ class CommentApi() {
         // 大于二级评论为要回复的评论id
         parent?.let { params.put("parent", parent) }
         formBody = ApiHelper.createParams(params)
-        DebugMiao.log("formBody", formBody)
+        Log.log("formBody", formBody)
     }
 
     fun del(

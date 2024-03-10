@@ -2,7 +2,6 @@ package cn.a10miaomiao.bilimiao.download
 
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadMediaFileInfo
-import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 
 object BiliPalyUrlHelper {
@@ -52,7 +51,7 @@ object BiliPalyUrlHelper {
         pageData: BiliDownloadEntryInfo.PageInfo,
     ): BiliDownloadMediaFileInfo {
         val res = BiliApiService.playerAPI
-            .getVideoPalyUrl(
+            .getVideoPlayUrl(
                 entry.avid!!.toString(),
                 pageData.cid.toString(),
                 entry.prefered_video_quality,

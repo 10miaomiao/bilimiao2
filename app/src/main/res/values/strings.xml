@@ -58,4 +58,8 @@
         <item>31</item>
     </string-array>
 
+    <string name="self">我的</string>
+    <string name="home">主页</string>
+    <string name="settings">设置</string>
+
 </resources>

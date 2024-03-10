@@ -6,9 +6,29 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.text.*
-import android.text.style.*
-import org.xml.sax.*
+import android.text.Editable
+import android.text.Html
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.TextUtils
+import android.text.style.ForegroundColorSpan
+import android.text.style.ImageSpan
+import android.text.style.ParagraphStyle
+import android.text.style.QuoteSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.SubscriptSpan
+import android.text.style.SuperscriptSpan
+import android.text.style.TextAppearanceSpan
+import android.text.style.TypefaceSpan
+import android.text.style.URLSpan
+import android.text.style.UnderlineSpan
+import org.xml.sax.Attributes
+import org.xml.sax.ContentHandler
+import org.xml.sax.InputSource
+import org.xml.sax.Locator
+import org.xml.sax.XMLReader
 import java.io.StringReader
 import javax.xml.parsers.SAXParser
 import javax.xml.parsers.SAXParserFactory
@@ -86,7 +106,7 @@ class HtmlTagHandler {
 
         private fun handleStartTag(tag: String, attributes: Attributes) {
             val className: String? = attributes.getValue("", "class")
-            DebugMiao.log(className)
+            Log.log(className)
             val classNames = if (className?.isNotBlank() == true) {
                 className.split(' ')
             } else { emptyList() }

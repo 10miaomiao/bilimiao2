@@ -1,8 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.network
 
-import android.os.Build
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import io.grpc.MethodDescriptor
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
