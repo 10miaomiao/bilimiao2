@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.compose.ui.NavGraphs
 import com.a10miaomiao.bilimiao.compose.ui.destinations.DirectionDestination
 import com.a10miaomiao.bilimiao.compose.ui.destinations.HomeScreenDestination

@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.a10miaomiao.bilimiao.R
+
 
 fun getThemeColor(context: Context): Color {
     val typedValue = TypedValue()

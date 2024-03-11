@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">bilimiao</string>
+    <string name="app_name">BilimiaoCompose</string>
     <string name="tag_left_fragment">left_fragment</string>
 
     <string name="search">搜索</string>

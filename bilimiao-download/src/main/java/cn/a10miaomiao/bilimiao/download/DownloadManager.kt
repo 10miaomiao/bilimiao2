@@ -3,7 +3,10 @@ package cn.a10miaomiao.bilimiao.download
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -83,7 +86,7 @@ class DownloadManager(
             request.addHeader(keys, info.header[keys]!!)
         }
         val call = mClient.newCall(request.build())
-        val response = call!!.execute()
+        val response = call.execute()
         if (!response.isSuccessful) {
             throw Throwable()
         }

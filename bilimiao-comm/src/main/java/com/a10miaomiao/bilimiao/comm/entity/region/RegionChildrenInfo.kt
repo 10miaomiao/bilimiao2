@@ -1,7 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.region
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
+
 
 /**
  * 子分区信息

@@ -17,6 +17,7 @@ gson = "2.10.1"
 grpc = "1.62.2"
 kotlin-coroutine-android = "1.8.0"
 androidx-browser = "1.8.0"
+protoc = "3.12.0"
 
 # test
 junit = "4.+"
@@ -71,6 +72,8 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version.ref = "grpc" }
 grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
+protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protoc" }
+
 
 # androidx
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlin-coroutine-android" }
@@ -82,6 +85,8 @@ androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-co
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-plugin" }
+android-library = { id = "com.android.library", version.ref = "android-plugin" }
+
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-plugin" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
