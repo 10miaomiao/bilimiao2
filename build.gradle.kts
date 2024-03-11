@@ -6,6 +6,7 @@ allprojects {
         maven("https://maven.aliyun.com/repository/public")
         maven("https://jitpack.io")
     }
+
 }
 plugins {
     alias(libs.plugins.android.application) apply false

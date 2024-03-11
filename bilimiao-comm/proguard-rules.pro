@@ -1,6 +1,3 @@
-# Application classes that will be serialized/deserialized over Gson
--printconfiguration /home/itsusinn/tmp/full-r8-config.txt
-
 # for gson https://r8.googlesource.com/r8/+/refs/heads/master/compatibility-faq.md
 -keepattributes Signature
 -keep class com.google.gson.reflect.TypeToken { *; }

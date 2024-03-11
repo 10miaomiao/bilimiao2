@@ -103,6 +103,6 @@ fun BottomBar(
 
 sealed class BottomBarDestination(@StringRes val label: Int, val dest: DirectionDestination, val icon: ImageVector, val selectedIcon: ImageVector) {
     data object Self : BottomBarDestination(R.string.self, SelfScreenDestination, Icons.Outlined.AccountCircle, Icons.Filled.AccountCircle)
-    data object Home : BottomBarDestination(R.string.home, HomeScreenDestination,Icons.Outlined.Home ,Icons.Filled.Home)
+    data object Home : BottomBarDestination(R.string.home, HomeScreenDestination, Icons.Outlined.Home ,Icons.Filled.Home)
     data object Settings: BottomBarDestination(R.string.settings, SettingsScreenDestination, Icons.Outlined.Settings, Icons.Filled.Settings)
 }

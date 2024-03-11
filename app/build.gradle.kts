@@ -1,9 +1,22 @@
+// https://github.com/LibChecker/LibChecker/blob/master/build-logic/src/main/kotlin/Projects.kt
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
 }
+
+val baseVersionName = "3.0.0"
+val Project.verName: String get() = "${baseVersionName}${versionNameSuffix}.${exec("git rev-parse --short HEAD")}"
+val Project.verCode: Int get() = exec("git rev-list --count HEAD").toInt()
+val Project.isDevVersion: Boolean get() = exec("git tag -l v$baseVersionName").isEmpty()
+val Project.versionNameSuffix: String get() = if (isDevVersion) ".dev" else ""
+
+fun Project.exec(command: String): String = providers.exec {
+    commandLine(command.split(" "))
+}.standardOutput.asText.get().trim()
+
 
 android {
     namespace = "com.a10miaomiao.bilimiao.compose"
@@ -13,8 +26,8 @@ android {
         applicationId = "com.a10miaomiao.bilimiao.compose"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "3.0.0-rc"
+        versionCode = verCode
+        versionName = verName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -27,13 +40,30 @@ android {
         }
     }
 
+    val releaseSigning = if (project.hasProperty("releaseStoreFile")) {
+        signingConfigs.create("release") {
+            storeFile = File(project.properties["releaseStoreFile"] as String)
+            storePassword = project.properties["releaseStorePassword"] as String
+            keyAlias = project.properties["releaseKeyAlias"] as String
+            keyPassword = project.properties["releaseKeyPassword"] as String
+        }
+    } else {
+        signingConfigs.getByName("debug")
+    }
     buildTypes {
-        getByName("release") {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
+        release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        all {
+            signingConfig = releaseSigning
         }
     }
 
