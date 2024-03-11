@@ -2,7 +2,7 @@ import com.google.protobuf.gradle.id
 import com.google.protobuf.gradle.proto
 
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
@@ -21,7 +21,7 @@ android {
 
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                "proguard-rules.pro"
@@ -49,9 +49,10 @@ protobuf {
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.33.0" // Grpc单独的编译器
+            artifact = "io.grpc:protoc-gen-grpc-java:1.62.2" // Grpc单独的编译器
         }
         id("javalite") {
+
             artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
             // 官方推荐的方法，Android 适用javalite,相较于java插件，生成的代码更轻量化
         }
