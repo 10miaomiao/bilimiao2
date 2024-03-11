@@ -1,5 +1,4 @@
 pluginManagement {
-    includeBuild("bilimiao-build")
     repositories {
         gradlePluginPortal()
         google()

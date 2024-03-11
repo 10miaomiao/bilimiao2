@@ -1,25 +1,22 @@
-import cn.a10miaomiao.bilimiao.build.Libraries
 import com.google.protobuf.gradle.id
 import com.google.protobuf.gradle.proto
 
 plugins {
-    id("com.android.library")
-    id("kotlin-android")
-    id("kotlin-parcelize")
-    id("com.google.protobuf") // proto
-    id("bilimiao-build")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.protobuf)
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
         version = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -76,26 +73,26 @@ protobuf {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
-    implementation(Libraries.lifecycle)
-    implementation(Libraries.lifecycleViewModel)
-    implementation(Libraries.browser)
+    implementation(libs.androidx.ktx)
 
-    implementation(Libraries.kotlinxCoroutinesAndroid)
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.lifecycle.rt.ktx)
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.browser)
 
-    implementation(Libraries.gson)
-    implementation(Libraries.okhttp3)
 
-    implementation(Libraries.grpcProtobuf)
-    implementation(Libraries.grpcStub)
 
-    implementation("javax.annotation:javax.annotation-api:1.2")
+    // serde & net
+    implementation(libs.gson)
+    implementation(libs.okhttp3)
+    implementation(libs.grpc.protobuf.lite)
+    implementation(libs.grpc.stub)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation("javax.annotation:javax.annotation-api:1.3.2")
 
-    // 极验验证
 
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.espresso)
 }

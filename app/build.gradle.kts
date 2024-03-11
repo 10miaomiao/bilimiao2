@@ -1,26 +1,20 @@
-
-import cn.a10miaomiao.bilimiao.build.Libraries
-
 plugins {
-    id("com.android.application")
-    id("kotlin-parcelize")
-    id("kotlin-android")
-    id("bilimiao-build")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.a10miaomiao.bilimiao"
+    namespace = "com.a10miaomiao.bilimiao.compose"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.a10miaomiao.bilimiao"
+        applicationId = "com.a10miaomiao.bilimiao.compose"
         minSdk = 21
         targetSdk = 34
-        versionCode = 94
-        versionName = "2.3.4"
-
-        flavorDimensions("default")
+        versionCode = 1
+        versionName = "3.0.0-rc"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -64,47 +58,49 @@ android {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
-    implementation(Libraries.lifecycle)
-    implementation(Libraries.lifecycleViewModel)
+    implementation(libs.androidx.ktx)
+    implementation(libs.androidx.activity.compose)
+    // Jetpack Compose
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material3.window.size)
+    // implementation(Libraries.composeMaterial3Android)
+    // 3rd party compose
+    implementation(libs.compose.destinations.core)
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+    implementation(libs.qrose)
+    ksp(libs.compose.destinations.ksp)
 
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.lifecycle.rt.ktx)
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.browser)
 
-    implementation(Libraries.browser)
     implementation("androidx.profileinstaller:profileinstaller:1.3.1")
+    implementation(libs.kotlinx.coroutines.android)
+    // media3
+    implementation(libs.media3)
+    implementation(libs.media3.decoder)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.dash)
 
-    implementation(Libraries.kotlinxCoroutinesAndroid)
-    // 播放器相关
-    implementation(Libraries.media3)
-    implementation(Libraries.media3Decoder)
-    implementation(Libraries.media3Ui)
-    implementation(Libraries.media3ExoPlayer)
-    implementation(Libraries.media3ExoPlayerDash)
-    implementation(Libraries.gson)
-    implementation(Libraries.okhttp3)
-    implementation(Libraries.grpcProtobuf)
+    // serde & net
+    implementation(libs.gson)
+    implementation(libs.okhttp3)
+    implementation(libs.grpc.protobuf.lite)
+    // implementation(libs.grpc.stub)
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
-    // Jetpack Compose
-    implementation(Libraries.composeUi)
-    implementation(Libraries.composeMaterial)
-    implementation(Libraries.composeMaterialIconsExtended)
-    implementation(Libraries.composeMaterial3)
-    // implementation(Libraries.composeMaterial3Android)
-    implementation(Libraries.composeMaterial3WindowSizeClass)
-    implementation(Libraries.composeUiToolingPreview)
-    implementation(Libraries.activityCompose)
-    implementation(Libraries.composeBOM)
-    implementation(Libraries.composeDestinations)
-    ksp(Libraries.composeDestinationsKSP)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.espresso)
 
-    implementation(Libraries.coil)
-    implementation(Libraries.coilCompose)
-    implementation(Libraries.qrose)
-
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
 }

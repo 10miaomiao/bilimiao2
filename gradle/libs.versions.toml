@@ -1,0 +1,88 @@
+[versions]
+kotlin = "1.9.22"
+
+androidx-core = "1.12.0"
+androidx-activity = "1.8.2"
+compose-bom = "2024.02.02"
+composeDestinations = "1.10.1"
+coil = "2.6.0"
+qrose = "1.0.0-beta3" # QrCode for compose https://github.com/alexzhirkevich/qrose
+
+media3 = "1.3.0"
+appcompat = "1.6.1"
+material = "1.11.0"
+lifecycle = "2.7.0"
+okhttp = "4.12.0"
+gson = "2.10.1"
+grpc = "1.62.2"
+kotlin-coroutine-android = "1.8.0"
+androidx-browser = "1.8.0"
+
+# test
+junit = "4.+"
+androidx-test-junit = "1.1.5"
+androidx-test-espresso = "3.5.1"
+
+# plugins
+android-plugin = "8.3.0"
+protobuf-plugin = "0.9.4"
+ksp-plugin = "1.9.22-1.0.17"
+
+[libraries]
+# androidx
+androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "androidx-activity" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidx-activity" }
+androidx-activity-compose  = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
+
+# compose
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+compose-material = { group = "androidx.compose.material", name = "material" }
+compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+compose-material3  = { group = "androidx.compose.material3", name = "material3" }
+compose-material3-window-size  = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+
+ # 3rd party compose
+compose-destinations-core = { group = "io.github.raamcosta.compose-destinations", name="core", version.ref = "composeDestinations" }
+compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name="ksp", version.ref = "composeDestinations" }
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+coil-compose  = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+qrose = { group = "io.github.alexzhirkevich", name = "qrose", version.ref = "qrose" }
+
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+lifecycle-rt-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-browser  = { group = "androidx.browser", name = "browser", version.ref = "androidx-browser" }
+
+# media3
+media3 = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
+media3-ui  = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+media3-decoder  = { group = "androidx.media3", name = "media3-decoder", version.ref = "media3" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3" }
+
+# serde
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version.ref = "grpc" }
+grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
+
+# androidx
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlin-coroutine-android" }
+
+# test
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
+androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-test-espresso" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-plugin" }
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

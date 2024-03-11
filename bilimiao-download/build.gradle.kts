@@ -1,9 +1,6 @@
-import cn.a10miaomiao.bilimiao.build.Libraries
-
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("bilimiao-build")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -13,7 +10,6 @@ android {
     defaultConfig {
         minSdk = 21
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -35,13 +31,15 @@ android {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
-    implementation(Libraries.gson)
-    implementation(Libraries.okhttp3)
+    implementation(libs.androidx.ktx)
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.gson)
+    implementation(libs.okhttp3)
+
     implementation(project(":bilimiao-comm"))
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.espresso)
 }
