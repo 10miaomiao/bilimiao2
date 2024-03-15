@@ -1,6 +1,6 @@
-package com.a10miaomiao.bilimiao.widget.comm.ui
+package com.a10miaomiao.bilimiao.widget.scaffold.ui
 
-import com.a10miaomiao.bilimiao.widget.comm.AppBarView
+import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import splitties.views.dsl.core.Ui
 
 interface AppBarUi : Ui {

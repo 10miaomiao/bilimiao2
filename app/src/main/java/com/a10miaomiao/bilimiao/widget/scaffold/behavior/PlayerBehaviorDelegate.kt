@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.behavior
+package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
 import android.view.MotionEvent
 import android.view.View
@@ -9,7 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.google.android.material.transition.Hold
 import splitties.dimensions.dip

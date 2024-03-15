@@ -36,7 +36,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment.Companion.generateKey
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
 import com.shuyu.gsyvideoplayer.player.PlayerFactory

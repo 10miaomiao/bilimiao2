@@ -6,7 +6,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
+import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView
 
 abstract class BaseResultFragment : RecyclerViewFragment() {
     abstract val title: String

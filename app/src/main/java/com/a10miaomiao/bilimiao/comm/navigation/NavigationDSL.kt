@@ -12,8 +12,8 @@ import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.comm.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import java.lang.Exception
 
 fun NavController.tryPopBackStack(): Boolean {
