@@ -52,7 +52,8 @@ class WebFragment : Fragment(), DIAware, MyPage {
             |osVer/${Build.VERSION.RELEASE} 
             |sdkInt/${Build.VERSION.SDK_INT}  
             |network/2 
-            |BiliApp/6710300 mobi_app/android 
+            |BiliApp/1450000
+            |mobi_app/android_hd 
             |channel/bili 
             |c_locale/zh_CN 
             |s_locale/zh_CN 
@@ -153,7 +154,6 @@ class WebFragment : Fragment(), DIAware, MyPage {
                             var r = window.BiliJsBridge.callbacks.map((function(t) {
                                 return t.callbackId
                             })).indexOf(Number(t));
-                            console.log(r)
                             r >= 0 && window.BiliJsBridge.callbacks[r].callback && window.BiliJsBridge.callbacks[r].callback(n || e)
                         }
                     }
@@ -209,7 +209,6 @@ class WebFragment : Fragment(), DIAware, MyPage {
                 userAgentString = "$defaultUserAgentString $userAgent"
             }
             webView.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
-//            webView.addJavascriptInterface(InJavaScriptLocalObj2(), "java_obj.test")
             val url = requireArguments().getString(MainNavArgs.url)
             if (url == null) {
                 findNavController().tryPopBackStack()

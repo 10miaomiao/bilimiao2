@@ -1,13 +1,11 @@
 package com.a10miaomiao.bilimiao.comm.network
 
-import android.content.pm.ApplicationInfo
 import android.util.Log
 import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -15,14 +13,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class MiaoHttp(var url: String? = null) {
     private val TAG = "MiaoHttp"
     private val cookieManager = CookieManager.getInstance()
 
-    var client = OkHttpClient()
-    val requestBuilder = Request.Builder()
+    private var client = OkHttpClient()
+    private val requestBuilder = Request.Builder()
     val headers = mutableMapOf<String, String>()
     var method = GET
 
@@ -30,11 +27,8 @@ class MiaoHttp(var url: String? = null) {
     var formBody: Map<String, String?>? = null
 
     private fun buildRequest(): Request {
-        for (key in headers.keys) {
-            requestBuilder.addHeader(key, headers[key]!!)
-        }
         requestBuilder.addHeader("user-agent", ApiHelper.USER_AGENT)
-        requestBuilder.addHeader("referer",ApiHelper.REFERER)
+        requestBuilder.addHeader("referer", ApiHelper.REFERER)
         requestBuilder.addHeader("build", ApiHelper.BUILD_VERSION.toString())
 
         if (url?.let { "bilibili.com" in it } == true) {
@@ -47,8 +41,12 @@ class MiaoHttp(var url: String? = null) {
                 requestBuilder.addHeader("x-bili-mid", it.mid.toString())
             }
         }
-
         requestBuilder.addHeader("cookie", (cookieManager.getCookie(url) ?: ""))
+
+        for (key in headers.keys) {
+            requestBuilder.addHeader(key, headers[key]!!)
+        }
+
         if (body == null && formBody != null) {
             val bodyStr = ApiHelper.urlencode(formBody!!)
             body = bodyStr.toRequestBody(
@@ -127,7 +125,12 @@ class MiaoHttp(var url: String? = null) {
             if (isDebug) {
                 DebugMiao.log(jsonStr)
             }
-            return Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
+            try {
+                return Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
+            } catch (e: IllegalStateException) {
+                DebugMiao.log("GSON解析出错：" + jsonStr)
+                throw e
+            }
         }
 
         const val GET = "GET"

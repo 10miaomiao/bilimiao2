@@ -13,16 +13,16 @@ import java.util.*
  */
 object ApiHelper {
 
-    const val BUILD_VERSION = 1441100
+    const val BUILD_VERSION = 1450000
     const val BILI_APP_VERSION = "1.44.1"
 
     // 用哪个APP_KEY登录后，之后的请求之后只能用同一个APP_KEY，现统一使用HD版的APP_KEY，APP版的APP_KEY无法使用二维码登录
     // Android APP
-//    const val APP_KEY = "1d8b6e7d45233436";
-//    const val APP_SECRET = "560c52ccd288fed045859ed18bffd973"
+    const val APP_KEY = "1d8b6e7d45233436";
+    const val APP_SECRET = "560c52ccd288fed045859ed18bffd973"
     // Android HD
-    const val APP_KEY = "dfca71928277209b";
-    const val APP_SECRET = "b5475a8825547a4fc26c7d518eaaa02e"
+    const val APP_KEY_HD = "dfca71928277209b";
+    const val APP_SECRET_HD = "b5475a8825547a4fc26c7d518eaaa02e"
 
     const val REFERER = "https://www.bilibili.com/"
     const val APP_BASE = "https://app.bilibili.com/"
@@ -40,7 +40,7 @@ object ApiHelper {
         """.trimMargin().replace("\n", "")
 
 
-    fun getTimeSpen() = Date().time / 1000
+    fun getTimeSpan() = Date().time / 1000
 
     /**
      * 获得一个UUID
@@ -127,35 +127,43 @@ object ApiHelper {
         }
     }
 
-    fun createParams(vararg pairs: Pair<String, String?>): MutableMap<String, String?>{
+    fun createParams(
+        vararg pairs: Pair<String, String?>,
+        appKey: String = APP_KEY_HD,
+        appSecrer: String = APP_SECRET_HD,
+    ): MutableMap<String, String?>{
         val params = mutableMapOf(
-            *pairs,
-            "appkey" to APP_KEY,
+            "appkey" to appKey,
             "build" to BUILD_VERSION.toString(),
             "buvid" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
-            "mobi_app" to "android",
+            "mobi_app" to "android_hd",
             "platform" to "android",
-            "ts" to getTimeSpen().toString()
+            "ts" to getTimeSpan().toString(),
+            *pairs,
         )
-        if (params["notoken"]?.isEmpty() != false) {
+        if (params["notoken"].isNullOrBlank()) {
             addAccessKeyAndMidToParams(params)
         }
-        params["sign"] = getSing(params, APP_SECRET)
+        params["sign"] = getSing(params, appSecrer)
         return params
     }
-    fun createParams(params: MutableMap<String, String?>): MutableMap<String, String?>{
+    fun createParams(
+        params: MutableMap<String, String?>,
+        appKey: String = APP_KEY_HD,
+        appSecrer: String = APP_SECRET_HD,
+    ): MutableMap<String, String?>{
         params.putAll(mapOf(
-            "appkey" to APP_KEY,
+            "appkey" to appKey,
             "build" to BUILD_VERSION.toString(),
             "buvid" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
-            "mobi_app" to "android",
+            "mobi_app" to "android_hd",
             "platform" to "android",
-            "ts" to getTimeSpen().toString()
+            "ts" to getTimeSpan().toString()
         ))
-        if (params["notoken"]?.isEmpty() != false) {
+        if (params["notoken"].isNullOrBlank()) {
             addAccessKeyAndMidToParams(params)
         }
-        params["sign"] = getSing(params, APP_SECRET)
+        params["sign"] = getSing(params, appSecrer)
         return params
     }
 

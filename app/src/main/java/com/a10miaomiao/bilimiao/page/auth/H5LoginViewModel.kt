@@ -12,17 +12,22 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.MainNavGraph
+import com.a10miaomiao.bilimiao.comm.BiliJsBridge
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.apis.AuthApi
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.QRLoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.page.web.WebFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -31,7 +36,7 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import java.lang.Exception
+import kotlin.Exception
 
 class H5LoginViewModel(
     override val di: DI,
@@ -44,6 +49,7 @@ class H5LoginViewModel(
 
     private var _authUrl = ""
     private var _authCode = ""
+    private val loginSessionId = ApiHelper.getUUID()
     var loading = false
 
     fun updateLoading(loading: Boolean) {
@@ -52,21 +58,36 @@ class H5LoginViewModel(
         }
     }
 
+    private fun setBiliAppWebView(webView: WebView) {
+        var defaultUserAgentString = webView.settings.userAgentString
+        if ("Mobile" !in defaultUserAgentString) {
+            defaultUserAgentString += " Mobile"
+        }
+        val userAgent = defaultUserAgentString + " " + WebFragment.userAgent
+        webView.settings.userAgentString = userAgent
+        val biliJsBridge = BiliJsBridge(fragment, webView)
+        webView.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
+    }
+
     fun getQrCodeUrl(webView: WebView) = viewModelScope.launch(Dispatchers.IO) {
         try {
             updateLoading(true)
             val res = BiliApiService.authApi
-                .qrCode()
+                .qrCode(loginSessionId)
                 .awaitCall()
                 .gson<ResultInfo<QRLoginInfo>>()
             if (res.isSuccess) {
                 _authUrl = res.data.url
                 _authCode = res.data.auth_code
-                launch(Dispatchers.Main) { checkQRCode(res.data.auth_code) }
-                withContext(Dispatchers.Main) {
-                    webView.loadUrl(res.data.url)
-                    alert("为获取BiliAPP登录凭证(token)，需模拟一次扫码登录，请在接下来的页面中点击确认登录。( *・ω・)")
+                delay((200 * Math.random()).toLong() + 200L)
+                if (!confirmQRCode(_authCode)) {
+                    withContext(Dispatchers.Main) {
+                        setBiliAppWebView(webView)
+                        webView.loadUrl(_authUrl)
+                        alert("为获取BiliAPP登录凭证(token)，需模拟一次扫码登录，请在接下来的页面中点击确认登录。( *・ω・)")
+                    }
                 }
+                launch(Dispatchers.Main) { checkQRCode(_authCode) }
             } else {
                 withContext(Dispatchers.Main) {
                     alert(res.message)
@@ -79,6 +100,19 @@ class H5LoginViewModel(
             }
         } finally {
             updateLoading(false)
+        }
+    }
+
+    suspend fun confirmQRCode(authCode: String): Boolean {
+        try {
+            val res = BiliApiService.authApi
+                .confirmQRCode(authCode)
+                .awaitCall()
+                .gson<MessageInfo>()
+            return res.isSuccess
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
     }
 
