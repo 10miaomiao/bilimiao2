@@ -51,8 +51,8 @@ import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
-import com.a10miaomiao.bilimiao.widget.comm.*
-import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
+import com.a10miaomiao.bilimiao.widget.scaffold.*
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.kodein.di.DI

@@ -31,7 +31,7 @@ import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesParam
 import com.a10miaomiao.bilimiao.service.PlayerService
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
 import com.kongzue.dialogx.dialogs.PopTip

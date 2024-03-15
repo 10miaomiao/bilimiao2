@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.behavior
+package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
 import android.animation.Animator
 import android.content.Context
@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import splitties.dimensions.dip
 
 

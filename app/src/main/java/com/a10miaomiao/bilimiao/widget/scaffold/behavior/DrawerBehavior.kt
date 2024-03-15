@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.behavior
+package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
 import android.content.Context
 import android.util.AttributeSet
@@ -12,7 +12,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import java.lang.ref.WeakReference
 import kotlin.math.abs
 
