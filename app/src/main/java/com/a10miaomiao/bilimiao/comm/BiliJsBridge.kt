@@ -5,6 +5,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.google.gson.Gson
@@ -15,10 +16,8 @@ import splitties.toast.toast
 class BiliJsBridge(
     val fragment: Fragment,
     val webView: WebView,
+//    val closeBrowser: () -> Unit,
 ) {
-
-    var canCloseBrowser = true
-
     private val activity get() = fragment.requireActivity()
 
     private val allSupportMethod = listOf<String>(
@@ -80,10 +79,9 @@ class BiliJsBridge(
             "global.closeBrowser",
             "view.closeBrowser",
             "view.goBack" -> {
-                if (canCloseBrowser) {
-                    activity.runOnUiThread {
-                        findNavController().tryPopBackStack()
-                    }
+//                closeBrowser.invoke()
+                activity.runOnUiThread {
+                    findNavController().tryPopBackStack()
                 }
             }
             "view.refresh" -> {
@@ -125,6 +123,14 @@ class BiliJsBridge(
                     }
                     """.trimIndent()
             }
+            "auth.login" -> {
+                val loginInfo = Bilimiao.commApp.loginInfo
+                if (loginInfo != null) {
+                    // TODO: 刷新登录cookie
+                    val onLoginCallbackId = event.data["onLoginCallbackId"].asString
+                    biliCallbackReceived(onLoginCallbackId, "{ state: 1 }")
+                }
+            }
         }
         activity.runOnUiThread {
             event.callback(result)
@@ -149,7 +155,7 @@ class BiliJsBridge(
             })()
             """.trimIndent()
         activity.runOnUiThread {
-            webView.loadUrl("javascript:$javascript")
+            webView.evaluateJavascript(javascript){ }
         }
     }
 
