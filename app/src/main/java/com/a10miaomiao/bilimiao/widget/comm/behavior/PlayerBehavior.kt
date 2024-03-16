@@ -79,7 +79,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                     object : PlayerBehaviorDelegate.Insets{
                         override val top get() = windowInsets.top
                         override val bottom get() = windowInsets.bottom
-                        override val left get() = windowInsets.left
+                        override val left get() = windowInsets.left + parentRef!!.appBarWidth
                         override val right get() = windowInsets.right
                     }
                 )
@@ -207,6 +207,13 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
     fun holdUpPlayer() {
         behaviorDelegate?.holdUpTop()
+    }
+
+    fun updateLayout(){
+        behaviorDelegate?.updateWindowSize()
+    }
+    fun updateContent(){
+        behaviorDelegate?.updateContent()
     }
 
 

@@ -59,6 +59,18 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 playerDelegate?.setHoldStatus(isHoldUpPlayer)
+                updateLayout()
+                requestLayout()
+            }
+        }
+    /**
+     * 播放器视图位置状态
+     */
+    var playerViewPlaceStatus: PlayerViewPlaceStatus = PlayerViewPlaceStatus.RT
+        set(value) {
+            if (field != value) {
+                field = value
+                updateLayout()
                 requestLayout()
             }
         }
@@ -75,6 +87,7 @@ class ScaffoldView @JvmOverloads constructor(
                 field = value
                 playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 this.appBar?.orientation = orientation
+                updateLayout()
                 requestLayout()
             }
         }
@@ -100,10 +113,16 @@ class ScaffoldView @JvmOverloads constructor(
             }
         }
 
+    var showSubContent = true
+        get() = field && spaceForSubContent
+    var spaceForSubContent = true
+    var contentExchanged = false // 主副区域交换位置
+
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
 
-    var rightPlayerSpaceWidth = 0 // 横屏时右侧留给播放器宽度
+    val contentMinWidth = dip(250) //内容区域每列最小宽度
+    val contentMinHeight = dip(200) // 内容区域每列最小高度
 
     val smallModePlayerMinHeight = dip(200) // 小屏模式下的播放器最小高度
     var smallModePlayerHeight = smallModePlayerMinHeight // 小屏模式下的播放器高度
@@ -111,6 +130,8 @@ class ScaffoldView @JvmOverloads constructor(
     var playerY = 0
     var playerHeight = -3
     var playerWidth = -3
+    var playerSpaceHeight = 0
+    var playerSpaceWidth = 0 // 窗口所占大小，也算上了窗口与边缘的距离
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null
@@ -118,6 +139,9 @@ class ScaffoldView @JvmOverloads constructor(
 
     var content: View? = null
     var contentBehavior: ContentBehavior? = null
+
+    var subContent: View? = null
+    var subContentBehavior: ContentBehavior? = null
 
     var player: View? = null
     var playerBehavior: PlayerBehavior? = null
@@ -138,6 +162,17 @@ class ScaffoldView @JvmOverloads constructor(
     fun updatePlayerSmallShowArea() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         playerSmallShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA, 400)
+        updateLayout()
+    }
+
+    fun updateLayout(){
+        playerBehavior?.updateLayout()
+        updateContentLayout()
+    }
+    fun updateContentLayout(){
+        playerBehavior?.updateContent()
+        contentBehavior?.updateLayout()
+        subContentBehavior?.updateLayout()
     }
 
     override fun addView(
@@ -155,8 +190,13 @@ class ScaffoldView @JvmOverloads constructor(
                     }
                 }
                 is ContentBehavior -> {
-                    this.content = child
-                    this.contentBehavior = behavior
+                    if (behavior.isSub){
+                        this.subContent = child
+                        this.subContentBehavior = behavior
+                    } else {
+                        this.content = child
+                        this.contentBehavior = behavior
+                    }
                 }
                 is PlayerBehavior -> {
                     this.player = child
@@ -247,6 +287,17 @@ class ScaffoldView @JvmOverloads constructor(
         NORMAL, // 正常
         FOLD, // 折叠，以展示内容区域为主
         HOLD_UP, // 挂起，横屏状态挂在屏幕边缘
+    }
+
+    /**
+     * 播放器位置状态
+     */
+    enum class PlayerViewPlaceStatus {
+        LT,
+        RT,
+        LB,
+        RB,
+        MIDDLE,
     }
 
 }
