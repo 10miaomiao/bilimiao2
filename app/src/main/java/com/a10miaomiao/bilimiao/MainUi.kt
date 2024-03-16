@@ -2,16 +2,13 @@ package com.a10miaomiao.bilimiao
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.view.Gravity
 import android.view.View
+import android.view.View.FOCUSABLE
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.RelativeLayout
-import android.widget.TextView
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentContainerView
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.widget.comm.AppBarView
 import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
@@ -30,8 +27,6 @@ import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
-import kotlin.math.ceil
-import kotlin.math.max
 
 
 @OptIn(InternalSplittiesApi::class)
@@ -45,6 +40,10 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
     }
 
     val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
+        backgroundColor = Color.TRANSPARENT
+    }
+
+    val mSubContainerView = inflate<FragmentContainerView>(R.layout.container_fragment_sub) {
         backgroundColor = Color.TRANSPARENT
     }
 
@@ -129,6 +128,15 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
         addView(mContainerView, lParams {
             behavior = ContentBehavior(ctx, null)
+            width = matchParent
+            height = matchParent
+        })
+
+        addView(mSubContainerView, lParams {
+            behavior = ContentBehavior(ctx, null).let {
+                it.isSub = true
+                it
+            }
             width = matchParent
             height = matchParent
         })
