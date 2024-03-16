@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.behavior
+package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
 import android.content.Context
 import android.util.AttributeSet
@@ -6,9 +6,12 @@ import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.PlayerViewPlaceStatus.*
-
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RT
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RB
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LB
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LT
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.MIDDLE
 
 class ContentBehavior : CoordinatorLayout.Behavior<View> {
 

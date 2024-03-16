@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.behavior
+package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
 import android.view.MotionEvent
 import android.view.View
@@ -7,8 +7,12 @@ import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView.PlayerViewPlaceStatus.*
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RT
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RB
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LB
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LT
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.MIDDLE
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import splitties.dimensions.dip
 import kotlin.math.ceil
@@ -147,7 +151,7 @@ class PlayerBehaviorDelegate(
      * 挂起到右上↗
      */
     fun holdUpTop() {
-        playerX =parent.measuredWidth - playerWidth - windowInsets.right
+        playerX =parent.measuredWidth - (parent.dip(onHoldShowArea) / sqrt(parent.playerVideoRatio)).toInt() - windowInsets.right
         playerY = windowInsets.top
         if (dragger.smoothSlideViewTo(playerView, playerX, playerY)) {
             ViewCompat.postInvalidateOnAnimation(parent)

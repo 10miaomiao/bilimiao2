@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm
+package com.a10miaomiao.bilimiao.widget.scaffold
 
 import android.content.Context
 import android.preference.PreferenceManager
@@ -14,11 +14,11 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
-import com.a10miaomiao.bilimiao.widget.comm.behavior.AppBarBehavior
-import com.a10miaomiao.bilimiao.widget.comm.behavior.ContentBehavior
-import com.a10miaomiao.bilimiao.widget.comm.behavior.DrawerBehavior
-import com.a10miaomiao.bilimiao.widget.comm.behavior.MaskBehavior
-import com.a10miaomiao.bilimiao.widget.comm.behavior.PlayerBehavior
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.ContentBehavior
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.views.dsl.core.viewFactory

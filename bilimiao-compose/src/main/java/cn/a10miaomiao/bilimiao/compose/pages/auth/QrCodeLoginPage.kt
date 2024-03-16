@@ -41,6 +41,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.QRLoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -78,6 +79,7 @@ internal class QrCodeLoginPageViewModel(
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
 
+    private val loginSessionId = ApiHelper.getUUID()
     private var _authCode = ""
 
     val loading = MutableStateFlow(false)
@@ -91,7 +93,7 @@ internal class QrCodeLoginPageViewModel(
             error.value = ""
             isScaned.value = false
             val res = BiliApiService.authApi
-                .qrCode()
+                .qrCode(loginSessionId)
                 .awaitCall()
                 .gson<ResultInfo<QRLoginInfo>>()
             if (res.isSuccess) {

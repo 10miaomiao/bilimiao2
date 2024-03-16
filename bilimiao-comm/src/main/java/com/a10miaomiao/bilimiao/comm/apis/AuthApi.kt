@@ -1,15 +1,13 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
-import android.util.Base64
+import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.RSAUtil
-import java.security.KeyFactory
-import java.security.spec.X509EncodedKeySpec
 import java.util.*
-import javax.crypto.Cipher
 
 class AuthApi {
 
@@ -52,6 +50,13 @@ class AuthApi {
     }
 
 
+    fun cookieInfo(
+        biliJct: String,
+        cookie: String,
+    ) = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/passport-login/web/cookie/info?csrf=$biliJct"
+        headers["cookie"] = cookie
+    }
 
     /**
      * 验证码
@@ -234,17 +239,21 @@ class AuthApi {
         url = BiliApiService.createUrl("https://passport.bilibili.com/x/safecenter/user/info",
             "tmp_code" to tmpCode,
         )
-//        url = "https://passport.bilibili.com/h5-app/passport/risk/verify?tmp_token=67381b8106a9f8c7ee7ea657be75a111&request_id=e6afd2ea2a614236a9ca8935d51772b6&source=risk"
     }
 
     /**
      * 获取登录二维码
      */
-    fun qrCode() = MiaoHttp.request {
+    fun qrCode(
+        loginSessionId: String
+    ) = MiaoHttp.request {
         url = "https://passport.bilibili.com/x/passport-tv-login/qrcode/auth_code"
         formBody = ApiHelper.createParams(
             "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+            "login_session_id" to loginSessionId,
+            "spm_id" to "from_spmid"
         )
+        headers["APP-KEY"] = "android_hd"
         method = MiaoHttp.POST
         // Response: QRLoginInfo
     }
@@ -262,5 +271,25 @@ class AuthApi {
         )
         method = MiaoHttp.POST
         // Response: TokenInfo
+    }
+
+    fun confirmQRCode(
+        authCode: String,
+    ) = MiaoHttp.request {
+        val cookieManager = CookieManager.getInstance()
+        val cookie = cookieManager.getCookie("https://passport.bilibili.com/")
+        val keyValueArr = cookie.split(";").map {
+            it.trimIndent()
+        }
+        val biliJct = keyValueArr.find { it.startsWith("bili_jct=") }?.let {
+            it.substring(9, it.length)
+        } ?: ""
+        url = "https://passport.bilibili.com/x/passport-tv-login/h5/qrcode/confirm"
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "auth_code" to authCode,
+            "csrf" to biliJct,
+        )
+        headers["cookie"] = cookie
     }
 }

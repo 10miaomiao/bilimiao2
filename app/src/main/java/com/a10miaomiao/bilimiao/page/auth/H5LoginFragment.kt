@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.page.auth
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -172,26 +173,22 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
         return ui.root
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mRootView = view.findViewById<View>(ID_root)
         if (mWebView == null) {
             val webView = view.findViewById<WebView>(ID_webView)
-            val biliJsBridge = BiliJsBridge(this, webView)
-            biliJsBridge.canCloseBrowser = false
+//            val biliJsBridge = BiliJsBridge(this, webView) {
+//                viewModel.getQrCodeUrl(webView)
+//            }
             CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
             webView.webViewClient = mWebViewClient
             webView.webChromeClient = mWebChromeClient
             webView.settings.apply {
                 javaScriptEnabled = true
-                var defaultUserAgentString = userAgentString
-                if ("Mobile" !in defaultUserAgentString) {
-                    defaultUserAgentString += " Mobile"
-                }
-                userAgentString = "$defaultUserAgentString ${WebFragment.userAgent}"
             }
-            webView.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
-//            webView.addJavascriptInterface(InJavaScriptLocalObj2(), "java_obj.test")
+//            webView.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
             val url = requireArguments().getString(MainNavArgs.url, "")
             if (url.isBlank()) {
                 webView.loadUrl("https://passport.bilibili.com/h5-app/passport/login")

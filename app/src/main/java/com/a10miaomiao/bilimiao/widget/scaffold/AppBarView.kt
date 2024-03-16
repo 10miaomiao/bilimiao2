@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm
+package com.a10miaomiao.bilimiao.widget.scaffold
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -17,9 +17,9 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarHorizontalUi
-import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarUi
-import com.a10miaomiao.bilimiao.widget.comm.ui.AppBarVerticalUi
+import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarHorizontalUi
+import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarUi
+import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarVerticalUi
 import com.google.android.material.card.MaterialCardView
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
