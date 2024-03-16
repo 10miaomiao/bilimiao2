@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.ui
+package com.a10miaomiao.bilimiao.widget.scaffold.ui
 
 import android.animation.Animator
 import android.animation.LayoutTransition
@@ -12,8 +12,8 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.comm.AppBarView
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
+import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
+import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView
 import splitties.dimensions.dip
 import splitties.views.*
 import splitties.views.dsl.core.*

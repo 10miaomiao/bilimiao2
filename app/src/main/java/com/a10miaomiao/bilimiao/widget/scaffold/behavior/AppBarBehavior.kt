@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.behavior
+package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -18,8 +18,8 @@ import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.comm.AppBarView
-import com.a10miaomiao.bilimiao.widget.comm.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import splitties.dimensions.dip
 

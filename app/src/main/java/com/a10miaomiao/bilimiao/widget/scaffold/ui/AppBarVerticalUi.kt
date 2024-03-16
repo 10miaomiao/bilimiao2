@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.comm.ui
+package com.a10miaomiao.bilimiao.widget.scaffold.ui
 
 import android.animation.*
 import android.content.Context
@@ -15,8 +15,8 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.comm.AppBarView
-import com.a10miaomiao.bilimiao.widget.comm.MenuItemView
+import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
+import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
