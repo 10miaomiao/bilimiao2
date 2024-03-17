@@ -4,6 +4,7 @@ import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
+import cn.a10miaomiao.miao.binding.android.view._contentDescription
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -104,6 +105,33 @@ fun MiaoUI.miniVideoItem(
 ): View {
     return frameLayout {
         padding = dip(5)
+
+        _contentDescription = with(StringBuilder()) {
+            if (!title.isNullOrBlank()) {
+                append(title)
+            }
+            if (!upperName.isNullOrBlank()) {
+                append(",")
+                append("up主：$upperName")
+            }
+            if (!duration.isNullOrBlank()) {
+                append(",")
+                append("视频时长：$duration")
+            }
+            if (!playNum.isNullOrBlank()) {
+                append(",")
+                append("播放量：$playNum")
+            }
+            if (!playNum.isNullOrBlank()) {
+                append(",")
+                append("弹幕数：$damukuNum")
+            }
+            if (!remark.isNullOrBlank()) {
+                append(",")
+                append(remark)
+            }
+            toString()
+        }
 
         views {
             +frameLayout {

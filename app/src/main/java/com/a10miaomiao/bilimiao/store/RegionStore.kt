@@ -13,9 +13,11 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import splitties.collections.forEachWithIndex
 import splitties.toast.toast
@@ -77,7 +79,7 @@ class RegionStore(override val di: DI) :
                 .regions()
                 .awaitCall()
                 .gson<ResultListInfo<RegionInfo>>()
-            if (res.code == 0) {
+            if (res.isSuccess) {
                 val regionList = res.data.filter { it.children != null && it.children.isNotEmpty() }
                 setState {
                     regions = regionList.toMutableList()
@@ -92,10 +94,12 @@ class RegionStore(override val di: DI) :
                     )
                 )
             } else {
-                context.toast(res.msg)
+                withContext(Dispatchers.Main) {
+                    PopTip.show(res.msg)
+                }
             }
         } catch (e: Exception) {
-            DebugMiao.loge(e)
+            e.printStackTrace()
         }
     }
 
