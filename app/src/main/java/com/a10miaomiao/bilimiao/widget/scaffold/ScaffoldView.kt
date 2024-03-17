@@ -43,6 +43,8 @@ class ScaffoldView @JvmOverloads constructor(
      */
     var playerSmallShowArea: Int = 400
         private set
+    var playerHoldShowArea: Int = 400
+        private set
 
     /**
      * 播放器比例
@@ -114,14 +116,23 @@ class ScaffoldView @JvmOverloads constructor(
         }
 
     var showSubContent = true
-        get() = field && spaceForSubContent
+        set(value) {
+            field = value
+            updateContentLayout()
+        }
     var spaceForSubContent = true
+    var contentDefaultSplit = 0f //默认情况下左右内容分割比
     var contentExchanged = false // 主副区域交换位置
+        set(value) {
+            field = value
+            updateContentLayout()
+        }
+    var focusOnMain = true //焦点在主/副内容上
 
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
 
-    val contentMinWidth = dip(250) //内容区域每列最小宽度
+    val contentMinWidth = dip(320) //内容区域每列最小宽度
     val contentMinHeight = dip(200) // 内容区域每列最小高度
 
     val smallModePlayerMinHeight = dip(200) // 小屏模式下的播放器最小高度
@@ -157,11 +168,22 @@ class ScaffoldView @JvmOverloads constructor(
 
     init {
         updatePlayerSmallShowArea()
+        updatePlayerHoldShowArea()
     }
 
     fun updatePlayerSmallShowArea() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         playerSmallShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA, 400)
+        updateLayout()
+    }
+    fun updatePlayerHoldShowArea() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        playerHoldShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_HOLD_SHOW_AREA, 100)
+        updateLayout()
+    }
+    fun updateContentDefaultSplit() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        contentDefaultSplit =  prefs.getInt(VideoSettingFragment.CONTENT_DEFAULT_SPLIT, 30)/100f
         updateLayout()
     }
 

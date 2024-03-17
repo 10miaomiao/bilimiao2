@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.net.Uri
@@ -15,17 +14,14 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.DisplayCutout
 import android.view.View
-import android.view.View.FOCUSABLE
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
@@ -33,10 +29,8 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
-import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -45,9 +39,6 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
@@ -68,7 +59,7 @@ class MainActivity
     : AppCompatActivity(),
     DIAware,
     NavController.OnDestinationChangedListener,
-    FragmentOnAttachListener, View.OnFocusChangeListener {
+    FragmentOnAttachListener{
 
     lateinit var ui: MainUi
 
@@ -95,7 +86,10 @@ class MainActivity
     private lateinit var subNavHostFragment: NavHostFragment
     private lateinit var subNavController: NavController
 
-    private var currentNav: NavHostFragment? = null
+    private val currentNav: NavHostFragment
+        get() = if(ui.root.focusOnMain) navHostFragment else subNavHostFragment
+    private val anotherNav: NavHostFragment
+        get() = if(!ui.root.focusOnMain) navHostFragment else subNavHostFragment
     var pageConfig: MyPageConfigInfo? = null
         private set
 
@@ -146,7 +140,6 @@ class MainActivity
         navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
 
-        currentNav = navHostFragment
 
         (supportFragmentManager.findFragmentByTag(getString(R.string.tag_left_fragment)) as? StartFragment)?.let {
             leftFragment = it
@@ -161,11 +154,15 @@ class MainActivity
         ui.mAppBar.onBackClick = this.onBackClick
         ui.mAppBar.onBackLongClick = this.onBackLongClick
         ui.mAppBar.onMenuItemClick = {
-            val fragment = currentNav!!.childFragmentManager.primaryNavigationFragment
+            val fragment = currentNav.childFragmentManager.primaryNavigationFragment
             if (fragment is MyPage) {
                 fragment.onMenuItemClick(it, it.prop)
             }
         }
+        ui.mAppBar.onMoveClick = this.onMoveClick
+        ui.mAppBar.onMoveLongClick = this.onMoveLongClick
+        ui.mAppBar.onExchangeClick = this.onExchangeClick
+        ui.mAppBar.onExchangeLongClick = this.onExchangeLongClick
 
 //        ui.mContainerView.addDrawerListener(onDrawer)
 //        lifecycleScope.launch(Dispatchers.IO){
@@ -211,13 +208,25 @@ class MainActivity
         })
 
         ui.root.isFocusable = true
+        ui.root.appBar?.isFocusable = true
         ui.root.content?.isFocusable = true
         ui.root.subContent?.isFocusable = true
         ui.root.isFocusableInTouchMode = true
+        ui.root.appBar?.isFocusableInTouchMode = true
         ui.root.content?.isFocusableInTouchMode = true
         ui.root.subContent?.isFocusableInTouchMode = true
 
-        ui.root.content?.setOnFocusChangeListener(this)
+        ui.root.content?.setOnFocusChangeListener { _, hasFocus ->
+            if(hasFocus) changeFocus(true)
+        }
+        ui.root.subContent?.setOnFocusChangeListener { _, hasFocus ->
+            if(hasFocus) changeFocus(false)
+        }
+
+        //主界面切至后台时会把当前侧栏内容覆盖掉，妥协方案，侧栏得失焦点刷新
+        ui.root.appBar?.setOnFocusChangeListener { _, _ ->
+            notifyConfigChanged()
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -252,19 +261,31 @@ class MainActivity
     ) {
         ui.mAppBar.canBack = destination.id != MainNavGraph.dest.main
 //        ui.mAppBar.cleanProp()
+
+        //将焦点给新页面
+        if(controller == anotherNav.navController){
+            changeFocus(!ui.root.focusOnMain)
+            ui.root.updateContentLayout()
+        }
     }
 
     //焦点改变时提示页面标题
-    override fun onFocusChange(v: View?, hasFocus: Boolean) {
-        currentNav = if(hasFocus) navHostFragment else subNavHostFragment
-        if (currentNav!!.childFragmentManager.fragments.isNotEmpty()) {
-            val fragment = currentNav!!.childFragmentManager.fragments.last()
-            ui.mAppBar.canBack = currentNav!!.navController.currentDestination?.id != MainNavGraph.dest.main
+    private fun changeFocus(focusOnMain:Boolean){
+        ui.root.focusOnMain = focusOnMain
+        notifyConfigChanged()
+    }
+    fun notifyConfigChanged(){
+        if (currentNav.childFragmentManager.fragments.isNotEmpty()) {
+            val fragment = currentNav.childFragmentManager.fragments.last()
+            ui.mAppBar.canBack =
+                currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
             if (fragment is MyPage) {
                 fragment.pageConfig.notifyConfigChanged()
             }
         }
+
     }
+
 
     fun setMyPageConfig(config: MyPageConfigInfo) {
         pageConfig = config
@@ -277,14 +298,14 @@ class MainActivity
     }
 
     private fun goBackHome(): Boolean {
-        return currentNav!!.navController.popBackStack(MainNavGraph.dest.main, false)
+        return currentNav.navController.popBackStack(MainNavGraph.dest.main, false)
     }
 
     val onBackClick = View.OnClickListener {
         onBackPressed()
     }
 
-    val onBackLongClick = View.OnLongClickListener {
+    private val onBackLongClick = View.OnLongClickListener {
         if (ui.root.showPlayer) {
             MainBackPopupMenu(
                 this@MainActivity,
@@ -295,6 +316,26 @@ class MainActivity
         } else {
             goBackHome()
         }
+    }
+    private val onMoveClick = View.OnClickListener {
+    }
+    private val onMoveLongClick = View.OnLongClickListener {
+        true
+    }
+    private val onExchangeClick = View.OnClickListener {
+        if(!ui.root.showSubContent || !ui.root.spaceForSubContent){
+            //单内容区，将焦点给到另一区域
+            changeFocus(!ui.root.focusOnMain)
+            ui.root.updateContentLayout()
+        } else {
+            //双内容区，互换
+            ui.root.contentExchanged = !ui.root.contentExchanged
+        }
+    }
+    private val onExchangeLongClick = View.OnLongClickListener {
+        //长按强制全屏
+        ui.root.showSubContent = !ui.root.showSubContent
+        true
     }
 
     val broadcastReceiver = object : BroadcastReceiver() {
@@ -321,7 +362,7 @@ class MainActivity
     }
 
     fun searchSelfPage(keyword: String) {
-        val fragment = currentNav!!.childFragmentManager.primaryNavigationFragment
+        val fragment = currentNav.childFragmentManager.primaryNavigationFragment
         if (fragment is MyPage) {
             fragment.onSearchSelfPage(this, keyword)
         }
@@ -579,7 +620,7 @@ class MainActivity
 
     private fun onNavBack():Boolean{
         if(ui.mAppBar.canBack){
-            currentNav!!.navController.popBackStack()
+            currentNav.navController.popBackStack()
             return true
         } else {
             return false

@@ -24,9 +24,19 @@ class AppBarHorizontalUi(
     val menuItemLongClick: View.OnLongClickListener,
     val backClick: View.OnClickListener,
     val backLongClick: View.OnLongClickListener,
+    val moveClick: View.OnClickListener,
+    val moveLongClick: View.OnLongClickListener,
+    val exchangeClick: View.OnClickListener,
+    val exchangeLongClick: View.OnLongClickListener,
 ) : AppBarUi {
 
     val mNavigationIcon = imageView {
+        setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
+    }
+    val mNavigationMoveIcon = imageView {
+        setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
+    }
+    val mNavigationExchangeIcon = imageView {
         setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
     }
 
@@ -36,6 +46,28 @@ class AppBarHorizontalUi(
         setOnClickListener(backClick)
         setOnLongClickListener(backLongClick)
         addView(mNavigationIcon, lParams {
+            gravity = Gravity.CENTER
+            width = dip(24)
+            height = dip(24)
+        })
+    }
+    val mNavigationMoveIconLayout = frameLayout {
+        padding = dip(10)
+        bottomPadding = 0
+        setOnClickListener(moveClick)
+        setOnLongClickListener(moveLongClick)
+        addView(mNavigationMoveIcon, lParams {
+            gravity = Gravity.CENTER
+            width = dip(24)
+            height = dip(24)
+        })
+    }
+    val mNavigationExchangeIconLayout = frameLayout {
+        padding = dip(10)
+        bottomPadding = 0
+        setOnClickListener(exchangeClick)
+        setOnLongClickListener(exchangeLongClick)
+        addView(mNavigationExchangeIcon, lParams {
             gravity = Gravity.CENTER
             width = dip(24)
             height = dip(24)
@@ -78,6 +110,14 @@ class AppBarHorizontalUi(
             width = matchParent
             height = wrapContent
         })
+        addView(mNavigationMoveIconLayout, lParams {
+            width = matchParent
+            height = wrapContent
+        })
+        addView(mNavigationExchangeIconLayout, lParams {
+            width = matchParent
+            height = wrapContent
+        })
         addView(mTitleLayout, lParams {
             width = matchParent
             height = wrapContent
@@ -113,6 +153,18 @@ class AppBarHorizontalUi(
                 mNavigationIcon.imageDrawable = prop.navigationIcon
             } else {
                 mNavigationIconLayout.visibility = View.GONE
+            }
+            if (prop.navigationMoveIcon != null) {
+                mNavigationMoveIcon.imageDrawable = prop.navigationMoveIcon
+                mNavigationMoveIconLayout.visibility = View.VISIBLE
+            } else {
+                mNavigationMoveIconLayout.visibility = View.GONE
+            }
+            if(prop.navigationExchangeIcon != null){
+                mNavigationExchangeIcon.imageDrawable = prop.navigationExchangeIcon
+                mNavigationExchangeIconLayout.visibility = View.VISIBLE
+            } else {
+                mNavigationExchangeIconLayout.visibility = View.VISIBLE
             }
             if (prop.title != null) {
                 mTitleLayout.visibility = View.VISIBLE

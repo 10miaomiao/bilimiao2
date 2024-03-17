@@ -100,6 +100,8 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val KEY_UNSPECIFIED = "UNSPECIFIED"
 
         const val PLAYER_SMALL_SHOW_AREA = "player_small_show_area"
+        const val PLAYER_HOLD_SHOW_AREA = "player_hold_show_area"
+        const val CONTENT_DEFAULT_SPLIT = "content_default_split"
     }
 
     override val pageConfig = myPageConfig {
@@ -180,6 +182,12 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         // 同步横屏时小屏播放面积
         if (key == PLAYER_SMALL_SHOW_AREA) {
             scaffoldView.updatePlayerSmallShowArea()
+        }
+        if (key == PLAYER_HOLD_SHOW_AREA) {
+            scaffoldView.updatePlayerHoldShowArea()
+        }
+        if (key == CONTENT_DEFAULT_SPLIT) {
+            scaffoldView.updateContentDefaultSplit()
         }
 
     }
@@ -350,6 +358,22 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             max = 600
             min = 150
             formatter = { it.toString() }
+        }
+
+        seekBar(PLAYER_HOLD_SHOW_AREA) {
+            title = "挂起后播放面积"
+            default = 150
+            max = 300
+            min = 100
+            formatter = { it.toString() }
+        }
+
+        seekBar(CONTENT_DEFAULT_SPLIT) {
+            title = "横屏时内容分割比"
+            default = 30
+            max = 85
+            min = 15
+            formatter = { "0.$it" }
         }
 
         categoryHeader("3") {

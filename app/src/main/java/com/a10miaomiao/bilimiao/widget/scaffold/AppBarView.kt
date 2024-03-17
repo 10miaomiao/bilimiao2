@@ -39,6 +39,10 @@ class AppBarView @JvmOverloads constructor(
     var onBackClick: View.OnClickListener? = null
     var onBackLongClick: View.OnLongClickListener? = null
     var onMenuItemClick: ((MenuItemView) -> Unit)? = null
+    var onMoveClick: View.OnClickListener? = null
+    var onMoveLongClick: View.OnLongClickListener? = null
+    var onExchangeClick: View.OnClickListener? = null
+    var onExchangeLongClick: View.OnLongClickListener? = null
 
     var orientation = ScaffoldView.VERTICAL
         set(value) {
@@ -81,6 +85,18 @@ class AppBarView @JvmOverloads constructor(
             false
         }
     }
+    private val moveClick = OnClickListener {view ->
+        onMoveClick?.onClick(view)
+    }
+    private val moveLongClick = OnLongClickListener {view ->
+        onMoveLongClick?.onLongClick(view) ?: false
+    }
+    private val exchangeClick = OnClickListener {view ->
+        onExchangeClick?.onClick(view)
+    }
+    private val exchangeLongClick = OnLongClickListener {view ->
+        onExchangeLongClick?.onLongClick(view) ?: false
+    }
 
     private var mUi = createUi()
 
@@ -97,6 +113,10 @@ class AppBarView @JvmOverloads constructor(
                 menuItemLongClick = menuItemLongClick,
                 backClick = backClick,
                 backLongClick = backLongClick,
+                moveClick = moveClick,
+                moveLongClick = moveLongClick,
+                exchangeClick = exchangeClick,
+                exchangeLongClick = exchangeLongClick,
             )
         } else {
             AppBarVerticalUi(
@@ -150,12 +170,15 @@ class AppBarView @JvmOverloads constructor(
         this.prop = prop
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private fun newProp (): PropInfo {
         val prop = PropInfo()
         if (canBack) {
 //            prop.onNavigationClick = onBackClick
             prop.navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp)
+            //prop.navigationMoveIcon = resources.getDrawable(R.drawable.ic_move_24dp)
         }
+        prop.navigationExchangeIcon = resources.getDrawable(R.drawable.ic_exchange_24dp)
         return prop
     }
 
@@ -177,6 +200,8 @@ class AppBarView @JvmOverloads constructor(
     class PropInfo (
         var title: String? = null,
         var navigationIcon: Drawable? = null,
+        var navigationMoveIcon: Drawable? = null,
+        var navigationExchangeIcon: Drawable? = null,
         var menus: List<MenuItemPropInfo>? = null,
     )
 
