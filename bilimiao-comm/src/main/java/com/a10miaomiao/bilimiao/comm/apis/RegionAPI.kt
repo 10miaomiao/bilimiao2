@@ -13,6 +13,7 @@ class RegionAPI {
     fun regions() = MiaoHttp.request {
         url = BiliApiService.biliApp(
             "x/v2/region/index",
+            "mobi_app" to "android", // hd版api没有子分区
         )
     }
 
