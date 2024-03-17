@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
@@ -73,6 +75,7 @@ class MenuItemView @JvmOverloads constructor(
                 subTitle.replace("\n", " ")
             }
         }
+        setContentDescription(prop.contentDescription)
     }
 
     inner class ViewUi: Ui {

@@ -50,5 +50,12 @@ inline var View._backgroundResource: Int
         setBackgroundResource(value)
     }
 
+inline var View._contentDescription: String
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(value) = miaoEffect(value) {
+        contentDescription = value
+    }
+
+
 
 

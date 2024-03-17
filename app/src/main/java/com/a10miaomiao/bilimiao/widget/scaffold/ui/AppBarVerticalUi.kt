@@ -2,13 +2,18 @@ package com.a10miaomiao.bilimiao.widget.scaffold.ui
 
 import android.animation.*
 import android.content.Context
+import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
@@ -171,7 +176,9 @@ class AppBarVerticalUi(
                             menuItemView.minimumWidth = dip(60)
                             menuItemView.setBackgroundResource(config.selectableItemBackgroundBorderless)
                             menuItemView.setOnClickListener(menuItemClick)
-                            menuItemView.setOnLongClickListener(menuItemLongClick)
+                            if (menu.key == MenuKeys.back) {
+                                menuItemView.setOnLongClickListener(menuItemLongClick)
+                            }
                             addView(menuItemView, lParams {
                                 width = wrapContent
                                 height = matchParent
