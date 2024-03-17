@@ -26,7 +26,6 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
     fun init() {
     }
     var isSub = false
-    var showThis = true
 
     var parentRef: ScaffoldView? = null
     var viewRef: View? = null
@@ -111,7 +110,10 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         if(parentRef == null){
             return
         }
+        //左侧右侧
         val isLeft = if(parentRef!!.contentExchanged) isSub else !isSub
+
+        val isOnFocus = if(parentRef!!.focusOnMain) !isSub else isSub
 
         val mWidth = parentRef!!.measuredWidth
         val mHeight = parentRef!!.measuredHeight
@@ -120,7 +122,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         val iLeft = parentRef!!.appBarWidth
         val iRight = 0
 
-        val originSplitRatio = 0.5f
+        val originSplitRatio = parentRef!!.contentDefaultSplit
         val minWidth = parentRef!!.contentMinWidth
         val minHeight = parentRef!!.contentMinHeight
 
@@ -134,7 +136,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         bottom = mHeight
         //竖屏
         if(parentRef!!.orientation == ScaffoldView.VERTICAL){
-            if(isLeft){
+            if(isOnFocus){
                 left = 0
                 right = mWidth
             } else {
@@ -142,13 +144,11 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 right = 0
                 bottom = 0
             }
-            height = bottom - top
-            width = right - left
-            return
+            return onUpdateFinished(false)
         }
-        //宽度不够分两列
-        if(contentWidth < minWidth*2 || contentWidth - pWidth < minWidth){
-            if(isLeft){
+        //宽度不够分两列,或强制单区域
+        if(contentWidth < minWidth*2 || !parentRef!!.showSubContent){
+            if(isOnFocus){
                 left = iLeft
                 right = mWidth
             } else {
@@ -156,9 +156,18 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 right = 0
                 bottom = 0
             }
-            height = bottom - top
-            width = right - left
-            return
+            return onUpdateFinished(false)
+        }
+        //另一侧被过度挤压
+        if(contentWidth - pWidth < minWidth){
+            if(isLeft){
+                left = iLeft
+                right = iLeft + splitLeftWidth
+            } else {
+                left = iLeft + splitLeftWidth
+                right = mWidth - iRight
+            }
+            return onUpdateFinished(true)
         }
         //挂起或无视频窗口
         if(parentRef!!.isHoldUpPlayer || !parentRef!!.showPlayer){
@@ -169,9 +178,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 left = iLeft + splitLeftWidth
                 right = mWidth - iRight
             }
-            height = bottom - top
-            width = right - left
-            return
+            return onUpdateFinished(true)
         }
         //竖屏窄小窗
         if(mHeight - pHeight < minHeight){
@@ -216,9 +223,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                             }
                         }
                     }
-                    height = bottom - top
-                    width = right -left
-                    return
+                    return onUpdateFinished(true)
                 }
                 //都不够，按默认分割
                 if(isLeft){
@@ -228,13 +233,11 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                     left = iLeft + splitLeftWidth
                     right = mWidth - iRight
                 }
-                height = bottom - top
-                width = right - left
-                return
+                return onUpdateFinished(true)
             }
             //宽度够分
             contentWidth -= pWidth
-            splitLeftWidth = splitLeftWidth
+            splitLeftWidth = (contentWidth * originSplitRatio).toInt()
             if(splitLeftWidth < minWidth)
                 splitLeftWidth = minWidth
             if(contentWidth - splitLeftWidth < minWidth)
@@ -268,9 +271,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                     }
                 }
             }
-            height = bottom - top
-            width = right - left
-            return
+            return onUpdateFinished(true)
         }
         //正常小窗
         when(parentRef!!.playerViewPlaceStatus) {
@@ -324,7 +325,12 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 }
             }
         }
+        return onUpdateFinished(true)
+    }
+    fun onUpdateFinished(spaceForSubContent: Boolean){
+        parentRef!!.spaceForSubContent = spaceForSubContent
         height = bottom - top
         width = right - left
+        viewRef?.requestLayout()
     }
 }

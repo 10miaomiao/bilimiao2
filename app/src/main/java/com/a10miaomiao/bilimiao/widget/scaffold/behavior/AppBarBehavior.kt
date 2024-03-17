@@ -89,6 +89,40 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
         return true
     }
 
+    //触摸分配焦点
+    override fun onInterceptTouchEvent(
+        parent: CoordinatorLayout,
+        child: View,
+        ev: MotionEvent
+    ): Boolean {
+        var left = 0
+        var right = 0
+        var top = 0
+        var bottom = 0
+        if(ev.action == MotionEvent.ACTION_DOWN && parentRef != null){
+            if (parentRef!!.fullScreenPlayer) {
+            } else {
+                if (parentRef!!.orientation == ScaffoldView.HORIZONTAL) {
+                    val width = appBarWidth + child.paddingLeft
+                    left = width - parentRef!!.measuredWidth
+                    top = 0
+                    right = width
+                    bottom = parentRef!!.measuredHeight
+                } else {
+                    val height = appBarHeight + child.paddingBottom
+                    left = 0
+                    top = parentRef!!.measuredHeight - height
+                    right = parentRef!!.measuredWidth
+                    bottom = parentRef!!.measuredHeight + parentRef!!.measuredHeight + height
+                }
+            }
+            if (ev.x > left && ev.x < right && ev.y > top && ev.y < bottom) {
+                child.requestFocus()
+            }
+        }
+        return super.onInterceptTouchEvent(parent, child, ev)
+    }
+
     /**
      * Sets an additional offset for the y position used to hide the view.
      *
