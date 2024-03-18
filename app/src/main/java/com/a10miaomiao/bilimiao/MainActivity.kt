@@ -86,10 +86,17 @@ class MainActivity
     private lateinit var subNavHostFragment: NavHostFragment
     private lateinit var subNavController: NavController
 
-    private val currentNav: NavHostFragment
+    val currentNav: NavHostFragment
         get() = if(ui.root.focusOnMain) navHostFragment else subNavHostFragment
-    private val anotherNav: NavHostFragment
+    val anotherNav: NavHostFragment
         get() = if(!ui.root.focusOnMain) navHostFragment else subNavHostFragment
+    //指示器，指示新页面该出现的地方
+    val pointerNav:NavHostFragment
+        get() = if(ui.root.subContentShown)
+            if(ui.root.pointerExchanged == ui.root.contentExchanged) navHostFragment else subNavHostFragment
+        else
+            currentNav
+
     var pageConfig: MyPageConfigInfo? = null
         private set
 
@@ -239,7 +246,7 @@ class MainActivity
                 .setPopExitAnim(R.anim.miao_fragment_close_exit)
                 .build()
             try {
-                navController.navigate(uri, navOptions)
+                pointerNav.navController.navigate(uri, navOptions)
                 true
             } catch (e: IllegalArgumentException) {
             }
@@ -271,19 +278,27 @@ class MainActivity
 
     //焦点改变时提示页面标题
     private fun changeFocus(focusOnMain:Boolean){
-        ui.root.focusOnMain = focusOnMain
-        notifyConfigChanged()
+        if(ui.root.pointerMoveByFocus && ui.root.focusOnMain != focusOnMain){
+            ui.root.focusOnMain = focusOnMain
+            //双内容区时自动切换指示器
+            if(ui.root.subContentShown) {
+                ui.root.pointerExchanged = !ui.root.pointerExchanged
+            }
+            notifyConfigChanged()
+        }
     }
     fun notifyConfigChanged(){
         if (currentNav.childFragmentManager.fragments.isNotEmpty()) {
             val fragment = currentNav.childFragmentManager.fragments.last()
             ui.mAppBar.canBack =
                 currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
+            ui.mAppBar.showPointer = ui.root.subContentShown
+            ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
+
             if (fragment is MyPage) {
                 fragment.pageConfig.notifyConfigChanged()
             }
         }
-
     }
 
 
@@ -318,12 +333,15 @@ class MainActivity
         }
     }
     private val onMoveClick = View.OnClickListener {
+        ui.root.pointerExchanged = !ui.root.pointerExchanged
+        notifyConfigChanged()
     }
     private val onMoveLongClick = View.OnLongClickListener {
+        ui.root.pointerMoveByFocus = !ui.root.pointerMoveByFocus
         true
     }
     private val onExchangeClick = View.OnClickListener {
-        if(!ui.root.showSubContent || !ui.root.spaceForSubContent){
+        if(!ui.root.subContentShown){
             //单内容区，将焦点给到另一区域
             changeFocus(!ui.root.focusOnMain)
             ui.root.updateContentLayout()
@@ -335,6 +353,14 @@ class MainActivity
     private val onExchangeLongClick = View.OnLongClickListener {
         //长按强制全屏
         ui.root.showSubContent = !ui.root.showSubContent
+        ui.root.updateContentLayout()
+        notifyConfigChanged()
+        //小窗行为跟随
+        if(!ui.root.subContentShown){
+            ui.root.playerBehavior?.holdUpPlayer()
+        } else {
+            ui.root.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
+        }
         true
     }
 
@@ -506,13 +532,13 @@ class MainActivity
                         .setPopEnterAnim(R.anim.miao_fragment_close_enter)
                         .setPopExitAnim(R.anim.miao_fragment_close_exit)
                         .build()
-                    navController.navigate(Uri.parse(pageUrl), navOptions)
+                    pointerNav.navController.navigate(Uri.parse(pageUrl), navOptions)
                     return
                 }
                 val mode = arguments.getInt(SearchActivity.KEY_MODE)
                 val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
                 if (mode == 0) {
-                    navController.navigate(
+                    pointerNav.navController.navigate(
                         SearchResultFragment.actionId,
                         SearchResultFragment.createArguments(keyword),
                     )

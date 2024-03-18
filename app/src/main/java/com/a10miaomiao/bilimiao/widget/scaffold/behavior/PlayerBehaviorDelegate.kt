@@ -149,7 +149,7 @@ class PlayerBehaviorDelegate(
      * 挂起到右上↗
      */
     fun holdUpTop() {
-        playerX =parent.measuredWidth - (parent.dip(parent.playerHoldShowArea) / sqrt(parent.playerVideoRatio)).toInt() - windowInsets.right
+        playerX =parent.measuredWidth - (parent.dip(parent.playerHoldShowArea) * sqrt(parent.playerVideoRatio)).toInt() - windowInsets.right
         playerY = windowInsets.top
         if (dragger.smoothSlideViewTo(playerView, playerX, playerY)) {
             ViewCompat.postInvalidateOnAnimation(parent)
@@ -209,7 +209,7 @@ class PlayerBehaviorDelegate(
                 }
                 MIDDLE -> {
                     playerX = (measuredWidth - windowInsets.right + windowInsets.left - playerWidth)/2
-                    playerY = (measuredHeight - windowInsets.top + windowInsets.bottom - playerHeight)/2
+                    playerY = (measuredHeight - windowInsets.bottom + windowInsets.top - playerHeight)/2
                 }
             }
         }

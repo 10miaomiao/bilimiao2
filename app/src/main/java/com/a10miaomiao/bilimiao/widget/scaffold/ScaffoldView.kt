@@ -6,12 +6,8 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
@@ -21,9 +17,7 @@ import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
-import splitties.views.dsl.core.viewFactory
 import splitties.views.dsl.core.wrapContent
-import splitties.views.dsl.material.hidden
 
 class ScaffoldView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -102,6 +96,7 @@ class ScaffoldView @JvmOverloads constructor(
                     playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 }
                 field = value
+                updateLayout()
                 requestLayout()
                 onPlayerChanged?.invoke(field)
             }
@@ -116,12 +111,12 @@ class ScaffoldView @JvmOverloads constructor(
             }
         }
 
-    var showSubContent = true
+    var showSubContent = true //设置值
         set(value) {
             field = value
             updateContentLayout()
         }
-    var spaceForSubContent = true
+    var subContentShown = true //实际是否显示
     var contentDefaultSplit = 0f //默认情况下左右内容分割比
     var contentExchanged = false // 主副区域交换位置
         set(value) {
@@ -129,6 +124,8 @@ class ScaffoldView @JvmOverloads constructor(
             updateContentLayout()
         }
     var focusOnMain = true //焦点在主/副内容上
+    var pointerExchanged = true //false左true右
+    var pointerMoveByFocus = true //指示器跟随焦点变化 可反向
 
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
@@ -179,7 +176,7 @@ class ScaffoldView @JvmOverloads constructor(
     }
     fun updatePlayerHoldShowArea() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        playerHoldShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_HOLD_SHOW_AREA, 100)
+        playerHoldShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_HOLD_SHOW_AREA, 130)
         updateLayout()
     }
     fun updateContentDefaultSplit() {

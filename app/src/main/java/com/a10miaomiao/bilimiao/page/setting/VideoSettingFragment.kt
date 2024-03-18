@@ -362,7 +362,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         seekBar(PLAYER_HOLD_SHOW_AREA) {
             title = "挂起后播放面积"
-            default = 150
+            default = 130
             max = 300
             min = 100
             formatter = { it.toString() }
