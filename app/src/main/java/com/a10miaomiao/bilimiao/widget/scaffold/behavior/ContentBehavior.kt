@@ -327,8 +327,8 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         }
         return onUpdateFinished(true)
     }
-    fun onUpdateFinished(spaceForSubContent: Boolean){
-        parentRef!!.spaceForSubContent = spaceForSubContent
+    fun onUpdateFinished(subContentShown: Boolean){
+        parentRef!!.subContentShown = subContentShown
         height = bottom - top
         width = right - left
         viewRef?.requestLayout()

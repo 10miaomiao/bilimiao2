@@ -18,6 +18,7 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
+import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
@@ -197,14 +198,16 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                 "AV" -> {
 //                    scaffoldApp.closeSearchDrawer()
 //                    Navigation.findNavController(view).popBackStack()
-                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                    val nav = (activity as? MainActivity)?.pointerNav?.navController
+                        ?: requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = VideoInfoFragment.createArguments(item.value)
                     nav.navigate(VideoInfoFragment.actionId, args)
                 }
                 "SS" -> {
 //                    scaffoldApp.closeSearchDrawer()
 //                    Navigation.findNavController(view).popBackStack()
-                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                    val nav = (activity as? MainActivity)?.pointerNav?.navController
+                        ?: requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = BangumiDetailFragment.createArguments(item.value)
                     nav.navigate(BangumiDetailFragment.actionId, args)
                 }

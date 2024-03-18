@@ -121,7 +121,8 @@ class SearchStartViewModel (
         searchHistoryDB.insertHistory(keyword)
         activity.getScaffoldView().closeDrawer()
         if (searchMode == 0) {
-            val nav = activity.findNavController(R.id.nav_host_fragment)
+            val nav = (activity as? MainActivity)?.pointerNav?.navController
+                ?: activity.findNavController(R.id.nav_host_fragment)
             val args = bundleOf(
                 MainNavArgs.text to keyword
             )
