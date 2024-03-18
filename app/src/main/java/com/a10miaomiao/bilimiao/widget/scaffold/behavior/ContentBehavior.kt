@@ -97,6 +97,9 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         child: View,
         ev: MotionEvent
     ): Boolean {
+        if(parentRef?.isDrawerOpen() ?: false){
+            return super.onInterceptTouchEvent(parent, child, ev)
+        }
         if(ev.action == ACTION_DOWN){
             if (ev.x > left && ev.x < right && ev.y > top && ev.y < bottom) {
                 child.requestFocus()

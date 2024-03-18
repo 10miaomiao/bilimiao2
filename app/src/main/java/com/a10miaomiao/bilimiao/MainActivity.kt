@@ -278,10 +278,10 @@ class MainActivity
 
     //焦点改变时提示页面标题
     private fun changeFocus(focusOnMain:Boolean){
-        if(ui.root.pointerMoveByFocus && ui.root.focusOnMain != focusOnMain){
+        if(ui.root.focusOnMain != focusOnMain){
             ui.root.focusOnMain = focusOnMain
             //双内容区时自动切换指示器
-            if(ui.root.subContentShown) {
+            if(ui.root.pointerMoveByFocus && ui.root.subContentShown) {
                 ui.root.pointerExchanged = !ui.root.pointerExchanged
             }
             notifyConfigChanged()
