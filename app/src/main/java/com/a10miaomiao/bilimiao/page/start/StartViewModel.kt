@@ -73,6 +73,11 @@ class StartViewModel(
             iconRes = R.drawable.ic_nav_watchlater,
             isNeedAuth = true,
         ),
+        StartNavInfo(
+            title = "设置",
+            pageUrl = "bilimiao://setting",
+            iconRes = R.drawable.ic_nav_setting,
+        ),
     )
 
     fun showUnreadBadge(): Boolean {

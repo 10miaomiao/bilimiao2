@@ -166,8 +166,8 @@ class MainActivity
                 fragment.onMenuItemClick(it, it.prop)
             }
         }
-        ui.mAppBar.onMoveClick = this.onMoveClick
-        ui.mAppBar.onMoveLongClick = this.onMoveLongClick
+        ui.mAppBar.onPointerClick = this.onPointerClick
+        ui.mAppBar.onPointerLongClick = this.onPointerLongClick
         ui.mAppBar.onExchangeClick = this.onExchangeClick
         ui.mAppBar.onExchangeLongClick = this.onExchangeLongClick
 
@@ -271,7 +271,11 @@ class MainActivity
 
         //将焦点给新页面
         if(controller == anotherNav.navController){
-            changeFocus(!ui.root.focusOnMain)
+            if(ui.root.focusOnMain){
+                ui.root.subContent?.requestFocus()
+            } else {
+                ui.root.content?.requestFocus()
+            }
             ui.root.updateContentLayout()
         }
     }
@@ -281,7 +285,7 @@ class MainActivity
         if(ui.root.focusOnMain != focusOnMain){
             ui.root.focusOnMain = focusOnMain
             //双内容区时自动切换指示器
-            if(ui.root.pointerMoveByFocus && ui.root.subContentShown) {
+            if(ui.root.pointerAutoChange && ui.root.subContentShown) {
                 ui.root.pointerExchanged = !ui.root.pointerExchanged
             }
             notifyConfigChanged()
@@ -332,22 +336,31 @@ class MainActivity
             goBackHome()
         }
     }
-    private val onMoveClick = View.OnClickListener {
+    private val onPointerClick = View.OnClickListener {
         ui.root.pointerExchanged = !ui.root.pointerExchanged
         notifyConfigChanged()
     }
-    private val onMoveLongClick = View.OnLongClickListener {
-        ui.root.pointerMoveByFocus = !ui.root.pointerMoveByFocus
+    private val onPointerLongClick = View.OnLongClickListener {
+        ui.root.pointerAutoChange = !ui.root.pointerAutoChange
         true
     }
     private val onExchangeClick = View.OnClickListener {
         if(!ui.root.subContentShown){
             //单内容区，将焦点给到另一区域
-            changeFocus(!ui.root.focusOnMain)
+            if(ui.root.focusOnMain){
+                ui.root.subContent?.requestFocus()
+            } else {
+                ui.root.content?.requestFocus()
+            }
             ui.root.updateContentLayout()
         } else {
             //双内容区，互换
             ui.root.contentExchanged = !ui.root.contentExchanged
+        }
+        //指示器不锁定时，交换一次方向
+        if(ui.root.pointerAutoChange){
+            ui.root.pointerExchanged = !ui.root.pointerExchanged
+            notifyConfigChanged()
         }
     }
     private val onExchangeLongClick = View.OnLongClickListener {

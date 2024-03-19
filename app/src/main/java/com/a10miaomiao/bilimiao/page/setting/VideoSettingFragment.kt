@@ -354,7 +354,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         seekBar(PLAYER_SMALL_SHOW_AREA) {
             title = "横屏时小屏播放面积"
-            default = 400
+            default = 480
             max = 600
             min = 150
             formatter = { it.toString() }
@@ -370,7 +370,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         seekBar(CONTENT_DEFAULT_SPLIT) {
             title = "横屏时内容分割比"
-            default = 30
+            default = 35
             max = 85
             min = 15
             formatter = { "0.$it" }

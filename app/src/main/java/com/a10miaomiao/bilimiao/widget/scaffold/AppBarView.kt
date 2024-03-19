@@ -27,8 +27,8 @@ class AppBarView @JvmOverloads constructor(
     var onBackClick: View.OnClickListener? = null
     var onBackLongClick: View.OnLongClickListener? = null
     var onMenuItemClick: ((MenuItemView) -> Unit)? = null
-    var onMoveClick: View.OnClickListener? = null
-    var onMoveLongClick: View.OnLongClickListener? = null
+    var onPointerClick: View.OnClickListener? = null
+    var onPointerLongClick: View.OnLongClickListener? = null
     var onExchangeClick: View.OnClickListener? = null
     var onExchangeLongClick: View.OnLongClickListener? = null
 
@@ -73,11 +73,11 @@ class AppBarView @JvmOverloads constructor(
             false
         }
     }
-    private val moveClick = OnClickListener {view ->
-        onMoveClick?.onClick(view)
+    private val pointerClick = OnClickListener {view ->
+        onPointerClick?.onClick(view)
     }
-    private val moveLongClick = OnLongClickListener {view ->
-        onMoveLongClick?.onLongClick(view) ?: false
+    private val pointerLongClick = OnLongClickListener { view ->
+        onPointerLongClick?.onLongClick(view) ?: false
     }
     private val exchangeClick = OnClickListener {view ->
         onExchangeClick?.onClick(view)
@@ -101,8 +101,8 @@ class AppBarView @JvmOverloads constructor(
                 menuItemLongClick = menuItemLongClick,
                 backClick = backClick,
                 backLongClick = backLongClick,
-                moveClick = moveClick,
-                moveLongClick = moveLongClick,
+                pointerClick = pointerClick,
+                pointerLongClick = pointerLongClick,
                 exchangeClick = exchangeClick,
                 exchangeLongClick = exchangeLongClick,
             )
