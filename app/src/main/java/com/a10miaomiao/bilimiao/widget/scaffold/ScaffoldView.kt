@@ -152,6 +152,9 @@ class ScaffoldView @JvmOverloads constructor(
     var subContent: View? = null
     var subContentBehavior: ContentBehavior? = null
 
+    val focusContent: View?
+        get() = if(focusOnMain) content else subContent
+
     var player: View? = null
     var playerBehavior: PlayerBehavior? = null
 
@@ -184,6 +187,12 @@ class ScaffoldView @JvmOverloads constructor(
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         contentDefaultSplit =  prefs.getInt(VideoSettingFragment.CONTENT_DEFAULT_SPLIT, 35)/100f
         updateLayout()
+    }
+
+    //内容不在顶端时，该裁掉的区域
+    fun setContentTopClip(clipHeight: Int){
+        contentBehavior?.clipHeight = clipHeight
+        subContentBehavior?.clipHeight = clipHeight
     }
 
     fun updateLayout(){
@@ -270,6 +279,10 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun setMaskViewVisibility(visibility: Int) {
         maskView?.visibility = visibility
+    }
+
+    fun getMaskViewVisibility(): Int{
+        return maskView?.visibility ?: INVISIBLE
     }
 
     fun setMaskViewAlpha(alpha: Float) {

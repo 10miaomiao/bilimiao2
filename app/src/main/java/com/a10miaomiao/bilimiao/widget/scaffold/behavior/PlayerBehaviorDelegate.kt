@@ -15,6 +15,7 @@ import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStat
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.MIDDLE
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import splitties.dimensions.dip
+import kotlin.math.absoluteValue
 import kotlin.math.ceil
 import kotlin.math.sqrt
 
@@ -173,8 +174,8 @@ class PlayerBehaviorDelegate(
         val measuredHeight = parent.measuredHeight
         if(parent.isHoldUpPlayer){
             //一点点惯性
-            val newX = playerView.x.toInt() + (xvel * 0.2).toInt()
-            val newY = playerView.y.toInt() + (yvel * 0.2).toInt()
+            val newX = playerView.x.toInt() + (xvel.absoluteValue * xvel / 15000).toInt()
+            val newY = playerView.y.toInt() + (yvel.absoluteValue * yvel / 15000).toInt()
             playerX = if (newX < windowInsets.left) {
                 windowInsets.left
             } else if (newX > measuredWidth - playerWidth - windowInsets.right) {
@@ -289,39 +290,34 @@ class PlayerBehaviorDelegate(
     //计算窗口加上边框的大小，供内容区域用
     fun updateContent(){
         when(parent.playerViewPlaceStatus){
-        LT -> {
-            parent.playerSpaceHeight = playerHeight + windowInsets.top
-            parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
-        }
-        RT -> {
-            parent.playerSpaceHeight = playerHeight + windowInsets.top
-            parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
-        }
-        LB -> {
-            parent.playerSpaceHeight = playerHeight + windowInsets.bottom
-            parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
-        }
-        RB -> {
-            parent.playerSpaceHeight = playerHeight + windowInsets.bottom
-            parent.playerSpaceWidth = playerWidth + windowInsets.right
-        }
-        MIDDLE -> {
-            parent.playerSpaceHeight = playerHeight
-            parent.playerSpaceWidth = playerWidth
-        }
-    }
-
-    }
-    fun onLayoutChild(){
-        onLayoutChild(false)
-    }
-    fun onLayoutChild(isForce:Boolean = false) {
-        if(!isForce) {
-            if (dragger.viewDragState == ViewDragHelper.STATE_SETTLING
-                || dragger.viewDragState == ViewDragHelper.STATE_DRAGGING
-            ) {
-                return
+            LT -> {
+                parent.playerSpaceHeight = playerHeight + windowInsets.top
+                parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
             }
+            RT -> {
+                parent.playerSpaceHeight = playerHeight + windowInsets.top
+                parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
+            }
+            LB -> {
+                parent.playerSpaceHeight = playerHeight + windowInsets.bottom
+                parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
+            }
+            RB -> {
+                parent.playerSpaceHeight = playerHeight + windowInsets.bottom
+                parent.playerSpaceWidth = playerWidth + windowInsets.right
+            }
+            MIDDLE -> {
+                parent.playerSpaceHeight = playerHeight
+                parent.playerSpaceWidth = playerWidth
+            }
+        }
+        parent.setContentTopClip(windowInsets.top)
+    }
+    fun onLayoutChild() {
+        if (dragger.viewDragState == ViewDragHelper.STATE_SETTLING
+            || dragger.viewDragState == ViewDragHelper.STATE_DRAGGING
+        ) {
+            return
         }
         if(_measuredHeight != parent.measuredHeight
             ||_measuredWidth != parent.measuredWidth

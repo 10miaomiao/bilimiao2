@@ -1,17 +1,21 @@
 package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
 import android.content.Context
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.View
+import android.view.View.VISIBLE
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RT
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LT
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.MIDDLE
+import splitties.systemservices.clipboardManager
 
 class ContentBehavior : CoordinatorLayout.Behavior<View> {
 
@@ -39,6 +43,10 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
     var right = 0
     var bottom = 0
 
+    //裁剪一下，否则视频底下的区域会有多余留白
+    var clipHeight = 0
+        get() = if(top == 0) 0 else field
+
     override fun onLayoutChild(parent: CoordinatorLayout, child: View, layoutDirection: Int): Boolean {
         if (parent is ScaffoldView) {
             if(parentRef == null){
@@ -53,7 +61,8 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 width = 0
                 child.layout(0, 0, 0, 0)
             } else {
-                child.layout(left,top,right,bottom)
+                child.layout(left,top-clipHeight,right,bottom)
+                child.setClipBounds(Rect(0,clipHeight,width,height))
 
                 if (orientation == ScaffoldView.VERTICAL) {
                     child.translationX = 0f
@@ -97,7 +106,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         child: View,
         ev: MotionEvent
     ): Boolean {
-        if(parentRef?.isDrawerOpen() ?: false){
+        if(parentRef?.isDrawerOpen() == true || parentRef?.getMaskViewVisibility() == VISIBLE){
             return super.onInterceptTouchEvent(parent, child, ev)
         }
         if(ev.action == ACTION_DOWN){
@@ -332,7 +341,8 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
     }
     fun onUpdateFinished(subContentShown: Boolean){
         parentRef!!.subContentShown = subContentShown
-        height = bottom - top
+        clipHeight = if(top == 0) 0 else parentRef!!.playerY
+        height = bottom - top + clipHeight
         width = right - left
         viewRef?.requestLayout()
     }

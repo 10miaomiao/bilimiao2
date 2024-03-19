@@ -140,7 +140,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
     ) {
         val parent = parentRef ?: return
         val playerView = viewRef ?: return
-        val contentView = parent.content ?: return
+        val contentView = parent.focusContent ?: return
         if (dy > 0 && parent.showPlayer
             && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
         ) {
@@ -171,7 +171,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
     ) {
         val parent = parentRef ?: return
         val playerView = viewRef ?: return
-        val contentView = parent.content ?: return
+        val contentView = parent.focusContent ?: return
         if (dyConsumed > 0 && parent.showPlayer
             && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
         ) {
