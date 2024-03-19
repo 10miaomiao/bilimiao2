@@ -22,8 +22,8 @@ class AppBarHorizontalUi(
     val menuItemLongClick: View.OnLongClickListener,
     val backClick: View.OnClickListener,
     val backLongClick: View.OnLongClickListener,
-    val moveClick: View.OnClickListener,
-    val moveLongClick: View.OnLongClickListener,
+    val pointerClick: View.OnClickListener,
+    val pointerLongClick: View.OnLongClickListener,
     val exchangeClick: View.OnClickListener,
     val exchangeLongClick: View.OnLongClickListener,
 ) : AppBarUi {
@@ -52,8 +52,8 @@ class AppBarHorizontalUi(
     val mNavigationPointerIconLayout = frameLayout {
         padding = dip(10)
         bottomPadding = 0
-        setOnClickListener(moveClick)
-        setOnLongClickListener(moveLongClick)
+        setOnClickListener(pointerClick)
+        setOnLongClickListener(pointerLongClick)
         addView(mNavigationPointerIcon, lParams {
             gravity = Gravity.CENTER
             width = dip(24)
