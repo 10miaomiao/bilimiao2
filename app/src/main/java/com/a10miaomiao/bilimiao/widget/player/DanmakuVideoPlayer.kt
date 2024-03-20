@@ -257,6 +257,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     var showBottomProgressBarInFullMode = true
     // 小屏状态下显示底部进度条
     var showBottomProgressBarInSmallMode = true
+    // 屏蔽触控
+    var stopTouch = false
+        get() = field || isHoldUp
 
     constructor(context: Context?, fullFlag: Boolean?) : super(context, fullFlag) {
         initView()
@@ -409,6 +412,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     override fun touchSurfaceDown(x: Float, y: Float) {
+        if (stopTouch) {
+            return
+        }
         super.touchSurfaceDown(x, y)
         val curWidth = measuredWidth
         val curHeight = measuredHeight
@@ -427,7 +433,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         if (isSpeedPlaying) {
             return
         }
-        if (isHoldUp) {
+        if (stopTouch) {
             return
         }
         if (mDownY<context.dip(25)){
@@ -468,6 +474,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     override fun touchSurfaceUp() {
+        if (stopTouch) {
+            return
+        }
         removeCallbacks(longClickControlTask)
         touchSurfaceDownTime = Long.MAX_VALUE
         if (isSpeedPlaying) {

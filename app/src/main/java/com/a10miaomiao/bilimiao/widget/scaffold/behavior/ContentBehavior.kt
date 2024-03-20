@@ -341,7 +341,6 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
     }
     fun onUpdateFinished(subContentShown: Boolean){
         parentRef!!.subContentShown = subContentShown
-        clipHeight = if(top == 0) 0 else parentRef!!.playerY
         height = bottom - top + clipHeight
         width = right - left
         viewRef?.requestLayout()

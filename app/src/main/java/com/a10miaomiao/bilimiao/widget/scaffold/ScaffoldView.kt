@@ -36,9 +36,7 @@ class ScaffoldView @JvmOverloads constructor(
      * 横盘时小窗大小
      */
     var playerSmallShowArea: Int = 400
-        private set
     var playerHoldShowArea: Int = 400
-        private set
 
     /**
      * 播放器比例
@@ -127,6 +125,8 @@ class ScaffoldView @JvmOverloads constructor(
     var pointerExchanged = true //false左true右
     var pointerAutoChange = true //指示器跟随焦点变化 可反向
 
+    var fullScreenDraggable = true //小屏时全屏可拖拽
+
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
 
@@ -171,6 +171,7 @@ class ScaffoldView @JvmOverloads constructor(
         updatePlayerSmallShowArea()
         updatePlayerHoldShowArea()
         updateContentDefaultSplit()
+        updateFullScreenDraggable()
     }
 
     fun updatePlayerSmallShowArea() {
@@ -186,6 +187,11 @@ class ScaffoldView @JvmOverloads constructor(
     fun updateContentDefaultSplit() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         contentDefaultSplit =  prefs.getInt(VideoSettingFragment.CONTENT_DEFAULT_SPLIT, 35)/100f
+        updateLayout()
+    }
+    fun updateFullScreenDraggable() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        fullScreenDraggable =  prefs.getBoolean(VideoSettingFragment.FULL_SCREEN_DRAGGABLE, false)
         updateLayout()
     }
 
