@@ -22,6 +22,7 @@ import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import cn.a10miaomiao.miao.binding.miaoEffect
+import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -185,7 +186,8 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             1 -> {
                 // 评论
                 if (info != null) {
-                    val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+                    val nav = (activity as? MainActivity)?.pointerNav?.navController
+                        ?: requireActivity().findNavController(R.id.nav_host_fragment)
                     val args = VideoCommentListFragment.createArguments(
                         info.aid,
                         info.title,
@@ -813,8 +815,6 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 +headerView().apply {
                     horizontalPadding = config.pagePadding
                     _topPadding = contentInsets.top + config.pagePadding
-                    _rightPadding = windowStore.state.playerSpaceWidth
-                    _minHeight = windowStore.state.playerSpaceHeight
                 }..lParams(matchParent, wrapContent)
             }
             footerViews(mAdapter) {

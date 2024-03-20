@@ -40,6 +40,7 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.mtjsoft.barcodescanning.ScanningManager
 import cn.mtjsoft.barcodescanning.config.ScanType
 import cn.mtjsoft.barcodescanning.interfaces.ScanResultListener
+import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.BiliNavigation
@@ -264,7 +265,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
                         }
                         viewLifecycleOwner.lifecycleScope.launch {
                             withStarted {
-                                val nav = activity.findNavController(R.id.nav_host_fragment)
+                                val nav = (activity as? MainActivity)?.pointerNav?.navController
+                                    ?: activity.findNavController(R.id.nav_host_fragment)
                                 if (!BiliNavigation.navigationTo(nav, value)) {
                                     BiliNavigation.navigationToWeb(activity, value)
                                 }
@@ -284,7 +286,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handlePlayerCardDetailClick = View.OnClickListener {
         val playerState = viewModel.playerStore.state
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav?.navController
+            ?: requireActivity().findNavController(R.id.nav_host_fragment)
         if (playerState.sid.isNotBlank()) {
             nav.navigateToCompose(BangumiDetailPage()) {
                 id set playerState.sid
@@ -304,7 +307,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private val handleUserClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav?.navController
+            ?: requireActivity().findNavController(R.id.nav_host_fragment)
         val userStore = viewModel.userStore
         if (userStore.isLogin()) {
             val mid = userStore.state.info?.mid ?: return@OnClickListener
@@ -318,7 +322,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private val handleMessageClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav?.navController
+            ?: requireActivity().findNavController(R.id.nav_host_fragment)
         nav.navigateToCompose(MessagePage())
         scaffoldView.closeDrawer()
     }
@@ -360,7 +365,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
             .setPopEnterAnim(R.anim.miao_fragment_close_enter)
             .setPopExitAnim(R.anim.miao_fragment_close_exit)
             .build()
-        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav?.navController
+            ?: requireActivity().findNavController(R.id.nav_host_fragment)
         val scaffoldView = requireActivity().getScaffoldView()
         if (item.isNeedAuth) {
             val userInfo = viewModel.userStore.state.info

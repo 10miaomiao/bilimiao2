@@ -21,6 +21,7 @@ import androidx.viewpager2.widget.ViewPager2
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.miaoEffect
+import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -90,7 +91,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
-        val nav = requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav?.navController
+            ?: requireActivity().findNavController(R.id.nav_host_fragment)
         when (menuItem.key) {
             MenuKeys.setting -> {
                 nav.navigate(SettingFragment.actionId)

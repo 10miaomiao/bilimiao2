@@ -690,8 +690,4 @@ class PlayerDelegate2(
         views.videoPlayer.setHoldStatus(isHold)
         completionBoxController.setHoldStatus(isHold)
     }
-
-    fun setPlayerSpaceScale(width:Int, height:Int){
-        windowStore.setPlayerSpaceScale(width,height)
-    }
 }
