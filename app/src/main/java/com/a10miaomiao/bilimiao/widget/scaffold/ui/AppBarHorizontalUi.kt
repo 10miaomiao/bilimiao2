@@ -8,9 +8,7 @@ import android.content.Context
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.attr
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView
@@ -24,9 +22,19 @@ class AppBarHorizontalUi(
     val menuItemLongClick: View.OnLongClickListener,
     val backClick: View.OnClickListener,
     val backLongClick: View.OnLongClickListener,
+    val pointerClick: View.OnClickListener,
+    val pointerLongClick: View.OnLongClickListener,
+    val exchangeClick: View.OnClickListener,
+    val exchangeLongClick: View.OnLongClickListener,
 ) : AppBarUi {
 
     val mNavigationIcon = imageView {
+        setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
+    }
+    val mNavigationPointerIcon = imageView {
+        setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
+    }
+    val mNavigationExchangeIcon = imageView {
         setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
     }
 
@@ -36,6 +44,28 @@ class AppBarHorizontalUi(
         setOnClickListener(backClick)
         setOnLongClickListener(backLongClick)
         addView(mNavigationIcon, lParams {
+            gravity = Gravity.CENTER
+            width = dip(24)
+            height = dip(24)
+        })
+    }
+    val mNavigationPointerIconLayout = frameLayout {
+        padding = dip(10)
+        bottomPadding = 0
+        setOnClickListener(pointerClick)
+        setOnLongClickListener(pointerLongClick)
+        addView(mNavigationPointerIcon, lParams {
+            gravity = Gravity.CENTER
+            width = dip(24)
+            height = dip(24)
+        })
+    }
+    val mNavigationExchangeIconLayout = frameLayout {
+        padding = dip(10)
+        bottomPadding = 0
+        setOnClickListener(exchangeClick)
+        setOnLongClickListener(exchangeLongClick)
+        addView(mNavigationExchangeIcon, lParams {
             gravity = Gravity.CENTER
             width = dip(24)
             height = dip(24)
@@ -78,6 +108,14 @@ class AppBarHorizontalUi(
             width = matchParent
             height = wrapContent
         })
+        addView(mNavigationPointerIconLayout, lParams {
+            width = matchParent
+            height = wrapContent
+        })
+        addView(mNavigationExchangeIconLayout, lParams {
+            width = matchParent
+            height = wrapContent
+        })
         addView(mTitleLayout, lParams {
             width = matchParent
             height = wrapContent
@@ -113,6 +151,19 @@ class AppBarHorizontalUi(
                 mNavigationIcon.imageDrawable = prop.navigationIcon
             } else {
                 mNavigationIconLayout.visibility = View.GONE
+            }
+            if (prop.navigationPointerIcon != null) {
+                mNavigationPointerIcon.imageDrawable = prop.navigationPointerIcon
+                mNavigationPointerIconLayout.visibility = View.VISIBLE
+                mNavigationPointerIcon.rotation = if(prop.pointerIconOrientation) 0F else 180F
+            } else {
+                mNavigationPointerIconLayout.visibility = View.GONE
+            }
+            if(prop.navigationExchangeIcon != null){
+                mNavigationExchangeIcon.imageDrawable = prop.navigationExchangeIcon
+                mNavigationExchangeIconLayout.visibility = View.VISIBLE
+            } else {
+                mNavigationExchangeIconLayout.visibility = View.VISIBLE
             }
             if (prop.title != null) {
                 mTitleLayout.visibility = View.VISIBLE

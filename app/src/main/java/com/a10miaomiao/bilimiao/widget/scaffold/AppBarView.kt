@@ -2,31 +2,17 @@ package com.a10miaomiao.bilimiao.widget.scaffold
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.view.Menu
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.LinearLayout
-import androidx.core.view.forEach
-import androidx.fragment.app.FragmentContainerView
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarUi
 import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarVerticalUi
-import com.google.android.material.card.MaterialCardView
-import splitties.dimensions.dip
-import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
-import splitties.views.imageDrawable
-import splitties.views.padding
-import splitties.views.topPadding
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -36,9 +22,15 @@ class AppBarView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs) {
 
     var canBack = false
+    var showPointer = false
+    var pointerOrientation = true
     var onBackClick: View.OnClickListener? = null
     var onBackLongClick: View.OnLongClickListener? = null
     var onMenuItemClick: ((MenuItemView) -> Unit)? = null
+    var onPointerClick: View.OnClickListener? = null
+    var onPointerLongClick: View.OnLongClickListener? = null
+    var onExchangeClick: View.OnClickListener? = null
+    var onExchangeLongClick: View.OnLongClickListener? = null
 
     var orientation = ScaffoldView.VERTICAL
         set(value) {
@@ -81,6 +73,18 @@ class AppBarView @JvmOverloads constructor(
             false
         }
     }
+    private val pointerClick = OnClickListener {view ->
+        onPointerClick?.onClick(view)
+    }
+    private val pointerLongClick = OnLongClickListener { view ->
+        onPointerLongClick?.onLongClick(view) ?: false
+    }
+    private val exchangeClick = OnClickListener {view ->
+        onExchangeClick?.onClick(view)
+    }
+    private val exchangeLongClick = OnLongClickListener {view ->
+        onExchangeLongClick?.onLongClick(view) ?: false
+    }
 
     private var mUi = createUi()
 
@@ -97,6 +101,10 @@ class AppBarView @JvmOverloads constructor(
                 menuItemLongClick = menuItemLongClick,
                 backClick = backClick,
                 backLongClick = backLongClick,
+                pointerClick = pointerClick,
+                pointerLongClick = pointerLongClick,
+                exchangeClick = exchangeClick,
+                exchangeLongClick = exchangeLongClick,
             )
         } else {
             AppBarVerticalUi(
@@ -150,12 +158,18 @@ class AppBarView @JvmOverloads constructor(
         this.prop = prop
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private fun newProp (): PropInfo {
         val prop = PropInfo()
         if (canBack) {
 //            prop.onNavigationClick = onBackClick
             prop.navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp)
         }
+        if (showPointer) {
+            prop.navigationPointerIcon = resources.getDrawable(R.drawable.ic_pointer_24dp)
+            prop.pointerIconOrientation = pointerOrientation
+        }
+        prop.navigationExchangeIcon = resources.getDrawable(R.drawable.ic_exchange_24dp)
         return prop
     }
 
@@ -177,6 +191,9 @@ class AppBarView @JvmOverloads constructor(
     class PropInfo (
         var title: String? = null,
         var navigationIcon: Drawable? = null,
+        var navigationPointerIcon: Drawable? = null,
+        var pointerIconOrientation: Boolean = true,
+        var navigationExchangeIcon: Drawable? = null,
         var menus: List<MenuItemPropInfo>? = null,
     )
 
