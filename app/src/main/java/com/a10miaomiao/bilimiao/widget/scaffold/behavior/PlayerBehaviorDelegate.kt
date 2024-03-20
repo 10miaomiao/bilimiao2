@@ -17,6 +17,8 @@ import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import splitties.dimensions.dip
 import kotlin.math.absoluteValue
 import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sqrt
 
 class PlayerBehaviorDelegate(
@@ -27,6 +29,8 @@ class PlayerBehaviorDelegate(
 
     private val dragAreaHeight = parent.dip(30)
     private val minPadding = parent.dip(10)
+    // 拖拽窗口边缘调整大小区域宽度
+    private val dragWidth = parent.dip(20)
 
     @DragState
     var dragState = ViewDragHelper.STATE_IDLE
@@ -44,6 +48,17 @@ class PlayerBehaviorDelegate(
             }
         }
     }
+    private val sizeChangeSettle: Runnable = object : Runnable {
+        override fun run() {
+            if (dragger.continueSettling(true)) {
+                ViewCompat.postOnAnimation(parent, this)
+                onSizeChanging = true
+            } else {
+                onSizeChanging = false
+            }
+        }
+    }
+    private var onSizeChanging = false
 
     private var currentOrientation = ScaffoldView.VERTICAL
 
@@ -83,11 +98,15 @@ class PlayerBehaviorDelegate(
 
     override fun onViewReleased(releasedChild: View, xvel: Float, yvel: Float) {
         danmakuVideoPlayer?.hideSmallDargBar()
+        val originWidth = playerWidth
+        val originHeight = playerWidth
         if (parent.isHoldUpPlayer) {
             if(playerView.x.toInt() == playerX && playerView.y.toInt() == playerY) {
                 //点击展开
                 parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
-                playerView.layout(playerView.x.toInt(), playerView.y.toInt(), playerView.x.toInt() + playerWidth, playerView.y.toInt() + playerHeight)
+                val expandX = (playerWidth - originWidth) / 2
+                val expandY = (playerHeight - originHeight) / 2
+                playerView.layout(playerView.x.toInt() - expandX,playerView.y.toInt() - expandY,playerView.x.toInt() + expandX,playerView.y.toInt() + expandY)
             } else {
                 resetPosition(xvel,yvel)
             }
@@ -95,12 +114,10 @@ class PlayerBehaviorDelegate(
             if(playerView.x < windowInsets.left - playerWidth * 1 / 4 ){
                 //拉至左边缘
                 parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
-                playerView.layout(playerView.x.toInt() + playerView.measuredWidth - playerWidth, playerView.y.toInt(), playerView.x.toInt() + playerView.measuredWidth, playerView.y.toInt() + playerHeight)
                 playerX = windowInsets.left
             } else if (playerView.x > parent.measuredWidth - playerWidth * 3 / 4 - windowInsets.right) {
                 //拉至右边缘
                 parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
-                playerView.layout(playerView.x.toInt(), playerView.y.toInt(), playerView.x.toInt() + playerWidth, playerView.y.toInt() + playerHeight)
                 playerX = parent.measuredWidth - playerWidth - windowInsets.right
             } else {
                 //判断播放器视图位置状态
@@ -134,15 +151,11 @@ class PlayerBehaviorDelegate(
             }
         }
         dragger.settleCapturedViewAt(playerX, playerY)
-        ViewCompat.postOnAnimation(parent, object : Runnable {
-            override fun run() {
-                if (dragger.continueSettling(true)) {
-                    ViewCompat.postOnAnimation(parent, this)
-                } else {
-                    playerView.requestLayout()
-                }
-            }
-        })
+        if(originWidth == playerWidth && originHeight == playerHeight){
+            ViewCompat.postOnAnimation(parent,draggerSettle)
+        } else {
+            ViewCompat.postOnAnimation(parent,sizeChangeSettle)
+        }
         super.onViewReleased(releasedChild, xvel, yvel)
     }
 
@@ -216,20 +229,152 @@ class PlayerBehaviorDelegate(
         }
     }
 
+    var startX = 0
+    var startY = 0
+    var draggingSide = NONE
+    companion object {
+        const val NONE = 0
+        const val LEFT = 1
+        const val TOP = 2
+        const val RIGHT = 3
+        const val BOTTOM = 4
+    }
+    fun changeSizeByHeight(newHeight :Int){
+        val widthHeightRatio = parent.playerVideoRatio
+        var newArea = (newHeight * sqrt(widthHeightRatio)).toInt()
+        newArea = (newArea / parent.resources.displayMetrics.density).toInt()
+        if(parent.isHoldUpPlayer){
+            newArea = min(newArea,300)
+            newArea = max(newArea,100)
+            parent.playerHoldShowArea = newArea
+        } else {
+            newArea = min(newArea,600)
+            newArea = max(newArea,150)
+            parent.playerSmallShowArea = newArea
+        }
+        updateWindowSize()
+    }
+    fun changeSizeByWidth(newWidth :Int){
+        val widthHeightRatio = parent.playerVideoRatio
+        var newArea = (newWidth / sqrt(widthHeightRatio)).toInt()
+        newArea = (newArea / parent.resources.displayMetrics.density).toInt()
+        if(parent.isHoldUpPlayer){
+            newArea = min(newArea,300)
+            newArea = max(newArea,100)
+            parent.playerHoldShowArea = newArea
+        } else {
+            newArea = min(newArea,600)
+            newArea = max(newArea,150)
+            parent.playerSmallShowArea = newArea
+        }
+        updateWindowSize()
+    }
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.action == MotionEvent.ACTION_DOWN
-            && parent.showPlayer
+        if (parent.showPlayer
             && !parent.fullScreenPlayer
             && parent.orientation == ScaffoldView.HORIZONTAL
         ) {
-            val x = ev.x
-            val y = ev.y
-            if (playerView.x < x
-                && playerView.y < y
-                && playerView.x + width - (if (parent.isHoldUpPlayer) 0 else dragAreaHeight) > x // 减去右侧挂起按钮宽度
-                && playerView.y + (if (parent.isHoldUpPlayer) height else dragAreaHeight) > y
-            ) {
-                dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
+            when (ev.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    startX = ev.x.toInt()
+                    startY = ev.y.toInt()
+                    if(startX > playerView.x
+                        && startY > playerView.y
+                        && startX < playerView.x + playerWidth
+                        && startY < playerView.y + playerHeight
+                    ){
+                        if(startY > playerView.y + playerHeight - dragWidth){
+                            draggingSide = BOTTOM
+                            danmakuVideoPlayer?.stopTouch = true
+                        } else if (startY < playerView.y + dragAreaHeight){
+                            draggingSide = TOP
+                            if(parent.fullScreenDraggable ||parent.isHoldUpPlayer
+                                ||playerView.x < playerView.x + playerWidth - dragAreaHeight // 减去右侧挂起按钮宽度
+                                ){
+                                dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
+                            }
+                        } else if (startX < playerView.x + dragWidth){
+                            draggingSide = LEFT
+                            danmakuVideoPlayer?.stopTouch = true
+                        } else if (startX > playerView.x + playerWidth - dragWidth){
+                            draggingSide = RIGHT
+                            danmakuVideoPlayer?.stopTouch = true
+                        } else if (parent.fullScreenDraggable ||parent.isHoldUpPlayer){
+                            draggingSide = NONE
+                            dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
+                        } else {
+                            draggingSide = NONE
+                        }
+                    } else {
+                        draggingSide = NONE
+                    }
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (draggingSide != NONE && dragger.viewDragState != ViewDragHelper.STATE_DRAGGING) {
+                        val endX = ev.x.toInt()
+                        val endY = ev.y.toInt()
+                        val disX = endX - startX
+                        val disY = endY - startY
+                        startX = endX
+                        startY = endY
+                        when(draggingSide){
+                            LEFT -> {
+                                if(parent.isHoldUpPlayer){
+
+                                } else {
+                                    when (parent.playerViewPlaceStatus) {
+                                        RT, RB -> {
+                                            changeSizeByWidth(playerWidth - disX)
+                                        }
+                                        MIDDLE -> {
+                                            changeSizeByWidth(playerWidth - disX * 2)
+                                        }
+                                        LB, LT -> {}
+                                    }
+                                }
+                            }
+                            BOTTOM -> {
+                                if(parent.isHoldUpPlayer){
+                                    changeSizeByHeight(playerHeight + disY)
+                                } else {
+                                    when (parent.playerViewPlaceStatus) {
+                                        RT, LT -> {
+                                            changeSizeByHeight(playerHeight + disY)
+                                        }
+                                        MIDDLE -> {
+                                            changeSizeByHeight(playerHeight + disY * 2)
+                                        }
+                                        LB, RB -> {}
+                                    }
+                                }
+                            }
+                            RIGHT -> {
+                                if(parent.isHoldUpPlayer){
+                                    changeSizeByWidth(playerWidth + disX)
+                                } else {
+                                    when (parent.playerViewPlaceStatus) {
+                                        LB, LT -> {
+                                            changeSizeByWidth(playerWidth + disX)
+                                        }
+                                        MIDDLE -> {
+                                            changeSizeByWidth(playerWidth + disX * 2)
+                                        }
+                                        RT, RB -> {}
+                                    }
+                                }
+                            }
+                        }
+                        onLayoutChild()
+                        parent.updateContentLayout()
+                        parent.content?.requestLayout()
+                        parent.subContent?.requestLayout()
+                    }
+
+                }
+                MotionEvent.ACTION_UP -> {
+                    draggingSide = NONE
+                    danmakuVideoPlayer?.stopTouch = false
+                }
             }
         }
         return dragger.shouldInterceptTouchEvent(ev)
@@ -314,10 +459,19 @@ class PlayerBehaviorDelegate(
         parent.setContentTopClip(windowInsets.top)
     }
     fun onLayoutChild() {
-        if (dragger.viewDragState == ViewDragHelper.STATE_SETTLING
-            || dragger.viewDragState == ViewDragHelper.STATE_DRAGGING
-        ) {
+        if(onSizeChanging){
+            //挂起和展开时，使播放器内容与窗口大小同步，并防止位置不同导致的动画闪烁
+            playerView.layout(playerView.x.toInt(), playerView.y.toInt(), playerView.x.toInt() + playerWidth, playerView.y.toInt() + playerHeight)
+            playerView.layoutParams.height = playerHeight
+            playerView.layoutParams.width = playerWidth
+            playerView.requestLayout()
             return
+        } else {
+            if (dragger.viewDragState == ViewDragHelper.STATE_SETTLING
+                || dragger.viewDragState == ViewDragHelper.STATE_DRAGGING
+            ) {
+                return
+            }
         }
         if(_measuredHeight != parent.measuredHeight
             ||_measuredWidth != parent.measuredWidth

@@ -102,6 +102,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_SMALL_SHOW_AREA = "player_small_show_area"
         const val PLAYER_HOLD_SHOW_AREA = "player_hold_show_area"
         const val CONTENT_DEFAULT_SPLIT = "content_default_split"
+        const val FULL_SCREEN_DRAGGABLE = "full_screen_draggable"
     }
 
     override val pageConfig = myPageConfig {
@@ -188,6 +189,9 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         }
         if (key == CONTENT_DEFAULT_SPLIT) {
             scaffoldView.updateContentDefaultSplit()
+        }
+        if (key == FULL_SCREEN_DRAGGABLE) {
+            scaffoldView.updateFullScreenDraggable()
         }
 
     }
@@ -374,6 +378,12 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             max = 85
             min = 15
             formatter = { "0.$it" }
+        }
+
+        switch(FULL_SCREEN_DRAGGABLE) {
+            title = "小屏时整个屏幕可拖拽"
+            summary = ""
+            defaultValue = false
         }
 
         categoryHeader("3") {

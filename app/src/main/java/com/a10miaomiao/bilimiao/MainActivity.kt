@@ -347,11 +347,7 @@ class MainActivity
     private val onExchangeClick = View.OnClickListener {
         if(!ui.root.subContentShown){
             //单内容区，将焦点给到另一区域
-            if(ui.root.focusOnMain){
-                ui.root.subContent?.requestFocus()
-            } else {
-                ui.root.content?.requestFocus()
-            }
+            changeFocus(!ui.root.focusOnMain)
             ui.root.updateContentLayout()
         } else {
             //双内容区，互换
