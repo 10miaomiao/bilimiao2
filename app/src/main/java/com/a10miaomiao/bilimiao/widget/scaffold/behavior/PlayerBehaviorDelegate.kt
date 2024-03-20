@@ -282,6 +282,8 @@ class PlayerBehaviorDelegate(
         if (parent.showPlayer
             && !parent.fullScreenPlayer
             && parent.orientation == ScaffoldView.HORIZONTAL
+            && !parent.isDrawerOpen()
+            && parent.getMaskViewVisibility() != View.VISIBLE
         ) {
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -334,10 +336,10 @@ class PlayerBehaviorDelegate(
                                 } else {
                                     when (parent.playerViewPlaceStatus) {
                                         RT, RB -> {
-                                            changeSizeByWidth(playerWidth - disX)
+                                            changeSizeByWidth((playerView.x - endX).toInt() + playerWidth)
                                         }
                                         MIDDLE -> {
-                                            changeSizeByWidth(playerWidth - disX * 2)
+                                            changeSizeByWidth((playerView.x - endX).toInt() + playerWidth)
                                         }
                                         LB, LT -> {}
                                     }
@@ -345,14 +347,11 @@ class PlayerBehaviorDelegate(
                             }
                             BOTTOM -> {
                                 if(parent.isHoldUpPlayer){
-                                    changeSizeByHeight(playerHeight + disY)
+                                    changeSizeByHeight((endY - playerView.y).toInt())
                                 } else {
                                     when (parent.playerViewPlaceStatus) {
-                                        RT, LT -> {
-                                            changeSizeByHeight(playerHeight + disY)
-                                        }
-                                        MIDDLE -> {
-                                            changeSizeByHeight(playerHeight + disY * 2)
+                                        RT, LT ,MIDDLE -> {
+                                            changeSizeByHeight((endY - playerView.y).toInt())
                                         }
                                         LB, RB -> {}
                                     }
@@ -360,14 +359,11 @@ class PlayerBehaviorDelegate(
                             }
                             RIGHT -> {
                                 if(parent.isHoldUpPlayer){
-                                    changeSizeByWidth(playerWidth + disX)
+                                    changeSizeByWidth((endX - playerView.x).toInt())
                                 } else {
                                     when (parent.playerViewPlaceStatus) {
-                                        LB, LT -> {
-                                            changeSizeByWidth(playerWidth + disX)
-                                        }
-                                        MIDDLE -> {
-                                            changeSizeByWidth(playerWidth + disX * 2)
+                                        LB, LT, MIDDLE -> {
+                                            changeSizeByWidth((endX - playerView.x).toInt())
                                         }
                                         RT, RB -> {}
                                     }
@@ -413,10 +409,10 @@ class PlayerBehaviorDelegate(
                 playerHeight = (newShowAreaDip / sqrt(widthHeightRatio)).toInt()
                 playerWidth = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }
-            //防止参数设置过大超出屏幕上限
-            if (playerWidth > parent.measuredWidth - windowInsets.left - windowInsets.right) {
+            //防止参数设置过大超出屏幕上限  保证一列内容区域的宽度
+            if (playerWidth > parent.measuredWidth - windowInsets.left - windowInsets.right - parent.contentMinWidth) {
                 val newShowAreaDip =
-                    (parent.measuredWidth - windowInsets.left - windowInsets.right) / sqrt(widthHeightRatio)
+                    (parent.measuredWidth - windowInsets.left - windowInsets.right - parent.contentMinWidth) / sqrt(widthHeightRatio)
                 playerHeight = (newShowAreaDip / sqrt(widthHeightRatio)).toInt()
                 playerWidth = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }

@@ -130,7 +130,7 @@ class ScaffoldView @JvmOverloads constructor(
     var appBarHeight = config.appBarHeight
     var appBarWidth = config.appBarMenuWidth
 
-    val contentMinWidth = dip(315) //内容区域每列最小宽度
+    val contentMinWidth = dip(300) //内容区域每列最小宽度
     val contentMinHeight = dip(200) // 内容区域每列最小高度
 
     val smallModePlayerMinHeight = dip(200) // 小屏模式下的播放器最小高度
