@@ -249,6 +249,7 @@ class PlayerBehaviorDelegate(
     }
     fun changeSizeByHeight(newHeight :Int){
         val widthHeightRatio = parent.playerVideoRatio
+        val originWidth = playerWidth
         var newArea = (newHeight * sqrt(widthHeightRatio)).toInt()
         newArea = (newArea / parent.resources.displayMetrics.density).toInt()
         if(parent.isHoldUpPlayer){
@@ -261,9 +262,23 @@ class PlayerBehaviorDelegate(
             parent.playerSmallShowArea = newArea
         }
         updateWindowSize()
+        //变化时顶点
+        if(parent.isHoldUpPlayer) {
+            when (draggingSide) {
+                LEFT -> {
+                    playerX += originWidth - playerWidth
+                }
+                RIGHT -> {
+                }
+                BOTTOM -> {
+                    playerX += (originWidth - playerWidth) / 2
+                }
+            }
+        }
     }
     fun changeSizeByWidth(newWidth :Int){
         val widthHeightRatio = parent.playerVideoRatio
+        val originWidth = playerWidth
         var newArea = (newWidth / sqrt(widthHeightRatio)).toInt()
         newArea = (newArea / parent.resources.displayMetrics.density).toInt()
         if(parent.isHoldUpPlayer){
@@ -276,6 +291,19 @@ class PlayerBehaviorDelegate(
             parent.playerSmallShowArea = newArea
         }
         updateWindowSize()
+        //变化时顶点
+        if(parent.isHoldUpPlayer) {
+            when (draggingSide) {
+                LEFT -> {
+                    playerX += originWidth - playerWidth
+                }
+                RIGHT -> {
+                }
+                BOTTOM -> {
+                    playerX += (originWidth - playerWidth) / 2
+                }
+            }
+        }
     }
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         danmakuVideoPlayer?.touch(ev)
@@ -325,14 +353,12 @@ class PlayerBehaviorDelegate(
                     if (draggingSide != NONE && dragger.viewDragState != ViewDragHelper.STATE_DRAGGING) {
                         val endX = ev.x.toInt()
                         val endY = ev.y.toInt()
-                        val disX = endX - startX
-                        val disY = endY - startY
                         startX = endX
                         startY = endY
                         when(draggingSide){
                             LEFT -> {
                                 if(parent.isHoldUpPlayer){
-
+                                    changeSizeByWidth((playerView.x - endX).toInt() + playerWidth)
                                 } else {
                                     when (parent.playerViewPlaceStatus) {
                                         RT, RB -> {
