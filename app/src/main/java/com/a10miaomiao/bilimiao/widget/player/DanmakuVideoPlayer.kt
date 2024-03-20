@@ -411,10 +411,17 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
-    override fun touchSurfaceDown(x: Float, y: Float) {
+    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
         if (stopTouch) {
-            return
+            return false
         }
+        return super.onTouch(v, event)
+    }
+
+    fun touch(ev: MotionEvent){
+        onTouch(this,ev)
+    }
+    override fun touchSurfaceDown(x: Float, y: Float) {
         super.touchSurfaceDown(x, y)
         val curWidth = measuredWidth
         val curHeight = measuredHeight
@@ -431,9 +438,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
         if (isSpeedPlaying) {
-            return
-        }
-        if (stopTouch) {
             return
         }
         if (mDownY<context.dip(25)){
@@ -474,9 +478,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     override fun touchSurfaceUp() {
-        if (stopTouch) {
-            return
-        }
         removeCallbacks(longClickControlTask)
         touchSurfaceDownTime = Long.MAX_VALUE
         if (isSpeedPlaying) {
@@ -937,6 +938,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     fun hideSmallDargBar() {
         mDragBarLayout.visibility = mTopContainer.visibility
+    }
+
+    fun getStartButtonVisibility(): Boolean{
+        return mStartButton.visibility == VISIBLE
+    }
+    fun clickUiToggle(){
+        onClickUiToggle(null)
     }
 
     fun setHoldStatus(isHold:Boolean){

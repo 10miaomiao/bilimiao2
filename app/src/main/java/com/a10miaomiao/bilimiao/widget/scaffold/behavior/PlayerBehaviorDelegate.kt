@@ -73,6 +73,9 @@ class PlayerBehaviorDelegate(
     private var _measuredWidth = 0
     private var _measuredHeight = 0
 
+    private val fullScreenDraggable
+        get() = parent.fullScreenDraggable && danmakuVideoPlayer?.getStartButtonVisibility() == false
+
     private val dragger = ViewDragHelper.create(parent, 0.8f, this).apply {
     }
 
@@ -111,7 +114,12 @@ class PlayerBehaviorDelegate(
                 resetPosition(xvel,yvel)
             }
         } else {
-            if(playerView.x < windowInsets.left - playerWidth * 1 / 4 ){
+            if(playerView.x.toInt() == playerX && playerView.y.toInt() == playerY){
+                //若全屏可拖拽，点击
+                if (fullScreenDraggable){
+                    danmakuVideoPlayer?.clickUiToggle()
+                }
+            } else if (playerView.x < windowInsets.left - playerWidth * 1 / 4 ){
                 //拉至左边缘
                 parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
                 playerX = windowInsets.left
@@ -270,6 +278,7 @@ class PlayerBehaviorDelegate(
         updateWindowSize()
     }
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        danmakuVideoPlayer?.touch(ev)
         if (parent.showPlayer
             && !parent.fullScreenPlayer
             && parent.orientation == ScaffoldView.HORIZONTAL
@@ -288,9 +297,10 @@ class PlayerBehaviorDelegate(
                             danmakuVideoPlayer?.stopTouch = true
                         } else if (startY < playerView.y + dragAreaHeight){
                             draggingSide = TOP
-                            if(parent.fullScreenDraggable ||parent.isHoldUpPlayer
-                                ||playerView.x < playerView.x + playerWidth - dragAreaHeight // 减去右侧挂起按钮宽度
-                                ){
+                            if(fullScreenDraggable || parent.isHoldUpPlayer){
+                                dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
+                            } else if(startX < playerView.x + playerWidth - dragAreaHeight){
+                                // 减去右侧挂起按钮宽度
                                 dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
                             }
                         } else if (startX < playerView.x + dragWidth){
@@ -299,7 +309,7 @@ class PlayerBehaviorDelegate(
                         } else if (startX > playerView.x + playerWidth - dragWidth){
                             draggingSide = RIGHT
                             danmakuVideoPlayer?.stopTouch = true
-                        } else if (parent.fullScreenDraggable ||parent.isHoldUpPlayer){
+                        } else if (fullScreenDraggable ||parent.isHoldUpPlayer){
                             draggingSide = NONE
                             dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
                         } else {
