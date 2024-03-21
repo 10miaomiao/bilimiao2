@@ -74,7 +74,6 @@ class VideoCommentDetailViewModel(
                 scene = ReplyOuterClass.DetailListScene.REPLY
                 _cursor?.let {
                     cursor = ReplyOuterClass.CursorReq.newBuilder()
-                        .setPrev(it.prev)
                         .setNext(it.next)
                         .setMode(it.mode)
                         .build()
