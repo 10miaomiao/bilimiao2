@@ -37,11 +37,9 @@ import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import cn.mtjsoft.barcodescanning.ScanningManager
-import cn.mtjsoft.barcodescanning.config.ScanType
-import cn.mtjsoft.barcodescanning.interfaces.ScanResultListener
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.activity.QRCodeActivity
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.BiliNavigation
 import com.a10miaomiao.bilimiao.comm.MiaoUI
@@ -243,42 +241,27 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private fun openQrScanning() {
         val activity = requireActivity()
-        ScanningManager.instance.openScanningActivity(
-            activity,
-            cn.mtjsoft.barcodescanning.config.Config(
-                true,
-                ScanType.QR_CODE,
-                null,
-                object : ScanResultListener {
-                    override fun onSuccessListener(value: String?) {
-                        if (value == null) {
-                            PopTip.show("二维码内容为空")
-                            return
-                        }
-                        if (
-                            !value.startsWith("http://")
-                            && !value.startsWith("https://")
-                            && !value.startsWith("://")
-                        ) {
-                            PopTip.show("扫描内容：$value")
-                            return
-                        }
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            withStarted {
-                                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                                    ?: activity.findNavController(R.id.nav_host_fragment)
-                                if (!BiliNavigation.navigationTo(nav, value)) {
-                                    BiliNavigation.navigationToWeb(activity, value)
-                                }
-                            }
+        QRCodeActivity.openScanningActivity(activity) { text ->
+            if (text.isBlank()) {
+                PopTip.show("二维码内容为空")
+            } else if (
+                !text.startsWith("http://")
+                && !text.startsWith("https://")
+                && !text.startsWith("://")
+            ) {
+                PopTip.show("扫描内容：$text")
+            } else {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    withStarted {
+                        val nav = (activity as? MainActivity)?.pointerNav?.navController
+                            ?: activity.findNavController(R.id.nav_host_fragment)
+                        if (!BiliNavigation.navigationTo(nav, text)) {
+                            BiliNavigation.navigationToWeb(activity, text)
                         }
                     }
-                    override fun onFailureListener(error: String) {
-                        PopTip.show("扫码失败：$error")
-                    }
-                    override fun onCompleteListener(value: String?) {}
-                })
-        )
+                }
+            }
+        }
         val scaffoldView = activity.getScaffoldView()
         scaffoldView.closeDrawer()
     }
@@ -346,7 +329,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
         if (hasPermission(Manifest.permission.CAMERA)) {
             openQrScanning()
         } else {
-            viewLifecycleOwner.lifecycleScope.launch  {
+            viewLifecycleOwner.lifecycleScope.launch {
                 val result = requestPermission(Manifest.permission.CAMERA)
                 if (result is PermissionRequestResult.Granted) {
                     openQrScanning()
@@ -426,7 +409,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                                     setTextColor(config.foregroundColor)
                                     textSize = 16f
                                     gravity = Gravity.CENTER_VERTICAL
-                                }..lParams(wrapContent,  dip(20))
+                                }..lParams(wrapContent, dip(20))
                                 +textView {
                                     _text = if (playerState.sid.isNotBlank()) {
                                         "SS${playerState.sid} / EP${playerState.epid}"
@@ -438,7 +421,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                                     setTextColor(config.foregroundAlpha45Color)
                                     textSize = 14f
                                     gravity = Gravity.BOTTOM
-                                }..lParams(wrapContent,  dip(20))
+                                }..lParams(wrapContent, dip(20))
                             }
                         }..lParams(matchParent, wrapContent)
                         +textView {

@@ -10,11 +10,11 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 34
         version = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -85,10 +85,8 @@ dependencies {
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi)
     implementation(Libraries.glide)
-    implementation(Libraries.dialogX)
-//    implementation(files("../app/libs/DialogX-release.aar")) // 新版DialogX，解决一些bug，作者未发布到mavenCentral，故先本地编译
-    implementation(Libraries.dialogXMaterialYou) {
-        exclude("com.kongzue.dialogx", "DialogX")
+    implementation(Libraries.dialogX) {
+        exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
 
     implementation(Libraries.gson)
