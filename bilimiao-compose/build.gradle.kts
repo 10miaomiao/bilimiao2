@@ -81,8 +81,9 @@ dependencies {
     implementation(Libraries.glideCompose)
     implementation(Libraries.qrGenerator)
 
-    implementation(Libraries.dialogX)
-//    implementation(files("../app/libs/DialogX-release.aar"))
+    implementation(Libraries.dialogX) {
+        exclude("com.github.kongzue.DialogX", "DialogXInterface")
+    }
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
