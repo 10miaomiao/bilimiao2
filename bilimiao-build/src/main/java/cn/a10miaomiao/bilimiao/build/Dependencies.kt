@@ -85,9 +85,8 @@ object Libraries {
 
     const val gsyVideoPlayer = "com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${Versions.gsyVideoPlayer}"
 
-    // 其他：极验验证、二维码生成
+    // 其他：极验验证
     const val sensebot = "com.geetest.sensebot:sensebot:4.3.8.1"
-    const val qrGenerator = "com.github.alexzhirkevich:custom-qr-generator:1.6.0"
 
     // 百度统计
     const val baiduMobstat = "com.baidu.mobstat:mtj-sdk:latest.integration"
