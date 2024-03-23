@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Image
@@ -36,6 +37,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
@@ -45,11 +47,8 @@ import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.github.alexzhirkevich.customqrgenerator.QrData
-import com.github.alexzhirkevich.customqrgenerator.vector.QrCodeDrawable
-import com.skydoves.landscapist.rememberDrawablePainter
+import com.king.zxing.util.CodeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,7 +82,7 @@ internal class QrCodeLoginPageViewModel(
     private var _authCode = ""
 
     val loading = MutableStateFlow(false)
-    val qrImage = MutableStateFlow<Drawable?>(null)
+    val qrImage = MutableStateFlow<ImageBitmap?>(null)
     val error = MutableStateFlow("")
     val isScaned = MutableStateFlow(false)
 
@@ -117,9 +116,10 @@ internal class QrCodeLoginPageViewModel(
     fun renderQrcode(
         url: String,
     ) {
-        qrImage.value = QrCodeDrawable(
-            data = QrData.Url(url)
-        )
+        ImageBitmap
+        qrImage.value = CodeUtils.createQRCode(
+            url, 600
+        ).asImageBitmap()
     }
 
 
@@ -178,7 +178,7 @@ internal class QrCodeLoginPageViewModel(
         }
         if (res.isSuccess) {
             userStore.setUserInfo(res.data)
-            fragment.findNavController().popBackStack()
+            fragment.findNavController().tryPopBackStack()
         } else {
             throw Exception(res.message)
         }
@@ -200,10 +200,10 @@ internal fun QrCodeLoginPageContent(
 
     val scrollState = rememberScrollState()
 
-    val loading by viewModel.loading.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val qrImage by viewModel.qrImage.collectAsState()
-    val isScaned by viewModel.isScaned.collectAsState()
+    val loading = viewModel.loading.collectAsState().value
+    val error = viewModel.error.collectAsState().value
+    val qrImage = viewModel.qrImage.collectAsState().value
+    val isScaned = viewModel.isScaned.collectAsState().value
 //    val isFullScreenQrcode by viewModel.isScaned.collectAsState()
 
     var isFullScreenQrcode by remember {
@@ -220,7 +220,7 @@ internal fun QrCodeLoginPageContent(
         && qrImage != null
     ) {
         Image(
-            painter = rememberDrawablePainter(drawable = qrImage),
+            bitmap = qrImage,
             contentDescription = "",
             modifier = Modifier
                 .fillMaxSize()
@@ -257,7 +257,7 @@ internal fun QrCodeLoginPageContent(
             ) {
                 if (qrImage != null) {
                     Image(
-                        painter = rememberDrawablePainter(drawable = qrImage),
+                        bitmap = qrImage,
                         contentDescription = "",
                         modifier = Modifier
                             .size(240.dp)
