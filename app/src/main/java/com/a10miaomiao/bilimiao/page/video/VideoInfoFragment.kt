@@ -129,7 +129,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             myMenuItem {
                 key = 1
                 iconResource = R.drawable.ic_column_comm
-                title = NumberUtil.converString(info?.stat?.reply?.toString() ?: "评论")
+                val replyNum = NumberUtil.converStringOrNull(info?.stat?.reply)
+                title = replyNum ?: "评论"
+                contentDescription = if (replyNum == null) "评论" else "评论(数量:${replyNum}条)"
             },
 //            myMenuItem {
 //                key = 2
@@ -143,7 +145,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 } else {
                     R.drawable.ic_column_star
                 }
-                title = NumberUtil.converString(info?.stat?.favorite?.toString() ?: "收藏")
+                val favoriteNum = NumberUtil.converStringOrNull(info?.stat?.favorite)
+                title = favoriteNum ?: "收藏"
+                contentDescription = if (favoriteNum == null) "收藏" else "收藏(数量:${favoriteNum}个)"
             },
             myMenuItem {
                 key = 4
@@ -152,7 +156,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 } else {
                     R.drawable.ic_column_coin
                 }
-                title = NumberUtil.converString(info?.stat?.coin?.toString() ?: "投币")
+                val coinNum = NumberUtil.converStringOrNull(info?.stat?.coin)
+                title = coinNum ?: "投币"
+                contentDescription = if (coinNum == null) "投币" else "投币(数量:${coinNum}枚)"
             },
             myMenuItem {
                 key = 5
@@ -161,7 +167,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 } else {
                     R.drawable.ic_column_like
                 }
-                title = NumberUtil.converString(info?.stat?.like?.toString() ?: "点赞")
+                val likeNum = NumberUtil.converStringOrNull(info?.stat?.like)
+                title = likeNum ?: "点赞"
+                contentDescription = if (likeNum == null) "点赞" else "点赞(数量:${likeNum}次)"
             },
         )
     }
