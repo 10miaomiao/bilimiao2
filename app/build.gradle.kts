@@ -114,8 +114,10 @@ dependencies {
     implementation(Libraries.foregroundCompat)
     implementation(Libraries.drawer)
     implementation(Libraries.modernAndroidPreferences)
-    implementation(Libraries.dialogX)
-    implementation("com.github.mtjsoft:CameraXBarcodeScanning:1.3.1")
+    implementation(Libraries.dialogX) {
+        exclude("com.github.kongzue.DialogX", "DialogXInterface")
+    }
+    implementation(Libraries.zxingLite)
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
 //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")

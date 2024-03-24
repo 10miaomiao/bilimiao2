@@ -80,11 +80,16 @@
         </activity>
         <activity
             android:name=".activity.SearchActivity"
-            android:label="@string/search"></activity>
+            android:label="@string/search"
+            android:theme="@style/Theme.Bilimiao"/>
+        <activity
+            android:name=".activity.QRCodeActivity"
+            android:label="@string/qrcode_scan"
+            android:theme="@style/Theme.Bilimiao"/>
         <activity
             android:name=".activity.DensitySettingActivity"
             android:label="@string/density_setting"
-            android:theme="@style/Theme.ShowActionBar.Bilimiao"></activity>
+            android:theme="@style/Theme.ShowActionBar.Bilimiao"/>
         <activity
             android:name="cn.a10miaomiao.bilimiao.cover.CoverActivity"
             android:exported="true"

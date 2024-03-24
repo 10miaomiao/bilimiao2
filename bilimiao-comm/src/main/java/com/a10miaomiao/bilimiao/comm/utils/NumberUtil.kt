@@ -38,8 +38,23 @@ object NumberUtil {
         } catch (e: NumberFormatException) {
             return num
         }
-
     }
+
+    fun converStringOrNull(num: Long?): String? {
+        if (num == null) return null
+        return converString(num)
+    }
+
+    fun converStringOrNull(num: Int?): String? {
+        if (num == null) return null
+        return converString(num)
+    }
+
+    fun converStringOrNull(num: String?): String? {
+        if (num == null) return null
+        return converString(num)
+    }
+
 
     fun converDuration(duration: Long): String {
         var s = (duration % 60).toString()

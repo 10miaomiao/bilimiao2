@@ -78,15 +78,15 @@ object Libraries {
     const val flexbox = "com.google.android.flexbox:flexbox:3.0.0"
     const val foregroundCompat = "me.zhanghai.android.foregroundcompat:library:1.0.2"
     const val drawer = "com.drakeet.drawer:drawer:1.0.3"
-    const val modernAndroidPreferences = "de.maxr1998:modernandroidpreferences:2.2.0"
-    const val dialogX = "com.kongzue.dialogx:DialogX:0.0.49"
-    const val dialogXMaterialYou = "com.kongzue.dialogx.style:DialogXMaterialYouStyle:0.0.49"
+    const val modernAndroidPreferences = "de.maxr1998:modernandroidpreferences:2.3.2"
+    const val dialogX = "com.github.kongzue:DialogX:0.0.50.beta8"
+    const val dialogXMaterialYou = "com.github.kongzue.DialogX:DialogXMaterialYou:0.0.50.beta8"
+    const val zxingLite = "com.github.jenly1314:zxing-lite:2.1.0"
 
     const val gsyVideoPlayer = "com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:${Versions.gsyVideoPlayer}"
 
-    // 其他：极验验证、二维码生成
+    // 其他：极验验证
     const val sensebot = "com.geetest.sensebot:sensebot:4.3.8.1"
-    const val qrGenerator = "com.github.alexzhirkevich:custom-qr-generator:1.6.0"
 
     // 百度统计
     const val baiduMobstat = "com.baidu.mobstat:mtj-sdk:latest.integration"
