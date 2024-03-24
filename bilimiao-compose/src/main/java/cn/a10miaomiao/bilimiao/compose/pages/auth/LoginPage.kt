@@ -34,6 +34,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
@@ -212,7 +213,7 @@ internal class LoginPageViewModel(
         }
         if (res.isSuccess) {
             userStore.setUserInfo(res.data)
-            fragment.findNavController().popBackStack()
+            fragment.findNavController().tryPopBackStack()
         } else {
             throw Exception(res.message)
         }
@@ -413,7 +414,7 @@ internal fun LoginPageContent(
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 TextButton(onClick = viewModel::toQrLogin) {
-                    Text(text = "二微码登录")
+                    Text(text = "二维码登录")
                 }
             }
             Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
