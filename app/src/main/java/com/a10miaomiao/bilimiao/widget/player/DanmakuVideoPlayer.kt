@@ -257,9 +257,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     var showBottomProgressBarInFullMode = true
     // 小屏状态下显示底部进度条
     var showBottomProgressBarInSmallMode = true
-    // 屏蔽触控
-    var stopTouch = false
-        get() = field || isHoldUp
 
     constructor(context: Context?, fullFlag: Boolean?) : super(context, fullFlag) {
         initView()
@@ -412,14 +409,15 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-        if (stopTouch) {
-            return false
+        if (event != null) {
+            when(event.action){
+                MotionEvent.ACTION_CANCEL -> {
+                    //触控被拦截不触发长按倍速
+                    removeCallbacks(longClickControlTask)
+                }
+            }
         }
         return super.onTouch(v, event)
-    }
-
-    fun touch(ev: MotionEvent){
-        onTouch(this,ev)
     }
     override fun touchSurfaceDown(x: Float, y: Float) {
         super.touchSurfaceDown(x, y)
@@ -938,13 +936,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     fun hideSmallDargBar() {
         mDragBarLayout.visibility = mTopContainer.visibility
-    }
-
-    fun getStartButtonVisibility(): Boolean{
-        return mStartButton.visibility == VISIBLE
-    }
-    fun clickUiToggle(){
-        onClickUiToggle(null)
     }
 
     fun setHoldStatus(isHold:Boolean){
