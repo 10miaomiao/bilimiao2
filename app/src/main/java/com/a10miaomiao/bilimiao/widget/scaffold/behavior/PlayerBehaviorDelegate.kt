@@ -124,10 +124,12 @@ class PlayerBehaviorDelegate(
                 parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
                 playerView.layout(playerView.x.toInt() + originWidth - playerWidth,playerView.y.toInt(),playerView.x.toInt() + playerWidth,playerView.y.toInt() + playerHeight)
                 playerX = windowInsets.left
+                playerY = playerView.y.toInt()
             } else if (playerView.x > parent.measuredWidth - playerWidth * 3 / 4 - windowInsets.right) {
                 //拉至右边缘
                 parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
                 playerX = parent.measuredWidth - playerWidth - windowInsets.right
+                playerY = playerView.y.toInt()
             } else {
                 //判断播放器视图位置状态
                 val playerMiddleX = newX + playerWidth / 2
@@ -168,6 +170,22 @@ class PlayerBehaviorDelegate(
         super.onViewReleased(releasedChild, xvel, yvel)
     }
 
+    /**
+     * 展开窗口
+     */
+    fun holdDown(){
+        val originHeight = playerHeight
+        val originWidth = playerWidth
+        parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
+        val expandX = (playerWidth - originWidth) / 2
+        val expandY = (playerHeight - originHeight) / 2
+        playerView.layout(playerView.x.toInt() - expandX,playerView.y.toInt() - expandY,playerView.x.toInt() + expandX,playerView.y.toInt() + expandY)
+        resetPosition()
+        if (dragger.smoothSlideViewTo(playerView, playerX, playerY)) {
+            ViewCompat.postInvalidateOnAnimation(parent)
+        }
+        ViewCompat.postOnAnimation(parent,sizeChangeSettle)
+    }
     /**
      * 挂起到右上↗
      */
@@ -318,8 +336,8 @@ class PlayerBehaviorDelegate(
                     return false
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    if (startX == ev.x.toInt()
-                        && startY == ev.y.toInt()
+                    if ((startX - ev.x.toInt()).absoluteValue < 30
+                        && (startY - ev.y.toInt()).absoluteValue < 30
                         && !parent.isHoldUpPlayer){
                         //正常窗口且手指不移动时，不拦截触控，交给播放器处理
                         return false
@@ -369,6 +387,18 @@ class PlayerBehaviorDelegate(
                         //视频窗口外部
                         draggingSide = NONE
                     }
+                }
+                MotionEvent.ACTION_UP -> {
+                    draggingSide = NONE
+                    if ((startX - ev.x.toInt()).absoluteValue < 30
+                        && (startY - ev.y.toInt()).absoluteValue < 30
+                        && parent.isHoldUpPlayer){
+                        holdDown()
+                        return false
+                    }
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    draggingSide = NONE
                 }
             }
         }
@@ -432,6 +462,12 @@ class PlayerBehaviorDelegate(
                     parent.content?.requestLayout()
                     parent.subContent?.requestLayout()
                 }
+            }
+            MotionEvent.ACTION_UP -> {
+                draggingSide = NONE
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                draggingSide = NONE
             }
         }
         return true
