@@ -390,9 +390,15 @@ class PlayerBehaviorDelegate(
                 }
                 MotionEvent.ACTION_UP -> {
                     draggingSide = NONE
+                    //挂起时点击展开
                     if ((startX - ev.x.toInt()).absoluteValue < 30
                         && (startY - ev.y.toInt()).absoluteValue < 30
-                        && parent.isHoldUpPlayer){
+                        && parent.isHoldUpPlayer
+                        && startX > playerView.x
+                        && startY > playerView.y
+                        && startX < playerView.x + playerWidth
+                        && startY < playerView.y + playerHeight
+                        ){
                         holdDown()
                         return false
                     }
