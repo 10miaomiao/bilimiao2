@@ -26,6 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.*
@@ -140,7 +141,7 @@ internal class TelVerifyPageViewModel(
                         setTitle("不支持验证")
                         setMessage("此帐号不支持手机号及邮箱验证，请去B站官方客户端或PC网页版完善帐号信息后再重新登录")
                         setNegativeButton("确定") { _, _ ->
-                            fragment.findNavController().popBackStack()
+                            fragment.findNavController().tryPopBackStack()
                         }
                     }.show()
                 }
@@ -232,7 +233,7 @@ internal class TelVerifyPageViewModel(
         }
         if (res.isSuccess) {
             userStore.setUserInfo(res.data)
-            fragment.findNavController().popBackStack()
+            fragment.findNavController().tryPopBackStack()
         } else {
             throw Exception(res.message)
         }

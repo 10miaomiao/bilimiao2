@@ -33,14 +33,11 @@ class BilimiaoCommApp(
         readAuthInfo()
 
         DialogX.init(app)
-        DialogX.implIMPLMode = DialogX.IMPL_MODE.DIALOG_FRAGMENT
         DialogX.globalStyle = MaterialYouStyle.style()
     }
 
     fun setCookie(cookieInfo: LoginInfo.CookieInfo) {
         val cookieManager = CookieManager.getInstance()
-        cookieManager.removeSessionCookies(null)//移除
-        cookieManager.removeAllCookies(null)
         cookieInfo.domains.forEach { domain ->
             cookieInfo.cookies.forEach { cookie ->
                 cookieManager.setCookie(domain, cookie.getValue(domain))
