@@ -105,6 +105,10 @@ class PlayerController(
         setDanmakuSwitchOnClickListener(that::danmakuSwitchClick)
         setExpandButtonOnClickListener(that::showPagesOrEpisodes)
         setSendDanmakuButtonOnClickListener(that::showSendDanmakuPage)
+        setSendDanmakuButtonOnLongClickListener{
+            danmakuSwitchClick(it)
+            true
+        }
         serHoldUpButtonOnClickListener(that::holdUpPlayer)
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)

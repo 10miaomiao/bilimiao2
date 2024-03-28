@@ -736,12 +736,14 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 }
                 mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_open)
                 mDanmakuSwitchTV.text = "弹幕开"
+                mMiniSendDanmakuIV.alpha = 1f
             } else {
                 if (mDanmakuView.isShown) {
                     mDanmakuView.hide()
                 }
                 mDanmakuSwitchIV.setImageResource(R.drawable.bili_player_danmaku_is_closed)
                 mDanmakuSwitchTV.text = "弹幕关"
+                mMiniSendDanmakuIV.alpha = 0.5f
             }
         }
     }
@@ -788,6 +790,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     fun setSendDanmakuButtonOnClickListener(l: OnClickListener) {
         mMiniSendDanmakuIV.setOnClickListener(l)
         mSendDanmakuTV.setOnClickListener(l)
+    }
+
+    fun setSendDanmakuButtonOnLongClickListener(l: OnLongClickListener) {
+        mMiniSendDanmakuIV.setOnLongClickListener(l)
     }
 
     fun serHoldUpButtonOnClickListener(l: OnClickListener) {
