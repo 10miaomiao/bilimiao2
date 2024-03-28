@@ -79,19 +79,20 @@ dependencies {
     implementation(Libraries.okhttp3)
     implementation(Libraries.glide)
     implementation(Libraries.glideCompose)
-    implementation(Libraries.qrGenerator)
+    implementation(Libraries.zxingLite)
 
-    implementation(Libraries.dialogX)
-//    implementation(files("../app/libs/DialogX-release.aar"))
+    implementation(Libraries.dialogX) {
+        exclude("com.github.kongzue.DialogX", "DialogXInterface")
+    }
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
-    implementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.03.00"))
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.espresso)
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
