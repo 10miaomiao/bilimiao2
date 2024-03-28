@@ -253,6 +253,7 @@ class PlayerBehaviorDelegate(
         }
     }
 
+    //手指落下的位置
     companion object {
         const val NONE = 0
         const val LEFTSIDE = 1
@@ -345,14 +346,14 @@ class PlayerBehaviorDelegate(
                             return true
                         } else if (startY < playerView.y + dragAreaHeight) {
                             //顶部拖拽条
-                            if (parent.fullScreenDraggable || parent.isHoldUpPlayer
-                                || startX < playerView.x + playerWidth - dragAreaHeight
-                            ) {
-                                //全屏拖拽，不减去按钮
-                                // 否则减去右侧挂起按钮宽度
+                            if (startX < playerView.x + playerWidth - dragAreaHeight || parent.isHoldUpPlayer) {
+                                // 非挂起时，减去右侧挂起按钮宽度
                                 draggingSide = TOPSIDE
                                 dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
                                 return dragger.shouldInterceptTouchEvent(ev)
+                            } else {
+                                //点到按钮
+                                return false
                             }
                         } else if (startX < playerView.x + dragWidth) {
                             //左边缘
