@@ -15,6 +15,7 @@ import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColor
 import cn.a10miaomiao.miao.binding.miaoEffect
+import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
@@ -73,8 +74,9 @@ class VideoRegionFragment : Fragment(), DIAware, MyPage {
     }
 
     val handleItemClick = OnItemClickListener {  adapter, view, position ->
-        val navHostFragment = requireActivity().supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navHostFragment = (activity as? MainActivity)?.currentNav
+            ?: requireActivity().supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val fragment = navHostFragment.childFragmentManager.primaryNavigationFragment
         if (fragment is SearchResultFragment) {
             val region = viewModel.regionList[position]
