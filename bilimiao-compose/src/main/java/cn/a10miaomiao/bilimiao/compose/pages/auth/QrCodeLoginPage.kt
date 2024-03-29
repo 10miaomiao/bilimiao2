@@ -116,7 +116,6 @@ internal class QrCodeLoginPageViewModel(
     fun renderQrcode(
         url: String,
     ) {
-        ImageBitmap
         qrImage.value = CodeUtils.createQRCode(
             url, 600
         ).asImageBitmap()
