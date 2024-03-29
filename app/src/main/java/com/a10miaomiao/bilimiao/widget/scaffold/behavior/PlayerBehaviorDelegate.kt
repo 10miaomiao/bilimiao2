@@ -31,6 +31,8 @@ class PlayerBehaviorDelegate(
     private val minPadding = parent.dip(10)
     // 拖拽窗口边缘调整大小区域宽度
     private val dragWidth = parent.dip(12)
+    private val dragButtonWidth
+        get() = danmakuVideoPlayer?.getHoldButtonWidth() ?: 0
 
     @DragState
     var dragState = ViewDragHelper.STATE_IDLE
@@ -261,6 +263,7 @@ class PlayerBehaviorDelegate(
         const val RIGHTSIDE = 3
         const val BOTTOMSIDE = 4
         const val MIDAREA = 5
+        const val HOLDBUTTON = 6
     }
     fun changeSizeByHeight(newHeight :Int){
         val widthHeightRatio = parent.playerVideoRatio
@@ -334,7 +337,7 @@ class PlayerBehaviorDelegate(
                 MotionEvent.ACTION_DOWN -> {
                     startX = ev.x.toInt()
                     startY = ev.y.toInt()
-                    //down时拦截：四边区域、挂起后的中间区域
+                    //down时拦截：四边区域（除去挂起按钮）、挂起后的中间区域
                     if(startX > playerView.x - dragWidth
                         && startY > playerView.y
                         && startX < playerView.x + playerWidth + dragWidth
@@ -353,6 +356,7 @@ class PlayerBehaviorDelegate(
                                 return dragger.shouldInterceptTouchEvent(ev)
                             } else {
                                 //点到按钮
+                                draggingSide = HOLDBUTTON
                                 return false
                             }
                         } else if (startX < playerView.x + dragWidth) {
@@ -380,12 +384,24 @@ class PlayerBehaviorDelegate(
                 }
                 MotionEvent.ACTION_MOVE -> {
                     //move时拦截：非挂起&&中间区域&&手指移动&&全屏拖拽
-                    if(parent.isHoldUpPlayer || !parent.fullScreenDraggable){
+                    //挂起按钮拖拽拦截
+
+                    if ((startX - ev.x.toInt()).absoluteValue < parent.dip(10)
+                        && (startY - ev.y.toInt()).absoluteValue < parent.dip(10)){
+                        //手指移动微小时，不拦截触控
                         return false
                     }
-                    if ((startX - ev.x.toInt()).absoluteValue < 30
-                        && (startY - ev.y.toInt()).absoluteValue < 30){
-                        //手指移动微小时，不拦截触控
+                    if(draggingSide == HOLDBUTTON) {
+                        val evCapture = ev.let {
+                            it.action = MotionEvent.ACTION_DOWN
+                            it
+                        }
+                        dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
+                        dragger.shouldInterceptTouchEvent(evCapture)
+                        dragger.processTouchEvent(evCapture)
+                        return dragger.viewDragState == ViewDragHelper.STATE_DRAGGING
+                    }
+                    if(parent.isHoldUpPlayer || !parent.fullScreenDraggable){
                         return false
                     }
                     if(draggingSide == MIDAREA) {
@@ -408,7 +424,6 @@ class PlayerBehaviorDelegate(
             }
         }
         return dragger.shouldInterceptTouchEvent(ev)
-                || (draggingSide != NONE && draggingSide != TOPSIDE)
     }
 
     fun onTouchEvent(ev: MotionEvent): Boolean {
