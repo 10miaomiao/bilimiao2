@@ -209,6 +209,10 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         behaviorDelegate?.holdUpTop()
     }
 
+    fun holdDownPlayer(){
+        behaviorDelegate?.holdDown()
+    }
+
     fun updateLayout(){
         behaviorDelegate?.updateWindowSize()
     }

@@ -368,7 +368,7 @@ class MainActivity
         if(!ui.root.subContentShown){
             ui.root.playerBehavior?.holdUpPlayer()
         } else {
-            ui.root.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
+            ui.root.playerBehavior?.holdDownPlayer()
         }
         true
     }

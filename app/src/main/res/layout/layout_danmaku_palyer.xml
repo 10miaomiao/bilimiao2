@@ -419,11 +419,11 @@
 
         <ImageView
             android:id="@+id/hold_up"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/shape_player_hold_up"
             android:scaleType="center"
-            android:layout_marginEnd="2dp"
+            android:layout_marginEnd="0dp"
             android:layout_gravity="end|center_vertical"/>
 
     </FrameLayout>
