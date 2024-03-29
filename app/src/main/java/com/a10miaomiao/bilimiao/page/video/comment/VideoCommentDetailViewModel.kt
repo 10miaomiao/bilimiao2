@@ -110,8 +110,8 @@ class VideoCommentDetailViewModel(
                 root = reply.id
                 type = 1
                 scene = ReplyOuterClass.DetailListScene.REPLY
-                cursor = _cursor?.let {
-                    ReplyOuterClass.CursorReq.newBuilder()
+                _cursor?.let {
+                    cursor = ReplyOuterClass.CursorReq.newBuilder()
                         .setNext(it.next)
                         .setMode(it.mode)
                         .build()
