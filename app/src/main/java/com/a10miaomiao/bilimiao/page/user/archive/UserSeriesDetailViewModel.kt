@@ -41,15 +41,17 @@ class UserSeriesDetailViewModel(
 
     var triggered = false
     var list = PaginationInfo<MediaListV2Info>()
+    private var _oid: String = ""
 
     init {
-        loadData(1)
+        loadData("")
     }
 
     private fun loadData(
-        pageNum: Int = list.pageNum
+        oid: String,
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
+            _oid = oid
             ui.setState {
                 list.loading = true
             }
@@ -57,17 +59,24 @@ class UserSeriesDetailViewModel(
                 .medialistResourceList(
                     bizId = id,
                     type = type,
+                    oid = oid,
                 )
                 .awaitCall()
                 .gson<ResultInfo<MediaResponseV2Info>>()
             if (res.code == 0) {
-                res.data.media_list?.let {
+                val mediaList = res.data.media_list
+                if (mediaList != null) {
                     ui.setState {
-                        list.data = it.toMutableList()
+                        if (oid.isBlank()) {
+                            list.data = mediaList.toMutableList()
+                        } else {
+                            list.data.addAll(mediaList.filter { i1 ->
+                                list.data.indexOfFirst { i2 -> i1.id == i2.id } == -1
+                            })
+                        }
                     }
                 }
-                list.pageNum = pageNum
-                list.finished = true
+                list.finished = !res.data.has_more
             } else {
                 withContext(Dispatchers.Main) {
                     PopTip.show(res.message)
@@ -88,14 +97,14 @@ class UserSeriesDetailViewModel(
     }
 
     private fun _loadData() {
-        loadData()
+        loadData(_oid)
     }
 
     fun loadMode () {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
             loadData(
-                pageNum = pageNum + 1
+                list.data.lastOrNull()?.id ?: ""
             )
         }
     }
@@ -104,7 +113,7 @@ class UserSeriesDetailViewModel(
         ui.setState {
             list = PaginationInfo()
             triggered = true
-            loadData()
+            loadData("")
         }
     }
 }
