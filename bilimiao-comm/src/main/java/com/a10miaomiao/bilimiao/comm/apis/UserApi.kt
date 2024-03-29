@@ -72,11 +72,13 @@ class UserApi {
     fun medialistResourceList(
         bizId: String,
         type: String, // 5为系列系列(series)，8为合集(seasons)，其它暂时未知
+        oid: String,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
             "x/v2/medialist/resource/list",
             "biz_id" to bizId,
             "type" to type,
+            "oid" to oid,
         )
     }
 
