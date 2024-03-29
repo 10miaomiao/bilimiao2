@@ -33,6 +33,8 @@ internal fun MessageItemBox(
     sourceContent: String,
     time: Long,
     onUserClick: () -> Unit,
+    onDetailClick: () -> Unit,
+    onMessageClick: (() -> Unit),
 ) {
     Row(
         modifier = Modifier
@@ -72,7 +74,8 @@ internal fun MessageItemBox(
             }
             if (sourceContent.isNotBlank()) {
                 Text(
-                    modifier = Modifier.padding(bottom = 5.dp),
+                    modifier = Modifier.clickable(onClick = onMessageClick)
+                        .padding(bottom = 5.dp),
                     text = sourceContent,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -89,7 +92,8 @@ internal fun MessageItemBox(
             }
         }
         Text(
-            modifier = Modifier.width(60.dp),
+            modifier = Modifier.width(60.dp)
+                .clickable(onClick = onDetailClick),
             text = title,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,

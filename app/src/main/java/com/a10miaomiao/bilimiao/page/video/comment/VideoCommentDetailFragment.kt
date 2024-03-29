@@ -68,13 +68,23 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "video.comment.detail"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://video/comment/{root}/detail")
+            deepLink("bilimiao://video/comment/{root}/detail/{id}")
+            argument(MainNavArgs.root) {
+                type = NavType.StringType
+                nullable = true
+            }
+            argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = true
+            }
             argument(MainNavArgs.index) {
                 type = NavType.IntType
-                nullable = false
+                defaultValue = -1
             }
             argument(MainNavArgs.reply) {
                 type = NavType.ParcelableType(VideoCommentViewInfo::class.java)
-                nullable = false
+                nullable = true
             }
         }
 
@@ -85,7 +95,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         ): Bundle {
             return bundleOf(
                 MainNavArgs.index to index,
-                MainNavArgs.id to upMid,
+//                MainNavArgs.id to upMid,
                 MainNavArgs.reply to reply,
             )
         }
@@ -121,7 +131,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
                     PopTip.show("请先登录")
                     return
                 }
-                val replyParams = viewModel.reply
+                val replyParams = viewModel.reply ?: return
                 val content = replyParams.content.message.split("\n")[0]
                 val params = SendCommentParam(
                     type = 2,
@@ -176,7 +186,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         if (reply is VideoCommentReplyInfo) {
             val parentId = reply.parent
             var position = 0
-            if (parentId != viewModel.reply.id) {
+            if (parentId != viewModel.reply?.id) {
                 val index = viewModel.list.data.indexOfFirst { it.id == parentId }
                 if (index in viewModel.list.data.indices) {
                     position = index + 1
@@ -210,6 +220,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
     }
 
     private fun toSendCommentPage(reply: VideoCommentViewInfo) {
+        val rootId = viewModel.reply?.id ?: return
         if (!viewModel.isLogin()) {
             PopTip.show("请先登录")
             return
@@ -218,7 +229,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         val params = SendCommentParam(
             type = 3,
             oid = reply.oid.toString(),
-            root = viewModel.reply.id.toString(),
+            root = rootId.toString(),
             parent = reply.id.toString(),
             content = content,
             image = reply.avatar,
@@ -281,7 +292,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
     }
 
     private val handleHeaderLongClick = View.OnLongClickListener {
-        val reply = viewModel.reply
+        val reply = viewModel.reply ?: return@OnLongClickListener false
         val args = ReplyDetailFragment.createArguments(reply)
         Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
             .navigate(ReplyDetailFragment.actionId, args)
@@ -403,7 +414,7 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
             }
 
             headerViews(mAdapter!!) {
-                val reply = viewModel.reply
+                val reply = viewModel.reply ?: VideoCommentViewAdapter.defaultVideoCommentViewInfo()
                 +videoCommentView(
                     viewInfo = reply,
                     upMid = viewModel.upMid,

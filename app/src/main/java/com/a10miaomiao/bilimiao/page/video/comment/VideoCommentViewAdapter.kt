@@ -8,6 +8,29 @@ import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 
 object VideoCommentViewAdapter {
+
+    fun defaultVideoCommentViewInfo(): VideoCommentViewInfo {
+        return VideoCommentViewInfo(
+            id = 0L,
+            oid = 0L,
+            mid = 0L,
+            uname = "",
+            avatar = "",
+            time = "",
+            location = "",
+            floor = 0,
+            content = VideoCommentViewContent(
+                message = "",
+                emote = emptyList(),
+                picturesList = emptyList(),
+            ),
+            like = 0,
+            count = 0,
+            cardLabels = emptyList(),
+            isLike = false,
+        )
+    }
+
     fun convertToVideoCommentViewInfo(
         reply: ReplyOuterClass.ReplyInfo
     ): VideoCommentViewInfo {
