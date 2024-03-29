@@ -938,6 +938,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mDragBarLayout.visibility = mTopContainer.visibility
     }
 
+    fun getHoldButtonWidth():Int{
+        return mHoldUpBtn.measuredWidth
+    }
+
     fun setHoldStatus(isHold:Boolean){
         if(isHold){
             mDanmakuView.pause()

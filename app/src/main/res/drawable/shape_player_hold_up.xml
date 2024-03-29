@@ -1,24 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
   <item>
-    <shape android:shape="oval">
-      <size
-          android:height="16dp"
-          android:width="16dp"/>
-      <solid android:color="#EEFFFFFF"/>
-    </shape>
-  </item>
-  <item
-      android:top="6dp"
-      android:bottom="6dp"
-      android:left="3dp"
-      android:right="3dp">
-    <shape>
-      <size
-          android:height="4dp"
-          android:width="10dp"/>
-      <corners android:radius="2dp"/>
-      <solid android:color="#111111"/>
-    </shape>
+    <vector
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0">
+      <path
+          android:fillColor="#EEFFFFFF"
+          android:pathData="M2,21l15,-15h-12v-2.3h16v16h-2.3v-12l-15,15"/>
+    </vector>
   </item>
 </layer-list>
