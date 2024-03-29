@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.message.commponents.MessageItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.AtMessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
@@ -112,6 +114,34 @@ internal class AtMessagePageModel(
         val uri = Uri.parse("bilimiao://user/$mid")
         fragment.findNavController().navigate(uri)
     }
+
+    fun toMessagePage(item: AtMessageInfo) {
+        // 评论
+        val sourceId = item.item.source_id
+        val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
+        fragment.findNavController().navigate(uri)
+    }
+
+    fun toDetailPage(item: AtMessageInfo) {
+        val type = item.item.type
+        if (type == "reply") {
+            // 评论
+//            val id = item.item.target_id
+            val id = item.item.target_id
+            val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
+            fragment.findNavController().navigate(uri)
+        } else if (type == "album") {
+            // 动态
+        } else if (type == "danmu") {
+            // 弹幕
+        } else if (type == "video") {
+            // 视频
+            val aid = item.item.subject_id
+            val uri = Uri.parse("bilimiao://video/$aid")
+            fragment.findNavController().navigate(uri)
+        }
+    }
+
 }
 
 
@@ -142,7 +172,7 @@ fun AtMessagePage() {
                 val item = list[it]
                 Column() {
                     if (it != 0) {
-                        Divider()
+                        HorizontalDivider()
                     }
                     MessageItemBox(
                         avatar = item.user.avatar,
@@ -154,6 +184,12 @@ fun AtMessagePage() {
                         onUserClick = {
                             viewModel.toUserPage(item)
                         },
+                        onDetailClick = {
+                            viewModel.toDetailPage(item)
+                        },
+                        onMessageClick = {
+                            viewModel.toMessagePage(item)
+                        }
                     )
                 }
             }

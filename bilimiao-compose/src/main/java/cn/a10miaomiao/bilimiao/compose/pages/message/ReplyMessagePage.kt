@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -133,6 +134,36 @@ internal class ReplyMessagePageModel(
         val uri = Uri.parse("bilimiao://user/$mid")
         fragment.findNavController().navigate(uri)
     }
+
+    fun toMessagePage(item: ReplyMessageInfo) {
+        // 评论
+        val sourceId = item.item.source_id
+        val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
+        fragment.findNavController().navigate(uri)
+    }
+
+    fun toDetailPage(item: ReplyMessageInfo) {
+        val type = item.item.type
+        if (type == "reply") {
+            // 评论
+            val rootId = item.item.root_id
+            val sourceId = item.item.source_id
+            val uri = Uri.parse("bilimiao://video/comment/${rootId}/detail/${sourceId}")
+            fragment.findNavController().navigate(uri)
+        } else if (type == "album") {
+            // 动态
+        } else if (type == "danmu") {
+            // 弹幕
+            val aid = item.item.subject_id
+            val uri = Uri.parse("bilimiao://video/$aid")
+            fragment.findNavController().navigate(uri)
+        } else if (type == "video") {
+            // 视频
+            val aid = item.item.subject_id
+            val uri = Uri.parse("bilimiao://video/$aid")
+            fragment.findNavController().navigate(uri)
+        }
+    }
 }
 
 @Composable
@@ -161,7 +192,7 @@ fun ReplyMessagePage() {
                 val item = list[it]
                 Column() {
                     if (it != 0) {
-                        Divider()
+                        HorizontalDivider()
                     }
                     MessageItemBox(
                         avatar = item.user.avatar,
@@ -172,6 +203,12 @@ fun ReplyMessagePage() {
                         time = item.reply_time,
                         onUserClick = {
                             viewModel.toUserPage(item)
+                        },
+                        onDetailClick = {
+                            viewModel.toDetailPage(item)
+                        },
+                        onMessageClick = {
+                            viewModel.toMessagePage(item)
                         }
                     )
                 }

@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.page.video.comment
 
 import android.content.Context
+import android.os.Debug
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
@@ -41,9 +43,8 @@ class VideoCommentDetailViewModel(
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
 
-    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
     val index by lazy { fragment.requireArguments().getInt(MainNavArgs.index, -1) }
-    var reply: VideoCommentViewInfo
+    var reply: VideoCommentViewInfo? = null
 
     // 0：按时间，1：按点赞数，2：按回复数
     var sortOrder = 2
@@ -55,15 +56,52 @@ class VideoCommentDetailViewModel(
 
     init {
         val arguments = fragment.requireArguments()
-        reply = arguments.getParcelable<VideoCommentViewInfo>(MainNavArgs.reply)!!
-        upMid = arguments.getLong(MainNavArgs.id, -1L)
-        loadData()
+        if (arguments.containsKey(MainNavArgs.root)) {
+            val rootId = arguments.getString(MainNavArgs.root, "0").toLong()
+            getRootReplyInfo(rootId)
+        } else if (arguments.containsKey(MainNavArgs.reply)) {
+            reply = arguments.getParcelable(MainNavArgs.reply)
+            loadData()
+        }
+    }
+
+    private fun getRootReplyInfo(
+        rootId: Long
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            ui.setState {
+                list.loading = true
+            }
+            val req = ReplyOuterClass.ReplyInfoReq.newBuilder().apply {
+                rpid = rootId
+                scene = 1
+            }.build()
+            val res = ReplyGrpc.getReplyInfoMethod().request(req)
+                .awaitCall()
+            ui.setState {
+                reply = VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.reply)
+                _cursor == null
+                loadData()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ui.setState {
+                list.fail = true
+            }
+        } finally {
+            ui.setState {
+                list.loading = false
+                triggered = false
+            }
+        }
     }
 
     private fun loadData(
         pageNum: Int = list.pageNum
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
+            val that = this@VideoCommentDetailViewModel
+            val reply = that.reply ?: return@launch
             ui.setState {
                 list.loading = true
             }
@@ -72,8 +110,8 @@ class VideoCommentDetailViewModel(
                 root = reply.id
                 type = 1
                 scene = ReplyOuterClass.DetailListScene.REPLY
-                _cursor?.let {
-                    cursor = ReplyOuterClass.CursorReq.newBuilder()
+                cursor = _cursor?.let {
+                    ReplyOuterClass.CursorReq.newBuilder()
                         .setNext(it.next)
                         .setMode(it.mode)
                         .build()
@@ -81,6 +119,7 @@ class VideoCommentDetailViewModel(
             }.build()
             val res = ReplyGrpc.getDetailListMethod().request(req)
                 .awaitCall()
+
             if (_cursor == null) {
                 list.data = mutableListOf()
             }
@@ -131,6 +170,8 @@ class VideoCommentDetailViewModel(
 
     fun setRootLike() = viewModelScope.launch(Dispatchers.IO) {
         try {
+            val that = this@VideoCommentDetailViewModel
+            val reply = that.reply ?: return@launch
             val newAction = if (reply.isLike) {
                 0
             } else {
@@ -146,7 +187,7 @@ class VideoCommentDetailViewModel(
                     like = reply.like - 1 + newAction * 2
                 )
                 ui.setState {
-                    reply = newReply
+                    that.reply = newReply
                 }
                 val navController = fragment.findNavController()
                 navController.previousBackStackEntry?.savedStateHandle?.let {
@@ -161,7 +202,7 @@ class VideoCommentDetailViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
+                PopTip.show(e.message ?: e.toString())
             }
         }
     }
@@ -197,7 +238,7 @@ class VideoCommentDetailViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
+                PopTip.show(e.message ?: e.toString())
             }
         }
     }
@@ -205,6 +246,8 @@ class VideoCommentDetailViewModel(
 
     fun delete() = viewModelScope.launch(Dispatchers.IO) {
         try {
+            val that = this@VideoCommentDetailViewModel
+            val reply = that.reply ?: return@launch
             withContext(Dispatchers.Main) {
                 WaitDialog.show("正在删除")
             }
@@ -275,7 +318,7 @@ class VideoCommentDetailViewModel(
     }
 
     fun isSelfReply(): Boolean {
-        return isSelfReply(reply)
+        return reply?.let(::isSelfReply) ?: false
     }
 
     fun isSelfReply(info: VideoCommentViewInfo): Boolean {
