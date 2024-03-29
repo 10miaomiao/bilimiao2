@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._isChecked
 import cn.a10miaomiao.miao.binding.android.widget._text
+import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
@@ -100,8 +101,9 @@ class VideoAddFavoriteFragment : Fragment(), DIAware, MyPage {
         val delIds = viewModel.list
             .filter { it.fav_state == 1 && !(viewModel.selectedMap[it.id] ?: true) }
             .map { it.id }
-        val navHostFragment = requireActivity().supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navHostFragment = (activity as? MainActivity)?.currentNav
+            ?: requireActivity().supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val fragment = navHostFragment.childFragmentManager.primaryNavigationFragment
         if (fragment is VideoInfoFragment) {
             fragment.confirmFavorite(
