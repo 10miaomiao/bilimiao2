@@ -27,10 +27,12 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.categoryHeader
 import de.Maxr1998.modernpreferences.helpers.screen
+import de.Maxr1998.modernpreferences.helpers.seekBar
 import de.Maxr1998.modernpreferences.helpers.singleChoice
 import de.Maxr1998.modernpreferences.helpers.switch
 import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
@@ -53,6 +55,7 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
         }
 
         const val FLAGS_SUB_CONTENT_SHOW = "flags_sub_content_show"
+        const val FLAGS_CONTENT_DEFAULT_SPLIT = "flags_content_default_split"
     }
 
     override val pageConfig = myPageConfig {
@@ -66,6 +69,8 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     private var mPreferencesAdapter: PreferencesAdapter? = null
+
+    private val scaffoldView by lazy { requireActivity().getScaffoldView() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -97,6 +102,8 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == FLAGS_SUB_CONTENT_SHOW) {
             showRebootAppDialog("修改双屏显示，需重新打开APP后生效")
+        } else if (key == FLAGS_CONTENT_DEFAULT_SPLIT) {
+            scaffoldView.updateContentDefaultSplit()
         }
     }
 
@@ -152,6 +159,16 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
             title = "横屏模式下双屏显示"
             summary = "修改后需重启APP"
             defaultValue = false
+        }
+
+        seekBar(FLAGS_CONTENT_DEFAULT_SPLIT) {
+            title = "横屏模式下双屏内容分割比"
+            default = 35
+            max = 85
+            min = 15
+            formatter = {
+                "${it} ：${100 - it}"
+            }
         }
 
     }
