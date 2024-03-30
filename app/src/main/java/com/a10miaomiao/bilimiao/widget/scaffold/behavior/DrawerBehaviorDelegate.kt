@@ -10,12 +10,10 @@ import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import java.lang.ref.WeakReference
-import kotlin.math.min
 
 class DrawerBehaviorDelegate(
     private val parent: ScaffoldView,
@@ -24,6 +22,8 @@ class DrawerBehaviorDelegate(
 
     //    private var initialY = 0f
     private var initialX = 0f
+    private var touchOnAppBar = false
+    private val minLeft = parent.dip(20)
 
     private val appBarHeight = parent.context.config.appBarHeight
     private val appBarWidth = parent.context.config.appBarMenuWidth
@@ -100,27 +100,26 @@ class DrawerBehaviorDelegate(
                 ev.action == MotionEvent.ACTION_DOWN
                 && parent.bottomSheetState() == BottomSheetBehavior.STATE_HIDDEN
             ) {
-                this.initialX = if (
-                    (parent.orientation == ScaffoldView.VERTICAL
-                            && ev.y > (parent.appBar?.top ?: parent.measuredHeight))
-                    || (parent.orientation == ScaffoldView.HORIZONTAL
-                            && ev.x < (parent.appBar?.right ?: 0))
-                ) {
-                    ev.x
-                } else {
-                    0f
-                }
+                this.touchOnAppBar = (parent.orientation == ScaffoldView.VERTICAL
+                        && ev.y > (parent.appBar?.top ?: parent.measuredHeight))
+                        || (parent.orientation == ScaffoldView.HORIZONTAL
+                        && ev.x < (parent.appBar?.right ?: 0))
+                this.initialX = ev.x
             } else if (
                 ev.action == MotionEvent.ACTION_MOVE
                 && initialX > 0f
                 && ev.x - initialX > dragger.touchSlop
+                && (this.touchOnAppBar || this.initialX < minLeft)
             ) {
+                this.initialX = 0f
+                this.touchOnAppBar = false
                 dragger.captureChildView(drawerView, ev.getPointerId(ev.actionIndex))
             } else if (
                 ev.action == MotionEvent.ACTION_CANCEL
                 || ev.action == MotionEvent.ACTION_UP
             ) {
                 this.initialX = 0f
+                this.touchOnAppBar = false
             }
         } else if (dragState == STATE_EXPANDED) {
             // 展开状态
