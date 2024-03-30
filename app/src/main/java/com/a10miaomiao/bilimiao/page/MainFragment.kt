@@ -5,12 +5,15 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Space
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +36,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.home.*
 import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
@@ -41,11 +45,13 @@ import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
 import org.kodein.di.*
+import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.dsl.core.*
 
@@ -54,6 +60,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     companion object : FragmentNavigatorBuilder() {
         override val name = "main"
+
+        private val ID_viewPager = View.generateViewId()
+        private val ID_tabLayout = View.generateViewId()
+        private val ID_space = View.generateViewId()
     }
 
     private var pageTitle = "bilimiao\n-\n首页"
@@ -114,18 +124,12 @@ class MainFragment : Fragment(), DIAware, MyPage {
     override val di: DI by lazyUiDi(ui = { ui })
 
     private val viewModel by diViewModel<MainViewModel>(di)
-
-    private val themeDelegate by instance<ThemeDelegate>()
+    private val windowStore by instance<WindowStore>()
     private val playerDelegate by instance<BasePlayerDelegate>()
     private val scaffoldApp by lazy { requireActivity().getScaffoldView() }
 
-    private var themeId = 0
 
     private val userStore by instance<UserStore>()
-
-    private val ID_viewPager = View.generateViewId()
-    private val ID_tabLayout = View.generateViewId()
-    private val ID_space = View.generateViewId()
 
     private var backKeyPressedTimes = 0L
 
@@ -134,10 +138,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (themeDelegate.getThemeResId() != themeId) {
-            ui.cleanCacheView()
-            themeId = themeDelegate.getThemeResId()
-        }
         ui.parentView = container
         return ui.root
     }
@@ -263,9 +263,9 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     @OptIn(InternalSplittiesApi::class)
     val ui = miaoBindingUi {
-        val windowStore = miaoStore<WindowStore>(viewLifecycleOwner, di)
-        val contentInsets = windowStore.getContentInsets(parentView)
+        connectStore(viewLifecycleOwner, windowStore)
         connectStore(viewLifecycleOwner, userStore)
+        val contentInsets = windowStore.getContentInsets(parentView)
         miaoEffect(userStore.isLogin()) {
             pageConfig.notifyConfigChanged()
             HomeSettingFragment.homeSettingVersion++
