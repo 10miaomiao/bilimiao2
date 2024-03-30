@@ -9,6 +9,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.page.setting.FlagsSeetingFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.ContentBehavior
@@ -41,9 +42,10 @@ class ScaffoldView @JvmOverloads constructor(
     /**
      * 播放器比例
      */
-    val playerVideoRatio: Float get() {
-        return playerDelegate?.getVideoRatio() ?: (16f / 9f)
-    }
+    val playerVideoRatio: Float
+        get() {
+            return playerDelegate?.getVideoRatio() ?: (16f / 9f)
+        }
 
     /**
      * 播放器视图尺寸状态
@@ -57,6 +59,7 @@ class ScaffoldView @JvmOverloads constructor(
                 requestLayout()
             }
         }
+
     /**
      * 播放器视图位置状态
      */
@@ -155,7 +158,7 @@ class ScaffoldView @JvmOverloads constructor(
     val hasSubContent get() = subContent != null
 
     val focusContent: View?
-        get() = if(focusOnMain) content else subContent
+        get() = if (focusOnMain) content else subContent
 
     var player: View? = null
     var playerBehavior: PlayerBehavior? = null
@@ -178,36 +181,41 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun updatePlayerSmallShowArea() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        playerSmallShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA, 480)
+        playerSmallShowArea = prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA, 480)
         updateLayout()
     }
+
     fun updatePlayerHoldShowArea() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        playerHoldShowArea =  prefs.getInt(VideoSettingFragment.PLAYER_HOLD_SHOW_AREA, 130)
+        playerHoldShowArea = prefs.getInt(VideoSettingFragment.PLAYER_HOLD_SHOW_AREA, 130)
         updateLayout()
     }
+
     fun updateContentDefaultSplit() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        contentDefaultSplit =  prefs.getInt(VideoSettingFragment.CONTENT_DEFAULT_SPLIT, 35)/100f
+        contentDefaultSplit =
+            prefs.getInt(FlagsSeetingFragment.FLAGS_CONTENT_DEFAULT_SPLIT, 35) / 100f
         updateLayout()
     }
+
     fun updateFullScreenDraggable() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        fullScreenDraggable =  prefs.getBoolean(VideoSettingFragment.FULL_SCREEN_DRAGGABLE, false)
+        fullScreenDraggable = prefs.getBoolean(VideoSettingFragment.FULL_SCREEN_DRAGGABLE, false)
         updateLayout()
     }
 
     //内容不在顶端时，该裁掉的区域
-    fun setContentTopClip(clipHeight: Int){
+    fun setContentTopClip(clipHeight: Int) {
         contentBehavior?.clipHeight = clipHeight
         subContentBehavior?.clipHeight = clipHeight
     }
 
-    fun updateLayout(){
+    fun updateLayout() {
         playerBehavior?.updateLayout()
         updateContentLayout()
     }
-    fun updateContentLayout(){
+
+    fun updateContentLayout() {
         playerBehavior?.updateContent()
         contentBehavior?.updateLayout()
         subContentBehavior?.updateLayout()
@@ -228,7 +236,7 @@ class ScaffoldView @JvmOverloads constructor(
                     }
                 }
                 is ContentBehavior -> {
-                    if (behavior.isSub){
+                    if (behavior.isSub) {
                         this.subContent = child
                         this.subContentBehavior = behavior
                     } else {
@@ -289,7 +297,7 @@ class ScaffoldView @JvmOverloads constructor(
         maskView?.visibility = visibility
     }
 
-    fun getMaskViewVisibility(): Int{
+    fun getMaskViewVisibility(): Int {
         return maskView?.visibility ?: INVISIBLE
     }
 
