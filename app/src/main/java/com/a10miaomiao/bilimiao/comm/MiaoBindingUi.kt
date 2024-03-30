@@ -20,16 +20,16 @@ abstract class MiaoBindingUi() : MiaoUI() {
 
     private var cacheView: View? = null
 
-//    private var curThemeName: String? = null
+    private var curThemeName: String? = null
 
     override val root: View
         get() {
-//            val themeName = ctx.config.themeName
-            return if (cacheView == null /*|| themeName != curThemeName*/) {
+            val themeName = ctx.config.themeName
+            return if (cacheView == null || themeName != curThemeName) {
                 binding.start<View>(MiaoBinding.INIT) {
                     miao {
                         val view = createView()
-//                        curThemeName = themeName
+                        curThemeName = themeName
                         cacheView = view
                         view
                     }

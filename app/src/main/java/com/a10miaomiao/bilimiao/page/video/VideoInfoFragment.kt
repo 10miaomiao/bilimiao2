@@ -17,9 +17,11 @@ import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
+import cn.a10miaomiao.miao.binding.android.widget._textColor
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainActivity
@@ -27,6 +29,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.video.UgcEpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
@@ -44,6 +47,7 @@ import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
@@ -58,6 +62,7 @@ import com.a10miaomiao.bilimiao.widget.rcImageView
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.FlexboxLayoutManager
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -371,6 +376,11 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         playVideo(item.cid, item.part)
     }
 
+    private val handleUgcEpisodeClick = OnItemClickListener { adapter, view, position ->
+        val item = viewModel.ugcSeasonEpisodes[position]
+        viewModel.changeVideo(item.aid)
+    }
+
     private val handleTagsItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.tags[position]
         val nav = findNavController()
@@ -441,8 +451,6 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 +textView {
                     horizontalPadding = dip(10)
                     verticalPadding = dip(5)
-                    textColorResource = R.color.text_black
-                    textAlignment = TextView.TEXT_ALIGNMENT_CENTER
                     maxWidth = dip(120)
                     minWidth = dip(60)
                     maxLines = 1
@@ -477,7 +485,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                             _miaoAdapter(
                                 items = viewModel.pages,
                                 itemUi = pageItemUi,
-                                depsAry = arrayOf(playerStore.state.cid),
+                                depsAry = arrayOf(viewModel.id, playerStore.state.cid),
                             ) {
                                 setOnItemClickListener(handlePageItemClick)
                             }
@@ -513,6 +521,100 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     _show = viewModel.pages.size > 2
                 }..lParams(dip(24), dip(24)) {
                     gravity = Gravity.CENTER
+                }
+            }
+        }
+    }
+
+    val ugcSeasonEpisodeUi = miaoBindingItemUi<UgcEpisodeInfo> { item, index ->
+        val selected = item.aid == viewModel.id
+        horizontalLayout {
+            padding = config.smallPadding
+            setBackgroundResource(config.selectableItemBackground)
+            views {
+                +rcImageView {
+                    radius = dip(5)
+                    _network(item.cover, "@672w_378h_1c_")
+                }..lParams {
+                    width = dip(60)
+                    height = dip(40)
+                    rightMargin = dip(5)
+                }
+                +verticalLayout {
+                    views {
+                        +textView {
+                            maxLines = 1
+                            ellipsize = TextUtils.TruncateAt.END
+                            textSize = 14f
+                            _textColor = if (selected) {
+                                config.themeColor
+                            } else {
+                                config.foregroundColor
+                            }
+                            _text = item.title
+                        }..lParams(matchParent, wrapContent)
+                        +textView {
+                            maxLines = 1
+                            ellipsize = TextUtils.TruncateAt.END
+                            textSize = 12f
+                            _textColor = if (selected) {
+                                config.themeColor
+                            } else {
+                                config.foregroundAlpha45Color
+                            }
+                            _text = item.cover_right_text
+                        }..lParams(matchParent, wrapContent)
+                    }
+                }..lParams(dip(200), wrapContent)
+            }
+        }
+
+    }
+
+    fun MiaoUI.ugcSeasonView(): View {
+        val ugcSeason = viewModel.ugcSeason
+        return verticalLayout {
+            backgroundColor = config.blockBackgroundColor
+            apply(ViewStyle.roundRect(dip(10)))
+            _show = ugcSeason != null
+
+            views {
+                +horizontalLayout {
+                    padding = config.smallPadding
+                    views {
+                        +textView {
+                            _text = "合集 · ${ugcSeason?.title}"
+                            textSize = 14f
+                        }
+                    }
+                }
+                +recyclerView {
+//                    val lm = LinearLayoutManager(context)
+//                    lm.orientation = LinearLayoutManager.HORIZONTAL
+                    val lm = FlexboxLayoutManager(context)
+                    lm.flexDirection = FlexDirection.COLUMN
+                    lm.flexWrap = FlexWrap.WRAP
+//                    scrollBarSize = 0
+                    _miaoLayoutManage(lm)
+
+                    _miaoAdapter(
+                        items = viewModel.ugcSeasonEpisodes,
+                        itemUi = ugcSeasonEpisodeUi,
+                        depsAry = arrayOf(viewModel.id, playerStore.state.cid),
+                    ) {
+                        setOnItemClickListener(handleUgcEpisodeClick)
+                    }
+                    miaoEffect(arrayOf(viewModel.id, viewModel.ugcSeasonEpisodes.size)) {
+                        val aid = viewModel.id
+                        val position = viewModel.ugcSeasonEpisodes.indexOfFirst { it.aid == aid }
+                        DebugMiao.log("position", aid, viewModel.ugcSeasonEpisodes.size, position)
+                        if (position > 0) {
+                            scrollToPosition(position)
+                        }
+                    }
+                }..lParams {
+                    width = matchParent
+                    height = dip(200)
                 }
             }
         }
@@ -771,6 +873,11 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 }..lParams {
                     width = matchParent
                     height = wrapContent
+                    topMargin = dip(10)
+                }
+
+                +ugcSeasonView()..lParams {
+                    width = matchParent
                     topMargin = dip(10)
                 }
 

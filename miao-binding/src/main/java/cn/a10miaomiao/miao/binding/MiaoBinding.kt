@@ -56,6 +56,8 @@ class MiaoBinding {
                 }
             }
             return true
+        } else if (oldValue is Array<*> && newValue is Array<*>) {
+            return oldValue.contentEquals(newValue)
         }
         return oldValue == newValue
     }
