@@ -106,6 +106,7 @@ object MainNavGraph {
             addFragment(SettingFragment::class, SettingFragment.Companion)
             addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
             addFragment(VideoSettingFragment::class, VideoSettingFragment.Companion)
+            addFragment(FlagsSeetingFragment::class, FlagsSeetingFragment.Companion)
         }
     }
 

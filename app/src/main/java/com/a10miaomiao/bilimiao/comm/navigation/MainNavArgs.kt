@@ -19,4 +19,5 @@ object MainNavArgs {
     const val reply = "reply"
     const val sendSuccess = "send_success"
     const val params = "params"
+    const val root = "root"
 }
