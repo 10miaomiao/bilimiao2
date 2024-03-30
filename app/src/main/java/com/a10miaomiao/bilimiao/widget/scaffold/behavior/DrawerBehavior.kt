@@ -4,30 +4,20 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
-import androidx.annotation.IntDef
-import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
-import androidx.customview.widget.ViewDragHelper
-import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
-import java.lang.ref.WeakReference
-import kotlin.math.abs
+import splitties.dimensions.dip
+import kotlin.math.min
 
-class DrawerBehavior : CoordinatorLayout.Behavior<View> {
+class DrawerBehavior(context: Context, attrs: AttributeSet?) :
+    CoordinatorLayout.Behavior<View>(context, attrs) {
 
+    private val maxWidth = context.dip(400)
     private var parentRef: ScaffoldView? = null
     private var viewRef: View? = null
     private var behaviorDelegate: DrawerBehaviorDelegate? = null
 
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init()
-    }
-
-    fun init() {
-
+    init {
     }
 
     override fun onLayoutChild(
@@ -50,6 +40,22 @@ class DrawerBehavior : CoordinatorLayout.Behavior<View> {
         } else {
             child.layout(0, 0, 0, 0)
         }
+        return true
+    }
+
+    override fun onMeasureChild(
+        parent: CoordinatorLayout,
+        child: View,
+        parentWidthMeasureSpec: Int,
+        widthUsed: Int,
+        parentHeightMeasureSpec: Int,
+        heightUsed: Int
+    ): Boolean {
+        val measuredWidth = min(maxWidth, parent.measuredWidth)
+        val measuredHeight = parent.measuredHeight
+        val widthSpec = View.MeasureSpec.makeMeasureSpec(measuredWidth, View.MeasureSpec.EXACTLY)
+        val heightSpec = View.MeasureSpec.makeMeasureSpec(measuredHeight, View.MeasureSpec.EXACTLY)
+        child.measure(widthSpec, heightSpec)
         return true
     }
 

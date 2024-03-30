@@ -13,8 +13,9 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import splitties.dimensions.dip
 import java.lang.ref.WeakReference
-import kotlin.math.abs
+import kotlin.math.min
 
 class DrawerBehaviorDelegate(
     private val parent: ScaffoldView,
@@ -62,8 +63,8 @@ class DrawerBehaviorDelegate(
 
     override fun onViewPositionChanged(changedView: View, left: Int, top: Int, dx: Int, dy: Int) {
         if (drawerView == changedView) {
-            val width = parent.measuredWidth
-            parent.setMaskViewAlpha((width + left).toFloat() / width.toFloat() * 0.6f)
+            val width = changedView.measuredWidth
+            parent.setMaskViewAlpha((width + left).toFloat() / width.toFloat() * 0.4f)
         }
     }
 
@@ -84,8 +85,8 @@ class DrawerBehaviorDelegate(
         if (targetState == STATE_EXPANDED) {
             dragger.settleCapturedViewAt(0, 0)
         } else {
-            val w = parent.measuredWidth
-            dragger.settleCapturedViewAt(-w, 0)
+            val measuredWidth = releasedChild.measuredWidth
+            dragger.settleCapturedViewAt(-measuredWidth, 0)
         }
         ViewCompat.postOnAnimation(parent, draggerSettle)
         super.onViewReleased(releasedChild, xvel, yvel)
@@ -163,16 +164,17 @@ class DrawerBehaviorDelegate(
             parent.setMaskViewVisibility(View.GONE)
         } else if (dragState == STATE_EXPANDED) {
             drawerView.visibility = View.VISIBLE
-            parent.setMaskViewVisibility(View.GONE)
+            parent.setMaskViewVisibility(View.VISIBLE)
         }
     }
 
     fun onLayoutChild(): Boolean {
+        val measuredWidth = drawerView.measuredWidth
+        val measuredHeight = drawerView.measuredHeight
         if (dragState == STATE_COLLAPSED) {
-            val measuredWidth = parent.measuredWidth
-            drawerView.layout(-measuredWidth, 0, 0, parent.measuredHeight)
+            drawerView.layout(-measuredWidth, 0, 0, measuredHeight)
         } else if (dragState == STATE_EXPANDED) {
-            drawerView.layout(0, 0, parent.measuredWidth, parent.measuredHeight)
+            drawerView.layout(0, 0, measuredWidth, measuredHeight)
         }
         nestedScrollingChildRef = WeakReference(findScrollingChild(drawerView))
         return true
@@ -205,9 +207,9 @@ class DrawerBehaviorDelegate(
     }
 
     fun closeDrawer() {
-        val w = parent.measuredWidth
+        val measuredWidth = drawerView.measuredWidth
         targetState = STATE_COLLAPSED
-        dragger.smoothSlideViewTo(drawerView, -w, 0)
+        dragger.smoothSlideViewTo(drawerView, -measuredWidth, 0)
         ViewCompat.postOnAnimation(parent, draggerSettle)
     }
 

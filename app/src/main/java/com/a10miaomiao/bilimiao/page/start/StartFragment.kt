@@ -507,6 +507,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
                             views {
                                 +textView(ID_searchTextView) {
                                     text = "请输入ID或关键字"
+                                    ellipsize = TextUtils.TruncateAt.END
+                                    maxLines = 1
                                     setTextColor(config.foregroundAlpha45Color)
                                     horizontalPadding = iconSize + dip(15)
                                     textSize = 18f
