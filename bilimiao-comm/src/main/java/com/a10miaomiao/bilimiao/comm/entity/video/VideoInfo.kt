@@ -38,5 +38,6 @@ data class VideoInfo(
     val title: String,
     val tname: String,
     val videos: Int,
-    val view_at: Long? // 历史记录的观看时间
+    val view_at: Long?, // 历史记录的观看时间
+    val ugc_season: UgcSeasonInfo?, // 视频合集
 ) : Parcelable

@@ -13,6 +13,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.*
 import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
@@ -47,11 +48,12 @@ class VideoInfoViewModel(
     val scaffoldApp by lazy { fragment.requireActivity().getScaffoldView() }
 
     //    val type by lazy { fragment.requireArguments().getString(MainNavArgs.type, "AV") }
-    val id by lazy { fragment.requireArguments().getString(MainNavArgs.id, "") }
-
+    var id: String = ""
     var info: VideoInfo? = null
     var relates = mutableListOf<VideoRelateInfo>()
     var pages = mutableListOf<VideoPageInfo>()
+    var ugcSeason: UgcSeasonInfo? = null
+    var ugcSeasonEpisodes = mutableListOf<UgcEpisodeInfo>()
     var staffs = mutableListOf<VideoStaffInfo>()
     var tags = mutableListOf<VideoTagInfo>()
 
@@ -63,7 +65,19 @@ class VideoInfoViewModel(
     val filterStore: FilterStore by instance()
 
     init {
+        val arguments = fragment.requireArguments()
+        id = arguments.getString(MainNavArgs.id, "")
         loadData()
+    }
+
+    fun changeVideo(aid: String) {
+        if (aid == id) {
+            return
+        }
+        ui.setState {
+            id = aid
+            loadData()
+        }
     }
 
     fun loadData() = viewModelScope.launch(Dispatchers.IO) {
@@ -79,7 +93,7 @@ class VideoInfoViewModel(
             }
             val res = BiliApiService.videoAPI
                 .info(id, type = type)
-                .call()
+                .awaitCall()
                 .gson<ResultInfo<VideoInfo>>()
             if (res.code == 0) {
                 val data = res.data
@@ -99,12 +113,18 @@ class VideoInfoViewModel(
                     }
                     it
                 }
+                val ugcSeasonData = data.ugc_season
                 ui.setState {
                     info = data
                     relates = relatesData.filterNot { it.aid.isNullOrEmpty() }.toMutableList()
                     pages = pagesData.toMutableList()
                     staffs = staffData.toMutableList()
                     tags = tagData.toMutableList()
+                    if (ugcSeasonData != null
+                        && ugcSeasonData.sections.isNotEmpty()) {
+                        ugcSeason = ugcSeasonData
+                        ugcSeasonEpisodes = ugcSeasonData.sections[0].episodes.toMutableList()
+                    }
                 }
                 withContext(Dispatchers.Main) {
                     if (!jumpSeason(data)) {
