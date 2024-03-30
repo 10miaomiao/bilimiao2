@@ -31,6 +31,7 @@ import androidx.media3.exoplayer.source.ConcatenatingMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
@@ -129,8 +130,32 @@ class PlayerDelegate2(
         }
     val playerSourceId get() = playerSource?.id ?: ""
 
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                PlayerService.ACTION_CREATED -> {
+                    PlayerService.selfInstance?.videoPlayerView = activity.findViewById(R.id.video_player)
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         initPlayer()
+
+        val intentFilter = IntentFilter().apply {
+            addAction(PlayerService.ACTION_CREATED)
+        }
+        ContextCompat.registerReceiver(
+            activity,
+            broadcastReceiver,
+            intentFilter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        if (PlayerService.selfInstance == null) {
+            val intent = Intent(activity, PlayerService::class.java)
+            activity.startService(intent)
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             picInPicHelper = PicInPicHelper(activity, views.videoPlayer)
@@ -158,6 +183,7 @@ class PlayerDelegate2(
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
     }
+
 
     override fun onResume() {
 
@@ -189,7 +215,7 @@ class PlayerDelegate2(
     }
 
     override fun onDestroy() {
-
+        activity.unregisterReceiver(broadcastReceiver)
     }
 
     override fun onBackPressed(): Boolean {
@@ -295,6 +321,7 @@ class PlayerDelegate2(
         return null
     }
 
+    @UnstableApi
     override fun getHttpDataSourceFactory(
         userAgent: String,
         listener: TransferListener?,

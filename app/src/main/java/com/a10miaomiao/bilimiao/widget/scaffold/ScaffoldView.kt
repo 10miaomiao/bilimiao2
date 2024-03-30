@@ -152,6 +152,8 @@ class ScaffoldView @JvmOverloads constructor(
     var subContent: View? = null
     var subContentBehavior: ContentBehavior? = null
 
+    val hasSubContent get() = subContent != null
+
     val focusContent: View?
         get() = if(focusOnMain) content else subContent
 

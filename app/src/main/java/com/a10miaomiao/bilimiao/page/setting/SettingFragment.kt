@@ -9,8 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -221,8 +221,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "切换主题"
             summary = "库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
             onClick {
-                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                    ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                val nav = findNavController()
                 nav.navigate(ThemeSettingFragment.actionId)
                 true
             }
@@ -242,8 +241,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "首页设置"
             summary = "整个宇宙将为你闪烁"
             onClick {
-                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                    ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                val nav = findNavController()
                 nav.navigate(HomeSettingFragment.actionId)
                 true
             }
@@ -253,8 +251,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "播放设置"
             summary = "咖啡拿铁,咖啡摩卡,卡布奇诺!"
             onClick {
-                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                    ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                val nav = findNavController()
                 nav.navigate(VideoSettingFragment.actionId)
                 true
             }
@@ -264,8 +261,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "弹幕设置"
             summary = "相信的心就是你的魔法"
             onClick {
-                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                    ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                val nav = findNavController()
                 nav.navigate(DanmakuSettingFragment.actionId)
                 true
             }
@@ -275,8 +271,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "屏蔽管理"
             summary = "对时光机、首页推荐和热门生效"
             onClick {
-                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                    ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                val nav = findNavController()
                 nav.navigateToCompose(FilterSettingPage())
                 true
             }
@@ -299,6 +294,16 @@ class SettingFragment : Fragment(), DIAware, MyPage
             }
         }
 
+        pref("flags-setting") {
+            title = "实验性功能"
+            summary = "自然选择号，前进四！"
+            onClick {
+                val nav = findNavController()
+                nav.navigate(FlagsSeetingFragment.actionId)
+                true
+            }
+        }
+
 
         categoryHeader("other") {
             title = "其它"
@@ -311,8 +316,7 @@ class SettingFragment : Fragment(), DIAware, MyPage
             title = "关于"
             summary = "版本：$version"
             onClick {
-                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                    ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                val nav = findNavController()
                 nav.navigate(AboutFragment.actionId)
                 true
             }
