@@ -22,6 +22,7 @@ class AppBarHorizontalUi(
     val menuItemLongClick: View.OnLongClickListener,
     val backClick: View.OnClickListener,
     val backLongClick: View.OnLongClickListener,
+    val enableSubContent: Boolean,
     val pointerClick: View.OnClickListener,
     val pointerLongClick: View.OnLongClickListener,
     val exchangeClick: View.OnClickListener,
@@ -108,14 +109,16 @@ class AppBarHorizontalUi(
             width = matchParent
             height = wrapContent
         })
-        addView(mNavigationPointerIconLayout, lParams {
-            width = matchParent
-            height = wrapContent
-        })
-        addView(mNavigationExchangeIconLayout, lParams {
-            width = matchParent
-            height = wrapContent
-        })
+        if (enableSubContent) {
+            addView(mNavigationPointerIconLayout, lParams {
+                width = matchParent
+                height = wrapContent
+            })
+            addView(mNavigationExchangeIconLayout, lParams {
+                width = matchParent
+                height = wrapContent
+            })
+        }
         addView(mTitleLayout, lParams {
             width = matchParent
             height = wrapContent

@@ -41,6 +41,15 @@ class AppBarView @JvmOverloads constructor(
                 setView(mUi.root)
             }
         }
+    var enableSubContent: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                mUi = createUi()
+                updateProp()
+                setView(mUi.root)
+            }
+        }
 
     private var prop: PropInfo? = null
         set(value) {
@@ -73,6 +82,7 @@ class AppBarView @JvmOverloads constructor(
             false
         }
     }
+
     private val pointerClick = OnClickListener {view ->
         onPointerClick?.onClick(view)
     }
@@ -101,6 +111,7 @@ class AppBarView @JvmOverloads constructor(
                 menuItemLongClick = menuItemLongClick,
                 backClick = backClick,
                 backLongClick = backLongClick,
+                enableSubContent = enableSubContent,
                 pointerClick = pointerClick,
                 pointerLongClick = pointerLongClick,
                 exchangeClick = exchangeClick,
