@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
@@ -39,6 +40,9 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
@@ -49,6 +53,8 @@ import com.a10miaomiao.bilimiao.widget.scaffold.*
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -59,7 +65,7 @@ class MainActivity
     : AppCompatActivity(),
     DIAware,
     NavController.OnDestinationChangedListener,
-    FragmentOnAttachListener{
+    FragmentOnAttachListener {
 
     lateinit var ui: MainUi
 
@@ -83,19 +89,27 @@ class MainActivity
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
 
-    private lateinit var subNavHostFragment: NavHostFragment
-    private lateinit var subNavController: NavController
+    private var subNavHostFragment: NavHostFragment? = null
+    private var subNavController: NavController? = null
 
     val currentNav: NavHostFragment
-        get() = if(ui.root.focusOnMain) navHostFragment else subNavHostFragment
+        get() = if (ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
     val anotherNav: NavHostFragment
-        get() = if(!ui.root.focusOnMain) navHostFragment else subNavHostFragment
+        get() = if (!ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
+
     //指示器，指示新页面该出现的地方
-    val pointerNav:NavHostFragment
-        get() = if(ui.root.subContentShown)
-            if(ui.root.pointerExchanged == ui.root.contentExchanged) navHostFragment else subNavHostFragment
-        else
+    val pointerNav: NavHostFragment get() {
+        return if (ui.root.subContentShown) {
+            if (ui.root.pointerExchanged == ui.root.contentExchanged) {
+                navHostFragment
+            } else {
+                subNavHostFragment ?: navHostFragment
+            }
+        } else {
             currentNav
+        }
+    }
+
 
     var pageConfig: MyPageConfigInfo? = null
         private set
@@ -133,65 +147,14 @@ class MainActivity
             fullScreenUseStatus()
         }
 
-        subNavHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment_sub) as NavHostFragment
-        subNavController = subNavHostFragment.navController
-        MainNavGraph.createGraph(subNavController, MainNavGraph.dest.main)
-        subNavController.addOnDestinationChangedListener(this)
-        subNavHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
-
-        navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-        MainNavGraph.createGraph(navController, MainNavGraph.dest.main)
-        navController.addOnDestinationChangedListener(this)
-        navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
-
-
-        (supportFragmentManager.findFragmentByTag(getString(R.string.tag_left_fragment)) as? StartFragment)?.let {
-            leftFragment = it
-            ui.root.drawerFragment = it
-//            if (leftFragment.isVisible) {
-//                supportFragmentManager.beginTransaction()
-//                    .hide(leftFragment)
-//                    .commit()
-//            }
-        }
-
-        ui.mAppBar.onBackClick = this.onBackClick
-        ui.mAppBar.onBackLongClick = this.onBackLongClick
-        ui.mAppBar.onMenuItemClick = {
-            val fragment = currentNav.childFragmentManager.primaryNavigationFragment
-            if (fragment is MyPage) {
-                fragment.onMenuItemClick(it, it.prop)
-            }
-        }
-        ui.mAppBar.onPointerClick = this.onPointerClick
-        ui.mAppBar.onPointerLongClick = this.onPointerLongClick
-        ui.mAppBar.onExchangeClick = this.onExchangeClick
-        ui.mAppBar.onExchangeLongClick = this.onExchangeLongClick
+        initNavController()
+        initAppBar()
 
 //        ui.mContainerView.addDrawerListener(onDrawer)
-//        lifecycleScope.launch(Dispatchers.IO){
-//            val refreshToken = Bilimiao.commApp.loginInfo!!.token_info.refresh_token
-//            DebugMiao.log(Bilimiao.commApp.loginInfo)
-//            val res = BiliApiService.authApi.refreshToken(refreshToken).awaitCall()
-//            DebugMiao.log("oauth2", res.body()?.string())
-//        }
 
         // 百度统计
         StatService.setAuthorizedState(this, false)
         StatService.start(this)
-
-        navController.handleDeepLink(intent)
-
-        val intentFilter = IntentFilter().apply {
-            addAction(PlayerService.ACTION_CREATED)
-        }
-        ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
-        if (PlayerService.selfInstance == null) {
-            startService(Intent(this, PlayerService::class.java))
-        }
 
         // 安卓13开始手动申请通知权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -214,6 +177,62 @@ class MainActivity
             ui.mAppBar.updateTheme()
         })
 
+        initViewFocusable()
+
+        //主界面切至后台时会把当前侧栏内容覆盖掉，妥协方案，侧栏得失焦点刷新
+        ui.root.appBar?.setOnFocusChangeListener { _, _ ->
+            notifyConfigChanged()
+        }
+    }
+
+    private fun initNavController() {
+        navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+        MainNavGraph.createGraph(navController, MainNavGraph.dest.main)
+        navController.addOnDestinationChangedListener(this)
+        navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
+
+        if (findViewById<View?>(R.id.nav_host_fragment_sub) != null) {
+            val _subNavHostFragment = supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment_sub) as NavHostFragment
+            val _subNavController = _subNavHostFragment.navController
+            MainNavGraph.createGraph(_subNavController, MainNavGraph.dest.main)
+            _subNavController.addOnDestinationChangedListener(this)
+            _subNavHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
+            subNavHostFragment = _subNavHostFragment
+            subNavController = _subNavController
+        }
+
+        (supportFragmentManager.findFragmentByTag(getString(R.string.tag_left_fragment)) as? StartFragment)?.let {
+            leftFragment = it
+            ui.root.drawerFragment = it
+//            if (leftFragment.isVisible) {
+//                supportFragmentManager.beginTransaction()
+//                    .hide(leftFragment)
+//                    .commit()
+//            }
+        }
+
+        navController.handleDeepLink(intent)
+    }
+
+    private fun initAppBar() {
+        ui.mAppBar.onBackClick = this.onBackClick
+        ui.mAppBar.onBackLongClick = this.onBackLongClick
+        ui.mAppBar.onMenuItemClick = {
+            val fragment = currentNav.childFragmentManager.primaryNavigationFragment
+            if (fragment is MyPage) {
+                fragment.onMenuItemClick(it, it.prop)
+            }
+        }
+        ui.mAppBar.onPointerClick = this.onPointerClick
+        ui.mAppBar.onPointerLongClick = this.onPointerLongClick
+        ui.mAppBar.onExchangeClick = this.onExchangeClick
+        ui.mAppBar.onExchangeLongClick = this.onExchangeLongClick
+    }
+
+    fun initViewFocusable() {
         ui.root.isFocusable = true
         ui.root.appBar?.isFocusable = true
         ui.root.content?.isFocusable = true
@@ -224,15 +243,10 @@ class MainActivity
         ui.root.subContent?.isFocusableInTouchMode = true
 
         ui.root.content?.setOnFocusChangeListener { _, hasFocus ->
-            if(hasFocus) changeFocus(true)
+            if (hasFocus) changeFocus(true)
         }
         ui.root.subContent?.setOnFocusChangeListener { _, hasFocus ->
-            if(hasFocus) changeFocus(false)
-        }
-
-        //主界面切至后台时会把当前侧栏内容覆盖掉，妥协方案，侧栏得失焦点刷新
-        ui.root.appBar?.setOnFocusChangeListener { _, _ ->
-            notifyConfigChanged()
+            if (hasFocus) changeFocus(false)
         }
     }
 
@@ -270,8 +284,8 @@ class MainActivity
 //        ui.mAppBar.cleanProp()
 
         //将焦点给新页面
-        if(controller == anotherNav.navController){
-            if(ui.root.focusOnMain){
+        if (controller == anotherNav.navController) {
+            if (ui.root.focusOnMain) {
                 ui.root.subContent?.requestFocus()
             } else {
                 ui.root.content?.requestFocus()
@@ -281,17 +295,18 @@ class MainActivity
     }
 
     //焦点改变时提示页面标题
-    private fun changeFocus(focusOnMain:Boolean){
-        if(ui.root.focusOnMain != focusOnMain){
+    private fun changeFocus(focusOnMain: Boolean) {
+        if (ui.root.focusOnMain != focusOnMain) {
             ui.root.focusOnMain = focusOnMain
             //双内容区时自动切换指示器
-            if(ui.root.pointerAutoChange && ui.root.subContentShown) {
+            if (ui.root.pointerAutoChange && ui.root.subContentShown) {
                 ui.root.pointerExchanged = !ui.root.pointerExchanged
             }
             notifyConfigChanged()
         }
     }
-    fun notifyConfigChanged(){
+
+    fun notifyConfigChanged() {
         if (currentNav.childFragmentManager.fragments.isNotEmpty()) {
             val fragment = currentNav.childFragmentManager.fragments.last()
             ui.mAppBar.canBack =
@@ -345,7 +360,7 @@ class MainActivity
         true
     }
     private val onExchangeClick = View.OnClickListener {
-        if(!ui.root.subContentShown){
+        if (!ui.root.subContentShown) {
             //单内容区，将焦点给到另一区域
             changeFocus(!ui.root.focusOnMain)
             ui.root.updateContentLayout()
@@ -354,7 +369,7 @@ class MainActivity
             ui.root.contentExchanged = !ui.root.contentExchanged
         }
         //指示器不锁定时，交换一次方向
-        if(ui.root.pointerAutoChange){
+        if (ui.root.pointerAutoChange) {
             ui.root.pointerExchanged = !ui.root.pointerExchanged
             notifyConfigChanged()
         }
@@ -365,22 +380,12 @@ class MainActivity
         ui.root.updateContentLayout()
         notifyConfigChanged()
         //小窗行为跟随
-        if(!ui.root.subContentShown){
+        if (!ui.root.subContentShown) {
             ui.root.playerBehavior?.holdUpPlayer()
         } else {
             ui.root.playerBehavior?.holdDownPlayer()
         }
         true
-    }
-
-    val broadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                PlayerService.ACTION_CREATED -> {
-                    PlayerService.selfInstance?.videoPlayerView = findViewById(R.id.video_player)
-                }
-            }
-        }
     }
 
     fun onDrawerStateChanged(state: Int) {
@@ -454,7 +459,10 @@ class MainActivity
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
             if (showPlayer) {
                 windowStore.setContentInsets(
-                    left, 0, right, bottom + top + config.appBarTitleHeight + ui.root.smallModePlayerHeight,
+                    left,
+                    0,
+                    right,
+                    bottom + top + config.appBarTitleHeight + ui.root.smallModePlayerHeight,
                 )
             } else {
                 windowStore.setContentInsets(
@@ -512,9 +520,8 @@ class MainActivity
         store.onDestroy()
         navController.removeOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
-        subNavController.removeOnDestinationChangedListener(this)
-        subNavHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
-        unregisterReceiver(broadcastReceiver)
+        subNavController?.removeOnDestinationChangedListener(this)
+        subNavHostFragment?.childFragmentManager?.removeFragmentOnAttachListener(this)
         super.onDestroy()
     }
 
@@ -653,8 +660,8 @@ class MainActivity
         }
     }
 
-    private fun onNavBack():Boolean{
-        if(ui.mAppBar.canBack){
+    private fun onNavBack(): Boolean {
+        if (ui.mAppBar.canBack) {
             currentNav.navController.popBackStack()
             return true
         } else {
@@ -676,7 +683,7 @@ class MainActivity
         if (basePlayerDelegate.onBackPressed()) {
             return
         }
-        if(onNavBack()){
+        if (onNavBack()) {
             return
         }
         super.onBackPressed()
