@@ -21,9 +21,9 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.web.NestedScrollWebView
 import org.kodein.di.DI
@@ -207,6 +207,15 @@ class WebFragment : Fragment(), DIAware, MyPage {
                     defaultUserAgentString += " Mobile"
                 }
                 userAgentString = "$defaultUserAgentString $userAgent"
+                allowContentAccess = true
+                allowFileAccess = true
+                cacheMode = WebSettings.LOAD_DEFAULT
+                databaseEnabled = true
+                domStorageEnabled = true
+                setSupportZoom(true)
+                builtInZoomControls = true
+                displayZoomControls = false
+                loadsImagesAutomatically = true
             }
             webView.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
             val url = requireArguments().getString(MainNavArgs.url)
