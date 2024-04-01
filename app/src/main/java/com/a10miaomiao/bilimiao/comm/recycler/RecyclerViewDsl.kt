@@ -27,6 +27,7 @@ inline fun <T> miaoAdapter(
         itemUi,
     ) {}.apply(adapterInit)
 }
+
 inline fun <T> miaoAdapter(
     items: MutableList<T>? = null,
     itemUi: MiaoBindingItemUi<T>,
@@ -65,8 +66,38 @@ fun <T> RecyclerView._miaoAdapter(
     return mAdapter
 }
 
+fun <T> RecyclerView._miaoMultiAdapter(
+    items: MutableList<T>? = null,
+    itemUi: MiaoBindingItemUi<T>,
+    depsArr: Array<*> = arrayOf<Any>(),
+    isForceUpdate: Boolean = false,
+    adapterInit: (MiaoBindingMultiAdapter<T>.() -> Unit)? = null,
+): MiaoBindingMultiAdapter<T> {
+    val mAdapter = miaoMemo(itemUi) {
+        object : MiaoBindingMultiAdapter<T>(
+            items,
+            it,
+        ) {}
+    }
+    var isInit = false
+    miaoEffect(mAdapter) {
+        isInit = true
+        adapterInit?.invoke(mAdapter)
+        this@_miaoMultiAdapter.adapter = mAdapter
+    }
+    miaoEffect(arrayOf(items?.size, items, *depsArr), {
+        if (!isInit) {
+            mAdapter.setList(items)
+        }
+    }, {
+        if (isForceUpdate) {
+            mAdapter.setList(items)
+        }
+    })
+    return mAdapter
+}
 
-fun <T: RecyclerView.LayoutManager> RecyclerView._miaoLayoutManage(
+fun <T : RecyclerView.LayoutManager> RecyclerView._miaoLayoutManage(
     lm: T
 ): T {
     val ref = miaoRef(lm)
@@ -78,9 +109,11 @@ fun <T: RecyclerView.LayoutManager> RecyclerView._miaoLayoutManage(
                 is LinearLayoutManager -> {
                     lm.scrollToPositionWithOffset(pLm.getPosition(topView), topView.top)
                 }
+
                 is GridLayoutManager -> {
                     lm.scrollToPositionWithOffset(pLm.getPosition(topView), topView.top)
                 }
+
                 is StaggeredGridLayoutManager -> {
                     lm.scrollToPositionWithOffset(pLm.getPosition(topView), topView.top)
                 }
@@ -92,7 +125,10 @@ fun <T: RecyclerView.LayoutManager> RecyclerView._miaoLayoutManage(
     return pLm
 }
 
-inline fun RecyclerView.headerViews(adapter: MiaoBindingAdapter<*>, block: RecyclerViews.() -> Unit) {
+inline fun RecyclerView.headerViews(
+    adapter: MiaoBindingAdapter<*>,
+    block: RecyclerViews.() -> Unit
+) {
     RecyclerViews(
         this,
         adapter,
@@ -105,7 +141,10 @@ inline fun RecyclerView.headerViews(adapter: MiaoBindingAdapter<*>, block: Recyc
     }
 }
 
-inline fun RecyclerView.footerViews(adapter: MiaoBindingAdapter<*>, block: RecyclerViews.() -> Unit) {
+inline fun RecyclerView.footerViews(
+    adapter: MiaoBindingAdapter<*>,
+    block: RecyclerViews.() -> Unit
+) {
     RecyclerViews(
         this,
         adapter,
@@ -128,7 +167,7 @@ inline fun RecyclerView.lParams(
     return RecyclerView.LayoutParams(width, height).apply(initParams)
 }
 
-fun <T> Context.miaoBindingItemUi (block: MiaoBindingItemUi<T>.(item: T, index: Int) -> View): MiaoBindingItemUi<T> {
+fun <T> Context.miaoBindingItemUi(block: MiaoBindingItemUi<T>.(item: T, index: Int) -> View): MiaoBindingItemUi<T> {
     return object : MiaoBindingItemUi<T>() {
         override val ctx: Context get() = this@miaoBindingItemUi
         override fun createView(item: T, index: Int) = block(item, index)

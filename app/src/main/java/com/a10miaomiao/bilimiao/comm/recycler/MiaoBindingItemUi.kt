@@ -10,9 +10,9 @@ abstract class MiaoBindingItemUi<T> : MiaoUI() {
     override val root: View
         get() = throw NullPointerException()
 
-    fun getView (binding: MiaoBinding, item: T): View {
+    fun getView (binding: MiaoBinding, item: T, index: Int = 0): View {
         return binding.start(MiaoBinding.INIT) {
-            miao { createView(item, 0) }
+            miao { createView(item, index) }
         }
     }
 
