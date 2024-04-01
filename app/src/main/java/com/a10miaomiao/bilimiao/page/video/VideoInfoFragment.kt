@@ -16,39 +16,42 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.*
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColor
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import cn.a10miaomiao.miao.binding.miaoEffect
+import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcEpisodeInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.UgcSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.ViewStyle
+import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
@@ -59,20 +62,21 @@ import com.a10miaomiao.bilimiao.widget.expandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.rcImageView
+import com.chad.library.adapter.base.delegate.BaseMultiTypeDelegate
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.kongzue.dialogx.dialogs.PopTip
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
-import splitties.toast.toast
+import splitties.experimental.InternalSplittiesApi
 import splitties.views.*
 import splitties.views.dsl.core.*
-import splitties.views.dsl.core.lParams
 import splitties.views.dsl.recyclerview.recyclerView
+
 
 class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
@@ -183,7 +187,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         super.onMenuItemClick(view, menuItem)
         val info = viewModel.info
         if (!userStore.isLogin() && (menuItem.key ?: 0) >= 3) {
-            toast("请先登录")
+            PopTip.show("请先登录")
             return
         }
         when (menuItem.key) {
@@ -213,7 +217,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             2 -> {
                 // 分享
                 if (info == null) {
-                    toast("视频信息未加载完成，请稍后再试")
+                    PopTip.show("视频信息未加载完成，请稍后再试")
                     return
                 }
                 var shareIntent = Intent().apply {
@@ -311,7 +315,15 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     }
                 }
             )
-//            basePlayerDelegate.playVideo(info.aid.toString(), cid, title)
+            val ugcSeason = viewModel.ugcSeason ?: return
+            val index = if (ugcSeason.sections.size > 1) {
+                ugcSeason.sections.indexOfFirst { section ->
+                    section.episodes.indexOfFirst { it.aid == info.aid } != -1
+                }
+            } else { 0 }
+            if (index != -1) {
+                playerStore.setPlayList(ugcSeason, index)
+            }
         }
     }
 
@@ -378,7 +390,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
     private val handleUgcEpisodeClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.ugcSeasonEpisodes[position]
-        viewModel.changeVideo(item.aid)
+        if (item is UgcEpisodeInfo) {
+            viewModel.changeVideo(item.aid)
+        }
     }
 
     private val handleTagsItemClick = OnItemClickListener { adapter, view, position ->
@@ -400,7 +414,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 val re = BiliNavigation.navigationTo(view, url)
                 if (!re) {
                     if (url.indexOf("bilibili://") == 0) {
-                        toast("不支持打开的链接：$url")
+                        PopTip.show("不支持打开的链接：$url")
                     } else {
                         BiliUrlMatcher.toUrlLink(view, url)
                     }
@@ -421,14 +435,14 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     val re = BiliNavigation.navigationTo(view, url)
                     if (!re) {
                         if (url.indexOf("bilibili://") == 0) {
-                            toast("不支持打开的链接：$url")
+                            PopTip.show("不支持打开的链接：$url")
                         } else {
                             BiliUrlMatcher.toUrlLink(view, url)
                         }
                     }
                 }
                 LinkType.MENTION_TYPE -> {
-//                toast("你点击了@用户 内容是：$content")
+//                PopTip.show("你点击了@用户 内容是：$content")
                 }
                 LinkType.SELF -> {
                     toSelfLink(view, selfContent)
@@ -443,6 +457,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 height = matchParent
                 rightMargin = dip(5)
             }
+            contentDescription = "分P${item.page}：${item.part}"
             val enabled = playerStore.state.cid != item.cid
             setBackgroundResource(R.drawable.shape_corner)
             _isEnabled = enabled
@@ -526,49 +541,76 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         }
     }
 
-    val ugcSeasonEpisodeUi = miaoBindingItemUi<UgcEpisodeInfo> { item, index ->
-        val selected = item.aid == viewModel.id
-        horizontalLayout {
-            padding = config.smallPadding
-            setBackgroundResource(config.selectableItemBackground)
-            views {
-                +rcImageView {
-                    radius = dip(5)
-                    _network(item.cover, "@672w_378h_1c_")
-                }..lParams {
-                    width = dip(60)
-                    height = dip(40)
-                    rightMargin = dip(5)
-                }
-                +verticalLayout {
-                    views {
-                        +textView {
-                            maxLines = 1
-                            ellipsize = TextUtils.TruncateAt.END
-                            textSize = 14f
-                            _textColor = if (selected) {
-                                config.themeColor
-                            } else {
-                                config.foregroundColor
-                            }
-                            _text = item.title
-                        }..lParams(matchParent, wrapContent)
-                        +textView {
-                            maxLines = 1
-                            ellipsize = TextUtils.TruncateAt.END
-                            textSize = 12f
-                            _textColor = if (selected) {
-                                config.themeColor
-                            } else {
-                                config.foregroundAlpha45Color
-                            }
-                            _text = item.cover_right_text
-                        }..lParams(matchParent, wrapContent)
+    @OptIn(InternalSplittiesApi::class)
+    val ugcSeasonEpisodeUi = miaoBindingItemUi<Any> { item, index ->
+        if (item is UgcEpisodeInfo) {
+            val selected = item.aid == viewModel.id
+            horizontalLayout {
+                padding = config.smallPadding
+                setBackgroundResource(config.selectableItemBackground)
+                views {
+                    +rcImageView {
+                        radius = dip(5)
+                        _network(item.cover, "@672w_378h_1c_")
+                    }..lParams {
+                        width = dip(60)
+                        height = dip(40)
+                        rightMargin = dip(5)
                     }
-                }..lParams(dip(200), wrapContent)
+                    +verticalLayout {
+                        views {
+                            +textView {
+                                maxLines = 1
+                                ellipsize = TextUtils.TruncateAt.END
+                                textSize = 14f
+                                _textColor = if (selected) {
+                                    config.themeColor
+                                } else {
+                                    config.foregroundColor
+                                }
+                                _text = item.title
+                            }..lParams(matchParent, wrapContent)
+                            +textView {
+                                maxLines = 1
+                                ellipsize = TextUtils.TruncateAt.END
+                                textSize = 12f
+                                _textColor = if (selected) {
+                                    config.themeColor
+                                } else {
+                                    config.foregroundAlpha45Color
+                                }
+                                _text = item.cover_right_text
+                            }..lParams(matchParent, wrapContent)
+                        }
+                    }..lParams(dip(200), wrapContent)
+                }
             }
+        } else if (item is UgcSectionInfo) {
+            verticalLayout {
+                padding = config.smallPadding
+                layoutParams = ViewGroup.LayoutParams(
+                    dip(80),
+                    wrapContent,
+                )
+                gravity = Gravity.END
+                views {
+                    +textView {
+                        _text = item.title + ":"
+                        gravity = Gravity.END
+                        textSize = 14f
+                        _textColor = config.foregroundColor
+                    }..lParams(matchParent, wrapContent)
+                    +textView {
+                        _text = "${item.episodes.size}个视频"
+                        gravity = Gravity.END
+                        textSize = 12f
+                        _textColor = config.foregroundAlpha45Color
+                    }..lParams(matchParent, wrapContent)
+                }
+            }
+        } else {
+            view<View>()
         }
-
     }
 
     fun MiaoUI.ugcSeasonView(): View {
@@ -589,32 +631,40 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     }
                 }
                 +recyclerView {
-//                    val lm = LinearLayoutManager(context)
-//                    lm.orientation = LinearLayoutManager.HORIZONTAL
-                    val lm = FlexboxLayoutManager(context)
-                    lm.flexDirection = FlexDirection.COLUMN
-                    lm.flexWrap = FlexWrap.WRAP
-//                    scrollBarSize = 0
+                    val lm = GridLayoutManager(context, 4)
+                    lm.orientation = LinearLayoutManager.HORIZONTAL
+                    lm.spanSizeLookup = miaoMemo(Unit) {
+                        object : SpanSizeLookup() {
+                            override fun getSpanSize(position: Int): Int {
+                                val item = viewModel.ugcSeasonEpisodes[position]
+                                if (item is UgcSectionInfo) {
+                                    return 4
+                                }
+                                return 1
+                            }
+                        }
+                    }
                     _miaoLayoutManage(lm)
 
-                    _miaoAdapter(
+                    _miaoMultiAdapter(
                         items = viewModel.ugcSeasonEpisodes,
                         itemUi = ugcSeasonEpisodeUi,
-                        depsAry = arrayOf(viewModel.id, playerStore.state.cid),
+                        depsArr = arrayOf(viewModel.id, playerStore.state.cid),
                     ) {
                         setOnItemClickListener(handleUgcEpisodeClick)
                     }
                     miaoEffect(arrayOf(viewModel.id, viewModel.ugcSeasonEpisodes.size)) {
                         val aid = viewModel.id
-                        val position = viewModel.ugcSeasonEpisodes.indexOfFirst { it.aid == aid }
-                        DebugMiao.log("position", aid, viewModel.ugcSeasonEpisodes.size, position)
+                        val position = viewModel.ugcSeasonEpisodes.indexOfFirst {
+                            (it as? UgcEpisodeInfo)?.aid == aid
+                        }
                         if (position > 0) {
                             scrollToPosition(position)
                         }
                     }
                 }..lParams {
                     width = matchParent
-                    height = dip(200)
+                    height = wrapContent
                 }
             }
         }

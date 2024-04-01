@@ -53,7 +53,7 @@ class VideoInfoViewModel(
     var relates = mutableListOf<VideoRelateInfo>()
     var pages = mutableListOf<VideoPageInfo>()
     var ugcSeason: UgcSeasonInfo? = null
-    var ugcSeasonEpisodes = mutableListOf<UgcEpisodeInfo>()
+    var ugcSeasonEpisodes = mutableListOf<Any>() // UgcSeasonInfo | UgcEpisodeInfo
     var staffs = mutableListOf<VideoStaffInfo>()
     var tags = mutableListOf<VideoTagInfo>()
 
@@ -122,8 +122,19 @@ class VideoInfoViewModel(
                     tags = tagData.toMutableList()
                     if (ugcSeasonData != null
                         && ugcSeasonData.sections.isNotEmpty()) {
+                        val sections = ugcSeasonData.sections
                         ugcSeason = ugcSeasonData
-                        ugcSeasonEpisodes = ugcSeasonData.sections[0].episodes.toMutableList()
+                        ugcSeasonEpisodes = mutableListOf()
+                        if (sections.size == 1) {
+                            ugcSeasonEpisodes.addAll(sections[0].episodes)
+                        } else {
+                            ugcSeasonData.sections.forEachIndexed { index, ugcSectionInfo ->
+                                val episodes = ugcSectionInfo.episodes
+                                ugcSeasonEpisodes.add(ugcSectionInfo)
+                                ugcSeasonEpisodes.addAll(episodes)
+                            }
+                        }
+
                     }
                 }
                 withContext(Dispatchers.Main) {
@@ -378,4 +389,8 @@ class VideoInfoViewModel(
             }
         }
     }
+
+//    data class SeasonEpisodeInfo(
+//
+//    )
 }
