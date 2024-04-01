@@ -6,6 +6,6 @@ import com.chad.library.adapter.base.viewholder.BaseViewHolder
 
 class MiaoBindingViewHolder(
     val binding: MiaoBinding,
-    view: View
+    val view: View
 ) : BaseViewHolder(view) {
 }
