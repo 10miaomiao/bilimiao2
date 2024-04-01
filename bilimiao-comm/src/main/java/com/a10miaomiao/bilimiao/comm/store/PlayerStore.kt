@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.delegate.player.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,10 +29,43 @@ class PlayerStore(override val di: DI) :
         var sid: String = "",
         var title: String = "",
         var cover: String = "",
+        var playList: PlayListInfo? = null,
     )
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
+
+    fun setPlayList(info: PlayListInfo) {
+        this.setState {
+            playList = info
+        }
+    }
+
+    fun setPlayList(info: UgcSeasonInfo, index: Int) {
+        val items = info.sections[index].episodes.map {
+            PlayListItemInfo(
+                aid = it.aid,
+                cid = it.cid,
+                duration = it.duration,
+                title = it.title,
+                cover = it.cover,
+                ownerId = it.author.mid,
+                ownerName = it.author.name,
+                from = info.id
+            )
+        }
+        val title = if (info.sections.size > 1) {
+            info.title + "：" +info.sections[index].title
+        } else {
+            info.title
+        }
+        setPlayList(PlayListInfo(
+            name = title,
+            from = 1,
+            items = items,
+            index = 0
+        ))
+    }
 
     fun setPlayerSource(source: BasePlayerSource) {
         val ids = source.getSourceIds()
