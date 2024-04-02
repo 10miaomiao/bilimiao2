@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
@@ -112,7 +113,7 @@ internal class LikeMessagePageModel(
     fun toUserPage(item: LikeMessageInfo) {
         val mid = item.users[0].mid
         val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri)
+        fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
     fun toDetailPage(item: LikeMessageInfo) {
@@ -121,7 +122,7 @@ internal class LikeMessagePageModel(
             // 评论
             val id = item.item.item_id
             val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
-            fragment.findNavController().navigate(uri)
+            fragment.findNavController().navigate(uri, defaultNavOptions)
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
@@ -130,7 +131,7 @@ internal class LikeMessagePageModel(
             // 视频
             val aid = item.item.item_id
             val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri)
+            fragment.findNavController().navigate(uri, defaultNavOptions)
         }
     }
 }

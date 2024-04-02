@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
@@ -112,14 +113,14 @@ internal class AtMessagePageModel(
     fun toUserPage(item: AtMessageInfo) {
         val mid = item.user.mid
         val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri)
+        fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
     fun toMessagePage(item: AtMessageInfo) {
         // 评论
         val sourceId = item.item.source_id
         val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
-        fragment.findNavController().navigate(uri)
+        fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
     fun toDetailPage(item: AtMessageInfo) {
@@ -138,7 +139,7 @@ internal class AtMessagePageModel(
             // 视频
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri)
+            fragment.findNavController().navigate(uri, defaultNavOptions)
         }
     }
 

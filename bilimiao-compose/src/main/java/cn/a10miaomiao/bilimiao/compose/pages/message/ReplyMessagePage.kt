@@ -34,6 +34,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import bilibili.broadcast.v1.Mod
+import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
@@ -132,14 +133,14 @@ internal class ReplyMessagePageModel(
     fun toUserPage(item: ReplyMessageInfo) {
         val mid = item.user.mid
         val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri)
+        fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
     fun toMessagePage(item: ReplyMessageInfo) {
         // 评论
         val sourceId = item.item.source_id
         val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
-        fragment.findNavController().navigate(uri)
+        fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
     fun toDetailPage(item: ReplyMessageInfo) {
@@ -149,19 +150,19 @@ internal class ReplyMessagePageModel(
             val rootId = item.item.root_id
             val sourceId = item.item.source_id
             val uri = Uri.parse("bilimiao://video/comment/${rootId}/detail/${sourceId}")
-            fragment.findNavController().navigate(uri)
+            fragment.findNavController().navigate(uri, defaultNavOptions)
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
             // 弹幕
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri)
+            fragment.findNavController().navigate(uri, defaultNavOptions)
         } else if (type == "video") {
             // 视频
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri)
+            fragment.findNavController().navigate(uri, defaultNavOptions)
         }
     }
 }
