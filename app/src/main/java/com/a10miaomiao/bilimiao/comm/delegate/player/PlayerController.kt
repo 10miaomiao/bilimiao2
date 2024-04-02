@@ -22,6 +22,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
@@ -53,6 +54,7 @@ class PlayerController(
 ) : DIAware, VideoPlayerCallBack, GSYVideoProgressListener {
 
     private val userStore by instance<UserStore>()
+    private val playerStore by instance<PlayerStore>()
     private val statusBarHelper by instance<StatusBarHelper>()
     private val scaffoldApp get() = delegate.scaffoldApp
     private val views get() = delegate.views
@@ -615,6 +617,17 @@ class PlayerController(
         } else if (nextPlayerSourceInfo is BangumiPlayerSource) {
             if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_NEXT_BANGUMI, true)) {
                 delegate.openPlayer(nextPlayerSourceInfo)
+                return
+            }
+        }
+        val playeState = playerStore.state
+        val playList = playeState.playList
+        if (playList != null) {
+            val currentPosition = playeState.getPlayListCurrentPosition()
+            if (currentPosition != -1
+                && currentPosition < playeState.getPlayListSize() - 1) {
+                val nextVideo = playList.items[currentPosition + 1]
+                delegate.openPlayer(nextVideo.toVideoPlayerSource())
                 return
             }
         }
