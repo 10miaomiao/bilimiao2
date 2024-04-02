@@ -36,6 +36,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
+import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -269,8 +270,8 @@ internal class BangumiDetailPageViewModel(
         val title = Uri.encode(item.title + if (item.long_title.isBlank()) "" else "_" + item.long_title)
         val cover = Uri.encode(item.cover)
         val name = Uri.encode(detailInfo.value?.season_title ?: "")
-        val uri = Uri.parse("bilimiao://video/comment/$id?title=$title&cover=$cover&name=$name")
-        fragment.findNavController().navigate(uri)
+        val uri = Uri.parse("bilimiao://video/$id/comment?title=$title&cover=$cover&name=$name")
+        fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
     fun shareEpisode(item: EpisodeInfo) {
