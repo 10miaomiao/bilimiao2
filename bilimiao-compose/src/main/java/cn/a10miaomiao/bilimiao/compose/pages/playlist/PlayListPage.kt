@@ -146,13 +146,13 @@ private fun PlayListPageContent(
                                 .clickable {
                                     viewModel.toVideoInfoPage(item)
                                 }
-                                .padding(10.dp)
+                                .padding(5.dp)
                                 .fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(130.dp, 80.dp)
+                                    .size(100.dp, 60.dp)
                                     .clip(RoundedCornerShape(10.dp)),
                             ) {
                                 GlideImage(
@@ -174,6 +174,7 @@ private fun PlayListPageContent(
                                         color = Color.White,
                                         text = "${index + 1}",
                                         fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
                                     )
                                 }
                             }
@@ -181,19 +182,22 @@ private fun PlayListPageContent(
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .padding(horizontal = 10.dp),
+                                    .padding(horizontal = 5.dp),
                             ) {
                                 Text(
                                     text = item.title,
                                     maxLines = 2,
                                     modifier = Modifier.padding(bottom = 5.dp),
                                     overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    style = MaterialTheme.typography.titleSmall,
                                 )
                                 Text(
                                     text = "UP:" + item.ownerName,
                                     maxLines = 1,
                                     color = MaterialTheme.colorScheme.outline,
                                     overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelMedium,
                                 )
                             }
                             Box(
@@ -204,7 +208,7 @@ private fun PlayListPageContent(
                                     Box(
                                         modifier = Modifier
                                             .sizeIn(
-                                                minWidth = 40.dp,
+                                                minWidth = 50.dp,
                                                 minHeight = 30.dp
                                             ),
                                         contentAlignment = Alignment.Center,
@@ -212,6 +216,7 @@ private fun PlayListPageContent(
                                         Text(
                                             color = MaterialTheme.colorScheme.primary,
                                             text = "播放中",
+                                            fontSize = 12.sp
                                         )
                                     }
                                 } else {
@@ -220,7 +225,7 @@ private fun PlayListPageContent(
                                         shape = MaterialTheme.shapes.small,
                                         contentPadding = PaddingValues(
                                             vertical = 4.dp,
-                                            horizontal = 16.dp,
+                                            horizontal = 12.dp,
                                         ),
                                         modifier = Modifier
                                             .sizeIn(
@@ -229,7 +234,10 @@ private fun PlayListPageContent(
                                             )
                                             .padding(0.dp)
                                     ) {
-                                        Text(text = "播放")
+                                        Text(
+                                            text = "播放",
+                                            fontSize = 12.sp
+                                        )
                                     }
                                 }
 
