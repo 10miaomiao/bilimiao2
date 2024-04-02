@@ -91,7 +91,7 @@ class UserFollowPage() : ComposePage() {
     }
 }
 
-internal data class FollowingItemInfo(
+private data class FollowingItemInfo(
     val mid: String,
     val attribute: Int, // 关注属性: 0：未关注, 2：已关注, 6：已互粉
     val mtime: Long,
@@ -105,13 +105,13 @@ internal data class FollowingItemInfo(
     val isFollowing get() = attribute == 2 || attribute == 6
 }
 
-internal data class FollowingsInfo(
+private data class FollowingsInfo(
     val list: List<FollowingItemInfo>,
     val re_version: Int,
     val total: Int,
 )
 
-internal class UserFollowPageViewModel(
+private class UserFollowPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -258,7 +258,7 @@ internal class UserFollowPageViewModel(
 }
 
 @Composable
-internal fun UserInfoCard(
+private fun UserInfoCard(
     name: String,
     face: String,
     sign: String,
@@ -273,34 +273,37 @@ internal fun UserInfoCard(
         Row(
             modifier = Modifier
                 .clickable { onClick() }
-                .padding(10.dp)
+                .padding(5.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             GlideImage(
                 imageModel = UrlUtil.autoHttps(face) + "@200w_200h",
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
             )
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .height(50.dp)
+                    .heightIn(min = 50.dp)
                     .padding(horizontal = 5.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
                     text = name,
                     maxLines = 1,
-                    modifier = Modifier.padding(bottom = 5.dp),
+                    modifier = Modifier.padding(bottom = 2.dp),
                     overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleSmall,
                 )
                 Text(
                     text = sign,
                     maxLines = 1,
                     color = MaterialTheme.colorScheme.outline,
                     overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelMedium,
                 )
             }
             actionContent()
@@ -309,7 +312,7 @@ internal fun UserInfoCard(
 }
 
 @Composable
-internal fun UserFollowPageContent(
+private fun UserFollowPageContent(
     viewModel: UserFollowPageViewModel,
 ) {
     val userStore: UserStore by rememberInstance()
@@ -403,11 +406,17 @@ internal fun UserFollowPageContent(
                     ) {
                         Button(
                             onClick = { viewModel.attention(it) },
+                            shape = MaterialTheme.shapes.small,
+                            contentPadding = PaddingValues(
+                                vertical = 4.dp,
+                                horizontal = 12.dp,
+                            ),
                             modifier = Modifier
-                                .padding(0.dp)
-                                .size(65.dp, 30.dp),
-                            contentPadding = PaddingValues(0.dp),
-                            shape = RoundedCornerShape(5.dp),
+                                .sizeIn(
+                                    minWidth = 40.dp,
+                                    minHeight = 30.dp
+                                )
+                                .padding(0.dp),
                             enabled = isLogin,
                             colors = if (item.isFollowing) {
                                 ButtonDefaults.buttonColors(

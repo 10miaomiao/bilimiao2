@@ -60,19 +60,11 @@ class HomeFragment : Fragment(), DIAware {
     private val viewModel by diViewModel<HomeViewModel>(di)
     private val userStore by instance<UserStore>()
 
-    private val themeDelegate by instance<ThemeDelegate>()
-
-    private var themeId = 0
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (themeDelegate.getThemeResId() != themeId) {
-            ui.cleanCacheView()
-            themeId = themeDelegate.getThemeResId()
-        }
         ui.parentView = container
         return ui.root
     }
