@@ -13,6 +13,7 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
 import com.a10miaomiao.bilimiao.widget.shadow.ShadowLayout
 import com.google.android.flexbox.FlexboxLayout
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.tabs.TabLayout
 import splitties.views.dsl.core.*
 import kotlin.contracts.InvocationKind
@@ -37,6 +38,19 @@ inline fun View.wrapInSwipeRefreshLayout(
     return view({ SwipeRefreshLayout(it) }, id) {
         addView(
             this@wrapInSwipeRefreshLayout,
+            ViewGroup.LayoutParams(matchParent, height)
+        )
+    }.apply(initView)
+}
+
+inline fun View.wrapInMaterialCardView(
+    @IdRes id: Int = View.NO_ID,
+    height: Int = matchParent,
+    initView: MaterialCardView.() -> Unit = {}
+): MaterialCardView {
+    return view({ MaterialCardView(it) }, id) {
+        addView(
+            this@wrapInMaterialCardView,
             ViewGroup.LayoutParams(matchParent, height)
         )
     }.apply(initView)
