@@ -30,7 +30,22 @@ class PlayerStore(override val di: DI) :
         var title: String = "",
         var cover: String = "",
         var playList: PlayListInfo? = null,
-    )
+    ) {
+        fun getPlayListSize(): Int {
+            return playList?.run { items.size } ?: 0
+        }
+
+        fun getPlayListCurrentPosition(): Int {
+            if (cid.isBlank()) {
+                return 0
+            }
+            return playList?.run {
+                items.indexOfFirst {
+                    it.cid == cid
+                }
+            } ?: -1
+        }
+    }
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
@@ -63,7 +78,6 @@ class PlayerStore(override val di: DI) :
             name = title,
             from = 1,
             items = items,
-            index = 0
         ))
     }
 
@@ -80,6 +94,9 @@ class PlayerStore(override val di: DI) :
             } else {
                 type = VIDEO
                 aid = ids.aid
+            }
+            if (getPlayListCurrentPosition() == -1) {
+                playList = null
             }
         }
     }

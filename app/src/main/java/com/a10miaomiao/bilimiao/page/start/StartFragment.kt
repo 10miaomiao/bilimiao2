@@ -30,6 +30,7 @@ import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -58,6 +59,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.network
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -67,6 +69,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInMaterialCardView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.user.UserFragment
@@ -95,6 +98,13 @@ import splitties.permissions.hasPermission
 import splitties.permissions.requestPermission
 import splitties.views.backgroundColor
 import splitties.views.bottomPadding
+import splitties.views.dsl.constraintlayout.constraintLayout
+import splitties.views.dsl.constraintlayout.lParams
+import splitties.views.dsl.constraintlayout.leftOfParent
+import splitties.views.dsl.constraintlayout.leftToRightOf
+import splitties.views.dsl.constraintlayout.rightOfParent
+import splitties.views.dsl.constraintlayout.topToBottomOf
+import splitties.views.dsl.coordinatorlayout.coordinatorLayout
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageView
@@ -109,6 +119,7 @@ import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.core.wrapInHorizontalScrollView
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.generateViewId
 import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding
@@ -303,6 +314,16 @@ class StartFragment : Fragment(), DIAware, MyPage {
         scaffoldView.closeDrawer()
     }
 
+    private val handlePlayListClick = View.OnClickListener {
+        val activity = requireActivity()
+        val scaffoldView = activity.getScaffoldView()
+        val nav = (activity as? MainActivity)?.pointerNav?.navController
+            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+//        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+        nav.navigateToCompose(PlayListPage())
+        scaffoldView.closeDrawer()
+    }
+
     private val handleMessageClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
         val nav = (activity as? MainActivity)?.pointerNav?.navController
@@ -384,7 +405,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     @InternalSplittiesApi
     fun MiaoUI.playerStateCard(): View {
         val playerState = viewModel.playerStore.state
-        return horizontalLayout {
+        return constraintLayout {
             apply(ViewStyle.roundRect(dip(10)))
             padding = dip(10)
             backgroundColor = config.blockBackgroundColor
@@ -392,77 +413,118 @@ class StartFragment : Fragment(), DIAware, MyPage {
             _show = playerState.cid.isNotBlank()
 
             views {
-                +rcImageView {
+                val imageView = +rcImageView {
                     radius = dip(10)
                     _network(playerState.cover, "@300w_300h_1c_")
                 }..lParams {
                     width = dip(60)
                     height = dip(60)
-                    rightMargin = dip(10)
                 }
-                +verticalLayout {
+
+                val statusView = +horizontalLayout {
+                    gravity = Gravity.START
                     views {
-                        +horizontalLayout {
-                            views {
-                                +textView {
-                                    text = "正在播放："
-                                    setTextColor(config.foregroundColor)
-                                    textSize = 16f
-                                    gravity = Gravity.CENTER_VERTICAL
-                                }..lParams(wrapContent, dip(20))
-                                +textView {
-                                    _text = if (playerState.sid.isNotBlank()) {
-                                        "SS${playerState.sid} / EP${playerState.epid}"
-                                    } else {
-                                        "AV${playerState.aid}"
-                                    }
-                                    ellipsize = TextUtils.TruncateAt.END
-                                    maxLines = 1
-                                    setTextColor(config.foregroundAlpha45Color)
-                                    textSize = 14f
-                                    gravity = Gravity.BOTTOM
-                                }..lParams(wrapContent, dip(20))
-                            }
-                        }..lParams(matchParent, wrapContent)
                         +textView {
-                            _text = playerState.title
-                            setTextColor(config.foregroundAlpha45Color)
+                            text = "正在播放："
+                            setTextColor(config.foregroundColor)
                             textSize = 16f
+                            gravity = Gravity.CENTER_VERTICAL
+                        }..lParams(wrapContent, dip(20))
+                        +textView {
+                            _text = if (playerState.sid.isNotBlank()) {
+                                "SS${playerState.sid} / EP${playerState.epid}"
+                            } else {
+                                "AV${playerState.aid}"
+                            }
                             ellipsize = TextUtils.TruncateAt.END
-                            maxLines = 2
-//                            gravity = Gravity.CENTER_VERTICAL
+                            maxLines = 1
+                            setTextColor(config.foregroundAlpha45Color)
+                            textSize = 14f
+                            gravity = Gravity.BOTTOM
+                        }..lParams(wrapContent, dip(20))
+                    }
+                }..lParams(height = wrapContent) {
+                    leftToRightOf(imageView, dip(5))
+                    rightOfParent()
+                }
+
+                val titleView = +textView {
+                    _text = playerState.title
+                    setTextColor(config.foregroundAlpha45Color)
+                    textSize = 16f
+                    ellipsize = TextUtils.TruncateAt.END
+                    maxLines = 2
+                }..lParams(height = wrapContent) {
+                    topToBottomOf(statusView, dip(2))
+                    leftToRightOf(imageView, dip(5))
+                    rightOfParent()
+                }
+
+                val buttonView = +horizontalLayout {
+                    views {
+                        +view<MaterialButton> {
+                            text = "关闭播放"
+                            cornerRadius = dip(10)
+                            backgroundColor = config.blockBackgroundColor
+                            textColorResource = config.themeColorResource
+                            strokeColor = ColorStateList.valueOf(config.themeColor)
+                            strokeWidth = dip(1.5f).toInt()
+                            setOnClickListener(handlePlayerCardCloseClick)
+                            textSize = 14f
+                            padding = 0
+                        }..lParams(dip(100), dip(40)) {
+                            rightMargin = dip(5)
+                        }
+                        +view<MaterialButton> {
+                            text = "查看详情"
+                            cornerRadius = dip(10)
+                            setTextColor(0xFFFFFFFF.toInt())
+                            setOnClickListener(handlePlayerCardDetailClick)
+                            textSize = 14f
+                            padding = 0
+                        }..lParams(dip(100), dip(40))
+                    }
+                }..lParams(height = wrapContent) {
+                    topToBottomOf(titleView)
+                    leftToRightOf(imageView, dip(5))
+                    rightOfParent()
+                }
+
+                val playList = playerState.playList
+                val listSize = playerState.getPlayListSize()
+                val currentPosition = playerState.getPlayListCurrentPosition()
+                +horizontalLayout {
+                    setBackgroundResource(config.selectableItemBackground)
+                    padding = dip(10)
+                    gravity = Gravity.CENTER_VERTICAL
+
+                    views {
+                        +textView {
+                            _text = "播放列表：${playList?.name}"
+                            setTextColor(config.foregroundColor)
                         }..lParams(matchParent, wrapContent) {
-                            topMargin = dip(2)
+                            weight = 1f
                         }
 
-                        +horizontalLayout {
-                            views {
-                                +view<MaterialButton> {
-                                    text = "关闭播放"
-                                    cornerRadius = dip(10)
-                                    backgroundColor = config.blockBackgroundColor
-                                    textColorResource = config.themeColorResource
-                                    strokeColor = ColorStateList.valueOf(config.themeColor)
-                                    strokeWidth = dip(1.5f).toInt()
-                                    setOnClickListener(handlePlayerCardCloseClick)
-                                    textSize = 14f
-                                    padding = 0
-                                }..lParams(dip(100), dip(40)) {
-                                    rightMargin = dip(5)
-                                }
-                                +view<MaterialButton> {
-                                    text = "查看详情"
-                                    cornerRadius = dip(10)
-                                    setTextColor(0xFFFFFFFF.toInt())
-                                    setOnClickListener(handlePlayerCardDetailClick)
-                                    textSize = 14f
-                                    padding = 0
-                                }..lParams(dip(100), dip(40))
-                            }
-                        }
+                        +textView {
+                            _text = "${currentPosition + 1}/${listSize}"
+                            setTextColor(config.foregroundColor)
+                        }..lParams(wrapContent, wrapContent)
+                        +imageView {
+                            setImageResource(R.drawable.ic_navigate_next_black_24dp)
+                            imageTintList = ColorStateList.valueOf(config.foregroundColor)
+                        }..lParams(dip(24), dip(24))
                     }
-                }..lParams {
-                    weight = 1f
+                }.wrapInMaterialCardView {
+                    setCardBackgroundColor(config.windowBackgroundColor)
+                    setOnClickListener(handlePlayListClick)
+                    strokeWidth = 0
+                    radius = dip(10f)
+                    _show = playList != null
+                }..lParams(height = wrapContent) {
+                    topToBottomOf(buttonView, dip(5))
+                    leftOfParent()
+                    rightOfParent()
                 }
             }
         }
@@ -470,76 +532,70 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     @OptIn(InternalSplittiesApi::class)
     fun MiaoUI.searchBoxView(): View {
-        return view<MaterialCardView>(ID_searchView) {
-            setCardBackgroundColor(config.blockBackgroundColor)
-            strokeWidth = 0
-            val iconSize = dip(30)
-            radius = dip(10f)
-
+        return verticalLayout {
             views {
 
-                +verticalLayout {
+                +horizontalLayout {
+                    horizontalPadding = config.pagePadding
+                    gravity = Gravity.CENTER_VERTICAL
 
                     views {
-
-                        +horizontalLayout {
-                            horizontalPadding = config.pagePadding
-                            gravity = Gravity.CENTER_VERTICAL
-
-                            views {
-                                +radioButton(ID_radioButton_all) {
-                                    text = "搜索全站"
-                                    isChecked = true
-                                }..lParams { rightMargin = config.dividerSize }
-                                +radioButton(ID_radioButton_self) {
-                                    text = ""
-                                    visibility = View.GONE
-                                }
-                            }
-                        }.wrapInHorizontalScrollView(
-                            height = dip(40)
-                        ) {
-
-                        }..lParams(width = matchParent)
-
-                        +frameLayout {
-
-                            views {
-                                +textView(ID_searchTextView) {
-                                    text = "请输入ID或关键字"
-                                    ellipsize = TextUtils.TruncateAt.END
-                                    maxLines = 1
-                                    setTextColor(config.foregroundAlpha45Color)
-                                    horizontalPadding = iconSize + dip(15)
-                                    textSize = 18f
-                                    gravity = Gravity.CENTER_VERTICAL
-                                    setOnClickListener(handleStartSearchClick)
-                                }..lParams(matchParent, dip(60)) {
-                                    gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
-                                }
-
-                                +imageView {
-                                    setImageResource(R.drawable.ic_search_24dp)
-                                    setBackgroundResource(config.selectableItemBackgroundBorderless)
-                                    setOnClickListener(handleStartSearchClick)
-                                }..lParams(iconSize, iconSize) {
-                                    leftMargin = config.pagePadding
-                                    gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
-                                }
-
-                                +imageView {
-                                    setImageResource(R.drawable.ic_baseline_qr_code_scanner_24)
-                                    setBackgroundResource(config.selectableItemBackgroundBorderless)
-                                    setOnClickListener(handleStartScanClick)
-                                }..lParams(iconSize, iconSize) {
-                                    rightMargin = config.pagePadding
-                                    gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
-                                }
-                            }
-                        }..lParams(matchParent, dip(60))
+                        +radioButton(ID_radioButton_all) {
+                            text = "搜索全站"
+                            isChecked = true
+                        }..lParams { rightMargin = config.dividerSize }
+                        +radioButton(ID_radioButton_self) {
+                            text = ""
+                            visibility = View.GONE
+                        }
                     }
-                }..lParams(matchParent, matchParent)
+                }.wrapInHorizontalScrollView(
+                    height = dip(40)
+                ) {
+
+                }..lParams(width = matchParent)
+
+                +frameLayout {
+                    val iconSize = dip(30)
+
+                    views {
+                        +textView(ID_searchTextView) {
+                            text = "请输入ID或关键字"
+                            ellipsize = TextUtils.TruncateAt.END
+                            maxLines = 1
+                            setTextColor(config.foregroundAlpha45Color)
+                            horizontalPadding = iconSize + dip(15)
+                            textSize = 18f
+                            gravity = Gravity.CENTER_VERTICAL
+                            setOnClickListener(handleStartSearchClick)
+                        }..lParams(matchParent, dip(60)) {
+                            gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
+                        }
+
+                        +imageView {
+                            setImageResource(R.drawable.ic_search_24dp)
+                            setBackgroundResource(config.selectableItemBackgroundBorderless)
+                            setOnClickListener(handleStartSearchClick)
+                        }..lParams(iconSize, iconSize) {
+                            leftMargin = config.pagePadding
+                            gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
+                        }
+
+                        +imageView {
+                            setImageResource(R.drawable.ic_baseline_qr_code_scanner_24)
+                            setBackgroundResource(config.selectableItemBackgroundBorderless)
+                            setOnClickListener(handleStartScanClick)
+                        }..lParams(iconSize, iconSize) {
+                            rightMargin = config.pagePadding
+                            gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
+                        }
+                    }
+                }..lParams(matchParent, dip(60))
             }
+        }.wrapInMaterialCardView(ID_searchView) {
+            setCardBackgroundColor(config.blockBackgroundColor)
+            strokeWidth = 0
+            radius = dip(10f)
         }
     }
 

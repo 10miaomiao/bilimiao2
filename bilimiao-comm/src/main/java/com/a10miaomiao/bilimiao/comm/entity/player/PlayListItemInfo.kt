@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.player
 
 import android.os.Parcelable
+import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -13,4 +14,15 @@ data class PlayListItemInfo(
     val ownerId: String,
     val ownerName: String,
     val from: String,
-) : Parcelable
+) : Parcelable {
+    fun toVideoPlayerSource(): VideoPlayerSource {
+        return VideoPlayerSource(
+            title = title,
+            coverUrl = cover,
+            aid = aid,
+            id = cid,
+            ownerId = ownerId,
+            ownerName = ownerName,
+        )
+    }
+}

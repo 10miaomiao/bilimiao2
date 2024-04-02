@@ -9,7 +9,7 @@ data class UgcEpisodeInfo(
     val author: VideoOwnerInfo,
     val author_desc: String,
     val bvid: String,
-    val cid: Int,
+    val cid: String,
     val cover: String,
     val cover_right_text: String,
 //    val dimension: Dimension,

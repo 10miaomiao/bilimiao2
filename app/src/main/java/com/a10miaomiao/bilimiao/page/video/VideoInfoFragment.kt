@@ -298,6 +298,18 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     private fun playVideo(cid: String, title: String) {
         val info = viewModel.info
         if (info != null) {
+            // 设置播放列表
+            viewModel.ugcSeason?.let {
+                val index = if (it.sections.size > 1) {
+                    it.sections.indexOfFirst { section ->
+                        section.episodes.indexOfFirst { it.aid == info.aid } != -1
+                    }
+                } else { 0 }
+                if (index != -1) {
+                    playerStore.setPlayList(it, index)
+                }
+            }
+            // 播放视频
             basePlayerDelegate.openPlayer(
                 VideoPlayerSource(
                     title = title,
@@ -315,15 +327,6 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     }
                 }
             )
-            val ugcSeason = viewModel.ugcSeason ?: return
-            val index = if (ugcSeason.sections.size > 1) {
-                ugcSeason.sections.indexOfFirst { section ->
-                    section.episodes.indexOfFirst { it.aid == info.aid } != -1
-                }
-            } else { 0 }
-            if (index != -1) {
-                playerStore.setPlayList(ugcSeason, index)
-            }
         }
     }
 
