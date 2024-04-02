@@ -1,11 +1,13 @@
 package com.a10miaomiao.bilimiao.activity
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
-import android.os.PersistableBundle
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.king.zxing.CameraScan
 import com.king.zxing.CaptureActivity
 import com.king.zxing.DecodeConfig
@@ -90,5 +92,12 @@ class QRCodeActivity : CaptureActivity() {
             finish()
         }
         return super.onScanResultCallback(result)
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val configuration: Configuration = newBase.resources.configuration
+        ScreenDpiUtil.readCustomConfiguration(configuration)
+        val newContext = newBase.createConfigurationContext(configuration)
+        super.attachBaseContext(newContext)
     }
 }

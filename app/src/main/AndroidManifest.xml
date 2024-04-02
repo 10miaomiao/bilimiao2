@@ -89,7 +89,7 @@
         <activity
             android:name=".activity.DensitySettingActivity"
             android:label="@string/density_setting"
-            android:theme="@style/Theme.ShowActionBar.Bilimiao"/>
+            android:theme="@style/Theme.Bilimiao"/>
         <activity
             android:name="cn.a10miaomiao.bilimiao.cover.CoverActivity"
             android:exported="true"

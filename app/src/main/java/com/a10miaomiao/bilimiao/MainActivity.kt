@@ -1,17 +1,14 @@
 package com.a10miaomiao.bilimiao
 
 import android.Manifest
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.DisplayCutout
@@ -26,7 +23,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
@@ -40,21 +36,16 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
-import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.*
 import com.a10miaomiao.bilimiao.widget.scaffold.*
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -116,7 +107,6 @@ class MainActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getCustomDensityDpi()
         themeDelegate.onCreate(savedInstanceState)
         ui = MainUi(this)
         setContentView(ui.root)
@@ -151,6 +141,15 @@ class MainActivity
         initAppBar()
 
 //        ui.mContainerView.addDrawerListener(onDrawer)
+//        lifecycleScope.launch(Dispatchers.IO){
+//            val loginInfo = Bilimiao.commApp.loginInfo!!
+//            val refreshToken = loginInfo.token_info.refresh_token
+//            val cookieInfo = loginInfo.cookie_info!!
+//            DebugMiao.log(Bilimiao.commApp.loginInfo)
+//            val res = BiliApiService.authApi.refreshToken(refreshToken, cookieInfo).awaitCall()
+//            DebugMiao.log("oauth2")
+//            DebugMiao.log("oauth2", res.body?.string())
+//        }
 
         // 百度统计
         StatService.setAuthorizedState(this, false)
@@ -641,7 +640,6 @@ class MainActivity
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        getCustomDensityDpi()
         super.onConfigurationChanged(newConfig)
         basePlayerDelegate.onConfigurationChanged(newConfig)
         ui.root.orientation = newConfig.orientation
@@ -649,14 +647,6 @@ class MainActivity
             !ui.root.showPlayer || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             setWindowInsetsAndroidL()
-        }
-    }
-
-    private fun getCustomDensityDpi() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val dpi = prefs.getInt("app_dpi", 0)
-        if (dpi != 0) {
-            Bilimiao.app.setCustomDensityDpi(this, dpi)
         }
     }
 
@@ -687,6 +677,13 @@ class MainActivity
             return
         }
         super.onBackPressed()
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val configuration: Configuration = newBase.resources.configuration
+        ScreenDpiUtil.readCustomConfiguration(configuration)
+        val newContext = newBase.createConfigurationContext(configuration)
+        super.attachBaseContext(newContext)
     }
 
 }

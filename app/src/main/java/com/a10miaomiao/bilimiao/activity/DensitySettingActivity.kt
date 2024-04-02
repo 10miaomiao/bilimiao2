@@ -1,20 +1,25 @@
 package com.a10miaomiao.bilimiao.activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.text.InputType
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
+import com.a10miaomiao.bilimiao.config.config
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
+import com.kongzue.dialogx.dialogs.PopTip
+import org.kodein.di.DI
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
-import splitties.toast.toast
+import splitties.views.backgroundColor
 import splitties.views.dsl.core.Ui
 import splitties.views.dsl.core.editText
 import splitties.views.dsl.core.horizontalMargin
@@ -30,43 +35,60 @@ import splitties.views.textColorResource
 
 class DensitySettingActivity : AppCompatActivity() {
 
-    private var initialAppDpi = 0
-    private lateinit var ui: DensitySettingUi
+    private val di: DI = DI.lazy {}
+
+    private val themeDelegate by lazy {
+        ThemeDelegate(this@DensitySettingActivity, di)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ui = DensitySettingUi(this)
-        setContentView(ui)
-        initialAppDpi = getAppApi()
-    }
-
-    fun getAppApi(): Int {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        return prefs.getInt("app_dpi", 0)
-    }
-
-    fun setCustomDensityDpi(dpi: Int) {
-        Bilimiao.app.setCustomDensityDpi(this, dpi)
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        prefs.edit()
-            .putInt("app_dpi", dpi)
-            .apply()
-        ui = DensitySettingUi(this)
+        themeDelegate.onCreate(savedInstanceState)
+        val ui = DensitySettingUi(this)
         setContentView(ui)
     }
 
     override fun onBackPressed() {
-        if (initialAppDpi == getAppApi()) {
-            super.onBackPressed()
-        } else {
+        if (isChanged()) {
             // 直接重启APP
             val intent = packageManager.getLaunchIntentForPackage(packageName)!!
             val componentName = intent.component
             val mainIntent = Intent.makeRestartActivityTask(componentName)
             startActivity(mainIntent)
             Runtime.getRuntime().exit(0)
+        } else {
+            finish()
         }
     }
+
+    fun setCustomConfiguration(dpi: Int, fontScale: Float) {
+        if (dpi <= 0 || fontScale <= 0f) {
+            PopTip.show("请输入大于0的整数")
+        }
+        ScreenDpiUtil.saveCustomConfiguration(dpi, fontScale)
+        reStartActivity()
+    }
+
+    private fun reStartActivity() {
+        val intent = intent
+        intent.putExtra("changed", true)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent)
+    }
+
+    private fun isChanged(): Boolean {
+        return intent.getBooleanExtra("changed", false)
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val configuration: Configuration = newBase.resources.configuration
+        ScreenDpiUtil.readCustomConfiguration(configuration)
+        val newContext = newBase.createConfigurationContext(configuration)
+        super.attachBaseContext(newContext)
+    }
+
 
     @OptIn(InternalSplittiesApi::class)
     class DensitySettingUi(
@@ -76,6 +98,8 @@ class DensitySettingActivity : AppCompatActivity() {
         override val ctx = activity
 
         val toolBar = view<MaterialToolbar>(View.generateViewId()) {
+            clipToPadding = true
+            fitsSystemWindows = true
             setTitle(R.string.density_setting)
             setNavigationIcon(R.drawable.ic_back_24dp)
             setNavigationOnClickListener {
@@ -85,19 +109,29 @@ class DensitySettingActivity : AppCompatActivity() {
 
         val dipEditText = editText {
             setRawInputType(InputType.TYPE_CLASS_NUMBER)
-            setText(resources.displayMetrics.densityDpi.toString())
+            setText(resources.configuration.densityDpi.toString())
+        }
+
+        val fontScaleEditText = editText {
+            setRawInputType(InputType.TYPE_CLASS_NUMBER)
+            setText(resources.configuration.fontScale.toString())
         }
 
         override val root: View = verticalLayout {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            fitsSystemWindows = true
+
             addView(toolBar, lParams(matchParent, wrapContent))
 
             addView(textView {
-                text = "系统默认DPI：${Bilimiao.app.noncompatDpi}"
+                text = "系统默认DPI：${ScreenDpiUtil.getDefaultDpi()}"
             }, lParams(matchParent, wrapContent) {
                 topMargin = dip(10)
                 horizontalMargin = dip(10)
             })
-
             addView(textView {
                 text = "当前应用内DPI修改："
             }, lParams(matchParent, wrapContent) {
@@ -106,6 +140,23 @@ class DensitySettingActivity : AppCompatActivity() {
             addView(dipEditText, lParams(matchParent, wrapContent) {
                 horizontalMargin = dip(10)
             })
+
+            addView(textView {
+                text = "系统默认字体缩放：${ScreenDpiUtil.getDefaultFontScale()}"
+            }, lParams(matchParent, wrapContent) {
+                topMargin = dip(10)
+                horizontalMargin = dip(10)
+            })
+            addView(textView {
+                text = "当前字体缩放修改："
+            }, lParams(matchParent, wrapContent) {
+                horizontalMargin = dip(10)
+            })
+            addView(fontScaleEditText, lParams(matchParent, wrapContent) {
+                horizontalMargin = dip(10)
+            })
+
+
             addView(view<MaterialButton> {
                 text = "确认修改"
                 textColorResource = R.color.white
@@ -114,20 +165,20 @@ class DensitySettingActivity : AppCompatActivity() {
                     try {
                         val dipStr = dipEditText.text.toString()
                         val dpi = dipStr.toInt()
-                        if (dpi <= 0) {
-                            toast("请输入大于0的整数")
-                        } else {
-                            activity.setCustomDensityDpi(dpi)
-                        }
+                        val fontScaleStr = fontScaleEditText.text.toString()
+                        val fontScale = fontScaleStr.toFloat()
+                        activity.setCustomConfiguration(dpi, fontScale)
                     } catch (ex: NumberFormatException) {
-                        toast("请输入整数")
+                        PopTip.show("请输入整数")
                     }
                 }
             }, lParams(matchParent, wrapContent) {
                 horizontalMargin = dip(10)
                 bottomMargin = dip(10)
             })
-        }.wrapInScrollView(height = ViewGroup.LayoutParams.MATCH_PARENT)
+        }.wrapInScrollView(height = ViewGroup.LayoutParams.MATCH_PARENT) {
+            backgroundColor = config.windowBackgroundColor
+        }
 
     }
 
