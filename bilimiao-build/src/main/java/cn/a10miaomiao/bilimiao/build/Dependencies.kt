@@ -13,7 +13,7 @@ object Versions {
     const val navigation = "2.7.6"
     const val compose = "1.5.4"
     const val media = "1.6.0"
-    const val media3 = "1.0.0-rc01"
+    const val media3 = "1.3.0"
 
     const val accompanist = "0.29.2-rc"
 
@@ -26,7 +26,7 @@ object Versions {
     const val gson = "2.10.1"
     const val glide = "4.13.2"
 
-    const val gsyVideoPlayer = "v8.4.0-release-jitpack"
+    const val gsyVideoPlayer = "v8.6.0-release-jitpack"
 }
 
 object Libraries {
