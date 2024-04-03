@@ -15,8 +15,12 @@ import androidx.navigation.NavType
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.miao.binding.android.view.*
+import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
@@ -83,6 +87,24 @@ class WebFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         title = pageTitle
+        menus = listOf(
+            myMenuItem {
+                key = MenuKeys.more
+                iconResource = R.drawable.ic_more_vert_grey_24dp
+                title = "更多"
+            },
+        )
+    }
+
+    override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+        super.onMenuItemClick(view, menuItem)
+        when(menuItem.key) {
+            MenuKeys.more -> {
+                val url = mWebView?.url ?: return
+                WebMorePopupMenu(requireActivity(), view, url)
+                    .show()
+            }
+        }
     }
 
     override val di: DI by lazyUiDi(ui = { ui })
