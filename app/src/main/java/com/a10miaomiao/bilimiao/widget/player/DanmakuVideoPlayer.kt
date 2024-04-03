@@ -24,20 +24,15 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
-import com.shuyu.gsyvideoplayer.video.base.GSYBaseVideoPlayer
-import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
-import com.shuyu.gsyvideoplayer.video.base.GSYVideoViewBridge
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
@@ -275,7 +270,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     private fun initView() {
-        mSeekRatio = 0.01f
+        mSeekRatio = 200f
         isShowDragProgressTextOnSeekBar = true
         enlargeImageRes = R.drawable.ic_player_portrait_fullscreen
         shrinkImageRes = R.drawable.ic_player_portrait_fullscreen
@@ -390,35 +385,58 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         if (System.currentTimeMillis() - touchSurfaceDownTime >= 500
             && mCurrentState == CURRENT_STATE_PLAYING
             && !mChangePosition && !mChangeVolume && !mBrightness) {
-            isSpeedPlaying = true
-            lastSpeed = speed
-            speed *= 2
-            mSpeedTips.visibility = View.VISIBLE
-            mTouchingProgressBar = false
-            (mSpeedTipsIV.drawable as? AnimationDrawable)?.start()
-            // 震动效果
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                vibrator.vibrate(
-                    VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
-                )
-            } else {
-                // 这种震动不舒服不自然
-                // vibrator.vibrate(longArrayOf(0, 50), -1)
-            }
+            startLongClickSpeedPlay()
         }
+    }
+
+    /**
+     * 开始长按倍数播放
+     */
+    private fun startLongClickSpeedPlay() {
+        isSpeedPlaying = true
+        lastSpeed = speed
+        speed *= 2
+        mSpeedTips.visibility = View.VISIBLE
+        mTouchingProgressBar = false
+        (mSpeedTipsIV.drawable as? AnimationDrawable)?.start()
+        // 震动效果
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            vibrator.vibrate(
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            )
+        } else {
+            // 这种震动不舒服不自然
+            // vibrator.vibrate(longArrayOf(0, 50), -1)
+        }
+    }
+
+    /**
+     * 停止长按倍数播放
+     */
+    private fun stopLongClickSpeedPlay() {
+        mSpeedTips.visibility = View.GONE
+        isSpeedPlaying = false
+        speed = lastSpeed
+        (mSpeedTipsIV.drawable as? AnimationDrawable)?.stop()
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
         if (event != null) {
             when(event.action){
-                MotionEvent.ACTION_CANCEL -> {
+                MotionEvent.ACTION_CANCEL,
+                MotionEvent.ACTION_UP-> {
                     //触控被拦截不触发长按倍速
                     removeCallbacks(longClickControlTask)
+                    touchSurfaceDownTime = Long.MAX_VALUE
+                    if (isSpeedPlaying) {
+                        stopLongClickSpeedPlay()
+                    }
                 }
             }
         }
         return super.onTouch(v, event)
     }
+
     override fun touchSurfaceDown(x: Float, y: Float) {
         super.touchSurfaceDown(x, y)
         val curWidth = measuredWidth
@@ -447,9 +465,12 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 if (CommonUtil.getCurrentScreenLand(activityContext as Activity)) mScreenWidth else mScreenHeight
         }
         if (mChangePosition) {
+            if (mDownPosition == 0L) {
+                mDownPosition = currentPosition
+            }
             //
             val totalTimeDuration = duration
-            val offsetPosition = deltaX / context.dip(1) / mSeekRatio
+            val offsetPosition = deltaX / context.dip(1) * mSeekRatio
             mSeekTimePosition = (mDownPosition + offsetPosition).toLong()
             if (mSeekTimePosition < 0) {
                 mSeekTimePosition = 0
@@ -475,18 +496,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
-    override fun touchSurfaceUp() {
-        removeCallbacks(longClickControlTask)
-        touchSurfaceDownTime = Long.MAX_VALUE
-        if (isSpeedPlaying) {
-            mSpeedTips.visibility = View.GONE
-            isSpeedPlaying = false
-            speed = lastSpeed
-            (mSpeedTipsIV.drawable as? AnimationDrawable)?.stop()
-        } else {
-            super.touchSurfaceUp()
-        }
-    }
     // end
 
 //    override fun setProgressAndTime(
@@ -563,15 +572,35 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     override fun hideAllWidget() {
-        setViewShowState(mBottomContainer, INVISIBLE)
-        setViewShowState(mTopContainer, INVISIBLE)
-        setViewShowState(mStartButton, INVISIBLE)
+        super.hideAllWidget()
         if (mode == PlayerMode.FULL && showBottomProgressBarInFullMode) {
             setViewShowState(mBottomProgressBar, VISIBLE)
         } else if ((mode == PlayerMode.SMALL_FLOAT || mode == PlayerMode.SMALL_TOP) && showBottomProgressBarInSmallMode) {
             setViewShowState(mBottomProgressBar, VISIBLE)
         } else {
             setViewShowState(mBottomProgressBar, INVISIBLE)
+        }
+    }
+
+    private fun showAllWidget() {
+        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
+            setViewShowState(mLockScreen, VISIBLE)
+        } else {
+            if (mIfCurrentIsFullscreen && !mSurfaceErrorPlay
+                && mCurrentState == CURRENT_STATE_ERROR) {
+                changeUiToPlayingShow()
+            } else if (mCurrentState == CURRENT_STATE_PREPAREING) {
+                changeUiToPreparingShow()
+            } else if (mCurrentState == CURRENT_STATE_PLAYING) {
+                changeUiToPlayingShow()
+            } else if (mCurrentState == CURRENT_STATE_PAUSE) {
+                changeUiToPauseShow()
+            } else if (mCurrentState == CURRENT_STATE_AUTO_COMPLETE) {
+                changeUiToCompleteShow()
+            } else if (mCurrentState == CURRENT_STATE_PLAYING_BUFFERING_START
+                && mBottomContainer != null) {
+                changeUiToPlayingBufferingShow()
+            }
         }
     }
 
@@ -928,8 +957,14 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         updateDanmakuMargin()
     }
 
+    fun showController() {
+        showAllWidget()
+        cancelDismissControlViewTimer()
+    }
+
     fun hideController() {
         hideAllWidget()
+        cancelDismissControlViewTimer()
     }
 
     fun showSmallDargBar() {

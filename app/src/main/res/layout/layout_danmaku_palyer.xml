@@ -24,10 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:background="#000000"
         android:scaleType="fitCenter" />
@@ -85,14 +83,16 @@
                 android:layout_height="36dp"
                 android:paddingRight="8dp"
                 android:src="@drawable/ic_baseline_send_24"
-                app:tint="@color/white"/>
+                app:tint="@color/white"
+                android:contentDescription="发送弹幕按钮"/>
 
             <ImageView
                 android:id="@+id/fullscreen"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:paddingRight="8dp"
-                android:src="@drawable/ic_player_portrait_fullscreen" />
+                android:src="@drawable/ic_player_portrait_fullscreen"
+                android:contentDescription="全屏切换按钮"/>
 
         </LinearLayout>
 
@@ -269,7 +269,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:paddingLeft="10dp"
-            android:src="@drawable/ic_close_white_24dp" />
+            android:src="@drawable/ic_close_white_24dp"
+            android:contentDescription="退出按钮"/>
 
         <TextView
             android:id="@+id/title"
@@ -335,7 +336,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:paddingRight="10dp"
-            android:src="@drawable/ic_more_vert_white_24dp" />
+            android:src="@drawable/ic_more_vert_white_24dp"
+            android:contentDescription="播放器菜单"/>
 
     </LinearLayout>
 
@@ -353,7 +355,8 @@
         android:layout_height="60dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:contentDescription="播放或暂停按钮"/>
 
 
     <ImageView
@@ -364,7 +367,8 @@
         android:paddingTop="10dp"
         android:scaleType="centerInside"
         android:src="@drawable/ic_close_white_24dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:contentDescription="关闭按钮"/>
 
     <ImageView
         android:id="@+id/lock_screen"
@@ -375,7 +379,8 @@
         android:layout_marginRight="50dp"
         android:scaleType="centerInside"
         android:src="@drawable/unlock"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:contentDescription="锁定按钮"/>
 
     <RelativeLayout
         android:id="@+id/layout_lock_screen"
@@ -390,7 +395,8 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="5dp"
-            android:src="@drawable/shape_unlock" />
+            android:src="@drawable/shape_unlock"
+            android:contentDescription="解锁按钮1"/>
 
         <ImageView
             android:id="@+id/unlock_right"
@@ -399,7 +405,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
-            android:src="@drawable/shape_unlock" />
+            android:src="@drawable/shape_unlock"
+            android:contentDescription="解锁按钮2"/>
 
     </RelativeLayout>
 
@@ -424,7 +431,8 @@
             android:src="@drawable/shape_player_hold_up"
             android:scaleType="center"
             android:layout_marginEnd="0dp"
-            android:layout_gravity="end|center_vertical"/>
+            android:layout_gravity="end|center_vertical"
+            android:contentDescription="挂起按钮"/>
 
     </FrameLayout>
 

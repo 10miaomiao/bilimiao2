@@ -3,7 +3,6 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Typeface
-import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Rational
@@ -11,10 +10,11 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.edit
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
@@ -32,20 +32,19 @@ import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesParam
 import com.a10miaomiao.bilimiao.service.PlayerService
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+
 
 class PlayerController(
     private var activity: AppCompatActivity,
@@ -124,6 +123,19 @@ class PlayerController(
                     "fonts/danmaku.ttf"
                 )
             )
+        }
+
+        // 无障碍适配
+        contentDescription = "播放窗口"
+        accessibilityDelegate = object : View.AccessibilityDelegate() {
+            override fun sendAccessibilityEvent(host: View, eventType: Int) {
+                super.sendAccessibilityEvent(host, eventType)
+                when (eventType) {
+                    AccessibilityEvent.TYPE_VIEW_HOVER_EXIT -> {
+                        showController()
+                    }
+                }
+            }
         }
     }
 
