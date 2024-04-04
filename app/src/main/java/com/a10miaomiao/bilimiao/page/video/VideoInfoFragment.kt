@@ -841,6 +841,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 +horizontalLayout {
                     views {
                         +rcImageView {
+                            contentDescription = "视频封面"
                             radius = dip(5)
                             setOnClickListener(handleCoverClick)
                             _network(videoInfo?.pic, "@672w_378h_1c_")
