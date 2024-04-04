@@ -33,6 +33,7 @@ import com.a10miaomiao.bilimiao.comm.newViewModelFactory
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.config
@@ -171,8 +172,9 @@ class SearchActivity : AppCompatActivity() {
             }
         })
         ui.searchEditText.setOnEditorActionListener(TextView.OnEditorActionListener { v, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_UNSPECIFIED
-                && event.action == KeyEvent.ACTION_DOWN
+            if (event?.action == KeyEvent.ACTION_DOWN
+                && actionId == EditorInfo.IME_ACTION_UNSPECIFIED
+                || actionId == EditorInfo.IME_ACTION_SEARCH
             ) {
                 val keyword = ui.searchEditText.text.toString()
                 startSearch(keyword)
