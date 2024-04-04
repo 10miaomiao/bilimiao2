@@ -23,7 +23,7 @@ class DrawerBehaviorDelegate(
     //    private var initialY = 0f
     private var initialX = 0f
     private var touchOnAppBar = false
-    private val minLeft = parent.dip(20)
+    private val minLeft = parent.dip(40)
 
     private val appBarHeight = parent.context.config.appBarHeight
     private val appBarWidth = parent.context.config.appBarMenuWidth

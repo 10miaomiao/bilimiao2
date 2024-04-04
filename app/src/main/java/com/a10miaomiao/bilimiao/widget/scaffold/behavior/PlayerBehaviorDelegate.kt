@@ -186,14 +186,25 @@ class PlayerBehaviorDelegate(
         if (dragger.smoothSlideViewTo(playerView, playerX, playerY)) {
             ViewCompat.postInvalidateOnAnimation(parent)
         }
-        ViewCompat.postOnAnimation(parent,sizeChangeSettle)
+        ViewCompat.postOnAnimation(parent, sizeChangeSettle)
     }
     /**
      * 挂起到右上↗
      */
     fun holdUpTop() {
-        playerX =parent.measuredWidth - (parent.dip(parent.playerHoldShowArea) * sqrt(parent.playerVideoRatio)).toInt() - windowInsets.right
+        val originHeight = playerHeight
+        val originWidth = playerWidth
+        val widthHeightRatio = parent.playerVideoRatio
+        playerHeight = (parent.dip(parent.playerHoldShowArea) / sqrt(widthHeightRatio)).toInt()
+        playerWidth = (parent.dip(parent.playerHoldShowArea) * sqrt(widthHeightRatio)).toInt()
+        playerX = parent.measuredWidth - playerWidth - windowInsets.right
         playerY = windowInsets.top
+        // 动画起点x,y坐标
+        val originX = playerView.x.toInt() + (originWidth - playerWidth) / 26
+        val originY = playerView.y.toInt() + (originHeight - playerHeight) / 2
+        // 在动画开始前改变布局位置及尺寸，在动画结束时就不会有顿挫感
+        playerView.layout(originX, originY,originX + playerWidth,originY + playerHeight)
+        // 开始动画
         if (dragger.smoothSlideViewTo(playerView, playerX, playerY)) {
             ViewCompat.postInvalidateOnAnimation(parent)
         }
@@ -211,7 +222,7 @@ class PlayerBehaviorDelegate(
     /**
      * 控制小窗位置
      */
-    private fun resetPosition(){
+    private fun resetPosition() {
         val measuredWidth = parent.measuredWidth
         val measuredHeight = parent.measuredHeight
         if(parent.isHoldUpPlayer){
@@ -323,6 +334,7 @@ class PlayerBehaviorDelegate(
             }
         }
     }
+
     private var draggingSide = NONE
     private var startX = 0
     private var startY = 0
@@ -504,17 +516,23 @@ class PlayerBehaviorDelegate(
                 playerHeight = (parent.dip(onSmallShowArea) / sqrt(widthHeightRatio)).toInt()
                 playerWidth = (parent.dip(onSmallShowArea) * sqrt(widthHeightRatio)).toInt()
             }
+            // 内容区域每列最小宽度，单屏模式时取0
+            val contentMinWidth = if (parent.hasSubContent) {
+                parent.contentMinWidth
+            } else {
+                0
+            }
             //阻止窗口过窄
-            if (playerWidth < parent.contentMinWidth && !parent.isHoldUpPlayer){
+            if (playerWidth < contentMinWidth && !parent.isHoldUpPlayer){
                 val newShowAreaDip =
-                    (parent.contentMinWidth) / sqrt(widthHeightRatio)
+                    (contentMinWidth) / sqrt(widthHeightRatio)
                 playerHeight = (newShowAreaDip / sqrt(widthHeightRatio)).toInt()
                 playerWidth = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }
             //防止参数设置过大超出屏幕上限  保证一列内容区域的宽度
-            if (playerWidth > parent.measuredWidth - windowInsets.left - windowInsets.right - parent.contentMinWidth) {
+            if (playerWidth > parent.measuredWidth - windowInsets.left - windowInsets.right - contentMinWidth) {
                 val newShowAreaDip =
-                    (parent.measuredWidth - windowInsets.left - windowInsets.right - parent.contentMinWidth) / sqrt(widthHeightRatio)
+                    (parent.measuredWidth - windowInsets.left - windowInsets.right - contentMinWidth) / sqrt(widthHeightRatio)
                 playerHeight = (newShowAreaDip / sqrt(widthHeightRatio)).toInt()
                 playerWidth = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }

@@ -172,15 +172,16 @@ class AppBarView @JvmOverloads constructor(
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun newProp (): PropInfo {
         val prop = PropInfo()
+        val theme = context.theme
         if (canBack) {
 //            prop.onNavigationClick = onBackClick
-            prop.navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp)
+            prop.navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp, theme)
         }
         if (showPointer) {
-            prop.navigationPointerIcon = resources.getDrawable(R.drawable.ic_pointer_24dp)
+            prop.navigationPointerIcon = resources.getDrawable(R.drawable.ic_pointer_24dp, theme)
             prop.pointerIconOrientation = pointerOrientation
         }
-        prop.navigationExchangeIcon = resources.getDrawable(R.drawable.ic_exchange_24dp)
+        prop.navigationExchangeIcon = resources.getDrawable(R.drawable.ic_exchange_24dp, theme)
         return prop
     }
 
