@@ -191,6 +191,8 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             this@MainUi.mBottomSheetBehavior = b
         })
     }
+
+    override val bottomSheetView get() = mBottomSheetView
     override val bottomSheetBehavior get() = mBottomSheetBehavior
     override val bottomSheetTitleView get() = mBottomSheetTitleView
     override val bottomSheetMaskView get() = mMaskView
