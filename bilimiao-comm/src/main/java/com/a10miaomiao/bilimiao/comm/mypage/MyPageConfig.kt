@@ -30,6 +30,7 @@ class MyPageConfig(
         override fun onResume(owner: LifecycleOwner) {
             super.onResume(owner)
             notifyConfigChanged()
+            fragment.view?.announceForAccessibility(configInfo.title)
         }
     }
 
