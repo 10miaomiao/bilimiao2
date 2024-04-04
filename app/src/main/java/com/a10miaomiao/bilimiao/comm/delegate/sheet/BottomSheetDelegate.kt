@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.delegate.sheet
 
 import android.os.Bundle
 import android.view.View
+import android.view.accessibility.AccessibilityEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -15,6 +16,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+
 
 class BottomSheetDelegate(
     private val activity: AppCompatActivity,
@@ -32,7 +34,7 @@ class BottomSheetDelegate(
 
     private fun initBottomSheet() {
         navBottomSheetFragment = activity.supportFragmentManager
-            .findFragmentById(R.id.nav_bottom_sheet_fragment) as NavHostFragment
+            .findFragmentById(ui.bottomSheetView.id) as NavHostFragment
         navBottomSheetController = navBottomSheetFragment.navController
         MainNavGraph.createGraph(navBottomSheetController, MainNavGraph.dest.template)
         navBottomSheetController.addOnDestinationChangedListener(this)
@@ -67,7 +69,6 @@ class BottomSheetDelegate(
         ui.bottomSheetMaskView.setOnClickListener {
             ui.bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         }
-
     }
 
     override fun onDestinationChanged(
@@ -86,7 +87,17 @@ class BottomSheetDelegate(
                 behavior?.state = BottomSheetBehavior.STATE_EXPANDED //设置为展开状态
                 behavior?.skipCollapsed = true
                 behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                requestFocus()
             }
+        }
+    }
+
+    private fun requestFocus() {
+        val bottomSheetView = ui.bottomSheetView
+        bottomSheetView.isFocusable = true
+        bottomSheetView.post {
+            bottomSheetView.requestFocus()
+            bottomSheetView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
         }
     }
 
@@ -98,7 +109,9 @@ class BottomSheetDelegate(
     }
 
     private fun setMyPageConfig(config: MyPageConfigInfo) {
-        ui.bottomSheetTitleView.text = config.title.replace("\n", " ")
+        val title = config.title.replace("\n", " ")
+        ui.bottomSheetTitleView.text = title
+        ui.bottomSheetView.contentDescription = "${title}，弹出式页面"
     }
 
 
