@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,6 +35,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -115,19 +117,20 @@ private fun PlayListPageContent(
     val playListInfo = playerState.playList
 
     if (playListInfo != null) {
+        val currentPosition = remember {
+            playerState.getPlayListCurrentPosition()
+        }
+        val lazyListState = rememberLazyListState(
+            initialFirstVisibleItemIndex = currentPosition
+        )
         LazyColumn(
-//            columns = GridCells.Adaptive(400.dp),
+            state = lazyListState,
             modifier = Modifier.padding(
                 start = windowInsets.leftDp.dp,
                 end = windowInsets.rightDp.dp,
             )
         ) {
-
-            item(
-//                span = {
-//                    GridItemSpan(maxLineSpan)
-//                }
-            ) {
+            item {
                 Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
             }
             val playListItems = playListInfo.items
@@ -255,5 +258,7 @@ private fun PlayListPageContent(
                 Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
             }
         }
+    } else {
+
     }
 }
