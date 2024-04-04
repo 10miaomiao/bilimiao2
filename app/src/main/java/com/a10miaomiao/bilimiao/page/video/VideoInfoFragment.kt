@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.*
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.cover.CoverActivity
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColor
@@ -68,6 +70,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.kongzue.dialogx.dialogs.PopTip
+import net.mikaelzero.mojito.ext.mojito
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -360,6 +363,16 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         viewModel.info?.let { info ->
             toUser(it, info.owner.mid)
         }
+    }
+
+    private val handleTitleClick = View.OnClickListener {
+        if (it is TextView) {
+            PopTip.show(it.text)
+        }
+    }
+
+    private val handleCoverClick = View.OnClickListener {
+        CoverActivity.launch(requireContext(), viewModel.id)
     }
 
     private val handleMorePageClick = View.OnClickListener {
@@ -829,6 +842,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     views {
                         +rcImageView {
                             radius = dip(5)
+                            setOnClickListener(handleCoverClick)
                             _network(videoInfo?.pic, "@672w_378h_1c_")
                         }..lParams {
                             width = dip(150)
@@ -845,6 +859,8 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                                     ellipsize = TextUtils.TruncateAt.END
                                     maxLines = 4
                                     setTextColor(config.foregroundColor)
+                                    setTextIsSelectable(true)
+                                    setOnClickListener(handleTitleClick)
                                     _text = videoInfo?.title ?: ""
                                 }..lParams(weight = 1f)
 
