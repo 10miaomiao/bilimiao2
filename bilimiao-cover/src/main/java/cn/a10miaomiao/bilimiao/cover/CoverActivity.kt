@@ -40,6 +40,14 @@ class CoverActivity : AppCompatActivity() {
             mIntent.putExtra("type", type)
             context.startActivity(mIntent)
         }
+
+        fun launch(context: Context, id: String) {
+            if (id.startsWith("BV")) {
+                launch(context, id, "BV")
+            } else {
+                launch(context, id, "AV")
+            }
+        }
     }
 
     private lateinit var viewModel: CoverViewModel
