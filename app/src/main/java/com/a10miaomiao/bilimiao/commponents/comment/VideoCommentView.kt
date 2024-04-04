@@ -12,6 +12,7 @@ import android.widget.ImageView
 import androidx.core.graphics.toColorInt
 import androidx.core.view.marginBottom
 import bilibili.main.community.reply.v1.ReplyOuterClass
+import cn.a10miaomiao.miao.binding.android.view._contentDescription
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -154,6 +155,36 @@ fun MiaoUI.videoCommentView(
         padding = dip(10)
         setBackgroundResource(config.selectableItemBackground)
 
+        _contentDescription = with(StringBuilder()) {
+            if (uname.isNotBlank()) {
+                if (upMid == mid) {
+                    append("UP主")
+                }
+                append(uname + "的评论")
+            }
+            if (time.isNotBlank()) {
+                append(",")
+                append("发表于：$time")
+            }
+            if (location.isNotBlank()) {
+                append(",")
+                append("IP属地：$location")
+            }
+            if (content.message.isNotBlank()) {
+                append(",")
+                append("评论内容：")
+                append(content.message)
+            }
+            append(",")
+            append("点赞数：${like}")
+            append(",")
+            append("评论数：${count}")
+            if (isLike) {
+                append(",你已点赞过该评论")
+            }
+            toString()
+        }
+
         views {
             // 头像
             +rcImageView {
@@ -162,6 +193,7 @@ fun MiaoUI.videoCommentView(
                 onUpperClick?.let {
                     setOnClickListener(onUpperClick)
                 }
+                _contentDescription = "${uname}的头像"
 
                 _network(avatar)
 //              .placeholder(R.drawable.ico_user_default)
@@ -279,6 +311,11 @@ fun MiaoUI.videoCommentView(
                             val iconSize = dip(14)
                             +imageView {
                                 setImageResource(R.drawable.ic_comment_unlike)
+                                _contentDescription = if (isLike) {
+                                    "点赞图标：已点赞"
+                                } else {
+                                    "点赞图标：未点赞"
+                                }
                                 _tag = index
                                 miaoEffect(isLike) {
                                     imageTintList = ColorStateList.valueOf(
@@ -296,6 +333,7 @@ fun MiaoUI.videoCommentView(
                             +textView {
                                 textSize = 14f
                                 _text = NumberUtil.converString(like)
+                                _contentDescription = "点赞数量：$like"
                                 _tag = index
                                 miaoEffect(isLike) {
                                     setTextColor(
@@ -310,6 +348,7 @@ fun MiaoUI.videoCommentView(
                             }..lParams(dip(80), wrapContent)
                             +imageView {
                                 setImageResource(R.drawable.ic_comment_reply)
+                                contentDescription = "回复图标"
                                 imageTintList = ColorStateList.valueOf(config.foregroundAlpha45Color)
                             }..lParams(iconSize, iconSize) {
                                 rightMargin = dip(4)
@@ -319,6 +358,7 @@ fun MiaoUI.videoCommentView(
                                 textSize = 14f
 
                                 _text = NumberUtil.converString(count)
+                                _contentDescription = "回复数量：$like"
                             }
                         }
                     }..lParams {
