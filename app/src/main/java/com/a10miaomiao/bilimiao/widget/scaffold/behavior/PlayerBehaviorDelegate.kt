@@ -31,7 +31,7 @@ class PlayerBehaviorDelegate(
     private val minPadding = parent.dip(10)
     // 拖拽窗口边缘调整大小区域宽度
     private val dragWidth = parent.dip(12)
-    private val dragButtonWidth
+    private val holdButtonWidth
         get() = danmakuVideoPlayer?.getHoldButtonWidth() ?: 0
 
     @DragState
@@ -176,6 +176,9 @@ class PlayerBehaviorDelegate(
      * 展开窗口
      */
     fun holdDown(){
+        if(!parent.showPlayer){
+            return
+        }
         val originHeight = playerHeight
         val originWidth = playerWidth
         parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
@@ -192,11 +195,12 @@ class PlayerBehaviorDelegate(
      * 挂起到右上↗
      */
     fun holdUpTop() {
+        if(!parent.showPlayer){
+            return
+        }
         val originHeight = playerHeight
         val originWidth = playerWidth
-        val widthHeightRatio = parent.playerVideoRatio
-        playerHeight = (parent.dip(parent.playerHoldShowArea) / sqrt(widthHeightRatio)).toInt()
-        playerWidth = (parent.dip(parent.playerHoldShowArea) * sqrt(widthHeightRatio)).toInt()
+        parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
         playerX = parent.measuredWidth - playerWidth - windowInsets.right
         playerY = windowInsets.top
         // 动画起点x,y坐标
@@ -208,15 +212,8 @@ class PlayerBehaviorDelegate(
         if (dragger.smoothSlideViewTo(playerView, playerX, playerY)) {
             ViewCompat.postInvalidateOnAnimation(parent)
         }
-        ViewCompat.postOnAnimation(parent, object : Runnable {
-            override fun run() {
-                if (dragger.continueSettling(true)) {
-                    ViewCompat.postOnAnimation(parent, this)
-                } else {
-                    parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.HOLD_UP
-                }
-            }
-        })
+        //用这个settle可以让视频内容一起缩放
+        ViewCompat.postOnAnimation(parent,sizeChangeSettle)
     }
 
     /**
@@ -361,7 +358,7 @@ class PlayerBehaviorDelegate(
                             return true
                         } else if (startY < playerView.y + dragAreaHeight) {
                             //顶部拖拽条
-                            if (startX < playerView.x + playerWidth - dragAreaHeight || parent.isHoldUpPlayer) {
+                            if (startX < playerView.x + playerWidth - holdButtonWidth || parent.isHoldUpPlayer) {
                                 // 非挂起时，减去右侧挂起按钮宽度
                                 draggingSide = TOPSIDE
                                 dragger.captureChildView(playerView, ev.getPointerId(ev.actionIndex))
