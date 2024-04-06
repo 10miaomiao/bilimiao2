@@ -454,9 +454,12 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     override fun touchSurfaceMove(deltaX: Float, deltaY: Float, y: Float) {
         if (isSpeedPlaying) {
+            mChangePosition=false
             return
         }
         if (mDownY<context.dip(25)){
+            //顶部防误触
+            mChangePosition=false
             return
         }
         var curHeight = 0
