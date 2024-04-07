@@ -176,15 +176,17 @@ class AppBarVerticalUi(
                             menuItemView.minimumWidth = dip(60)
                             menuItemView.setBackgroundResource(config.selectableItemBackgroundBorderless)
                             menuItemView.setOnClickListener(menuItemClick)
-                            //if (menu.key == MenuKeys.back) {
-                                menuItemView.setOnLongClickListener(menuItemLongClick)
-                            //}
                             addView(menuItemView, lParams {
                                 width = wrapContent
                                 height = matchParent
                             })
                         } else {
                             menuItemView = getChildAt(index) as MenuItemView
+                        }
+                        if (menu.key == MenuKeys.back) {
+                            menuItemView.setOnLongClickListener(menuItemLongClick)
+                        } else {
+                            menuItemView.setOnLongClickListener(null)
                         }
                         menuItemView.prop = menu
                     }
