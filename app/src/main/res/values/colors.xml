@@ -12,11 +12,13 @@
     <color name="windowBackgroundColor">#f2f2f2</color>
     <color name="blockBackgroundColor">#ffffff</color>
     <color name="lineColor">#e6e6e6</color>
+    <color name="shadowColor">#000000</color>
 
     <color name="darkForegroundColor">#ffffff</color>
     <color name="darkWindowBackgroundColor">#000000</color>
     <color name="darkBlockBackgroundColor">#2b2b2b</color>
     <color name="darkLineColor">#2c2c2c</color>
+    <color name="darkShadowColor">#ffffff</color>
 
     <color name="gray_light">#dcdcdc</color>
     <color name="bangumi_badge_gary">#668B8B8C</color>

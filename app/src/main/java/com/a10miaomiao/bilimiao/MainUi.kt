@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.preference.PreferenceManager
 import android.view.Gravity
 import android.view.View
@@ -64,6 +65,9 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
     val mPlayerLayout = frameLayout {
         backgroundColor = 0xFF000000.toInt()
         elevation = dip(20).toFloat()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            outlineSpotShadowColor = config.shadowColor
+        }
 
         val videoPlayerView = PlayerService.selfInstance?.videoPlayerView?.apply {
             (parent as? ViewGroup)?.removeAllViews()

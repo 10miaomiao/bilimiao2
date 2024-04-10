@@ -27,6 +27,7 @@
         <item name="blockBackground">@color/blockBackgroundColor</item>
         <item name="foregroundColor">@color/foregroundColor</item>
         <item name="lineColor">@color/lineColor</item>
+        <item name="shadowColor">@color/shadowColor</item>
         <item name="defaultBackgroundColor">@color/windowBackgroundColor</item>
 
         <item name="android:windowBackground">@drawable/splash_default</item>
@@ -57,6 +58,7 @@
         <item name="blockBackground">@color/darkBlockBackgroundColor</item>
         <item name="foregroundColor">@color/darkForegroundColor</item>
         <item name="lineColor">@color/darkLineColor</item>
+        <item name="shadowColor">@color/darkShadowColor</item>
         <item name="defaultBackgroundColor">@color/darkWindowBackgroundColor</item>
 
         <item name="android:windowBackground">@drawable/splash_default</item>
@@ -80,6 +82,7 @@
         <item name="blockBackground">@color/blockBackgroundColor</item>
         <item name="foregroundColor">@color/foregroundColor</item>
         <item name="lineColor">@color/lineColor</item>
+        <item name="shadowColor">@color/shadowColor</item>
         <item name="defaultBackgroundColor">@color/windowBackgroundColor</item>
 
         <item name="navigationViewStyle">@style/Widget.Bilimaio.Material3.NavigationView</item>
