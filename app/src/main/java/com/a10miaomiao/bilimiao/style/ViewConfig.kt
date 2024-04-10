@@ -57,6 +57,8 @@ class ViewConfig(val context: Context) {
 
     val lineColorResource get() = context.attr(R.attr.lineColor)
     val lineColor get() = getColor(lineColorResource)
+    val shadowColorResource get() = context.attr(R.attr.shadowColor)
+    val shadowColor get() = getColor(shadowColorResource)
 
     val selectableItemBackground get() = context.attr(android.R.attr.selectableItemBackground)
     val selectableItemBackgroundBorderless get() = context.attr(android.R.attr.selectableItemBackgroundBorderless)
