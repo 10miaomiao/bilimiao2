@@ -106,7 +106,6 @@ internal class BangumiDetailPageViewModel(
 
     private val fragment by instance<Fragment>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
-    private val navController by instance<NavHostController>()
 
     var seasonId = ""
         set(value) {
@@ -320,7 +319,6 @@ internal class BangumiDetailPageViewModel(
                 // 更多
                 val pm = BangumiMorePopupMenu(
                     activity = fragment.requireActivity(),
-                    navController = navController,
                     detailInfo = detailInfo.value,
                 )
                 pm.show(view)

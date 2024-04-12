@@ -14,6 +14,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -200,9 +201,14 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 }
                 "attention" -> {
                     val nav = it.findNavController()
-                    nav.navigateToCompose(UserFollowPage()) {
-                        id set viewModel.id
+                    if (viewModel.isSelf) {
+                        nav.navigateToCompose(MyFollowPage())
+                    } else {
+                        nav.navigateToCompose(UserFollowPage()) {
+                            id set viewModel.id
+                        }
                     }
+
                 }
                 "fans" -> {
                     val args = UserFollowFragment.createArguments(

@@ -29,6 +29,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadListItem
 import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
@@ -60,7 +61,6 @@ internal class DownloadListPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
-    private val composeNav by instance<NavHostController>()
 
     var downloadListVersion = 0
     val downloadList = MutableStateFlow(emptyList<BiliDownloadEntryAndPathInfo>())
@@ -184,7 +184,8 @@ internal class DownloadListPageViewModel(
     }
 
     fun toDetailPage(item: DownloadInfo) {
-        composeNav.navigate(DownloadDetailPage()) {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(DownloadDetailPage()) {
             path set item.dir_path
         }
     }

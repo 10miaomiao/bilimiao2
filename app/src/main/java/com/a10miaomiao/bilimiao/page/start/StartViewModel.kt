@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
@@ -32,7 +33,9 @@ class StartViewModel(
     val navList = mutableListOf(
         StartNavInfo(
             title = "关注",
-            pageUrl = "bilimiao://compose?url=user%2F{mid}%2Ffollow",
+            pageUrl = composePageUrl(
+                MyFollowPage().url()
+            ),
             iconRes = R.drawable.ic_nav_following,
             isNeedAuth = true,
         ),

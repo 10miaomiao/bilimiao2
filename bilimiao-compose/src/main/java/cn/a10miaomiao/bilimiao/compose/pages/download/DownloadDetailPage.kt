@@ -28,6 +28,7 @@ import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadDetailItem
 import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadListItem
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPageViewModel
@@ -74,7 +75,6 @@ internal class DownloadDetailPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
-    private val composeNav by instance<NavHostController>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     val downloadInfo = MutableStateFlow<DownloadInfo?>(null)
@@ -209,7 +209,8 @@ internal class DownloadDetailPageViewModel(
             PopTip.show("已删除：" + info.title + "-"  +item.title)
             _loadDownloadDetail(service, dirPath)
             if (downloadInfo.value == null) {
-                composeNav.popBackStack()
+                val nav = fragment.findComposeNavController()
+                nav.popBackStack()
             }
         }
     }

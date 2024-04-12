@@ -1,40 +1,52 @@
-package cn.a10miaomiao.bilimiao.compose.pages.user
+package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.app.Activity
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
-import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceDialog
-import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceItem
-import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.rememberDialogState
+import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
+import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo
+import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingsInfo
+import cn.a10miaomiao.bilimiao.compose.pages.user.InterrelationInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -42,7 +54,10 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,67 +65,31 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.compose.localDI
+import org.kodein.di.compose.rememberDI
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-
-
-
-class UserFollowPage() : ComposePage() {
-
-    val id = stringPageArg("id")
-
-    override val route: String
-        get() = "user/${id}/follow"
-
-    @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val viewModel = diViewModel<UserFollowPageViewModel>()
-        val mid = navEntry.arguments?.get(id) ?: ""
-        LaunchedEffect(mid) {
-            viewModel.mid = mid
-        }
-        UserFollowPageContent(viewModel = viewModel)
-    }
-}
-
-private class UserFollowPageViewModel(
+private class TagFollowContentModel(
+    val tagId: Int,
+    val orderType: String,
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val activity by instance<Activity>()
+    private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
 
-    var mid = "0"
-        set(value) {
-            if (field != value) {
-                field = value
-                loadData(1)
-            }
-        }
+
+//    var orderType = "attention"
 
     val count = MutableStateFlow(1)
     val isRefreshing = MutableStateFlow(false)
     val listState = MutableStateFlow(LazyListState(0, 0))
     val list = FlowPaginationInfo<FollowingItemInfo>()
 
-    val orderTypeList = listOf(
-        SingleChoiceItem("最常访问", "attention"),
-        SingleChoiceItem("关注顺序", ""),
-    )
-    val orderType = MutableStateFlow("attention")
-
-    fun add() {
-        count.value = count.value + 1
-    }
-
-    fun changeOrderType(value: String) {
-        orderType.value = value
-        list.data.value = emptyList()
-        list.finished.value = false
-        list.fail.value = ""
-        loadData(1)
+    init {
+        loadData()
     }
 
     fun loadData(
@@ -119,36 +98,75 @@ private class UserFollowPageViewModel(
         try {
             list.loading.value = true
             val res = BiliApiService.userRelationApi
-                .followings(
-                    mid = mid,
+                .tagDetail(
+                    tagId = tagId,
                     pageNum = pageNum,
                     pageSize = list.pageSize,
-                    order = orderType.value
+                    order = orderType
                 )
                 .awaitCall()
-                .gson<ResultInfo<FollowingsInfo>>()
+                .gson<ResultInfo<List<FollowingItemInfo>>>()
             if (res.isSuccess) {
                 list.pageNum = pageNum
-                list.finished.value = res.data == null || res.data.list.isEmpty()
-                if (res.data != null) {
-                    if (pageNum == 1) {
-                        list.data.value = res.data.list
-                    } else {
-                        list.data.value = mutableListOf<FollowingItemInfo>().apply {
-                            addAll(list.data.value)
-                            addAll(res.data.list)
-                        }
+                val listData = getInterrelations(
+                    res.data,
+                    InterrelationInfo(
+                        attribute = 2,
+                        is_followed = true,
+                    )
+                )
+                list.finished.value = listData.isEmpty()
+                if (pageNum == 1) {
+                    list.data.value = listData
+                } else {
+                    list.data.value = mutableListOf<FollowingItemInfo>().apply {
+                        addAll(list.data.value)
+                        addAll(listData)
                     }
-                    list.finished.value = res.data.list.size < list.pageSize
                 }
+                list.finished.value = res.data.size < list.pageSize
             } else {
                 list.fail.value = res.message
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             list.fail.value = "无法连接到御坂网络"
         } finally {
             list.loading.value = false
             isRefreshing.value = false
+        }
+    }
+
+    suspend fun getInterrelations(
+        list: List<FollowingItemInfo>,
+        defaultInterrelation: InterrelationInfo,
+    ): List<FollowingItemInfo> {
+        val res = BiliApiService.userRelationApi
+            .interrelations(list.map { it.mid })
+            .awaitCall()
+            .gson<ResultInfo<JsonObject>>(isDebug = true)
+        val interrelationMap = if (res.isSuccess) {
+            res.data
+        } else {
+            JsonObject()
+        }
+        return list.map {
+            var interrelation = defaultInterrelation
+            if (interrelationMap.has(it.mid)) {
+                val interrelationJObj = interrelationMap[it.mid]
+                if (interrelationJObj.isJsonObject) {
+                    interrelation = Gson().fromJson(
+                        interrelationJObj,
+                        InterrelationInfo::class.java
+                    )
+                }
+            }
+            it.copy(
+                attribute = interrelation.attribute,
+                special = interrelation.special,
+                mtime = interrelation.mtime,
+                tag = interrelation.tag,
+            )
         }
     }
 
@@ -158,8 +176,10 @@ private class UserFollowPageViewModel(
         }
     }
 
-    fun refresh() {
-        isRefreshing.value = true
+    fun refresh(
+        refreshing: Boolean = true
+    ) {
+        isRefreshing.value = refreshing
         list.finished.value = false
         list.fail.value = ""
         loadData(1)
@@ -170,9 +190,7 @@ private class UserFollowPageViewModel(
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             if (!userStore.isLogin()) {
-                withContext(Dispatchers.Main) {
-                    PopTip.show("请先登录")
-                }
+                PopTip.show("请先登录")
                 return@launch
             }
             val item = list.data.value[index]
@@ -197,24 +215,18 @@ private class UserFollowPageViewModel(
                         it
                     }
                 }
-                withContext(Dispatchers.Main) {
-                    PopTip.show(
-                        if (mode == 2) {
-                            "已取消关注"
-                        } else {
-                            "关注成功"
-                        }
-                    )
-                }
+                PopTip.show(
+                    if (mode == 2) {
+                        "已取消关注"
+                    } else {
+                        "关注成功"
+                    }
+                )
             } else {
-                withContext(Dispatchers.Main) {
-                    PopTip.show(res.message)
-                }
+                 PopTip.show(res.message)
             }
         } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
-                PopTip.show("网络错误")
-            }
+            PopTip.show("网络错误")
             e.printStackTrace()
         }
     }
@@ -229,13 +241,26 @@ private class UserFollowPageViewModel(
 }
 
 @Composable
-private fun UserFollowPageContent(
-    viewModel: UserFollowPageViewModel,
+internal fun TagFollowContent(
+    tagId: Int,
+    orderType: String,
 ) {
-    val userStore: UserStore by rememberInstance()
+    val di = localDI()
+    val viewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        key = tagId.toString() + orderType,
+        initializer = {
+            TagFollowContentModel(
+                tagId = tagId,
+                orderType = orderType,
+                di
+            )
+        }
+    )
+
     val windowStore: WindowStore by rememberInstance()
+    val userStore: UserStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
+    val windowInsets = windowState.getContentInsets(localContainerView())
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
@@ -244,38 +269,12 @@ private fun UserFollowPageContent(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLogin = userStore.isLogin()
 
-    val dialogState = rememberDialogState()
-    val orderTypeList = viewModel.orderTypeList
-    val orderType by viewModel.orderType.collectAsState()
-
-    PageConfig(
-        title = if (userStore.isSelf(viewModel.mid)) {
-            "我的关注"
-        } else {
-            "Ta的关注"
-        },
-        menus = listOf(
-            myMenuItem {
-                key = 1
-                iconFileName = "ic_baseline_filter_list_grey_24"
-                title = "排序"
-            }
-        )
-    )
-    PageMenuItemClick(viewModel, dialogState) {
-        when (it.key) {
-            1 -> {
-                dialogState.openDialog = true
-            }
-        }
-    }
-    SingleChoiceDialog(
-        dialogState,
-        title = "选择排序方式",
-        list = orderTypeList,
-        selected = orderType,
-        onChange = viewModel::changeOrderType
-    )
+//    LaunchedEffect(viewModel, orderType) {
+//        if (orderType != viewModel.orderType) {
+//            viewModel.orderType = orderType
+//            viewModel.refresh(false)
+//        }
+//    }
 
     SwipeToRefresh(
         refreshing = isRefreshing,
@@ -288,15 +287,6 @@ private fun UserFollowPageContent(
                 end = windowInsets.rightDp.dp,
             )
         ) {
-
-            item(
-                span = {
-                    GridItemSpan(maxLineSpan)
-                }
-            ) {
-                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
-            }
-
             items(list.size, { list[it].mid }) {
                 val item = list[it]
                 Box(
@@ -378,17 +368,5 @@ private fun UserFollowPageContent(
                 }
             }
         }
-//        LazyColumn(
-//            modifier = Modifier.padding(
-//                start = windowInsets.leftDp.dp,
-//                end = windowInsets.rightDp.dp,
-//            )
-//        ) {
-//            item(key = "top") {
-//                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
-//            }
-//
-//
-//        }
     }
 }

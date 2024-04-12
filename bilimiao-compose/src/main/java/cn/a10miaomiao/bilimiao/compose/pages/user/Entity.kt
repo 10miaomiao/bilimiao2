@@ -1,0 +1,42 @@
+package cn.a10miaomiao.bilimiao.compose.pages.user
+
+internal data class FollowingItemInfo(
+    val mid: String,
+    val attribute: Int, // 关注属性: 0：未关注, 2：已关注, 6：已互粉
+    val mtime: Long,
+    val special: Int, // 特别关注标志: 0：否, 1：是
+    val uname: String,
+    val face: String,
+    val sign: String,
+    val face_nft: Int,
+    val nft_icon: String,
+    val tag: List<Int>?,
+) {
+    val isFollowing get() = attribute == 2 || attribute == 6
+}
+
+internal data class FollowingsInfo(
+    val list: List<FollowingItemInfo>,
+    val re_version: Int,
+    val total: Int,
+)
+
+/**
+ * 分组信息
+ */
+internal data class TagInfo(
+    val tagid: Int,
+    val name: String,
+    val count: Int,
+    val tip: String,
+)
+
+internal data class InterrelationInfo(
+    val attribute: Int = 0, // 关注属性: 0：未关注, 2：已关注, 6：已互粉
+    val is_followed: Boolean = false,
+    val mid: String = "",
+    val mtime: Long = 0L,
+    val special: Int = 0, // 特别关注标志: 0：否, 1：是
+    val tag: List<Int>? = null,
+)
+
