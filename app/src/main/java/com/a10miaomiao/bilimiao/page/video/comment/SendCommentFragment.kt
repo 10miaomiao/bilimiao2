@@ -124,13 +124,13 @@ class SendCommentFragment : Fragment(), DIAware, MyPage, ViewTreeObserver.OnGlob
             ),
             if (viewModel.isShowEmoteGrid) {
                 MenuItemPropInfo(
-                    key = 0,
+                    key = MenuKeys.keyboard,
                     iconResource = R.drawable.ic_baseline_keyboard_24,
                     title = "键盘"
                 )
             } else {
                 MenuItemPropInfo(
-                    key = 0,
+                    key = MenuKeys.emoji,
                     iconResource = R.drawable.ic_baseline_emoji_emotions_24,
                     title = "表情"
                 )
@@ -147,14 +147,13 @@ class SendCommentFragment : Fragment(), DIAware, MyPage, ViewTreeObserver.OnGlob
                 val message = editText.text.toString()
                 viewModel.sendComment(message)
             }
-            0 -> {
-                val isShowEmoteGrid = viewModel.isShowEmoteGrid
-                if (isShowEmoteGrid) {
-                    showSoftInput()
-                } else {
-                    hideSoftInput()
-                }
-                viewModel.setEmoteGridDisplay(!isShowEmoteGrid)
+            MenuKeys.keyboard -> {
+                showSoftInput()
+                viewModel.setEmoteGridDisplay(false)
+            }
+            MenuKeys.emoji -> {
+                hideSoftInput()
+                viewModel.setEmoteGridDisplay(true)
             }
         }
     }
