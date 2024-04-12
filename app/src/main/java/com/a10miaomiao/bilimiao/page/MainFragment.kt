@@ -72,9 +72,9 @@ class MainFragment : Fragment(), DIAware, MyPage {
         title = pageTitle
         menus = listOf(
             myMenuItem {
-                key = MenuKeys.setting
-                title = "设置"
-                iconResource = R.drawable.ic_baseline_settings_grey_24
+                key = MenuKeys.search
+                title = "搜索"
+                iconResource = R.drawable.ic_search_gray
             },
             myMenuItem {
                 key = MenuKeys.history
@@ -92,9 +92,9 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 iconResource = R.drawable.ic_arrow_downward_gray_24dp
             },
             myMenuItem {
-                key = MenuKeys.search
-                title = "搜索"
-                iconResource = R.drawable.ic_search_gray
+                key = MenuKeys.setting
+                title = "菜单"
+                iconResource = R.drawable.ic_baseline_menu_24
             },
         )
     }
@@ -105,7 +105,8 @@ class MainFragment : Fragment(), DIAware, MyPage {
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
         when (menuItem.key) {
             MenuKeys.setting -> {
-                nav.navigate(SettingFragment.actionId)
+                val scaffoldApp = requireActivity().getScaffoldView()
+                scaffoldApp.openDrawer()
             }
             MenuKeys.history -> {
                 nav.navigate(HistoryFragment.actionId)
