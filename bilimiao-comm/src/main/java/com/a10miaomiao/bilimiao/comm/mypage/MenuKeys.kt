@@ -20,4 +20,7 @@ object MenuKeys {
 
     val more = id_counter++
     val follow = id_counter++
+
+    val keyboard = id_counter++
+    val emoji = id_counter++
 }

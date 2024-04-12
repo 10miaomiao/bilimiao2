@@ -127,7 +127,7 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
                 title = "发布评论"
             },
             myMenuItem {
-                key = 0
+                key = MenuKeys.filter
                 iconResource = R.drawable.ic_baseline_filter_list_grey_24
                 title = SortOrderPopupMenu.getText(viewModel.sortOrder)
             },
@@ -137,7 +137,7 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
         when (menuItem.key) {
-            0 -> {
+            MenuKeys.filter -> {
                 val pm = SortOrderPopupMenu(
                     activity = requireActivity(),
                     anchor = view,

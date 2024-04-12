@@ -40,6 +40,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -134,7 +135,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         } ?: "视频详情"
         menus = listOf(
             myMenuItem {
-                key = 0
+                key = MenuKeys.more
                 iconResource = R.drawable.ic_more_vert_grey_24dp
                 title = "更多"
             },
@@ -194,7 +195,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             return
         }
         when (menuItem.key) {
-            0 -> {
+            MenuKeys.more -> {
                 // 更多
                 val pm = VideoMorePopupMenu(
                     activity = requireActivity(),
