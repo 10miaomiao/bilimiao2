@@ -1,9 +1,10 @@
 package com.a10miaomiao.bilimiao.comm.network
 
-import android.net.Uri
 import android.os.Build
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
@@ -14,7 +15,7 @@ import java.util.*
 object ApiHelper {
 
     const val BUILD_VERSION = 1450000
-    const val BILI_APP_VERSION = "1.44.1"
+    const val BILI_APP_VERSION = "1.45.0"
 
     // 用哪个APP_KEY登录后，之后的请求之后只能用同一个APP_KEY，现统一使用HD版的APP_KEY，APP版的APP_KEY无法使用二维码登录
     // Android APP
@@ -29,14 +30,19 @@ object ApiHelper {
     const val GRPC_BASE = "https://grpc.biliapi.net/"
 
     /**
-     * User-Agent: Dalvik/2.1.0 (Linux; U; Android 12; sdk_gpc_x86_64 Build/SE2B.220326.023) 1.39.0 os/android model/sdk_gpc_x86_64 mobi_app/android_hd build/1390002 channel/yingyongbao innerVer/1390002 osVer/12 network/1
-     *             Dalvik/2.1.0 (Linux; U; Android 12; sdk_gpc_x86_64 Build/SE2B.220326.023) 1.39.0 os/android model/sdk_gpc_x86_64 mobi_app/android_hd build/1390002 channel/bili innerVer/1390002osVer/12 network/2
+     * User-Agent: Mozilla/5.0 BiliDroid/1.45.0 (bbcallen@gmail.com) os/android model/2201123C mobi_app/android_hd build/1450000 channel/bili innerVer/1450000 osVer/12 network/2
      */
     val USER_AGENT = """
-            |${BiliGRPCConfig.getSystemUserAgent()} 
-            |${BILI_APP_VERSION} os/android model/${Build.MODEL} mobi_app/android_hd 
-            |build/${BUILD_VERSION} channel/bili innerVer/${BUILD_VERSION}
-            |osVer/${Build.VERSION.RELEASE} network/2
+        |Mozilla/5.0 
+        |BiliDroid/1.45.0 (bbcallen@gmail.com) 
+        |os/android 
+        |model/${Build.MODEL} 
+        |mobi_app/android_hd 
+        |build/${BUILD_VERSION} 
+        |channel/bili 
+        |innerVer/${BUILD_VERSION} 
+        |osVer/${Build.VERSION.RELEASE} 
+        |network/2
         """.trimMargin().replace("\n", "")
 
 
@@ -97,25 +103,21 @@ object ApiHelper {
     }
 
     fun urlencode(params: Map<String, String?>, isSort: Boolean = false): String {
-        val list = params.map {
-            if (it.value != null) {
-                "${Uri.encode(it.key)}=${Uri.encode(it.value)}"
+        return params.map {
+            if (it.key.isNotBlank() && !it.value.isNullOrBlank()) {
+                "${it.key}=${URLEncoder.encode(it.value, "UTF-8")}"
             } else {
                 ""
             }
-        }.toMutableList()
-        if (isSort) {
-            list.sort()
-        }
-
-        return StringBuilder().apply {
-            list.forEach { item ->
-                if (item.isNotEmpty()) {
-                    append(if (isNotEmpty()) "&" else "")
-                    append(item)
-                }
+        }.filter {
+            it.isNotBlank()
+        }.run {
+            if (isSort) {
+                sorted().joinToString("&")
+            } else {
+                joinToString("&")
             }
-        }.toString()
+        }
     }
 
     fun addAccessKeyAndMidToParams(params: MutableMap<String, String?>){

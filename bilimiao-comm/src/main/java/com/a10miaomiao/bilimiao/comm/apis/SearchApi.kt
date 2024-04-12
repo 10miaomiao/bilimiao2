@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.apis
 
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 
 class SearchApi {
@@ -23,7 +25,15 @@ class SearchApi {
         duration: Int,
         rid: Int,
     ) = MiaoHttp.request {
-        url = "https://app.bilibili.com/x/v2/search?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3710&device=phone&duration=$duration&mobi_app=iphone&order=$order&platform=ios&rid=$rid&keyword=$keyword&pn=$pageNum&ps=$pageSize"
+        url = BiliApiService.biliApp(
+            "x/v2/search",
+            "duration" to duration.toString(),
+            "order" to order,
+            "rid" to rid.toString(),
+            "keyword" to keyword,
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+        )
     }
 
     /**
@@ -34,7 +44,13 @@ class SearchApi {
         pageNum: Int,
         pageSize: Int
     ) = MiaoHttp.request{
-        url = "https://app.bilibili.com/x/v2/search/type?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3710&device=phone&mobi_app=iphone&platform=ios&type=7&keyword=$keyword&pn=$pageNum&ps=$pageSize"
+        url = BiliApiService.biliApp(
+            "x/v2/search/type",
+            "keyword" to keyword,
+            "type" to "7",
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+        )
     }
 
     /**
@@ -43,9 +59,20 @@ class SearchApi {
     fun searchUpper(
         keyword: String,
         pageNum: Int,
-        pageSize: Int
+        pageSize: Int,
+        userType: Int = 0, // 0:全部,1:UP主,2:普通用户,3:认证用户
     ) = MiaoHttp.request{
-        url = "https://app.bilibili.com/x/v2/search/type?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3710&device=phone&mobi_app=iphone&platform=ios&type=2&keyword=$keyword&pn=$pageNum&ps=$pageSize"
+        url = BiliApiService.biliApp(
+            "x/v2/search/type",
+            "disable_rcmd" to "0",
+            "highlight" to "1",
+            "order" to "totalrank",
+            "keyword" to keyword,
+            "type" to "2",
+            "user_type" to userType.toString(),
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+        )
     }
 
 }

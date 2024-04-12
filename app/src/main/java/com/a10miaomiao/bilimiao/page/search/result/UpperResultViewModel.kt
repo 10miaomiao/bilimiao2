@@ -49,7 +49,7 @@ class UpperResultViewModel(
 
             val res = BiliApiService.searchApi
                 .searchUpper(
-                    keyword = Uri.encode(keyword),
+                    keyword = keyword,
                     pageNum = pageNum,
                     pageSize = list.pageSize
                 )

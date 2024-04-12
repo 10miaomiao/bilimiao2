@@ -76,7 +76,7 @@ class VideoResultViewModel(
 
             val res = BiliApiService.searchApi
                 .searchArchive(
-                    keyword = Uri.encode(keyword),
+                    keyword = keyword,
                     order = rankOrder.value,
                     duration = duration.value,
                     rid = regionId,

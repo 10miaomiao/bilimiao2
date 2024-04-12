@@ -50,7 +50,7 @@ class BangumiResultViewModel (
 
             val res = BiliApiService.searchApi
                 .searchBangumi(
-                    keyword = Uri.encode(keyword),
+                    keyword = keyword,
                     pageNum = pageNum,
                     pageSize = list.pageSize
                 )
