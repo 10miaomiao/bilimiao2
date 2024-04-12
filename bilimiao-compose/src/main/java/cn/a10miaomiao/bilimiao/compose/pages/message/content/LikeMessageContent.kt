@@ -1,60 +1,39 @@
-package cn.a10miaomiao.bilimiao.compose.pages.message
+package cn.a10miaomiao.bilimiao.compose.pages.message.content
 
 import android.net.Uri
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import bilibili.broadcast.v1.Mod
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
-import cn.a10miaomiao.bilimiao.compose.commponents.list.LoadMoreListHandler
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.commponents.MessageItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.message.AtMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -63,7 +42,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-internal class ReplyMessagePageModel(
+private class LikeMessageContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -71,7 +50,7 @@ internal class ReplyMessagePageModel(
     private val messageStore by instance<MessageStore>()
 
     val isRefreshing = MutableStateFlow(false)
-    val list = FlowPaginationInfo<ReplyMessageInfo>()
+    val list = FlowPaginationInfo<LikeMessageInfo>()
     var _cursor: MessageCursorInfo? = null
 
     init {
@@ -85,21 +64,22 @@ internal class ReplyMessagePageModel(
         try {
             list.loading.value = true
             val res = BiliApiService.messageApi
-                .reply(id, time)
+                .like(id, time)
                 .awaitCall()
-                .gson<ResultInfo<MessageResponseInfo<ReplyMessageInfo>>>()
+                .gson<ResultInfo<LikeMessageResponseInfo>>()
             if (res.isSuccess) {
-                messageStore.clearReplyUnread()
-                _cursor = res.data.cursor
+                messageStore.clearLikeUnread()
+                val total = res.data.total
+                _cursor = total.cursor
                 if (id == 0L) {
-                    list.data.value = res.data.items
+                    list.data.value = total.items
                 } else {
-                    list.data.value = mutableListOf<ReplyMessageInfo>().apply {
+                    list.data.value = mutableListOf<LikeMessageInfo>().apply {
                         addAll(list.data.value)
-                        addAll(res.data.items)
+                        addAll(total.items)
                     }
                 }
-                list.finished.value = res.data.items.isEmpty()
+                list.finished.value = total.items.isEmpty()
             } else {
                 list.fail.value = res.message
             }
@@ -130,46 +110,36 @@ internal class ReplyMessagePageModel(
         loadData()
     }
 
-    fun toUserPage(item: ReplyMessageInfo) {
-        val mid = item.user.mid
+    fun toUserPage(item: LikeMessageInfo) {
+        val mid = item.users[0].mid
         val uri = Uri.parse("bilimiao://user/$mid")
         fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
-    fun toMessagePage(item: ReplyMessageInfo) {
-        // 评论
-        val sourceId = item.item.source_id
-        val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
-    }
-
-    fun toDetailPage(item: ReplyMessageInfo) {
+    fun toDetailPage(item: LikeMessageInfo) {
         val type = item.item.type
         if (type == "reply") {
             // 评论
-            val rootId = item.item.root_id
-            val sourceId = item.item.source_id
-            val uri = Uri.parse("bilimiao://video/comment/${rootId}/detail/${sourceId}")
+            val id = item.item.item_id
+            val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
             fragment.findNavController().navigate(uri, defaultNavOptions)
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
             // 弹幕
-            val aid = item.item.subject_id
-            val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
         } else if (type == "video") {
             // 视频
-            val aid = item.item.subject_id
+            val aid = item.item.item_id
             val uri = Uri.parse("bilimiao://video/$aid")
             fragment.findNavController().navigate(uri, defaultNavOptions)
         }
     }
 }
 
+
 @Composable
-fun ReplyMessagePage() {
-    val viewModel: ReplyMessagePageModel = diViewModel()
+internal fun LikeMessageContent() {
+    val viewModel: LikeMessageContentModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
@@ -195,13 +165,29 @@ fun ReplyMessagePage() {
                     if (it != 0) {
                         HorizontalDivider()
                     }
+                    val business = item.item.business
+                    val (nickname, actionText) = when(item.users.size) {
+                        0 -> Pair("", "零人赞了我的${business}")
+                        1 ->  Pair(
+                            item.users[0].nickname,
+                            "赞了我的${business}"
+                        )
+                        2 ->  Pair(
+                            "${item.users[0].nickname}、${item.users[1].nickname}",
+                            "赞了我的${business}"
+                        )
+                        else -> Pair(
+                            "${item.users[0].nickname}、${item.users[1].nickname}",
+                            "等总计${item.counts}人赞了我的${business}"
+                        )
+                    }
                     MessageItemBox(
-                        avatar = item.user.avatar,
-                        nickname = item.user.nickname,
-                        actionText = "回复了我的${item.item.business}",
+                        avatar = item.users[0]?.avatar ?: "",
+                        nickname = nickname,
+                        actionText = actionText,
                         title = item.item.title,
-                        sourceContent = item.item.source_content,
-                        time = item.reply_time,
+                        sourceContent = "",
+                        time = item.like_time,
                         onUserClick = {
                             viewModel.toUserPage(item)
                         },
@@ -209,7 +195,7 @@ fun ReplyMessagePage() {
                             viewModel.toDetailPage(item)
                         },
                         onMessageClick = {
-                            viewModel.toMessagePage(item)
+
                         }
                     )
                 }

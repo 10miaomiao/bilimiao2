@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -32,8 +30,9 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.pages.message.AtMessagePage
-import cn.a10miaomiao.bilimiao.compose.pages.message.ReplyMessagePage
+import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterTagListContent
+import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterUpperListContent
+import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterWordListContent
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -53,7 +52,7 @@ class FilterSettingPage : ComposePage() {
     }
 }
 
-internal class FilterSettingPageViewModel(
+private class FilterSettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -64,7 +63,7 @@ internal class FilterSettingPageViewModel(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-internal fun FilterSettingPageContent(
+private fun FilterSettingPageContent(
     viewModel: FilterSettingPageViewModel
 ) {
     PageConfig(
@@ -159,13 +158,13 @@ internal fun FilterSettingPageContent(
         ) { index ->
             when(index) {
                 0 -> {
-                    FilterWordListPage()
+                    FilterWordListContent()
                 }
                 1 -> {
-                    FilterUpperListPage()
+                    FilterUpperListContent()
                 }
                 2 -> {
-                    FilterTagListPage()
+                    FilterTagListContent()
                 }
             }
         }

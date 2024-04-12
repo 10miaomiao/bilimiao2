@@ -54,6 +54,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.commponents.PlayListItemCard
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
@@ -139,122 +140,20 @@ private fun PlayListPageContent(
                 Box(
                     modifier = Modifier.padding(5.dp),
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .clickable {
-                                    viewModel.toVideoInfoPage(item)
-                                }
-                                .padding(5.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp, 60.dp)
-                                    .clip(RoundedCornerShape(10.dp)),
-                            ) {
-                                GlideImage(
-                                    imageModel = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
-                                    modifier = Modifier.fillMaxSize(),
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .background(
-                                            color = MaterialTheme.colorScheme.primary,
-                                            shape = RoundedCornerShape(bottomEnd = 10.dp)
-                                        )
-                                        .padding(
-                                            vertical = 2.dp,
-                                            horizontal = 4.dp,
-                                        ),
-                                    ) {
-                                    Text(
-                                        color = Color.White,
-                                        text = "${index + 1}",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp,
-                                    )
-                                }
-                            }
-
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 5.dp),
-                            ) {
-                                Text(
-                                    text = item.title,
-                                    maxLines = 2,
-                                    modifier = Modifier.padding(bottom = 5.dp),
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    style = MaterialTheme.typography.titleSmall,
-                                )
-                                Text(
-                                    text = "UP:" + item.ownerName,
-                                    maxLines = 1,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            }
-                            Box(
-                                modifier = Modifier.fillMaxHeight(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (playerState.cid == item.cid) {
-                                    Box(
-                                        modifier = Modifier
-                                            .sizeIn(
-                                                minWidth = 50.dp,
-                                                minHeight = 30.dp
-                                            ),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Text(
-                                            color = MaterialTheme.colorScheme.primary,
-                                            text = "播放中",
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                } else {
-                                    Button(
-                                        onClick = { viewModel.playVideo(item) },
-                                        shape = MaterialTheme.shapes.small,
-                                        contentPadding = PaddingValues(
-                                            vertical = 4.dp,
-                                            horizontal = 12.dp,
-                                        ),
-                                        modifier = Modifier
-                                            .sizeIn(
-                                                minWidth = 40.dp,
-                                                minHeight = 30.dp
-                                            )
-                                            .padding(0.dp)
-                                    ) {
-                                        Text(
-                                            text = "播放",
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                }
-
-                            }
+                    PlayListItemCard(
+                        index = index,
+                        item = item,
+                        currentPlayCid = playerState.cid,
+                        onPlayClick = {
+                            viewModel.playVideo(item)
+                        },
+                        onClick = {
+                            viewModel.toVideoInfoPage(item)
                         }
-                    }
+                    )
                 }
             }
-
-            item(
-//                span = {
-//                    GridItemSpan(maxLineSpan)
-//                }
-            ) {
+            item {
                 Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
             }
         }

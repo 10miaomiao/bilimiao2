@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.pages.filter
+package cn.a10miaomiao.bilimiao.compose.pages.filter.content
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +38,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-internal class FilterUpperListPageViewModel(
+private class FilterUpperListContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -60,8 +58,8 @@ internal class FilterUpperListPageViewModel(
 }
 
 @Composable
-internal fun FilterUpperListPage() {
-    val viewModel: FilterUpperListPageViewModel = diViewModel()
+internal fun FilterUpperListContent() {
+    val viewModel: FilterUpperListContentModel = diViewModel()
 
     val state by viewModel.stateFlow.collectAsState()
     val filterUpperList = state.filterUpperList

@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.pages.filter
+package cn.a10miaomiao.bilimiao.compose.pages.filter.content
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +52,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 
-internal class FilterWordListPageViewModel(
+internal class FilterTagListContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -64,34 +62,34 @@ internal class FilterWordListPageViewModel(
 
     val stateFlow get() = filterStore.stateFlow
 
-    fun addWord(text: String) {
-        val filterWordList = stateFlow.value.filterWordList
-        if (filterWordList.indexOf(text) == -1) {
-            filterStore.addWord(text)
+    fun addTag(text: String) {
+        val filterTagList = stateFlow.value.filterTagList
+        if (filterTagList.indexOf(text) == -1) {
+            filterStore.addTag(text)
         } else {
-            PopTip.show("该关键字已存在")
+            PopTip.show("该标签已存在")
         }
     }
 
-    fun setWord(oldWord: String, newWord: String) {
-        filterStore.setWord(oldWord, newWord)
+    fun setTag(old: String, new: String) {
+        filterStore.setTag(old, new)
     }
 
     fun deleteSelected(selectedMap: Map<String, Int>) {
-        val keywordList = selectedMap.keys.toList()
-        if (keywordList.isEmpty()) {
-            PopTip.show("未选择关键字")
+        val tagList = selectedMap.keys.toList()
+        if (tagList.isEmpty()) {
+            PopTip.show("未选择标签")
         }
-        filterStore.deleteWord(keywordList)
+        filterStore.deleteTag(tagList)
     }
 }
 
 @Composable
-internal fun FilterWordListPage() {
-    val viewModel: FilterWordListPageViewModel = diViewModel()
+internal fun FilterTagListContent() {
+    val viewModel: FilterTagListContentModel = diViewModel()
 
     val state by viewModel.stateFlow.collectAsState()
-    val filterWordList = state.filterWordList
+    val filterTagList = state.filterTagList
 
     val selectedMap = remember {
         mutableStateMapOf<String, Int>()
@@ -105,14 +103,23 @@ internal fun FilterWordListPage() {
         mutableStateOf("")
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(10.dp)
     ) {
+
+        Text(
+            text = "此功能为实验性功能，仅对首页推荐和热门列表生效，开启标签屏蔽后列表加载可能有性能问题",
+            textAlign = TextAlign.Center,
+            color = Color.Red,
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .weight(1f)
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(10.dp),
@@ -123,8 +130,8 @@ internal fun FilterWordListPage() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                if (filterWordList.size > 0
-                    && selectedMap.size == filterWordList.size) {
+                if (filterTagList.size > 0
+                    && selectedMap.size == filterTagList.size) {
                     TextButton(onClick = {
                         selectedMap.clear()
                     }) {
@@ -133,11 +140,11 @@ internal fun FilterWordListPage() {
                 } else {
                     TextButton(
                         onClick = {
-                            selectedMap.putAll(filterWordList.mapIndexed { index, s ->
+                            selectedMap.putAll(filterTagList.mapIndexed { index, s ->
                                 s to index
                             })
                         },
-                        enabled = filterWordList.size > 0,
+                        enabled = filterTagList.size > 0,
                     ) {
                         Text(text = "全选")
                     }
@@ -166,35 +173,35 @@ internal fun FilterWordListPage() {
             LazyColumn(
                 modifier = Modifier.weight(1f),
             ) {
-                items(filterWordList.size, { filterWordList[it] }) { index ->
-                    val word = filterWordList[index]
+                items(filterTagList.size, { filterTagList[it] }) { index ->
+                    val tag = filterTagList[index]
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
                                 inputMode = index
-                                inputText = word
+                                inputText = tag
                             }
                     ) {
                         Checkbox(
-                            checked = selectedMap.contains(word),
+                            checked = selectedMap.contains(tag),
                             onCheckedChange = {
-                                if (selectedMap.contains(word)) {
-                                    selectedMap.remove(word)
+                                if (selectedMap.contains(tag)) {
+                                    selectedMap.remove(tag)
                                 } else {
-                                    selectedMap[word] = index
+                                    selectedMap[tag] = index
                                 }
                             }
                         )
                         Text(
-                            text = word,
+                            text = tag,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
 
-                if (filterWordList.size == 0) {
+                if (filterTagList.size == 0) {
                     item {
                         Box(
                             modifier = Modifier
@@ -203,7 +210,7 @@ internal fun FilterWordListPage() {
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
-                                text = "空空如也\n去添加关键字吧",
+                                text = "空空如也\n去添加标签吧\n屏蔽标签会导致加载变慢!",
                                 color = MaterialTheme.colorScheme.outline,
                                 textAlign = TextAlign.Center,
                             )
@@ -220,9 +227,6 @@ internal fun FilterWordListPage() {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(inputMode) {
         if (inputMode > -2) {
-//            if (inputMode > -1) {
-//                inputText = filterWordList[inputMode]
-//            }
             launch {
                 focusRequester.requestFocus()
             }
@@ -237,14 +241,14 @@ internal fun FilterWordListPage() {
 
     fun handleConfirm() {
         if (inputText.isBlank()) {
-            errorText = "请输入关键字"
+            errorText = "请输入标签"
             return
         }
         if (inputMode < 0) {
-            viewModel.addWord(inputText)
+            viewModel.addTag(inputText)
         } else {
-            val oldWord = filterWordList[inputMode]
-            viewModel.setWord(oldWord, inputText)
+            val oldWord = filterTagList[inputMode]
+            viewModel.setTag(oldWord, inputText)
         }
         handleDismiss()
     }
@@ -254,16 +258,16 @@ internal fun FilterWordListPage() {
             onDismissRequest = ::handleDismiss,
             title = {
                 if (inputMode < 0) {
-                    Text(text = "添加屏蔽关键字")
+                    Text(text = "添加屏蔽标签")
                 } else {
-                    Text(text = "编辑屏蔽关键字")
+                    Text(text = "编辑屏蔽标签")
                 }
             },
             text = {
                 Column {
                     TextField(
                         label = {
-                            Text(text = "关键字")
+                            Text(text = "标签")
                         },
                         isError = errorText.isNotBlank(),
                         value = inputText,
@@ -280,18 +284,6 @@ internal fun FilterWordListPage() {
                             onDone = { handleConfirm() }
                         ),
                     )
-                    Text(text =  "注：支持正则表达式（语法：/正则表达式主体/）")
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                    ) {
-//                        Checkbox(
-//                            checked = false,
-//                            onCheckedChange = {
-//
-//                            }
-//                        )
-//                        Text(text = "使用正则表达式")
-//                    }
                 }
 
             },
