@@ -49,8 +49,8 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 
-class SettingFragment : Fragment(), DIAware, MyPage
-    , SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingFragment : Fragment(), DIAware, MyPage,
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object : FragmentNavigatorBuilder() {
         override val name = "setting"
@@ -164,23 +164,21 @@ class SettingFragment : Fragment(), DIAware, MyPage
     val ui = miaoBindingUi {
         connectStore(viewLifecycleOwner, windowStore)
         val insets = windowStore.getContentInsets(parentView)
-        frameLayout {
+        recyclerView {
             _leftPadding = insets.left
             _topPadding = insets.top
             _rightPadding = insets.right
-            _bottomPadding = insets.bottom
-            views {
-                +recyclerView {
-                    _miaoLayoutManage(LinearLayoutManager(requireContext()))
-                    val mAdapter = miaoMemo(null) {
-                        PreferencesAdapter(createRootScreen())
-                    }
-                    miaoEffect(null) {
-                        adapter = mAdapter
-                    }
-                    mPreferencesAdapter = mAdapter
-                }..lParams(matchParent, matchParent)
+            _bottomPadding = insets.bottom + windowStore.bottomAppBarHeight
+            clipToPadding = false
+
+            _miaoLayoutManage(LinearLayoutManager(requireContext()))
+            val mAdapter = miaoMemo(null) {
+                PreferencesAdapter(createRootScreen())
             }
+            miaoEffect(null) {
+                adapter = mAdapter
+            }
+            mPreferencesAdapter = mAdapter
         }
     }
 

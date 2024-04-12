@@ -76,7 +76,6 @@ internal class DownloadBangumiCreatePageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
-    private val composeNav by instance<NavHostController>()
 
     val isRefreshing = MutableStateFlow(false)
     val listState = MutableStateFlow(LazyListState(0, 0))

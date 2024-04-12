@@ -5,21 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -29,7 +25,6 @@ import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.comm.*
 import cn.a10miaomiao.bilimiao.compose.comm.LocalContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.LocalFragment
-import cn.a10miaomiao.bilimiao.compose.comm.LocalFragmentNavController
 import cn.a10miaomiao.bilimiao.compose.comm.LocalNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfigInfo
@@ -37,7 +32,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.subDI
@@ -83,7 +77,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
     override val di: DI = subDI(closestDI()) {
         bindSingleton { this@ComposeFragment }
         bindSingleton { this@ComposeFragment.requireArguments() }
-        bindSingleton { composeNav }
     }
 
     private val pageConfigInfo = PageConfigInfo(this)
@@ -102,15 +95,13 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
         requireArguments().getString("url", "")
     }
 
-    private lateinit var fragmentNav: NavController
-    private lateinit var composeNav: NavHostController
+    lateinit var composeNav: NavHostController
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        fragmentNav = findNavController()
+    ): View {
         return ComposeView(requireContext()).apply {
             setContent {
                 val connection = rememberMyNestedScrollInteropConnection(container ?: LocalView.current)
@@ -118,7 +109,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
                 CompositionLocalProvider(
                     LocalContainerView provides container,
                     LocalFragment provides this@ComposeFragment,
-                    LocalFragmentNavController provides fragmentNav,
                     LocalNavController provides composeNav,
                     LocalPageConfigInfo provides pageConfigInfo,
                 ) {
@@ -134,7 +124,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        showPrivacyDialog()
 //        requireActivity().onBackPressedDispatcher
 //            .addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
 //                override fun handleOnBackPressed() {
@@ -149,7 +138,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
         }
         return true
     }
-
 
 }
 

@@ -142,8 +142,8 @@ class UserViewModel(
         try {
             val detailInfo = dataInfo ?: return@launch
             val mode = if (isFollow) { 2 } else { 1 }
-            val res = BiliApiService.userApi
-                .attention(id, mode)
+            val res = BiliApiService.userRelationApi
+                .modify(id, mode)
                 .awaitCall().gson<MessageInfo>()
             if (res.code == 0) {
                 detailInfo.card.relation.is_follow = 2 - mode

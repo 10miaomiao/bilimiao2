@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.network
 
 import com.a10miaomiao.bilimiao.comm.apis.*
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 object BiliApiService {
     fun createUrl(url: String, vararg pairs: Pair<String, String?>): String {
@@ -27,6 +28,7 @@ object BiliApiService {
     val searchApi = SearchApi()
     val playerAPI = PlayerAPI()
     val userApi = UserApi()
+    val userRelationApi = UserRelationApi()
     val messageApi = MessageAPI()
     val authApi = AuthApi()
     val homeApi = HomeApi()

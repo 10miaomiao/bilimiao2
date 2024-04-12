@@ -34,6 +34,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -82,8 +83,6 @@ internal class LoginPageViewModel(
 
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
-
-    private val composeNav by instance<NavHostController>()
 
     private val biliGeetestUtil = BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
 
@@ -151,7 +150,8 @@ internal class LoginPageViewModel(
                             setNegativeButton("取消", null)
                             setPositiveButton("请往验证") { _, _ ->
                                 val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
-                                composeNav.navigate(TelVerifyPage()) {
+                                val nav = fragment.findComposeNavController()
+                                nav.navigate(TelVerifyPage()) {
                                     code set params["tmp_token"]!!
                                     requestId set params["request_id"]!!
                                     source set params["source"]!!
@@ -263,7 +263,8 @@ internal class LoginPageViewModel(
     }
 
     fun toQrLogin() {
-        composeNav.navigate(QrCodeLoginPage())
+        val nav = fragment.findComposeNavController()
+        nav.navigate(QrCodeLoginPage())
     }
 }
 

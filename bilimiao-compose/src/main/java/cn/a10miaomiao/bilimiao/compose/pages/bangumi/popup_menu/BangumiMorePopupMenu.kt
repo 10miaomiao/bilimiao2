@@ -18,7 +18,6 @@ import com.kongzue.dialogx.dialogs.PopTip
 
 class BangumiMorePopupMenu (
     private val activity: Activity,
-    private val navController: NavHostController,
     private val detailInfo: SeasonV2Info?,
 ): PopupMenu.OnMenuItemClickListener {
 
