@@ -7,18 +7,17 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.DecelerateInterpolator
 import android.view.animation.TranslateAnimation
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
-import androidx.core.view.AccessibilityDelegateCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
-import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView
@@ -26,8 +25,7 @@ import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
-import splitties.views.gravityBottom
-import splitties.views.imageDrawable
+import splitties.views.topPadding
 
 class AppBarVerticalUi(
     override val ctx: Context,
@@ -46,24 +44,6 @@ class AppBarVerticalUi(
         setTextColor(config.foregroundAlpha45Color)
     }
 
-    val mNavigationIcon = imageView {
-        setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
-    }
-    val mNavigationMoveIcon = imageView {
-        setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
-    }
-    val mNavigationExchangeIcon = imageView {
-        setBackgroundResource(ctx.attr(android.R.attr.selectableItemBackgroundBorderless))
-    }
-
-//    val mNavigationIconLayout = frameLayout {
-//        padding = dip(10)
-//        addView(mNavigationIcon, lParams {
-//            width = dip(24)
-//            height = dip(24)
-//        })
-//    }
-
     private fun View.getInAnim(): Animator {
         val trX = PropertyValuesHolder.ofFloat("translationX", 0f, 0f);
         val trY = PropertyValuesHolder.ofFloat("translationY", 100f, 0f);
@@ -73,43 +53,28 @@ class AppBarVerticalUi(
 
     private fun View.getOutAnim(): Animator {
         val trX = PropertyValuesHolder.ofFloat("translationX", 0f, 0f)
-        val trY = PropertyValuesHolder.ofFloat("translationY", 0f, 100f)
+        val trY = PropertyValuesHolder.ofFloat("translationY", 0f, -100f)
         val trAlpha = PropertyValuesHolder.ofFloat("alpha", 1f, 0f)
         return ObjectAnimator.ofPropertyValuesHolder(this, trY, trAlpha, trX)
     }
 
     val mNavigationMemuLayout = horizontalLayout {
-//        gravity = Gravity.CENTER_HORIZONTAL
+        gravity = Gravity.CENTER_HORIZONTAL
         val layoutTransition = LayoutTransition()
 
         //View出現的動畫
-        layoutTransition.setAnimator(LayoutTransition.APPEARING, getInAnim())
+        //出现动画对LinearLayout.addView(View child, int index, LayoutParams params)方法无效
+//        layoutTransition.setAnimator(LayoutTransition.APPEARING, getInAnim())
         //元素在容器中消失時需要動畫顯示
         layoutTransition.setAnimator(LayoutTransition.DISAPPEARING, getOutAnim())
+        layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        layoutTransition.setDuration(400)
+        layoutTransition.setInterpolator(LayoutTransition.DISAPPEARING, DecelerateInterpolator())
         setLayoutTransition(layoutTransition)
 
-//        endPadding = dip(10)
+        topPadding = mTitleHeight
     }
 
-//    val mNavigationLayout = horizontalLayout {
-
-//        addView(mNavigationIconLayout, lParams {
-//            width = wrapContent
-//            height = wrapContent
-//        })
-//        addView(mNavigationMemuLayout, lParams {
-//            width = matchParent
-//            height = matchParent
-//            weight = 1f
-//        })
-//    }
-
-//    val mNavigationLayout = recyclerView {
-//        val lm = LinearLayoutManager(context)
-//        lm.orientation = LinearLayoutManager.HORIZONTAL
-//        scrollBarSize = 0
-//        layoutManager = lm
-//    }
     private val lineView = textView {
         backgroundColor = ctx.config.colorSurfaceVariant
     }
@@ -126,9 +91,8 @@ class AppBarVerticalUi(
                 scrollBarSize = 0
                 addView(
                     mNavigationMemuLayout, lParams {
-                        topMargin = mTitleHeight
                         width = matchParent
-                        height = mMenuHeight
+                        height = mMenuHeight + mTitleHeight
                     }
                 )
             },
@@ -144,14 +108,7 @@ class AppBarVerticalUi(
 
     override fun setProp(prop: AppBarView.PropInfo?) {
         if (prop != null) {
-            if (prop.navigationIcon != null) {
-//                mNavigationIconLayout.visibility = View.VISIBLE
-                mNavigationIcon.imageDrawable = prop.navigationIcon
-            } else {
-//                mNavigationIconLayout.visibility = View.GONE
-            }
             mTitle.text = (prop.title ?: "").replace("\n", " ")
-
             val menus = mutableListOf<MenuItemPropInfo>()
             prop.navigationIcon?.let {
                 menus.add(
@@ -159,7 +116,6 @@ class AppBarVerticalUi(
                         key = MenuKeys.back,
                         title = "返回",
                         iconResource = com.a10miaomiao.bilimiao.R.drawable.ic_back_24dp
-//                        iconDrawable = it,
                     )
                 )
             }
@@ -168,30 +124,31 @@ class AppBarVerticalUi(
                 mNavigationMemuLayout.removeAllViews()
             } else {
                 mNavigationMemuLayout.apply {
-                    menus.forEachIndexed { index, menu ->
-                        var menuItemView: MenuItemView
-                        if (index >= childCount) {
-                            menuItemView = MenuItemView(ctx)
-                            menuItemView.orientation = LinearLayout.VERTICAL
-                            menuItemView.minimumWidth = dip(60)
-                            menuItemView.setBackgroundResource(config.selectableItemBackgroundBorderless)
-                            menuItemView.setOnClickListener(menuItemClick)
-                            if (menu.key == MenuKeys.back) {
-                                menuItemView.setOnLongClickListener(menuItemLongClick)
-                            }
-                            addView(menuItemView, lParams {
-                                width = wrapContent
-                                height = matchParent
-                            })
+                    var menuViewIndex = 0
+                    menus.forEachIndexed { index, prop ->
+                        val i = indexOfMenuItemViewByKey(prop.key, menuViewIndex)
+                        val menuItemView = getChildAt(i) as? MenuItemView
+                        if (menuItemView == null) {
+                            val view = newMenuItemView(ctx, prop)
+                            addView(
+                                view,
+                                menuViewIndex,
+                                lParams(wrapContent, matchParent)
+                            )
+                            view.startAnimation(translateMenuItemAniShow)
+                            menuViewIndex++
                         } else {
-                            menuItemView = getChildAt(index) as MenuItemView
+                            menuItemView.prop = prop
+                            if (i > menuViewIndex) {
+                                removeViews(menuViewIndex, i - menuViewIndex)
+                            }
+                            menuViewIndex++
                         }
-                        menuItemView.prop = menu
                     }
-                    if (childCount > menus.size) {
+                    if (childCount > menuViewIndex) {
                         removeViews(
-                            menus.size,
-                            childCount - menus.size
+                            menuViewIndex,
+                            childCount - menuViewIndex
                         )
                     }
                 }
@@ -199,8 +156,44 @@ class AppBarVerticalUi(
         }
     }
 
+    private fun ViewGroup.indexOfMenuItemViewByKey(key: Int?, start: Int = 0): Int {
+        if (start > childCount) return -1
+        for (i in start until childCount) {
+            val view = getChildAt(i) as? MenuItemView ?: return -1
+            if (view.prop.key == key) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private fun newMenuItemView(
+        context: Context,
+        data: MenuItemPropInfo,
+    ) = MenuItemView(context).apply {
+        orientation = LinearLayout.VERTICAL
+        minimumWidth = dip(60)
+        setBackgroundResource(config.selectableItemBackgroundBorderless)
+        setOnClickListener(menuItemClick)
+        if (data.key == MenuKeys.back) {
+            setOnLongClickListener(menuItemLongClick)
+        }
+        prop = data
+    }
+
     override fun updateTheme() {
         lineView.backgroundColor = ctx.config.colorSurfaceVariant
+    }
+
+    private val translateMenuItemAniShow = AnimationSet(false).apply {
+        addAnimation(TranslateAnimation(
+            0f, 0f,
+            100f, 0f,
+        ))
+        addAnimation(AlphaAnimation(0f, 1f))
+        duration = 400
+        repeatMode = Animation.REVERSE
+        interpolator = DecelerateInterpolator()
     }
 
     //向上位移显示动画  从自身位置的最下端向上滑动了自身的高度
@@ -215,7 +208,8 @@ class AppBarVerticalUi(
         /* toYValue = */ 0f
     ).apply {
         repeatMode = Animation.REVERSE
-        duration = 200
+        duration = 400
+        interpolator = DecelerateInterpolator()
     }
 
     //向下位移隐藏动画  从自身位置的最上端向下滑动了自身的高度
@@ -230,7 +224,15 @@ class AppBarVerticalUi(
         /* toYValue = */ 1f
     ).apply {
         repeatMode = Animation.REVERSE
-        duration = 200
+        duration = 400
+        interpolator = DecelerateInterpolator()
+        setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {}
+            override fun onAnimationEnd(animation: Animation) {
+                mNavigationMemuLayout.visibility = View.GONE
+            }
+            override fun onAnimationRepeat(animation: Animation) {}
+        })
     }
 
     fun showMenu() {
@@ -240,14 +242,5 @@ class AppBarVerticalUi(
 
     fun hideMenu() {
         mNavigationMemuLayout.startAnimation(translateAniHide)
-        translateAniHide.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-            override fun onAnimationEnd(animation: Animation) {
-                mNavigationMemuLayout.visibility = View.GONE
-            }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
-
     }
 }
