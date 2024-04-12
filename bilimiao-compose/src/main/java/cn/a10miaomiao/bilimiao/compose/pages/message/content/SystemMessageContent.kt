@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.pages.message
+package cn.a10miaomiao.bilimiao.compose.pages.message.content
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
@@ -8,14 +8,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-internal class SystemMessagePageModel(
+internal class SystemMessageContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -25,8 +24,8 @@ internal class SystemMessagePageModel(
 
 
 @Composable
-fun SystemMessagePage() {
-    val viewModel: ReplyMessagePageModel = diViewModel()
+fun SystemMessageContent() {
+    val viewModel: SystemMessageContentModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())

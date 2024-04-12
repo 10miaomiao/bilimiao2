@@ -1,4 +1,5 @@
-package cn.a10miaomiao.bilimiao.compose.pages.message
+package cn.a10miaomiao.bilimiao.compose.pages.message.content
+
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
@@ -43,7 +44,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-internal class AtMessagePageModel(
+private class AtMessageContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -147,8 +148,8 @@ internal class AtMessagePageModel(
 
 
 @Composable
-fun AtMessagePage() {
-    val viewModel: AtMessagePageModel = diViewModel()
+internal fun AtMessageContent() {
+    val viewModel: AtMessageContentModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())

@@ -11,20 +11,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.BottomNavigation
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -33,6 +33,9 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.pages.message.content.AtMessageContent
+import cn.a10miaomiao.bilimiao.compose.pages.message.content.LikeMessageContent
+import cn.a10miaomiao.bilimiao.compose.pages.message.content.ReplyMessageContent
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
@@ -158,26 +161,31 @@ internal fun MessagePageContent(
                 )
             }
         }
+        val saveableStateHolder = rememberSaveableStateHolder()
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
             state = pagerState,
         ) { index ->
-            when(viewModel.tabs[index].id) {
-                0 -> {
-                    ReplyMessagePage()
-                }
-                1 -> {
-                    AtMessagePage()
-                }
-                2 -> {
-                    LikeMessagePage()
-                }
+            val id = viewModel.tabs[index].id
+            saveableStateHolder.SaveableStateProvider(id) {
+                when(id) {
+                    0 -> {
+                        ReplyMessageContent()
+                    }
+                    1 -> {
+                        AtMessageContent()
+                    }
+                    2 -> {
+                        LikeMessageContent()
+                    }
 //                3 -> {
 //                    SystemMessagePage()
 //                }
+                }
             }
+
         }
     }
 }
