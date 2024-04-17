@@ -2,33 +2,50 @@ package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -45,8 +62,11 @@ import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo
+import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingListAction
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingsInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.InterrelationInfo
+import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserTagSetDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -54,13 +74,16 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
@@ -79,6 +102,7 @@ private class TagFollowContentModel(
     private val activity by instance<Activity>()
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
+    private val myFollowViewModel by instance<MyFollowViewModel>()
 
 
 //    var orderType = "attention"
@@ -90,6 +114,39 @@ private class TagFollowContentModel(
 
     init {
         loadData()
+        viewModelScope.launch {
+            myFollowViewModel.listActionFlow
+                .collect(::listAction)
+        }
+    }
+
+    fun listAction(action: FollowingListAction) {
+        when (action) {
+            is FollowingListAction.AddItem -> {
+                if (action.tagIds.indexOf(tagId) != -1) {
+                    val originListData = list.data.value
+                    if (originListData.indexOfFirst { it.mid == action.item.mid } == -1) {
+                        list.data.value = mutableListOf<FollowingItemInfo>().apply {
+                            add(action.item)
+                            addAll(list.data.value)
+                        }
+                    }
+                }
+            }
+            is FollowingListAction.DeleteItem -> {
+                if (action.tagIds.indexOf(tagId) != -1) {
+                    list.data.value = list.data.value.filter {
+                        it.mid != action.item.mid
+                    }
+                }
+            }
+            is FollowingListAction.UpdateList -> {
+                if (action.tagIds.indexOf(tagId) != -1) {
+                    refresh()
+                }
+            }
+            else -> Unit
+        }
     }
 
     fun loadData(
@@ -105,11 +162,11 @@ private class TagFollowContentModel(
                     order = orderType
                 )
                 .awaitCall()
-                .gson<ResultInfo<List<FollowingItemInfo>>>()
+                .gson<ResultInfo<List<FollowingItemInfo>?>>()
             if (res.isSuccess) {
                 list.pageNum = pageNum
                 val listData = getInterrelations(
-                    res.data,
+                    res.data ?: listOf(),
                     InterrelationInfo(
                         attribute = 2,
                         is_followed = true,
@@ -119,12 +176,18 @@ private class TagFollowContentModel(
                 if (pageNum == 1) {
                     list.data.value = listData
                 } else {
+                    val originListData = list.data.value
                     list.data.value = mutableListOf<FollowingItemInfo>().apply {
-                        addAll(list.data.value)
-                        addAll(listData)
+                        addAll(originListData)
+                        addAll(listData.filter {
+                            val mid = it.mid
+                            originListData.indexOfFirst {
+                                it.mid == mid
+                            } == -1
+                        })
                     }
                 }
-                list.finished.value = res.data.size < list.pageSize
+                list.finished.value = listData.size < list.pageSize
             } else {
                 list.fail.value = res.message
             }
@@ -144,7 +207,7 @@ private class TagFollowContentModel(
         val res = BiliApiService.userRelationApi
             .interrelations(list.map { it.mid })
             .awaitCall()
-            .gson<ResultInfo<JsonObject>>(isDebug = true)
+            .gson<ResultInfo<JsonObject>>()
         val interrelationMap = if (res.isSuccess) {
             res.data
         } else {
@@ -223,7 +286,7 @@ private class TagFollowContentModel(
                     }
                 )
             } else {
-                 PopTip.show(res.message)
+                PopTip.show(res.message)
             }
         } catch (e: Exception) {
             PopTip.show("网络错误")
@@ -237,6 +300,117 @@ private class TagFollowContentModel(
             "bilimiao://user/$id".toUri(),
             defaultNavOptions
         )
+    }
+}
+
+@Composable
+private fun AttentionButton(
+    index: Int,
+    isLogin: Boolean,
+    user: FollowingItemInfo,
+    viewModel: TagFollowContentModel,
+    myFollowViewModel: MyFollowViewModel,
+) {
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
+    fun handleClick() {
+        if (!isLogin) {
+            PopTip.show("请先登录")
+            return
+        }
+        if (user.isFollowing) {
+            expanded = true
+        } else {
+            viewModel.attention(index)
+        }
+    }
+
+    Box() {
+        Button(
+            onClick = ::handleClick,
+            shape = MaterialTheme.shapes.small,
+            contentPadding = PaddingValues(
+                vertical = 4.dp,
+                horizontal = 12.dp,
+            ),
+            modifier = Modifier
+                .sizeIn(
+                    minWidth = 40.dp,
+                    minHeight = 30.dp
+                )
+                .padding(0.dp),
+            enabled = isLogin,
+            colors = if (user.isFollowing) {
+                ButtonDefaults.buttonColors(
+                    containerColor = Color.Gray
+                )
+            } else {
+                ButtonDefaults.buttonColors()
+            }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (!isLogin) {
+                    Text(
+                        text = "未登录",
+                        fontSize = 12.sp,
+                    )
+                } else if (user.isFollowing) {
+                    Icon(
+                        modifier = Modifier.size(15.dp),
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        text = "已关注",
+                        fontSize = 12.sp,
+                    )
+                } else {
+                    Icon(
+                        modifier = Modifier.size(15.dp),
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        text = "关注",
+                        fontSize = 12.sp,
+                    )
+                }
+            }
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    viewModel.attention(index)
+                    expanded = false
+                },
+                text = {
+                    Text(text = "取消关注")
+                }
+            )
+            DropdownMenuItem(
+                onClick = {
+                    myFollowViewModel.updateUserTagSetDialogState(
+                        UserTagSetDialogState(
+                            user = user,
+                            formTagId = viewModel.tagId,
+                        )
+                    )
+                    expanded = false
+                },
+                text = {
+                    Text(text = "设置分组")
+                }
+            )
+        }
     }
 }
 
@@ -256,7 +430,7 @@ internal fun TagFollowContent(
             )
         }
     )
-
+    val myFollowViewModel: MyFollowViewModel by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val userStore: UserStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -268,13 +442,6 @@ internal fun TagFollowContent(
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLogin = userStore.isLogin()
-
-//    LaunchedEffect(viewModel, orderType) {
-//        if (orderType != viewModel.orderType) {
-//            viewModel.orderType = orderType
-//            viewModel.refresh(false)
-//        }
-//    }
 
     SwipeToRefresh(
         refreshing = isRefreshing,
@@ -300,54 +467,13 @@ internal fun TagFollowContent(
                             viewModel.toUserDetailPage(item.mid)
                         }
                     ) {
-                        Button(
-                            onClick = { viewModel.attention(it) },
-                            shape = MaterialTheme.shapes.small,
-                            contentPadding = PaddingValues(
-                                vertical = 4.dp,
-                                horizontal = 12.dp,
-                            ),
-                            modifier = Modifier
-                                .sizeIn(
-                                    minWidth = 40.dp,
-                                    minHeight = 30.dp
-                                )
-                                .padding(0.dp),
-                            enabled = isLogin,
-                            colors = if (item.isFollowing) {
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Color.Gray
-                                )
-                            } else {
-                                ButtonDefaults.buttonColors()
-                            }
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                if (!isLogin) {
-                                    Text(
-                                        text = "未登录",
-                                        fontSize = 12.sp,
-                                    )
-                                } else if (item.isFollowing) {
-                                    Text(
-                                        text = "已关注",
-                                        fontSize = 12.sp,
-                                    )
-                                } else {
-                                    Icon(
-                                        modifier = Modifier.size(15.dp),
-                                        imageVector = Icons.Filled.Add,
-                                        contentDescription = null,
-                                    )
-                                    Text(
-                                        text = "关注",
-                                        fontSize = 12.sp,
-                                    )
-                                }
-                            }
-                        }
+                        AttentionButton(
+                            index = it,
+                            isLogin = isLogin,
+                            user = item,
+                            viewModel = viewModel,
+                            myFollowViewModel = myFollowViewModel,
+                        )
                     }
                 }
             }

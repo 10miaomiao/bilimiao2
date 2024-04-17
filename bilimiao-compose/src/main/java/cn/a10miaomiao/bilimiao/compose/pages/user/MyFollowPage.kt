@@ -1,35 +1,61 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.app.Activity
+import android.view.MenuItem
 import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.navigate
@@ -48,14 +74,14 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.kodein.di.DI
-import org.kodein.di.DIAware
+import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
-import org.kodein.di.instance
+import org.kodein.di.compose.subDI
 
 class MyFollowPage() : ComposePage() {
 
@@ -64,201 +90,21 @@ class MyFollowPage() : ComposePage() {
 
     @Composable
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val viewModel = diViewModel<MyFollowPageViewModel>()
-        MyFollowPageContent(viewModel = viewModel)
-    }
-}
-
-private class MyFollowPageViewModel(
-    override val di: DI,
-) : ViewModel(), DIAware {
-
-    private val fragment by instance<Fragment>()
-    private val activity by instance<Activity>()
-    private val userStore by instance<UserStore>()
-
-    val count = MutableStateFlow(1)
-    val isRefreshing = MutableStateFlow(false)
-    val listState = MutableStateFlow(LazyListState(0, 0))
-    val tagList = FlowPaginationInfo<TagInfo>()
-
-    val orderTypeList = listOf(
-        SingleChoiceItem("最常访问", "attention"),
-        SingleChoiceItem("关注顺序", ""),
-    )
-    val orderType = MutableStateFlow("attention")
-    val orderTypeToNameMap = mapOf(
-        "attention" to "最常访问",
-        "" to "关注顺序",
-    )
-
-    fun add() {
-        count.value = count.value + 1
-    }
-
-//    fun changeOrderType(value: String) {
-//        orderType.value = value
-//        list.data.value = emptyList()
-//        list.finished.value = false
-//        list.fail.value = ""
-//        loadData(1)
-//    }
-
-    init {
-        loadData()
-    }
-
-    private suspend fun getRelationTags() {
-        return
-    }
-
-    fun loadData(
-        pageNum: Int = tagList.pageNum
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            tagList.loading.value = true
-            val res = BiliApiService.userRelationApi
-                .tags()
-                .awaitCall()
-                .gson<ResultInfo<List<TagInfo>>>()
-            if (res.isSuccess) {
-                tagList.pageNum = pageNum
-                tagList.data.value = res.data
-            } else {
-                tagList.fail.value = res.message
+        val viewModel = diViewModel<MyFollowViewModel>()
+        subDI(
+            diBuilder = {
+                bindSingleton { viewModel }
             }
-
-            val mid = userStore.state.info?.mid ?: return@launch
-//
-//            val res = BiliApiService.userApi
-//                .followings(
-//                    mid = mid.toString(),
-//                    pageNum = pageNum,
-//                    pageSize = list.pageSize,
-//                    order = orderType.value
-//                )
-//                .awaitCall()
-//                .gson<ResultInfo<FollowingsInfo>>()
-//            if (res.isSuccess) {
-//                list.pageNum = pageNum
-//                list.finished.value = res.data == null || res.data.list.isEmpty()
-//                if (res.data != null) {
-//                    if (pageNum == 1) {
-//                        list.data.value = res.data.list
-//                    } else {
-//                        list.data.value = mutableListOf<FollowingItemInfo>().apply {
-//                            addAll(list.data.value)
-//                            addAll(res.data.list)
-//                        }
-//                    }
-//                    list.finished.value = res.data.list.size < list.pageSize
-//                }
-//            } else {
-//                list.fail.value = res.message
-//            }
-        } catch (e: Exception) {
-            tagList.fail.value = "无法连接到御坂网络"
-        } finally {
-            tagList.loading.value = false
-            isRefreshing.value = false
+        ) {
+            MyFollowPageContent()
         }
-    }
-
-//    fun loadMore() {
-//        if (!list.finished.value && !list.loading.value) {
-//            loadData(list.pageNum + 1)
-//        }
-//    }
-
-    fun refresh() {
-        isRefreshing.value = true
-        tagList.finished.value = false
-        tagList.fail.value = ""
-        loadData(1)
-    }
-
-//    fun attention(
-//        index: Int,
-//    ) = viewModelScope.launch(Dispatchers.IO) {
-//        try {
-//            if (!userStore.isLogin()) {
-//                withContext(Dispatchers.Main) {
-//                    PopTip.show("请先登录")
-//                }
-//                return@launch
-//            }
-//            val item = list.data.value[index]
-//            val mode = if (item.isFollowing) {
-//                2
-//            } else {
-//                1
-//            }
-//            val newAttribute = if (item.isFollowing) {
-//                0
-//            } else {
-//                2
-//            }
-//            val res = BiliApiService.userApi
-//                .attention(item.mid, mode)
-//                .awaitCall().gson<MessageInfo>()
-//            if (res.code == 0) {
-//                list.data.value = list.data.value.map {
-//                    if (item.mid == it.mid) {
-//                        it.copy(attribute = newAttribute)
-//                    } else {
-//                        it
-//                    }
-//                }
-//                withContext(Dispatchers.Main) {
-//                    PopTip.show(
-//                        if (mode == 2) {
-//                            "已取消关注"
-//                        } else {
-//                            "关注成功"
-//                        }
-//                    )
-//                }
-//            } else {
-//                withContext(Dispatchers.Main) {
-//                    PopTip.show(res.message)
-//                }
-//            }
-//        } catch (e: Exception) {
-//            withContext(Dispatchers.Main) {
-//                PopTip.show("网络错误")
-//            }
-//            e.printStackTrace()
-//        }
-//    }
-
-    fun toSearchPage() {
-        fragment.findComposeNavController()
-            .navigate(SearchFollowPage())
-    }
-
-    fun showOrderPopupMenu(view: View) {
-        val pm = UserFollowOrderPopupMenu(
-            activity,
-            view,
-            checkedValue = orderType.value
-        )
-        pm.setOnMenuItemClickListener {
-            it.isChecked = true
-            val value = arrayOf("attention", "")[it.itemId]
-            if (value != orderType.value) {
-                orderType.value = value
-            }
-            false
-        }
-        pm.show()
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun MyFollowPageContent(
-    viewModel: MyFollowPageViewModel,
-) {
+private fun MyFollowPageContent() {
+    val viewModel: MyFollowViewModel by rememberInstance()
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -271,11 +117,26 @@ private fun MyFollowPageContent(
     val orderType by viewModel.orderType.collectAsState()
     val isLogin = userStore.isLogin()
 
+    val pagerState = rememberPagerState(pageCount = { tagList.size })
+    val currentPage = pagerState.currentPage
     val scope = rememberCoroutineScope()
 
     PageConfig(
         title = "我的关注",
         menus = listOf(
+            myMenuItem {
+                key = MenuKeys.more
+                iconFileName = "ic_more_vert_grey_24dp"
+                title = "更多"
+                visibility = if (
+                    currentPage in tagList.indices
+                    && tagList[currentPage].tagid > 0
+                ) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            },
             myMenuItem {
                 key = MenuKeys.search
                 iconFileName = "ic_search_gray"
@@ -293,53 +154,81 @@ private fun MyFollowPageContent(
             MenuKeys.filter -> {
                 viewModel.showOrderPopupMenu(view)
             }
+
             MenuKeys.search -> {
                 viewModel.toSearchPage()
+            }
+
+            MenuKeys.more -> {
+                viewModel.showMorePopupMenu(view, currentPage)
             }
         }
     }
 
-    val pagerState = rememberPagerState(pageCount = { tagList.size })
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        PrimaryTabRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(
-                    top = windowInsets.topDp.dp,
-                    start = windowInsets.leftDp.dp,
-                    end = windowInsets.rightDp.dp,
-                ),
-            selectedTabIndex = pagerState.currentPage,
+        Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            tagList.forEachIndexed { index, tab ->
-                Tab(
-                    text = {
-                        Row() {
-                            Text(
-                                text = "${tab.name}(${tab.count})",
-                                color = if (index == pagerState.currentPage) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onBackground
-                                }
-                            )
-                        }
-                    },
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
-                )
+            ScrollableTabRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+                    .wrapContentWidth()
+                    .padding(
+                        top = windowInsets.topDp.dp,
+                        start = windowInsets.leftDp.dp,
+                        end = windowInsets.rightDp.dp,
+                    ),
+                edgePadding = 0.dp,
+                selectedTabIndex = currentPage,
+                indicator = { positions ->
+                    if (currentPage > -1 && currentPage < positions.size) {
+                        TabRowDefaults.PrimaryIndicator(
+                            modifier = Modifier.tabIndicatorOffset(
+                                positions[currentPage],
+//                            matchContentSize = true
+                            ),
+                            width = Dp.Unspecified,
+                        )
+                    }
+                },
+                divider = {}
+            ) {
+                tagList.forEachIndexed { index, tab ->
+                    Tab(
+                        text = {
+                            Row() {
+                                Text(
+                                    text = "${tab.name}(${tab.count})",
+                                    color = if (index == pagerState.currentPage) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onBackground
+                                    }
+                                )
+                            }
+                        },
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                    )
+                }
             }
+            HorizontalDivider(
+                Modifier.align(Alignment.BottomStart)
+                    .fillMaxWidth()
+            )
         }
 
         val saveableStateHolder = rememberSaveableStateHolder()
+//        LaunchedEffect(key1 = ) {
+//            saveableStateHolder.removeState()
+//        }
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
@@ -354,5 +243,193 @@ private fun MyFollowPageContent(
                 )
             }
         }
+
     }
+
+    val tagEditDialogState = viewModel.tagEditDialogState.collectAsState().value
+    val userTagSetDialogState = viewModel.userTagSetDialogState.collectAsState().value
+    if (userTagSetDialogState != null) {
+        val selectedUser = userTagSetDialogState.user
+        val selectedTag = remember(selectedUser) {
+            val tagPairList = mutableListOf<Pair<Int, Int>>()
+            selectedUser.tag?.forEachIndexed { i, tagId ->
+                if (tagId != 0) {
+                    tagPairList.add(tagId to i)
+                }
+            }
+            if (tagPairList.isEmpty()) {
+                tagPairList.add(0 to 0)
+            }
+            mutableStateMapOf(*tagPairList.toTypedArray())
+        }
+        AlertDialog(
+            onDismissRequest = viewModel::clearUserTagSetDialogState,
+            title = {
+                Text(
+                    text = "设置分组",
+                    fontWeight = FontWeight.W700,
+                    style = MaterialTheme.typography.titleSmall
+                )
+            },
+            text = {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 400.dp)
+                ) {
+                    items(tagList) { item ->
+                        if (item.tagid != 0) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(
+                                    checked = selectedTag.containsKey(item.tagid),
+                                    onCheckedChange = {
+                                        if (selectedTag.containsKey(item.tagid)) {
+                                            selectedTag.remove(item.tagid)
+                                        } else {
+                                            selectedTag[item.tagid] =
+                                                selectedUser.tag?.indexOf(item.tagid) ?: -1
+                                        }
+                                    }
+                                )
+                                Text(text = item.name)
+                            }
+                        }
+                    }
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.updateTagEditDialogState(
+                                        TagEditDialogState.Add
+                                    )
+                                }
+                        ) {
+                            Box(
+                                modifier = Modifier.size(48.dp, 48.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Add,
+                                    contentDescription = "添加图标"
+                                )
+                            }
+                            Text(text = "添加分组")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                if (selectedTag.isEmpty()) {
+                    TextButton(onClick = {
+                        viewModel.addUserTags(
+                            user = selectedUser,
+                            tagIds = listOf(0),
+                        )
+                        viewModel.clearUserTagSetDialogState()
+                    }) {
+                        Text(text = "保存至默认分组")
+                    }
+                } else {
+                    TextButton(onClick = {
+                        val tagMap = selectedTag.toMap()
+                        viewModel.addUserTags(
+                            user = selectedUser,
+                            tagIds = tagMap.keys.filter { it != 0 },
+                        )
+                        viewModel.clearUserTagSetDialogState()
+                    }) {
+                        Text(text = "确认")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = viewModel::clearUserTagSetDialogState,
+                ) {
+                    Text(text = "取消")
+                }
+            }
+        )
+    }
+    if (tagEditDialogState != null) {
+        var tagText by remember(tagEditDialogState) {
+            if (tagEditDialogState is TagEditDialogState.Update) {
+                mutableStateOf(tagEditDialogState.name)
+            } else {
+                mutableStateOf("")
+            }
+        }
+        var loading by remember {
+            mutableStateOf(false)
+        }
+
+        fun handleConfirmClick() {
+            scope.launch(Dispatchers.IO) {
+                loading = true
+                when (val state = tagEditDialogState) {
+                    is TagEditDialogState.Add -> {
+                        viewModel.addTag(tagText)
+                    }
+
+                    is TagEditDialogState.Update -> {
+                        viewModel.updateTag(state.id, tagText)
+                    }
+
+                    null -> Unit
+                }
+                loading = false
+            }
+        }
+        AlertDialog(
+            onDismissRequest = viewModel::clearTagEditDialogState,
+            title = {
+                Text(
+                    text = "分组名称",
+                    fontWeight = FontWeight.W700,
+                    style = MaterialTheme.typography.titleSmall
+                )
+            },
+            text = {
+                TextField(
+                    value = tagText,
+                    onValueChange = {
+                        tagText = it
+                    },
+                    placeholder = {
+                        Text(text = "分组名称不允许以特殊字符命名")
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !loading,
+                    onClick = ::handleConfirmClick,
+                ) {
+                    when (tagEditDialogState) {
+                        is TagEditDialogState.Add -> {
+                            Text(text = "添加")
+                        }
+
+                        is TagEditDialogState.Update -> {
+                            Text(text = "修改")
+                        }
+
+                        null -> {
+                            Text(text = "提交")
+                        }
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = viewModel::clearTagEditDialogState,
+                ) {
+                    Text(text = "取消")
+                }
+            }
+        )
+    }
+
 }

@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting.proxy
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,11 +26,13 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerCard
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.proxy.BiliUposInfo
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -60,7 +61,6 @@ internal class SelectProxyServerPageViewModel(
 
     private val fragment by instance<Fragment>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
-    private val composeNav by instance<NavHostController>()
 
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())
     var selectedServerIndex = MutableStateFlow(-1)
@@ -133,13 +133,15 @@ internal class SelectProxyServerPageViewModel(
     }
 
     fun toAddPage() {
-        composeNav.navigate(AddProxyServerPage())
+        val nav = fragment.findComposeNavController()
+        nav.navigate(AddProxyServerPage())
     }
 
     fun toEditPage(
         index: Int
     ) {
-        composeNav.navigate(EditProxyServerPage()) {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(EditProxyServerPage()) {
             this.index set index
         }
     }

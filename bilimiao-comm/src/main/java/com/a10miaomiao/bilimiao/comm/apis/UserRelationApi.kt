@@ -28,7 +28,7 @@ class UserRelationApi {
     fun followings(
         mid: String,
         pageNum: Int = 1,
-        pageSize: Int = 30,
+        pageSize: Int = 50,
         order: String = "attention" // 最常访问排列：attention，关注顺序排列：留空
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
@@ -38,6 +38,24 @@ class UserRelationApi {
             "ps" to pageSize.toString(),
             "order_type" to order,
             "order" to "desc",
+        )
+    }
+
+    /**
+     * 搜索关注的up主
+     */
+    fun search(
+        mid: String,
+        name: String,
+        pageNum: Int = 1,
+        pageSize: Int = 50,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/relation/followings/search",
+            "vmid" to mid,
+            "name" to name,
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
         )
     }
 
@@ -55,7 +73,7 @@ class UserRelationApi {
         tagId: Int, // 特别关注恒为-10,默认分组恒为0
         order: String = "attention", // 最常访问排列：attention，关注顺序排列：留空
         pageNum: Int = 1,
-        pageSize: Int = 30,
+        pageSize: Int = 50,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi("x/relation/tag",
             "tagid" to tagId.toString(),
@@ -84,11 +102,12 @@ class UserRelationApi {
      */
     fun tagUpdate(
         tagId: Int,
-        tag: String, // 分组名
+        tagName: String, // 分组名
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi("x/relation/tag/update")
         formBody = ApiHelper.createParams(
-            "tag" to tag,
+            "tagid" to tagId.toString(),
+            "name" to tagName,
         )
         method = MiaoHttp.POST
     }
@@ -99,7 +118,7 @@ class UserRelationApi {
     fun tagDelete(
         tagId: Int,
     ) = MiaoHttp.request {
-        url = BiliApiService.biliApi("x/relation/tag/update")
+        url = BiliApiService.biliApi("x/relation/tag/del")
         formBody = ApiHelper.createParams(
             "tagid" to tagId.toString(),
         )
@@ -134,6 +153,18 @@ class UserRelationApi {
             "fids" to fids.joinToString(","),
             "beforeTagids" to beforeTagids.joinToString(","),
             "afterTagids" to afterTagids.joinToString(","),
+        )
+        method = MiaoHttp.POST
+    }
+
+    fun addUsers(
+        fids: List<String>, // 用户 mid 列表
+        tagIds: List<Int>, // 分组 id 列表
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/relation/tags/addUsers")
+        formBody = ApiHelper.createParams(
+            "fids" to fids.joinToString(","),
+            "tagids" to tagIds.joinToString(","),
         )
         method = MiaoHttp.POST
     }

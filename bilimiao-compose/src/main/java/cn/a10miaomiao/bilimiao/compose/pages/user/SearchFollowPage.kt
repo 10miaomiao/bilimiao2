@@ -1,14 +1,28 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
+import android.app.Activity
+import android.view.View
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,17 +30,36 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
+import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.commponents.input.SearchBox
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
+import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFollowOrderPopupMenu
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
@@ -48,8 +81,81 @@ private class SearchFollowPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
+    private val activity by instance<Activity>()
     private val fragment by instance<Fragment>()
+    private val userStore by instance<UserStore>()
 
+    val searchText = MutableStateFlow("")
+    val isRefreshing = MutableStateFlow(false)
+    val list = FlowPaginationInfo<FollowingItemInfo>()
+
+    init {
+        viewModelScope.launch {
+            searchText.collect {
+                if (!list.loading.value) {
+                    loadData(it)
+                }
+            }
+        }
+    }
+
+    fun loadData(
+        name: String,
+        pageNum: Int = 1,
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val mid = userStore.state.info?.mid ?: return@launch
+            list.loading.value = true
+            val res = BiliApiService.userRelationApi
+                .search(
+                    mid = mid.toString(),
+                    name = name,
+                    pageNum = pageNum,
+                    pageSize = list.pageSize,
+                )
+                .awaitCall()
+                .gson<ResultInfo<FollowingsInfo>>()
+            if (res.isSuccess) {
+                list.pageNum = pageNum
+                list.finished.value = res.data.list.isEmpty()
+                if (pageNum == 1) {
+                    list.data.value = res.data.list
+                } else {
+                    list.data.value = mutableListOf<FollowingItemInfo>().apply {
+                        addAll(list.data.value)
+                        addAll(res.data.list)
+                    }
+                }
+                list.finished.value = res.data.list.size < list.pageSize
+            } else {
+                list.fail.value = res.message
+            }
+        } catch (e: Exception) {
+            list.fail.value = "无法连接到御坂网络"
+        } finally {
+            list.loading.value = false
+            isRefreshing.value = false
+            if (name != searchText.value) {
+                _loadData(searchText.value)
+            }
+        }
+    }
+
+    private fun _loadData(name: String) {
+        loadData(name)
+    }
+
+    fun updateSearchText(value: String) {
+        searchText.value = value
+    }
+
+    fun toUserDetailPage(id: String) {
+        val nav = fragment.findNavController()
+        nav.navigate(
+            "bilimiao://user/$id".toUri(),
+            defaultNavOptions
+        )
+    }
 
 }
 
@@ -65,9 +171,13 @@ private fun SearchFollowPageContent(
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
-    var searchText by remember {
-        mutableStateOf("")
-    }
+    val searchText by viewModel.searchText.collectAsState()
+    val list by viewModel.list.data.collectAsState()
+    val listLoading by viewModel.list.loading.collectAsState()
+    val listFinished by viewModel.list.finished.collectAsState()
+    val listFail by viewModel.list.fail.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
 
     LazyVerticalGrid(
         columns = GridCells.Adaptive(400.dp),
@@ -88,14 +198,30 @@ private fun SearchFollowPageContent(
                 Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
                 SearchBox(
                     value = searchText,
-                    onValueChange = { searchText = it },
+                    onValueChange = viewModel::updateSearchText,
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
                         Text("搜索我的关注")
                     }
                 )
             }
+        }
 
+        items(list.size, { list[it].mid }) {
+            val item = list[it]
+            Box(
+                modifier = Modifier.padding(5.dp),
+            ) {
+                UserInfoCard(
+                    name = item.uname,
+                    face = item.face,
+                    sign = item.sign,
+                    onClick = {
+                        viewModel.toUserDetailPage(item.mid)
+                    },
+                    actionContent = {}
+                )
+            }
         }
 
         item(
