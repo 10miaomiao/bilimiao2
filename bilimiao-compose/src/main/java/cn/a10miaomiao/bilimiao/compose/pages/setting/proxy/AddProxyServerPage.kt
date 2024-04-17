@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting.proxy
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,17 +22,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerForm
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerFormState
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.rememberProxyServerFormState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -56,18 +58,15 @@ internal class AddProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
     private val fragment by instance<Fragment>()
-    private val composeNav by instance<NavHostController>()
     fun addProxyServer(
         formState: ProxyServerFormState
     ) {
         if (formState.name.isBlank()) {
-            Toast.makeText(fragment.requireActivity(), "请填写服务器名称", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("请填写服务器名称")
             return
         }
         if (formState.host.isBlank()) {
-            Toast.makeText(fragment.requireActivity(), "请填写服务器地址", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("请填写服务器地址")
             return
         }
         ProxyHelper.saveServer(
@@ -93,9 +92,9 @@ internal class AddProxyServerPageViewModel(
                 }
             )
         )
-        Toast.makeText(fragment.requireActivity(), "添加成功", Toast.LENGTH_SHORT)
-            .show()
-        composeNav.popBackStack()
+        PopTip.show("添加成功")
+        val nav = fragment.findComposeNavController()
+        nav.popBackStack()
     }
 }
 

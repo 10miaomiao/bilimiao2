@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting.proxy
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +19,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -28,13 +28,16 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.KeyValueInputStateCarrier
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerForm
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerFormState
 import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.rememberProxyServerFormState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -59,7 +62,6 @@ internal class EditProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
     private val fragment by instance<Fragment>()
-    private val composeNav by instance<NavHostController>()
     var index = -1
 
     fun getProxyServer(): ProxyServerInfo? {
@@ -74,13 +76,11 @@ internal class EditProxyServerPageViewModel(
         formState: ProxyServerFormState
     ) {
         if (formState.name.isBlank()) {
-            Toast.makeText(fragment.requireActivity(), "请填写服务器名称", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("请填写服务器名称")
             return
         }
         if (formState.host.isBlank()) {
-            Toast.makeText(fragment.requireActivity(), "请填写服务器地址", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("请填写服务器地址")
             return
         }
         ProxyHelper.saveServer(
@@ -107,9 +107,9 @@ internal class EditProxyServerPageViewModel(
             ),
             index,
         )
-        Toast.makeText(fragment.requireActivity(), "修改成功", Toast.LENGTH_SHORT)
-            .show()
-        composeNav.popBackStack()
+        PopTip.show("修改成功")
+        val nav = fragment.findComposeNavController()
+        nav.popBackStack()
     }
 
     fun deleteProxyServer() {
@@ -118,9 +118,9 @@ internal class EditProxyServerPageViewModel(
             null,
             index,
         )
-        Toast.makeText(fragment.requireActivity(), "删除成功", Toast.LENGTH_SHORT)
-            .show()
-        composeNav.popBackStack()
+        PopTip.show("删除成功")
+        val nav = fragment.findComposeNavController()
+        nav.popBackStack()
     }
 }
 

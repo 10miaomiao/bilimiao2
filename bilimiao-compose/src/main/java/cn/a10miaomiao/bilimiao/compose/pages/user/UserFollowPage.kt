@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.app.Activity
+import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
@@ -36,8 +37,10 @@ import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.rememberDialogState
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
+import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFollowOrderPopupMenu
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -90,7 +93,6 @@ private class UserFollowPageViewModel(
             }
         }
 
-    val count = MutableStateFlow(1)
     val isRefreshing = MutableStateFlow(false)
     val listState = MutableStateFlow(LazyListState(0, 0))
     val list = FlowPaginationInfo<FollowingItemInfo>()
@@ -100,10 +102,10 @@ private class UserFollowPageViewModel(
         SingleChoiceItem("关注顺序", ""),
     )
     val orderType = MutableStateFlow("attention")
-
-    fun add() {
-        count.value = count.value + 1
-    }
+    val orderTypeToNameMap = mapOf(
+        "attention" to "最常访问",
+        "" to "关注顺序",
+    )
 
     fun changeOrderType(value: String) {
         orderType.value = value
@@ -226,6 +228,23 @@ private class UserFollowPageViewModel(
             defaultNavOptions
         )
     }
+
+    fun showOrderPopupMenu(view: View) {
+        val pm = UserFollowOrderPopupMenu(
+            activity,
+            view,
+            checkedValue = orderType.value
+        )
+        pm.setOnMenuItemClickListener {
+            it.isChecked = true
+            val value = arrayOf("attention", "")[it.itemId]
+            if (value != orderType.value) {
+                changeOrderType(value)
+            }
+            false
+        }
+        pm.show()
+    }
 }
 
 @Composable
@@ -244,7 +263,6 @@ private fun UserFollowPageContent(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLogin = userStore.isLogin()
 
-    val dialogState = rememberDialogState()
     val orderTypeList = viewModel.orderTypeList
     val orderType by viewModel.orderType.collectAsState()
 
@@ -258,24 +276,17 @@ private fun UserFollowPageContent(
             myMenuItem {
                 key = 1
                 iconFileName = "ic_baseline_filter_list_grey_24"
-                title = "排序"
+                title = viewModel.orderTypeToNameMap[orderType]
             }
         )
     )
-    PageMenuItemClick(viewModel, dialogState) {
-        when (it.key) {
-            1 -> {
-                dialogState.openDialog = true
+    PageMenuItemClick(viewModel) { view, item ->
+        when (item.key) {
+            MenuKeys.filter -> {
+                viewModel.showOrderPopupMenu(view)
             }
         }
     }
-    SingleChoiceDialog(
-        dialogState,
-        title = "选择排序方式",
-        list = orderTypeList,
-        selected = orderType,
-        onChange = viewModel::changeOrderType
-    )
 
     SwipeToRefresh(
         refreshing = isRefreshing,

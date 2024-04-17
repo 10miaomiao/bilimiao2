@@ -11,7 +11,7 @@ private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }
 
-internal val LocalContainerView = staticCompositionLocalOf<ViewGroup> {
+internal val LocalContainerView = staticCompositionLocalOf<ViewGroup?> {
     noLocalProvidedFor("LocalFragment")
 }
 

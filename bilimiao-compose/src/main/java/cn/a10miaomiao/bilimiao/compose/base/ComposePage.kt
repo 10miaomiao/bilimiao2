@@ -16,9 +16,9 @@ abstract class ComposePage {
 
     abstract val route: String
 
-    open val arguments: List<NamedNavArgument> = autoGetArguments()
+    open val arguments: List<NamedNavArgument> get() = autoGetArguments()
 
-    open val deepLinks: List<NavDeepLink> = emptyList()
+    open val deepLinks: List<NavDeepLink> get() = emptyList()
 
     open fun url(): String {
         return route

@@ -40,3 +40,41 @@ internal data class InterrelationInfo(
     val tag: List<Int>? = null,
 )
 
+internal sealed class FollowingListAction {
+    data class UpdateList(
+        val tagIds: List<Int>,
+    ): FollowingListAction()
+
+    data class AddItem(
+        val tagIds: List<Int>,
+        val item: FollowingItemInfo,
+    ): FollowingListAction()
+
+    data class DeleteItem(
+        val tagIds: List<Int>,
+        val item: FollowingItemInfo,
+    ): FollowingListAction()
+
+    data class UpdateCount(
+        val tagId: Int,
+        val count: Int,
+    ): FollowingListAction()
+}
+
+internal sealed class TagEditDialogState {
+    object Add: TagEditDialogState()
+
+    data class Update(
+        val id: Int,
+        val name: String,
+    ): TagEditDialogState()
+}
+
+/**
+ * 用户分组设置对话框状态
+ */
+internal data class UserTagSetDialogState(
+    val user: FollowingItemInfo,
+    val formTagId: Int,
+)
+

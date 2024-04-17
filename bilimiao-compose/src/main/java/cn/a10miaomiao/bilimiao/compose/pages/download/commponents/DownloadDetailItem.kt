@@ -114,12 +114,12 @@ fun DownloadDetailItem(
                 if (!item.is_completed) {
                     if (item.cid == curDownload?.id) {
                         LinearProgressIndicator(
-                            progress = curDownload.rate,
+                            progress = { curDownload.rate },
                             modifier = Modifier.fillMaxWidth()
                         )
                     } else if (item.total_bytes != 0L) {
                         LinearProgressIndicator(
-                            progress = item.downloaded_bytes.toFloat() / item.total_bytes.toFloat(),
+                            progress = { item.downloaded_bytes.toFloat() / item.total_bytes.toFloat() },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
