@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.config.resetViewConfig
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
@@ -81,6 +82,7 @@ class ThemeSettingFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.getItemOrNull(position)
         if (item is ThemeDelegate.ThemeInfo) {
+            requireActivity().resetViewConfig()
             themeDelegate.setTheme(item.theme)
             adapter.notifyDataSetChanged()
         }
