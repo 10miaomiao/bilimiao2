@@ -76,6 +76,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYER_VERTICAL_DEFAULT_FULL = "player_vertical_default_full"
         const val PLAYER_HORIZONTAL_DEFAULT_FULL = "player_horizontal_default_full"
         const val PLAYER_SCREEN_TYPE = "player_screen_type"
+        const val PLAYER_AUDIO_FOCUS = "player_audio_focus"
 
         const val PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR = "player_full_show_bottom_progress_bar"
         const val PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR = "player_small_show_bottom_progress_bar"
@@ -175,8 +176,10 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             }
         }
         // 同步播放器底部进度条显示控制
+        // 及音频焦点
         if (key == PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR ||
-            key == PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR) {
+            key == PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR ||
+            key == PLAYER_AUDIO_FOCUS) {
             basePlayerDelegate.updateVideoSetting()
         }
         // 同步横屏时小屏播放面积
@@ -230,6 +233,18 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             initialSelection = DECODER_DEFAULT
         }
 
+        switch(PLAYER_BACKGROUND) {
+            title = "后台播放"
+            summary = "遇到困难时，不要停下来."
+            defaultValue = true
+        }
+
+        switch(PLAYER_AUDIO_FOCUS) {
+            title = "占用音频焦点"
+            summary = "关闭后可以与其它APP同时播放"
+            defaultValue = true
+        }
+
         categoryHeader("1") {
             title = "视频源设置"
         }
@@ -258,12 +273,6 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         categoryHeader("2") {
             title = "播放控制设置"
-        }
-
-        switch(PLAYER_BACKGROUND) {
-            title = "后台播放"
-            summary = "遇到困难时，不要停下来."
-            defaultValue = true
         }
 
         switch(PLAYER_AUTO_START) {

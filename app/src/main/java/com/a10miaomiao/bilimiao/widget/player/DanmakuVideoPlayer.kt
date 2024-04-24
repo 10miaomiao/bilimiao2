@@ -8,8 +8,13 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
@@ -29,10 +34,12 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
+import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
+import com.shuyu.gsyvideoplayer.video.base.GSYVideoView
 import master.flame.danmaku.controller.DrawHandler
 import master.flame.danmaku.danmaku.model.BaseDanmaku
 import master.flame.danmaku.danmaku.model.DanmakuTimer
@@ -157,6 +164,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     private var mDisplayCutout: DisplayCutout? = null
 
+    private var mFocusRequest: AudioFocusRequest? = null
+
+    private val mAudioFocusHandler = Handler(Looper.getMainLooper())
+
     // 字幕源列表
     var subtitleSourceList = emptyList<SubtitleSourceInfo>()
         set(value) {
@@ -252,6 +263,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     var showBottomProgressBarInFullMode = true
     // 小屏状态下显示底部进度条
     var showBottomProgressBarInSmallMode = true
+    // 占用音频焦点
+    var enabledAudioFocus = true
 
     constructor(context: Context?, fullFlag: Boolean?) : super(context, fullFlag) {
         initView()
@@ -305,6 +318,20 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mLockContainer.setOnClickListener(lockClickListener)
         mUnlockLeftIV.setOnClickListener(lockClickListener)
         mUnlockRightIV.setOnClickListener(lockClickListener)
+
+        //android 版本 8.0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val attribute = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+            mFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                .setWillPauseWhenDucked(true)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(onAudioFocusChangeListener, mAudioFocusHandler)
+                .setAudioAttributes(attribute)
+                .build()
+        }
     }
 
     private fun updateMode() {
@@ -690,12 +717,21 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         super.clickStartIcon()
         if (mCurrentState == CURRENT_STATE_PLAYING) {
             danmakuOnResume()
+            if (enabledAudioFocus) {
+                requestAudioFocus()
+            }
         } else if (mCurrentState == CURRENT_STATE_PAUSE) {
             danmakuOnPause()
+            if (enabledAudioFocus) {
+                abandonAudioFocus()
+            }
         }
     }
 
     override fun onCompletion() {
+        if (enabledAudioFocus) {
+            abandonAudioFocus()
+        }
         super.onCompletion()
         releaseDanmaku()
     }
@@ -940,6 +976,78 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     override fun setSpeed(speed: Float, soundTouch: Boolean) {
         super.setSpeed(speed, soundTouch)
         mPlaySpeedValue.text = "x$speed"
+    }
+
+
+    /**
+     * 暂时失去AudioFocus，但是可以继续播放，不过要在降低音量
+     */
+    override fun onLossTransientCanDuck() {
+        // 暂时失去AudioFocus，但是可以继续播放，不过要在降低音量
+        DebugMiao.log("onLossTransientCanDuck")
+    }
+
+    /**
+     * 暂时失去Audio Focus，并会很快再次获得
+     */
+    override fun onLossTransientAudio() {
+        // 暂时失去Audio Focus，并会很快再次获得。必须停止Audio的播放
+        DebugMiao.log("onLossTransientAudio")
+        if (enabledAudioFocus) {
+            Handler(Looper.getMainLooper()).post {
+                onVideoPause()
+            }
+        }
+    }
+
+    /**
+     * 获得了Audio Focus
+     */
+    override fun onGankAudio() {
+        DebugMiao.log("onGankAudio")
+        if (enabledAudioFocus) {
+            Handler(Looper.getMainLooper()).post {
+                if (currentState == GSYVideoView.CURRENT_STATE_PAUSE) {
+                    onVideoResume()
+                }
+            }
+        }
+    }
+
+    /**
+     * 失去了Audio Focus，并将会持续很长的时间
+     */
+    override fun onLossAudio() {
+        DebugMiao.log("onLossAudio")
+        if (enabledAudioFocus) {
+            Handler(Looper.getMainLooper()).post {
+               onVideoPause()
+            }
+        }
+    }
+
+    private fun requestAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mFocusRequest?.let {
+                mAudioManager.requestAudioFocus(it)
+                return
+            }
+        }
+        mAudioManager.requestAudioFocus(
+            onAudioFocusChangeListener,
+            AudioManager.STREAM_MUSIC,
+            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+        )
+    }
+
+    private fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mFocusRequest?.let {
+                mAudioManager.abandonAudioFocusRequest(it)
+                return
+            }
+        }
+        mAudioManager.abandonAudioFocus(onAudioFocusChangeListener)
     }
 
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?) {

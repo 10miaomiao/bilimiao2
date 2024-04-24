@@ -165,6 +165,8 @@ class PlayerDelegate2(
         controller.initVideoPlayerSetting()
         views.videoPlayer.subtitleLoader = this::loadSubtitleData
         views.videoPlayer.subtitleSourceSelector = this::selectSourceSubtitle
+        //音频焦点冲突时是否释放
+        views.videoPlayer.isReleaseWhenLossAudio = false
 
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
