@@ -10,22 +10,32 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.session.PlaybackState
+import android.net.Uri
 import android.os.Build
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class PlayingNotification(
     val playerService: PlayerService,
+    val scope: CoroutineScope,
 ) {
 
     companion object {
@@ -46,13 +56,21 @@ class PlayingNotification(
         internal const val NOTIFICATION_CHANNEL_NAME = "playing_notification"
 
         const val NOTIFICATION_ID = 10071
+
+        private const val NOTIFICATION_LARGE_ICON_SIZE = 144 // px
+
+        private val glideOptions = RequestOptions()
+            .fallback(R.drawable.top_bg1)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
     }
 
     val manager: NotificationManager = playerService.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private var notificationBuilder: NotificationCompat.Builder? = null
+    private var mediaSessionToken: MediaSessionCompat.Token? = null
     private var playingInfo = PlayerService.PlayingInfo()
-    private var coverBitmap: Bitmap? = null
+    private var currentCoverUrl: String = ""
+    private var currentCoverBitmap: Bitmap? = null
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -68,77 +86,54 @@ class PlayingNotification(
         }
     }
 
-    private fun getDefaultImageBitmap(): Bitmap {
-        return BitmapFactory.decodeResource(
-            playerService.resources,
-            R.drawable.top_bg1
-        )
-    }
-
     fun cancel() {
         playingInfo = PlayerService.PlayingInfo()
-        coverBitmap = null
+        currentCoverUrl = ""
+        currentCoverBitmap = null
         notificationBuilder = null
         manager.cancel(NOTIFICATION_ID)
     }
 
-    fun setPlayingInfo(info: PlayerService.PlayingInfo) {
+    fun setPlayingInfo(
+        mediaSession: MediaSessionCompat?,
+        info: PlayerService.PlayingInfo
+    ) {
+        val coverUrl = info.cover ?: ""
+        val sessionToken = mediaSession?.sessionToken ?: return
+        val builder = getNotificationBuilder(sessionToken)
+        setNotificationActions(builder)
         playingInfo = info
-        val url = playingInfo.cover
-        if (url == null){
-            coverBitmap = null
-        } else {
-            val newUrl = if ("://" in url) {
-                url.replace("http://","https://")
-            } else { "https:$url" }
-            val bigNotificationImageSize = playerService.resources
-                .getDimensionPixelSize(R.dimen.notification_big_image_size)
-            Glide.with(playerService)
-                .asBitmap()
-                .centerCrop()
-                .override(bigNotificationImageSize)
-                .load(newUrl)
-                .listener(object : RequestListener<Bitmap> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        val defaultCoverBitmap = getDefaultImageBitmap()
-                        updateWithBitmap(defaultCoverBitmap)
-                        return true
-                    }
-
-                    override fun onResourceReady(
-                        resource: Bitmap?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        if (resource != null) {
-                            updateWithBitmap(resource)
-                        } else {
-                            val defaultCoverBitmap = getDefaultImageBitmap()
-                            updateWithBitmap(defaultCoverBitmap)
-                        }
-                        return true
-                    }
-                })
-                .submit()
+        if (coverUrl != currentCoverUrl && coverUrl.isNotBlank()) {
+            currentCoverBitmap = null
+            currentCoverUrl = coverUrl
+            scope.launch {
+                val uri = Uri.parse(UrlUtil.autoHttps(coverUrl))
+                val coverBitmap = resolveUriAsBitmap(uri)
+                if (coverUrl == currentCoverUrl && coverBitmap != null) {
+                    currentCoverBitmap = coverBitmap
+                    updateWithBitmap(coverBitmap)
+                    val metaData = playerService.getMediaMetadata(info)
+                    metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverBitmap)
+                    mediaSession.setMetadata(metaData.build())
+                }
+            }
         }
-    }
-
-    fun updateForPlaying() {
-        val builder = getNotificationBuilder()
-//        builder.setLargeIcon(bitmap)
         val notification: Notification = builder.build()
         manager.notify(NOTIFICATION_ID, notification)
     }
 
-    fun updateWithProgress(max: Long, progress: Long) {
-        val builder = getNotificationBuilder()
+    fun updateForPlaying(mediaSession: MediaSessionCompat?) {
+        val sessionToken = mediaSession?.sessionToken ?: return
+        val builder = getNotificationBuilder(sessionToken)
+        setNotificationActions(builder)
+        val notification: Notification = builder.build()
+        manager.notify(NOTIFICATION_ID, notification)
+    }
+
+    fun updateWithProgress(mediaSession: MediaSessionCompat?, max: Long, progress: Long) {
+        val sessionToken = mediaSession?.sessionToken ?: return
+        val builder = getNotificationBuilder(sessionToken)
+        setNotificationActions(builder)
         builder.setProgress(max.toInt(), progress.toInt(), true)
         val notification: Notification = builder.build()
         manager.notify(NOTIFICATION_ID, notification)
@@ -146,7 +141,8 @@ class PlayingNotification(
 
 
     private fun updateWithBitmap(bitmap: Bitmap) {
-        val builder = getNotificationBuilder()
+        val sessionToken = mediaSessionToken ?: return
+        val builder = getNotificationBuilder(sessionToken)
         builder.setLargeIcon(bitmap)
         val notification: Notification = builder.build()
         manager.notify(NOTIFICATION_ID, notification)
@@ -169,11 +165,14 @@ class PlayingNotification(
         )
     }
 
-    private fun getNotificationBuilder(): NotificationCompat.Builder {
-        notificationBuilder?.let {
-            setNotificationActions(it)
-            return it
+    private fun getNotificationBuilder(
+        sessionToken: MediaSessionCompat.Token
+    ): NotificationCompat.Builder {
+        if (sessionToken === mediaSessionToken) {
+            notificationBuilder?.let { return it }
         }
+        mediaSessionToken = sessionToken
+
         val builder = NotificationCompat.Builder(playerService, NOTIFICATION_CHANNEL_ID)
 
         builder.setContentTitle(playingInfo.title ?: "bilimiao正在播放")
@@ -201,7 +200,7 @@ class PlayingNotification(
         builder.setContentIntent(pIntent)
 
         val style = androidx.media.app.NotificationCompat.MediaStyle()
-        style.setMediaSession(playerService.mediaSession.sessionToken)
+        style.setMediaSession(sessionToken)
         //CancelButton在5.0以下的机器有效
         style.setCancelButtonIntent(pIntent)
         style.setShowCancelButton(true)
@@ -228,4 +227,25 @@ class PlayingNotification(
         )
     }
 
+    private suspend fun resolveUriAsBitmap(uri: Uri): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            // Block on downloading artwork.
+            miaoLogger().d(
+                "resolveUriAsBitmap",
+                "uri" to uri,
+            )
+            try {
+                Glide.with(playerService)
+                    .applyDefaultRequestOptions(glideOptions)
+                    .asBitmap()
+                    .load(uri)
+                    .submit(NOTIFICATION_LARGE_ICON_SIZE, NOTIFICATION_LARGE_ICON_SIZE)
+                    .get()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext null
+            }
+
+        }
+    }
 }
