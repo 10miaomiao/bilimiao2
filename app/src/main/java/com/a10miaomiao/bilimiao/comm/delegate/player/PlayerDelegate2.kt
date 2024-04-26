@@ -402,10 +402,12 @@ class PlayerDelegate2(
                 withContext(Dispatchers.Main) {
                     // 设置通知栏控制器
                     PlayerService.selfInstance?.setPlayingInfo(
-                        source.title,
-                        source.ownerName,
-                        source.coverUrl,
-                        sourceInfo.duration
+                        PlayerService.PlayingInfo(
+                            title = source.title,
+                            author = source.ownerName,
+                            cover = source.coverUrl,
+                            duration = sourceInfo.duration,
+                        )
                     )
                     views.videoPlayer.releaseDanmaku()
                     views.videoPlayer.danmakuParser = danmukuParser

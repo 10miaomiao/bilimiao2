@@ -39,7 +39,6 @@ class PlayerService : Service() {
     private val playingNotification by lazy { PlayingNotification(this, serviceScope) }
 
     private var mediaSession: MediaSessionCompat? = null
-    private val info: PlayingInfo = PlayingInfo()
     private var showNotification = true // 是否显示通知栏控制器
 
     override fun onCreate() {
@@ -81,18 +80,9 @@ class PlayerService : Service() {
         selfInstance = null
     }
 
-    fun setPlayingInfo(
-        title: String,
-        author: String,
-        cover: String,
-        duration: Long,
-    ) {
-        info.title = title
-        info.author = author
-        info.cover = cover
-        info.duration = duration
+    fun setPlayingInfo(info: PlayingInfo) {
         showNotification = getShowNotification()
-        setupMediaSession()
+        setupMediaSession(info)
         mediaSession?.isActive = true
         if (showNotification) {
             playingNotification.setPlayingInfo(mediaSession, info)
@@ -100,17 +90,9 @@ class PlayerService : Service() {
     }
 
     fun clearPlayingInfo() {
-        info.title = null
-        info.author = null
-        info.cover = null
-        info.duration = 0L
         mediaSession?.isActive = false
+        mediaSession = null
         playingNotification.cancel()
-    }
-
-
-    fun getPlayingInfo(): PlayingInfo {
-        return info
     }
 
     fun isPlaying(): Boolean {
@@ -150,7 +132,7 @@ class PlayerService : Service() {
     }
 
     fun setProgress(max: Long, progress: Long) {
-        if (showNotification && info.title != null) {
+        if (showNotification && mediaSession != null) {
             playingNotification.updateWithProgress(mediaSession, max, progress)
             val stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlayingNotification.MEDIA_SESSION_ACTIONS)
@@ -164,7 +146,7 @@ class PlayerService : Service() {
         }
     }
 
-    private fun setupMediaSession() {
+    private fun setupMediaSession(info: PlayingInfo) {
         val mediaSession = MediaSessionCompat(this, "BilimiaoPlayer").apply {
             setCallback(mediaSessionCallback)
         }
@@ -174,7 +156,7 @@ class PlayerService : Service() {
         this.mediaSession = mediaSession
     }
 
-    fun getMediaMetadata(info: PlayerService.PlayingInfo): MediaMetadataCompat.Builder {
+    fun getMediaMetadata(info: PlayingInfo): MediaMetadataCompat.Builder {
         val metaData = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, info.author ?: "bilimiao")
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, info.author ?: "bilimiao")
