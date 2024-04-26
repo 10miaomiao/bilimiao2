@@ -30,6 +30,7 @@ class PlayerStore(override val di: DI) :
         var title: String = "",
         var cover: String = "",
         var playList: PlayListInfo? = null,
+        var playProgress: Long = 0,
     ) {
         fun getPlayListSize(): Int {
             return playList?.run { items.size } ?: 0
@@ -50,6 +51,11 @@ class PlayerStore(override val di: DI) :
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
 
+    fun setPlayProgress(progress:Long){
+        this.setState {
+            playProgress = progress
+        }
+    }
     fun setPlayList(info: PlayListInfo) {
         this.setState {
             playList = info
@@ -87,6 +93,7 @@ class PlayerStore(override val di: DI) :
             cid = source.id
             title = source.title
             cover = source.coverUrl
+            playProgress = 0
             if (ids.sid.isNotBlank() && ids.epid.isNotBlank()) {
                 type = BANGUMI
                 sid = ids.sid
@@ -110,6 +117,7 @@ class PlayerStore(override val di: DI) :
             this.title = ""
             this.sid = ""
             this.epid = ""
+            this.playProgress = 0
         }
     }
 }

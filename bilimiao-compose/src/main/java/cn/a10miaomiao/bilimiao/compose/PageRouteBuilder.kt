@@ -15,6 +15,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
@@ -74,6 +75,9 @@ class PageRouteBuilder (
         +MyFollowPage()
         +UserFollowPage()
         +SearchFollowPage()
+
+        //lyric
+        +LyricPage()
     }
 
     private operator fun ComposePage.unaryPlus() {
