@@ -316,6 +316,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             // 播放视频
             basePlayerDelegate.openPlayer(
                 VideoPlayerSource(
+                    mainTitle = info.title,
                     title = title,
                     coverUrl = info.pic,
                     aid = info.aid,

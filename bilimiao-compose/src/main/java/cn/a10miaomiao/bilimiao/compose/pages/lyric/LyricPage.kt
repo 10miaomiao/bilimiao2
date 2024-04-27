@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.lyric
 
 import android.app.Activity
+import android.util.Log
 import android.view.View
 import android.view.Window
 import androidx.compose.animation.AnimatedContentScope
@@ -49,11 +50,6 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricOffsetPopupMenu
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricSourcePopupMenu
-import com.a10miaomiao.bilimiao.comm.entity.lyric.KugouAccessKeyItem
-import com.a10miaomiao.bilimiao.comm.entity.lyric.KugouLyricItem
-import com.a10miaomiao.bilimiao.comm.entity.lyric.KugouSearchResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.lyric.NeteaseLyricItem
-import com.a10miaomiao.bilimiao.comm.entity.lyric.NeteaseSearchResultInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
@@ -72,7 +68,9 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
+import java.io.ByteArrayOutputStream
 import java.util.Base64
+import java.util.zip.Inflater
 import kotlin.experimental.xor
 
 class LyricPage :ComposePage(){
@@ -101,6 +99,7 @@ internal class LyricPageViewModel(
     var lyric= MutableStateFlow(mutableStateListOf<LyricLine>())
     var offset= MutableStateFlow(0)
 
+    var loadedSourceTitle=MutableStateFlow("\n")
     var source=MutableStateFlow(mutableStateListOf<LyricSource>())
 
 
@@ -126,6 +125,7 @@ internal class LyricPageViewModel(
     }
     fun loadSource(videoTitle:String) = viewModelScope.launch(Dispatchers.IO){
         source.value.clear()
+        loadedSourceTitle.value=videoTitle
         if(videoTitle==""){
             setMessage("当前无视频播放")
         } else {
@@ -194,7 +194,6 @@ internal class LyricPageViewModel(
         }
     }
  */
-
     suspend fun loadLyric(index:Int,replace:Boolean = false){
         if(loadingLyric.value){
             //不同时读取
@@ -239,11 +238,11 @@ internal class LyricPageViewModel(
 //                                }
 //                                if(res2.error_code==0){
 //                                    val base64DecodedBytes= Base64.getDecoder().decode(res2.content)
-//                                    val krcString=String(base64DecodedBytes).replaceFirst("krc1","")
 //                                    val encryptKey = arrayOf(64.toByte(), 71.toByte(), 97.toByte(), 119.toByte(), 94.toByte(), 50.toByte(), 116.toByte(), 71.toByte(), 81.toByte(), 54.toByte(), 49.toByte(), 45.toByte(), 206.toByte(), 210.toByte(), 110.toByte(), 105.toByte())
-//                                    val byteArray=krcString.toByteArray()
-//                                    for(i in byteArray.indices){
-//                                        byteArray[i]=byteArray[i] xor encryptKey[i % encryptKey.size]
+//                                    val byteArray=base64DecodedBytes.copyOfRange(4,base64DecodedBytes.size)
+//                                    var encryptedByteArray=byteArray
+//                                    for(i in encryptedByteArray.indices){
+//                                        encryptedByteArray[i]=byteArray[i] xor encryptKey[i % encryptKey.size]
 //                                    }
 //                                    //没解出来
 //                                    list.add(LyricLine(0,"酷狗暂时无法解析，请选其他源"))
@@ -325,15 +324,10 @@ internal class LyricPageViewModel(
                 }
             }
             2 -> {
-                if(lyricTitle.value==""){
-                    PopTip.show("无歌词")
-                } else {
-                    LyricOffsetPopupMenu(activity,this).show(view)
-                }
+                LyricOffsetPopupMenu(activity,this).show(view)
             }
         }
     }
-
 }
 @Preview
 @Composable
@@ -386,9 +380,13 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
             (canvasHeight/2*160/conf.densityDpi).toInt()-50
         }
     }
-    LaunchedEffect(playerState.title){
-        viewModel.clearLyric()
-        viewModel.loadSource(playerState.title)
+    LaunchedEffect(playerState.mainTitle){
+        //过滤掉视频名中的方括号，搜索更精准
+        val regex="\\【.*?\\】".toRegex()
+        val videoTitle=playerState.mainTitle.replace(regex,"")
+        if(videoTitle!=viewModel.loadedSourceTitle.value){
+            viewModel.loadSource(videoTitle)
+        }
     }
     LaunchedEffect(key1 = focusOn){
         scrollState.animateScrollToItem(focusOn+1,-spacerPadding.value*conf.densityDpi/160)
