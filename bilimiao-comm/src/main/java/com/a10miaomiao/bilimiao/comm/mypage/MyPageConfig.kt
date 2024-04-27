@@ -12,7 +12,7 @@ class MyPageConfig(
 
     var setConfig: ((MyPageConfigInfo) -> Unit)? = null
 
-    private val configInfo get() = getConfigInfo()
+    val configInfo get() = getConfigInfo()
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
