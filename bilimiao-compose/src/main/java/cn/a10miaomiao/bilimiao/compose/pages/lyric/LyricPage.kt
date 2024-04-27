@@ -48,6 +48,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.pages.lyric.lib.KrcText
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricOffsetPopupMenu
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricSourcePopupMenu
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
@@ -131,9 +132,9 @@ internal class LyricPageViewModel(
         } else {
             loadingSource.value = true
             setMessage("正在加载歌词源...")
-            //val res1=async{ loadSourceFromKugou(videoTitle) }
+            val res1=async{ loadSourceFromKugou(videoTitle) }
             val res2=async{ loadSourceFromNetease(videoTitle) }
-            //res1.await()
+            res1.await()
             res2.await()
             loadingSource.value = false
         }
@@ -165,7 +166,7 @@ internal class LyricPageViewModel(
             }
         }
     }
-/*
+
     suspend fun loadSourceFromKugou(videoTitle: String){
         try {
             val res = MiaoHttp.request {
@@ -193,7 +194,12 @@ internal class LyricPageViewModel(
             }
         }
     }
- */
+    fun String.decodeKrc():String{
+        val base64DecodedBytes= Base64.getDecoder().decode(this)
+        val byteArray = base64DecodedBytes.copyOfRange(4,base64DecodedBytes.size)
+        return KrcText().getKrcText(byteArray)
+    }
+
     suspend fun loadLyric(index:Int,replace:Boolean = false){
         if(loadingLyric.value){
             //不同时读取
@@ -223,38 +229,57 @@ internal class LyricPageViewModel(
             var by=""
             val list= mutableListOf<LyricLine>()
             when (src.type) {
-//                        "kugou" -> {
-//                            val res1 = MiaoHttp.request {
-//                                url ="https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&keyword=&duration=&hash=${src.code}&album_audio_id="
-//                            }.awaitCall().let{
-//                                Gson().fromJson(it.body!!.string(),KugouAccessKeyItem::class.java)
-//                            }
-//                            if(res1.errcode==200){
-//                                val res2 = MiaoHttp.request {
-//                                    val can = res1.candidates[0]
-//                                    url ="https://lyrics.kugou.com/download?ver=1&client=pc&id=${can.id}&accesskey=${can.accesskey}&fmt=krc&charset=utf8"
-//                                }.awaitCall().let{
-//                                    Gson().fromJson(it.body!!.string(),KugouLyricItem::class.java)
-//                                }
-//                                if(res2.error_code==0){
-//                                    val base64DecodedBytes= Base64.getDecoder().decode(res2.content)
-//                                    val encryptKey = arrayOf(64.toByte(), 71.toByte(), 97.toByte(), 119.toByte(), 94.toByte(), 50.toByte(), 116.toByte(), 71.toByte(), 81.toByte(), 54.toByte(), 49.toByte(), 45.toByte(), 206.toByte(), 210.toByte(), 110.toByte(), 105.toByte())
-//                                    val byteArray=base64DecodedBytes.copyOfRange(4,base64DecodedBytes.size)
-//                                    var encryptedByteArray=byteArray
-//                                    for(i in encryptedByteArray.indices){
-//                                        encryptedByteArray[i]=byteArray[i] xor encryptKey[i % encryptKey.size]
-//                                    }
-//                                    //没解出来
-//                                    list.add(LyricLine(0,"酷狗暂时无法解析，请选其他源"))
-//                                } else {
-//                                    PopTip.show(res2.info)
-//                                    setMessage("歌词详情获取失败")
-//                                }
-//                            } else {
-//                                PopTip.show(res1.errmsg)
-//                                setMessage("歌词详情获取失败")
-//                            }
-//                        }
+                        "kugou" -> {
+                            val res1 = MiaoHttp.request {
+                                url ="https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&keyword=&duration=&hash=${src.code}&album_audio_id="
+                            }.awaitCall().let{
+                                Gson().fromJson(it.body!!.string(),KugouAccessKeyItem::class.java)
+                            }
+                            if(res1.errcode==200){
+                                val res2 = MiaoHttp.request {
+                                    val can = res1.candidates[0]
+                                    url ="https://lyrics.kugou.com/download?ver=1&client=pc&id=${can.id}&accesskey=${can.accesskey}&fmt=krc&charset=utf8"
+                                }.awaitCall().let{
+                                    Gson().fromJson(it.body!!.string(),KugouLyricItem::class.java)
+                                }
+                                if(res2.error_code==0){
+                                    res2.content.decodeKrc().split('\n').forEach {
+                                        val full=it.substringBefore(']').substringAfter('[')
+                                        val body=it.substringAfter(']')
+                                        if(full.contains(':')){
+                                            val left=full.substringBefore(':')
+                                            val right=full.substringAfter(':')
+                                            if(left=="ti"){
+                                                title=right
+                                            } else if(left=="by"){
+                                                by=right
+                                            } else if(left=="ar"){
+                                                author=right
+                                            } else if(left=="offset"){
+                                                val time = right.toIntOrNull()
+                                                if(time!=null&&time!=0){
+                                                    //offset为0时不覆盖原有的
+                                                    offset.value=time
+                                                }
+                                            }
+                                        } else if(full.contains(',')){
+                                            val time=full.substringBefore(',').toIntOrNull()
+                                            if(time!=null){
+                                                val regex="<.*?>".toRegex()
+                                                val text=body.replace(regex,"")
+                                                list.add(LyricLine(time.toLong(),text))
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    PopTip.show(res2.info)
+                                    list.add(LyricLine(0,"歌词详情获取失败"))
+                                }
+                            } else {
+                                PopTip.show(res1.errmsg)
+                                list.add(LyricLine(0,"歌词详情获取失败"))
+                            }
+                        }
                 "netease" -> {
                     val res = MiaoHttp.request {
                         url ="https://music.163.com/api/song/media?id=${src.code}"
@@ -274,7 +299,8 @@ internal class LyricPageViewModel(
                                 author=right
                             } else if(left=="offset"){
                                 val time = right.toIntOrNull()
-                                if(time!=null){
+                                if(time!=null&&time!=0){
+                                    //offset为0时不覆盖原有的
                                     offset.value=time
                                 }
                             } else {
@@ -288,7 +314,7 @@ internal class LyricPageViewModel(
                         }
                     } else {
                         PopTip.show("网易云歌词获取失败：${res.code}")
-                        setMessage("歌词详情获取失败")
+                        list.add(LyricLine(0,"歌词详情获取失败"))
                     }
                 }
 
@@ -300,6 +326,7 @@ internal class LyricPageViewModel(
                 list.add(LyricLine(0,"歌词内容为空"))
             }
             if(title==""){
+                //没读取到标题的，自动填充
                 title=src.name
             }
             setLyric(list, title, author, by)
@@ -381,9 +408,10 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
         }
     }
     LaunchedEffect(playerState.mainTitle){
-        //过滤掉视频名中的方括号，搜索更精准
-        val regex="\\【.*?\\】".toRegex()
-        val videoTitle=playerState.mainTitle.replace(regex,"")
+        //过滤掉视频名中的括号，搜索更精准
+        val regex1="【.*?】".toRegex()
+        val regex2="\\(.*?\\)".toRegex()
+        val videoTitle=playerState.mainTitle.replace(regex1,"").replace(regex2,"")
         if(videoTitle!=viewModel.loadedSourceTitle.value){
             viewModel.loadSource(videoTitle)
         }
