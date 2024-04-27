@@ -27,6 +27,7 @@ class PlayerStore(override val di: DI) :
         var cid: String = "",
         var epid: String = "",
         var sid: String = "",
+        var mainTitle: String = "",
         var title: String = "",
         var cover: String = "",
         var playList: PlayListInfo? = null,
@@ -72,7 +73,7 @@ class PlayerStore(override val di: DI) :
                 cover = it.cover,
                 ownerId = it.author.mid,
                 ownerName = it.author.name,
-                from = info.id
+                from = info.id,
             )
         }
         val title = if (info.sections.size > 1) {
@@ -94,6 +95,11 @@ class PlayerStore(override val di: DI) :
             title = source.title
             cover = source.coverUrl
             playProgress = 0
+            if(source is VideoPlayerSource) {
+                mainTitle = source.mainTitle
+            } else {
+                mainTitle = ""
+            }
             if (ids.sid.isNotBlank() && ids.epid.isNotBlank()) {
                 type = BANGUMI
                 sid = ids.sid
@@ -115,6 +121,7 @@ class PlayerStore(override val di: DI) :
             this.aid = ""
             this.cid = ""
             this.title = ""
+            this.mainTitle = ""
             this.sid = ""
             this.epid = ""
             this.playProgress = 0

@@ -17,6 +17,7 @@ data class PlayListItemInfo(
 ) : Parcelable {
     fun toVideoPlayerSource(): VideoPlayerSource {
         return VideoPlayerSource(
+            mainTitle = title,
             title = title,
             coverUrl = cover,
             aid = aid,
