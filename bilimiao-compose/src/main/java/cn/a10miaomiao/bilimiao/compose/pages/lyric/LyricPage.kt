@@ -408,10 +408,11 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
         }
     }
     LaunchedEffect(playerState.mainTitle){
-        //过滤掉视频名中的括号，搜索更精准
-        val regex1="【.*?】".toRegex()
-        val regex2="\\(.*?\\)".toRegex()
-        val videoTitle=playerState.mainTitle.replace(regex1,"").replace(regex2,"")
+        val videoTitle=playerState.mainTitle
+            .replace("【.*?】".toRegex(),"")
+            .replace("\\(.*?\\)".toRegex(),"") //过滤掉视频名中的括号，搜索更精准
+            .substringBefore("feat.")
+            .substringBeforeLast('/') //过滤掉作者信息
         if(videoTitle!=viewModel.loadedSourceTitle.value){
             viewModel.loadSource(videoTitle)
         }
