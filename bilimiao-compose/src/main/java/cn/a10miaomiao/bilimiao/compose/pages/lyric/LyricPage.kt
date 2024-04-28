@@ -384,7 +384,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
     val lyric = viewModel.lyric.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
     val title = viewModel.lyricTitle.collectAsState().value
-    val focusOn = remember (playerStore.state.playProgress,lyric,offset){
+    val focusOn = remember (playerState.playProgress,lyric,offset){
         derivedStateOf{
             var focused = -100
             for (item in lyric) {
@@ -402,9 +402,9 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
     val scrollState= rememberLazyListState()
     val conf = LocalConfiguration.current
     var canvasHeight by remember { mutableFloatStateOf(0f) }
-    val spacerPadding = remember(canvasHeight){
+    val spacerPadding = remember(canvasHeight,windowState.contentInsets.bottom){
         derivedStateOf {
-            (canvasHeight/2*160/conf.densityDpi).toInt()-50
+            ((canvasHeight-windowState.contentInsets.bottom)/2*160/conf.densityDpi).toInt()-50
         }
     }
     LaunchedEffect(playerState.mainTitle){
@@ -422,7 +422,9 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
     }
     Box{
         Canvas(modifier = Modifier.fillMaxSize()){
-            canvasHeight = size.height
+            if(size.height!= 0f){
+                canvasHeight = size.height
+            }
         }
         LazyColumn(state = scrollState) {
             item {
