@@ -4,21 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.miniVideoItem
@@ -30,11 +24,9 @@ import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
-import splitties.views.dsl.recyclerview.recyclerView
 
 class RecommendFragment: RecyclerViewFragment(), DIAware {
 
@@ -73,7 +65,7 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val nav = Navigation.findNavController(view)
         val item = viewModel.list.data[position]
-        DebugMiao.log("item.goto", item.goto, item.param, item)
+
         if (item.goto == "av" || item.goto == "vertical_av") {
             val args = VideoInfoFragment.createArguments(item.param)
             nav.navigate(VideoInfoFragment.actionId, args)

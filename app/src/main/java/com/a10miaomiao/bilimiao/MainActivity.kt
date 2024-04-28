@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
@@ -67,6 +68,7 @@ class MainActivity
         bindSingleton { themeDelegate }
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
+
     }
 
     private val store by lazy { Store(this, di) }
@@ -321,12 +323,14 @@ class MainActivity
 
 
     fun setMyPageConfig(config: MyPageConfigInfo) {
-        pageConfig = config
-        ui.mAppBar.setProp {
-            title = config.title
-            menus = config.menus
+        if (config.title.isNotBlank()) {
+            pageConfig = config
+            ui.mAppBar.setProp {
+                title = config.title
+                menus = config.menus
+            }
+            ui.root.slideUpBottomAppBar()
         }
-        ui.root.slideUpBottomAppBar()
         leftFragment.setConfig(config.search)
     }
 
@@ -650,8 +654,14 @@ class MainActivity
         }
     }
 
-    private fun onNavBack(): Boolean {
+    private fun onHostNavBack(): Boolean {
         if (ui.mAppBar.canBack) {
+            val currentDestinationId = currentNav.navController.currentDestination?.id
+            if (currentDestinationId == MainNavGraph.dest.compose) {
+                (currentNav.childFragmentManager.fragments.last()
+                        as? ComposeFragment)?.onBackPressed()
+                return true
+            }
             currentNav.navController.popBackStack()
             return true
         } else {
@@ -673,7 +683,7 @@ class MainActivity
         if (basePlayerDelegate.onBackPressed()) {
             return
         }
-        if (onNavBack()) {
+        if (onHostNavBack()) {
             return
         }
         super.onBackPressed()
@@ -684,6 +694,16 @@ class MainActivity
         ScreenDpiUtil.readCustomConfiguration(configuration)
         val newContext = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(newContext)
+    }
+
+    fun getPrimaryNavigationFragment(nav: NavController): Fragment? {
+        return if (nav === navController) {
+            navHostFragment.childFragmentManager.primaryNavigationFragment
+        } else if (nav === subNavController) {
+            subNavHostFragment?.childFragmentManager?.primaryNavigationFragment
+        } else {
+            null
+        }
     }
 
 }

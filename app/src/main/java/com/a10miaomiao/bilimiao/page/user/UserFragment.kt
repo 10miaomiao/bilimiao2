@@ -29,6 +29,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
@@ -93,11 +94,12 @@ class UserFragment : Fragment(), DIAware, MyPage {
 
         menus = listOf(
             myMenuItem {
-                key = 0
+                key = MenuKeys.more
                 iconResource = R.drawable.ic_more_vert_grey_24dp
                 title = "更多"
             },
             myMenuItem {
+                key = MenuKeys.follow
                 key = 1
                 visibility = if (viewModel.isSelf) {
                     View.GONE
@@ -118,7 +120,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
         when (menuItem.key) {
-            0 -> {
+            MenuKeys.more -> {
                 // 更多
                 val pm = UserMorePopupMenu(
                     activity = requireActivity(),
@@ -127,7 +129,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 )
                 pm.show()
             }
-            1 -> {
+            MenuKeys.follow -> {
                 // 关注up主
                 viewModel.attention()
             }

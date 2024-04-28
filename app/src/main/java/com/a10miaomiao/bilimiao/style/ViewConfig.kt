@@ -92,7 +92,7 @@ fun Context.resetViewConfig() {
 val Context.config: ViewConfig
     get() {
         return BackendViewConfig.config?.takeIf {
-            this == BackendViewConfig.configContext
+            this === BackendViewConfig.configContext
         } ?: ViewConfig(this).also {
             BackendViewConfig.config = it
             BackendViewConfig.configContext = this
