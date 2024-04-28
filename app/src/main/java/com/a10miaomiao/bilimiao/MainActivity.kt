@@ -37,6 +37,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
@@ -179,11 +180,6 @@ class MainActivity
         })
 
         initViewFocusable()
-
-        //主界面切至后台时会把当前侧栏内容覆盖掉，妥协方案，侧栏得失焦点刷新
-        ui.root.appBar?.setOnFocusChangeListener { _, _ ->
-            notifyConfigChanged()
-        }
     }
 
     private fun initNavController() {
@@ -272,7 +268,7 @@ class MainActivity
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
         if (fragment is MyPage) {
             val config = fragment.pageConfig
-            config.setConfig = this::setMyPageConfig
+            config.setConfig = this::notifyConfigChanged
         }
     }
 
@@ -303,20 +299,21 @@ class MainActivity
             if (ui.root.pointerAutoChange && ui.root.subContentShown) {
                 ui.root.pointerExchanged = !ui.root.pointerExchanged
             }
-            notifyConfigChanged()
+            notifyFocusChanged()
         }
     }
 
-    fun notifyConfigChanged() {
-        if (currentNav.childFragmentManager.fragments.isNotEmpty()) {
-            val fragment = currentNav.childFragmentManager.fragments.last()
-            ui.mAppBar.canBack =
-                currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
-            ui.mAppBar.showPointer = ui.root.subContentShown
-            ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
-
-            if (fragment is MyPage) {
-                fragment.pageConfig.notifyConfigChanged()
+    fun notifyFocusChanged() {
+        ui.mAppBar.canBack =
+            currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
+        ui.mAppBar.showPointer = ui.root.subContentShown
+        ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
+        notifyConfigChanged()
+    }
+    fun notifyConfigChanged(){
+        currentNav.childFragmentManager.fragments.lastOrNull().let {
+            if(it is MyPage){
+                setMyPageConfig(it.pageConfig.configInfo)
             }
         }
     }
@@ -356,7 +353,7 @@ class MainActivity
     }
     private val onPointerClick = View.OnClickListener {
         ui.root.pointerExchanged = !ui.root.pointerExchanged
-        notifyConfigChanged()
+        notifyFocusChanged()
     }
     private val onPointerLongClick = View.OnLongClickListener {
         ui.root.pointerAutoChange = !ui.root.pointerAutoChange
@@ -374,14 +371,14 @@ class MainActivity
         //指示器不锁定时，交换一次方向
         if (ui.root.pointerAutoChange) {
             ui.root.pointerExchanged = !ui.root.pointerExchanged
-            notifyConfigChanged()
+            notifyFocusChanged()
         }
     }
     private val onExchangeLongClick = View.OnLongClickListener {
         //长按强制全屏
         ui.root.showSubContent = !ui.root.showSubContent
         ui.root.updateContentLayout()
-        notifyConfigChanged()
+        notifyFocusChanged()
         //小窗行为跟随
         if (!ui.root.subContentShown) {
             ui.root.playerBehavior?.holdUpPlayer()
