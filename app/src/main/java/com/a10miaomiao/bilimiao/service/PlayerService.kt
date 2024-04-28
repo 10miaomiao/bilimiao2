@@ -7,7 +7,6 @@ import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
@@ -25,6 +24,7 @@ class PlayerService : Service() {
 
         const val BILIMIAO_PLAYER_PACKAGE_NAME = "com.a10miaomiao.bilimiao.player"
         const val ACTION_CREATED = "$BILIMIAO_PLAYER_PACKAGE_NAME.CREATED"
+        const val ACTION_DESTROY = "$BILIMIAO_PLAYER_PACKAGE_NAME.DESTROY"
     }
 
     var videoPlayerView: DanmakuVideoPlayer? = null
@@ -76,8 +76,9 @@ class PlayerService : Service() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         selfInstance = null
+        sendBroadcast(Intent(ACTION_DESTROY))
+        super.onDestroy()
     }
 
     fun setPlayingInfo(info: PlayingInfo) {
@@ -147,9 +148,15 @@ class PlayerService : Service() {
     }
 
     private fun setupMediaSession(info: PlayingInfo) {
-        val mediaSession = MediaSessionCompat(this, "BilimiaoPlayer").apply {
-            setCallback(mediaSessionCallback)
-        }
+        val mediaSession = MediaSessionCompat(this, "BilimiaoPlayer")
+        val stateBuilder = PlaybackStateCompat.Builder()
+            .setActions(PlayingNotification.MEDIA_SESSION_ACTIONS)
+            .setState(
+                if (isPlaying()) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
+                0,
+                1.0f
+            )
+        mediaSession.setPlaybackState(stateBuilder.build())
         mediaSession.setCallback(mediaSessionCallback)
         val metaData = getMediaMetadata(info)
         mediaSession.setMetadata(metaData.build())
@@ -185,6 +192,11 @@ class PlayerService : Service() {
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             videoPlayerView?.seekTo(pos)
+        }
+
+        override fun onStop() {
+            super.onStop()
+            videoPlayerView?.closeVideo()
         }
     }
 
