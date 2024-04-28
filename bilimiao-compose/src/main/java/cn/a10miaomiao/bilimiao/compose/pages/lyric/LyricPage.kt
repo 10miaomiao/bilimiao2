@@ -465,7 +465,13 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
             },
             myMenuItem {
                 key = 2
-                this.title = if(offset==0) "延迟" else if (offset>0) "+$offset" else offset.toString()
+                this.title = if(offset==0) {
+                    "延迟"
+                }else if (offset>0) {
+                    '+' + String.format("%.1f",offset/1000f) +'s'
+                }else {
+                    String.format("%.1f",offset/1000f) + 's'
+                }
                 iconFileName = "ic_history_gray_24dp"
             }
         )
