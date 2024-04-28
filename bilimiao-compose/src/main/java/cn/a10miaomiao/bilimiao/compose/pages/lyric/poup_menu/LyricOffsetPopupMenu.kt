@@ -13,13 +13,15 @@ internal class LyricOffsetPopupMenu(
 ): PopupMenu.OnMenuItemClickListener{
 
     private fun Menu.initMenu() {
-        add(Menu.FIRST,-1000,1,"-1000" )
-        add(Menu.FIRST,-100,2,"-100" )
-        add(Menu.FIRST,-10,3,"-10" )
-        add(Menu.FIRST,0,4,"->0" )
-        add(Menu.FIRST,10,5,"+10" )
-        add(Menu.FIRST,100,6,"+100" )
-        add(Menu.FIRST,1000,7,"+1000" )
+        add(Menu.FIRST,-5000,1,"-5s" )
+        add(Menu.FIRST,-1000,1,"-1s" )
+        add(Menu.FIRST,-500,2,"-0.5s" )
+        add(Menu.FIRST,-100,3,"-0.1s" )
+        add(Menu.FIRST,0,4,"0" )
+        add(Menu.FIRST,100,5,"+0.1s" )
+        add(Menu.FIRST,500,6,"+0.5s" )
+        add(Menu.FIRST,1000,7,"+1s" )
+        add(Menu.FIRST,5000,7,"+5s" )
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {
