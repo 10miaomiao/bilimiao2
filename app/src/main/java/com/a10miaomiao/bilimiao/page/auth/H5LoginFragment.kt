@@ -187,6 +187,20 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
             webView.webChromeClient = mWebChromeClient
             webView.settings.apply {
                 javaScriptEnabled = true
+                var defaultUserAgentString = userAgentString
+                if ("Mobile" !in defaultUserAgentString) {
+                    defaultUserAgentString += " Mobile"
+                }
+                userAgentString = "$defaultUserAgentString ${WebFragment.userAgent}"
+                allowContentAccess = true
+                allowFileAccess = true
+                cacheMode = WebSettings.LOAD_DEFAULT
+                databaseEnabled = true
+                domStorageEnabled = true
+                setSupportZoom(true)
+                builtInZoomControls = true
+                displayZoomControls = false
+                loadsImagesAutomatically = true
             }
 //            webView.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
             val url = requireArguments().getString(MainNavArgs.url, "")
