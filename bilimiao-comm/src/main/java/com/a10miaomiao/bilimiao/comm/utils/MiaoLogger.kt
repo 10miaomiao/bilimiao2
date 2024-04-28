@@ -65,7 +65,7 @@ class MiaoLogger(
                         append("[${msg.first.string()}]:")
                         append(msg.second.string())
                     } else {
-                        append("[$index]:")
+                        append("[$index]")
                         append(msg.string())
                     }
                     append("\n")
@@ -86,5 +86,5 @@ fun Any.miaoLogger(): MiaoLogger {
     val tag = this::class.java.name.run {
         substring(lastIndexOf('.') + 1, length)
     }
-    return MiaoLogger("Miao:$tag")
+    return MiaoLogger("Miao>$tag")
 }
