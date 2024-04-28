@@ -10,7 +10,7 @@ class MyPageConfig(
     private val getConfigInfo: (() -> MyPageConfigInfo),
 ) {
 
-    var setConfig: ((MyPageConfigInfo) -> Unit)? = null
+    var setConfig: (() -> Unit)? = null
 
     val configInfo get() = getConfigInfo()
 
@@ -41,7 +41,7 @@ class MyPageConfig(
     fun notifyConfigChanged () {
         if (fragment.lifecycle.currentState == Lifecycle.State.RESUMED) {
             setConfig?.let {
-                it(configInfo)
+                it()
             }
         }
     }

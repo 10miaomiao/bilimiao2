@@ -302,26 +302,16 @@ class MainActivity
     }
 
     fun notifyFocusChanged() {
-        if (currentNav.childFragmentManager.fragments.isNotEmpty()) {
-            val fragment = currentNav.childFragmentManager.fragments.last()
-            ui.mAppBar.canBack =
-                currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
-            ui.mAppBar.showPointer = ui.root.subContentShown
-            ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
-
-            if (fragment is MyPage) {
-                fragment.pageConfig.notifyConfigChanged()
-            }
-        }
+        ui.mAppBar.canBack =
+            currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
+        ui.mAppBar.showPointer = ui.root.subContentShown
+        ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
+        notifyConfigChanged()
     }
-    fun notifyConfigChanged(config: MyPageConfigInfo){
-        currentNav.childFragmentManager.fragments.let {
-            if(it.isNotEmpty()){
-                it.last().let{
-                    if(it is MyPage){
-                        setMyPageConfig(it.pageConfig.configInfo)
-                    }
-                }
+    fun notifyConfigChanged(){
+        currentNav.childFragmentManager.fragments.lastOrNull().let {
+            if(it is MyPage){
+                setMyPageConfig(it.pageConfig.configInfo)
             }
         }
     }
