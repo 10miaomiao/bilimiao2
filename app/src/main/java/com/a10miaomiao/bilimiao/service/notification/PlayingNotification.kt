@@ -100,23 +100,19 @@ class PlayingNotification(
         info: PlayerService.PlayingInfo
     ) {
         playingInfo = info
-        val coverUrl = info.cover ?: ""
+        val coverUrl = info.cover ?: return
         val sessionToken = mediaSession?.sessionToken ?: return
         val builder = getNotificationBuilder(sessionToken)
         setNotificationActions(builder)
-        if (coverUrl != currentCoverUrl && coverUrl.isNotBlank()) {
+        if (coverUrl == currentCoverUrl) {
+            updateWithBitmap(mediaSession, info, currentCoverBitmap)
+        } else {
             currentCoverBitmap = null
             currentCoverUrl = coverUrl
             scope.launch {
                 val uri = Uri.parse(UrlUtil.autoHttps(coverUrl))
                 val coverBitmap = resolveUriAsBitmap(uri)
-                if (coverUrl == currentCoverUrl && coverBitmap != null) {
-                    currentCoverBitmap = coverBitmap
-                    updateWithBitmap(coverBitmap)
-                    val metaData = playerService.getMediaMetadata(info)
-                    metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverBitmap)
-                    mediaSession.setMetadata(metaData.build())
-                }
+                updateWithBitmap(mediaSession, info, coverBitmap)
             }
         }
         val notification: Notification = builder.build()
@@ -141,12 +137,24 @@ class PlayingNotification(
     }
 
 
-    private fun updateWithBitmap(bitmap: Bitmap) {
-        val sessionToken = mediaSessionToken ?: return
-        val builder = getNotificationBuilder(sessionToken)
-        builder.setLargeIcon(bitmap)
-        val notification: Notification = builder.build()
-        manager.notify(NOTIFICATION_ID, notification)
+    private fun updateWithBitmap(
+        mediaSession: MediaSessionCompat?,
+        info: PlayerService.PlayingInfo,
+        coverBitmap: Bitmap?,
+    ) {
+        val coverUrl = info.cover ?: ""
+        val sessionToken = mediaSession?.sessionToken ?: return
+        if (coverUrl == currentCoverUrl && coverBitmap != null) {
+            currentCoverBitmap = coverBitmap
+            val metaData = playerService.getMediaMetadata(info)
+            metaData.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverBitmap)
+            mediaSession.setMetadata(metaData.build())
+
+            val builder = getNotificationBuilder(sessionToken)
+            builder.setLargeIcon(coverBitmap)
+            val notification: Notification = builder.build()
+            manager.notify(NOTIFICATION_ID, notification)
+        }
     }
 
     private fun setNotificationActions(builder: NotificationCompat.Builder) {
