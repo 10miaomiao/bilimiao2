@@ -15,8 +15,8 @@ android {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 21
         targetSdk = 34
-        versionCode = 95
-        versionName = "2.3.5"
+        versionCode = 96
+        versionName = "2.3.6"
 
         flavorDimensions("default")
 
@@ -32,7 +32,10 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        debug {
+            applicationIdSuffix = ".dev"
+        }
+        release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -55,7 +58,6 @@ android {
 
     productFlavors {
         create("dev") {
-//            applicationId = "cn.a10miaomiao.bilimiao.dev"
             val manifestPlaceholders = createManifestPlaceholders("Development")
             addManifestPlaceholders(manifestPlaceholders)
         }
