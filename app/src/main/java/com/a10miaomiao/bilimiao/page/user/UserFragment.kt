@@ -100,7 +100,6 @@ class UserFragment : Fragment(), DIAware, MyPage {
             },
             myMenuItem {
                 key = MenuKeys.follow
-                key = 1
                 visibility = if (viewModel.isSelf) {
                     View.GONE
                 } else {
