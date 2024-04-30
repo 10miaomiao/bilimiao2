@@ -14,7 +14,6 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
@@ -38,6 +37,7 @@ import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
+import com.shuyu.gsyvideoplayer.utils.Debuger
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoView
 import master.flame.danmaku.controller.DrawHandler
@@ -689,6 +689,40 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         return super.onTouchEvent(event)
     }
 
+    override fun startPrepare() {
+        // super.startPrepare()
+        // 重写方法，加入音频焦点开关
+        this.gsyVideoManager.listener()?.onCompletion()
+
+        if (mVideoAllCallBack != null) {
+            Debuger.printfLog("onStartPrepared")
+            mVideoAllCallBack.onStartPrepared(mOriginUrl, *arrayOf(mTitle, this))
+        }
+
+        this.gsyVideoManager.setListener(this)
+        this.gsyVideoManager.playTag = mPlayTag
+        this.gsyVideoManager.playPosition = mPlayPosition
+
+        // AudioManager.requestAudioFocus(onAudioFocusChangeListener, 3, 2)
+        if (enabledAudioFocus) {
+            requestAudioFocus()
+        }
+
+        try {
+            (mContext as? Activity)?.window
+                ?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } catch (var2: java.lang.Exception) {
+            var2.printStackTrace()
+        }
+
+        mBackUpPlayingBufferState = -1
+        this.gsyVideoManager.prepare(
+            mUrl,  mMapHeadData ?: hashMapOf(),
+            mLooping, mSpeed, mCache, mCachePath, mOverrideExtension
+        )
+        setStateAndUi(CURRENT_STATE_PREPAREING)
+    }
+
     override fun onPrepared() {
         super.onPrepared()
         onPrepareDanmaku(this)
@@ -705,12 +739,18 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         super.onVideoPause()
         danmakuOnPause()
         videoPlayerCallBack?.onVideoPause()
+        if (enabledAudioFocus) {
+            abandonAudioFocus()
+        }
     }
 
     override fun onVideoResume(isResume: Boolean) {
         super.onVideoResume(isResume)
         danmakuOnResume()
         videoPlayerCallBack?.onVideoResume(isResume)
+        if (enabledAudioFocus) {
+            requestAudioFocus()
+        }
     }
 
     override fun clickStartIcon() {
