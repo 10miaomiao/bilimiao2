@@ -22,13 +22,13 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 
 class UserViewModel(
     override val di: DI,
@@ -61,7 +61,7 @@ class UserViewModel(
             id = userStore.state.info?.mid?.toString() ?: ""
         }
         if (id.isBlank()) {
-            activity.toast("请先登录")
+            PopTip.show("请先登录")
         } else {
             loadData()
         }
@@ -79,7 +79,7 @@ class UserViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    activity.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
             val res2 = UserApi().upperChanne(id).awaitCall().gson<ResultListInfo<UpperChannelInfo>>()
@@ -91,7 +91,7 @@ class UserViewModel(
 
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                activity.toast("网络错误")
+                PopTip.show("网络错误")
             }
             e.printStackTrace()
         } finally {
@@ -111,7 +111,7 @@ class UserViewModel(
     fun filterUpperAdd () {
         val info = dataInfo
         if (info == null) {
-            activity.toast("请等待信息加载完成")
+            PopTip.show("请等待信息加载完成")
         } else {
             filterStore.addUpper(
                 info.card.mid.toLong(),
@@ -132,7 +132,7 @@ class UserViewModel(
                 val nav = (activity as? MainActivity)?.pointerNav?.navController
                     ?: activity.findNavController(R.id.nav_host_fragment)
                 nav.popBackStack()
-                activity.toast("已退出登录了喵")
+                PopTip.show("已退出登录了喵")
             }
             setPositiveButton("取消", null)
         }.show()
@@ -149,7 +149,7 @@ class UserViewModel(
                 detailInfo.card.relation.is_follow = 2 - mode
                 withContext(Dispatchers.Main) {
                     myPage.pageConfig.notifyConfigChanged()
-                    activity.toast(if (mode == 1) {
+                    PopTip.show(if (mode == 1) {
                         "关注成功"
                     } else {
                         "已取消关注"
@@ -157,12 +157,12 @@ class UserViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    activity.toast(res.message)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                activity.toast("网络错误")
+                PopTip.show("网络错误")
             }
             e.printStackTrace()
         }

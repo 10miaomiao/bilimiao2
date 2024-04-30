@@ -178,7 +178,7 @@ class PlayerDelegate2(
         views.videoPlayer.subtitleLoader = this::loadSubtitleData
         views.videoPlayer.subtitleSourceSelector = this::selectSourceSubtitle
         //音频焦点冲突时是否释放
-        views.videoPlayer.isReleaseWhenLossAudio = false
+        views.videoPlayer.isReleaseWhenLossAudio = true
 
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
@@ -188,8 +188,12 @@ class PlayerDelegate2(
     }
 
     private fun startPlayerService() {
-        val intent = Intent(activity, PlayerService::class.java)
-        activity.startService(intent)
+        try {
+            val intent = Intent(activity, PlayerService::class.java)
+            activity.startService(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onResume() {

@@ -15,6 +15,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+
     <application
         android:name=".Bilimiao"
         android:allowBackup="true"
@@ -106,7 +110,8 @@
 
         <service
             android:name=".service.PlayerService"
-            android:exported="true" />
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"/>
         <service
             android:name="cn.a10miaomiao.bilimiao.download.DownloadService"
             android:exported="true" />

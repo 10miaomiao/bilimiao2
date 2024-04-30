@@ -117,6 +117,7 @@ class PlayingNotification(
         }
         val notification: Notification = builder.build()
         manager.notify(NOTIFICATION_ID, notification)
+        playerService.startForeground(1, notification)
     }
 
     fun updateForPlaying(mediaSession: MediaSessionCompat?) {
