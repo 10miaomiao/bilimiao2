@@ -94,6 +94,8 @@ internal class MyFollowViewModel(
         }
     }
 
+    fun tryAgainLoadData() = loadData()
+
     suspend fun addTag(name: String): Boolean {
         try {
             val res = BiliApiService.userRelationApi
