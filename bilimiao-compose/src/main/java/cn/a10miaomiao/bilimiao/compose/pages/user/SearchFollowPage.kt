@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -48,6 +50,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.commponents.input.SearchBox
+import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
 import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFollowOrderPopupMenu
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -136,12 +139,14 @@ private class SearchFollowPageViewModel(
             list.loading.value = false
             isRefreshing.value = false
             if (name != searchText.value) {
-                _loadData(searchText.value)
+                tryAgainLoadData(searchText.value)
             }
         }
     }
 
-    private fun _loadData(name: String) {
+    fun tryAgainLoadData(
+        name: String = searchText.value
+    ) {
         loadData(name)
     }
 
@@ -178,58 +183,64 @@ private fun SearchFollowPageContent(
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(400.dp),
-        modifier = Modifier.padding(
-            start = windowInsets.leftDp.dp,
-            end = windowInsets.rightDp.dp,
-        )
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .padding(10.dp)
+            .padding(top = windowInsets.topDp.dp)
     ) {
-
-        item(
-            span = {
-                GridItemSpan(maxLineSpan)
+        SearchBox(
+            value = searchText,
+            onValueChange = viewModel::updateSearchText,
+            modifier = Modifier.height(40.dp)
+                .fillMaxWidth(),
+            placeholder = {
+                Text("搜索我的关注")
             }
+        )
+        Box(
+            modifier = Modifier.weight(1f)
         ) {
-            Column(
-                modifier = Modifier.padding(10.dp)
-            ) {
-                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
-                SearchBox(
-                    value = searchText,
-                    onValueChange = viewModel::updateSearchText,
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text("搜索我的关注")
+            if (listLoading) {
+                ListStateBox(loading = true)
+            } else if (listFail.isNotBlank()) {
+                ListStateBox(
+                    fail = listFail,
+                    loadMore = viewModel::tryAgainLoadData
+                )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(400.dp),
+                    modifier = Modifier.padding(
+                        start = windowInsets.leftDp.dp,
+                        end = windowInsets.rightDp.dp,
+                    )
+                ) {
+                    items(list.size, { list[it].mid }) {
+                        val item = list[it]
+                        Box(
+                            modifier = Modifier.padding(vertical = 5.dp),
+                        ) {
+                            UserInfoCard(
+                                name = item.uname,
+                                face = item.face,
+                                sign = item.sign,
+                                onClick = {
+                                    viewModel.toUserDetailPage(item.mid)
+                                },
+                                actionContent = {}
+                            )
+                        }
                     }
-                )
+                    item(
+                        span = {
+                            GridItemSpan(maxLineSpan)
+                        }
+                    ) {
+                        Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
+                    }
+                }
             }
-        }
 
-        items(list.size, { list[it].mid }) {
-            val item = list[it]
-            Box(
-                modifier = Modifier.padding(5.dp),
-            ) {
-                UserInfoCard(
-                    name = item.uname,
-                    face = item.face,
-                    sign = item.sign,
-                    onClick = {
-                        viewModel.toUserDetailPage(item.mid)
-                    },
-                    actionContent = {}
-                )
-            }
-        }
-
-        item(
-            span = {
-                GridItemSpan(maxLineSpan)
-            }
-        ) {
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
         }
     }
 

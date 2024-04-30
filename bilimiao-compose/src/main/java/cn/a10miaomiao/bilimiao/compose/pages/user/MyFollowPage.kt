@@ -66,6 +66,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceItem
+import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.TagFollowContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFollowOrderPopupMenu
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -220,15 +221,21 @@ private fun MyFollowPageContent() {
                 }
             }
             HorizontalDivider(
-                Modifier.align(Alignment.BottomStart)
+                Modifier
+                    .align(Alignment.BottomStart)
                     .fillMaxWidth()
             )
         }
 
+        if (tagListLoading) {
+            ListStateBox(loading = true)
+        } else if (tagListFail.isNotBlank()) {
+            ListStateBox(
+                fail = tagListFail,
+                loadMore = viewModel::tryAgainLoadData
+            )
+        }
         val saveableStateHolder = rememberSaveableStateHolder()
-//        LaunchedEffect(key1 = ) {
-//            saveableStateHolder.removeState()
-//        }
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
