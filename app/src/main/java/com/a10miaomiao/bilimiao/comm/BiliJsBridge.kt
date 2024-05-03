@@ -108,7 +108,7 @@ class BiliJsBridge(
                 val url = event.data["url"].asString ?: return
                 activity.runOnUiThread {
                     val re = BiliNavigation.navigationTo(
-                        webView,
+                        NavHosts.pointerNavController,
                         url
                     )
                     if (!re) {

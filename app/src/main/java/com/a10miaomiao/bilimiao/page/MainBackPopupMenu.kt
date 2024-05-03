@@ -5,10 +5,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
-import androidx.navigation.findNavController
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.MainNavGraph
-import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.NavHosts
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 
 class MainBackPopupMenu(
@@ -34,10 +32,8 @@ class MainBackPopupMenu(
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when (item?.itemId) {
             0 -> {
-                if(activity is MainActivity) {
-                    val nav = activity.currentNav.navController
-                    return nav.popBackStack(MainNavGraph.dest.main, false)
-                }
+                val nav = NavHosts.currentNavController
+                return nav.popBackStack(MainNavGraph.dest.main, false)
             }
             1 -> {
                 basePlayerDelegate.closePlayer()

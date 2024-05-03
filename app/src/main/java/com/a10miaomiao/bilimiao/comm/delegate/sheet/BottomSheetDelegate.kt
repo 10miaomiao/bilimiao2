@@ -12,7 +12,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.MainNavGraph
-import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.NavHosts
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -39,6 +39,8 @@ class BottomSheetDelegate(
         MainNavGraph.createGraph(navBottomSheetController, MainNavGraph.dest.template)
         navBottomSheetController.addOnDestinationChangedListener(this)
         navBottomSheetFragment.childFragmentManager.addFragmentOnAttachListener(this)
+
+        NavHosts.getBottomSheetHostFrag={navBottomSheetFragment}
 
         ui.bottomSheetBehavior?.let { behavior ->
             behavior.isHideable = true

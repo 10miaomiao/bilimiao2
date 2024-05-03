@@ -29,6 +29,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
+import com.a10miaomiao.bilimiao.comm.NavHosts
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -37,14 +38,13 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
-import com.a10miaomiao.bilimiao.store.*
-import com.a10miaomiao.bilimiao.widget.scaffold.*
+import com.a10miaomiao.bilimiao.store.Store
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -86,13 +86,13 @@ class MainActivity
     private var subNavHostFragment: NavHostFragment? = null
     private var subNavController: NavController? = null
 
-    val currentNav: NavHostFragment
+    private val currentNav: NavHostFragment
         get() = if (ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
-    val anotherNav: NavHostFragment
+    private val anotherNav: NavHostFragment
         get() = if (!ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
 
     //指示器，指示新页面该出现的地方
-    val pointerNav: NavHostFragment get() {
+    private val pointerNav: NavHostFragment get() {
         return if (ui.root.subContentShown) {
             if (ui.root.pointerExchanged == ui.root.contentExchanged) {
                 navHostFragment
@@ -210,6 +210,11 @@ class MainActivity
 //                    .commit()
 //            }
         }
+        NavHosts.getMainHostFrag={navHostFragment}
+        NavHosts.getSubHostFrag={subNavHostFragment}
+        NavHosts.getCurrentHostFrag={currentNav}
+        NavHosts.getAnotherHostFrag={anotherNav}
+        NavHosts.getPointerHostFrag={pointerNav}
 
         navController.handleDeepLink(intent)
     }
@@ -281,7 +286,7 @@ class MainActivity
 //        ui.mAppBar.cleanProp()
 
         //将焦点给新页面
-        if (controller == anotherNav.navController) {
+        if (controller === anotherNav.navController) {
             if (ui.root.focusOnMain) {
                 ui.root.subContent?.requestFocus()
             } else {
@@ -548,13 +553,13 @@ class MainActivity
                         .setPopEnterAnim(R.anim.miao_fragment_close_enter)
                         .setPopExitAnim(R.anim.miao_fragment_close_exit)
                         .build()
-                    pointerNav.navController.navigate(Uri.parse(pageUrl), navOptions)
+                    currentNav.navController.navigate(Uri.parse(pageUrl), navOptions)
                     return
                 }
                 val mode = arguments.getInt(SearchActivity.KEY_MODE)
                 val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
                 if (mode == 0) {
-                    pointerNav.navController.navigate(
+                    currentNav.navController.navigate(
                         SearchResultFragment.actionId,
                         SearchResultFragment.createArguments(keyword),
                     )
@@ -692,15 +697,4 @@ class MainActivity
         val newContext = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(newContext)
     }
-
-    fun getPrimaryNavigationFragment(nav: NavController): Fragment? {
-        return if (nav === navController) {
-            navHostFragment.childFragmentManager.primaryNavigationFragment
-        } else if (nav === subNavController) {
-            subNavHostFragment?.childFragmentManager?.primaryNavigationFragment
-        } else {
-            null
-        }
-    }
-
 }

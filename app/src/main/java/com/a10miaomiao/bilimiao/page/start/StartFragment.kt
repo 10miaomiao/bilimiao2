@@ -6,8 +6,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.Gravity
@@ -20,13 +18,10 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withStarted
 import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
@@ -38,12 +33,12 @@ import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.QRCodeActivity
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.BiliNavigation
 import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm.NavHosts
 import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
@@ -59,16 +54,12 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.network
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.comm.wrapInMaterialCardView
 import com.a10miaomiao.bilimiao.config.ViewStyle
@@ -77,8 +68,8 @@ import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.badgeTextView
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.rcImageView
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
@@ -105,7 +96,6 @@ import splitties.views.dsl.constraintlayout.leftOfParent
 import splitties.views.dsl.constraintlayout.leftToRightOf
 import splitties.views.dsl.constraintlayout.rightOfParent
 import splitties.views.dsl.constraintlayout.topToBottomOf
-import splitties.views.dsl.coordinatorlayout.coordinatorLayout
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageView
@@ -120,7 +110,6 @@ import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.core.wrapInHorizontalScrollView
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.generateViewId
 import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding
@@ -265,8 +254,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             } else {
                 viewLifecycleOwner.lifecycleScope.launch {
                     withStarted {
-                        val nav = (activity as? MainActivity)?.pointerNav?.navController
-                            ?: activity.findNavController(R.id.nav_host_fragment)
+                        val nav = NavHosts.pointerNavController
                         if (!BiliNavigation.navigationTo(nav, text)) {
                             BiliNavigation.navigationToWeb(activity, text)
                         }
@@ -281,8 +269,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handlePlayerCardDetailClick = View.OnClickListener {
         val playerState = viewModel.playerStore.state
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = NavHosts.pointerNavController
         if (playerState.sid.isNotBlank()) {
             nav.navigateToCompose(BangumiDetailPage()) {
                 id set playerState.sid
@@ -302,8 +289,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private val handleUserClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = NavHosts.pointerNavController
         val userStore = viewModel.userStore
         if (userStore.isLogin()) {
             val mid = userStore.state.info?.mid ?: return@OnClickListener
@@ -318,17 +304,14 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handlePlayListClick = View.OnClickListener {
         val activity = requireActivity()
         val scaffoldView = activity.getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
-//        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
+        val nav = NavHosts.pointerNavController
         nav.navigateToCompose(PlayListPage())
         scaffoldView.closeDrawer()
     }
 
     private val handleMessageClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = NavHosts.pointerNavController
         nav.navigateToCompose(MessagePage())
         scaffoldView.closeDrawer()
     }
@@ -370,8 +353,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             .setPopEnterAnim(R.anim.miao_fragment_close_enter)
             .setPopExitAnim(R.anim.miao_fragment_close_exit)
             .build()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = NavHosts.pointerNavController
         val scaffoldView = requireActivity().getScaffoldView()
         var pageUrl = item.pageUrl
         if (item.isNeedAuth) {

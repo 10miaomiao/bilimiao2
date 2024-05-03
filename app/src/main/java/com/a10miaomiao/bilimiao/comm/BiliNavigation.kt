@@ -13,13 +13,10 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.page.web.WebFragment
@@ -132,7 +129,7 @@ object BiliNavigation {
             || "b23.tv" in host
             || "b23.snm0516.aisee.tv" in host) {
             // b站网页使用内部浏览器打开
-            val nav = (activity as? MainActivity)?.pointerNav?.navController
+            val nav = NavHosts.pointerNavController
                 ?: activity.findNavController(R.id.nav_host_fragment)
             nav.navigate(
                 WebFragment.actionId,

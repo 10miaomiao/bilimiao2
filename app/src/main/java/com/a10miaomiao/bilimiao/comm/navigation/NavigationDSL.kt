@@ -10,15 +10,8 @@ import androidx.navigation.NavOptions
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import com.a10miaomiao.bilimiao.MainActivity
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
-import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
-import com.a10miaomiao.bilimiao.page.start.StartFragment
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
-import java.lang.Exception
+import com.a10miaomiao.bilimiao.comm.NavHosts
 
 fun NavController.tryPopBackStack(): Boolean {
     return try {
@@ -34,8 +27,8 @@ fun NavController.navigateToCompose(
     url: String,
     navOptions: NavOptions? = null,
 ) {
-    val curFragment = (context as? MainActivity)
-        ?.getPrimaryNavigationFragment(this)
+    val curFragment = NavHosts.getNavHostFragment(this)
+        ?.childFragmentManager?.primaryNavigationFragment
     if (curFragment is ComposeFragment) {
         val composeNav = curFragment.composeNav
         val arguments = composeNav.currentBackStackEntry?.arguments

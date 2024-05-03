@@ -4,19 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.dynamic.v2.ModuleOuterClass
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.MainNavGraph
-import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.NavHosts
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.miaoStore
+import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
+import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler.footerViews
+import com.a10miaomiao.bilimiao.comm.recycler.lParams
+import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.dynamic.dynamicCardView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
@@ -30,11 +37,12 @@ import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.instance
 import splitties.toast.toast
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
-import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.wrapContent
 
 class DynamicFragment: RecyclerViewFragment(), DIAware {
 
@@ -90,16 +98,15 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
             && tag.second is String
         ) {
             val (type, id) = tag as Pair<Int, String>
+            val nav = NavHosts.pointerNavController
             when(type) {
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
                     val args = UserFragment.createArguments(id)
-                    Navigation.findNavController(it)
-                        .navigate(UserFragment.actionId, args)
+                    nav.navigate(UserFragment.actionId, args)
                 }
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
                     val args = BangumiDetailFragment.createArguments(id)
-                    Navigation.findNavController(it)
-                        .navigate(BangumiDetailFragment.actionId, args)
+                    nav.navigate(BangumiDetailFragment.actionId, args)
                 }
                 else -> {
                     toast("未知跳转类型")
@@ -112,16 +119,15 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
         val index = it.tag
         if (index is Int && index in viewModel.list.data.indices) {
             val item = viewModel.list.data[index]
+            val nav = NavHosts.pointerNavController
             when(item.dynamicType) {
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
                     val args = VideoInfoFragment.createArguments(item.dynamicContent.id)
-                    Navigation.findNavController(it)
-                        .navigate(VideoInfoFragment.actionId, args)
+                    nav.navigate(VideoInfoFragment.actionId, args)
                 }
                 ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
                     val args = BangumiDetailFragment.createArguments(item.dynamicContent.id)
-                    Navigation.findNavController(it)
-                        .navigate(BangumiDetailFragment.actionId, args)
+                    nav.navigate(BangumiDetailFragment.actionId, args)
                 }
                 else -> {
                     toast("未知跳转类型")

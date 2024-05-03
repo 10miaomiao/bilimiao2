@@ -2,40 +2,60 @@ package com.a10miaomiao.bilimiao.page.user
 
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavType
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
-import cn.a10miaomiao.miao.binding.android.view.*
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._topMargin
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm.NavHosts
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm._network
+import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.loadImageUrl
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
+import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler.headerViews
+import com.a10miaomiao.bilimiao.comm.recycler.lParams
+import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.ImageSaveUtil
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.season.miniSeasonItemView
 import com.a10miaomiao.bilimiao.commponents.video.mediaItemView
 import com.a10miaomiao.bilimiao.config.ViewStyle
@@ -60,7 +80,16 @@ import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.verticalMargin
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
 import splitties.views.padding
@@ -177,31 +206,27 @@ class UserFragment : Fragment(), DIAware, MyPage {
         if (info == null) {
             toast("操作失败，信息未加载完成")
         } else {
+            val nav = NavHosts.currentNavController
             when (it.tag) {
                 "archive" -> {
                     val args = UserArchiveListFragment.createArguments(viewModel.id, info.card.name)
-                    Navigation.findNavController(it)
-                        .navigate(UserArchiveListFragment.actionId, args)
+                    nav.navigate(UserArchiveListFragment.actionId, args)
                 }
                 "season" -> {
                     if (viewModel.isSelf) {
-                        Navigation.findNavController(it)
-                            .navigate(MyBangumiFragment.actionId)
+                        nav.navigate(MyBangumiFragment.actionId)
                     } else {
                         val args = UserBangumiFragment.createArguments(viewModel.id, info.card.name)
-                        Navigation.findNavController(it)
-                            .navigate(UserBangumiFragment.actionId, args)
+                        nav.navigate(UserBangumiFragment.actionId, args)
                     }
 
                 }
                 "favourite" -> {
                     val args =
                         UserFavouriteListFragment.createArguments(viewModel.id, info.card.name)
-                    Navigation.findNavController(it)
-                        .navigate(UserFavouriteListFragment.actionId, args)
+                    nav.navigate(UserFavouriteListFragment.actionId, args)
                 }
                 "attention" -> {
-                    val nav = it.findNavController()
                     if (viewModel.isSelf) {
                         nav.navigateToCompose(MyFollowPage())
                     } else {
@@ -217,8 +242,7 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         type = "fans",
                         name = info.card.name,
                     )
-                    Navigation.findNavController(it)
-                        .navigate(UserFollowFragment.actionId, args)
+                    nav.navigate(UserFollowFragment.actionId, args)
                 }
             }
         }
@@ -227,12 +251,12 @@ class UserFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.data[position]
         if (item != null) {
+            val nav=NavHosts.pointerNavController
             when (item) {
                 // 跳转视频
                 is SpaceInfo.ArchiveItem -> {
                     val args = VideoInfoFragment.createArguments(item.param)
-                    Navigation.findNavController(view)
-                        .navigate(VideoInfoFragment.actionId, args)
+                    nav.navigate(VideoInfoFragment.actionId, args)
                 }
                 // 跳转收藏详情
                 is SpaceInfo.FavouriteItem -> {
@@ -240,16 +264,14 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         item.media_id.toString(),
                         item.name,
                     )
-                    Navigation.findNavController(view)
-                        .navigate(UserFavouriteDetailFragment.actionId, args)
+                    nav.navigate(UserFavouriteDetailFragment.actionId, args)
                 }
                 is SpaceInfo.Favourite2Item -> {
                     val args = UserFavouriteDetailFragment.createArguments(
                         item.media_id,
                         item.title,
                     )
-                    Navigation.findNavController(view)
-                        .navigate(UserFavouriteDetailFragment.actionId, args)
+                    nav.navigate(UserFavouriteDetailFragment.actionId, args)
                 }
                 is UpperChannelInfo -> {
                     val args = UserChannelDetailFragment.createArguments(
@@ -257,13 +279,11 @@ class UserFragment : Fragment(), DIAware, MyPage {
                         parent = item.mid,
                         name = item.name
                     )
-                    Navigation.findNavController(view)
-                        .navigate(UserChannelDetailFragment.actionId, args)
+                    nav.navigate(UserChannelDetailFragment.actionId, args)
                 }
                 // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
-                    Navigation.findNavController(view)
-                        .navigateToCompose(BangumiDetailPage()) {
+                    nav.navigateToCompose(BangumiDetailPage()) {
                             id set item.param
                         }
                 }

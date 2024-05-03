@@ -141,7 +141,7 @@ class WebFragment : Fragment(), DIAware, MyPage {
     private val mWebViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             var url = request.url.toString()
-            val re = BiliNavigation.navigationTo(view, url)
+            val re = BiliNavigation.navigationTo(NavHosts.pointerNavController, url)
             if (re) {
                 return true
             }

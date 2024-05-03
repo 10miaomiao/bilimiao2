@@ -1,5 +1,6 @@
-import com.google.protobuf.gradle.*
-import cn.a10miaomiao.bilimiao.build.*
+import cn.a10miaomiao.bilimiao.build.Libraries
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.proto
 
 plugins {
     id("com.android.library")
@@ -105,4 +106,6 @@ dependencies {
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.espresso)
+
+    implementation(Libraries.navigationFragment)
 }
