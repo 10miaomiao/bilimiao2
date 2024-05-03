@@ -56,6 +56,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -78,6 +80,11 @@ internal class LyricPageViewModel(
     override val di: DI,
 ): ViewModel(), DIAware{
 
+    companion object{
+        const val KUGOU = "ku"
+        const val NETEASE = "net"
+    }
+
     private val activity by instance<Activity>()
     var loadingSource = MutableStateFlow(false)
     var loadingLyric = MutableStateFlow(false)
@@ -93,13 +100,12 @@ internal class LyricPageViewModel(
     var source=MutableStateFlow(mutableStateListOf<LyricSource>())
 
 
+    private val sourceMutex =Mutex()
+    private val lyricMutex =Mutex()
 
     //加载过程中，一些提示信息放在歌词位置第一行
     fun setMessage(message:String){
         setLyric(mutableStateListOf(LyricLine(0,message)),"","","")
-    }
-    fun clearLyric(){
-        setLyric(mutableStateListOf(),"","","")
     }
     @Synchronized
     fun setLyric(list:MutableList<LyricLine>,title:String,author:String,by:String){
@@ -110,28 +116,33 @@ internal class LyricPageViewModel(
         this.lyric.value.addAll(list)
     }
     @Synchronized
-    fun addSource(list:MutableList<LyricSource>){
+    fun addSource(list:MutableList<LyricSource>): Int{
+        val originCount=source.value.count()
         source.value.addAll(list)
+        // 返回值：新增项中的第一个序号
+        return if(list.isEmpty()) -1 else originCount
     }
     fun loadSource(videoTitle:String) = viewModelScope.launch(Dispatchers.IO){
-        source.value.clear()
-        loadedSourceTitle.value=videoTitle
-        if(videoTitle==""){
-            setMessage("当前无视频播放")
-        } else {
-            loadingSource.value = true
-            setMessage("正在加载歌词源...")
-            val res1=async{ loadSourceFromKugou(videoTitle) }
-            val res2=async{ loadSourceFromNetease(videoTitle) }
-            res1.await()
-            res2.await()
-            loadingSource.value = false
+        sourceMutex.withLock {
+            source.value.clear()
+            loadedSourceTitle.value=videoTitle
+            if(videoTitle==""){
+                setMessage("当前无视频播放")
+            } else {
+                loadingSource.value = true
+                setMessage("正在加载歌词源...")
+                val res1=async{ loadSourceFromKugou(videoTitle) }
+                val res2=async{ loadSourceFromNetease(videoTitle) }
+                res1.await()
+                res2.await()
+                loadingSource.value = false
+            }
         }
     }
     suspend fun loadSourceFromNetease(videoTitle: String){
         try {
             val res = MiaoHttp.request {
-                url ="https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s=$videoTitle&type=1&offset=0&total=true&limit=10"
+                url ="https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s=$videoTitle&type=1&offset=0&total=true&limit=12"
             }.awaitCall().let{
                 val jsonStr = it.body!!.string()
                 Gson().fromJson(jsonStr,NeteaseSearchResultInfo::class.java)
@@ -139,10 +150,10 @@ internal class LyricPageViewModel(
             if (res.code==200) {
                 val addList= mutableListOf<LyricSource>()
                 res.result.songs.forEach {
-                    addList.add(LyricSource(it.name,it.id,"netease",it.duration))
+                    addList.add(LyricSource(it.name,it.id, NETEASE,it.duration))
                 }
-                addSource(addList)
-                loadLyric(0)
+                val shouldLoad = addSource(addList)
+                loadLyric(shouldLoad)
             } else {
                 withContext(Dispatchers.Main) {
                     PopTip.show("网易云歌词列表加载失败"+res.code.toString())
@@ -159,18 +170,18 @@ internal class LyricPageViewModel(
     suspend fun loadSourceFromKugou(videoTitle: String){
         try {
             val res = MiaoHttp.request {
-                url ="https://mobileservice.kugou.com/api/v3/lyric/search?version=9108&highlight=1&keyword=$videoTitle&plat=0&pagesize=20&area_code=1&page=1&with_res_tag=1"
+                url ="https://mobileservice.kugou.com/api/v3/lyric/search?version=9108&highlight=1&keyword=$videoTitle&plat=0&pagesize=12&area_code=1&page=1&with_res_tag=1"
             }.awaitCall().let{
-                val jsonStr = it.body!!.string().replace("<!--KG_TAG_RES_START-->","").replace("<!--KG_TAG_RES_END-->","")
+                val jsonStr = it.body!!.string().replace("<!--.*?-->".toRegex(),"")
                 Gson().fromJson(jsonStr,KugouSearchResultInfo::class.java)
             }
             if (res.errcode == 0) {
                 val addList= mutableListOf<LyricSource>()
                 res.data.info.forEach {
-                    addList.add(LyricSource(it.filename,it.hash,"kugou",it.duration*100))
+                    addList.add(LyricSource(it.filename,it.hash, KUGOU,it.duration*100))
                 }
-                addSource(addList)
-                loadLyric(0)
+                val shouldLoad = addSource(addList)
+                loadLyric(shouldLoad)
             } else {
                 withContext(Dispatchers.Main) {
                     PopTip.show("酷狗歌词列表加载失败"+res.error)
@@ -190,143 +201,145 @@ internal class LyricPageViewModel(
     }
 
     suspend fun loadLyric(index:Int,replace:Boolean = false){
-        if(loadingLyric.value){
-            //不同时读取
-            return
-        }
-        loadingLyric.value = true
-        if(source.value.isEmpty()){
-            setMessage("当前无歌词源")
-            loadingLyric.value = false
-            return
-        }
-        if(!replace && lyricTitle.value!=""){
-            //已有歌词时默认不覆盖
-            loadingLyric.value = false
-            return
-        }
-        setMessage("正在加载歌词...")
-        try {
-            val src = if(index in source.value.indices){
-                source.value[index]
-            } else {
-                source.value[0]
+        lyricMutex.withLock {
+            loadingLyric.value = true
+            if(source.value.isEmpty()){
+                setMessage("当前无歌词源")
+                loadingLyric.value = false
+                return
             }
-
-            var title=""
-            var author=""
-            var by=""
-            val list= mutableListOf<LyricLine>()
-            when (src.type) {
-                        "kugou" -> {
-                            val res1 = MiaoHttp.request {
-                                url ="https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&keyword=&duration=&hash=${src.code}&album_audio_id="
+            if(!replace && lyricTitle.value!=""){
+                //已有歌词时默认不覆盖
+                loadingLyric.value = false
+                return
+            }
+            if(index !in source.value.indices){
+                loadingLyric.value = false
+                return
+            }
+            setMessage("正在加载歌词...")
+            try {
+                val src =source.value[index]
+                var title=""
+                var author=""
+                var by=""
+                val list= mutableListOf<LyricLine>()
+                when (src.type) {
+                    KUGOU -> {
+                        val res1 = MiaoHttp.request {
+                            url ="https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&keyword=&duration=&hash=${src.code}&album_audio_id="
+                        }.awaitCall().let{
+                            val jsonStr=it.body!!.string()
+                            Gson().fromJson(jsonStr,KugouAccessKeyItem::class.java)
+                        }
+                        if(res1.errcode==200){
+                            val res2 = MiaoHttp.request {
+                                val can = res1.candidates[0]
+                                url ="https://lyrics.kugou.com/download?ver=1&client=pc&id=${can.id}&accesskey=${can.accesskey}&fmt=krc&charset=utf8"
                             }.awaitCall().let{
-                                Gson().fromJson(it.body!!.string(),KugouAccessKeyItem::class.java)
+                                val jsonStr=it.body!!.string()
+                                Gson().fromJson(jsonStr,KugouLyricItem::class.java)
                             }
-                            if(res1.errcode==200){
-                                val res2 = MiaoHttp.request {
-                                    val can = res1.candidates[0]
-                                    url ="https://lyrics.kugou.com/download?ver=1&client=pc&id=${can.id}&accesskey=${can.accesskey}&fmt=krc&charset=utf8"
-                                }.awaitCall().let{
-                                    Gson().fromJson(it.body!!.string(),KugouLyricItem::class.java)
-                                }
-                                if(res2.error_code==0){
-                                    res2.content.decodeKrc().split('\n').forEach {
-                                        val full=it.substringBefore(']').substringAfter('[')
-                                        val body=it.substringAfter(']')
-                                        if(full.contains(':')){
-                                            val left=full.substringBefore(':')
-                                            val right=full.substringAfter(':')
-                                            if(left=="ti"){
-                                                title=right
-                                            } else if(left=="by"){
-                                                by=right
-                                            } else if(left=="ar"){
-                                                author=right
-                                            } else if(left=="offset"){
-                                                val time = right.toIntOrNull()
-                                                if(time!=null&&time!=0){
-                                                    //offset为0时不覆盖原有的
-                                                    offset.value=time
-                                                }
-                                            }
-                                        } else if(full.contains(',')){
-                                            val time=full.substringBefore(',').toIntOrNull()
-                                            if(time!=null){
-                                                val regex="<.*?>".toRegex()
-                                                val text=body.replace(regex,"")
-                                                list.add(LyricLine(time.toLong(),text))
+                            if(res2.error_code==0){
+                                res2.content.decodeKrc().split('\n').forEach {
+                                    val full=it.substringBefore(']').substringAfter('[')
+                                    val body=it.substringAfter(']')
+                                    if(full.contains(':')){
+                                        val left=full.substringBefore(':')
+                                        val right=full.substringAfter(':')
+                                        if(left=="ti"){
+                                            title=right
+                                        } else if(left=="by"){
+                                            by=right
+                                        } else if(left=="ar"){
+                                            author=right
+                                        } else if(left=="offset"){
+                                            val time = right.toIntOrNull()
+                                            if(time!=null&&time!=0){
+                                                //offset为0时不覆盖原有的
+                                                offset.value=time
                                             }
                                         }
+                                    } else if(full.contains(',')){
+                                        val time=full.substringBefore(',').toIntOrNull()
+                                        if(time!=null){
+                                            val regex="<.*?>".toRegex()
+                                            val text=body.replace(regex,"")
+                                            list.add(LyricLine(time.toLong(),text))
+                                        }
                                     }
-                                } else {
-                                    PopTip.show(res2.info)
-                                    list.add(LyricLine(0,"歌词详情获取失败"))
                                 }
                             } else {
-                                PopTip.show(res1.errmsg)
+                                PopTip.show(res2.info)
                                 list.add(LyricLine(0,"歌词详情获取失败"))
                             }
+                        } else {
+                            PopTip.show(res1.errmsg)
+                            list.add(LyricLine(0,"歌词详情获取失败"))
                         }
-                "netease" -> {
-                    val res = MiaoHttp.request {
-                        url ="https://music.163.com/api/song/media?id=${src.code}"
-                    }.awaitCall().let{
-                        Gson().fromJson(it.body!!.string(),NeteaseLyricItem::class.java)
                     }
-                    if (res.code==200) {
-                        res.lyric.split('\n').forEach {
-                            val left=it.substringBefore(':').substringAfter('[')
-                            val right=it.substringBefore(']').substringAfter(':')
-                            val body=it.substringAfter(']')
-                            if(left=="title"){
-                                title=right
-                            } else if(left=="by"){
-                                by=right
-                            } else if(left=="author"){
-                                author=right
-                            } else if(left=="offset"){
-                                val time = right.toIntOrNull()
-                                if(time!=null&&time!=0){
-                                    //offset为0时不覆盖原有的
-                                    offset.value=time
-                                }
-                            } else {
-                                val minute=left.toIntOrNull()
-                                val second=right.toFloatOrNull()
-                                if(minute!=null&&second!=null){
-                                    val time=minute*60000+(second*1000).toLong()
-                                    list.add(LyricLine(time,body))
+                    NETEASE -> {
+                        val res = MiaoHttp.request {
+                            url ="https://music.163.com/api/song/media?id=${src.code}"
+                        }.awaitCall().let{
+                            val jsonStr=it.body!!.string()
+                            Gson().fromJson(jsonStr,NeteaseLyricItem::class.java)
+                        }
+                        if (res.code==200) {
+                            res.lyric.split('\n').forEach {
+                                val left=it.substringBefore(':').substringAfter('[')
+                                var right=it.substringBefore(']').substringAfter(':')
+                                val body=it.substringAfter(']')
+                                if(left=="title"){
+                                    title=right
+                                } else if(left=="by"){
+                                    by=right
+                                } else if(left=="author"){
+                                    author=right
+                                } else if(left=="offset"){
+                                    val time = right.toIntOrNull()
+                                    if(time!=null&&time!=0){
+                                        //offset为0时不覆盖原有的
+                                        offset.value=time
+                                    }
+                                } else {
+                                    if(right.contains(':')){
+                                        right = right.replace(':','.')
+                                    }
+                                    val minute=left.toIntOrNull()
+                                    val second=right.toFloatOrNull()
+                                    if(minute!=null&&second!=null){
+                                        val time=minute*60000+(second*1000).toLong()
+                                        list.add(LyricLine(time,body))
+                                    }
                                 }
                             }
+                        } else {
+                            PopTip.show("网易云歌词获取失败：${res.code}")
+                            list.add(LyricLine(0,"歌词详情获取失败"))
                         }
-                    } else {
-                        PopTip.show("网易云歌词获取失败：${res.code}")
-                        list.add(LyricLine(0,"歌词详情获取失败"))
+                    }
+                    else -> {
+                        list.add(LyricLine(0,"歌词未知类型：${src.type}"))
                     }
                 }
-
-                else -> {
-                    list.add(LyricLine(0,"歌词未知类型：${src.type}"))
+                if(list.isEmpty()){
+                    list.add(LyricLine(0,"歌词内容为空"))
                 }
+                if(title==""){
+                    //没读取到标题的，自动填充
+                    title=src.name
+                }
+                setLyric(list, title, author, by)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    PopTip.show("歌词详情获取失败")
+                    setMessage("歌词详情获取失败")
+                }
+            } finally {
+                loadingLyric.value = false
             }
-            if(list.isEmpty()){
-                list.add(LyricLine(0,"歌词内容为空"))
-            }
-            if(title==""){
-                //没读取到标题的，自动填充
-                title=src.name
-            }
-            setLyric(list, title, author, by)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            withContext(Dispatchers.Main) {
-                PopTip.show("歌词详情获取失败")
-                setMessage("歌词详情获取失败")
-            }
-        } finally {
-            loadingLyric.value = false
         }
     }
 
@@ -492,7 +505,7 @@ internal fun LyricItem(color: Color, alpha: Float, line: LyricLine){
                         .fillMaxWidth()
                         .wrapContentWidth(Alignment.CenterHorizontally)
                         .alpha(alpha),
-                    )
+                )
                 Text(
                     line.subText,
                     color = color,

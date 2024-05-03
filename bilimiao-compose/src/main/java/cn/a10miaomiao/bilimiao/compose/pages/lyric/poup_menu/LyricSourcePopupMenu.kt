@@ -19,9 +19,8 @@ internal class LyricSourcePopupMenu(
     private fun Menu.initMenu() {
         viewModel.source.value.forEachIndexed { index, it ->
             val type=when(it.type){
-                "kugou" -> "酷狗"
-                "netease" -> "网易云"
-                "qq" -> "QQ音乐"
+                LyricPageViewModel.KUGOU-> "酷狗"
+                LyricPageViewModel.NETEASE -> "网易云"
                 else -> "未知来源"
             }
             val name = it.name.let {
