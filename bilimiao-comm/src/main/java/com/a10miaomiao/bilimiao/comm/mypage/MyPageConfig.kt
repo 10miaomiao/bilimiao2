@@ -10,9 +10,9 @@ class MyPageConfig(
     private val getConfigInfo: (() -> MyPageConfigInfo),
 ) {
 
-    var setConfig: ((MyPageConfigInfo) -> Unit)? = null
+    var setConfig: (() -> Unit)? = null
 
-    private val configInfo get() = getConfigInfo()
+    val configInfo get() = getConfigInfo()
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) {
@@ -41,7 +41,7 @@ class MyPageConfig(
     fun notifyConfigChanged () {
         if (fragment.lifecycle.currentState == Lifecycle.State.RESUMED) {
             setConfig?.let {
-                it(configInfo)
+                it()
             }
         }
     }

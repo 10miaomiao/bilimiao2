@@ -104,7 +104,14 @@ class BottomSheetDelegate(
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
         if (fragment is MyPage) {
             val config = fragment.pageConfig
-            config.setConfig = this::setMyPageConfig
+            config.setConfig = this::notifyConfigChanged
+        }
+    }
+    private fun notifyConfigChanged(){
+        navBottomSheetFragment.childFragmentManager.fragments.lastOrNull().let {
+            if(it is MyPage){
+                setMyPageConfig(it.pageConfig.configInfo)
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -10,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.text.TextUtils
 import android.view.DisplayCutout
 import android.view.WindowManager
 import android.widget.ImageView
@@ -46,19 +49,19 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
@@ -133,8 +136,19 @@ class PlayerDelegate2(
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
+                // 播放器后台服务开启
                 PlayerService.ACTION_CREATED -> {
                     PlayerService.selfInstance?.videoPlayerView = activity.findViewById(R.id.video_player)
+                }
+                // 播放器后台服务被杀
+                PlayerService.ACTION_DESTROY -> {
+                    startPlayerService()
+                }
+                // 耳机检测
+                AudioManager.ACTION_AUDIO_BECOMING_NOISY -> {
+                    //暂停播放
+                    if (isPlaying())
+                        views.videoPlayer.onVideoPause()
                 }
             }
         }
@@ -145,18 +159,16 @@ class PlayerDelegate2(
 
         val intentFilter = IntentFilter().apply {
             addAction(PlayerService.ACTION_CREATED)
+            addAction(PlayerService.ACTION_DESTROY)
+            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+            addAction(Intent.ACTION_MEDIA_BUTTON)
         }
-        ContextCompat.registerReceiver(
+        registerReceiver(
             activity,
             broadcastReceiver,
             intentFilter,
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
-        if (PlayerService.selfInstance == null) {
-            val intent = Intent(activity, PlayerService::class.java)
-            activity.startService(intent)
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             picInPicHelper = PicInPicHelper(activity, views.videoPlayer)
         }
@@ -165,28 +177,29 @@ class PlayerDelegate2(
         controller.initVideoPlayerSetting()
         views.videoPlayer.subtitleLoader = this::loadSubtitleData
         views.videoPlayer.subtitleSourceSelector = this::selectSourceSubtitle
+        //音频焦点冲突时是否释放
+        views.videoPlayer.isReleaseWhenLossAudio = true
 
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
             val themeColor = activity.config.themeColor
             views.videoPlayer.updateThemeColor(activity, themeColor)
         })
-        //耳机检测
-        val intentFilterEarphone = IntentFilter().apply {
-            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-            addAction(Intent.ACTION_MEDIA_BUTTON)
-        }
-        registerReceiver(
-            activity,
-            earphoneReceiver,
-            intentFilterEarphone,
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
     }
 
+    private fun startPlayerService() {
+        try {
+            val intent = Intent(activity, PlayerService::class.java)
+            activity.startService(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     override fun onResume() {
-
+        if (PlayerService.selfInstance == null) {
+            startPlayerService()
+        }
     }
 
     override fun onPause() {
@@ -400,10 +413,12 @@ class PlayerDelegate2(
                 withContext(Dispatchers.Main) {
                     // 设置通知栏控制器
                     PlayerService.selfInstance?.setPlayingInfo(
-                        source.title,
-                        source.ownerName,
-                        source.coverUrl,
-                        sourceInfo.duration
+                        PlayerService.PlayingInfo(
+                            title = source.title,
+                            author = source.ownerName,
+                            cover = source.coverUrl,
+                            duration = sourceInfo.duration,
+                        )
                     )
                     views.videoPlayer.releaseDanmaku()
                     views.videoPlayer.danmakuParser = danmukuParser
@@ -695,17 +710,6 @@ class PlayerDelegate2(
             it.proxyServer = proxyServer
             it.uposHost = uposHost
             openPlayer(it)
-        }
-    }
-
-    private val earphoneReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            val action = intent.action
-            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == action) {
-                //暂停播放
-                if (isPlaying())
-                    views.videoPlayer.onVideoPause()
-            }
         }
     }
 

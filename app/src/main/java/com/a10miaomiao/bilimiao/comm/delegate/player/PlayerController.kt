@@ -349,6 +349,10 @@ class PlayerController(
             VideoSettingFragment.PLAYER_SMALL_SHOW_BOTTOM_PROGRESS_BAR,
             true
         )
+        views.videoPlayer.enabledAudioFocus = prefs.getBoolean(
+            VideoSettingFragment.PLAYER_AUDIO_FOCUS,
+            true
+        )
     }
 
     /**

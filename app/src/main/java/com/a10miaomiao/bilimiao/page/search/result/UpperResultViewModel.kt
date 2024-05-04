@@ -13,13 +13,13 @@ import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 
 class UpperResultViewModel(
     override val di: DI,
@@ -76,9 +76,7 @@ class UpperResultViewModel(
                     _loadData(pageNum + 1)
                 }
             } else {
-                withContext(Dispatchers.Main) {
-                    context.toast(res.message)
-                }
+                PopTip.show(res.message)
                 throw Exception(res.message)
             }
         } catch (e: Exception) {

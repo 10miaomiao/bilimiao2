@@ -41,7 +41,7 @@ internal fun BlankPageContent(
     viewModel: BlankPageViewModel
 ) {
     PageConfig(
-        title = "空白页"
+        title = ""
     )
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value

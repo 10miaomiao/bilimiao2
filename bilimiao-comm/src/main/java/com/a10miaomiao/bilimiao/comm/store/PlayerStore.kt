@@ -100,13 +100,13 @@ class PlayerStore(override val di: DI) :
             } else {
                 mainTitle = ""
             }
-            if (ids.sid.isNotBlank() && ids.epid.isNotBlank()) {
-                type = BANGUMI
-                sid = ids.sid
-                epid = ids.epid
+            sid = ids.sid
+            epid = ids.epid
+            aid = ids.aid
+            type = if (ids.sid.isNotBlank()) {
+                BANGUMI
             } else {
-                type = VIDEO
-                aid = ids.aid
+                VIDEO
             }
             if (getPlayListCurrentPosition() == -1) {
                 playList = null

@@ -85,7 +85,6 @@ class DynamicViewModel(
                             dynamicContent = getDynamicContent(dynamicModule),
                         )
                     }
-                    DebugMiao.log(itemsList)
                     if (offset.isBlank()) {
                         list.data = itemsList.toMutableList()
                     } else {

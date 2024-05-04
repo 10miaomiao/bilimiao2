@@ -94,7 +94,7 @@ class DrawerBehaviorDelegate(
 
 
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        if (dragState == STATE_COLLAPSED) {
+        if (dragState == STATE_COLLAPSED && !parent.fullScreenPlayer) {
             // 折叠状态
             if (
                 ev.action == MotionEvent.ACTION_DOWN
