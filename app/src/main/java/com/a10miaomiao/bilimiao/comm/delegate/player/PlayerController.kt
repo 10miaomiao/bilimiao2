@@ -689,6 +689,7 @@ class PlayerController(
         currentPosition: Long,
         duration: Long
     ) {
+        playerStore.setPlayProgress(currentPosition)
         delegate.historyReport(currentPosition)
         PlayerService.selfInstance?.setProgress(
             duration,
