@@ -144,6 +144,8 @@ class ScaffoldView @JvmOverloads constructor(
         }
     var smallModePlayerCurrentHeight = smallModePlayerMinHeight // 竖屏模式播放器实际高度
     var statusBarHeight = 0
+    var playerScrolling = false
+        get() = field && orientation == VERTICAL
 
     var contentAnimationDuration = 0
     var playerSpaceHeight = 0
@@ -323,6 +325,7 @@ class ScaffoldView @JvmOverloads constructor(
             value.addUpdateListener {
                 smallModePlayerCurrentHeight = value.animatedValue as Int
                 updateLayout(false)
+                focusContent?.translationY = (playerSpaceHeight).toFloat()
             }
             value.start()
         }

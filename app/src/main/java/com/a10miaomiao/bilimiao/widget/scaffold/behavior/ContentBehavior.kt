@@ -56,6 +56,9 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 parentRef = parent
                 updateLayout(false)
             }
+            if(parent.playerScrolling){
+                return true
+            }
             val orientation = parent.orientation
             if (parent.fullScreenPlayer) {
                 height = 0
@@ -64,7 +67,8 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
             } else {
                 if(orientation == ScaffoldView.VERTICAL){
                     val downHeight = parent.playerSpaceHeight
-                    height = bottom - top - downHeight
+                    height = bottom - top - if(parent.showPlayer)
+                            ( parent.smallModePlayerMinHeight + parent.statusBarHeight) else 0
                     width = right - left
                     child.translationY = downHeight.toFloat()
                     child.layout(left, top, right, bottom)
