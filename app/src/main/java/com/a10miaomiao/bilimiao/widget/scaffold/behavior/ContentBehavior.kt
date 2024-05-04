@@ -64,8 +64,13 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
             } else {
                 if(orientation == ScaffoldView.VERTICAL){
                     val downHeight = parent.playerSpaceHeight
-                    height = bottom - top - if(parent.showPlayer)
-                            ( parent.smallModePlayerMinHeight + parent.statusBarHeight) else 0
+                    height = if(bottom - top == 0) {
+                        0
+                    } else if(parent.showPlayer) {
+                        bottom - top - parent.smallModePlayerMinHeight - parent.statusBarHeight
+                    } else {
+                        bottom - top
+                    }
                     width = right - left
                     child.translationY = downHeight.toFloat()
                     child.layout(left, top, right, bottom)
