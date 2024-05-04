@@ -139,18 +139,23 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         type: Int
     ) {
         val parent = parentRef ?: return
+        val contentView = parentRef?.focusContent ?: return
         if (dy > 0 && parent.showPlayer
             && parent.orientation== ScaffoldView.VERTICAL
         ) {
             val playerMinHeight = parent.smallModePlayerMinHeight
             if (parent.smallModePlayerCurrentHeight > playerMinHeight) {
+                parent.playerScrolling = true
                 consumed[1] = dy
                 val playerHeight = max(
                     parent.smallModePlayerCurrentHeight - dy,
                     playerMinHeight,
                 )
+                contentView.translationY = (playerHeight + parent.statusBarHeight).toFloat()
                 parent.smallModePlayerCurrentHeight = playerHeight
-                parent.updateLayout(false)
+                contentView.invalidate()
+                updateLayout()
+                child.requestLayout()
             }
         }
     }
@@ -166,17 +171,22 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         consumed: IntArray
     ) {
         val parent = parentRef ?: return
+        val contentView = parentRef?.focusContent ?: return
         if (dyConsumed > 0 && parent.showPlayer
             && parent.orientation== ScaffoldView.VERTICAL
         ) {
             val playerMinHeight = parent.smallModePlayerMinHeight
             if (parent.smallModePlayerCurrentHeight > playerMinHeight) {
+                parent.playerScrolling = true
                 val playerHeight = max(
                     parent.smallModePlayerCurrentHeight - dyConsumed,
                     playerMinHeight,
                 )
+                contentView.translationY = (playerHeight + parent.statusBarHeight).toFloat()
                 parent.smallModePlayerCurrentHeight = playerHeight
-                parent.updateLayout(false)
+                contentView.invalidate()
+                updateLayout()
+                child.requestLayout()
             }
         }
         if (dyUnconsumed < 0 && parent.showPlayer
@@ -184,15 +194,28 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         ) {
             val playerMaxHeight = parent.smallModePlayerMaxHeight
             if (parent.smallModePlayerCurrentHeight < playerMaxHeight) {
+                parent.playerScrolling = true
                 consumed[1] = dyUnconsumed
                 val playerHeight = min(
                     parent.smallModePlayerCurrentHeight - dyUnconsumed,
                     playerMaxHeight,
                 )
+                contentView.translationY = (playerHeight + parent.statusBarHeight).toFloat()
                 parent.smallModePlayerCurrentHeight = playerHeight
-                parent.updateLayout(false)
+                contentView.invalidate()
+                updateLayout()
+                child.requestLayout()
             }
         }
+    }
+
+    override fun onStopNestedScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: View,
+        target: View
+    ) {
+        val parent = parentRef ?: return
+        parent.playerScrolling = false
     }
 
 
