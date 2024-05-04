@@ -56,9 +56,6 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 parentRef = parent
                 updateLayout(false)
             }
-            if(parent.playerScrolling){
-                return true
-            }
             val orientation = parent.orientation
             if (parent.fullScreenPlayer) {
                 height = 0
