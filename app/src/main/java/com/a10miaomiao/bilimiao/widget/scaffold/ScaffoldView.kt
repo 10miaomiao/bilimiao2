@@ -56,7 +56,7 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 playerDelegate?.setHoldStatus(isHoldUpPlayer)
-                updateLayout(true)
+                updateLayout(false)
             }
         }
 
@@ -144,8 +144,6 @@ class ScaffoldView @JvmOverloads constructor(
         }
     var smallModePlayerCurrentHeight = smallModePlayerMinHeight // 竖屏模式播放器实际高度
     var statusBarHeight = 0
-    var playerScrolling = false
-        get() = field && orientation == VERTICAL
 
     var contentAnimationDuration = 0
     var playerSpaceHeight = 0
@@ -324,7 +322,8 @@ class ScaffoldView @JvmOverloads constructor(
             value.duration=300
             value.addUpdateListener {
                 smallModePlayerCurrentHeight = value.animatedValue as Int
-                updateLayout(false)
+                playerBehavior?.updateLayout()
+                player?.requestLayout()
                 focusContent?.translationY = (playerSpaceHeight).toFloat()
             }
             value.start()
