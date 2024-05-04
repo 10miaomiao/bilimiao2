@@ -37,14 +37,13 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
-import com.a10miaomiao.bilimiao.store.*
-import com.a10miaomiao.bilimiao.widget.scaffold.*
+import com.a10miaomiao.bilimiao.store.Store
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -287,7 +286,7 @@ class MainActivity
             } else {
                 ui.root.content?.requestFocus()
             }
-            ui.root.updateContentLayout()
+            ui.root.updateLayout(true)
         }
     }
 
@@ -295,6 +294,8 @@ class MainActivity
     private fun changeFocus(focusOnMain: Boolean) {
         if (ui.root.focusOnMain != focusOnMain) {
             ui.root.focusOnMain = focusOnMain
+            ui.mContainerView.translationZ = if(focusOnMain) 0f else -0.1f
+            ui.mSubContainerView.translationZ = if(focusOnMain) -0.1f else 0f
             //双内容区时自动切换指示器
             if (ui.root.pointerAutoChange && ui.root.subContentShown) {
                 ui.root.pointerExchanged = !ui.root.pointerExchanged
@@ -363,7 +364,7 @@ class MainActivity
         if (!ui.root.subContentShown) {
             //单内容区，将焦点给到另一区域
             changeFocus(!ui.root.focusOnMain)
-            ui.root.updateContentLayout()
+            ui.root.updateLayout(true)
         } else {
             //双内容区，互换
             ui.root.contentExchanged = !ui.root.contentExchanged
@@ -377,7 +378,7 @@ class MainActivity
     private val onExchangeLongClick = View.OnLongClickListener {
         //长按强制全屏
         ui.root.showSubContent = !ui.root.showSubContent
-        ui.root.updateContentLayout()
+        ui.root.updateLayout(true)
         notifyFocusChanged()
         //小窗行为跟随
         if (!ui.root.subContentShown) {
@@ -462,7 +463,7 @@ class MainActivity
                     left,
                     0,
                     right,
-                    bottom + top + config.appBarTitleHeight + ui.root.smallModePlayerHeight,
+                    bottom + config.appBarTitleHeight,
                 )
             } else {
                 windowStore.setContentInsets(
@@ -487,7 +488,8 @@ class MainActivity
             )
         }
         basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
-        ui.root.requestLayout()
+        ui.root.statusBarHeight = top
+        ui.root.updateLayout(false)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
