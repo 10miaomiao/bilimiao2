@@ -1,22 +1,19 @@
 package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
+import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.View
 import android.view.View.VISIBLE
-import android.view.animation.DecelerateInterpolator
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RT
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LT
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.MIDDLE
-import splitties.systemservices.clipboardManager
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RB
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RT
 
 class ContentBehavior : CoordinatorLayout.Behavior<View> {
 
@@ -35,19 +32,19 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
 
     var parentRef: ScaffoldView? = null
     var viewRef: View? = null
-    var downHeight = 0 // 界面下降高度
     var height = 0
     var width = 0
-    var showPlayer = false
+
+    var endLeft = 0
+    var endTop = 0
+    var endRight = 0
+    var endBottom = 0
 
     var left = 0
     var top = 0
     var right = 0
     var bottom = 0
 
-    //裁剪一下，否则视频底下的区域会有多余留白
-    var clipHeight = 0
-        get() = if (top == 0) 0 else field
 
     override fun onLayoutChild(
         parent: CoordinatorLayout,
@@ -57,29 +54,25 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         if (parent is ScaffoldView) {
             if (parentRef == null) {
                 parentRef = parent
-                updateLayout()
+                updateLayout(false)
             }
             val orientation = parent.orientation
-            val playerWidth = parent.playerWidth
-            val playerHeight = parent.playerHeight
             if (parent.fullScreenPlayer) {
                 height = 0
                 width = 0
                 child.layout(0, 0, 0, 0)
             } else {
-                child.layout(left, top - clipHeight, right, bottom)
-                child.setClipBounds(Rect(0, clipHeight, width, height))
-
-                if (orientation == ScaffoldView.VERTICAL) {
-                    child.translationX = 0f
-                    if (downHeight != playerHeight) {
-                        downHeight = playerHeight
-                        startDownAnimation(child, playerHeight.toFloat())
-                    }
+                if(orientation == ScaffoldView.VERTICAL){
+                    val downHeight = parent.playerSpaceHeight
+                    height = bottom - top - downHeight
+                    width = right - left
+                    child.translationY = downHeight.toFloat()
+                    child.layout(left, top, right, bottom)
                 } else {
-                    child.translationX = 0f
+                    height = bottom - top
+                    width = right - left
                     child.translationY = 0f
-                    downHeight = 0
+                    child.layout(left, top, right, bottom)
                 }
             }
 
@@ -96,17 +89,6 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         return true
     }
 
-    private fun startDownAnimation(
-        child: View,
-        height: Float,
-    ) {
-        child.animate().apply {
-            duration = 200
-            setInterpolator(DecelerateInterpolator())
-            translationY(height)
-        }.start()
-    }
-
     //触摸分配焦点
     override fun onInterceptTouchEvent(
         parent: CoordinatorLayout,
@@ -117,15 +99,63 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
             return super.onInterceptTouchEvent(parent, child, ev)
         }
         if (ev.action == ACTION_DOWN) {
-            if (ev.x > left && ev.x < right && ev.y > top && ev.y < bottom) {
+            if (ev.x > endLeft && ev.x < endRight && ev.y > endTop && ev.y < endBottom) {
                 child.requestFocus()
             }
         }
         return super.onInterceptTouchEvent(parent, child, ev)
     }
 
+
+    fun updateLayout(withAnimation: Boolean){
+        calculate()
+        if(withAnimation && parentRef?.contentAnimationDuration!=0){
+            animateTo(endLeft, endTop, endRight, endBottom)
+        } else {
+            left=endLeft
+            top=endTop
+            right=endRight
+            bottom=endBottom
+        }
+    }
+
+    fun animateTo(
+        endLeft:Int,
+        endTop:Int,
+        endRight:Int,
+        endBottom:Int,
+        startLeft:Int=left,
+        startTop:Int=top,
+        startRight:Int=right,
+        startBottom:Int=bottom,
+    ){
+        if(startLeft==endLeft
+            &&startTop==endTop
+            &&startRight==endRight
+            &&startBottom==endBottom){
+            return
+        }
+        val duration = parentRef?.contentAnimationDuration ?: return
+        val value = ValueAnimator.ofFloat(0f,1f)
+        fun getValue(start:Int,end:Int):Int{
+            val process=value.animatedValue as Float
+            return ((start.toFloat()*(1f-process)+end.toFloat()*(process)).toInt())
+        }
+
+        value.duration=duration.toLong()
+        value.addUpdateListener {
+            left=getValue(startLeft,endLeft)
+            top=getValue(startTop,endTop)
+            right=getValue(startRight,endRight)
+            bottom=getValue(startBottom,endBottom)
+            parentRef?.requestLayout()
+        }
+        value.start()
+    }
+
+
     //根据视频窗口分配内容区域
-    fun updateLayout() {
+    private fun calculate() {
         val parentView = parentRef ?: return
 
         val isLeft = if (parentView.contentExchanged) isSub else !isSub
@@ -149,59 +179,64 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
             splitLeftWidth = minWidth
         if (contentWidth - splitLeftWidth < minWidth)
             splitLeftWidth = contentWidth - minWidth
-        top = 0
-        bottom = mHeight
+        endTop = 0
+        endBottom = mHeight
         // 竖屏
         if (parentView.orientation == ScaffoldView.VERTICAL) {
             if (isOnFocus) {
-                left = 0
-                right = mWidth
+                endLeft = 0
+                endRight = mWidth
             } else {
-                left = 0
-                right = 0
-                bottom = 0
+                endLeft = 0
+                endRight = 0
+                endBottom = 0
             }
-            return onUpdateFinished(false)
+            parentView.subContentShown = false
+            return
         }
         // 未启用副屏
         if (!parentView.hasSubContent) {
-            left = iLeft
-            right = mWidth
-            return onUpdateFinished(false)
+            endLeft = iLeft
+            endRight = mWidth
+            parentView.subContentShown = false
+            return
         }
         //宽度不够分两列,或强制单区域
         if (contentWidth < minWidth * 2 || !parentView.showSubContent) {
             if (isOnFocus) {
-                left = iLeft
-                right = mWidth
+                endLeft = iLeft
+                endRight = mWidth
             } else {
-                left = 0
-                right = 0
-                bottom = 0
+                endLeft = 0
+                endRight = 0
+                endBottom = 0
             }
-            return onUpdateFinished(false)
+            parentView.subContentShown = false
+            return
         }
         //另一侧被过度挤压
         if (contentWidth - pWidth < minWidth) {
             if (isLeft) {
-                left = iLeft
-                right = iLeft + splitLeftWidth
+                endLeft = iLeft
+                endRight = iLeft + splitLeftWidth
             } else {
-                left = iLeft + splitLeftWidth
-                right = mWidth - iRight
+                endLeft = iLeft + splitLeftWidth
+                endRight = mWidth - iRight
             }
-            return onUpdateFinished(true)
+            parentView.subContentShown = true
+            return
         }
         //挂起或无视频窗口
         if (parentView.isHoldUpPlayer || !parentView.showPlayer) {
             if (isLeft) {
-                left = iLeft
-                right = iLeft + splitLeftWidth
+                endLeft = iLeft
+                endRight = iLeft + splitLeftWidth
             } else {
-                left = iLeft + splitLeftWidth
-                right = mWidth - iRight
+                endLeft = iLeft + splitLeftWidth
+                endRight = mWidth - iRight
             }
-            return onUpdateFinished(true)
+            parentView.subContentShown = true
+            return
         }
         //竖屏窄小窗
         if (mHeight - pHeight < minHeight) {
@@ -212,53 +247,55 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                     when (parentView.playerViewPlaceStatus) {
                         LT, LB -> {
                             if (isLeft) {
-                                left = mWidth - contentWidth + pWidth
-                                right = mWidth - iRight
-                                top = 0
-                                bottom = mHeight / 2
+                                endLeft = mWidth - contentWidth + pWidth
+                                endRight = mWidth - iRight
+                                endTop = 0
+                                endBottom = mHeight / 2
                             } else {
-                                left = mWidth - contentWidth + pWidth
-                                right = mWidth - iRight
-                                top = mHeight / 2
-                                bottom = mHeight
+                                endLeft = mWidth - contentWidth + pWidth
+                                endRight = mWidth - iRight
+                                endTop = mHeight / 2
+                                endBottom = mHeight
                             }
                         }
 
                         RT, RB -> {
                             if (isLeft) {
-                                left = iLeft
-                                right = mWidth - pWidth
-                                top = 0
-                                bottom = mHeight / 2
+                                endLeft = iLeft
+                                endRight = mWidth - pWidth
+                                endTop = 0
+                                endBottom = mHeight / 2
                             } else {
-                                left = iLeft
-                                right = mWidth - pWidth
-                                top = mHeight / 2
-                                bottom = mHeight
+                                endLeft = iLeft
+                                endRight = mWidth - pWidth
+                                endTop = mHeight / 2
+                                endBottom = mHeight
                             }
                         }
 
                         MIDDLE -> {
                             if (isLeft) {
-                                left = iLeft
-                                right = iLeft + splitLeftWidth
+                                endLeft = iLeft
+                                endRight = iLeft + splitLeftWidth
                             } else {
-                                left = iLeft + splitLeftWidth
-                                right = mWidth - iRight
+                                endLeft = iLeft + splitLeftWidth
+                                endRight = mWidth - iRight
                             }
                         }
                     }
-                    return onUpdateFinished(true)
+                    parentView.subContentShown = true
+                    return
                 }
                 //都不够，按默认分割
                 if (isLeft) {
-                    left = iLeft
-                    right = iLeft + splitLeftWidth
+                    endLeft = iLeft
+                    endRight = iLeft + splitLeftWidth
                 } else {
-                    left = iLeft + splitLeftWidth
-                    right = mWidth - iRight
+                    endLeft = iLeft + splitLeftWidth
+                    endRight = mWidth - iRight
                 }
-                return onUpdateFinished(true)
+                parentView.subContentShown = true
+                return
             }
             //宽度够分
             contentWidth -= pWidth
@@ -270,99 +307,94 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
             when (parentView.playerViewPlaceStatus) {
                 LT, LB -> {
                     if (isLeft) {
-                        left = iLeft + pWidth
-                        right = iLeft + pWidth + splitLeftWidth
+                        endLeft = iLeft + pWidth
+                        endRight = iLeft + pWidth + splitLeftWidth
                     } else {
-                        left = iLeft + pWidth + splitLeftWidth
-                        right = mWidth - iRight
+                        endLeft = iLeft + pWidth + splitLeftWidth
+                        endRight = mWidth - iRight
                     }
                 }
 
                 RT, RB -> {
                     if (isLeft) {
-                        left = iLeft
-                        right = iLeft + splitLeftWidth
+                        endLeft = iLeft
+                        endRight = iLeft + splitLeftWidth
                     } else {
-                        left = iLeft + splitLeftWidth
-                        right = mWidth - iRight - pWidth
+                        endLeft = iLeft + splitLeftWidth
+                        endRight = mWidth - iRight - pWidth
                     }
                 }
 
                 MIDDLE -> {
                     if (isLeft) {
-                        left = iLeft
-                        right = iLeft + contentWidth / 2
+                        endLeft = iLeft
+                        endRight = iLeft + contentWidth / 2
                     } else {
-                        left = iLeft + contentWidth / 2 + pWidth
-                        right = mWidth - iRight
+                        endLeft = iLeft + contentWidth / 2 + pWidth
+                        endRight = mWidth - iRight
                     }
                 }
             }
-            return onUpdateFinished(true)
+            parentView.subContentShown = true
+            return
         }
         //正常小窗
         when (parentView.playerViewPlaceStatus) {
             LT -> {
                 if (isLeft) {
-                    left = iLeft
-                    right = iLeft + pWidth
-                    top += pHeight
+                    endLeft = iLeft
+                    endRight = iLeft + pWidth
+                    endTop += pHeight
                 } else {
-                    left = iLeft + pWidth
-                    right = mWidth - iRight
+                    endLeft = iLeft + pWidth
+                    endRight = mWidth - iRight
                 }
             }
 
             RT -> {
                 if (isLeft) {
-                    left = iLeft
-                    right = iLeft + contentWidth - pWidth
+                    endLeft = iLeft
+                    endRight = iLeft + contentWidth - pWidth
                 } else {
-                    left = iLeft + contentWidth - pWidth
-                    right = mWidth - iRight
-                    top += pHeight
+                    endLeft = iLeft + contentWidth - pWidth
+                    endRight = mWidth - iRight
+                    endTop += pHeight
                 }
             }
 
             LB -> {
                 if (isLeft) {
-                    left = iLeft
-                    right = iLeft + pWidth
-                    bottom -= pHeight
+                    endLeft = iLeft
+                    endRight = iLeft + pWidth
+                    endBottom -= pHeight
                 } else {
-                    left = iLeft + pWidth
-                    right = mWidth - iRight
+                    endLeft = iLeft + pWidth
+                    endRight = mWidth - iRight
                 }
             }
 
             RB -> {
                 if (isLeft) {
-                    left = iLeft
-                    right = iLeft + contentWidth - pWidth
+                    endLeft = iLeft
+                    endRight = iLeft + contentWidth - pWidth
                 } else {
-                    left = iLeft + contentWidth - pWidth
-                    right = mWidth - iRight
-                    bottom -= pHeight
+                    endLeft = iLeft + contentWidth - pWidth
+                    endRight = mWidth - iRight
+                    endBottom -= pHeight
                 }
             }
 
             MIDDLE -> {
                 if (isLeft) {
-                    left = iLeft
-                    right = iLeft + splitLeftWidth
+                    endLeft = iLeft
+                    endRight = iLeft + splitLeftWidth
                 } else {
-                    left = iLeft + splitLeftWidth
-                    right = mWidth - iRight
+                    endLeft = iLeft + splitLeftWidth
+                    endRight = mWidth - iRight
                 }
             }
         }
-        return onUpdateFinished(true)
-    }
-
-    fun onUpdateFinished(subContentShown: Boolean) {
-        parentRef?.subContentShown = subContentShown
-        height = bottom - top + clipHeight
-        width = right - left
-        viewRef?.requestLayout()
+        parentView.subContentShown = true
+        return
     }
 }
