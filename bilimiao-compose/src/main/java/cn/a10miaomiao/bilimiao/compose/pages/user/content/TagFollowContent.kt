@@ -75,6 +75,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.gson.Gson
@@ -315,21 +316,19 @@ private fun AttentionButton(
         mutableStateOf(false)
     }
 
-    fun handleClick() {
-        if (!isLogin) {
-            PopTip.show("请先登录")
-            return
-        }
-        if (user.isFollowing) {
-            expanded = true
-        } else {
-            viewModel.attention(index)
-        }
-    }
-
     Box() {
         Button(
-            onClick = ::handleClick,
+            onClick = {
+                if (!isLogin) {
+                    PopTip.show("请先登录")
+                    return@Button
+                }
+                if (user.isFollowing) {
+                    expanded = true
+                } else {
+                    viewModel.attention(index)
+                }
+            },
             shape = MaterialTheme.shapes.small,
             contentPadding = PaddingValues(
                 vertical = 4.dp,

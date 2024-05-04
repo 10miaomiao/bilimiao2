@@ -34,11 +34,10 @@ class StartViewModel(
     val navList = mutableListOf(
         StartNavInfo(
             title = "关注",
-            pageUrl = composePageUrl(
-                MyFollowPage().url()
-            ),
+            pageUrl = MyFollowPage().url(),
             iconRes = R.drawable.ic_nav_following,
             isNeedAuth = true,
+            isComposePage = true,
         ),
         StartNavInfo(
             title = "粉丝",
@@ -60,10 +59,9 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "下载",
-            pageUrl = composePageUrl(
-                DownloadListPage().url()
-            ),
+            pageUrl = DownloadListPage().url(),
             iconRes = R.drawable.ic_nav_download,
+            isComposePage = true,
         ),
         StartNavInfo(
             title = "历史",
@@ -104,10 +102,6 @@ class StartViewModel(
         return unreadCount.toString()
     }
 
-    private fun composePageUrl(url: String): String {
-        return "bilimiao://compose?url=${Uri.encode(url)}"
-    }
-
     data class StartNavInfo(
         val title: String,
         val pageUrl: String,
@@ -115,6 +109,7 @@ class StartViewModel(
         val iconRes: Int? = null,
         val iconUrl: String? = null,
         val isNeedAuth: Boolean = false,
+        val isComposePage: Boolean = false,
     )
 
 }

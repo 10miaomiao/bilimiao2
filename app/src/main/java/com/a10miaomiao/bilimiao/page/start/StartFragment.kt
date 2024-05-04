@@ -68,6 +68,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.comm.wrapInMaterialCardView
 import com.a10miaomiao.bilimiao.config.ViewStyle
@@ -372,19 +373,21 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val nav = (activity as? MainActivity)?.pointerNav?.navController
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
         val scaffoldView = requireActivity().getScaffoldView()
+        var pageUrl = item.pageUrl
         if (item.isNeedAuth) {
             val userInfo = viewModel.userStore.state.info
             if (userInfo == null) {
                 PopTip.show("请先登录")
                 return@OnItemClickListener
             }
-            val pageUrl = item.pageUrl
+            pageUrl = item.pageUrl
                 .replace("{mid}", userInfo.mid.toString())
                 .replace("{name}", userInfo.name)
-            nav.navigate(Uri.parse(pageUrl), navOptions)
+        }
+        if (item.isComposePage) {
+            nav.navigateToCompose(pageUrl, navOptions)
             scaffoldView.closeDrawer()
         } else {
-            val pageUrl = item.pageUrl
             nav.navigate(Uri.parse(pageUrl), navOptions)
             scaffoldView.closeDrawer()
         }

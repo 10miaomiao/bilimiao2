@@ -2,9 +2,6 @@ package com.a10miaomiao.bilimiao.service
 
 import android.app.Service
 import android.content.Intent
-import android.media.MediaMetadata
-import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.os.IBinder
 import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
@@ -14,6 +11,9 @@ import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 class PlayerService : Service() {
 
@@ -24,6 +24,7 @@ class PlayerService : Service() {
 
         const val BILIMIAO_PLAYER_PACKAGE_NAME = "com.a10miaomiao.bilimiao.player"
         const val ACTION_CREATED = "$BILIMIAO_PLAYER_PACKAGE_NAME.CREATED"
+        const val ACTION_DESTROY = "$BILIMIAO_PLAYER_PACKAGE_NAME.DESTROY"
     }
 
     var videoPlayerView: DanmakuVideoPlayer? = null
@@ -33,24 +34,16 @@ class PlayerService : Service() {
             updatePlayerState()
         }
 
-    private val playingNotification by lazy { PlayingNotification(this) }
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
+    private val playingNotification by lazy { PlayingNotification(this, serviceScope) }
 
-    val mediaSession by lazy {
-        MediaSessionCompat(this, "BilimiaoPlayer").apply {
-            setCallback(mediaSessionCallback)
-        }
-    }
-//    var mediaSession: MediaSession? = null
-    private val info: PlayingInfo = PlayingInfo()
+    private var mediaSession: MediaSessionCompat? = null
     private var showNotification = true // 是否显示通知栏控制器
 
     override fun onCreate() {
         super.onCreate()
         selfInstance = this
-
-
-//        mediaSession?.setCallback(mediaSessionCallback)
-
         sendBroadcast(Intent(ACTION_CREATED))
     }
 
@@ -83,40 +76,24 @@ class PlayerService : Service() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         selfInstance = null
+        sendBroadcast(Intent(ACTION_DESTROY))
+        super.onDestroy()
     }
 
-    fun setPlayingInfo(
-        title: String,
-        author: String,
-        cover: String,
-        duration: Long,
-    ) {
-        info.title = title
-        info.author = author
-        info.cover = cover
-        info.duration = duration
+    fun setPlayingInfo(info: PlayingInfo) {
         showNotification = getShowNotification()
+        setupMediaSession(info)
+        mediaSession?.isActive = true
         if (showNotification) {
-            mediaSession?.isActive = true
-            setupMediaSession()
-            playingNotification.setPlayingInfo(info)
+            playingNotification.setPlayingInfo(mediaSession, info)
         }
     }
 
     fun clearPlayingInfo() {
-        info.title = null
-        info.author = null
-        info.cover = null
-        info.duration = 0L
         mediaSession?.isActive = false
+        mediaSession = null
         playingNotification.cancel()
-    }
-
-
-    fun getPlayingInfo(): PlayingInfo {
-        return info
     }
 
     fun isPlaying(): Boolean {
@@ -146,9 +123,9 @@ class PlayerService : Service() {
                         videoPlayerView?.currentPositionWhenPlaying ?: 0L,
                         1.0f
                     )
-                mediaSession.setPlaybackState(stateBuilder.build())
+                mediaSession?.setPlaybackState(stateBuilder.build())
             }
-            playingNotification.updateForPlaying()
+            playingNotification.updateForPlaying(mediaSession)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -156,8 +133,8 @@ class PlayerService : Service() {
     }
 
     fun setProgress(max: Long, progress: Long) {
-        if (showNotification && info.title != null) {
-            playingNotification.updateWithProgress(max, progress)
+        if (showNotification && mediaSession != null) {
+            playingNotification.updateWithProgress(mediaSession, max, progress)
             val stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlayingNotification.MEDIA_SESSION_ACTIONS)
                 .setState(
@@ -166,20 +143,34 @@ class PlayerService : Service() {
                     1.0f
                 )
 //        setCustomAction(stateBuilder)
-            mediaSession.setPlaybackState(stateBuilder.build())
+            mediaSession?.setPlaybackState(stateBuilder.build())
         }
     }
 
-    private fun setupMediaSession() {
-        // TODO: 封面
+    private fun setupMediaSession(info: PlayingInfo) {
+        val mediaSession = MediaSessionCompat(this, "BilimiaoPlayer")
+        val stateBuilder = PlaybackStateCompat.Builder()
+            .setActions(PlayingNotification.MEDIA_SESSION_ACTIONS)
+            .setState(
+                if (isPlaying()) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
+                0,
+                1.0f
+            )
+        mediaSession.setPlaybackState(stateBuilder.build())
+        mediaSession.setCallback(mediaSessionCallback)
+        val metaData = getMediaMetadata(info)
+        mediaSession.setMetadata(metaData.build())
+        this.mediaSession = mediaSession
+    }
+
+    fun getMediaMetadata(info: PlayingInfo): MediaMetadataCompat.Builder {
         val metaData = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, info.author ?: "bilimiao")
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, info.author ?: "bilimiao")
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, info.title ?: "bilimiao正在播放")
             .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, info.duration)
-//            .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, (getPosition() + 1).toLong())
-
-        mediaSession?.setMetadata(metaData.build())
+        //            .putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, (getPosition() + 1).toLong())
+        return metaData
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -201,6 +192,11 @@ class PlayerService : Service() {
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             videoPlayerView?.seekTo(pos)
+        }
+
+        override fun onStop() {
+            super.onStop()
+            videoPlayerView?.closeVideo()
         }
     }
 

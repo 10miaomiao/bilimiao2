@@ -200,7 +200,7 @@ class AboutFragment : Fragment(), DIAware, MyPage {
                             bottomMargin = dip(2)
                         }
                         +textView {
-                            text = "bilimiao 2.2"
+                            text = "bilimiao 2.x"
                             setTextColor(config.foregroundColor)
                             textSize = 16f
                         }..lParams(wrapContent, wrapContent)

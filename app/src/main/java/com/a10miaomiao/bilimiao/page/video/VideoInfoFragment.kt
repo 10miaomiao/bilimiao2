@@ -190,7 +190,11 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
         val info = viewModel.info
-        if (!userStore.isLogin() && (menuItem.key ?: 0) >= 3) {
+        val needLogin = when(menuItem.key) {
+            3, 4, 5 -> true
+            else -> false
+        }
+        if (!userStore.isLogin() && needLogin) {
             PopTip.show("请先登录")
             return
         }

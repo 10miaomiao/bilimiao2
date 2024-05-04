@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
@@ -52,11 +53,11 @@ class WebFragment : Fragment(), DIAware, MyPage {
         val userAgent = """
             |os/android 
             |model/${Build.MODEL} 
-            |build/6710300 
+            |build/${ApiHelper.BUILD_VERSION} 
             |osVer/${Build.VERSION.RELEASE} 
             |sdkInt/${Build.VERSION.SDK_INT}  
             |network/2 
-            |BiliApp/1450000
+            |BiliApp/${ApiHelper.BUILD_VERSION} 
             |mobi_app/android_hd 
             |channel/bili 
             |c_locale/zh_CN 

@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
@@ -36,6 +37,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
@@ -67,6 +69,7 @@ class MainActivity
         bindSingleton { themeDelegate }
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
+
     }
 
     private val store by lazy { Store(this, di) }
@@ -177,11 +180,6 @@ class MainActivity
         })
 
         initViewFocusable()
-
-        //主界面切至后台时会把当前侧栏内容覆盖掉，妥协方案，侧栏得失焦点刷新
-        ui.root.appBar?.setOnFocusChangeListener { _, _ ->
-            notifyConfigChanged()
-        }
     }
 
     private fun initNavController() {
@@ -270,7 +268,7 @@ class MainActivity
     override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
         if (fragment is MyPage) {
             val config = fragment.pageConfig
-            config.setConfig = this::setMyPageConfig
+            config.setConfig = this::notifyConfigChanged
         }
     }
 
@@ -301,32 +299,35 @@ class MainActivity
             if (ui.root.pointerAutoChange && ui.root.subContentShown) {
                 ui.root.pointerExchanged = !ui.root.pointerExchanged
             }
-            notifyConfigChanged()
+            notifyFocusChanged()
         }
     }
 
-    fun notifyConfigChanged() {
-        if (currentNav.childFragmentManager.fragments.isNotEmpty()) {
-            val fragment = currentNav.childFragmentManager.fragments.last()
-            ui.mAppBar.canBack =
-                currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
-            ui.mAppBar.showPointer = ui.root.subContentShown
-            ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
-
-            if (fragment is MyPage) {
-                fragment.pageConfig.notifyConfigChanged()
+    fun notifyFocusChanged() {
+        ui.mAppBar.canBack =
+            currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
+        ui.mAppBar.showPointer = ui.root.subContentShown
+        ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
+        notifyConfigChanged()
+    }
+    fun notifyConfigChanged(){
+        currentNav.childFragmentManager.fragments.lastOrNull().let {
+            if(it is MyPage){
+                setMyPageConfig(it.pageConfig.configInfo)
             }
         }
     }
 
 
     fun setMyPageConfig(config: MyPageConfigInfo) {
-        pageConfig = config
-        ui.mAppBar.setProp {
-            title = config.title
-            menus = config.menus
+        if (config.title.isNotBlank()) {
+            pageConfig = config
+            ui.mAppBar.setProp {
+                title = config.title
+                menus = config.menus
+            }
+            ui.root.slideUpBottomAppBar()
         }
-        ui.root.slideUpBottomAppBar()
         leftFragment.setConfig(config.search)
     }
 
@@ -352,7 +353,7 @@ class MainActivity
     }
     private val onPointerClick = View.OnClickListener {
         ui.root.pointerExchanged = !ui.root.pointerExchanged
-        notifyConfigChanged()
+        notifyFocusChanged()
     }
     private val onPointerLongClick = View.OnLongClickListener {
         ui.root.pointerAutoChange = !ui.root.pointerAutoChange
@@ -370,14 +371,14 @@ class MainActivity
         //指示器不锁定时，交换一次方向
         if (ui.root.pointerAutoChange) {
             ui.root.pointerExchanged = !ui.root.pointerExchanged
-            notifyConfigChanged()
+            notifyFocusChanged()
         }
     }
     private val onExchangeLongClick = View.OnLongClickListener {
         //长按强制全屏
         ui.root.showSubContent = !ui.root.showSubContent
         ui.root.updateContentLayout()
-        notifyConfigChanged()
+        notifyFocusChanged()
         //小窗行为跟随
         if (!ui.root.subContentShown) {
             ui.root.playerBehavior?.holdUpPlayer()
@@ -650,8 +651,14 @@ class MainActivity
         }
     }
 
-    private fun onNavBack(): Boolean {
+    private fun onHostNavBack(): Boolean {
         if (ui.mAppBar.canBack) {
+            val currentDestinationId = currentNav.navController.currentDestination?.id
+            if (currentDestinationId == MainNavGraph.dest.compose) {
+                (currentNav.childFragmentManager.fragments.last()
+                        as? ComposeFragment)?.onBackPressed()
+                return true
+            }
             currentNav.navController.popBackStack()
             return true
         } else {
@@ -673,7 +680,7 @@ class MainActivity
         if (basePlayerDelegate.onBackPressed()) {
             return
         }
-        if (onNavBack()) {
+        if (onHostNavBack()) {
             return
         }
         super.onBackPressed()
@@ -684,6 +691,16 @@ class MainActivity
         ScreenDpiUtil.readCustomConfiguration(configuration)
         val newContext = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(newContext)
+    }
+
+    fun getPrimaryNavigationFragment(nav: NavController): Fragment? {
+        return if (nav === navController) {
+            navHostFragment.childFragmentManager.primaryNavigationFragment
+        } else if (nav === subNavController) {
+            subNavHostFragment?.childFragmentManager?.primaryNavigationFragment
+        } else {
+            null
+        }
     }
 
 }

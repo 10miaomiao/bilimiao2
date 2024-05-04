@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.config
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.view.View
@@ -12,60 +13,62 @@ import splitties.views.dsl.core.matchParent
 
 class ViewConfig(val context: Context) {
     val containerWidth = context.dip(900)
-    val pagePadding get() = context.dip(10)
+    val pagePadding = context.dip(10)
     val bottomSheetTitleHeight = context.dip(30)
 
-    val smallPadding get() = context.dip(5)
-    val largePadding get() = context.dip(20)
+    val smallPadding = context.dip(5)
+    val largePadding = context.dip(20)
 
-    val dividerSize get() = context.dip(8)
-    val regionIconSize get() = context.dip(24)
+    val dividerSize = context.dip(8)
+    val regionIconSize = context.dip(24)
 
-    val blackAlpha45 get() = getColor(R.color.black_alpha_45)
-    val black80 get() = getColor(R.color.black_80)
+    val blackAlpha45 = getColor(R.color.black_alpha_45)
+    val black80 = getColor(R.color.black_80)
 
-    val white80 get() = 0xAAFFFFFF.toInt()
+    val white80 = 0xAAFFFFFF.toInt()
 
-    val themeName get() = context.resources.getString(context.attr(R.attr.themeName))
+    val themeName = context.resources.getString(context.attr(R.attr.themeName))
 
-    val colorSurfaceResource get() = context.attr(com.google.android.material.R.attr.colorSurface)
-    val colorSurface get() = getColor(colorSurfaceResource)
+    val colorSurfaceResource = context.attr(com.google.android.material.R.attr.colorSurface)
+    val colorSurface = getColor(colorSurfaceResource)
 
-    val colorSurfaceVariantResource get() = context.attr(com.google.android.material.R.attr.colorSurfaceVariant)
-    val colorSurfaceVariant get() = getColor(colorSurfaceVariantResource)
+    val colorSurfaceVariantResource =
+        context.attr(com.google.android.material.R.attr.colorSurfaceVariant)
+    val colorSurfaceVariant = getColor(colorSurfaceVariantResource)
 
 
-    val themeColorResource get() = context.attr(android.R.attr.colorPrimary)
-    val themeColor get() = getColor(themeColorResource)
+    val themeColorResource = context.attr(android.R.attr.colorPrimary)
+    val themeColor = getColor(themeColorResource)
 
-    val windowBackgroundResource get() = context.attr(R.attr.defaultBackgroundColor)
-    val windowBackgroundColor get() = getColor(windowBackgroundResource)
+    val windowBackgroundResource = context.attr(R.attr.defaultBackgroundColor)
+    val windowBackgroundColor = getColor(windowBackgroundResource)
 
-//    val blockBackgroundResource get() = context.attr(com.google.android.material.R.attr.colorSurface)
-    val blockBackgroundResource get() = context.attr(R.attr.blockBackground)
-    val blockBackgroundColor get() = getColor(blockBackgroundResource)
-    val blockBackgroundAlpha45Color get() = (blockBackgroundColor and 0x00FFFFFF) or 0x71000000
+    //    val blockBackgroundResource = context.attr(com.google.android.material.R.attr.colorSurface)
+    val blockBackgroundResource = context.attr(R.attr.blockBackground)
+    val blockBackgroundColor = getColor(blockBackgroundResource)
+    val blockBackgroundAlpha45Color = (blockBackgroundColor and 0x00FFFFFF) or 0x71000000
 
-    val foregroundColorResource get() = context.attr(R.attr.foregroundColor)
-    val foregroundColor get() = getColor(foregroundColorResource)
-    val foregroundAlpha45Color get() = (foregroundColor and 0x00FFFFFF) or 0x71000000
+    val foregroundColorResource = context.attr(R.attr.foregroundColor)
+    val foregroundColor = getColor(foregroundColorResource)
+    val foregroundAlpha45Color = (foregroundColor and 0x00FFFFFF) or 0x71000000
 
-    val foregroundAlpha80Color get() = (foregroundColor and 0x00FFFFFF) or 0xCC000000.toInt()
+    val foregroundAlpha80Color = (foregroundColor and 0x00FFFFFF) or 0xCC000000.toInt()
 
-    private val isLightThemeResource get() = context.attr(R.attr.isLightTheme)
-    val isLightTheme get() = context.resources.getBoolean(isLightThemeResource)
+    private val isLightThemeResource = context.attr(R.attr.isLightTheme)
+    val isLightTheme = context.resources.getBoolean(isLightThemeResource)
 
-    val lineColorResource get() = context.attr(R.attr.lineColor)
-    val lineColor get() = getColor(lineColorResource)
-    val shadowColorResource get() = context.attr(R.attr.shadowColor)
-    val shadowColor get() = getColor(shadowColorResource)
+    val lineColorResource = context.attr(R.attr.lineColor)
+    val lineColor = getColor(lineColorResource)
+    val shadowColorResource = context.attr(R.attr.shadowColor)
+    val shadowColor = getColor(shadowColorResource)
 
-    val selectableItemBackground get() = context.attr(android.R.attr.selectableItemBackground)
-    val selectableItemBackgroundBorderless get() = context.attr(android.R.attr.selectableItemBackgroundBorderless)
+    val selectableItemBackground = context.attr(android.R.attr.selectableItemBackground)
+    val selectableItemBackgroundBorderless =
+        context.attr(android.R.attr.selectableItemBackgroundBorderless)
 
-    val appBarHeight get() = context.dip(70)
-    val appBarTitleHeight get() = context.dip(20)
-    val appBarMenuHeight get() = context.dip(50)
+    val appBarHeight = context.dip(70)
+    val appBarTitleHeight = context.dip(20)
+    val appBarMenuHeight = context.dip(50)
     val appBarMenuWidth = context.dip(120)
 
     internal fun getColor(resId: Int): Int {
@@ -73,6 +76,27 @@ class ViewConfig(val context: Context) {
     }
 }
 
-inline val Context.config get() = ViewConfig(this)
+@SuppressLint("StaticFieldLeak")
+private object BackendViewConfig {
+    var config: ViewConfig? = null
+    var configContext: Context? = null
+}
+
+fun Context.resetViewConfig() {
+    if (this == BackendViewConfig.configContext) {
+        BackendViewConfig.config = null
+        BackendViewConfig.configContext = null
+    }
+}
+@get:Synchronized
+val Context.config: ViewConfig
+    get() {
+        return BackendViewConfig.config?.takeIf {
+            this === BackendViewConfig.configContext
+        } ?: ViewConfig(this).also {
+            BackendViewConfig.config = it
+            BackendViewConfig.configContext = this
+        }
+    }
 inline val Fragment.config get() = requireContext().config
 inline val View.config get() = context.config

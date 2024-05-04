@@ -16,13 +16,12 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 
 class VideoResultViewModel(
     override val di: DI,
@@ -92,10 +91,12 @@ class VideoResultViewModel(
                         list.finished = true
                     }
                 } else {
-                    var totalCount = result.size // 屏蔽前数量
+                    val totalCount = result.size // 屏蔽前数量
                     result = result.filter {
-                        filterStore.filterWord(it.title)
-                                && filterStore.filterUpper(it.mid.toLong())
+                        val title = it.title ?: return@filter false
+                        val mid = it.mid ?: return@filter false
+                        filterStore.filterWord(title)
+                                && filterStore.filterUpper(mid.toLong())
                     }
                     ui.setState {
                         list.finished = totalCount == 0
@@ -107,9 +108,7 @@ class VideoResultViewModel(
                 }
                 list.pageNum = pageNum
             } else {
-                withContext(Dispatchers.Main) {
-                    context.toast(res.message)
-                }
+                PopTip.show(res.message)
                 throw Exception(res.message)
             }
         } catch (e: Exception) {
