@@ -26,6 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
@@ -75,6 +76,7 @@ class PageRouteBuilder (
         +MyFollowPage()
         +UserFollowPage()
         +SearchFollowPage()
+        +UserFavouritePage()
 
         //lyric
         +LyricPage()

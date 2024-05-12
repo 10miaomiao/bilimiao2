@@ -189,7 +189,6 @@ private fun MyFollowPageContent() {
                         TabRowDefaults.PrimaryIndicator(
                             modifier = Modifier.tabIndicatorOffset(
                                 positions[currentPage],
-//                            matchContentSize = true
                             ),
                             width = Dp.Unspecified,
                         )
@@ -200,16 +199,14 @@ private fun MyFollowPageContent() {
                 tagList.forEachIndexed { index, tab ->
                     Tab(
                         text = {
-                            Row() {
-                                Text(
-                                    text = "${tab.name}(${tab.count})",
-                                    color = if (index == pagerState.currentPage) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onBackground
-                                    }
-                                )
-                            }
+                            Text(
+                                text = "${tab.name}(${tab.count})",
+                                color = if (index == pagerState.currentPage) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground
+                                }
+                            )
                         },
                         selected = pagerState.currentPage == index,
                         onClick = {
