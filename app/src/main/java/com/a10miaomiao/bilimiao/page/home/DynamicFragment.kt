@@ -4,18 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.dynamic.v2.ModuleOuterClass
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.commponents.dynamic.dynamicCardView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -91,12 +86,12 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
         ) {
             val (type, id) = tag as Pair<Int, String>
             when(type) {
-                ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
+                bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
                     val args = UserFragment.createArguments(id)
                     Navigation.findNavController(it)
                         .navigate(UserFragment.actionId, args)
                 }
-                ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
+                bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
                     val args = BangumiDetailFragment.createArguments(id)
                     Navigation.findNavController(it)
                         .navigate(BangumiDetailFragment.actionId, args)
@@ -113,12 +108,12 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
         if (index is Int && index in viewModel.list.data.indices) {
             val item = viewModel.list.data[index]
             when(item.dynamicType) {
-                ModuleOuterClass.ModuleDynamicType.mdl_dyn_archive_VALUE -> {
+                bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
                     val args = VideoInfoFragment.createArguments(item.dynamicContent.id)
                     Navigation.findNavController(it)
                         .navigate(VideoInfoFragment.actionId, args)
                 }
-                ModuleOuterClass.ModuleDynamicType.mdl_dyn_pgc_VALUE -> {
+                bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
                     val args = BangumiDetailFragment.createArguments(item.dynamicContent.id)
                     Navigation.findNavController(it)
                         .navigate(BangumiDetailFragment.actionId, args)

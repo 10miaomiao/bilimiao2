@@ -6,16 +6,16 @@ import org.gradle.kotlin.dsl.DependencyHandlerScope
 
 object Versions {
     // jetpack
-    const val core = "1.6.0"
+    const val core = "1.13.1"
     const val appcompat = "1.6.1"
     const val material = "1.8.0"
     const val lifecycle = "2.5.1"
-    const val navigation = "2.7.6"
-    const val compose = "1.5.4"
+    const val navigation = "2.7.7"
+    const val compose = "1.7.0-alpha08"
     const val media = "1.6.0"
-    const val media3 = "1.3.0"
+    const val media3 = "1.3.1"
 
-    const val accompanist = "0.29.2-rc"
+    const val accompanist = "0.35.0-alpha"
 
     //
     const val splitties = "3.0.0-beta06"
@@ -25,6 +25,7 @@ object Versions {
     const val okhttp = "4.10.0"
     const val gson = "2.10.1"
     const val glide = "4.13.2"
+    const val pbandk = "0.14.4-SNAPSHOT"
 
     const val gsyVideoPlayer = "v8.6.0-release-jitpack"
 }
@@ -49,16 +50,18 @@ object Libraries {
 
     // compose基础组件
     const val composeUi = "androidx.compose.ui:ui:${Versions.compose}"
+    const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.compose}"
     const val composeUiToolingPreview = "androidx.compose.ui:ui-tooling-preview:${Versions.compose}"
-    const val composeMaterial = "androidx.compose.material:material:1.5.4"
-    const val composeMaterial3 = "androidx.compose.material3:material3:1.2.0-rc01"
-    const val composeMaterial3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:1.1.2"
-    const val activityCompose = "androidx.activity:activity-compose:${Versions.compose}"
+    const val composeMaterial = "androidx.compose.material:material:1.6.7"
+    const val composeMaterial3 = "androidx.compose.material3:material3:1.2.1"
+    const val composeMaterial3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:1.2.1"
+    const val activityCompose = "androidx.activity:activity-compose:1.9.0"
     const val navigationCompose = "androidx.navigation:navigation-compose:${Versions.navigation}"
     const val composeMaterialIconsExtended = "androidx.compose.material:material-icons-extended:$${Versions.compose}"
     const val glideCompose = "com.github.skydoves:landscapist-glide:2.0.0"
     // compose控件
     const val accompanistDrawablePainter = "com.google.accompanist:accompanist-drawablepainter:${Versions.accompanist}"
+    const val accompanistAdaptive = "com.google.accompanist:accompanist-adaptive:${Versions.accompanist}"
 
     // 通用库
     const val kotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9"
@@ -66,8 +69,9 @@ object Libraries {
     const val kodeinDiCompose = "org.kodein.di:kodein-di-framework-compose:${Versions.kodein_di}"
     const val gson = "com.google.code.gson:gson:${Versions.gson}"
     const val okhttp3 = "com.squareup.okhttp3:okhttp:${Versions.okhttp}"
-    const val grpcProtobuf = "io.grpc:grpc-protobuf-lite:1.33.0"
-    const val grpcStub = "io.grpc:grpc-stub:1.33.0"
+//    const val grpcProtobuf = "io.grpc:grpc-protobuf-lite:1.33.0"
+//    const val grpcStub = "io.grpc:grpc-stub:1.33.0"
+    const val pbandkRuntime = "pro.streem.pbandk:pbandk-runtime:$${Versions.pbandk}"
     const val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
     const val glideCompiler = "com.github.bumptech.glide:compiler:${Versions.glide}"
 

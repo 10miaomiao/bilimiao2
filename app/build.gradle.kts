@@ -138,7 +138,7 @@ dependencies {
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
-    implementation(Libraries.grpcProtobuf)
+    implementation(Libraries.pbandkRuntime)
     implementation(Libraries.glide)
     annotationProcessor(Libraries.glideCompiler)
 

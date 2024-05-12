@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bilibili.app.show.v1.RankGrpc
-import bilibili.app.show.v1.RankOuterClass
+import bilibili.app.show.v1.RankAllResultReq
+import bilibili.app.show.v1.RankGRPC
+import bilibili.app.show.v1.RankRegionResultReq
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.network.request
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.page.region.RegionDetailsFragment
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +31,7 @@ class RankDetailViewModel(
 
     val rid by lazy { fragment.requireArguments().getInt(RegionDetailsFragment.TID) }
 
-    var list = PaginationInfo<RankOuterClass.Item>()
+    var list = PaginationInfo<bilibili.app.show.v1.Item>()
     var triggered = false
 
 
@@ -45,21 +46,23 @@ class RankDetailViewModel(
             ui.setState {
                 list.loading = true
             }
-            val result = (if (rid == 0) {
-                val req = RankOuterClass.RankAllResultReq.newBuilder()
-                    .setOrder("all")
-                    .setPn(pageNum)
-                    .setPs(list.pageSize)
-                    .build()
-                RankGrpc.getRankAllMethod().request(req).awaitCall()
-            } else {
-                val req = RankOuterClass.RankRegionResultReq.newBuilder()
-                    .setRid(rid)
-                    .setPn(pageNum)
-                    .setPs(list.pageSize)
-                    .build()
-                RankGrpc.getRankRegionMethod().request(req).awaitCall()
-            })
+            val result = BiliGRPCHttp.request {
+                if (rid == 0) {
+                    val req = RankAllResultReq(
+                        order = "all",
+                        pn = pageNum,
+                        ps = list.pageSize
+                    )
+                    RankGRPC.rankAll(req)
+                } else {
+                    val req = RankRegionResultReq(
+                        rid = rid,
+                        pn = pageNum,
+                        ps = list.pageSize
+                    )
+                    RankGRPC.rankRegion(req)
+                }
+            }.awaitCall()
 //            var totalCount = 0 // 屏蔽前数量
 //            if (result.size < list.pageSize) {
 //                ui.setState { list.finished = true }
@@ -73,7 +76,7 @@ class RankDetailViewModel(
                 if (pageNum == 1) {
                     list.data = arrayListOf()
                 }
-                list.data.addAll(result.itemsList)
+                list.data.addAll(result.items)
             }
             list.pageNum = pageNum
 //            if (list.data.size < 10 && totalCount != result.size) {

@@ -139,6 +139,11 @@ class FilterStore(override val di: DI) :
         return true
     }
 
+    fun filterUpperName(name: String): Boolean {
+        // TODO: 筛选UP主昵称
+        return true
+    }
+
     fun filterTag(text: List<VideoTagInfo>): Boolean {
         text.forEach {
             if (state.filterTagList.contains(it.tag_name)) {

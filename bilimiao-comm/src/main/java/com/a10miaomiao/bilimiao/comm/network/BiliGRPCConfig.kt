@@ -3,13 +3,16 @@ package com.a10miaomiao.bilimiao.comm.network
 import android.os.Build
 import android.util.Base64
 import android.webkit.WebSettings
-import bilibili.metadata.MetadataOuterClass
-import bilibili.metadata.device.DeviceOuterClass
-import bilibili.metadata.fawkes.Fawkes
-import bilibili.metadata.locale.LocaleOuterClass
-import bilibili.metadata.network.NetworkOuterClass
-import bilibili.metadata.restriction.RestrictionOuterClass
+import bilibili.metadata.Metadata
+import bilibili.metadata.device.Device
+import bilibili.metadata.fawkes.FawkesReq
+import bilibili.metadata.locale.Locale
+import bilibili.metadata.locale.LocaleIds
+import bilibili.metadata.network.Network
+import bilibili.metadata.network.NetworkType
+import bilibili.metadata.restriction.Restriction
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import pbandk.encodeToByteArray
 
 object BiliGRPCConfig {
 
@@ -73,85 +76,87 @@ object BiliGRPCConfig {
      * 获取客户端在Fawkes系统中的信息标头.
      */
     fun getFawkesreqBin(): String {
-        val msg = Fawkes.FawkesReq.newBuilder()
-            .setAppkey(mobileApp)
-            .setEnv(envorienment)
-            .build()
-        return toBase64(msg.toByteArray())
+        val msg = FawkesReq(
+            appkey = mobileApp,
+            env = envorienment,
+        )
+        return toBase64(msg.encodeToByteArray())
     }
 
     /**
      * 获取元数据标头.
      */
     fun getMetadataBin(accessToken: String): String {
-        val msg = MetadataOuterClass.Metadata.newBuilder()
-            .setAccessKey(accessToken)
-            .setMobiApp(mobileApp)
-            .setBuild(ApiHelper.BUILD_VERSION)
-            .setChannel(channel)
-            .setBuvid(buvid)
-            .setPlatform(platform)
-            .build()
-        return toBase64(msg.toByteArray())
+        val msg = Metadata(
+            accessKey = accessToken,
+            mobiApp = mobileApp,
+            build = ApiHelper.BUILD_VERSION,
+            channel = channel,
+            buvid = buvid,
+            platform = platform,
+        )
+        return toBase64(msg.encodeToByteArray())
     }
 
     /**
      * 获取设备标头.
      */
     fun getDeviceBin(): String {
-        val msg = DeviceOuterClass.Device.newBuilder()
-            .setAppId(appId)
-            .setMobiApp(mobileApp)
-            .setBuild(ApiHelper.BUILD_VERSION)
-            .setChannel(channel)
-            .setBuvid(buvid)
-            .setPlatform(platform)
-            .setBrand(Build.BRAND)
-            .setModel(Build.MODEL)
-            .setOsver(Build.VERSION.RELEASE)
-            .build()
-        return toBase64(msg.toByteArray())
+        val msg = Device(
+            appId = appId,
+            mobiApp = mobileApp,
+            build = ApiHelper.BUILD_VERSION,
+            channel = channel,
+            buvid = buvid,
+            platform = platform,
+            brand = Build.BRAND,
+            model = Build.MODEL,
+            osver = Build.VERSION.RELEASE,
+        )
+        return toBase64(msg.encodeToByteArray())
     }
 
     /**
      * 获取网络标头.
      */
     fun getNetworkBin(): String {
-        val msg = NetworkOuterClass.Network.newBuilder()
-            .setType(NetworkOuterClass.NetworkType.WIFI)
-            .setOid(networkOid)
-            .build()
-        return toBase64(msg.toByteArray())
+        val msg = Network(
+            type = NetworkType.WIFI,
+            oid = networkOid,
+        )
+        return toBase64(msg.encodeToByteArray())
     }
 
     /**
      * 获取限制标头.
      */
     fun getRestrictionBin(): String {
-        val msg = RestrictionOuterClass.Restriction.newBuilder()
-            .build()
-        return toBase64(msg.toByteArray())
+        val msg = Restriction()
+        return toBase64(msg.encodeToByteArray())
     }
 
     /**
      * 获取本地化标头.
      */
     fun getLocaleBin(): String {
-        val cLocale = LocaleOuterClass.LocaleIds.newBuilder()
-            .setLanguage(language)
-            .setRegion(region)
-            .build()
-        val sLocale = LocaleOuterClass.LocaleIds.newBuilder()
-            .setLanguage(language)
-            .setRegion(region)
-            .build()
-        val msg = LocaleOuterClass.Locale.newBuilder()
-            .setCLocale(cLocale)
-            .setSLocale(sLocale)
-            .build()
-        return toBase64(msg.toByteArray())
+        val cLocale = LocaleIds(
+            language = language,
+            region = region,
+        )
+        val sLocale = LocaleIds(
+            language = language,
+            region = region,
+        )
+        val msg = Locale(
+            cLocale = cLocale,
+            sLocale = sLocale,
+        )
+        return toBase64(msg.encodeToByteArray())
     }
 
+    /**
+     *  Dalvik/2.1.0 (Linux; U; Android 12; 2201123C Build/V417IR) 1.45.0 os/android model/2201123C mobi_app/android_hd build/1450000 channel/bili innerVer/1450000 osVer/12 network/2
+     */
     fun getSystemUserAgent(): String {
         var userAgent = ""
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
