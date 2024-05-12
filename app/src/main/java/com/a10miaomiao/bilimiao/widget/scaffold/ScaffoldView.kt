@@ -135,7 +135,7 @@ class ScaffoldView @JvmOverloads constructor(
     val smallModePlayerMinHeight = dip(200) // 竖屏模式下的播放器最小高度
     var smallModePlayerMaxHeight = smallModePlayerMinHeight // 竖屏模式下的播放器最大高度
         set(value) {
-            if(field!=value){
+            if (field != value) {
                 field = value
                 if (smallModePlayerCurrentHeight > value) {
                     animatePlayerHeight(value)
@@ -210,10 +210,11 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun updateContentAnimationDuration() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        contentAnimationDuration = prefs.getInt(FlagsSeetingFragment.FLAGS_CONTENT_ANIMATION_DURATION, 0)
+        contentAnimationDuration =
+            prefs.getInt(FlagsSeetingFragment.FLAGS_CONTENT_ANIMATION_DURATION, 0)
     }
 
-    fun updateLayout(contentAnimation:Boolean=false) {
+    fun updateLayout(contentAnimation: Boolean = false) {
         playerBehavior?.updateLayout()
         contentBehavior?.updateLayout(contentAnimation)
         subContentBehavior?.updateLayout(contentAnimation)
@@ -234,6 +235,7 @@ class ScaffoldView @JvmOverloads constructor(
                         this.appBarBehavior = behavior
                     }
                 }
+
                 is ContentBehavior -> {
                     if (behavior.isSub) {
                         this.subContent = child
@@ -243,18 +245,22 @@ class ScaffoldView @JvmOverloads constructor(
                         this.contentBehavior = behavior
                     }
                 }
+
                 is PlayerBehavior -> {
                     this.player = child
                     this.playerBehavior = behavior
                 }
+
                 is BottomSheetBehavior -> {
                     this.bottomSheet = child
                     this.bottomSheetBehavior = behavior
                 }
+
                 is DrawerBehavior -> {
                     this.drawerView = child
                     this.drawerBehavior = behavior
                 }
+
                 is MaskBehavior -> {
                     this.maskView = child
                     this.maskBehavior = behavior
@@ -316,10 +322,10 @@ class ScaffoldView @JvmOverloads constructor(
         playerBehavior?.holdUpPlayer()
     }
 
-    fun animatePlayerHeight(target:Int){
-        if(orientation== VERTICAL){
-            val value = ValueAnimator.ofInt(smallModePlayerCurrentHeight,target)
-            value.duration=300
+    fun animatePlayerHeight(target: Int) {
+        if (orientation == VERTICAL) {
+            val value = ValueAnimator.ofInt(smallModePlayerCurrentHeight, target)
+            value.duration = 300
             value.addUpdateListener {
                 smallModePlayerCurrentHeight = value.animatedValue as Int
                 playerBehavior?.updateLayout()

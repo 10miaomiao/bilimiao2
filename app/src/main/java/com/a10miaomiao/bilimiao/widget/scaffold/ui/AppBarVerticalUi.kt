@@ -60,9 +60,11 @@ class AppBarVerticalUi(
 
         //View出現的動畫
         //出现动画对LinearLayout.addView(View child, int index, LayoutParams params)方法无效
-//        layoutTransition.setAnimator(LayoutTransition.APPEARING, getInAnim())
+        layoutTransition.setAnimator(LayoutTransition.APPEARING, getInAnim())
+//        layoutTransition.setAnimator(LayoutTransition.CHANGE_APPEARING, getInAnim())
         //元素在容器中消失時需要動畫顯示
         layoutTransition.setAnimator(LayoutTransition.DISAPPEARING, getOutAnim())
+//        layoutTransition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, getOutAnim())
         layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         layoutTransition.setDuration(400)
         layoutTransition.setInterpolator(LayoutTransition.DISAPPEARING, DecelerateInterpolator())

@@ -1,5 +1,10 @@
 package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -11,12 +16,15 @@ import android.view.animation.AnimationSet
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.ScaleAnimation
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.animation.addListener
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import splitties.dimensions.dip
 import kotlin.math.max
 import kotlin.math.min
+
 
 class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
@@ -203,8 +211,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         }
     }
 
-
-
     fun holdUpPlayer() {
         behaviorDelegate?.holdUpTop()
     }
@@ -217,59 +223,61 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         behaviorDelegate?.updateWindowSize()
     }
 
-
-    // 显示动画
-    private val showAnimation = AnimationSet(true).apply {
-        addAnimation(
-            ScaleAnimation(
-                0.2f, 1f,
-                0.1f, 1f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0f,
-            )
-        )
-        addAnimation(
-            AlphaAnimation(0f, 1f)
-        )
-        interpolator = DecelerateInterpolator()
-        repeatMode = Animation.REVERSE
-        duration = 200
-    }
-
-    // 隐藏动画
-    private val hideAnimation = AnimationSet(true).apply {
-        addAnimation(
-            ScaleAnimation(
-                1f, 0.2f,
-                1f, 0.1f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0f,
-            )
-        )
-        addAnimation(
-            AlphaAnimation(1f, 0f)
-        )
-        interpolator = AccelerateInterpolator()
-        repeatMode = Animation.REVERSE
-        duration = 200
-    }
-
+    /**
+     * 显示播放器动画
+     */
     private fun startShowAnimation(child: View) {
-        child.startAnimation(showAnimation)
+        ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 200
+            interpolator = AccelerateInterpolator()
+            val contentView = parentRef?.takeIf {
+                it.orientation == ScaffoldView.VERTICAL
+            }?.content
+            val childHeight = (playerHeight + windowInsets.top).toFloat()
+            child.pivotY = 0f
+            child.pivotX = child.width / 2f
+            addUpdateListener { animation ->
+                val value = animation.animatedValue as Float
+                child.alpha = value
+                child.scaleX = value
+                child.scaleY = value
+                contentView?.translationY = value * childHeight
+            }
+            addListener(
+                onEnd = {
+                    contentView?.translationY = childHeight
+                }
+            )
+        }.start()
     }
 
+    /**
+     * 隐藏播放器动画
+     */
     private fun startHideAnimation(child: View) {
-        // 关闭动画
-        child.startAnimation(hideAnimation)
-        hideAnimation.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {}
-            override fun onAnimationEnd(animation: Animation) {
-                child.layout(0, 0, 0, 0)
-//                child.visibility = View.GONE
+        ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = 200
+            interpolator = AccelerateInterpolator()
+            val contentView = parentRef?.takeIf {
+                it.orientation == ScaffoldView.VERTICAL
+            }?.content
+            val childHeight = (playerHeight + windowInsets.top).toFloat()
+            child.pivotY = 0f
+            child.pivotX = child.width / 2f
+            addUpdateListener { animation ->
+                val value = animation.animatedValue as Float
+                child.alpha = value
+                child.scaleX = value
+                child.scaleY = value
+                contentView?.translationY = value * childHeight
             }
-
-            override fun onAnimationRepeat(animation: Animation) {}
-        })
+            addListener(
+                onEnd = {
+                    child.layout(0, 0, 0, 0)
+                    contentView?.translationY = 0f
+                }
+            )
+        }.start()
     }
 }
 

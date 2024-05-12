@@ -72,12 +72,10 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                         bottom - top
                     }
                     width = right - left
-                    child.translationY = downHeight.toFloat()
                     child.layout(left, top, right, bottom)
                 } else {
                     height = bottom - top
                     width = right - left
-                    child.translationY = 0f
                     child.layout(left, top, right, bottom)
                 }
             }
