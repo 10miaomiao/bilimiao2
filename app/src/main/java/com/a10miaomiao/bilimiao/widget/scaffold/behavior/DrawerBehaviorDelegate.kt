@@ -8,7 +8,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.google.android.material.bottomsheet.BottomSheetBehavior

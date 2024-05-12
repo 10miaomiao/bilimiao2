@@ -1,9 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.composable
-import androidx.navigation.get
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
@@ -28,7 +26,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 class PageRouteBuilder (
     val builder: NavGraphBuilder

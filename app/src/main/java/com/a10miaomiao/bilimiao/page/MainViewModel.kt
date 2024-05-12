@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.home.DynamicFragment
 import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.HomeFragment
@@ -15,7 +14,6 @@ import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import kotlin.reflect.KClass
 
 class MainViewModel(
     override val di: DI,

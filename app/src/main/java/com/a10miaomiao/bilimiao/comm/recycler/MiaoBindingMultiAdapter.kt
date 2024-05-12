@@ -2,11 +2,8 @@ package com.a10miaomiao.bilimiao.comm.recycler
 
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.core.view.size
 import cn.a10miaomiao.miao.binding.MiaoBinding
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.chad.library.adapter.base.BaseDelegateMultiAdapter
-import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.module.LoadMoreModule
 
 open class MiaoBindingMultiAdapter<T>(

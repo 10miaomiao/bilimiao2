@@ -2,7 +2,6 @@ package com.a10miaomiao.bilimiao.page.auth
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -11,8 +10,6 @@ import android.view.ViewGroup
 import android.webkit.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
@@ -23,20 +20,9 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
-import com.a10miaomiao.bilimiao.comm.network.ApiHelper
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.page.web.WebFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.web.NestedScrollWebView
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance

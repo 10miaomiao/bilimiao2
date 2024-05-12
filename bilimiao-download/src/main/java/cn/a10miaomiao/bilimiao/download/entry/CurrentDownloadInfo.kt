@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.download.entry
 
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import java.text.DecimalFormat
 
 data class CurrentDownloadInfo(

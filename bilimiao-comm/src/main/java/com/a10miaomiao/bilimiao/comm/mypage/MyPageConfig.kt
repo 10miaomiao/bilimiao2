@@ -3,7 +3,6 @@ package com.a10miaomiao.bilimiao.comm.mypage
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.*
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 class MyPageConfig(
     private val fragment: Fragment,

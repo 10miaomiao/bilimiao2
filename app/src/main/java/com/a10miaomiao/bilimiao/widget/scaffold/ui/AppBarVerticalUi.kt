@@ -2,12 +2,9 @@ package com.a10miaomiao.bilimiao.widget.scaffold.ui
 
 import android.animation.*
 import android.content.Context
-import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.accessibility.AccessibilityNodeInfo
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.AnimationSet
@@ -17,7 +14,6 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView

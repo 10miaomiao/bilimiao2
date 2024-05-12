@@ -1,9 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.video
 
-import android.os.Parcel
 import android.os.Parcelable
 import com.a10miaomiao.bilimiao.comm.entity.user.MemberInfo
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import kotlinx.android.parcel.Parcelize
 
 

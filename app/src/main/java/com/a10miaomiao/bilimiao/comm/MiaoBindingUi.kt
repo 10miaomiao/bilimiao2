@@ -1,14 +1,11 @@
 package com.a10miaomiao.bilimiao.comm
 
-import android.content.res.Resources
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
-import android.text.method.TextKeyListener.clear
 import android.view.View
 import cn.a10miaomiao.miao.binding.MiaoBinding
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import java.lang.Exception
 

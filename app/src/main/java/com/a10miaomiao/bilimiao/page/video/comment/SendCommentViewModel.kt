@@ -6,18 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.user.UserEmoteInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserEmotePackageInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserEmotePanelInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentSendResultInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.kongzue.dialogx.dialogs.PopTip
 import com.kongzue.dialogx.dialogs.TipDialog
 import com.kongzue.dialogx.dialogs.WaitDialog
 import kotlinx.coroutines.Dispatchers
@@ -116,7 +111,6 @@ class SendCommentViewModel(
                 }
             }
         } catch (e: Exception) {
-            DebugMiao.log(e)
             e.printStackTrace()
             withContext(Dispatchers.Main) {
                 TipDialog.show("发送失败", WaitDialog.TYPE.ERROR)
