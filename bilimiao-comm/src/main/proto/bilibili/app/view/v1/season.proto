@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_outer_classname = "ViewSeasonOuterClass";
+
+package bilibili.app.view.v1;
+
+import "bilibili/app/view/v1/ugc.proto";
+
+// 合集详情页-请求
+message SeasonReq {
+  // 合集id
+  int64 season_id = 1;
+}
+
+// 合集详情页-响应
+message SeasonReply {
+  // 合集信息
+  UgcSeason season = 1;
+}

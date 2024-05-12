@@ -39,7 +39,6 @@ internal class MyFollowViewModel(
 
     val count = MutableStateFlow(1)
     val isRefreshing = MutableStateFlow(false)
-    val listState = MutableStateFlow(LazyListState(0, 0))
     val tagList = FlowPaginationInfo<TagInfo>()
 
     val listActionFlow = MutableSharedFlow<FollowingListAction>()
@@ -54,22 +53,7 @@ internal class MyFollowViewModel(
 
     init {
         loadData()
-//        viewModelScope.launch {
-//            listActionFlow.collect(::listAction)
-//        }
     }
-
-//    fun listAction(action: FollowingListAction) {
-//        if (action is FollowingListAction.UpdateCount) {
-//            tagList.data.value = tagList.data.value.map {
-//                if (it.tagid == action.tagId) {
-//                    it.copy(count = it.count)
-//                } else {
-//                    it
-//                }
-//            }
-//        }
-//    }
 
     fun loadData(
         pageNum: Int = tagList.pageNum

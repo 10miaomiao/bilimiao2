@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.page.web.WebFragment
@@ -97,6 +98,9 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
     private val mWebViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             var url = request.url.toString()
+            miaoLogger() debug (
+                "url" to url
+            )
             if (
                 url.startsWith("https://www.bilibili.com/")
                 || url.startsWith("https://m.bilibili.com/")
@@ -191,7 +195,7 @@ class H5LoginFragment : Fragment(), DIAware, MyPage {
                 if ("Mobile" !in defaultUserAgentString) {
                     defaultUserAgentString += " Mobile"
                 }
-                userAgentString = "$defaultUserAgentString ${WebFragment.userAgent}"
+                userAgentString = defaultUserAgentString
                 allowContentAccess = true
                 allowFileAccess = true
                 cacheMode = WebSettings.LOAD_DEFAULT

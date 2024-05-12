@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LifecycleOwner
@@ -87,6 +89,18 @@ class ThemeDelegate(
                 )
             )
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            fullScreenUseStatus()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    private fun fullScreenUseStatus() {
+        val window = activity.window
+        val attributes = window.attributes
+        attributes.layoutInDisplayCutoutMode =
+            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        window.attributes = attributes
     }
 
     fun getThemeResId(themeName: String = getTheme()) = try {

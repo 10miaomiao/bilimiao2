@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import android.icu.text.CaseMap.Title
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
@@ -18,6 +19,7 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 class VideoPlayerSource(
+    val mainTitle: String, //视频名字，不是分p名
     override val title: String,
     override val coverUrl: String,
     var aid: String, // av号
@@ -157,6 +159,7 @@ class VideoPlayerSource(
         if (nextIndex in pages.indices) {
             val nextPage = pages[nextIndex]
             val nextPlayerSource = VideoPlayerSource(
+                mainTitle = mainTitle,
                 title = nextPage.title,
                 coverUrl = coverUrl,
                 aid = aid,

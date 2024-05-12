@@ -40,7 +40,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.0"
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
     namespace = "cn.a10miaomiao.bilimiao.compose"
     packaging {
@@ -64,19 +64,21 @@ dependencies {
     implementation(Libraries.kodeinDiCompose) // 依赖注入
 
     implementation(Libraries.composeUi)
+    implementation(Libraries.composeFoundation)
     implementation(Libraries.composeMaterial)
     implementation(Libraries.composeMaterialIconsExtended)
     implementation(Libraries.composeMaterial3)
-//    implementation(Libraries.composeMaterial3Android)
     implementation(Libraries.composeMaterial3WindowSizeClass)
     implementation(Libraries.composeUiToolingPreview)
     implementation(Libraries.activityCompose)
     implementation(Libraries.navigationCompose)
 
     implementation(Libraries.accompanistDrawablePainter)
+    implementation(Libraries.accompanistAdaptive)
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
+    implementation(Libraries.pbandkRuntime)
     implementation(Libraries.glide)
     implementation(Libraries.glideCompose)
     implementation(Libraries.zxingLite)

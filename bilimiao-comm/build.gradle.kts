@@ -1,5 +1,6 @@
 import com.google.protobuf.gradle.*
 import cn.a10miaomiao.bilimiao.build.*
+import java.nio.file.Paths
 
 plugins {
     id("com.android.library")
@@ -7,6 +8,7 @@ plugins {
     id("kotlin-parcelize")
     id("com.google.protobuf") // proto
     id("bilimiao-build")
+//    id("com.toasttab.protokt") version "1.0.0-beta.1"
 }
 
 android {
@@ -45,29 +47,41 @@ android {
     }
 }
 
+
 protobuf {
+    val pbandkVersion = Versions.pbandk
     protoc {
         artifact = "com.google.protobuf:protoc:3.12.0"  // 相当于proto编译器
     }
     plugins {
-        id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.33.0" // Grpc单独的编译器
-        }
-        id("javalite") {
-            artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
-            // 官方推荐的方法，Android 适用javalite,相较于java插件，生成的代码更轻量化
+        id("pbandk") {
+            artifact = "pro.streem.pbandk:protoc-gen-pbandk-jvm:$pbandkVersion:jvm8@jar"
         }
     }
     generateProtoTasks {
-        all().forEach {
-            it.builtins {
-                register("java") {
-                    option("lite")
-                }
-            }
-            it.plugins {
-                id("grpc") {
-                    option("lite")
+        val generatorModule = "grpc-generator"
+        val generatorClass = "cn.a10miaomiao.generator.GrpcServiceGenerator"
+        // grpc-generator/build/libs/grpc-generator.jar
+        val generatorJarFile = Paths.get(
+            project(":grpc-generator").buildDir.path,
+            "libs",
+            "$generatorModule.jar"
+        ).toFile()
+        all().forEach { task ->
+            task.plugins {
+                id("pbandk") {
+                    if (!generatorJarFile.exists()) {
+                        task.dependsOn(":$generatorModule:jar")
+                    }
+                    option("log=debug")
+                    var jarPath = generatorJarFile.path
+                    jarPath.indexOf(':')
+                        .takeIf { it != -1 }
+                        ?.let {
+                            // option不能传递`:`符号，故windows情况下只能去除盘符
+                            jarPath = jarPath.substring(it + 1, jarPath.length)
+                        }
+                    option("kotlin_service_gen=${jarPath}|$generatorClass")
                 }
             }
         }
@@ -91,9 +105,7 @@ dependencies {
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
-
-    implementation(Libraries.grpcProtobuf)
-    implementation(Libraries.grpcStub)
+    implementation(Libraries.pbandkRuntime)
 
     implementation("javax.annotation:javax.annotation-api:1.2")
 

@@ -156,6 +156,7 @@ internal class BangumiDetailPageViewModel(
                 seasons.value = seasonModule?.data?.seasons ?: emptyList()
                 isFollow.value = detailInfo.value?.user_status?.follow == 1
                 if (seasonId != result.season_id) {
+                    seasonId = result.season_id
                     loadEpisodeList(result.season_id)
                 }
             } else {
@@ -378,7 +379,13 @@ internal fun BangumiDetailPageContent(
     LaunchedEffect(seasonEpId.value) {
         viewModel.epId = seasonEpId.value
     }
-
+    LaunchedEffect(detailInfo) {
+        detailInfo?.let {
+            if (it.season_id != seasonId.value) {
+                seasonId.value = it.season_id
+            }
+        }
+    }
     LaunchedEffect(seasons, seasonId.value) {
         val index = seasons.indexOfFirst {
             it.season_id == seasonId.value

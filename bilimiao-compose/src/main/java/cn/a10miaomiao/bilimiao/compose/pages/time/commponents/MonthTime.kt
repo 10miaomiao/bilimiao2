@@ -12,15 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import bilibili.broadcast.v1.Mod
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPageViewMode
-import com.a10miaomiao.bilimiao.comm.store.model.DateModel
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 @Composable
 internal fun TextBox(

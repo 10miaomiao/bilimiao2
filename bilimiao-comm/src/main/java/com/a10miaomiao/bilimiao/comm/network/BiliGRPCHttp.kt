@@ -1,25 +1,30 @@
 package com.a10miaomiao.bilimiao.comm.network
 
-import android.os.Build
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import io.grpc.MethodDescriptor
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import pbandk.Message
+import pbandk.decodeFromStream
+import pbandk.encodeToByteArray
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class BiliGRPCHttp<ReqT, RespT> internal constructor(
-    private val grpcMethod: MethodDescriptor<ReqT, RespT>,
-    private val reqMessage: ReqT,
+class BiliGRPCHttp<ReqT : Message, RespT : Message>(
+    val method: GRPCMethod<ReqT, RespT>
 ) {
 
-    var baseUrl = ApiHelper.GRPC_BASE
+    companion object {
+        private var baseUrl = ApiHelper.GRPC_BASE
 
-    private val client = OkHttpClient()
+        private val client = OkHttpClient()
+
+        inline fun <ReqT : Message, RespT : Message> request(methodGetter: () -> GRPCMethod<ReqT, RespT>)
+            = BiliGRPCHttp(methodGetter())
+    }
 
     var needToken = true
 
@@ -49,8 +54,8 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
     }
 
     private fun buildRequest(): Request {
-        val url = baseUrl + grpcMethod.fullMethodName.replace("interfaces", "interface")
-        val messageBytes = grpcMethod.streamRequest(reqMessage).readBytes()
+        val url = baseUrl + method.name.replace("interfaces", "interface")
+        val messageBytes = method.reqMessage.encodeToByteArray()
         // 校验用?第五位为数组长度
         val stateBytes = byteArrayOf(0, 0, 0, 0, messageBytes.size.toByte())
         // 合并两个字节数组
@@ -71,16 +76,15 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
     private fun parseResponse(res: Response): RespT {
         val inputStream = res.body!!.byteStream()
         inputStream.skip(5L)
-        return grpcMethod.parseResponse(inputStream)
+        return method.respMessageCompanion
+            .decodeFromStream(inputStream)
     }
 
-    fun call(): RespT {
-        val req = buildRequest()
-        val res = client.newCall(req).execute()
-        return parseResponse(res)
-    }
-
-    suspend fun awaitCall(): RespT{
+    suspend fun awaitCall(): RespT {
+        miaoLogger().d(
+            "name" to method.name,
+            "reqMessage" to method.reqMessage
+        )
         return suspendCoroutine { continuation ->
             val req = buildRequest()
             client.newCall(req).enqueue(object : Callback {
@@ -89,7 +93,8 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
                 }
                 override fun onResponse(call: Call, response: Response) {
                     try {
-                        continuation.resume(parseResponse(response))
+                        val respMessage = parseResponse(response)
+                        continuation.resume(respMessage)
                     } catch (e: Exception) {
                         continuation.resumeWithException(e)
                     }
@@ -98,16 +103,3 @@ class BiliGRPCHttp<ReqT, RespT> internal constructor(
         }
     }
 }
-
-fun <ReqT, RespT> MethodDescriptor<ReqT, RespT>.request(
-    reqMessage: ReqT,
-    biliGRPCHttpBuilder: (BiliGRPCHttp<ReqT, RespT>.() -> Unit)? = null
-): BiliGRPCHttp<ReqT, RespT> {
-    return BiliGRPCHttp(
-        this,
-        reqMessage,
-    ).apply {
-        biliGRPCHttpBuilder?.invoke(this)
-    }
-}
-

@@ -6,14 +6,9 @@ data class MediasInfo(
     val ctime: Long,
     val duration: Long,
     val title: String,
-    val upper: UpperInfo,
+    val upper: MediaUpperInfo,
     val cnt_info: CntInfo
 ) {
-    data class UpperInfo(
-        val face: String,
-        val name: String,
-        val mid: String
-    )
 
     data class CntInfo(
         val coin: Int,

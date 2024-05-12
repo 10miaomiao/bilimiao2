@@ -78,3 +78,8 @@ internal data class UserTagSetDialogState(
     val formTagId: Int,
 )
 
+enum class UserFavouriteFolderType {
+    Created,
+    Collected,
+}
+

@@ -5,7 +5,9 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
+import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
@@ -46,9 +48,10 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "收藏",
-            pageUrl = "bilimiao://user/fav/list?mid={mid}&name={name}",
+            pageUrl = UserFavouritePage().url(),
             iconRes = R.drawable.ic_nav_fav,
             isNeedAuth = true,
+            isComposePage = true,
         ),
         StartNavInfo(
             title = "追番",
@@ -78,6 +81,12 @@ class StartViewModel(
             title = "设置",
             pageUrl = "bilimiao://setting",
             iconRes = R.drawable.ic_nav_setting,
+        ),
+        StartNavInfo(
+            title = "歌词",
+            pageUrl = LyricPage().url(),
+            iconRes = R.drawable.ic_nav_lyric,
+            isComposePage = true,
         ),
     )
 

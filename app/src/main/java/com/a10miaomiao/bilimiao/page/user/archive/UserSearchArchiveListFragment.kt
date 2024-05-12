@@ -13,7 +13,6 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.archive.v1.Archive
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -146,13 +145,13 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
             .navigate(VideoInfoFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<Archive.Arc> { item, index ->
+    val itemUi = miaoBindingItemUi<bilibili.app.archive.v1.Arc> { item, index ->
         videoItem (
             title = item.title,
             pic = item.pic,
             remark = NumberUtil.converCTime(item.ctime),
-            playNum = item.stat.view.toString(),
-            damukuNum = item.stat.danmaku.toString(),
+            playNum = item.stat?.view.toString(),
+            damukuNum = item.stat?.danmaku.toString(),
             duration = NumberUtil.converDuration(item.duration),
             isHtml = true,
         )
