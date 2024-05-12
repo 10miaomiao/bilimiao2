@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
@@ -63,7 +63,7 @@ class BiliJsBridge(
 
     @JavascriptInterface
     fun postMessage(eventString: String) {
-        DebugMiao.log("postMessage", eventString)
+        miaoLogger().d("postMessage" to eventString)
         val event = Gson().fromJson<MessageEventInfo>(eventString, MessageEventInfoType.type)
         var result = ""
         when (event.method) {

@@ -57,7 +57,6 @@ class SendCommentViewModel(
 
     init {
         getUserEmoteList()
-        DebugMiao.log("params", params)
     }
 
     private fun getUserEmoteList() = viewModelScope.launch {
@@ -79,7 +78,6 @@ class SendCommentViewModel(
                 }
             }
         } catch (e: Exception) {
-            DebugMiao.log(e)
             e.printStackTrace()
         }
     }

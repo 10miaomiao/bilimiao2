@@ -128,7 +128,6 @@ internal class TelVerifyPageViewModel(
                     .awaitCall()
                     .gson<ResultInfo<TmpUserInfo>>()
             }
-            DebugMiao.log("getTmpUserInfo", res)
             if (res.isSuccess) {
                 val info = res.data.account_info
                 tmpAccountInfo.value = info

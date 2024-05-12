@@ -130,7 +130,6 @@ class EmojiGridFragment : Fragment(), DIAware {
 
             }
         } catch (e: Exception) {
-            DebugMiao.log(e)
             e.printStackTrace()
         } finally {
             ui.setState { loading = false }

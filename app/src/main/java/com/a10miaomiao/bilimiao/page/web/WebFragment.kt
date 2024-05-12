@@ -28,6 +28,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.web.NestedScrollWebView
@@ -245,7 +246,9 @@ class WebFragment : Fragment(), DIAware, MyPage {
             if (url == null) {
                 findNavController().tryPopBackStack()
             } else {
-                DebugMiao.log("webView", url)
+                miaoLogger().d(
+                    "webView" to url
+                )
                 webView.loadUrl(url.replace("http://", "https://"))
             }
             mWebView = webView

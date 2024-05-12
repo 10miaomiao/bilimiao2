@@ -19,6 +19,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
@@ -110,7 +111,7 @@ object BiliNavigation {
             nav.navigate(uri, navOptions)
             true
         } catch (e: IllegalArgumentException) {
-            DebugMiao.log("未知url:$url")
+            miaoLogger() debug "未知url:$url"
             false
         }
     }

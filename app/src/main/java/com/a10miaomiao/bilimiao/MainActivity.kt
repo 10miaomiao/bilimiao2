@@ -37,6 +37,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu

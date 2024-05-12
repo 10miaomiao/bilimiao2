@@ -141,7 +141,6 @@ internal class LoginPageViewModel(
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val loginInfo = res.data
-                    DebugMiao.log(loginInfo)
                     if (loginInfo.status == 0) {
                         BilimiaoCommApp.commApp.saveAuthInfo(loginInfo.toLoginInfo())
                         authInfo()

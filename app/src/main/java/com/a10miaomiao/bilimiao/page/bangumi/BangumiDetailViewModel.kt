@@ -157,7 +157,6 @@ class BangumiDetailViewModel(
             } else {
                 BiliApiService.bangumiAPI.followSeason(id)
             }).awaitCall().gson<ResultInfo2<ToastInfo>>()
-            DebugMiao.log(res)
             if (res.isSuccess) {
                 detailInfo.user_status.follow = 2 - mode
                 withContext(Dispatchers.Main) {
