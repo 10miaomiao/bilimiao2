@@ -4,15 +4,19 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.view.animation.*
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.ScaleAnimation
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import splitties.dimensions.dip
 import kotlin.math.max
+import kotlin.math.min
 
 class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
@@ -37,7 +41,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
     var parentRef: ScaffoldView? = null
     var viewRef: View? = null
-    private var scrollDy = 0
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
         playerHeight = context.dip(200)
@@ -66,9 +69,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         child: View,
         layoutDirection: Int
     ): Boolean {
-        if (scrollDy > 0) {
-            return true
-        }
         this.viewRef = child
         if (parent is ScaffoldView) {
             this.parentRef = parent
@@ -139,25 +139,24 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         type: Int
     ) {
         val parent = parentRef ?: return
-        val playerView = viewRef ?: return
-        val contentView = parent.focusContent ?: return
+        val contentView = parentRef?.focusContent ?: return
         if (dy > 0 && parent.showPlayer
-            && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
+            && parent.orientation== ScaffoldView.VERTICAL
         ) {
-            val playerMinHeight = parent.smallModePlayerMinHeight + windowInsets.top
-            if (contentView.translationY > playerMinHeight) {
+            val playerMinHeight = parent.smallModePlayerMinHeight
+            if (parent.smallModePlayerCurrentHeight > playerMinHeight) {
                 consumed[1] = dy
-                scrollDy = dy
                 val playerHeight = max(
-                    contentView.translationY.toInt() - dy,
+                    parent.smallModePlayerCurrentHeight - dy,
                     playerMinHeight,
                 )
-                contentView.translationY = playerHeight.toFloat()
-                playerView.layout(0, 0, parent.measuredWidth, playerHeight)
+                parent.smallModePlayerCurrentHeight = playerHeight
+                updateLayout()
+                child.requestLayout()
+                contentView.translationY = (parent.playerSpaceHeight).toFloat()
             }
         }
     }
-
     override fun onNestedScroll(
         coordinatorLayout: CoordinatorLayout,
         child: View,
@@ -170,40 +169,41 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         consumed: IntArray
     ) {
         val parent = parentRef ?: return
-        val playerView = viewRef ?: return
-        val contentView = parent.focusContent ?: return
+        val contentView = parentRef?.focusContent ?: return
         if (dyConsumed > 0 && parent.showPlayer
-            && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
+            && parent.orientation== ScaffoldView.VERTICAL
         ) {
-            val playerMinHeight = parent.smallModePlayerMinHeight + windowInsets.top
-            if (contentView.translationY > playerMinHeight) {
-                consumed[1] = dyConsumed
-                scrollDy = dyConsumed
+            val playerMinHeight = parent.smallModePlayerMinHeight
+            if (parent.smallModePlayerCurrentHeight > playerMinHeight) {
                 val playerHeight = max(
-                    contentView.translationY.toInt() - dyConsumed,
+                    parent.smallModePlayerCurrentHeight - dyConsumed,
                     playerMinHeight,
                 )
-                contentView.translationY = playerHeight.toFloat()
-                playerView.layout(0, 0, parent.measuredWidth, playerHeight)
+                parent.smallModePlayerCurrentHeight = playerHeight
+                updateLayout()
+                child.requestLayout()
+                contentView.translationY = (parent.playerSpaceHeight).toFloat()
+            }
+        }
+        if (dyUnconsumed < 0 && parent.showPlayer
+            && parent.orientation== ScaffoldView.VERTICAL
+        ) {
+            val playerMaxHeight = parent.smallModePlayerMaxHeight
+            if (parent.smallModePlayerCurrentHeight < playerMaxHeight) {
+                consumed[1] = dyUnconsumed
+                val playerHeight = min(
+                    parent.smallModePlayerCurrentHeight - dyUnconsumed,
+                    playerMaxHeight,
+                )
+                parent.smallModePlayerCurrentHeight = playerHeight
+                updateLayout()
+                child.requestLayout()
+                contentView.translationY = (parent.playerSpaceHeight).toFloat()
             }
         }
     }
 
 
-    override fun onStopNestedScroll(
-        coordinatorLayout: CoordinatorLayout,
-        child: View,
-        target: View,
-        type: Int
-    ) {
-        val parent = parentRef ?: return
-        if (scrollDy > 0 && parent.showPlayer
-            && parent.playerViewSizeStatus == ScaffoldView.PlayerViewSizeStatus.NORMAL
-        ) {
-            scrollDy = 0
-            parent.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.FOLD
-        }
-    }
 
     fun holdUpPlayer() {
         behaviorDelegate?.holdUpTop()
@@ -215,9 +215,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
     fun updateLayout(){
         behaviorDelegate?.updateWindowSize()
-    }
-    fun updateContent(){
-        behaviorDelegate?.updateContent()
     }
 
 

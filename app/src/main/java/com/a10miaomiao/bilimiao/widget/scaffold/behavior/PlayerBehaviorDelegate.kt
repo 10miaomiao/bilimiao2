@@ -7,13 +7,13 @@ import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RT
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LT
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.MIDDLE
-import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RB
+import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.RT
 import splitties.dimensions.dip
 import kotlin.math.absoluteValue
 import kotlin.math.ceil
@@ -62,7 +62,6 @@ class PlayerBehaviorDelegate(
     }
     private var onSizeChanging = false
 
-    private var currentOrientation = ScaffoldView.VERTICAL
 
     private var playerX = -1
     private var playerY = -1
@@ -301,6 +300,7 @@ class PlayerBehaviorDelegate(
                 }
             }
         }
+        parent.updateLayout(false)
     }
     fun changeSizeByWidth(newWidth :Int){
         val widthHeightRatio = parent.playerVideoRatio
@@ -330,6 +330,7 @@ class PlayerBehaviorDelegate(
                 }
             }
         }
+        parent.updateLayout(false)
     }
 
     private var draggingSide = NONE
@@ -486,10 +487,6 @@ class PlayerBehaviorDelegate(
                             }
                         }
                     }
-                    onLayoutChild()
-                    parent.updateContentLayout()
-                    parent.content?.requestLayout()
-                    parent.subContent?.requestLayout()
                 }
             }
             MotionEvent.ACTION_UP -> {
@@ -540,46 +537,52 @@ class PlayerBehaviorDelegate(
                 playerWidth = (newShowAreaDip * sqrt(widthHeightRatio)).toInt()
             }
         } else {
-            if(parent.isFoldPlayer) {
-                parent.smallModePlayerHeight = parent.smallModePlayerMinHeight
-            } else {
-                parent.smallModePlayerHeight = ceil(parent.measuredWidth / widthHeightRatio).toInt()
-                //防止竖屏时超出屏幕下边缘
-                if (parent.smallModePlayerHeight > parent.measuredHeight * 3 / 4) {
-                    parent.smallModePlayerHeight = parent.measuredHeight * 3 / 4
-                }
-            }
-            playerHeight = parent.smallModePlayerHeight
+            var maxHeight = ceil(parent.measuredWidth / widthHeightRatio).toInt()
+            //防止竖屏时超出屏幕下边缘
+            maxHeight = min(maxHeight,parent.measuredHeight * 3 / 4)
+            maxHeight = max(maxHeight,parent.smallModePlayerMinHeight)
+            parent.smallModePlayerMaxHeight = maxHeight
+            playerHeight = parent.smallModePlayerCurrentHeight
             playerWidth = parent.measuredWidth
         }
         resetPosition()
+        updateContent()
     }
 
     //计算窗口加上边框的大小，供内容区域用
     fun updateContent(){
-        when(parent.playerViewPlaceStatus){
-            LT -> {
-                parent.playerSpaceHeight = playerHeight + windowInsets.top
-                parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
-            }
-            RT -> {
-                parent.playerSpaceHeight = playerHeight + windowInsets.top
-                parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
-            }
-            LB -> {
-                parent.playerSpaceHeight = playerHeight + windowInsets.bottom
-                parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
-            }
-            RB -> {
-                parent.playerSpaceHeight = playerHeight + windowInsets.bottom
-                parent.playerSpaceWidth = playerWidth + windowInsets.right
-            }
-            MIDDLE -> {
-                parent.playerSpaceHeight = playerHeight
+        if(!parent.showPlayer){
+            parent.playerSpaceHeight = 0
+            parent.playerSpaceWidth = 0
+        } else {
+            if(parent.orientation == ScaffoldView.VERTICAL){
+                parent.playerSpaceHeight = playerHeight + playerView.paddingTop
                 parent.playerSpaceWidth = playerWidth
+            } else {
+                when(parent.playerViewPlaceStatus){
+                    LT -> {
+                        parent.playerSpaceHeight = playerHeight
+                        parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
+                    }
+                    RT -> {
+                        parent.playerSpaceHeight = playerHeight
+                        parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
+                    }
+                    LB -> {
+                        parent.playerSpaceHeight = playerHeight + windowInsets.bottom
+                        parent.playerSpaceWidth = playerWidth + windowInsets.left - parent.appBarWidth
+                    }
+                    RB -> {
+                        parent.playerSpaceHeight = playerHeight + windowInsets.bottom
+                        parent.playerSpaceWidth = playerWidth + windowInsets.right
+                    }
+                    MIDDLE -> {
+                        parent.playerSpaceHeight = playerHeight
+                        parent.playerSpaceWidth = playerWidth
+                    }
+                }
             }
         }
-        parent.setContentTopClip(windowInsets.top)
     }
     fun onLayoutChild() {
         if(onSizeChanging){
@@ -589,12 +592,11 @@ class PlayerBehaviorDelegate(
             playerView.layoutParams.width = playerWidth
             playerView.requestLayout()
             return
-        } else {
-            if (dragger.viewDragState == ViewDragHelper.STATE_SETTLING
-                || dragger.viewDragState == ViewDragHelper.STATE_DRAGGING
-            ) {
-                return
-            }
+        }
+        if (dragger.viewDragState == ViewDragHelper.STATE_SETTLING
+            || dragger.viewDragState == ViewDragHelper.STATE_DRAGGING
+        ) {
+            return
         }
         if(_measuredHeight != parent.measuredHeight
             ||_measuredWidth != parent.measuredWidth
@@ -614,27 +616,11 @@ class PlayerBehaviorDelegate(
             // 竖向屏幕
             onVerticalScreenLayoutChild()
         }
-
-        if (parent.orientation != currentOrientation) {
-            playerView.translationX = 0f
-            playerView.translationY = 0f
-        }
-        currentOrientation = parent.orientation
         // 播放器尺寸校正
         if (playerView.layoutParams.height != height || playerView.layoutParams.width != width) {
             playerView.layoutParams.height = height
             playerView.layoutParams.width = width
             playerView.requestLayout()
-        }
-        val measuredHeight = playerView.measuredHeight
-        val measuredWidth = playerView.measuredWidth
-        // 内容区域布局尺寸校正
-        if (parent.playerHeight != measuredHeight || parent.playerWidth != measuredWidth) {
-            parent.playerHeight = measuredHeight
-            parent.playerWidth = measuredWidth
-            parent.playerX = playerX
-            parent.playerY = playerY
-            parent.content?.requestLayout()
         }
     }
 
@@ -645,8 +631,6 @@ class PlayerBehaviorDelegate(
         height = parent.measuredHeight
         width = parent.measuredWidth
         playerView.layout(0, 0, width, height)
-        playerView.translationX = 0f
-        playerView.translationY = 0f
     }
 
     /**
@@ -668,8 +652,8 @@ class PlayerBehaviorDelegate(
      */
     private fun onVerticalScreenLayoutChild() {
         if (parent.showPlayer) {
-            height = parent.smallModePlayerHeight + playerView.paddingTop
-            width = parent.measuredWidth
+            height = playerHeight + playerView.paddingTop
+            width = playerWidth
             playerView.layout(0, 0, width, height)
         } else {
             height = 0

@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.edit
@@ -24,7 +23,6 @@ import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
@@ -678,9 +676,7 @@ class PlayerController(
     }
 
     override fun onClickUiToggle(e: MotionEvent?) {
-        if (scaffoldApp.playerViewSizeStatus != ScaffoldView.PlayerViewSizeStatus.NORMAL) {
-            scaffoldApp.playerViewSizeStatus = ScaffoldView.PlayerViewSizeStatus.NORMAL
-        }
+        scaffoldApp.animatePlayerHeight(scaffoldApp.smallModePlayerMaxHeight)
     }
 
     override fun onProgress(
