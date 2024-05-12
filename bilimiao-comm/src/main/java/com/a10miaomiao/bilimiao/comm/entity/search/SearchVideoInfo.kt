@@ -10,8 +10,8 @@ data class SearchVideoInfo(
     val `param`: String,
     val play: String,
     val status: Int,
-    val title: String,
+    val title: String?,
     val total_count: Long,
     val uri: String,
-    val mid: String,
+    val mid: String?,
 )

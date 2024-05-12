@@ -83,33 +83,97 @@ class UserApi {
     }
 
     /**
-     * 收藏夹列表
+     * 用户空间的收藏夹列表
      */
-    fun medialist() = MiaoHttp.request {
-        url = BiliApiService.biliApi("medialist/gateway/base/space")
-    }
-
-    fun medialist(up_mid: String) = MiaoHttp.request {
-        url = BiliApiService.biliApp(
-            "x/v2/favorite",
-            "vmid" to up_mid
-        )
-    }
-
-    fun favFolderList(
+    fun favSpaceFolder(
         up_mid: String,
         pageNum: Int,
         pageSize: Int,
     ) = MiaoHttp.request {
-        // 用户空间 x/v3/fav/folder/space/v2
         url = BiliApiService.biliApi(
-            "x/v3/fav/folder/created/list",
+            "x/v3/fav/folder/space",
             "up_mid" to up_mid,
             "pn" to pageNum.toString(),
             "ps" to pageSize.toString(),
         )
     }
 
+    /**
+     * 创建的收藏夹列表
+     */
+    fun favCreatedList(
+        upMid: String,
+        pageNum: Int,
+        pageSize: Int,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/v3/fav/folder/created/list",
+            "up_mid" to upMid,
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+        )
+    }
+
+    /**
+     * 订阅的收藏夹列表
+     */
+    fun favCollectedList(
+        upMid: String,
+        pageNum: Int,
+        pageSize: Int,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "x/v3/fav/folder/collected-with-resources",
+            "up_mid" to upMid,
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString(),
+            "disable_rcmd" to "0",
+        )
+    }
+
+    fun favAddFolder(
+        title: String,
+        cover: String,
+        intro: String,
+        privacy: Int, // 0:公开,1:不公开
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v3/fav/folder/add")
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "title" to title,
+            "cover" to cover,
+            "intro" to intro,
+            "privacy" to privacy.toString(),
+        )
+    }
+
+    fun favEditFolder(
+        mediaId: String,
+        title: String,
+        cover: String,
+        intro: String,
+        privacy: Int, // 0:公开,1:不公开
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v3/fav/folder/edit")
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "media_id" to mediaId,
+            "title" to title,
+            "cover" to cover,
+            "intro" to intro,
+            "privacy" to privacy.toString(),
+        )
+    }
+
+    fun favDeleteFolder(
+        mediaId: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v3/fav/folder/del")
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "media_id" to mediaId,
+        )
+    }
 
     /**
      * 收藏夹列表详情

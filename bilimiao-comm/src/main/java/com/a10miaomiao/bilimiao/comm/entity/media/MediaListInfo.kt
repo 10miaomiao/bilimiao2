@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.media
 
 data class MediaListInfo(
+    val attr: Int,
     var cover: String,
     var intro: String,
     var title: String,
@@ -15,4 +16,8 @@ data class MediaListInfo(
     var mtime: Long,
     var state: Int,
     var type: Int,
-)
+    var upper: MediaUpperInfo,
+) {
+    // 0:公开,1:私有
+    val privacy: Int get() = attr and 1
+}

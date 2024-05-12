@@ -199,6 +199,7 @@ class VideoInfoViewModel(
         }
         basePlayerDelegate.openPlayer(
             VideoPlayerSource(
+                mainTitle = info.title,
                 title = title,
                 coverUrl = info.pic,
                 aid = info.aid,

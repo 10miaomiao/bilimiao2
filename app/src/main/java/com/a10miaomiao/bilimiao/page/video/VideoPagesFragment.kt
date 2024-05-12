@@ -99,6 +99,7 @@ class VideoPagesFragment : Fragment(), DIAware, MyPage {
             aid = video.aid,
             id = item.cid,
             coverUrl = video.pic,
+            mainTitle = video.title,
             title = item.part,
             ownerId = video.ownerId,
             ownerName = video.ownerName,

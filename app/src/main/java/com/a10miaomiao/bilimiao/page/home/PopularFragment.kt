@@ -9,8 +9,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.card.v1.Single
-import bilibili.app.show.v1.PopularOuterClass
+import bilibili.app.card.v1.SmallCoverV5
+import bilibili.app.show.v1.EntranceShow
 import cn.a10miaomiao.miao.binding.android.view._bottomMargin
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.comm.*
@@ -85,12 +85,12 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = VideoInfoFragment.createArguments(item.base.param)
+        val args = VideoInfoFragment.createArguments(item.base!!.param)
         Navigation.findNavController(view)
             .navigate(VideoInfoFragment.actionId, args)
     }
 
-    val topEntranceItemUi = miaoBindingItemUi<PopularOuterClass.EntranceShow> { item, index ->
+    val topEntranceItemUi = miaoBindingItemUi<EntranceShow> { item, index ->
         verticalLayout {
             layoutParams = ViewGroup.MarginLayoutParams(
                 dip(100), wrapContent
@@ -114,10 +114,10 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
         }
     }
 
-    val itemUi = miaoBindingItemUi<Single.SmallCoverV5> { item, index ->
+    val itemUi = miaoBindingItemUi<SmallCoverV5> { item, index ->
         videoItem (
-            title = item.base.title,
-            pic =item.base.cover,
+            title = item.base?.title,
+            pic =item.base?.cover,
             upperName = item.rightDesc1,
             remark = item.rightDesc2,
             duration = item.coverRightText1,

@@ -14,7 +14,7 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.interfaces.v1.HistoryOuterClass
+import bilibili.app.interfaces.v1.CursorItem
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -176,25 +176,16 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
         true
     }
 
-    val itemUi = miaoBindingItemUi<HistoryOuterClass.CursorItem> { item, index ->
+    val itemUi = miaoBindingItemUi<CursorItem> { item, index ->
         videoItem (
             title = item.title,
-            pic = if (item.hasCardOgv()) {
-                item.cardOgv.cover
-            } else {
-                item.cardUgc.cover
-            },
-            upperName = if (item.hasCardOgv()) {
-                null
-            } else {
-                item.cardUgc.name
-            },
+            pic = item.cardOgv?.cover
+                ?: item.cardUgc?.cover,
+            upperName = item.cardUgc?.name,
             remark = NumberUtil.converCTime(item.viewAt),
-            duration = NumberUtil.converDuration(if (item.hasCardOgv()) {
-                item.cardOgv.duration
-            } else {
-                item.cardUgc.duration
-            }),
+            duration = NumberUtil.converDuration(
+                item.cardOgv?.duration ?: item.cardUgc?.duration ?: 0
+            ),
             isHtml = true,
         )
     }

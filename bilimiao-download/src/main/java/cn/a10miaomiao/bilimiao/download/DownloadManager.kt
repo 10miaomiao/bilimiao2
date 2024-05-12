@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.download
 
-import bilibili.app.view.v1.ViewOuterClass.DM
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil

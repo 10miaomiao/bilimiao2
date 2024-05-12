@@ -4,7 +4,6 @@ package bilibili.app.dynamic.v2;
 
 option java_outer_classname = "DynamicArchiveOuterClass";
 
-import "bilibili/app/archive/middleware/v1/preload.proto";
 import "bilibili/app/dynamic/v2/common.proto";
 
 // 动态-详情模块-稿件

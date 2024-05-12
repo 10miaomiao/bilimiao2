@@ -27,9 +27,11 @@ class PlayerStore(override val di: DI) :
         var cid: String = "",
         var epid: String = "",
         var sid: String = "",
+        var mainTitle: String = "",
         var title: String = "",
         var cover: String = "",
         var playList: PlayListInfo? = null,
+        var playProgress: Long = 0,
     ) {
         fun getPlayListSize(): Int {
             return playList?.run { items.size } ?: 0
@@ -50,6 +52,11 @@ class PlayerStore(override val di: DI) :
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
 
+    fun setPlayProgress(progress:Long){
+        this.setState {
+            playProgress = progress
+        }
+    }
     fun setPlayList(info: PlayListInfo) {
         this.setState {
             playList = info
@@ -66,7 +73,7 @@ class PlayerStore(override val di: DI) :
                 cover = it.cover,
                 ownerId = it.author.mid,
                 ownerName = it.author.name,
-                from = info.id
+                from = info.id,
             )
         }
         val title = if (info.sections.size > 1) {
@@ -87,6 +94,12 @@ class PlayerStore(override val di: DI) :
             cid = source.id
             title = source.title
             cover = source.coverUrl
+            playProgress = 0
+            if(source is VideoPlayerSource) {
+                mainTitle = source.mainTitle
+            } else {
+                mainTitle = ""
+            }
             sid = ids.sid
             epid = ids.epid
             aid = ids.aid
@@ -108,8 +121,10 @@ class PlayerStore(override val di: DI) :
             this.aid = ""
             this.cid = ""
             this.title = ""
+            this.mainTitle = ""
             this.sid = ""
             this.epid = ""
+            this.playProgress = 0
         }
     }
 }

@@ -4,6 +4,8 @@ package bilibili.app.view.v1;
 import "google/protobuf/any.proto";
 import "bilibili/app/archive/middleware/v1/preload.proto";
 import "bilibili/app/archive/v1/archive.proto";
+import "bilibili/app/view/v1/ugc.proto";
+import "bilibili/app/view/v1/season.proto";
 
 service View {
     // 视频页详情页
@@ -878,106 +880,6 @@ message Label {
 }
 
 //
-enum SeasonType {
-    Unknown = 0; //
-    Base = 1;    //
-    Good = 2;    //
-}
-
-// UGC视频合集信息
-message UgcSeason {
-    // 合集id
-    int64 id = 1;
-    // 合集标题
-    string title = 2;
-    // 合集封面url
-    string cover = 3;
-    // 合集简介
-    string intro = 4;
-    // 小节列表
-    repeated Section sections = 5;
-    // 合集状态数
-    UgcSeasonStat stat = 6;
-    // 标签字色
-    string label_text = 7;
-    // 标签背景色
-    string label_text_color = 8;
-    // 标签夜间字色
-    string label_bg_color = 9;
-    // 标签夜间背景色
-    string label_text_night_color = 10;
-    // 右侧描述文案
-    string label_bg_night_color = 11;
-    // 按钮文案
-    string descRight = 12;
-    // 分集总数
-    int64 ep_count = 13;
-    // 合集类型
-    SeasonType season_type = 14;
-}
-
-// ugc视频合集状态数
-message UgcSeasonStat {
-    // 合集id
-    int64 season_id = 1;
-    // 观看数
-    int32 view = 2;
-    // 弹幕数
-    int32 danmaku = 3;
-    // 评论数
-    int32 reply = 4;
-    // 收藏数
-    int32 fav = 5;
-    // 投币数
-    int32 coin = 6;
-    // 分享数
-    int32 share = 7;
-    // 当前排名
-    int32 now_rank = 8;
-    // 历史最高排名
-    int32 his_rank = 9;
-    // 总计点赞
-    int32 like = 10;
-}
-
-// 视频合集小节信息
-message Section {
-    // 小节id
-    int64 id = 1;
-    // 小节标题
-    string title = 2;
-    // 小节类型
-    // 0:其他 1:正片
-    int64 type = 3;
-    // 单话列表
-    repeated Episode episodes = 4;
-}
-
-//视频合集单话信息
-message Episode {
-    // 合集单话id
-    int64 id = 1;
-    // 稿件avid
-    int64 aid = 2;
-    // 视频1P cid
-    int64 cid = 3;
-    // 稿件标题
-    string title = 4;
-    // 稿件封面url
-    string cover = 5;
-    // 投稿时间显示文案
-    string coverRightText = 6;
-    // 视频分P信息
-    bilibili.app.archive.v1.Page page = 7;
-    // 视频状态数
-    bilibili.app.archive.v1.Stat stat = 8;
-    // 稿件bvid
-    string bvid = 9;
-    // 稿件UP主信息
-    bilibili.app.archive.v1.Author author = 10;
-}
-
-//
 message Config {
     // 下方推荐项标题
     string relates_title = 1;
@@ -1385,18 +1287,6 @@ message BizReserveGameParam {
 message BizFavSeasonParam {
     // 合集id
     int64 season_id = 1;
-}
-
-// 合集详情页-请求
-message SeasonReq {
-    // 合集id
-    int64 season_id = 1;
-}
-
-// 合集详情页-响应
-message SeasonReply {
-    // 合集信息
-    UgcSeason season = 1;
 }
 
 // 播放器卡片曝光-请求

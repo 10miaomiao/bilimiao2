@@ -47,6 +47,7 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -98,7 +99,7 @@ internal class LoginPageViewModel(
         password.value = value
     }
 
-    fun stringLogin(
+    fun startLogin(
         gt3Result: BiliGeetestUtil.GT3ResultBean? = null,
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
@@ -151,17 +152,25 @@ internal class LoginPageViewModel(
                             setPositiveButton("请往验证") { _, _ ->
                                 val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
                                 val nav = fragment.findComposeNavController()
-                                nav.navigate(TelVerifyPage()) {
-                                    code set params["tmp_token"]!!
-                                    requestId set params["request_id"]!!
-                                    source set params["source"]!!
+                                if (params.containsKey("tmp_token")
+                                    && params.containsKey("request_id")
+                                    && params.containsKey("source")) {
+                                    nav.navigate(TelVerifyPage()) {
+                                        code set params["tmp_token"]!!
+                                        requestId set params["request_id"]!!
+                                        source set params["source"]!!
+                                    }
+                                } else {
+                                    val intent = Intent(Intent.ACTION_VIEW)
+                                    intent.data = Uri.parse(loginInfo.url)
+                                    fragment.requireActivity().startActivity(intent)
                                 }
                             }
-//                            setNeutralButton("使用原始网页") { _, _ ->
-//                                fragment.findNavController().navigate(
-//                                    Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
-//                                )
-//                            }
+                            setNeutralButton("使用原始网页") { _, _ ->
+                                fragment.findNavController().navigate(
+                                    Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
+                                )
+                            }
                         }
                     } else {
                         alert( "登录失败，请稍后重试：" + loginInfo.status) {
@@ -238,7 +247,7 @@ internal class LoginPageViewModel(
     override suspend fun onGTDialogResult(
         result: BiliGeetestUtil.GT3ResultBean
     ): Boolean {
-        stringLogin(result)
+        startLogin(result)
         return true
     }
 
@@ -297,7 +306,7 @@ internal fun LoginPageContent(
     val passwordKeyboardActions = remember(viewModel) {
         KeyboardActions(
             onDone = {
-                viewModel.stringLogin()
+                viewModel.startLogin()
             }
         )
     }
@@ -389,7 +398,7 @@ internal fun LoginPageContent(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Button(
-                onClick = viewModel::stringLogin,
+                onClick = viewModel::startLogin,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !loading,
             ) {

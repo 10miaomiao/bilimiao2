@@ -4,14 +4,13 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bilibili.app.archive.v1.Archive
-import bilibili.app.interfaces.v1.SpaceGrpc
-import bilibili.app.interfaces.v1.SpaceOuterClass
+import bilibili.app.interfaces.v1.SearchArchiveReq
+import bilibili.app.interfaces.v1.SpaceGRPC
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.network.request
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,7 +35,7 @@ class UserSearchArchiveListViewModel(
 
     var triggered = false
     var total = 0
-    var list = PaginationInfo<Archive.Arc>()
+    var list = PaginationInfo<bilibili.app.archive.v1.Arc>()
 
     init {
         keyword = fragment.requireArguments().getString(MainNavArgs.text, "")
@@ -50,18 +49,18 @@ class UserSearchArchiveListViewModel(
             ui.setState {
                 list.loading = true
             }
-            val req = SpaceOuterClass.SearchArchiveReq.newBuilder()
-                .setKeyword(keyword)
-                .setMid(id.toLong())
-                .setPn(pageNum.toLong())
-                .setPs(list.pageSize.toLong())
-                .build()
-            val res = SpaceGrpc.getSearchArchiveMethod()
-                .request(req)
-                .awaitCall()
-            val archivesList = res.archivesList.map {
+            val req = SearchArchiveReq(
+                keyword = keyword,
+                mid = id.toLong(),
+                pn = pageNum.toLong(),
+                ps = list.pageSize.toLong(),
+            )
+            val res = BiliGRPCHttp.request {
+                SpaceGRPC.searchArchive(req)
+            }.awaitCall()
+            val archivesList = res.archives.map {
                 it.archive
-            }
+            }.filterNotNull()
             ui.setState {
                 if (pageNum == 1) {
                     list.data = archivesList.toMutableList()

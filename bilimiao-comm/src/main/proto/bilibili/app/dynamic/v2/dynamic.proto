@@ -2,11 +2,9 @@ syntax = "proto3";
 
 package bilibili.app.dynamic.v2;
 
-import "google/protobuf/any.proto";
 import "bilibili/app/archive/middleware/v1/preload.proto";
 import "bilibili/app/dynamic/v2/common.proto";
 import "bilibili/app/dynamic/v2/module.proto";
-import "bilibili/app/dynamic/v2/video.proto";
 import "bilibili/app/dynamic/v2/other.proto";
 
 // v2动态

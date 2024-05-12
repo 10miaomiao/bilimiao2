@@ -135,10 +135,6 @@ class MainActivity
             setWindowInsetsAndroidL()
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            fullScreenUseStatus()
-        }
-
         initNavController()
         initAppBar()
 
@@ -246,9 +242,10 @@ class MainActivity
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
+
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent?.data?.let { uri ->
+        intent.data?.let { uri ->
             val navOptions = NavOptions.Builder()
                 .setEnterAnim(R.anim.miao_fragment_open_enter)
                 .setExitAnim(R.anim.miao_fragment_open_exit)
@@ -492,14 +489,6 @@ class MainActivity
         ui.root.updateLayout(false)
     }
 
-    @RequiresApi(Build.VERSION_CODES.P)
-    fun fullScreenUseStatus() {
-        val attributes = window.attributes
-        attributes.layoutInDisplayCutoutMode =
-            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-        window.attributes = attributes
-    }
-
     override fun onResume() {
         super.onResume()
         basePlayerDelegate.onResume()
@@ -543,14 +532,19 @@ class MainActivity
             SearchActivity.REQUEST_CODE -> {
                 val arguments = data?.extras ?: Bundle()
                 if (arguments.containsKey(SearchActivity.KEY_URL)) {
-                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)
-                    val navOptions = NavOptions.Builder()
-                        .setEnterAnim(R.anim.miao_fragment_open_enter)
-                        .setExitAnim(R.anim.miao_fragment_open_exit)
-                        .setPopEnterAnim(R.anim.miao_fragment_close_enter)
-                        .setPopExitAnim(R.anim.miao_fragment_close_exit)
-                        .build()
-                    pointerNav.navController.navigate(Uri.parse(pageUrl), navOptions)
+                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
+                    val isComposePage = arguments.getBoolean(SearchActivity.KEY_IS_COMPOSE_PAGE, false)
+                    if (isComposePage) {
+                        pointerNav.navController.navigateToCompose(pageUrl)
+                    } else {
+                        val navOptions = NavOptions.Builder()
+                            .setEnterAnim(R.anim.miao_fragment_open_enter)
+                            .setExitAnim(R.anim.miao_fragment_open_exit)
+                            .setPopEnterAnim(R.anim.miao_fragment_close_enter)
+                            .setPopExitAnim(R.anim.miao_fragment_close_exit)
+                            .build()
+                        pointerNav.navController.navigate(Uri.parse(pageUrl), navOptions)
+                    }
                     return
                 }
                 val mode = arguments.getInt(SearchActivity.KEY_MODE)

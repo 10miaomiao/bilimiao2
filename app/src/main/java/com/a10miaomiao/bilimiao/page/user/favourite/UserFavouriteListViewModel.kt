@@ -47,7 +47,7 @@ class UserFavouriteListViewModel(
             ui.setState {
                 list.loading = true
             }
-            val res = BiliApiService.userApi.favFolderList(
+            val res = BiliApiService.userApi.favCreatedList(
                 id,
                 pageNum = pageNum,
                 pageSize = list.pageSize

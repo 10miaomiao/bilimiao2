@@ -5,7 +5,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -105,7 +105,6 @@ internal fun MessagePageContent(
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
-
     val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
     Column(
         modifier = Modifier.fillMaxSize()
@@ -124,15 +123,7 @@ internal fun MessagePageContent(
             viewModel.tabs.forEachIndexed { index, tab ->
                 Tab(
                     text = {
-                        Row() {
-                            Text(
-                                text = tab.name,
-                                color = if (index == pagerState.currentPage) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onBackground
-                                }
-                            )
+                        Box() {
                             val unreadCount: Int = messageState.unread?.let {
                                 when (index) {
                                     0 -> it.reply
@@ -141,11 +132,21 @@ internal fun MessagePageContent(
                                     else -> 0
                                 }
                             } ?: 0
+                            Text(
+                                modifier = Modifier.padding(
+                                    end = if (unreadCount > 0) 16.dp else 0.dp
+                                ),
+                                text = tab.name,
+                                color = if (index == pagerState.currentPage) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground
+                                }
+                            )
                             if (unreadCount > 0) {
                                 Badge(
-                                    modifier = Modifier.padding(
-                                        start = 5.dp
-                                    )
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
                                 ) {
                                     Text(unreadCount.toString())
                                 }

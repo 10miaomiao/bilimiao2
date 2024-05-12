@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.utils
 
 import android.util.Log
-import com.google.protobuf.MessageLite
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -52,7 +51,6 @@ class MiaoLogger(
         return when (this) {
             null -> "null"
             is String -> this
-            is MessageLite -> toByteString().toStringUtf8()
             else -> toString()
         }
     }

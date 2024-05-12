@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import bilibili.app.show.v1.RankOuterClass
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
 import com.a10miaomiao.bilimiao.MainNavGraph
@@ -76,7 +75,7 @@ class RankDetailFragment : RecyclerViewFragment(), DIAware {
             .navigate(VideoInfoFragment.actionId, args)
     }
 
-    val itemUi = miaoBindingItemUi<RankOuterClass.Item> { item, index ->
+    val itemUi = miaoBindingItemUi<bilibili.app.show.v1.Item> { item, index ->
         horizontalLayout {
             layoutParams = ViewGroup.LayoutParams(matchParent, wrapContent)
             setBackgroundResource(config.selectableItemBackground)
