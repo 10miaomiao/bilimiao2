@@ -67,12 +67,12 @@ class RegionStore(override val di: DI) :
             }
             // 从网络读取最新版本的分区列表
             if (!isBestRegion) {
-                getRegionsByNetword(context)
+                getRegionsByNetwork(context)
             }
         }
     }
 
-    fun getRegionsByNetword(context: Context) = viewModelScope.launch(Dispatchers.IO) {
+    fun getRegionsByNetwork(context: Context) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val res = BiliApiService.regionAPI
                 .regions()
