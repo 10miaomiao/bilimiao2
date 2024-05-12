@@ -4,26 +4,20 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bilibili.main.community.reply.v1.ReplyGrpc
-import bilibili.main.community.reply.v1.ReplyOuterClass
-import com.a10miaomiao.bilimiao.MainNavGraph
+import bilibili.main.community.reply.v1.CursorReply
+import bilibili.main.community.reply.v1.CursorReq
+import bilibili.main.community.reply.v1.MainListReq
+import bilibili.main.community.reply.v1.ReplyGRPC
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
+import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentViewAdapter.convertToVideoCommentViewInfo
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +45,7 @@ class VideoCommentListViewModel(
     var triggered = false
     var list = PaginationInfo<VideoCommentViewInfo>()
     var upMid = -1L
-    private var _cursor: ReplyOuterClass.CursorReply? = null
+    private var _cursor: CursorReply? = null
 
     init {
         loadData()
@@ -62,51 +56,45 @@ class VideoCommentListViewModel(
             ui.setState {
                 list.loading = true
             }
-            val req = ReplyOuterClass.MainListReq.newBuilder().apply {
-                oid = id.toLong()
-                type = 1
-                rpid = 0
-                cursor = ReplyOuterClass.CursorReq.newBuilder().apply {
-                    modeValue = sortOrder
-                    _cursor?.let {
-                        next = it.next
-//                        prev = it.prev
-                    }
-                }.build()
-            }.build()
-            val res = ReplyGrpc.getMainListMethod().request(req)
-                .awaitCall()
+            val req = MainListReq(
+                oid = id.toLong(),
+                type = 1,
+                rpid = 0,
+                cursor = CursorReq(
+                    mode = bilibili.main.community.reply.v1.Mode.fromValue(sortOrder),
+                    next = _cursor?.next ?: 0,
+                )
+            )
+            val res = BiliGRPCHttp.request {
+                ReplyGRPC.mainList(req)
+            }.awaitCall()
             if (_cursor == null) {
                 list.data = mutableListOf()
-                when {
-                    res.upTop != null && res.upTop.id != 0L -> {
-                        list.data.add(
-                            VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.upTop)
-                        )
-                    }
-
-                    res.adminTop != null && res.adminTop.id != 0L -> {
-                        list.data.add(
-                            VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.adminTop)
-                        )
-                    }
-
-                    res.voteTop != null && res.voteTop.id != 0L -> {
-                        list.data.add(
-                            VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.voteTop)
-                        )
-                    }
+                res.upTop?.let {
+                    list.data.add(
+                        convertToVideoCommentViewInfo(it)
+                    )
+                }
+                res.adminTop?.let {
+                    list.data.add(
+                        convertToVideoCommentViewInfo(it)
+                    )
+                }
+                res.voteTop?.let {
+                    list.data.add(
+                        convertToVideoCommentViewInfo(it)
+                    )
                 }
             }
             ui.setState {
-                upMid = res.subjectControl.upMid
-                if (res.repliesList != null) {
-                    list.data.addAll(res.repliesList.map(
-                        VideoCommentViewAdapter::convertToVideoCommentViewInfo
-                    ))
+                res.subjectControl?.let {
+                    upMid = it.upMid
                 }
+                list.data.addAll(res.replies.map(
+                    VideoCommentViewAdapter::convertToVideoCommentViewInfo
+                ))
                 _cursor = res.cursor
-                if (res.cursor.isEnd) {
+                if (res.cursor?.isEnd == true) {
                     list.finished = true
                 }
             }

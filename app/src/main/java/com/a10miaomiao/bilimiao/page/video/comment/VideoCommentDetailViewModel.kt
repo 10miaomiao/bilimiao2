@@ -6,22 +6,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import bilibili.main.community.reply.v1.ReplyGrpc
-import bilibili.main.community.reply.v1.ReplyOuterClass
-import com.a10miaomiao.bilimiao.MainNavGraph
+import bilibili.main.community.reply.v1.CursorReply
+import bilibili.main.community.reply.v1.CursorReq
+import bilibili.main.community.reply.v1.DetailListReq
+import bilibili.main.community.reply.v1.DetailListScene
+import bilibili.main.community.reply.v1.ReplyGRPC
+import bilibili.main.community.reply.v1.ReplyInfoReq
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.network.request
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewContent
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.kongzue.dialogx.dialogs.PopTip
 import com.kongzue.dialogx.dialogs.TipDialog
@@ -32,7 +30,6 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import splitties.toast.toast
 
 class VideoCommentDetailViewModel(
     override val di: DI,
@@ -52,7 +49,7 @@ class VideoCommentDetailViewModel(
     var triggered = false
     var list = PaginationInfo<VideoCommentViewInfo>()
     var upMid = 0L
-    private var _cursor: ReplyOuterClass.CursorReply? = null
+    private var _cursor: CursorReply? = null
 
     init {
         val arguments = fragment.requireArguments()
@@ -72,14 +69,15 @@ class VideoCommentDetailViewModel(
             ui.setState {
                 list.loading = true
             }
-            val req = ReplyOuterClass.ReplyInfoReq.newBuilder().apply {
-                rpid = rootId
-                scene = 1
-            }.build()
-            val res = ReplyGrpc.getReplyInfoMethod().request(req)
-                .awaitCall()
+            val req = ReplyInfoReq(
+                rpid = rootId,
+                scene = 1,
+            )
+            val res = BiliGRPCHttp.request {
+                ReplyGRPC.replyInfo(req)
+            }.awaitCall()
             ui.setState {
-                reply = VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.reply)
+                reply = VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.reply!!)
                 _cursor == null
                 loadData()
             }
@@ -105,33 +103,37 @@ class VideoCommentDetailViewModel(
             ui.setState {
                 list.loading = true
             }
-            val req = ReplyOuterClass.DetailListReq.newBuilder().apply {
-                oid = reply.oid
-                root = reply.id
-                type = 1
-                scene = ReplyOuterClass.DetailListScene.REPLY
-                _cursor?.let {
-                    cursor = ReplyOuterClass.CursorReq.newBuilder()
-                        .setNext(it.next)
-                        .setMode(it.mode)
-                        .build()
+            val req = DetailListReq(
+                oid = reply.oid,
+                root = reply.id,
+                type = 1,
+                scene = DetailListScene.REPLY,
+                cursor = _cursor?.let {
+                    CursorReq(
+                        next = it.next,
+                        mode = it.mode,
+                    )
                 }
-            }.build()
-            val res = ReplyGrpc.getDetailListMethod().request(req)
-                .awaitCall()
-
+            )
+            val res = BiliGRPCHttp.request {
+                ReplyGRPC.detailList(req)
+            }.awaitCall()
             if (_cursor == null) {
                 list.data = mutableListOf()
             }
             ui.setState {
-                upMid = res.subjectControl.upMid
-                list.data.addAll(
-                    res.root.repliesList.map(
-                        VideoCommentViewAdapter::convertToVideoCommentViewInfo
+                res.subjectControl?.let {
+                    upMid = it.upMid
+                }
+                res.root?.let {
+                    list.data.addAll(
+                        it.replies.map(
+                            VideoCommentViewAdapter::convertToVideoCommentViewInfo
+                        )
                     )
-                )
+                }
                 _cursor = res.cursor
-                if (res.cursor.isEnd) {
+                if (res.cursor?.isEnd == true) {
                     list.finished = true
                 }
             }

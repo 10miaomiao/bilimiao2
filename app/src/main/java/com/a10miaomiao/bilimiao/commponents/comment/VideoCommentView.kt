@@ -8,10 +8,6 @@ import android.os.Parcelable
 import android.text.Spannable
 import android.view.Gravity
 import android.view.View
-import android.widget.ImageView
-import androidx.core.graphics.toColorInt
-import androidx.core.view.marginBottom
-import bilibili.main.community.reply.v1.ReplyOuterClass
 import cn.a10miaomiao.miao.binding.android.view._contentDescription
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._tag
@@ -20,9 +16,7 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._network
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.config
@@ -30,13 +24,10 @@ import com.a10miaomiao.bilimiao.widget._setContent
 import com.a10miaomiao.bilimiao.widget.expandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
 import com.a10miaomiao.bilimiao.widget.expandabletext.UrlImageSpan
-import com.a10miaomiao.bilimiao.widget.expandabletext.app.LinkType
 import com.a10miaomiao.bilimiao.widget.gridimage.GlideNineGridImageLoader
 import com.a10miaomiao.bilimiao.widget.gridimage.OnImageItemClickListener
 import com.a10miaomiao.bilimiao.widget.nineGridImageView
 import com.a10miaomiao.bilimiao.widget.rcImageView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.parcel.Parcelize
 import splitties.dimensions.dip
 import splitties.views.dsl.core.*
@@ -65,7 +56,6 @@ data class VideoCommentViewInfo(
 
 @Parcelize
 data class VideoCommentViewContent(
-//        val device: String,
     val message: String,
     val emote: List<Emote>?,
     val picturesList: List<String>,

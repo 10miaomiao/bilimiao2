@@ -5,27 +5,21 @@ import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.util.Log.Logger
-import bilibili.app.card.v1.CardOuterClass
-import bilibili.app.card.v1.Single
-import bilibili.app.show.v1.PopularGrpc
-import bilibili.app.show.v1.PopularOuterClass
+import bilibili.app.card.v1.Card
+import bilibili.app.card.v1.SmallCoverV5
+import bilibili.app.show.v1.EntranceShow
+import bilibili.app.show.v1.PopularGRPC
+import bilibili.app.show.v1.PopularResultReq
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.apis.VideoAPI
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
-import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.network.request
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import java.util.Locale
 
 class PopularViewModel(
     override val di: DI,
@@ -36,13 +30,14 @@ class PopularViewModel(
     val fragment: Fragment by instance()
     val filterStore: FilterStore by instance()
 
-    private val lastIdx get() = if (list.data.size == 0) {
-        0
-    } else {
-        list.data[list.data.size - 1].base.idx
-    }
-    var list = PaginationInfo<Single.SmallCoverV5>()
-    var topEntranceList = mutableListOf<PopularOuterClass.EntranceShow>()
+    private val lastIdx
+        get() = if (list.data.size == 0) {
+            0
+        } else {
+            list.data[list.data.size - 1].base?.idx ?: 0
+        }
+    var list = PaginationInfo<SmallCoverV5>()
+    var topEntranceList = mutableListOf<EntranceShow>()
     var triggered = false
 
     init {
@@ -51,40 +46,46 @@ class PopularViewModel(
 
     private fun loadData(
         idx: Long = lastIdx
-    ) = viewModelScope.launch(Dispatchers.IO){
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             ui.setState {
                 list.loading = true
             }
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val carryToken = prefs.getBoolean("home_popular_carry_token", true)
-            val req = PopularOuterClass.PopularResultReq.newBuilder()
-                .setIdx(idx)
-                .build()
-            val result = PopularGrpc.getIndexMethod()
-                .request(req){ needToken = carryToken }
-                .awaitCall()
-            val itemsList = result.itemsList
-            val filterList = itemsList.filter {
-                it.itemCase == CardOuterClass.Card.ItemCase.SMALL_COVER_V5
-                    && it.smallCoverV5 != null
-                    && it.smallCoverV5.base.cardGoto == "av"
-                    && filterStore.filterWord(it.smallCoverV5.base.title)
-                    && filterStore.filterUpper(it.smallCoverV5.up.id)
-                    && filterStore.filterTag(it.smallCoverV5.base.param, it.smallCoverV5.base.cardGoto)
-            }.map {
-                it.smallCoverV5
+            val req = PopularResultReq(
+                idx = idx,
+            )
+            val result = BiliGRPCHttp.request {
+                PopularGRPC.index(req)
+            }.also {
+                it.needToken = carryToken
+            }.awaitCall()
+            val itemsList = result.items
+            val filterList = itemsList.mapNotNull {
+                (it.item as? Card.Item.SmallCoverV5)?.value
+            }.filter {
+                val base = it.base
+//                val upper = it?.up
+                (base != null // && upper != null
+                        && base.cardGoto == "av"
+                        && filterStore.filterWord(base.title)
+                        && filterStore.filterUpperName(it.rightDesc1)
+                        && filterStore.filterTag(base.param, base.cardGoto)
+                        )
             }
-            val topItems = result.config.topItemsList
             ui.setState {
-                topEntranceList = topItems
+                val topItems = result.config?.topItems
+                if (topItems != null) {
+                    topEntranceList = topItems.toMutableList()
+                }
                 if (idx == 0L) {
                     list.data = filterList.toMutableList()
                 } else {
                     list.data.addAll(filterList)
                 }
                 if (itemsList.isEmpty()) {
-                     list.finished = true
+                    list.finished = true
                 }
                 list.loading = false
                 triggered = false
@@ -107,7 +108,7 @@ class PopularViewModel(
         }
     }
 
-    fun loadMode () {
+    fun loadMode() {
         val (loading, finished, pageNum) = this.list
         if (!finished && !loading) {
             loadData(lastIdx)

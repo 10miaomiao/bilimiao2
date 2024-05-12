@@ -57,9 +57,6 @@
         <meta-data
             android:name="BaiduMobAd_WIFI_LOCATION"
             android:value="false" />
-        <meta-data
-            android:name="miuiWidgetVersion"
-            android:value="1" />
 
         <activity
             android:name=".MainActivity"

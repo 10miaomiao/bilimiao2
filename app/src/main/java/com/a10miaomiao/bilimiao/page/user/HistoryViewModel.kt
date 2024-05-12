@@ -4,17 +4,14 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bilibili.app.archive.middleware.v1.Preload
-import bilibili.app.interfaces.v1.HistoryGrpc
-import bilibili.app.interfaces.v1.HistoryOuterClass
-import bilibili.main.community.reply.v1.ReplyOuterClass
-import com.a10miaomiao.bilimiao.MainNavGraph
+import bilibili.app.interfaces.v1.Cursor
+import bilibili.app.interfaces.v1.CursorItem
+import bilibili.app.interfaces.v1.CursorV2Req
+import bilibili.app.interfaces.v1.HistoryGRPC
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.apis.UserApi
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.network.request
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +34,7 @@ class HistoryViewModel(
     var keyword = ""
 
     var triggered = false
-    var list = PaginationInfo<HistoryOuterClass.CursorItem>()
+    var list = PaginationInfo<CursorItem>()
 
     private var _mapTp = 3
     private var _maxId = 0L
@@ -77,25 +74,29 @@ class HistoryViewModel(
     private suspend fun loadList(
         maxId: Long,
     ) {
-        val req = HistoryOuterClass.CursorV2Req.newBuilder().apply {
-            business = "archive"
-            cursor = HistoryOuterClass.Cursor.newBuilder().apply {
-                if (maxId != 0L) {
-                    max = maxId
-                    maxTp = _mapTp // 本页最大值游标类型
-                }
-            }.build()
-        }.build()
-        val res = HistoryGrpc.getCursorV2Method()
-            .request(req)
-            .awaitCall()
+        val req = CursorV2Req(
+            business = "archive",
+            cursor = if (maxId != 0L) {
+                Cursor(
+                    max = maxId,
+                    maxTp = _mapTp, // 本页最大值游标类型
+                )
+            } else {
+                Cursor()
+            }
+        )
+        val res = BiliGRPCHttp.request {
+            HistoryGRPC.cursorV2(req)
+        }.awaitCall()
         if (maxId == 0L) {
             list.data = mutableListOf()
         }
         ui.setState {
-            list.data.addAll(res.itemsList)
-            _maxId = res.cursor.max
-            _mapTp = res.cursor.maxTp
+            list.data.addAll(res.items)
+            res.cursor?.let {
+                _maxId = it.max
+                _mapTp = it.maxTp
+            }
             if (!res.hasMore) {
                 list.finished = true
             }
@@ -106,20 +107,20 @@ class HistoryViewModel(
         _keyword: String,
         pageNum: Long,
     ) {
-        val req = HistoryOuterClass.SearchReq.newBuilder().apply {
-            business = "archive"
-            keyword = _keyword
-            pn = pageNum
-        }.build()
-        val res = HistoryGrpc.getSearchMethod()
-            .request(req)
-            .awaitCall()
+        val req = bilibili.app.interfaces.v1.SearchReq(
+            business = "archive",
+            keyword = _keyword,
+            pn = pageNum,
+        )
+        val res = BiliGRPCHttp.request {
+            HistoryGRPC.search(req)
+        }.awaitCall()
         if (pageNum == 1L) {
             list.data = mutableListOf()
         }
         ui.setState {
-            list.data.addAll(res.itemsList)
-            _maxId = res.page.pn
+            list.data.addAll(res.items)
+            _maxId = res.page?.pn ?: 0
             if (!res.hasMore) {
                 list.finished = true
             }
@@ -129,15 +130,15 @@ class HistoryViewModel(
     fun deleteHistory(position: Int) = viewModelScope.launch(Dispatchers.IO) {
         val item = list.data[position]
         try {
-            val req = HistoryOuterClass.DeleteReq.newBuilder().apply {
-                hisInfo = HistoryOuterClass.HisInfo.newBuilder().apply {
-                    business = item.business
-                    kid = item.kid
-                }.build()
-            }.build()
-            HistoryGrpc.getDeleteMethod()
-                .request(req)
-                .awaitCall()
+            val req = bilibili.app.interfaces.v1.DeleteReq(
+                hisInfo = bilibili.app.interfaces.v1.HisInfo(
+                    business = item.business,
+                    kid = item.kid,
+                )
+            )
+            BiliGRPCHttp.request {
+                HistoryGRPC.delete(req)
+            }.awaitCall()
             withContext(Dispatchers.Main) {
                 ui.setState {
                     list.data.removeAt(position)

@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+option java_outer_classname = "ViewSectionOuterClass";
+
+package bilibili.app.view.v1;
+
+import "bilibili/app/archive/v1/archive.proto";
+
+// 视频合集小节信息
+message Section {
+  // 小节id
+  int64 id = 1;
+  // 小节标题
+  string title = 2;
+  // 小节类型
+  // 0:其他 1:正片
+  int64 type = 3;
+  // 单话列表
+  repeated Episode episodes = 4;
+}
+
+// 视频合集单话信息
+message Episode {
+  // 合集单话id
+  int64 id = 1;
+  // 稿件avid
+  int64 aid = 2;
+  // 视频1P cid
+  int64 cid = 3;
+  // 稿件标题
+  string title = 4;
+  // 稿件封面url
+  string cover = 5;
+  // 投稿时间显示文案
+  string coverRightText = 6;
+  // 视频分P信息
+  bilibili.app.archive.v1.Page page = 7;
+  // 视频状态数
+  bilibili.app.archive.v1.Stat stat = 8;
+  // 稿件bvid
+  string bvid = 9;
+  // 稿件UP主信息
+  bilibili.app.archive.v1.Author author = 10;
+  //
+  string author_desc = 11;
+  //
+  BadgeStyle badge_style = 12;
+  //
+  bool need_pay = 13;
+  //
+  bool episode_pay = 14;
+  //
+  bool free_watch = 15;
+  //
+  string first_frame = 16;
+}
+
+//
+message BadgeStyle {
+  //
+  string text = 1;
+  //
+  string text_color = 2;
+  //
+  string text_color_night = 3;
+  //
+  string bg_color = 4;
+  //
+  string bg_color_night = 5;
+  //
+  string border_color = 6;
+  //
+  string border_color_night = 7;
+  //
+  int32 bg_style = 8;
+}
