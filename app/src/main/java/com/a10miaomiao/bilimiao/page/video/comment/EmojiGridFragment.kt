@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.page.video.comment
 
 import android.os.Bundle
-import android.text.Editable
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -19,7 +18,6 @@ import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserEmoteInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserEmotePackagesInfo
-import com.a10miaomiao.bilimiao.comm.entity.user.UserEmotePanelInfo
 import com.a10miaomiao.bilimiao.comm.lazyUiDi
 import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -29,9 +27,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.comm.views
-import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.config.config
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.material.card.MaterialCardView
@@ -41,9 +37,7 @@ import org.kodein.di.DIAware
 import splitties.bundle.put
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
-import splitties.views.dsl.core.button
 import splitties.views.dsl.core.frameLayout
-import splitties.views.dsl.core.imageButton
 import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
 import splitties.views.dsl.core.margin

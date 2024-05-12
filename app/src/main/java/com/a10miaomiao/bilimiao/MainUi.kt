@@ -1,6 +1,5 @@
 package com.a10miaomiao.bilimiao
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
@@ -10,9 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.fragment.app.FragmentContainerView
-import androidx.recyclerview.widget.LinearLayoutManager
-import cn.a10miaomiao.miao.binding.android.widget._textColor
-import com.a10miaomiao.bilimiao.comm.attr
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
@@ -20,7 +16,6 @@ import com.a10miaomiao.bilimiao.widget.scaffold.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetUi
 import com.a10miaomiao.bilimiao.comm.shadowLayout
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.setting.FlagsSeetingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService

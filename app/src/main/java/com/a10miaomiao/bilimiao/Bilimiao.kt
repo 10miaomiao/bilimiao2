@@ -1,11 +1,8 @@
 package com.a10miaomiao.bilimiao
 
-import android.app.Activity
 import android.app.Application
-import android.util.DisplayMetrics
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import net.mikaelzero.mojito.Mojito
 import net.mikaelzero.mojito.loader.glide.GlideImageLoader
 import net.mikaelzero.mojito.view.sketch.SketchImageLoadFactory

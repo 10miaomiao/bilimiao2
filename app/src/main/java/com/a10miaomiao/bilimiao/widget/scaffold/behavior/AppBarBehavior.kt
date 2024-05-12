@@ -5,23 +5,17 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.TimeInterpolator
 import android.content.Context
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import androidx.annotation.Dimension
-import androidx.collection.SimpleArrayMap
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
-import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
-import splitties.dimensions.dip
 
 class AppBarBehavior : CoordinatorLayout.Behavior<View> {
 

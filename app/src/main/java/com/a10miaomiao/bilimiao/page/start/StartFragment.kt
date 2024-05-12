@@ -6,8 +6,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.Gravity
@@ -20,10 +18,8 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withStarted
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
@@ -59,16 +55,12 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.network
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
-import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.comm.wrapInMaterialCardView
 import com.a10miaomiao.bilimiao.config.ViewStyle
@@ -105,7 +97,6 @@ import splitties.views.dsl.constraintlayout.leftOfParent
 import splitties.views.dsl.constraintlayout.leftToRightOf
 import splitties.views.dsl.constraintlayout.rightOfParent
 import splitties.views.dsl.constraintlayout.topToBottomOf
-import splitties.views.dsl.coordinatorlayout.coordinatorLayout
 import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageView
@@ -120,7 +111,6 @@ import splitties.views.dsl.core.view
 import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.core.wrapInHorizontalScrollView
 import splitties.views.dsl.recyclerview.recyclerView
-import splitties.views.generateViewId
 import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding

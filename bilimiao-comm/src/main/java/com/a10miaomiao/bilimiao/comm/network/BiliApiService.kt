@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.network
 
 import com.a10miaomiao.bilimiao.comm.apis.*
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 
 object BiliApiService {
     fun createUrl(url: String, vararg pairs: Pair<String, String?>): String {

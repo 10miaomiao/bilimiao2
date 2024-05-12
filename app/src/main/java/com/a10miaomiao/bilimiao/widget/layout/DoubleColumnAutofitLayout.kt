@@ -4,17 +4,12 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.config.config
 import splitties.dimensions.dip
 import splitties.views.assignAndGetGeneratedId
 import splitties.views.dsl.constraintlayout.*
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.wrapContent
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 class DoubleColumnAutofitLayout@JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

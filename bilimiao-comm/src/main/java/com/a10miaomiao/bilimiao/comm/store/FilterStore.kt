@@ -11,12 +11,10 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import org.kodein.di.instance
-import java.util.regex.Pattern
 
 class FilterStore(override val di: DI) :
     ViewModel(), BaseStore<FilterStore.State> {

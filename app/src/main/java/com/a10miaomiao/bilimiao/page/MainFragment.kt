@@ -5,15 +5,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.Space
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +25,6 @@ import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
 import com.a10miaomiao.bilimiao.comm.mypage.*
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
@@ -36,22 +32,17 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
-import com.a10miaomiao.bilimiao.page.home.*
 import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
 import org.kodein.di.*
-import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.dsl.core.*
 
