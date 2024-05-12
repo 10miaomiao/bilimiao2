@@ -15,8 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import bilibili.broadcast.v1.Mod
-import cn.a10miaomiao.bilimiao.compose.comm.localNavController
 
 @Composable
 fun ProxyServerCard(

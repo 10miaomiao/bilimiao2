@@ -1,10 +1,16 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -39,7 +45,7 @@ import org.kodein.di.android.x.closestDI
 import org.kodein.di.bindSingleton
 import org.kodein.di.compose.withDI
 
-class ComposeFragment : Fragment(), MyPage, DIAware {
+class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwner {
 
     companion object {
         const val KEY_URL = "url"
@@ -111,6 +117,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
                     LocalFragment provides this@ComposeFragment,
                     LocalNavController provides composeNav,
                     LocalPageConfigInfo provides pageConfigInfo,
+                    LocalOnBackPressedDispatcherOwner provides this@ComposeFragment,
                 ) {
                     withDI(di = di) {
                         BilimiaoTheme {
@@ -133,10 +140,28 @@ class ComposeFragment : Fragment(), MyPage, DIAware {
     }
 
     fun onBackPressed(): Boolean {
-        if (!composeNav.popBackStack()) {
-            findNavController().popBackStack()
-        }
+        onBackPressedDispatcher.onBackPressed()
         return true
+    }
+
+    override val onBackPressedDispatcher: OnBackPressedDispatcher by lazy {
+        OnBackPressedDispatcher {
+            try {
+                if (!composeNav.popBackStack()) {
+                    findNavController().popBackStack()
+                }
+            } catch (e: IllegalStateException) {
+                if (e.message != "Can not perform this action after onSaveInstanceState") {
+                    throw e
+                }
+            } catch (e: NullPointerException) {
+                if (e.message != "Attempt to invoke virtual method 'android.os.Handler " +
+                    "android.app.FragmentHostCallback.getHandler()' on a " +
+                    "null object reference") {
+                    throw e
+                }
+            }
+        }
     }
 
 }
