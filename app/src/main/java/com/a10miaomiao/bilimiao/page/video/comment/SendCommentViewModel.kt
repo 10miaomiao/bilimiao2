@@ -96,7 +96,7 @@ class SendCommentViewModel(
                     parent = params.parent,
                 )
                 .awaitCall()
-                .gson<ResultInfo<VideoCommentSendResultInfo>>(isDebug = true)
+                .gson<ResultInfo<VideoCommentSendResultInfo>>(isLog = true)
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val result = res.data

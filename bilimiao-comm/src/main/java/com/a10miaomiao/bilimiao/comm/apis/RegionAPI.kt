@@ -14,6 +14,8 @@ class RegionAPI {
         url = BiliApiService.biliApp(
             "x/v2/region/index",
             "mobi_app" to "android", // hd版api没有子分区
+            "statistics" to """{"appId":1,"platform":3,"version":"7.66.0","abtest":""}""",
+            "build" to "7660300",
         )
     }
 

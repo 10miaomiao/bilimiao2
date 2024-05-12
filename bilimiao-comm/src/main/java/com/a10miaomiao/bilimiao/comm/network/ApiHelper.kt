@@ -16,6 +16,13 @@ object ApiHelper {
 
     const val BUILD_VERSION = 1450000
     const val BILI_APP_VERSION = "1.45.0"
+    const val MOBI_APP_HD = "android_hd" // 默认HD
+    const val MOBI_APP = "android"
+    const val STATISTICS_HD = """{"appId":5,"platform":3,"version":"$BILI_APP_VERSION","abtest":""}"""
+    const val STATISTICS = """{"appId":1,"platform":3,"version":"7.66.0","abtest":""}"""
+    const val PLATFORM = "android"
+    const val LOCALE = "zh_CN"
+    const val CHANNEL = "bili"
 
     // 用哪个APP_KEY登录后，之后的请求之后只能用同一个APP_KEY，现统一使用HD版的APP_KEY，APP版的APP_KEY无法使用二维码登录
     // Android APP
@@ -134,39 +141,36 @@ object ApiHelper {
         appKey: String = APP_KEY_HD,
         appSecrer: String = APP_SECRET_HD,
     ): MutableMap<String, String?>{
-        val params = mutableMapOf(
-            "appkey" to appKey,
-            "build" to BUILD_VERSION.toString(),
-            "buvid" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
-            "mobi_app" to "android_hd",
-            "platform" to "android",
-            "ts" to getTimeSpan().toString(),
-            *pairs,
+        return createParams(
+            mapOf(*pairs),
+            appKey,
+            appSecrer
         )
-        if (params["notoken"].isNullOrBlank()) {
-            addAccessKeyAndMidToParams(params)
-        }
-        params["sign"] = getSing(params, appSecrer)
-        return params
     }
     fun createParams(
-        params: MutableMap<String, String?>,
+        params: Map<String, String?>,
         appKey: String = APP_KEY_HD,
         appSecrer: String = APP_SECRET_HD,
-    ): MutableMap<String, String?>{
-        params.putAll(mapOf(
+    ): MutableMap<String, String?> {
+        var _appSecrer = appSecrer
+        val paramMap = mutableMapOf<String, String?>(
             "appkey" to appKey,
+//            "buvid" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+            "platform" to PLATFORM,
+            "channel" to CHANNEL,
+            "mobi_app" to MOBI_APP_HD,
+            "statistics" to STATISTICS_HD,
             "build" to BUILD_VERSION.toString(),
-            "buvid" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
-            "mobi_app" to "android_hd",
-            "platform" to "android",
-            "ts" to getTimeSpan().toString()
-        ))
-        if (params["notoken"].isNullOrBlank()) {
-            addAccessKeyAndMidToParams(params)
+            "c_locale" to LOCALE,
+            "s_locale" to LOCALE,
+            "ts" to getTimeSpan().toString(),
+        )
+        paramMap.putAll(params)
+        if (paramMap["notoken"].isNullOrBlank()) {
+            addAccessKeyAndMidToParams(paramMap)
         }
-        params["sign"] = getSing(params, appSecrer)
-        return params
+        paramMap["sign"] = getSing(paramMap, _appSecrer)
+        return paramMap
     }
 
 }
