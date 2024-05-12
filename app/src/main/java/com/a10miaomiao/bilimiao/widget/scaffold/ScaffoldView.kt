@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.widget.scaffold
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.preference.PreferenceManager
 import android.util.AttributeSet
@@ -55,8 +56,7 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 playerDelegate?.setHoldStatus(isHoldUpPlayer)
-                updateLayout()
-                requestLayout()
+                updateLayout(false)
             }
         }
 
@@ -67,8 +67,7 @@ class ScaffoldView @JvmOverloads constructor(
         set(value) {
             if (field != value) {
                 field = value
-                updateLayout()
-                requestLayout()
+                updateLayout(true)
             }
         }
 
@@ -85,7 +84,6 @@ class ScaffoldView @JvmOverloads constructor(
                 playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 this.appBar?.orientation = orientation
                 updateLayout()
-                requestLayout()
             }
         }
 
@@ -93,12 +91,11 @@ class ScaffoldView @JvmOverloads constructor(
         set(value) {
             if (field != value) {
                 if (!value) {
-                    smallModePlayerHeight = smallModePlayerMinHeight
+                    smallModePlayerCurrentHeight = smallModePlayerMinHeight
                     playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 }
                 field = value
-                updateLayout()
-                requestLayout()
+                updateLayout(true)
                 onPlayerChanged?.invoke(field)
             }
         }
@@ -107,7 +104,6 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 updateLayout()
-                requestLayout()
                 onPlayerChanged?.invoke(true)
             }
         }
@@ -115,14 +111,14 @@ class ScaffoldView @JvmOverloads constructor(
     var showSubContent = true //设置值
         set(value) {
             field = value
-            updateContentLayout()
+            updateLayout(true)
         }
     var subContentShown = true //实际是否显示
     var contentDefaultSplit = 0f //默认情况下左右内容分割比
     var contentExchanged = false // 主副区域交换位置
         set(value) {
             field = value
-            updateContentLayout()
+            updateLayout(true)
         }
     var focusOnMain = true //焦点在主/副内容上
     var pointerExchanged = true //false左true右
@@ -136,12 +132,20 @@ class ScaffoldView @JvmOverloads constructor(
     val contentMinWidth = dip(300) //内容区域每列最小宽度
     val contentMinHeight = dip(200) // 内容区域每列最小高度
 
-    val smallModePlayerMinHeight = dip(200) // 小屏模式下的播放器最小高度
-    var smallModePlayerHeight = smallModePlayerMinHeight // 小屏模式下的播放器高度
-    var playerX = 0
-    var playerY = 0
-    var playerHeight = -3
-    var playerWidth = -3
+    val smallModePlayerMinHeight = dip(200) // 竖屏模式下的播放器最小高度
+    var smallModePlayerMaxHeight = smallModePlayerMinHeight // 竖屏模式下的播放器最大高度
+        set(value) {
+            if(field!=value){
+                field = value
+                if (smallModePlayerCurrentHeight > value) {
+                    animatePlayerHeight(value)
+                }
+            }
+        }
+    var smallModePlayerCurrentHeight = smallModePlayerMinHeight // 竖屏模式播放器实际高度
+    var statusBarHeight = 0
+
+    var contentAnimationDuration = 0
     var playerSpaceHeight = 0
     var playerSpaceWidth = 0 // 窗口所占大小，也算上了窗口与边缘的距离
 
@@ -177,6 +181,7 @@ class ScaffoldView @JvmOverloads constructor(
         updatePlayerHoldShowArea()
         updateContentDefaultSplit()
         updateFullScreenDraggable()
+        updateContentAnimationDuration()
     }
 
     fun updatePlayerSmallShowArea() {
@@ -201,24 +206,18 @@ class ScaffoldView @JvmOverloads constructor(
     fun updateFullScreenDraggable() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         fullScreenDraggable = prefs.getBoolean(VideoSettingFragment.FULL_SCREEN_DRAGGABLE, false)
-        updateLayout()
     }
 
-    //内容不在顶端时，该裁掉的区域
-    fun setContentTopClip(clipHeight: Int) {
-        contentBehavior?.clipHeight = clipHeight
-        subContentBehavior?.clipHeight = clipHeight
+    fun updateContentAnimationDuration() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        contentAnimationDuration = prefs.getInt(FlagsSeetingFragment.FLAGS_CONTENT_ANIMATION_DURATION, 0)
     }
 
-    fun updateLayout() {
+    fun updateLayout(contentAnimation:Boolean=false) {
         playerBehavior?.updateLayout()
-        updateContentLayout()
-    }
-
-    fun updateContentLayout() {
-        playerBehavior?.updateContent()
-        contentBehavior?.updateLayout()
-        subContentBehavior?.updateLayout()
+        contentBehavior?.updateLayout(contentAnimation)
+        subContentBehavior?.updateLayout(contentAnimation)
+        requestLayout()
     }
 
     override fun addView(
@@ -315,6 +314,20 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun holdUpPlayer() {
         playerBehavior?.holdUpPlayer()
+    }
+
+    fun animatePlayerHeight(target:Int){
+        if(orientation== VERTICAL){
+            val value = ValueAnimator.ofInt(smallModePlayerCurrentHeight,target)
+            value.duration=300
+            value.addUpdateListener {
+                smallModePlayerCurrentHeight = value.animatedValue as Int
+                playerBehavior?.updateLayout()
+                player?.requestLayout()
+                focusContent?.translationY = (playerSpaceHeight).toFloat()
+            }
+            value.start()
+        }
     }
 
     inline fun lParams(

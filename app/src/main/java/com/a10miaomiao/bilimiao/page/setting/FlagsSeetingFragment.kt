@@ -33,9 +33,7 @@ import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.categoryHeader
 import de.Maxr1998.modernpreferences.helpers.screen
 import de.Maxr1998.modernpreferences.helpers.seekBar
-import de.Maxr1998.modernpreferences.helpers.singleChoice
 import de.Maxr1998.modernpreferences.helpers.switch
-import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -56,6 +54,7 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
 
         const val FLAGS_SUB_CONTENT_SHOW = "flags_sub_content_show"
         const val FLAGS_CONTENT_DEFAULT_SPLIT = "flags_content_default_split"
+        const val FLAGS_CONTENT_ANIMATION_DURATION = "flags_content_animation_duration"
     }
 
     override val pageConfig = myPageConfig {
@@ -104,6 +103,8 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
             showRebootAppDialog("修改双屏显示，需重新打开APP后生效")
         } else if (key == FLAGS_CONTENT_DEFAULT_SPLIT) {
             scaffoldView.updateContentDefaultSplit()
+        } else if (key == FLAGS_CONTENT_ANIMATION_DURATION) {
+            scaffoldView.updateContentAnimationDuration()
         }
     }
 
@@ -168,6 +169,17 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
             min = 15
             formatter = {
                 "${it} ：${100 - it}"
+            }
+        }
+
+        seekBar(FLAGS_CONTENT_ANIMATION_DURATION) {
+            title = "内容区域动画时长"
+            summary = "为0时不显示动画，开启后动画可能掉帧"
+            default = 0
+            max = 1000
+            min = 0
+            formatter = {
+                "${it}ms"
             }
         }
 
