@@ -44,18 +44,14 @@ class DoubleColumnAutofitLayout@JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        DebugMiao.log("onSizeChanged1")
         var lView = leftView ?: return
         var cViewId = contentViewId ?: return
         var cView = findViewById<ViewGroup>(cViewId) ?: return
-        DebugMiao.log("onSizeChanged2")
         if (w >= expandWidth) {
             if (cView.childCount > 0 && cView.getChildAt(0) == lView) {
-                DebugMiao.log("onSizeChanged3")
                 cView.removeViewAt(0)
             }
             if (childCount == 0 || getChildAt(0) != lView) {
-                DebugMiao.log("onSizeChanged4")
                 lView.layoutParams = lParams(dip(300), matchParent)
                 addView(lView, 0)
                 rightView?.layoutParams = lParams(0, matchParent) {
@@ -64,14 +60,11 @@ class DoubleColumnAutofitLayout@JvmOverloads constructor(
                 }
             }
         } else {
-            DebugMiao.log("onSizeChanged10")
             if (childCount > 0 && getChildAt(0) == lView) {
-                DebugMiao.log("onSizeChanged11")
                 rightView?.layoutParams = lParams(matchParent, matchParent)
                 removeViewAt(0)
             }
             if (cView.childCount == 0 || cView.getChildAt(0) != lView) {
-                DebugMiao.log("onSizeChanged12")
                 lView.layoutParams = MarginLayoutParams(matchParent, wrapContent).apply {
                     bottomMargin = dividerSize
                 }

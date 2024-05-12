@@ -34,6 +34,7 @@ import androidx.annotation.RequiresApi
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.utils.DebugMiao
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.shuyu.gsyvideoplayer.utils.CommonUtil
@@ -1024,7 +1025,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
      */
     override fun onLossTransientCanDuck() {
         // 暂时失去AudioFocus，但是可以继续播放，不过要在降低音量
-        DebugMiao.log("onLossTransientCanDuck")
+        miaoLogger() debug "onLossTransientCanDuck"
     }
 
     /**
@@ -1032,7 +1033,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
      */
     override fun onLossTransientAudio() {
         // 暂时失去Audio Focus，并会很快再次获得。必须停止Audio的播放
-        DebugMiao.log("onLossTransientAudio")
+        miaoLogger() debug "onLossTransientAudio"
         if (enabledAudioFocus) {
             Handler(Looper.getMainLooper()).post {
                 onVideoPause()
@@ -1044,7 +1045,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
      * 获得了Audio Focus
      */
     override fun onGankAudio() {
-        DebugMiao.log("onGankAudio")
+        miaoLogger() debug "onGankAudio"
         if (enabledAudioFocus) {
             Handler(Looper.getMainLooper()).post {
                 if (currentState == GSYVideoView.CURRENT_STATE_PAUSE) {
@@ -1058,7 +1059,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
      * 失去了Audio Focus，并将会持续很长的时间
      */
     override fun onLossAudio() {
-        DebugMiao.log("onLossAudio")
+        miaoLogger() debug "onLossAudio"
         if (enabledAudioFocus) {
             Handler(Looper.getMainLooper()).post {
                onVideoPause()

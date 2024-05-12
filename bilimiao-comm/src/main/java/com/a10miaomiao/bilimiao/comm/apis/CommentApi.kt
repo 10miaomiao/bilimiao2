@@ -106,7 +106,6 @@ class CommentApi() {
         // 大于二级评论为要回复的评论id
         parent?.let { params.put("parent", parent) }
         formBody = ApiHelper.createParams(params)
-        DebugMiao.log("formBody", formBody)
     }
 
     fun del(

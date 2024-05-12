@@ -21,7 +21,6 @@ fun LoadMoreListHandler(
             val layoutInfo = listState.layoutInfo
             val totalItemsCount = layoutInfo.totalItemsCount
             val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1
-            DebugMiao.log(lastVisibleItemIndex, totalItemsCount)
             lastVisibleItemIndex == (totalItemsCount - buffer)
         }
     }

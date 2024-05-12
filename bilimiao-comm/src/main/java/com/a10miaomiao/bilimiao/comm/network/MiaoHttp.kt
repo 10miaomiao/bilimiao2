@@ -53,14 +53,6 @@ class MiaoHttp(var url: String? = null) {
                 "application/x-www-form-urlencoded".toMediaType()
             )
         }
-        if (DebugMiao.isDebug) {
-            Log.d(TAG, "-----START-$method-----")
-            Log.d(TAG, "URL = $url")
-            formBody?.let {
-                Log.d(TAG, "BODY = $it")
-            }
-            Log.d(TAG, "------END-$method------")
-        }
         val req = requestBuilder.method(method, body)
             .url(url!!)
             .build()
@@ -122,13 +114,9 @@ class MiaoHttp(var url: String? = null) {
 
         inline fun <reified T> Response.gson(isDebug: Boolean = false): T {
             val jsonStr = this.body!!.string()
-            if (isDebug) {
-                DebugMiao.log(jsonStr)
-            }
             try {
                 return Gson().fromJson(jsonStr, object : TypeToken<T>() {}.type)
             } catch (e: IllegalStateException) {
-                DebugMiao.log("GSON解析出错：" + jsonStr)
                 throw e
             }
         }

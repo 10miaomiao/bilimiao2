@@ -71,7 +71,7 @@ object Libraries {
     const val okhttp3 = "com.squareup.okhttp3:okhttp:${Versions.okhttp}"
 //    const val grpcProtobuf = "io.grpc:grpc-protobuf-lite:1.33.0"
 //    const val grpcStub = "io.grpc:grpc-stub:1.33.0"
-    const val pbandkRuntime = "pro.streem.pbandk:pbandk-runtime:$${Versions.pbandk}"
+    const val pbandkRuntime = "pro.streem.pbandk:pbandk-runtime:${Versions.pbandk}"
     const val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
     const val glideCompiler = "com.github.bumptech.glide:compiler:${Versions.glide}"
 

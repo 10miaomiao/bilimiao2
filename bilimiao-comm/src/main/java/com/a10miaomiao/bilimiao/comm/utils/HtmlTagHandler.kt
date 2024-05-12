@@ -86,7 +86,6 @@ class HtmlTagHandler {
 
         private fun handleStartTag(tag: String, attributes: Attributes) {
             val className: String? = attributes.getValue("", "class")
-            DebugMiao.log(className)
             val classNames = if (className?.isNotBlank() == true) {
                 className.split(' ')
             } else { emptyList() }
