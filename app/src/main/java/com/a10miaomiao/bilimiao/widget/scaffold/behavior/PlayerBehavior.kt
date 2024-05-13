@@ -168,7 +168,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                     parent.smallModePlayerCurrentHeight - dy,
                     playerMinHeight,
                 )
-                setPlayerViewHeight(
+                setPlayerViewHeightInSmallMode(
                     parent,
                     child,
                     contentView,
@@ -205,7 +205,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                     parent.smallModePlayerCurrentHeight - dyConsumed,
                     playerMinHeight,
                 )
-                setPlayerViewHeight(
+                setPlayerViewHeightInSmallMode(
                     parent,
                     child,
                     contentView,
@@ -222,7 +222,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                     parent.smallModePlayerCurrentHeight - dyUnconsumed,
                     playerMaxHeight,
                 )
-                setPlayerViewHeight(
+                setPlayerViewHeightInSmallMode(
                     parent,
                     child,
                     contentView,
@@ -244,7 +244,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         behaviorDelegate?.updateWindowSize()
     }
 
-    fun setPlayerViewHeight(
+    fun setPlayerViewHeightInSmallMode(
         parent: ScaffoldView,
         playerView: View,
         contentView: View,
