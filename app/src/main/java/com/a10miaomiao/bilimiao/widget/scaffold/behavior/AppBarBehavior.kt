@@ -138,7 +138,10 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
         nestedScrollAxes: Int,
         type: Int
     ): Boolean {
-        return viewRef?.top != 0 && target.tag != false && nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
+        return viewRef?.top != 0 // AppBar在底部时
+                && parentRef?.showMaskView != true // 未显示遮罩
+                && target.tag != false // 目标View允许时，手动设置targetView的tag控制
+                && nestedScrollAxes == ViewCompat.SCROLL_AXIS_VERTICAL
     }
 
     override fun onNestedScroll(

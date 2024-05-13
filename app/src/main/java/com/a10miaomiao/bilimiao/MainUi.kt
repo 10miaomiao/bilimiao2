@@ -23,6 +23,7 @@ import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MyBottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
@@ -184,10 +185,8 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         addView(mBottomSheetLayout, lParams {
             height = matchParent
             width = matchParent
-            val b = BottomSheetBehavior<View>(ctx, null)
-
-            behavior = b
-            this@MainUi.mBottomSheetBehavior = b
+            mBottomSheetBehavior = MyBottomSheetBehavior(ctx)
+            behavior = mBottomSheetBehavior
         })
     }
 

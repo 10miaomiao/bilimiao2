@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.animation.addListener
 import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.config.config
@@ -163,6 +164,8 @@ class ScaffoldView @JvmOverloads constructor(
 
     val focusContent: View?
         get() = if (focusOnMain) content else subContent
+
+    val showMaskView get() = maskView?.visibility == View.VISIBLE
 
     var player: View? = null
     var playerBehavior: PlayerBehavior? = null
