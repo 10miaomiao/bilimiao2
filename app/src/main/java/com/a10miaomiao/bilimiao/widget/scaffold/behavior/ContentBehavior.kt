@@ -72,8 +72,10 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                         bottom - top
                     }
                     width = right - left
+                    child.translationY = downHeight.toFloat()
                     child.layout(left, top, right, bottom)
                 } else {
+                    child.translationY = 0f // 竖屏模式时在PlayerBehavior控制contentView.translationY, 横屏时恢复
                     height = bottom - top
                     width = right - left
                     child.layout(left, top, right, bottom)
