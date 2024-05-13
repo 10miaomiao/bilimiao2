@@ -8,9 +8,11 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.commponents.dynamic.dynamicCardView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -92,9 +94,10 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
                         .navigate(UserFragment.actionId, args)
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
-                    val args = BangumiDetailFragment.createArguments(id)
                     Navigation.findNavController(it)
-                        .navigate(BangumiDetailFragment.actionId, args)
+                        .navigateToCompose(BangumiDetailPage()) {
+                            this.id set id
+                        }
                 }
                 else -> {
                     toast("未知跳转类型")
@@ -114,9 +117,10 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
                         .navigate(VideoInfoFragment.actionId, args)
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
-                    val args = BangumiDetailFragment.createArguments(item.dynamicContent.id)
                     Navigation.findNavController(it)
-                        .navigate(BangumiDetailFragment.actionId, args)
+                        .navigateToCompose(BangumiDetailPage()) {
+                            this.id set item.dynamicContent.id
+                        }
                 }
                 else -> {
                     toast("未知跳转类型")
