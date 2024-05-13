@@ -20,6 +20,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavHostController
@@ -110,7 +111,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val connection = rememberMyNestedScrollInteropConnection(container ?: LocalView.current)
+                val connection = rememberNestedScrollInteropConnection(container ?: LocalView.current)
                 composeNav = rememberNavController()
                 CompositionLocalProvider(
                     LocalContainerView provides container,
