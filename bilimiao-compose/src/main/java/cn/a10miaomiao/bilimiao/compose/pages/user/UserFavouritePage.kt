@@ -174,12 +174,14 @@ internal fun UserFavouritePageContent() {
                 ) { index ->
                     when(index) {
                         0 -> {
+                            // 创建的
                             UserFavouriteListContent(
                                 showTowPane = it.showTowPane,
                                 folderType = UserFavouriteFolderType.Created,
                             )
                         }
                         1 -> {
+                            // 订阅的
                             UserFavouriteListContent(
                                 showTowPane = it.showTowPane,
                                 folderType = UserFavouriteFolderType.Collected,
@@ -196,11 +198,13 @@ internal fun UserFavouritePageContent() {
             if (media != null) {
                 saveableStateHolder.SaveableStateProvider(media.id) {
                     if (media.type == 21) {
+                        // 合集详情
                         UserSeasonDetailContent(
                             media.id,
                             media.title
                         )
                     } else {
+                        // 收藏详情
                         UserFavouriteDetailContent(
                             media.id,
                             media.title

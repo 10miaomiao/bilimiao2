@@ -1,6 +1,16 @@
 package cn.a10miaomiao.bilimiao.compose.commponents.layout
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -25,11 +35,40 @@ class AutoTwoPaneLayoutState(
     val showTowPane: Boolean,
 )
 
+private val defaultFirstEnter = fadeIn(
+    animationSpec = tween(durationMillis = 200)
+) + slideInHorizontally(
+    initialOffsetX = { -it / 4 },
+    animationSpec = tween(durationMillis = 200)
+)
+private val defaultFirstExit = fadeOut(
+    animationSpec = tween(durationMillis = 200)
+) + slideOutHorizontally(
+    targetOffsetX = { -it / 4 },
+    animationSpec = tween(durationMillis = 200)
+)
+private val defaultSecondEnter = fadeIn(
+    animationSpec = tween(durationMillis = 200)
+) + slideInHorizontally(
+    initialOffsetX = { it / 4 },
+    animationSpec = tween(durationMillis = 200)
+)
+private val defaultSecondExit = fadeOut(
+    animationSpec = tween(durationMillis = 200)
+) + slideOutHorizontally(
+    targetOffsetX = { it / 4 },
+    animationSpec = tween(durationMillis = 200)
+)
+
 @Composable
 fun AutoTwoPaneLayout(
     modifier: Modifier = Modifier,
     first: @Composable (state: AutoTwoPaneLayoutState) -> Unit,
     second: @Composable (state: AutoTwoPaneLayoutState) -> Unit,
+    firstEnter: EnterTransition = defaultFirstEnter,
+    firstExit: ExitTransition = defaultFirstExit,
+    secondEnter: EnterTransition = defaultSecondEnter,
+    secondExit: ExitTransition = defaultSecondExit,
     twoPaneMinWidth: Dp,
     firstPaneMaxWidth: Dp = 0.dp,
     secondPaneMaxWidth: Dp = 0.dp,
@@ -47,7 +86,9 @@ fun AutoTwoPaneLayout(
             content = {
                 Box(Modifier.layoutId(0)) {
                     AnimatedVisibility(
-                        visible = showFirst
+                        visible = showFirst,
+                        enter = firstEnter,
+                        exit = firstExit,
                     ) {
                         first(AutoTwoPaneLayoutState(
                             visible = showFirst,
@@ -57,7 +98,9 @@ fun AutoTwoPaneLayout(
                 }
                 Box(Modifier.layoutId(1)) {
                     AnimatedVisibility(
-                        visible = showSecond
+                        visible = showSecond,
+                        enter = secondEnter,
+                        exit = secondExit,
                     ) {
                         second(AutoTwoPaneLayoutState(
                             visible = showSecond,

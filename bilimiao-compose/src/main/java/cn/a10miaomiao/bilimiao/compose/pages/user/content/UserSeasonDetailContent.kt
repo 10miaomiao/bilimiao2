@@ -36,10 +36,10 @@ import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
-import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItem
-import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
+import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,10 +108,10 @@ private class UserSeasonDetailViewModel(
         }
     }
 
-    fun toVideoDetailPage(item: MediasInfo) {
+    fun toVideoDetailPage(item: bilibili.app.view.v1.Episode) {
         fragment.findNavController()
             .navigate(
-                Uri.parse("bilimiao://video/" + item.id),
+                Uri.parse("bilimiao://video/" + item.aid),
                 defaultNavOptions,
             )
     }
@@ -176,15 +176,15 @@ internal fun UserSeasonDetailContent(
                 columns = GridCells.Adaptive(400.dp),
             ) {
                 items(list) {
-                    VideoItem(
+                    VideoItemBox(
                         title = it.title,
-//                        pic = it.cover,
-//                        upperName = it.author.name,
-//                        playNum = it.stat.view.toString(),
-//                        damukuNum = it.stat.danmaku.toString(),
-//                        duration = NumberUtil.converDuration(it.page.duration),
+                        pic = it.cover,
+                        upperName = it.author?.name,
+                        playNum = it.stat?.view.toString(),
+                        damukuNum = it.stat?.danmaku.toString(),
+                        duration = NumberUtil.converDuration(it.page?.duration ?: 0),
                         onClick = {
-//                            viewModel.toVideoDetailPage(it)
+                            viewModel.toVideoDetailPage(it)
                         }
                     )
                 }
