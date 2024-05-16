@@ -69,12 +69,13 @@ internal fun UserFavouriteListContent(
             onRefresh = { viewModel.refresh(folderType) },
         ) {
             LazyColumn {
-                val selectedMedia = openedMedia ?: list.firstOrNull()
+                val selectedMedia = openedMedia ?: list.firstOrNull()?.takeIf {
+                    folderType == UserFavouriteFolderType.Created
+                }
                 items(list, { it.id }) {
-                    val isSelected =
-                        if (showTowPane && folderType == UserFavouriteFolderType.Created) {
-                            selectedMedia?.id == it.id
-                        } else false
+                    val isSelected = if (showTowPane) {
+                        selectedMedia?.id == it.id
+                    } else false
                     Box(
                         modifier = Modifier.padding(5.dp),
                     ) {

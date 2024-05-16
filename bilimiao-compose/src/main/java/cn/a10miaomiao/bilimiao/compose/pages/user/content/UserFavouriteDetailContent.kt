@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,12 +35,9 @@ import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
-import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItem
-import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
+import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
-import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -51,7 +47,6 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
@@ -196,7 +191,7 @@ internal fun UserFavouriteDetailContent(
                 columns = GridCells.Adaptive(400.dp),
             ) {
                 items(list) {
-                    VideoItem(
+                    VideoItemBox(
                         title = it.title,
                         pic = it.cover,
                         upperName = it.upper.name,
