@@ -325,17 +325,24 @@ class ScaffoldView @JvmOverloads constructor(
         playerBehavior?.holdUpPlayer()
     }
 
+    private var _playerHeightAnimator: ValueAnimator? = null
+
     fun animatePlayerHeight(target: Int) {
-        if (orientation == VERTICAL) {
-            val value = ValueAnimator.ofInt(smallModePlayerCurrentHeight, target)
-            value.duration = 300
-            value.addUpdateListener {
-                smallModePlayerCurrentHeight = value.animatedValue as Int
-                playerBehavior?.updateLayout()
-                player?.requestLayout()
-                focusContent?.translationY = (playerSpaceHeight).toFloat()
+        if (orientation == VERTICAL && smallModePlayerCurrentHeight != target) {
+            _playerHeightAnimator?.cancel()
+            _playerHeightAnimator = ValueAnimator.ofInt(
+                smallModePlayerCurrentHeight,
+                target
+            ).apply {
+                duration = 200
+                addUpdateListener {
+                    smallModePlayerCurrentHeight = it.animatedValue as Int
+                    playerBehavior?.updateLayout()
+                    player?.requestLayout()
+                }
+                start()
             }
-            value.start()
+            contentBehavior?.animateTranslationY(playerSpaceHeight.toFloat())
         }
     }
 

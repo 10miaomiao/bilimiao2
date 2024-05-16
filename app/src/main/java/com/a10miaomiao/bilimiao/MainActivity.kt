@@ -461,7 +461,7 @@ class MainActivity
                     left,
                     0,
                     right,
-                    bottom + config.appBarTitleHeight,
+                    bottom + config.appBarTitleHeight + ui.root.smallModePlayerMinHeight,
                 )
             } else {
                 windowStore.setContentInsets(
