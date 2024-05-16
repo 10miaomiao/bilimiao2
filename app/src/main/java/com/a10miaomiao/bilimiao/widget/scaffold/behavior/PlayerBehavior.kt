@@ -268,7 +268,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
             val contentView = parentRef?.takeIf {
                 it.orientation == ScaffoldView.VERTICAL
             }?.content
-            val childHeight = child.height.toFloat()
             child.pivotY = 0f
             child.pivotX = child.width / 2f
             addUpdateListener { animation ->
@@ -276,13 +275,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                 child.alpha = value
                 child.scaleX = value
                 child.scaleY = value
-                contentView?.translationY = value * childHeight
             }
-            addListener(
-                onEnd = {
-                    contentView?.translationY = childHeight
-                }
-            )
         }.start()
     }
 
@@ -293,10 +286,6 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         ValueAnimator.ofFloat(1f, 0f).apply {
             duration = 200
             interpolator = AccelerateInterpolator()
-            val contentView = parentRef?.takeIf {
-                it.orientation == ScaffoldView.VERTICAL
-            }?.content
-            val childHeight = child.height.toFloat()
             child.pivotY = 0f
             child.pivotX = child.width / 2f
             addUpdateListener { animation ->
@@ -304,12 +293,10 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
                 child.alpha = value
                 child.scaleX = value
                 child.scaleY = value
-                contentView?.translationY = value * childHeight
             }
             addListener(
                 onEnd = {
                     child.layout(0, 0, 0, 0)
-                    contentView?.translationY = 0f
                 }
             )
         }.start()

@@ -51,6 +51,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         child: View,
         layoutDirection: Int
     ): Boolean {
+        this.viewRef = child
         if (parent is ScaffoldView) {
             if (parentRef == null) {
                 parentRef = parent
@@ -62,22 +63,14 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 width = 0
                 child.layout(0, 0, 0, 0)
             } else {
+                height = bottom - top
+                width = right - left
+                child.layout(left, top, right, bottom)
                 if(orientation == ScaffoldView.VERTICAL){
                     val downHeight = parent.playerSpaceHeight
-                    height = if(bottom - top == 0) {
-                        0
-                    } else if(parent.showPlayer) {
-                        bottom - top - parent.smallModePlayerMinHeight - parent.statusBarHeight
-                    } else {
-                        bottom - top
-                    }
-                    width = right - left
-                    child.translationY = downHeight.toFloat()
-                    child.layout(left, top, right, bottom)
+                    animateTranslationY(downHeight.toFloat())
                 } else {
-                    child.translationY = 0f // 竖屏模式时在PlayerBehavior控制contentView.translationY, 横屏时恢复
-                    height = bottom - top
-                    width = right - left
+                    animateTranslationY(0f)
                     child.layout(left, top, right, bottom)
                 }
             }
@@ -90,8 +83,6 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         } else {
             child.layout(0, 0, parent.measuredWidth, parent.measuredHeight)
         }
-
-        this.viewRef = child
         return true
     }
 
@@ -402,5 +393,24 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         }
         parentView.subContentShown = true
         return
+    }
+
+    private var _translationYAnimator: ValueAnimator? = null
+    fun animateTranslationY(translationY: Float) {
+        val child = viewRef ?: return
+        val curTranslationY = child.translationY
+        if (curTranslationY != translationY) {
+            _translationYAnimator?.cancel()
+            _translationYAnimator = ValueAnimator.ofFloat(
+                curTranslationY,
+                translationY
+            ).apply {
+                duration = 200
+                addUpdateListener {
+                    child.translationY = it.animatedValue as Float
+                }
+                start()
+            }
+        }
     }
 }
