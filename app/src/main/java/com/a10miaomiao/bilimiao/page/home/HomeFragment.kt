@@ -11,21 +11,33 @@ import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
-import cn.a10miaomiao.miao.binding.android.view.*
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm.connectStore
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.flexboxLayout
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.loadImageUrl
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.miaoStore
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.region.RegionFragment
@@ -40,9 +52,22 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
-import splitties.views.*
-import splitties.views.dsl.core.*
+import splitties.views.backgroundColor
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.space
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.imageResource
+import splitties.views.padding
+import splitties.views.textColorResource
+import splitties.views.verticalPadding
 
 class HomeFragment : Fragment(), DIAware {
 
@@ -78,12 +103,12 @@ class HomeFragment : Fragment(), DIAware {
         val userInfo = viewModel.userStore.state.info
         if (userInfo != null) {
             // 跳转个人中心
-            val nav = Navigation.findNavController(it)
+            val nav = Navigation.findNavController(it).currentOrSelf()
             val args = UserFragment.createArguments(userInfo.mid.toString())
             nav.navigate(UserFragment.actionId, args)
         } else {
             // 跳转登录
-            val nav = Navigation.findNavController(it)
+            val nav = Navigation.findNavController(it).currentOrSelf()
             nav.navigateToCompose(LoginPage())
         }
     }
@@ -91,7 +116,7 @@ class HomeFragment : Fragment(), DIAware {
     val handleHeaderLongClick = View.OnLongClickListener{
         if (viewModel.userStore.state.info == null) {
             // 跳转登录
-            val nav = Navigation.findNavController(it)
+            val nav = Navigation.findNavController(it).currentOrSelf()
             nav.navigateToCompose(LoginPage())
             true
         } else {
@@ -149,7 +174,7 @@ class HomeFragment : Fragment(), DIAware {
 
     val regionItemClick = OnItemClickListener { baseQuickAdapter, view, i  ->
         val regions = viewModel.regionStore.state.regions
-        val nav = Navigation.findNavController(view)
+        val nav = Navigation.findNavController(view).currentOrSelf()
         val args = RegionFragment.createArguments(regions[i])
         nav.navigate(RegionFragment.actionId, args)
     }

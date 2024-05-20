@@ -1,6 +1,5 @@
 package com.a10miaomiao.bilimiao.page.video.comment
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,9 +22,14 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.BiliNavigation
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -33,8 +37,20 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.recycler.*
-import com.a10miaomiao.bilimiao.comm.utils.*
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
+import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
+import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
+import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler.footerViews
+import com.a10miaomiao.bilimiao.comm.recycler.headerViews
+import com.a10miaomiao.bilimiao.comm.recycler.lParams
+import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.ImageSaveUtil
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -60,7 +76,10 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.toast.toast
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.margin
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 
 class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
@@ -144,7 +163,9 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
                     title = ""
                 )
                 val args = SendCommentFragment.createArguments(params)
-                findNavController().navigate(SendCommentFragment.actionId, args)
+                findNavController().pointerOrSelf()
+                    .stopSameIdAndArgs(SendCommentFragment.id,args)
+                    ?.navigate(SendCommentFragment.actionId, args)
             }
             MenuKeys.delete -> {
                 viewModel.delete()
@@ -213,8 +234,9 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         when (urlType) {
             "AV", "BV" -> {
                 val args = VideoInfoFragment.createArguments(urlId)
-                Navigation.findNavController(view)
-                    .navigate(VideoInfoFragment.actionId, args)
+                Navigation.findNavController(view).pointerOrSelf()
+                    .stopSameIdAndArgs(VideoInfoFragment.id, args)
+                    ?.navigate(VideoInfoFragment.actionId, args)
             }
         }
     }
@@ -237,14 +259,15 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
             title = ""
         )
         val args = SendCommentFragment.createArguments(params)
-        findNavController().navigate(SendCommentFragment.actionId, args)
+        findNavController().currentOrSelf()
+            .navigate(SendCommentFragment.actionId, args)
     }
 
     private val handleUserClick = View.OnClickListener {
         val id = it.tag
         if (id != null && id is String) {
             val args = UserFragment.createArguments(id)
-            Navigation.findNavController(it)
+            Navigation.findNavController(it).currentOrSelf()
                 .navigate(UserFragment.actionId, args)
         }
     }

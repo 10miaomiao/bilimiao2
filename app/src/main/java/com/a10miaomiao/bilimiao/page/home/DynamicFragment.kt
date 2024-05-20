@@ -11,15 +11,27 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
+import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
+import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler.footerViews
+import com.a10miaomiao.bilimiao.comm.recycler.lParams
+import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.dynamic.dynamicCardView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -27,11 +39,12 @@ import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.instance
 import splitties.toast.toast
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
-import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.wrapContent
 
 class DynamicFragment: RecyclerViewFragment(), DIAware {
 
@@ -90,11 +103,12 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
             when(type) {
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
                     val args = UserFragment.createArguments(id)
-                    Navigation.findNavController(it)
-                        .navigate(UserFragment.actionId, args)
+                    Navigation.findNavController(it).pointerOrSelf()
+                        .stopSameIdAndArgs(UserFragment.id,args)
+                        ?.navigate(UserFragment.actionId, args)
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
-                    Navigation.findNavController(it)
+                    Navigation.findNavController(it).pointerOrSelf()
                         .navigateToCompose(BangumiDetailPage()) {
                             this.id set id
                         }
@@ -113,11 +127,12 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
             when(item.dynamicType) {
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
                     val args = VideoInfoFragment.createArguments(item.dynamicContent.id)
-                    Navigation.findNavController(it)
-                        .navigate(VideoInfoFragment.actionId, args)
+                    Navigation.findNavController(it).pointerOrSelf()
+                        .stopSameIdAndArgs(VideoInfoFragment.id, args)
+                        ?.navigate(VideoInfoFragment.actionId, args)
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
-                    Navigation.findNavController(it)
+                    Navigation.findNavController(it).pointerOrSelf()
                         .navigateToCompose(BangumiDetailPage()) {
                             this.id set item.dynamicContent.id
                         }

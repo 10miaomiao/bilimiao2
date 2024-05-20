@@ -21,17 +21,30 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.mypage.*
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.connectUi
+import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
@@ -107,10 +120,11 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
 
     override fun onSearchSelfPage(context: Context, keyword: String) {
         if (viewModel.keyword.isBlank()) {
-            findNavController().navigate(
-                HistoryFragment.actionId,
-                HistoryFragment.createArguments(keyword,)
-            )
+            findNavController().currentOrSelf()
+                .navigate(
+                    HistoryFragment.actionId,
+                    HistoryFragment.createArguments(keyword,)
+                )
         } else {
             viewModel.keyword = keyword
             pageConfig.notifyConfigChanged()
@@ -145,12 +159,12 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val nav = Navigation.findNavController(view)
+        val nav = Navigation.findNavController(view).pointerOrSelf()
         when(item.business) {
             "archive" -> {
                 val args = VideoInfoFragment.createArguments(item.oid.toString())
-                Navigation.findNavController(view)
-                    .navigate(VideoInfoFragment.actionId, args)
+                nav.stopSameIdAndArgs(VideoInfoFragment.id,args)
+                    ?.navigate(VideoInfoFragment.actionId, args)
             }
             "pgc" -> {
                 nav.navigateToCompose(BangumiDetailPage()) {

@@ -26,6 +26,9 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
@@ -108,14 +111,17 @@ private class ReplyMessageContentModel(
     fun toUserPage(item: ReplyMessageInfo) {
         val mid = item.user.mid
         val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        fragment.findNavController().currentOrSelf()
+            .navigate(uri, defaultNavOptions)
     }
 
     fun toMessagePage(item: ReplyMessageInfo) {
         // 评论
         val sourceId = item.item.source_id
         val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        fragment.findNavController().pointerOrSelf()
+            .stopSameUrl(uri)
+            ?.navigate(uri, defaultNavOptions)
     }
 
     fun toDetailPage(item: ReplyMessageInfo) {
@@ -125,19 +131,25 @@ private class ReplyMessageContentModel(
             val rootId = item.item.root_id
             val sourceId = item.item.source_id
             val uri = Uri.parse("bilimiao://video/comment/${rootId}/detail/${sourceId}")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            fragment.findNavController().pointerOrSelf()
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
             // 弹幕
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            fragment.findNavController().pointerOrSelf()
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         } else if (type == "video") {
             // 视频
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            fragment.findNavController().pointerOrSelf()
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         }
     }
 }

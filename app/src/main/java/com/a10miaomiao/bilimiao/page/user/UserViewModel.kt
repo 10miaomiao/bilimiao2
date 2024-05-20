@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.findNavController
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
@@ -17,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -129,8 +129,7 @@ class UserViewModel(
             setTitle("确定退出登录，喵？")
             setNegativeButton("确定退出") { dialog, which ->
                 userStore.logout()
-                val nav = (activity as? MainActivity)?.pointerNav?.navController
-                    ?: activity.findNavController(R.id.nav_host_fragment)
+                val nav = activity.findNavController(R.id.nav_host_fragment).currentOrSelf()
                 nav.popBackStack()
                 PopTip.show("已退出登录了喵")
             }

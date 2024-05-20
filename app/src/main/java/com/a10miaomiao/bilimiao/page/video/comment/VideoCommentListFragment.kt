@@ -22,9 +22,14 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.BiliNavigation
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.connectUi
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -32,6 +37,9 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -39,6 +47,7 @@ import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.ImageSaveUtil
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
@@ -149,7 +158,9 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
                     content = ""
                 )
                 val args = SendCommentFragment.createArguments(params)
-                findNavController().navigate(SendCommentFragment.actionId, args)
+                findNavController().pointerOrSelf()
+                    .stopSameIdAndArgs(SendCommentFragment.id,args)
+                    ?.navigate(SendCommentFragment.actionId, args)
             }
         }
     }
@@ -224,7 +235,7 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
         when (urlType) {
             "AV", "BV" -> {
                 val args = VideoInfoFragment.createArguments(urlId)
-                Navigation.findNavController(view)
+                Navigation.findNavController(view).currentOrSelf()
                     .navigate(VideoInfoFragment.actionId, args)
             }
         }
@@ -234,7 +245,7 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
         val id = it.tag
         if (id != null && id is String) {
             val args = UserFragment.createArguments(id)
-            Navigation.findNavController(it)
+            Navigation.findNavController(it).currentOrSelf()
                 .navigate(UserFragment.actionId, args)
         }
     }
@@ -246,7 +257,7 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = adapter.getItem(position) as VideoCommentViewInfo
         val args = VideoCommentDetailFragment.createArguments(position, viewModel.upMid, item)
-        Navigation.findNavController(view)
+        Navigation.findNavController(view).currentOrSelf()
             .navigate(VideoCommentDetailFragment.actionId, args)
     }
 

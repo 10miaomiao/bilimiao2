@@ -1,24 +1,13 @@
 package com.a10miaomiao.bilimiao.comm.navigation
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
 import android.view.View
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import com.a10miaomiao.bilimiao.MainActivity
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.SearchActivity
-import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
-import com.a10miaomiao.bilimiao.page.start.StartFragment
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
-import java.lang.Exception
 
 fun NavController.tryPopBackStack(): Boolean {
     return try {
@@ -29,22 +18,15 @@ fun NavController.tryPopBackStack(): Boolean {
     }
 }
 
-@SuppressLint("RestrictedApi")
 fun NavController.navigateToCompose(
     url: String,
     navOptions: NavOptions? = null,
 ) {
-    val curFragment = (context as? MainActivity)
-        ?.getPrimaryNavigationFragment(this)
+    val curFragment = findPrimaryNavigationFragment()
     if (curFragment is ComposeFragment) {
-        val composeNav = curFragment.composeNav
-        val arguments = composeNav.currentBackStackEntry?.arguments
-        val intent = arguments?.getParcelable<Intent>(NavController.KEY_DEEP_LINK_INTENT)
-        val curUrl = intent?.data?.toString()
-        if (curUrl != null && curUrl == NavDestination.createRoute(url)) {
-            return
-        }
-        composeNav.navigate(url)
+        curFragment.composeNav
+            .stopSameUrlCompose(url)
+            ?.navigate(url)
         return
     }
     navigate(

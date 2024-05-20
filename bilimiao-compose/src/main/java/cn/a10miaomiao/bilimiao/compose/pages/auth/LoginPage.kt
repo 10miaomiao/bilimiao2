@@ -4,13 +4,34 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -40,6 +61,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.WebKeyInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -147,7 +169,7 @@ internal class LoginPageViewModel(
                             setNegativeButton("取消", null)
                             setPositiveButton("请往验证") { _, _ ->
                                 val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
-                                val nav = fragment.findComposeNavController()
+                                val nav = fragment.findComposeNavController().currentOrSelf()
                                 if (params.containsKey("tmp_token")
                                     && params.containsKey("request_id")
                                     && params.containsKey("source")) {
@@ -163,9 +185,10 @@ internal class LoginPageViewModel(
                                 }
                             }
                             setNeutralButton("使用原始网页") { _, _ ->
-                                fragment.findNavController().navigate(
-                                    Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
-                                )
+                                fragment.findNavController().currentOrSelf()
+                                    .navigate(
+                                        Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
+                                    )
                             }
                         }
                     } else {
@@ -263,12 +286,12 @@ internal class LoginPageViewModel(
     }
 
     fun toH5LoginPage() {
-        fragment.findNavController()
+        fragment.findNavController().currentOrSelf()
             .navigate(Uri.parse("bilimiao://auth/h5"))
     }
 
     fun toQrLogin() {
-        val nav = fragment.findComposeNavController()
+        val nav = fragment.findComposeNavController().currentOrSelf()
         nav.navigate(QrCodeLoginPage())
     }
 }

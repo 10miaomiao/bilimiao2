@@ -13,10 +13,11 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
@@ -130,12 +131,13 @@ object BiliNavigation {
             || "b23.tv" in host
             || "b23.snm0516.aisee.tv" in host) {
             // b站网页使用内部浏览器打开
-            val nav = (activity as? MainActivity)?.pointerNav?.navController
-                ?: activity.findNavController(R.id.nav_host_fragment)
-            nav.navigate(
-                WebFragment.actionId,
-                WebFragment.createArguments(uri.toString())
-            )
+            val nav = activity.findNavController(R.id.nav_host_fragment).pointerOrSelf()
+            val args = WebFragment.createArguments(uri.toString())
+            nav.stopSameIdAndArgs(WebFragment.id,args)
+                ?.navigate(
+                    WebFragment.actionId,
+                    args
+                )
         } else {
             // 非B站网页使用外部浏览器打开
             val typedValue = TypedValue()

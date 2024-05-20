@@ -5,9 +5,12 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import com.a10miaomiao.bilimiao.comm.navigation.NavHosts
+import com.a10miaomiao.bilimiao.comm.navigation.inNavHosts
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrlCompose
 
 abstract class ComposePage {
 
@@ -67,9 +70,22 @@ abstract class ComposePage {
 
 }
 
-fun NavHostController.navigate(page: ComposePage) = navigate(page.url())
+fun NavController.navigateToCompose(url:String){
+    //是compose内部导航则直接跳转
+    //否则通过接口跳转
+    if(inNavHosts()){
+        apply{
+            with(context as? NavHosts ?: return){
+                navigateCompose(url)
+            }
+        }
+    } else {
+        stopSameUrlCompose(url)?.navigate(url)
+    }
+}
+fun NavController.navigate(page: ComposePage) = navigateToCompose(page.url())
 
-inline fun <T : ComposePage> NavHostController.navigate(
+inline fun <T : ComposePage> NavController.navigate(
     page: T,
     initArgs: T.() -> Unit,
 ) = navigate(page.also(initArgs))

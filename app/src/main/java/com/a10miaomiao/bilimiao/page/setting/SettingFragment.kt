@@ -19,19 +19,24 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
-import com.a10miaomiao.bilimiao.MainActivity
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.DensitySettingActivity
-import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
-import com.a10miaomiao.bilimiao.page.setting.*
+import com.a10miaomiao.bilimiao.page.setting.AboutFragment
+import com.a10miaomiao.bilimiao.page.setting.DanmakuSettingFragment
+import com.a10miaomiao.bilimiao.page.setting.FlagsSeetingFragment
+import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
+import com.a10miaomiao.bilimiao.page.setting.ThemeSettingFragment
+import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.store.RegionStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -39,10 +44,15 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.Maxr1998.modernpreferences.Preference
 import de.Maxr1998.modernpreferences.PreferencesAdapter
-import de.Maxr1998.modernpreferences.helpers.*
-import org.kodein.di.*
+import de.Maxr1998.modernpreferences.helpers.categoryHeader
+import de.Maxr1998.modernpreferences.helpers.onClick
+import de.Maxr1998.modernpreferences.helpers.pref
+import de.Maxr1998.modernpreferences.helpers.screen
+import de.Maxr1998.modernpreferences.helpers.switch
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import splitties.toast.toast
-import splitties.views.dsl.core.*
 import splitties.views.dsl.recyclerview.recyclerView
 import java.io.BufferedReader
 import java.io.File
@@ -212,7 +222,7 @@ class SettingFragment : Fragment(), DIAware, MyPage,
             title = "切换主题"
             summary = "库洛里多创造的库洛牌啊，请你舍弃旧形象，以小樱之名命令你，封印解除！！！"
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigate(ThemeSettingFragment.actionId)
                 true
             }
@@ -232,7 +242,7 @@ class SettingFragment : Fragment(), DIAware, MyPage,
             title = "首页设置"
             summary = "整个宇宙将为你闪烁"
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigate(HomeSettingFragment.actionId)
                 true
             }
@@ -242,7 +252,7 @@ class SettingFragment : Fragment(), DIAware, MyPage,
             title = "播放设置"
             summary = "咖啡拿铁,咖啡摩卡,卡布奇诺!"
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigate(VideoSettingFragment.actionId)
                 true
             }
@@ -252,7 +262,7 @@ class SettingFragment : Fragment(), DIAware, MyPage,
             title = "弹幕设置"
             summary = "相信的心就是你的魔法"
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigate(DanmakuSettingFragment.actionId)
                 true
             }
@@ -262,7 +272,7 @@ class SettingFragment : Fragment(), DIAware, MyPage,
             title = "屏蔽管理"
             summary = "对时光机、首页推荐和热门生效"
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigateToCompose(FilterSettingPage())
                 true
             }
@@ -289,7 +299,7 @@ class SettingFragment : Fragment(), DIAware, MyPage,
             title = "实验性功能"
             summary = "自然选择号，前进四！"
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigate(FlagsSeetingFragment.actionId)
                 true
             }
@@ -307,7 +317,7 @@ class SettingFragment : Fragment(), DIAware, MyPage,
             title = "关于"
             summary = "版本：$version"
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigate(AboutFragment.actionId)
                 true
             }

@@ -34,7 +34,6 @@ import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.activity.QRCodeActivity
 import com.a10miaomiao.bilimiao.activity.SearchActivity
@@ -54,6 +53,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -69,8 +69,8 @@ import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.badgeTextView
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.rcImageView
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
@@ -255,8 +255,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             } else {
                 viewLifecycleOwner.lifecycleScope.launch {
                     withStarted {
-                        val nav = (activity as? MainActivity)?.pointerNav?.navController
-                            ?: activity.findNavController(R.id.nav_host_fragment)
+                        val nav = activity.findNavController(R.id.nav_host_fragment).currentOrSelf()
                         if (!BiliNavigation.navigationTo(nav, text)) {
                             BiliNavigation.navigationToWeb(activity, text)
                         }
@@ -271,8 +270,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handlePlayerCardDetailClick = View.OnClickListener {
         val playerState = viewModel.playerStore.state
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
         if (playerState.sid.isNotBlank()) {
             nav.navigateToCompose(BangumiDetailPage()) {
                 id set playerState.sid
@@ -292,8 +290,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private val handleUserClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
         val userStore = viewModel.userStore
         if (userStore.isLogin()) {
             val mid = userStore.state.info?.mid ?: return@OnClickListener
@@ -308,8 +305,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handlePlayListClick = View.OnClickListener {
         val activity = requireActivity()
         val scaffoldView = activity.getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
 //        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
         nav.navigateToCompose(PlayListPage())
         scaffoldView.closeDrawer()
@@ -317,8 +313,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private val handleMessageClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
         nav.navigateToCompose(MessagePage())
         scaffoldView.closeDrawer()
     }
@@ -360,8 +355,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             .setPopEnterAnim(R.anim.miao_fragment_close_enter)
             .setPopExitAnim(R.anim.miao_fragment_close_exit)
             .build()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
         val scaffoldView = requireActivity().getScaffoldView()
         var pageUrl = item.pageUrl
         if (item.isNeedAuth) {

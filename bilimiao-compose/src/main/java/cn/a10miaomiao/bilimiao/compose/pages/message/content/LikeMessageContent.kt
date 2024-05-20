@@ -4,9 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,12 +22,12 @@ import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.commponents.MessageItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.message.AtMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
-import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
-import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
@@ -113,7 +111,8 @@ private class LikeMessageContentModel(
     fun toUserPage(item: LikeMessageInfo) {
         val mid = item.users[0].mid
         val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        fragment.findNavController().currentOrSelf()
+            .navigate(uri, defaultNavOptions)
     }
 
     fun toDetailPage(item: LikeMessageInfo) {
@@ -122,7 +121,9 @@ private class LikeMessageContentModel(
             // 评论
             val id = item.item.item_id
             val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            fragment.findNavController().pointerOrSelf()
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
@@ -131,7 +132,9 @@ private class LikeMessageContentModel(
             // 视频
             val aid = item.item.item_id
             val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            fragment.findNavController().pointerOrSelf()
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         }
     }
 }
