@@ -3,7 +3,11 @@ package com.a10miaomiao.bilimiao.page.search
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.*
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.CompoundButton
 import android.widget.EditText
@@ -12,24 +16,33 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavType
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
-import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.miao.binding.android.view.*
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
+import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.flexboxLayout
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInNestedScrollView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
@@ -46,9 +59,23 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.toast.toast
-import splitties.views.*
-import splitties.views.dsl.core.*
+import splitties.views.backgroundColor
+import splitties.views.bottomPadding
+import splitties.views.dsl.core.editText
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.radioButton
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.verticalMargin
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.horizontalPadding
+import splitties.views.padding
 
 class SearchStartFragment : Fragment(), DIAware, MyPage {
 
@@ -198,16 +225,14 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
                 "AV" -> {
 //                    scaffoldApp.closeSearchDrawer()
 //                    Navigation.findNavController(view).popBackStack()
-                    val nav = (activity as? MainActivity)?.pointerNav?.navController
-                        ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                    val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
                     val args = VideoInfoFragment.createArguments(item.value)
                     nav.navigate(VideoInfoFragment.actionId, args)
                 }
                 "SS" -> {
 //                    scaffoldApp.closeSearchDrawer()
 //                    Navigation.findNavController(view).popBackStack()
-                    val nav = (activity as? MainActivity)?.pointerNav?.navController
-                        ?: requireActivity().findNavController(R.id.nav_host_fragment)
+                    val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
                     val args = BangumiDetailFragment.createArguments(item.value)
                     nav.navigate(BangumiDetailFragment.actionId, args)
                 }

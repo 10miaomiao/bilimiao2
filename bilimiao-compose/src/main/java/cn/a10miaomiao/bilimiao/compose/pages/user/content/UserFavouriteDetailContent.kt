@@ -39,6 +39,7 @@ import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -124,7 +125,7 @@ private class UserFavouriteDetailViewModel(
     }
 
     fun toVideoDetailPage(item: MediasInfo) {
-        fragment.findNavController()
+        fragment.findNavController().pointerOrSelf()
             .navigate(
                 Uri.parse("bilimiao://video/" + item.id),
                 defaultNavOptions,

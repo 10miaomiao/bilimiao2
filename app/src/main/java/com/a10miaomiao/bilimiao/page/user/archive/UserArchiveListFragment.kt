@@ -18,13 +18,23 @@ import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
-import com.a10miaomiao.bilimiao.comm.mypage.*
+import com.a10miaomiao.bilimiao.comm.connectStore
+import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
+import com.a10miaomiao.bilimiao.comm.tabLayout
+import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.menu.CheckPopupMenu
 import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -33,7 +43,12 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import splitties.experimental.InternalSplittiesApi
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.wrapContent
 
 class UserArchiveListFragment : Fragment(), DIAware, MyPage {
 
@@ -93,14 +108,15 @@ class UserArchiveListFragment : Fragment(), DIAware, MyPage {
     }
 
     override fun onSearchSelfPage(context: Context, keyword: String) {
-        findNavController().navigate(
-            UserSearchArchiveListFragment.actionId,
-            UserSearchArchiveListFragment.createArguments(
-                viewModel.id,
-                viewModel.name ?: "",
-                keyword,
+        findNavController().currentOrSelf()
+            .navigate(
+                UserSearchArchiveListFragment.actionId,
+                UserSearchArchiveListFragment.createArguments(
+                    viewModel.id,
+                    viewModel.name ?: "",
+                    keyword,
+                )
             )
-        )
     }
 
     override val di: DI by lazyUiDi(ui = { ui }) {

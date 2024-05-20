@@ -11,21 +11,26 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
-import androidx.navigation.fragment.NavHostFragment
-import cn.a10miaomiao.miao.binding.android.view.*
+import cn.a10miaomiao.miao.binding.android.view._bottomPadding
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._imageResource
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.MainActivity
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm.connectUi
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.NavHosts
+import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -34,7 +39,16 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.horizontalMargin
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.margin
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.wrapContent
 
 class VideoCoinFragment : Fragment(), DIAware, MyPage {
 
@@ -86,9 +100,7 @@ class VideoCoinFragment : Fragment(), DIAware, MyPage {
     }
 
     val handleConfirmClick = View.OnClickListener {
-        val navHostFragment = (activity as? MainActivity)?.currentNav
-            ?: requireActivity().supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navHostFragment = (activity as? NavHosts)?.currentNavHostFragment ?: return@OnClickListener
         val fragment = navHostFragment.childFragmentManager.primaryNavigationFragment
         if (fragment is VideoInfoFragment) {
             fragment.confirmCoin(coinNum)

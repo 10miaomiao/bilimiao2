@@ -1,5 +1,8 @@
-import com.google.protobuf.gradle.*
-import cn.a10miaomiao.bilimiao.build.*
+
+import cn.a10miaomiao.bilimiao.build.Libraries
+import cn.a10miaomiao.bilimiao.build.Versions
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.proto
 import java.nio.file.Paths
 
 plugins {
@@ -95,6 +98,7 @@ dependencies {
     implementation(Libraries.lifecycle)
     implementation(Libraries.lifecycleViewModel)
     implementation(Libraries.browser)
+    implementation(Libraries.navigationFragment)
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi)

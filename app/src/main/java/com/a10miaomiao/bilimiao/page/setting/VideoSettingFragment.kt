@@ -25,16 +25,23 @@ import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import de.Maxr1998.modernpreferences.PreferencesAdapter
-import de.Maxr1998.modernpreferences.helpers.*
+import de.Maxr1998.modernpreferences.helpers.categoryHeader
+import de.Maxr1998.modernpreferences.helpers.onClick
+import de.Maxr1998.modernpreferences.helpers.pref
+import de.Maxr1998.modernpreferences.helpers.screen
+import de.Maxr1998.modernpreferences.helpers.seekBar
+import de.Maxr1998.modernpreferences.helpers.singleChoice
+import de.Maxr1998.modernpreferences.helpers.switch
 import de.Maxr1998.modernpreferences.preferences.SwitchPreference
 import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
@@ -258,7 +265,7 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             summary = "滴，出差卡"
 
             onClick {
-                val nav = findNavController()
+                val nav = findNavController().currentOrSelf()
                 nav.navigateToCompose(ProxySettingPage())
                 true
             }

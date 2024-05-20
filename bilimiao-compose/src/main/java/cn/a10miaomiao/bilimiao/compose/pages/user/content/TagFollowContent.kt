@@ -52,6 +52,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserTagSetDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -271,7 +272,7 @@ private class TagFollowContentModel(
     }
 
     fun toUserDetailPage(id: String) {
-        val nav = fragment.findNavController()
+        val nav = fragment.findNavController().pointerOrSelf()
         nav.navigate(
             "bilimiao://user/$id".toUri(),
             defaultNavOptions

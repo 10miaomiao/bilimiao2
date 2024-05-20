@@ -1,26 +1,22 @@
 package com.a10miaomiao.bilimiao.page.search
 
-import android.content.Context
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.a10miaomiao.bilimiao.MainActivity
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.db.SearchHistoryDB
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONException
 import org.json.JSONObject
 import org.json.JSONTokener
 import org.kodein.di.DI
@@ -121,8 +117,7 @@ class SearchStartViewModel (
         searchHistoryDB.insertHistory(keyword)
         activity.getScaffoldView().closeDrawer()
         if (searchMode == 0) {
-            val nav = (activity as? MainActivity)?.pointerNav?.navController
-                ?: activity.findNavController(R.id.nav_host_fragment)
+            val nav = activity.findNavController(R.id.nav_host_fragment).currentOrSelf()
             val args = bundleOf(
                 MainNavArgs.text to keyword
             )

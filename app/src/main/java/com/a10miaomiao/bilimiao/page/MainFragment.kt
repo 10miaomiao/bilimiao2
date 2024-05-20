@@ -19,19 +19,31 @@ import androidx.navigation.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
-import cn.a10miaomiao.miao.binding.android.view.*
+import cn.a10miaomiao.miao.binding.android.view._height
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
-import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.dsl.addOnDoubleClickTabListener
-import com.a10miaomiao.bilimiao.comm.mypage.*
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.tabLayout
+import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -42,9 +54,16 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
-import org.kodein.di.*
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import splitties.experimental.InternalSplittiesApi
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.space
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.wrapContent
 
 
 class MainFragment : Fragment(), DIAware, MyPage {
@@ -92,8 +111,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = requireActivity().findNavController(R.id.nav_host_fragment).currentOrSelf()
         when (menuItem.key) {
             MenuKeys.setting -> {
                 val scaffoldApp = requireActivity().getScaffoldView()

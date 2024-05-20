@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
@@ -19,10 +18,13 @@ import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._topPadding
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.connectUi
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -31,17 +33,19 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
@@ -120,13 +124,14 @@ class UserFavouriteDetailFragment : Fragment(), DIAware, MyPage {
 
     override fun onSearchSelfPage(context: Context, keyword: String) {
         if (viewModel.keyword.isBlank()) {
-            findNavController().navigate(
-                UserFavouriteDetailFragment.actionId,
-                UserFavouriteDetailFragment.createArguments(
-                    viewModel.id,
-                    viewModel.name,
-                    keyword
-                )
+            findNavController().currentOrSelf()
+                .navigate(
+                    UserFavouriteDetailFragment.actionId,
+                    UserFavouriteDetailFragment.createArguments(
+                        viewModel.id,
+                        viewModel.name,
+                        keyword
+                    )
             )
         } else {
             viewModel.keyword = keyword
@@ -163,7 +168,7 @@ class UserFavouriteDetailFragment : Fragment(), DIAware, MyPage {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
         val args = VideoInfoFragment.createArguments(item.id)
-        Navigation.findNavController(view)
+        Navigation.findNavController(view).pointerOrSelf()
             .navigate(VideoInfoFragment.actionId, args)
     }
 

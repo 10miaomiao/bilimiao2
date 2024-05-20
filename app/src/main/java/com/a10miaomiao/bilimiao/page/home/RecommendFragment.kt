@@ -9,10 +9,25 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.BiliNavigation
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
+import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
-import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
+import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
+import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
+import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler.footerViews
+import com.a10miaomiao.bilimiao.comm.recycler.lParams
+import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.miniVideoItem
@@ -26,7 +41,10 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import splitties.dimensions.dip
 import splitties.views.backgroundColor
-import splitties.views.dsl.core.*
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.wrapContent
 
 class RecommendFragment: RecyclerViewFragment(), DIAware {
 
@@ -63,7 +81,7 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
     }
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
-        val nav = Navigation.findNavController(view)
+        val nav = Navigation.findNavController(view).pointerOrSelf()
         val item = viewModel.list.data[position]
 
         if (item.goto == "av" || item.goto == "vertical_av") {
