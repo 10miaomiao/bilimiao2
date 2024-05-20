@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
@@ -86,7 +87,8 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
 
         if (item.goto == "av" || item.goto == "vertical_av") {
             val args = VideoInfoFragment.createArguments(item.param)
-            nav.navigate(VideoInfoFragment.actionId, args)
+            nav.stopSameIdAndArgs(VideoInfoFragment.id, args)
+                ?.navigate(VideoInfoFragment.actionId, args)
         } else if (item.goto == "bangumi") {
             nav.navigateToCompose(BangumiDetailPage()) {
                 epId set item.param

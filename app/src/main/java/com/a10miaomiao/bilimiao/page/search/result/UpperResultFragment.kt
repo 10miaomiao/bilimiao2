@@ -17,6 +17,7 @@ import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -90,7 +91,8 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
         val item = viewModel.list.data[position]
         val args = UserFragment.createArguments(item.param)
         Navigation.findNavController(view).pointerOrSelf()
-            .navigate(UserFragment.actionId, args)
+            .stopSameIdAndArgs(UserFragment.id,args)
+            ?.navigate(UserFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<SearchUpperInfo> { item, index ->

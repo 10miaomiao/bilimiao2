@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
@@ -121,7 +122,8 @@ private class LikeMessageContentModel(
             val id = item.item.item_id
             val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
             fragment.findNavController().pointerOrSelf()
-                .navigate(uri, defaultNavOptions)
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
@@ -131,7 +133,8 @@ private class LikeMessageContentModel(
             val aid = item.item.item_id
             val uri = Uri.parse("bilimiao://video/$aid")
             fragment.findNavController().pointerOrSelf()
-                .navigate(uri, defaultNavOptions)
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         }
     }
 }

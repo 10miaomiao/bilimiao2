@@ -58,6 +58,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -250,7 +251,8 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                         info.pic,
                         info.owner.name,
                     )
-                    nav.navigate(VideoCommentListFragment.actionId, args)
+                    nav.stopSameIdAndArgs(VideoCommentListFragment.id,args)
+                        ?.navigate(VideoCommentListFragment.actionId, args)
                 }
             }
             2 -> {

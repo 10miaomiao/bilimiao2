@@ -38,6 +38,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -162,7 +163,8 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
         when(item.business) {
             "archive" -> {
                 val args = VideoInfoFragment.createArguments(item.oid.toString())
-                nav.navigate(VideoInfoFragment.actionId, args)
+                nav.stopSameIdAndArgs(VideoInfoFragment.id,args)
+                    ?.navigate(VideoInfoFragment.actionId, args)
             }
             "pgc" -> {
                 nav.navigateToCompose(BangumiDetailPage()) {

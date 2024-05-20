@@ -22,6 +22,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -148,7 +149,8 @@ class VideoResultFragment : BaseResultFragment(), DIAware {
         val item = viewModel.list.data[position]
         val args = VideoInfoFragment.createArguments(item.param)
         Navigation.findNavController(view).pointerOrSelf()
-            .navigate(VideoInfoFragment.actionId, args)
+            .stopSameIdAndArgs(VideoInfoFragment.id, args)
+            ?.navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<SearchVideoInfo> { item, index ->

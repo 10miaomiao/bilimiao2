@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -110,7 +111,8 @@ class UserFavouriteListFragment : Fragment(), DIAware, MyPage {
         val item = viewModel.list.data[position]
         val args = UserFavouriteDetailFragment.createArguments(item.id, item.title)
         Navigation.findNavController(view).pointerOrSelf()
-            .navigate(UserFavouriteDetailFragment.actionId, args)
+            .stopSameIdAndArgs(UserFavouriteDetailFragment.id,args)
+            ?.navigate(UserFavouriteDetailFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<MediaListInfo> { item, index ->

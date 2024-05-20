@@ -39,6 +39,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -163,7 +164,8 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
                 )
                 val args = SendCommentFragment.createArguments(params)
                 findNavController().pointerOrSelf()
-                    .navigate(SendCommentFragment.actionId, args)
+                    .stopSameIdAndArgs(SendCommentFragment.id,args)
+                    ?.navigate(SendCommentFragment.actionId, args)
             }
             MenuKeys.delete -> {
                 viewModel.delete()
@@ -233,7 +235,8 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
             "AV", "BV" -> {
                 val args = VideoInfoFragment.createArguments(urlId)
                 Navigation.findNavController(view).pointerOrSelf()
-                    .navigate(VideoInfoFragment.actionId, args)
+                    .stopSameIdAndArgs(VideoInfoFragment.id, args)
+                    ?.navigate(VideoInfoFragment.actionId, args)
             }
         }
     }

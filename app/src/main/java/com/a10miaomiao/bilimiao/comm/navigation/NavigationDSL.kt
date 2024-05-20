@@ -25,7 +25,7 @@ fun NavController.navigateToCompose(
     val curFragment = findPrimaryNavigationFragment()
     if (curFragment is ComposeFragment) {
         curFragment.composeNav
-            .stopSameUrl(url)
+            .stopSameUrlCompose(url)
             ?.navigate(url)
         return
     }

@@ -33,6 +33,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -153,7 +154,8 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
         val item = viewModel.list.data[position]
         val args = VideoInfoFragment.createArguments(item.aid.toString())
         Navigation.findNavController(view).pointerOrSelf()
-            .navigate(VideoInfoFragment.actionId, args)
+            .stopSameIdAndArgs(VideoInfoFragment.id, args)
+            ?.navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<bilibili.app.archive.v1.Arc> { item, index ->

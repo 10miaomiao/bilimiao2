@@ -26,6 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.playlist.commponents.PlayListItemCa
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
@@ -55,10 +56,12 @@ private class PlayListPageViewModel(
     fun toVideoInfoPage(item: PlayListItemInfo) {
         val nav = fragment.findNavController().pointerOrSelf()
         val id = item.aid
-        nav.navigate(
-            "bilimiao://video/$id".toUri(),
-            defaultNavOptions
-        )
+        val uri = "bilimiao://video/$id".toUri()
+        nav.stopSameUrl(uri)
+            ?.navigate(
+                uri,
+                defaultNavOptions
+            )
     }
 
     fun playVideo(item: PlayListItemInfo) {

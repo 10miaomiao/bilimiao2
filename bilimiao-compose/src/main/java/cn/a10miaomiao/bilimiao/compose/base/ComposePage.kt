@@ -10,7 +10,7 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.NavType
 import com.a10miaomiao.bilimiao.comm.navigation.NavHosts
 import com.a10miaomiao.bilimiao.comm.navigation.inNavHosts
-import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrlCompose
 
 abstract class ComposePage {
 
@@ -80,7 +80,7 @@ fun NavController.navigateToCompose(url:String){
             }
         }
     } else {
-        stopSameUrl(url)?.navigate(url)
+        stopSameUrlCompose(url)?.navigate(url)
     }
 }
 fun NavController.navigate(page: ComposePage) = navigateToCompose(page.url())

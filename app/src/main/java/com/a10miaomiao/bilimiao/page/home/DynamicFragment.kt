@@ -18,6 +18,7 @@ import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -103,7 +104,8 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
                     val args = UserFragment.createArguments(id)
                     Navigation.findNavController(it).pointerOrSelf()
-                        .navigate(UserFragment.actionId, args)
+                        .stopSameIdAndArgs(UserFragment.id,args)
+                        ?.navigate(UserFragment.actionId, args)
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
                     Navigation.findNavController(it)
@@ -126,7 +128,8 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
                     val args = VideoInfoFragment.createArguments(item.dynamicContent.id)
                     Navigation.findNavController(it).pointerOrSelf()
-                        .navigate(VideoInfoFragment.actionId, args)
+                        .stopSameIdAndArgs(VideoInfoFragment.id, args)
+                        ?.navigate(VideoInfoFragment.actionId, args)
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
                     Navigation.findNavController(it).pointerOrSelf()

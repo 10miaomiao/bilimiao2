@@ -22,6 +22,7 @@ import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.miaoStore
 import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -108,7 +109,8 @@ class PopularFragment: RecyclerViewFragment(), DIAware {
         val item = viewModel.list.data[position]
         val args = VideoInfoFragment.createArguments(item.base!!.param)
         Navigation.findNavController(view).pointerOrSelf()
-            .navigate(VideoInfoFragment.actionId, args)
+            .stopSameIdAndArgs(VideoInfoFragment.id, args)
+            ?.navigate(VideoInfoFragment.actionId, args)
     }
 
     val topEntranceItemUi = miaoBindingItemUi<EntranceShow> { item, index ->

@@ -50,6 +50,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -267,7 +268,8 @@ class UserFragment : Fragment(), DIAware, MyPage {
                 is SpaceInfo.ArchiveItem -> {
                     val args = VideoInfoFragment.createArguments(item.param)
                     Navigation.findNavController(view).pointerOrSelf()
-                        .navigate(VideoInfoFragment.actionId, args)
+                        .stopSameIdAndArgs(VideoInfoFragment.id, args)
+                        ?.navigate(VideoInfoFragment.actionId, args)
                 }
                 // 跳转收藏详情
                 is SpaceInfo.FavouriteItem -> {

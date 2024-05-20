@@ -17,6 +17,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
@@ -131,10 +132,12 @@ object BiliNavigation {
             || "b23.snm0516.aisee.tv" in host) {
             // b站网页使用内部浏览器打开
             val nav = activity.findNavController(R.id.nav_host_fragment).pointerOrSelf()
-            nav.navigate(
-                WebFragment.actionId,
-                WebFragment.createArguments(uri.toString())
-            )
+            val args = WebFragment.createArguments(uri.toString())
+            nav.stopSameIdAndArgs(WebFragment.id,args)
+                ?.navigate(
+                    WebFragment.actionId,
+                    args
+                )
         } else {
             // 非B站网页使用外部浏览器打开
             val typedValue = TypedValue()

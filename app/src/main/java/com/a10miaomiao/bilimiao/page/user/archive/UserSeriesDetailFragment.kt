@@ -27,6 +27,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -115,7 +116,8 @@ class UserSeriesDetailFragment : Fragment(), DIAware, MyPage {
         val item = viewModel.list.data[position]
         val args = VideoInfoFragment.createArguments(item.id)
         Navigation.findNavController(view).pointerOrSelf()
-            .navigate(VideoInfoFragment.actionId, args)
+            .stopSameIdAndArgs(VideoInfoFragment.id, args)
+            ?.navigate(VideoInfoFragment.actionId, args)
     }
 
     val itemUi = miaoBindingItemUi<MediaListV2Info> { item, index ->

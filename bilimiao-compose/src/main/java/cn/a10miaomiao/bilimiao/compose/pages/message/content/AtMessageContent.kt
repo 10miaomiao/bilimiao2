@@ -28,6 +28,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
@@ -119,7 +120,8 @@ private class AtMessageContentModel(
         val sourceId = item.item.source_id
         val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
         fragment.findNavController().pointerOrSelf()
-            .navigate(uri, defaultNavOptions)
+            .stopSameUrl(uri)
+            ?.navigate(uri, defaultNavOptions)
     }
 
     fun toDetailPage(item: AtMessageInfo) {
@@ -130,7 +132,8 @@ private class AtMessageContentModel(
             val id = item.item.target_id
             val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
             fragment.findNavController().pointerOrSelf()
-                .navigate(uri)
+                .stopSameUrl(uri)
+                ?.navigate(uri)
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
@@ -140,7 +143,8 @@ private class AtMessageContentModel(
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
             fragment.findNavController().pointerOrSelf()
-                .navigate(uri, defaultNavOptions)
+                .stopSameUrl(uri)
+                ?.navigate(uri, defaultNavOptions)
         }
     }
 

@@ -68,6 +68,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.navigation.pointerOrSelf
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -281,7 +282,8 @@ internal class BangumiDetailPageViewModel(
         val name = Uri.encode(detailInfo.value?.season_title ?: "")
         val uri = Uri.parse("bilimiao://video/$id/comment?title=$title&cover=$cover&name=$name")
         fragment.findNavController().pointerOrSelf()
-            .navigate(uri, defaultNavOptions)
+            .stopSameUrl(uri)
+            ?.navigate(uri, defaultNavOptions)
     }
 
     fun shareEpisode(item: EpisodeInfo) {
