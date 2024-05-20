@@ -38,6 +38,8 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.navigation.NavHosts
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameIdAndArgs
+import com.a10miaomiao.bilimiao.comm.navigation.stopSameUrl
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
@@ -539,7 +541,8 @@ class MainActivity
                     val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
                     val isComposePage = arguments.getBoolean(SearchActivity.KEY_IS_COMPOSE_PAGE, false)
                     if (isComposePage) {
-                        pointerNavHostFragment.navController.navigateCompose(pageUrl)
+                        val nav = currentNavHostFragment.navController
+                        nav.navigateToCompose(pageUrl)
                     } else {
                         val navOptions = NavOptions.Builder()
                             .setEnterAnim(R.anim.miao_fragment_open_enter)
@@ -547,17 +550,23 @@ class MainActivity
                             .setPopEnterAnim(R.anim.miao_fragment_close_enter)
                             .setPopExitAnim(R.anim.miao_fragment_close_exit)
                             .build()
-                        pointerNavHostFragment.navController.navigate(Uri.parse(pageUrl), navOptions)
+                        val nav = currentNavHostFragment.navController
+                        val uri = Uri.parse(pageUrl)
+                        nav.stopSameUrl(uri)
+                            ?.navigate(uri, navOptions)
                     }
                     return
                 }
                 val mode = arguments.getInt(SearchActivity.KEY_MODE)
                 val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
                 if (mode == 0) {
-                    pointerNavHostFragment.navController.navigate(
-                        SearchResultFragment.actionId,
-                        SearchResultFragment.createArguments(keyword),
-                    )
+                    val nav = currentNavHostFragment.navController
+                    val args = SearchResultFragment.createArguments(keyword)
+                    nav.stopSameIdAndArgs(SearchResultFragment.id, args)
+                        ?.navigate(
+                            SearchResultFragment.actionId,
+                            args,
+                        )
                 } else {
                     searchSelfPage(keyword)
                 }

@@ -452,7 +452,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
     private val handleTagsItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.tags[position]
-        val nav = findNavController()
+        val nav = findNavController().currentOrSelf()
         val args = SearchResultFragment.createArguments(item.tag_name)
         nav.navigate(SearchResultFragment.actionId, args)
     }

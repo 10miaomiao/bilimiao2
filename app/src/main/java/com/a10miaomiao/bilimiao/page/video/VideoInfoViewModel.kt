@@ -13,8 +13,14 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.*
+import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.currentOrSelf
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -217,7 +223,7 @@ class VideoInfoViewModel(
     private fun jumpSeason(info: VideoInfo): Boolean {
         info.season?.let {
             if (it.is_jump == 1) {
-                val nav = fragment.findNavController()
+                val nav = fragment.findNavController().currentOrSelf()
                 val previousId = nav.previousBackStackEntry?.destination?.id
                 nav.navigateToCompose(
                     BangumiDetailPage(),

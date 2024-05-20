@@ -185,9 +185,10 @@ internal class LoginPageViewModel(
                                 }
                             }
                             setNeutralButton("使用原始网页") { _, _ ->
-                                fragment.findNavController().navigate(
-                                    Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
-                                )
+                                fragment.findNavController().currentOrSelf()
+                                    .navigate(
+                                        Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
+                                    )
                             }
                         }
                     } else {
@@ -285,7 +286,7 @@ internal class LoginPageViewModel(
     }
 
     fun toH5LoginPage() {
-        fragment.findNavController()
+        fragment.findNavController().currentOrSelf()
             .navigate(Uri.parse("bilimiao://auth/h5"))
     }
 

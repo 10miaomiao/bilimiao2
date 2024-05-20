@@ -108,7 +108,7 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
                         ?.navigate(UserFragment.actionId, args)
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
-                    Navigation.findNavController(it)
+                    Navigation.findNavController(it).pointerOrSelf()
                         .navigateToCompose(BangumiDetailPage()) {
                             this.id set id
                         }

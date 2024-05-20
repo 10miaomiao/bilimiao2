@@ -116,7 +116,7 @@ class HomeFragment : Fragment(), DIAware {
     val handleHeaderLongClick = View.OnLongClickListener{
         if (viewModel.userStore.state.info == null) {
             // 跳转登录
-            val nav = Navigation.findNavController(it)
+            val nav = Navigation.findNavController(it).currentOrSelf()
             nav.navigateToCompose(LoginPage())
             true
         } else {
