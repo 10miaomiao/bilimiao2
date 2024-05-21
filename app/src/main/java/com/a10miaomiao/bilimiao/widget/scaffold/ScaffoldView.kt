@@ -95,7 +95,7 @@ class ScaffoldView @JvmOverloads constructor(
                     playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 }
                 field = value
-                updateLayout(false)
+                updateLayout(orientation == HORIZONTAL)
                 onPlayerChanged?.invoke(field)
             }
         }
