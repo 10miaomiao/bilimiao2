@@ -14,7 +14,6 @@ import android.util.DisplayMetrics
 import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
-import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -284,7 +283,7 @@ class MainActivity
             } else {
                 ui.root.content?.requestFocus()
             }
-            ui.root.updateLayout(true)
+            ui.root.updateLayout(false)
         }
     }
 
@@ -292,8 +291,6 @@ class MainActivity
     private fun changeFocus(focusOnMain: Boolean) {
         if (ui.root.focusOnMain != focusOnMain) {
             ui.root.focusOnMain = focusOnMain
-            ui.mContainerView.translationZ = if(focusOnMain) 0f else -0.1f
-            ui.mSubContainerView.translationZ = if(focusOnMain) -0.1f else 0f
             //双内容区时自动切换指示器
             if (ui.root.pointerAutoChange && ui.root.subContentShown) {
                 ui.root.pointerExchanged = !ui.root.pointerExchanged

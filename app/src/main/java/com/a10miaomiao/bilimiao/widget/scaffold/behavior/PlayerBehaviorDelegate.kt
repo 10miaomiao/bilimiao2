@@ -601,10 +601,14 @@ class PlayerBehaviorDelegate(
         if(_measuredHeight != parent.measuredHeight
             ||_measuredWidth != parent.measuredWidth
             ||_videoRatio != parent.playerVideoRatio) {
+            if(_videoRatio != parent.playerVideoRatio){
+                parent.updateLayout(true)
+            } else {
+                parent.updateLayout(false)
+            }
             _measuredHeight = parent.measuredHeight
             _measuredWidth = parent.measuredWidth
             _videoRatio = parent.playerVideoRatio
-            parent.updateLayout()
         }
         if (parent.fullScreenPlayer) {
             // 全屏
