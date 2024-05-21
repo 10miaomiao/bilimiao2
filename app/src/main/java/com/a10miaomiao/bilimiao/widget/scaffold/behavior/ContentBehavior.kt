@@ -107,6 +107,13 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
 
 
     fun updateLayout(withAnimation: Boolean){
+        if( _alphaAnimator?.isRunning == true
+            && (left!=endLeft||top!=endTop||right!=endRight||bottom!=endBottom)
+        ){
+            //动画处于重新布局前的阶段，此时不打断原有动画，只更改end位置
+            calculate()
+            return
+        }
         calculate()
         val duration = parentRef?.contentAnimationDuration
         if(withAnimation && duration != null && duration>0){
@@ -131,7 +138,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
 
 
     //根据视频窗口分配内容区域
-    private fun calculate() {
+    fun calculate() {
         val parentView = parentRef ?: return
 
         val isLeft = if (parentView.contentExchanged) isSub else !isSub
