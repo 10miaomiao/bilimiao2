@@ -56,7 +56,7 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 playerDelegate?.setHoldStatus(isHoldUpPlayer)
-                updateLayout(true)
+                updateLayout(subContentShown)
             }
         }
 
@@ -67,7 +67,7 @@ class ScaffoldView @JvmOverloads constructor(
         set(value) {
             if (field != value) {
                 field = value
-                updateLayout(true)
+                updateLayout(subContentShown)
             }
         }
 
