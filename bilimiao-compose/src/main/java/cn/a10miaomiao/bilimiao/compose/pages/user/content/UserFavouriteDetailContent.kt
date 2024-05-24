@@ -83,7 +83,8 @@ private class UserFavouriteDetailViewModel(
                 keyword = keyword,
                 pageNum = pageNum,
                 pageSize = list.pageSize
-            ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
+            ).awaitCall()
+                .gson<ResultInfo<MediaDetailInfo>>()
             if (res.code == 0) {
                 val result = res.data.medias
                 if (pageNum == 1) {

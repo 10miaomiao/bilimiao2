@@ -1,14 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -24,38 +19,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
-import androidx.window.layout.DisplayFeature
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.AutoTwoPaneLayout
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.accompanist.adaptive.HorizontalTwoPaneStrategy
-import com.google.accompanist.adaptive.SplitResult
-import com.google.accompanist.adaptive.TwoPane
-import com.google.accompanist.adaptive.TwoPaneStrategy
-import com.google.accompanist.adaptive.calculateDisplayFeatures
 import kotlinx.coroutines.launch
-import org.kodein.di.DI
-import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.compose.subDI
-import org.kodein.di.instance
 
 class UserFavouritePage : ComposePage() {
 
@@ -87,6 +72,7 @@ internal fun UserFavouritePageContent() {
     val viewModel: UserFavouriteViewModel by rememberInstance()
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
+    val playerStore: PlayerStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
     val saveableStateHolder = rememberSaveableStateHolder()
@@ -104,8 +90,24 @@ internal fun UserFavouritePageContent() {
     }
 
     PageConfig(
-        title = "${callName}的收藏"
+        title = "${callName}的收藏",
+        menus = if(openMediaDetail != null){
+            listOf(
+                myMenuItem {
+                    key = MenuKeys.playList
+                    iconFileName = "ic_baseline_menu_24"
+                    title = "播放列表"
+                },
+            )
+        } else null
     )
+    PageMenuItemClick(viewModel) { view, item ->
+        when (MenuKeys.playList) {
+            MenuKeys.playList -> {
+                viewModel.toPlayList()
+            }
+        }
+    }
 
     BackHandler(
         enabled = openMediaDetail != null,
