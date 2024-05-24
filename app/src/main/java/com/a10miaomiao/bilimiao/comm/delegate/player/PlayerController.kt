@@ -637,6 +637,21 @@ class PlayerController(
         val playeState = playerStore.state
         val playList = playeState.playList
         if (playList != null) {
+            if (playList.type == 2){
+                if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_AUTO_REPLAY, false)){
+                    //播放收藏夹视频列表时 单集循环选项
+                    delegate.playerSource?.let { delegate.openPlayer(it) }
+                    return
+                }
+                if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_RANDOM_NEXT, false)){
+                    //播放收藏夹视频列表时 随机播放选项
+                    val count = playeState.getPlayListSize()
+                    val pos = (0..<count).random()
+                    val nextVideo = playList.items[pos]
+                    delegate.openPlayer(nextVideo.toVideoPlayerSource())
+                    return
+                }
+            }
             val currentPosition = playeState.getPlayListCurrentPosition()
             if (currentPosition != -1
                 && currentPosition < playeState.getPlayListSize() - 1) {
