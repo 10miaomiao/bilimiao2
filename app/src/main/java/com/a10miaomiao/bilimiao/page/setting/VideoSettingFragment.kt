@@ -85,6 +85,8 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
         const val PLAYLIST_RANDOM_NEXT = "playlist_random_next"
         const val PLAYLIST_AUTO_REPLAY = "playlist_auto_replay"
 
+        const val PLAYER_AUTO_STOP_DURATION = "player_auto_stop_duration"
+
         const val PLAYER_SUBTITLE_SHOW = "player_subtitle_show"
         const val PLAYER_AI_SUBTITLE_SHOW = "player_ai_subtitle_show"
 
@@ -342,6 +344,25 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             title = "视频自动播放下一P"
             summary = ""
             defaultValue = true
+        }
+
+        seekBar(PLAYER_AUTO_STOP_DURATION) {
+            title = "播放器定时关闭"
+            summary = "视频播放的时长，而不是实际经过的时间"
+            max = 3600000
+            min = 0
+            default = 0
+            formatter = {
+                val second = value/1000
+                val minute = second/60
+                if(second == 0){
+                    "${value}ms"
+                } else if(minute == 0){
+                    "${second}s"
+                } else {
+                    "${minute}min${second-minute*60}s"
+                }
+            }
         }
 
         switch(PLAYER_AUTO_NEXT_BANGUMI) {
