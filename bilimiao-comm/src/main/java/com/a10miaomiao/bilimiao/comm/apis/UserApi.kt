@@ -166,12 +166,12 @@ class UserApi {
     }
 
     fun favDeleteFolder(
-        mediaId: String,
+        mediaIds: String,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi("x/v3/fav/folder/del")
         method = MiaoHttp.POST
         formBody = ApiHelper.createParams(
-            "media_id" to mediaId,
+            "media_ids" to mediaIds,
         )
     }
 

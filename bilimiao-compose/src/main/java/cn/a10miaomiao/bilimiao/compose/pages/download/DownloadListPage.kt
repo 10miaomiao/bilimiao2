@@ -22,13 +22,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavHostController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadListItem
 import cn.a10miaomiao.bilimiao.download.DownloadService
@@ -215,7 +214,7 @@ internal class DownloadListPageViewModel(
 internal fun DownloadListPageContent(
     viewModel: DownloadListPageViewModel
 ) {
-    PageConfig(
+    val pageConfigId = PageConfig(
         title = "下载列表",
         menus = listOf(
             MenuItemPropInfo(
@@ -238,8 +237,9 @@ internal fun DownloadListPageContent(
     }
 
     var showHelpDialog by remember { mutableStateOf(false) }
-    PageMenuItemClick(
-        onMenuItemClick = { menuItem ->
+    PageListener(
+        pageConfigId,
+        onMenuItemClick = { _, menuItem ->
             when(menuItem.key) {
                 0 -> showHelpDialog = true
             }

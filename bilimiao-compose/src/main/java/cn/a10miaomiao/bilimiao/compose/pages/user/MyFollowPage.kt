@@ -52,7 +52,7 @@ import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.TagFollowContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
@@ -103,49 +103,58 @@ private fun MyFollowPageContent() {
     val currentPage = pagerState.currentPage
     val scope = rememberCoroutineScope()
 
-    PageConfig(
+    val pageConfigId = PageConfig(
         title = "我的关注",
-        menus = listOf(
-            myMenuItem {
-                key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
-                title = "更多"
-                visibility = if (
-                    currentPage in tagList.indices
-                    && tagList[currentPage].tagid > 0
-                ) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
-            },
-            myMenuItem {
-                key = MenuKeys.search
-                iconFileName = "ic_search_gray"
-                title = "搜索"
-            },
-            myMenuItem {
-                key = MenuKeys.filter
-                iconFileName = "ic_baseline_filter_list_grey_24"
-                title = viewModel.orderTypeToNameMap[orderType]
-            },
-        )
+        menus = remember(currentPage, tagList) {
+            listOf(
+                myMenuItem {
+                    key = MenuKeys.more
+                    iconFileName = "ic_more_vert_grey_24dp"
+                    title = "更多"
+                    visibility = if (
+                        currentPage in tagList.indices
+                        && tagList[currentPage].tagid > 0
+                    ) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                },
+                myMenuItem {
+                    key = MenuKeys.search
+                    iconFileName = "ic_search_gray"
+                    title = "搜索"
+                },
+                myMenuItem {
+                    key = MenuKeys.filter
+                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    title = viewModel.orderTypeToNameMap[orderType]
+                },
+            )
+        }
     )
-    PageMenuItemClick(viewModel) { view, item ->
-        when (item.key) {
-            MenuKeys.filter -> {
-                viewModel.showOrderPopupMenu(view)
-            }
 
-            MenuKeys.search -> {
-                viewModel.toSearchPage()
-            }
+    PageListener(
+        configId = pageConfigId,
+        onMenuItemClick = remember(currentPage) {
+            { view, item ->
+                when (item.key) {
+                    MenuKeys.filter -> {
+                        viewModel.showOrderPopupMenu(view)
+                    }
 
-            MenuKeys.more -> {
-                viewModel.showMorePopupMenu(view, currentPage)
+                    MenuKeys.search -> {
+                        viewModel.toSearchPage()
+                    }
+
+                    MenuKeys.more -> {
+                        viewModel.showMorePopupMenu(view, currentPage)
+                    }
+                }
+                Unit
             }
         }
-    }
+    )
 
     Column(
         modifier = Modifier.fillMaxSize()
