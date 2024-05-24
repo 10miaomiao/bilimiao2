@@ -23,4 +23,5 @@ object MenuKeys {
 
     val keyboard = id_counter++
     val emoji = id_counter++
+    val playList = id_counter++
 }

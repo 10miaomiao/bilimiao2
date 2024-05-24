@@ -3,11 +3,18 @@ package com.a10miaomiao.bilimiao.comm.store
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 
@@ -36,14 +43,25 @@ class PlayerStore(override val di: DI) :
         }
 
         fun getPlayListCurrentPosition(): Int {
-            if (cid.isBlank()) {
+            if (aid.isBlank()) {
                 return 0
             }
             return playList?.run {
                 items.indexOfFirst {
-                    it.cid == cid
+                    it.aid == aid
                 }
             } ?: -1
+        }
+
+        fun inPlayList(aid: String): Boolean {
+            playList?.run {
+                items.forEach {
+                    if(aid == it.aid){
+                        return true
+                    }
+                }
+            }
+            return false
         }
     }
 
@@ -81,8 +99,9 @@ class PlayerStore(override val di: DI) :
         }
         setPlayList(PlayListInfo(
             name = title,
-            from = 1,
+            from = info.id,
             items = items,
+            type = 1,
         ))
     }
 
@@ -112,6 +131,73 @@ class PlayerStore(override val di: DI) :
         }
     }
 
+    suspend fun setFavoriteList(mediaId: String, mediaTitle: String) {
+        val items = mutableListOf<PlayListItemInfo>()
+        val pageSize = 20
+        var pageNum = 1
+        var loadFinish = false
+        while(!loadFinish){
+            try {
+                val res = BiliApiService.userApi.mediaDetail(
+                    media_id = mediaId,
+                    keyword = "",
+                    pageNum = pageNum,
+                    pageSize = 20,
+                ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
+                if (res.code == 0) {
+                    val result = res.data.medias
+                    val newItems = result.map {
+                        PlayListItemInfo(
+                            aid = it.id,
+                            cid = it.ugc.first_cid,
+                            duration = it.duration.toInt(),
+                            title = it.title,
+                            cover = it.cover,
+                            ownerId = it.upper.mid,
+                            ownerName = it.upper.name,
+                            from = mediaId,
+                        )
+                    }
+                    items.addAll(newItems)
+                    loadFinish = newItems.size != pageSize
+                    pageNum++
+                } else {
+                    withContext(Dispatchers.Main) {
+                        PopTip.show(res.message)
+                    }
+                    loadFinish = true
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    PopTip.show(e.toString())
+                }
+                loadFinish = true
+            } finally {
+            }
+        }
+
+        val aid = state.aid
+        var currentVideoInList = false
+        items.forEach{
+            if(it.aid == aid){
+                currentVideoInList = true
+            }
+        }
+        if(aid.isNotEmpty() && !currentVideoInList) {
+            //有视频正在播放 且当前视频不在列表中时，不设置列表
+        } else {
+            this.setState {
+                playList = PlayListInfo(
+                    name = mediaTitle,
+                    from = mediaId,
+                    items = items,
+                    type = 2,
+                )
+            }
+        }
+    }
 
     fun clearPlayerInfo() {
         this.setState {

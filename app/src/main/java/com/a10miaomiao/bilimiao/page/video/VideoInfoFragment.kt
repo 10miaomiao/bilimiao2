@@ -13,7 +13,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.navigation.*
+import androidx.navigation.NavType
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,7 +23,11 @@ import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.cover.CoverActivity
-import cn.a10miaomiao.miao.binding.android.view.*
+import cn.a10miaomiao.miao.binding.android.view._isEnabled
+import cn.a10miaomiao.miao.binding.android.view._leftPadding
+import cn.a10miaomiao.miao.binding.android.view._rightPadding
+import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColor
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
@@ -29,15 +35,22 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.*
+import com.a10miaomiao.bilimiao.comm.BiliNavigation
+import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm._isRefreshing
+import com.a10miaomiao.bilimiao.comm._network
+import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcEpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
+import com.a10miaomiao.bilimiao.comm.lazyUiDi
+import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -45,11 +58,20 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.recycler.*
+import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
+import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
+import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
+import com.a10miaomiao.bilimiao.comm.recycler._miaoMultiAdapter
+import com.a10miaomiao.bilimiao.comm.recycler.footerViews
+import com.a10miaomiao.bilimiao.comm.recycler.headerViews
+import com.a10miaomiao.bilimiao.comm.recycler.lParams
+import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.views
+import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
@@ -73,9 +95,23 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
-import splitties.views.*
-import splitties.views.dsl.core.*
+import splitties.views.backgroundColor
+import splitties.views.bottomPadding
+import splitties.views.dsl.core.frameLayout
+import splitties.views.dsl.core.horizontalLayout
+import splitties.views.dsl.core.imageView
+import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.matchParent
+import splitties.views.dsl.core.textView
+import splitties.views.dsl.core.verticalLayout
+import splitties.views.dsl.core.view
+import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
+import splitties.views.horizontalPadding
+import splitties.views.imageResource
+import splitties.views.padding
+import splitties.views.topPadding
+import splitties.views.verticalPadding
 
 
 class VideoInfoFragment : Fragment(), DIAware, MyPage {
@@ -303,14 +339,19 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         val info = viewModel.info
         if (info != null) {
             // 设置播放列表
-            viewModel.ugcSeason?.let {
-                val index = if (it.sections.size > 1) {
-                    it.sections.indexOfFirst { section ->
-                        section.episodes.indexOfFirst { it.aid == info.aid } != -1
+            if(playerStore.state.playList?.type == 2
+                && playerStore.state.inPlayList(info.aid)) {
+                //视频已在收藏夹类型的列表中，不设置新的列表
+            } else {
+                viewModel.ugcSeason?.let {
+                    val index = if (it.sections.size > 1) {
+                        it.sections.indexOfFirst { section ->
+                            section.episodes.indexOfFirst { it.aid == info.aid } != -1
+                        }
+                    } else { 0 }
+                    if (index != -1) {
+                        playerStore.setPlayList(it, index)
                     }
-                } else { 0 }
-                if (index != -1) {
-                    playerStore.setPlayList(it, index)
                 }
             }
             // 播放视频
