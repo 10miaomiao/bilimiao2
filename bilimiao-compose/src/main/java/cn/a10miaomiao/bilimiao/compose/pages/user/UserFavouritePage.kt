@@ -39,6 +39,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.AutoTwoPaneLayout
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialog
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
@@ -217,5 +218,7 @@ internal fun UserFavouritePageContent() {
         openedSecond = openMediaDetail != null,
         firstPaneMaxWidth = 400.dp
     )
+
+    FavouriteEditDialog()
 
 }

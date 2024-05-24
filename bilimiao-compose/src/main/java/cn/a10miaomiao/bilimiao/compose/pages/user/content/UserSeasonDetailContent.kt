@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -60,13 +63,19 @@ private class UserSeasonDetailViewModel(
         set(value) {
             if (field != value) {
                 field = value
+                list.finished.value = false
+                list.fail.value = ""
+                list.data.value = listOf()
                 loadData(1)
             }
         }
 
     var keyword = ""
 
+    var seasonInfo = MutableStateFlow<bilibili.app.view.v1.UgcSeason?>(null)
     val isRefreshing = MutableStateFlow(false)
+    val curSection = MutableStateFlow<bilibili.app.view.v1.Section?>(null)
+    val sections = MutableStateFlow<List<bilibili.app.view.v1.Section>>(listOf())
     val list = FlowPaginationInfo<bilibili.app.view.v1.Episode>()
 
 
@@ -81,7 +90,11 @@ private class UserSeasonDetailViewModel(
             val res = BiliGRPCHttp.request {
                 ViewGRPC.season(req)
             }.awaitCall()
-            list.data.value = res.season?.sections?.get(0)?.episodes ?: listOf()
+            seasonInfo.value = res.season
+            sections.value = res.season?.sections ?: listOf()
+            if (sections.value.isNotEmpty()) {
+                setCurrentSection(sections.value[0])
+            }
             list.finished.value = true
             list.pageNum = pageNum
         } catch (e: Exception) {
@@ -115,6 +128,11 @@ private class UserSeasonDetailViewModel(
                 defaultNavOptions,
             )
     }
+
+    fun setCurrentSection(section: bilibili.app.view.v1.Section) {
+        curSection.value = section
+        list.data.value = section.episodes
+    }
 }
 
 @Composable
@@ -132,6 +150,9 @@ internal fun UserSeasonDetailContent(
     val listFinished by viewModel.list.finished.collectAsState()
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+    val sections by viewModel.sections.collectAsState()
+    val curSection by viewModel.curSection.collectAsState()
 
     LaunchedEffect(seasonId) {
         viewModel.sid = seasonId
@@ -162,9 +183,28 @@ internal fun UserSeasonDetailContent(
                     Text(text = seasonTitle)
                 }
                 HorizontalDivider(
-                    modifier = Modifier.align(Alignment.BottomStart)
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
                         .fillMaxWidth()
                 )
+            }
+        }
+        if (sections.size > 1) {
+            LazyRow(
+                modifier = Modifier.padding(horizontal = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                items(sections, { it.id }) {
+                    FilterChip(
+                        selected = curSection?.id == it.id,
+                        onClick = {
+                            viewModel.setCurrentSection(it)
+                        },
+                        label = {
+                            Text(text = it.title)
+                        }
+                    )
+                }
             }
         }
         SwipeToRefresh(

@@ -65,7 +65,7 @@ class UserFavouriteDetailViewModel(
                 .awaitCall()
                 .gson<ResultInfo<MediaDetailInfo>>()
             if (res.code == 0) {
-                val result = res.data.medias
+                val result = res.data.medias ?: listOf()
                 if (result.size < list.pageSize) {
                     ui.setState { list.finished = true }
                 }

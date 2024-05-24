@@ -41,7 +41,7 @@ import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.lib.KrcText
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricOffsetPopupMenu
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricSourcePopupMenu
@@ -444,7 +444,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
             }
         }
     }
-    PageConfig(
+    val pageConfigId = PageConfig(
         title = "歌词-"+title.let {
             if(it==""){
                 "暂无歌词"
@@ -457,26 +457,31 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                 }
             }
         },
-        menus = listOf(
-            myMenuItem {
-                key = 1
-                this.title = "歌词源"
-                iconFileName = "ic_more_vert_grey_24dp"
-            },
-            myMenuItem {
-                key = 2
-                this.title = if(offset==0) {
-                    "延迟"
-                }else if (offset>0) {
-                    '+' + String.format("%.1f",offset/1000f) +'s'
-                }else {
-                    String.format("%.1f",offset/1000f) + 's'
+        menus = remember {
+            listOf(
+                myMenuItem {
+                    key = 1
+                    this.title = "歌词源"
+                    iconFileName = "ic_more_vert_grey_24dp"
+                },
+                myMenuItem {
+                    key = 2
+                    this.title = if(offset==0) {
+                        "延迟"
+                    }else if (offset>0) {
+                        '+' + String.format("%.1f",offset/1000f) +'s'
+                    }else {
+                        String.format("%.1f",offset/1000f) + 's'
+                    }
+                    iconFileName = "ic_history_gray_24dp"
                 }
-                iconFileName = "ic_history_gray_24dp"
-            }
-        )
+            )
+        }
     )
-    PageMenuItemClick(viewModel::menuItemClick)
+    PageListener(
+        pageConfigId,
+        onMenuItemClick = viewModel::menuItemClick,
+    )
 }
 
 @Composable
