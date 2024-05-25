@@ -7,13 +7,16 @@ import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialogState
 import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaFoldersInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -21,7 +24,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class UserFavouriteViewModel (
+internal class UserFavouriteViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -41,12 +44,14 @@ class UserFavouriteViewModel (
 
     val openedMedia = MutableStateFlow<MediaListInfo?>(null)
 
+    val editDialogState = MutableStateFlow<FavouriteEditDialogState?>(null)
+
     var mid = "0"
         set(value) {
             if (field != value) {
                 field = value
-                loadData( UserFavouriteFolderType.Created, 1)
-                loadData( UserFavouriteFolderType.Collected, 1)
+                loadData(UserFavouriteFolderType.Created, 1)
+                loadData(UserFavouriteFolderType.Collected, 1)
             }
         }
 
@@ -66,7 +71,7 @@ class UserFavouriteViewModel (
         try {
             list.loading.value = true
             val hasMore: Boolean
-            val resultList = if(type == UserFavouriteFolderType.Created) {
+            val resultList = if (type == UserFavouriteFolderType.Created) {
                 val res = BiliApiService.userApi.favCreatedList(
                     mid,
                     pageNum = pageNum,
@@ -141,13 +146,12 @@ class UserFavouriteViewModel (
     fun closeMediaDetail() {
         openedMedia.value = null
     }
-
     fun toPlayList() {
         openedMedia.value?.let {
             viewModelScope.launch {
-                if(it.type == 21){
+                if (it.type == 21) {
                     //合集
-                    playerStore.setSeasonList(it.id,it.title,0)
+                    playerStore.setSeasonList(it.id, it.title, 0)
                 } else {
                     //收藏
                     playerStore.setFavoriteList(it.id, it.title)
@@ -156,5 +160,133 @@ class UserFavouriteViewModel (
         }
         val nav = fragment.findComposeNavController()
         nav.navigate(PlayListPage())
+    }
+
+    fun editFolder(
+        mediaId: String,
+        title: String,
+        cover: String,
+        intro: String,
+        privacy: Int, // 0:公开,1:不公开
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.userApi
+                .favEditFolder(
+                    mediaId = mediaId,
+                    title = title,
+                    cover = cover,
+                    intro = intro,
+                    privacy = privacy,
+                )
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.isSuccess) {
+                PopTip.show("修改成功")
+                val index = createdList.data.value.indexOfFirst {
+                    it.id == mediaId
+                }
+                if (index >= 0) {
+                    val newList = createdList.data.value.toMutableList()
+                    val updateItem = newList[index]
+                    val attr = if (privacy == 0) {
+                        updateItem.attr and 1.inv()
+                    } else {
+                        updateItem.attr or 1
+                    }
+                    newList[index] = updateItem.copy(
+                        title = title,
+                        cover = cover,
+                        intro = intro,
+                        attr = attr,
+                    )
+                    createdList.data.value = newList
+                    openedMedia.value = newList[index]
+                }
+                clearEditDialogState()
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
+    fun addFolder(
+        title: String,
+        cover: String,
+        intro: String,
+        privacy: Int, // 0:公开,1:不公开
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.userApi
+                .favAddFolder(
+                    title = title,
+                    cover = cover,
+                    intro = intro,
+                    privacy = privacy,
+                )
+                .awaitCall()
+                .gson<MessageInfo>()
+            if (res.isSuccess) {
+                PopTip.show("创建成功")
+                clearEditDialogState()
+                refresh(UserFavouriteFolderType.Created)
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
+    fun deleteFolder(
+        mediaId: String,
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.userApi
+                .favDeleteFolder(
+                    mediaIds = mediaId,
+                )
+                .awaitCall()
+                .gson<MessageInfo>(isLog = true)
+            if (res.isSuccess) {
+                PopTip.show("删除成功")
+                clearEditDialogState()
+                closeMediaDetail()
+                refresh(UserFavouriteFolderType.Created)
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
+    fun showAddDialog() {
+        editDialogState.value = FavouriteEditDialogState.Add
+    }
+
+    fun showDeleteDialog(mediaInfo: MediaListInfo) {
+        editDialogState.value = FavouriteEditDialogState.Delete(
+            id = mediaInfo.id,
+            title = mediaInfo.title,
+        )
+    }
+
+    fun showEditDialog(mediaInfo: MediaListInfo) {
+        editDialogState.value = FavouriteEditDialogState.Update(
+            id = mediaInfo.id,
+            cover = mediaInfo.cover,
+            title = mediaInfo.title,
+            intro = mediaInfo.intro,
+            privacy = mediaInfo.privacy,
+        )
+    }
+
+    fun clearEditDialogState() {
+        editDialogState.value = null
     }
 }

@@ -1,20 +1,11 @@
 package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateInterpolator
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationSet
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.ScaleAnimation
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.addListener
 import androidx.core.graphics.Insets
@@ -190,7 +181,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         consumed: IntArray
     ) {
         val parent = parentRef ?: return
-        val contentView = parentRef?.content ?: return
+        val contentView = parentRef?.focusContent ?: return
         if (!parent.showPlayer
             || parent.showMaskView
             || parent.orientation != ScaffoldView.VERTICAL) {

@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.widget.scaffold.behavior
 
+import android.animation.Animator
+import android.animation.Animator.AnimatorListener
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
@@ -105,54 +107,38 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
 
 
     fun updateLayout(withAnimation: Boolean){
-        calculate()
-        if(withAnimation && parentRef?.contentAnimationDuration!=0){
-            animateTo(endLeft, endTop, endRight, endBottom)
-        } else {
-            left=endLeft
-            top=endTop
-            right=endRight
-            bottom=endBottom
-        }
-    }
-
-    fun animateTo(
-        endLeft:Int,
-        endTop:Int,
-        endRight:Int,
-        endBottom:Int,
-        startLeft:Int=left,
-        startTop:Int=top,
-        startRight:Int=right,
-        startBottom:Int=bottom,
-    ){
-        if(startLeft==endLeft
-            &&startTop==endTop
-            &&startRight==endRight
-            &&startBottom==endBottom){
+        if( _alphaAnimator?.isRunning == true
+            && (left!=endLeft||top!=endTop||right!=endRight||bottom!=endBottom)
+        ){
+            //动画处于重新布局前的阶段，此时不打断原有动画，只更改end位置
+            calculate()
             return
         }
-        val duration = parentRef?.contentAnimationDuration ?: return
-        val value = ValueAnimator.ofFloat(0f,1f)
-        fun getValue(start:Int,end:Int):Int{
-            val process=value.animatedValue as Float
-            return ((start.toFloat()*(1f-process)+end.toFloat()*(process)).toInt())
+        calculate()
+        val duration = parentRef?.contentAnimationDuration
+        if(withAnimation && duration != null && duration>0){
+            animateAlpha(0f,duration/2){
+                //播放完时 若透明度为0 更改布局位置并回复透明度
+                if(viewRef?.alpha == 0f){
+                    left = endLeft
+                    top = endTop
+                    right = endRight
+                    bottom = endBottom
+                    parentRef?.requestLayout()
+                    animateAlpha(1f, duration / 2)
+                }
+            }
+        } else {
+            left = endLeft
+            top = endTop
+            right = endRight
+            bottom = endBottom
         }
-
-        value.duration=duration.toLong()
-        value.addUpdateListener {
-            left=getValue(startLeft,endLeft)
-            top=getValue(startTop,endTop)
-            right=getValue(startRight,endRight)
-            bottom=getValue(startBottom,endBottom)
-            parentRef?.requestLayout()
-        }
-        value.start()
     }
 
 
     //根据视频窗口分配内容区域
-    private fun calculate() {
+    fun calculate() {
         val parentView = parentRef ?: return
 
         val isLeft = if (parentView.contentExchanged) isSub else !isSub
@@ -409,6 +395,36 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 addUpdateListener {
                     child.translationY = it.animatedValue as Float
                 }
+                start()
+            }
+        }
+    }
+
+    private var _alphaAnimator: ValueAnimator? = null
+    fun animateAlpha(alpha:Float, duration:Int, onFinished: (() -> Unit)? = null){
+        val child = viewRef ?: return
+        val curAlpha = child.alpha
+        if(curAlpha != alpha){
+            _alphaAnimator?.cancel()
+            _alphaAnimator = ValueAnimator.ofFloat(
+                curAlpha,
+                alpha
+            ).apply {
+                this.duration = duration.toLong()
+                addUpdateListener {
+                    child.alpha = it.animatedValue as Float
+                }
+                addListener(object : AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {
+                    }
+                    override fun onAnimationEnd(animation: Animator) {
+                        onFinished?.invoke()
+                    }
+                    override fun onAnimationCancel(animation: Animator) {
+                    }
+                    override fun onAnimationRepeat(animation: Animator) {
+                    }
+                })
                 start()
             }
         }

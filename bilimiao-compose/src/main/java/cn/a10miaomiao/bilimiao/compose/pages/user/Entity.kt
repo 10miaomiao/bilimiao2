@@ -62,7 +62,7 @@ internal sealed class FollowingListAction {
 }
 
 internal sealed class TagEditDialogState {
-    object Add: TagEditDialogState()
+    data object Add: TagEditDialogState()
 
     data class Update(
         val id: Int,
@@ -82,4 +82,3 @@ enum class UserFavouriteFolderType {
     Created,
     Collected,
 }
-

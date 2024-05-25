@@ -162,7 +162,7 @@ class PlayerStore(override val di: DI) :
                 ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
                 if (res.code == 0) {
                     val result = res.data.medias
-                    val newItems = result.map {
+                    val newItems = result?.map {
                         PlayListItemInfo(
                             aid = it.id,
                             cid = it.ugc.first_cid,
@@ -174,8 +174,12 @@ class PlayerStore(override val di: DI) :
                             from = mediaId,
                         )
                     }
-                    items.addAll(newItems)
-                    loadFinish = newItems.size != pageSize
+                    if(newItems != null){
+                        items.addAll(newItems)
+                        loadFinish = newItems.size != pageSize
+                    } else {
+                        loadFinish = true
+                    }
                     pageNum++
                 } else {
                     withContext(Dispatchers.Main) {

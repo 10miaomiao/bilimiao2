@@ -30,10 +30,8 @@ import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
-import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceDialog
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceItem
-import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.rememberDialogState
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
@@ -55,8 +53,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
-
-
 
 
 class UserFollowPage() : ComposePage() {
@@ -266,27 +262,32 @@ private fun UserFollowPageContent(
     val orderTypeList = viewModel.orderTypeList
     val orderType by viewModel.orderType.collectAsState()
 
-    PageConfig(
+    val pageConfigId = PageConfig(
         title = if (userStore.isSelf(viewModel.mid)) {
             "我的关注"
         } else {
             "Ta的关注"
         },
-        menus = listOf(
-            myMenuItem {
-                key = 1
-                iconFileName = "ic_baseline_filter_list_grey_24"
-                title = viewModel.orderTypeToNameMap[orderType]
-            }
-        )
+        menus = remember {
+            listOf(
+                myMenuItem {
+                    key = 1
+                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    title = viewModel.orderTypeToNameMap[orderType]
+                }
+            )
+        }
     )
-    PageMenuItemClick(viewModel) { view, item ->
-        when (item.key) {
-            MenuKeys.filter -> {
-                viewModel.showOrderPopupMenu(view)
+    PageListener(
+        pageConfigId,
+        onMenuItemClick = fun(view, item) {
+            when (item.key) {
+                MenuKeys.filter -> {
+                    viewModel.showOrderPopupMenu(view)
+                }
             }
         }
-    }
+    )
 
     SwipeToRefresh(
         refreshing = isRefreshing,
