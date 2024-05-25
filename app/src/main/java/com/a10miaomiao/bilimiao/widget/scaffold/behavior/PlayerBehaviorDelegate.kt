@@ -300,7 +300,7 @@ class PlayerBehaviorDelegate(
                 }
             }
         }
-        parent.updateLayout(false)
+        parent.requestLayout()
     }
     fun changeSizeByWidth(newWidth :Int){
         val widthHeightRatio = parent.playerVideoRatio
@@ -330,10 +330,47 @@ class PlayerBehaviorDelegate(
                 }
             }
         }
-        parent.updateLayout(false)
+        parent.requestLayout()
     }
 
     private var draggingSide = NONE
+        set(value) {
+            if(value != field){
+                if(field == NONE){
+                    //按下时
+                    if (value in arrayOf(LEFTSIDE, RIGHTSIDE, BOTTOMSIDE)
+                        && !parent.isHoldUpPlayer
+                        && parent.subContentShown
+                    ){
+                        //开始改变大小，内容区域透明度下降
+                        fun ContentBehavior.anim(){
+                            animateAlpha(0.3f,300)
+                        }
+                        parent.contentBehavior?.anim()
+                        parent.subContentBehavior?.anim()
+                    }
+                }
+                if(value == NONE){
+                    //松开时
+                    if (field in arrayOf(LEFTSIDE, RIGHTSIDE, BOTTOMSIDE)
+                        && !parent.isHoldUpPlayer
+                        && parent.subContentShown
+                    ){
+                        fun ContentBehavior.anim(){
+                            //先降至0
+                            animateAlpha(0f,100){
+                                //改变布局并恢复透明度
+                                parent.updateLayout(false)
+                                animateAlpha(1f,300)
+                            }
+                        }
+                        parent.contentBehavior?.anim()
+                        parent.subContentBehavior?.anim()
+                    }
+                }
+                field = value
+            }
+        }
     private var startX = 0
     private var startY = 0
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -601,10 +638,14 @@ class PlayerBehaviorDelegate(
         if(_measuredHeight != parent.measuredHeight
             ||_measuredWidth != parent.measuredWidth
             ||_videoRatio != parent.playerVideoRatio) {
+            if(_videoRatio != parent.playerVideoRatio){
+                parent.updateLayout(true)
+            } else {
+                parent.updateLayout(false)
+            }
             _measuredHeight = parent.measuredHeight
             _measuredWidth = parent.measuredWidth
             _videoRatio = parent.playerVideoRatio
-            parent.updateLayout()
         }
         if (parent.fullScreenPlayer) {
             // 全屏
