@@ -148,7 +148,7 @@ internal class UserFavouriteViewModel(
     }
     fun toPlayList() {
         openedMedia.value?.let {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 if (it.type == 21) {
                     //合集
                     playerStore.setSeasonList(it.id, it.title, 0)
