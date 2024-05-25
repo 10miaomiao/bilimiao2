@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.animation.addListener
 import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.config.config
@@ -57,7 +56,7 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 playerDelegate?.setHoldStatus(isHoldUpPlayer)
-                updateLayout(false)
+                updateLayout(subContentShown)
             }
         }
 
@@ -68,7 +67,7 @@ class ScaffoldView @JvmOverloads constructor(
         set(value) {
             if (field != value) {
                 field = value
-                updateLayout(true)
+                updateLayout(subContentShown)
             }
         }
 
@@ -84,7 +83,7 @@ class ScaffoldView @JvmOverloads constructor(
                 field = value
                 playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 this.appBar?.orientation = orientation
-                updateLayout()
+                updateLayout(false)
             }
         }
 
@@ -96,7 +95,7 @@ class ScaffoldView @JvmOverloads constructor(
                     playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
                 }
                 field = value
-                updateLayout(true)
+                updateLayout(orientation == HORIZONTAL)
                 onPlayerChanged?.invoke(field)
             }
         }
@@ -104,7 +103,7 @@ class ScaffoldView @JvmOverloads constructor(
         set(value) {
             if (field != value) {
                 field = value
-                updateLayout()
+                updateLayout(false)
                 onPlayerChanged?.invoke(true)
             }
         }
@@ -165,6 +164,9 @@ class ScaffoldView @JvmOverloads constructor(
     val focusContent: View?
         get() = if (focusOnMain) content else subContent
 
+    val focusContentBehavior: ContentBehavior?
+        get() = if (focusOnMain) contentBehavior else subContentBehavior
+
     val showMaskView get() = maskView?.visibility == View.VISIBLE
 
     var player: View? = null
@@ -217,7 +219,7 @@ class ScaffoldView @JvmOverloads constructor(
             prefs.getInt(FlagsSeetingFragment.FLAGS_CONTENT_ANIMATION_DURATION, 0)
     }
 
-    fun updateLayout(contentAnimation: Boolean = false) {
+    fun updateLayout(contentAnimation: Boolean = true) {
         playerBehavior?.updateLayout()
         contentBehavior?.updateLayout(contentAnimation)
         subContentBehavior?.updateLayout(contentAnimation)
@@ -342,7 +344,7 @@ class ScaffoldView @JvmOverloads constructor(
                 }
                 start()
             }
-            contentBehavior?.animateTranslationY(playerSpaceHeight.toFloat())
+            focusContentBehavior?.animateTranslationY(playerSpaceHeight.toFloat())
         }
     }
 

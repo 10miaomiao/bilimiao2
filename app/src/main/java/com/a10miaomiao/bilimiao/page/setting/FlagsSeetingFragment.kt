@@ -174,7 +174,7 @@ class FlagsSeetingFragment : Fragment(), DIAware, MyPage
 
         seekBar(FLAGS_CONTENT_ANIMATION_DURATION) {
             title = "内容区域动画时长"
-            summary = "为0时不显示动画，开启后动画可能掉帧"
+            summary = "为0时不显示动画"
             default = 0
             max = 1000
             min = 0
