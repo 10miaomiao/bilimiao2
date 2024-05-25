@@ -355,11 +355,17 @@ class VideoInfoViewModel(
 
                 //收藏夹变动，重新加载播放列表
                 val playList = playerStore.state.playList
-                if(playList != null && playList.type == 2){
+                if(playList != null && playList.type == PlayerStore.FAVORITE){
+                    //当前列表为收藏夹类型
                     val currentId = playList.from
                     if(addIds.contains(currentId) || delIds.contains(currentId)){
-                        val currentName = playList.name
-                        playerStore.setFavoriteList(currentId,currentName)
+                        if(delIds.contains(currentId) && curInfo.aid == playerStore.state.aid){
+                            //从收藏夹中删除的是当前播放的视频
+                            playerStore.setPlayList(null)
+                        } else {
+                            val currentName = playList.name
+                            playerStore.setFavoriteList(currentId,currentName)
+                        }
                     }
                 }
             } else {

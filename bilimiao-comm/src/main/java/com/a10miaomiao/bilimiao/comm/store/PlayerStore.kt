@@ -1,6 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.store
 
 import androidx.lifecycle.ViewModel
+import bilibili.app.dynamic.v2.ThreePointType
+import bilibili.app.view.v1.ViewGRPC
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -9,11 +11,14 @@ import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
@@ -24,6 +29,9 @@ class PlayerStore(override val di: DI) :
     companion object {
         const val VIDEO = "video"
         const val BANGUMI = "bangumi"
+
+        const val FAVORITE = 2 // 收藏
+        const val SEASON = 1 // 合集
     }
 
     data class State(
@@ -37,6 +45,8 @@ class PlayerStore(override val di: DI) :
         var cover: String = "",
         var playList: PlayListInfo? = null,
         var playProgress: Long = 0,
+
+        var playListLoading: Boolean = false,
     ) {
         fun getPlayListSize(): Int {
             return playList?.run { items.size } ?: 0
@@ -44,11 +54,11 @@ class PlayerStore(override val di: DI) :
 
         fun getPlayListCurrentPosition(): Int {
             if (aid.isBlank()) {
-                return 0
+                return -1
             }
             return playList?.run {
                 items.indexOfFirst {
-                    it.aid == aid
+                    it.cid == cid
                 }
             } ?: -1
         }
@@ -73,7 +83,7 @@ class PlayerStore(override val di: DI) :
             playProgress = progress
         }
     }
-    fun setPlayList(info: PlayListInfo) {
+    fun setPlayList(info: PlayListInfo?) {
         this.setState {
             playList = info
         }
@@ -101,7 +111,7 @@ class PlayerStore(override val di: DI) :
             name = title,
             from = info.id,
             items = items,
-            type = 1,
+            type = SEASON,
         ))
     }
 
@@ -131,7 +141,13 @@ class PlayerStore(override val di: DI) :
         }
     }
 
-    suspend fun setFavoriteList(mediaId: String, mediaTitle: String) {
+    val playListLoadingMutex = Mutex()
+    suspend fun setFavoriteList(mediaId: String, mediaTitle: String)
+    = playListLoadingMutex.withLock {
+        setState {
+            playListLoading = true
+            playList = null
+        }
         val items = mutableListOf<PlayListItemInfo>()
         val pageSize = 20
         var pageNum = 1
@@ -171,31 +187,70 @@ class PlayerStore(override val di: DI) :
             } catch (e: Exception) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    PopTip.show(e.toString())
+                    e.toString().let {
+                        //收藏夹内视频个数为20的整倍数时会弹，但是不影响运行结果
+                        if(it != "java.lang.NullPointerException:" +
+                            " Parameter specified as non-null is null:" +
+                            " method kotlin.collections.CollectionsKt__IterablesKt.collectionSizeOrDefault," +
+                            " parameter <this>"){
+                            PopTip.show(it)
+                        }
+                    }
                 }
                 loadFinish = true
             } finally {
             }
         }
-
-        val aid = state.aid
-        var currentVideoInList = false
-        items.forEach{
-            if(it.aid == aid){
-                currentVideoInList = true
-            }
+        this.setState {
+            playList = PlayListInfo(
+                name = mediaTitle,
+                from = mediaId,
+                items = items,
+                type = FAVORITE,
+            )
+            playListLoading = false
         }
-        if(aid.isNotEmpty() && !currentVideoInList) {
-            //有视频正在播放 且当前视频不在列表中时，不设置列表
-        } else {
-            this.setState {
-                playList = PlayListInfo(
-                    name = mediaTitle,
-                    from = mediaId,
-                    items = items,
-                    type = 2,
+    }
+
+    suspend fun setSeasonList(seasonId: String, seasonTitle: String, seasonIndex: Int)
+    = playListLoadingMutex.withLock{
+        setState {
+            playListLoading = true
+            playList = null
+        }
+        var items = listOf<PlayListItemInfo>()
+        try {
+            val req = bilibili.app.view.v1.SeasonReq(
+                seasonId = seasonId.toLong(),
+            )
+            val res = BiliGRPCHttp.request {
+                ViewGRPC.season(req)
+            }.awaitCall()
+            items = (res.season?.sections?.get(seasonIndex)?.episodes ?: listOf()).map{
+                PlayListItemInfo(
+                    aid = it.aid.toString(),
+                    cid = it.cid.toString(),
+                    duration = 0,
+                    title = it.title,
+                    cover = it.cover,
+                    ownerId = it.author?.mid.toString(),
+                    ownerName = it.author?.name.toString(),
+                    from = seasonId,
                 )
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.toString())
+        } finally {
+        }
+        setState {
+            playList = PlayListInfo(
+                name = seasonTitle,
+                from = seasonId,
+                items = items,
+                type = SEASON,
+            )
+            playListLoading = false
         }
     }
 
