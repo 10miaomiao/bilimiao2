@@ -38,6 +38,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -89,13 +90,20 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     private val pageConfigInfo = PageConfigInfo(this)
 
     override val pageConfig = myPageConfig {
-        title = pageConfigInfo.title
-        menus = pageConfigInfo.menus
+        val config = pageConfigInfo.lastConfig()
+        title = config?.title ?: ""
+        menus = config?.menus ?: listOf()
+        search = config?.search
     }
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
-        pageConfigInfo.onMenuItemClick?.invoke(view, menuItem)
+        pageConfigInfo.onMenuItemClick(view, menuItem)
+    }
+
+    override fun onSearchSelfPage(context: Context, keyword: String) {
+        super.onSearchSelfPage(context, keyword)
+        pageConfigInfo.onSearchSelfPage(context, keyword)
     }
 
     private val url by lazy {

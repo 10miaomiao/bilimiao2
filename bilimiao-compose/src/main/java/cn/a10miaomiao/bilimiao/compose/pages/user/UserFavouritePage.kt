@@ -27,8 +27,9 @@ import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.AutoTwoPaneLayout
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialog
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
@@ -90,24 +91,8 @@ internal fun UserFavouritePageContent() {
     }
 
     PageConfig(
-        title = "${callName}的收藏",
-        menus = if(openMediaDetail != null){
-            listOf(
-                myMenuItem {
-                    key = MenuKeys.playList
-                    iconFileName = "ic_baseline_menu_24"
-                    title = "播放列表"
-                },
-            )
-        } else null
+        title = "${callName}的收藏"
     )
-    PageMenuItemClick(viewModel) { view, item ->
-        when (MenuKeys.playList) {
-            MenuKeys.playList -> {
-                viewModel.toPlayList()
-            }
-        }
-    }
 
     BackHandler(
         enabled = openMediaDetail != null,
@@ -219,5 +204,7 @@ internal fun UserFavouritePageContent() {
         openedSecond = openMediaDetail != null,
         firstPaneMaxWidth = 400.dp
     )
+
+    FavouriteEditDialog()
 
 }

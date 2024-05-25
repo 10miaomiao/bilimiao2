@@ -1,5 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.comm.navigation
 
+import android.app.Activity
+import android.app.ActivityOptions
+import android.content.Intent
+import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
@@ -47,4 +51,21 @@ fun NavController.tryPopBackStack(): Boolean {
     } catch (e: Exception) {
         false
     }
+}
+
+fun View.openSearch(
+    mode: Int,
+    keyword: String,
+    name: String,
+) {
+    val activity = context as? Activity ?: return
+    val intent = Intent(activity, Class.forName("com.a10miaomiao.bilimiao.activity.SearchActivity"))
+    val options = ActivityOptions.makeSceneTransitionAnimation(
+        activity,
+        android.util.Pair(this, "shareElement"),
+    ).toBundle()
+    intent.putExtra("keyword", keyword)
+    intent.putExtra("mode", mode)
+    intent.putExtra("name", name)
+    activity.startActivityForResult(intent, 1234, options)
 }

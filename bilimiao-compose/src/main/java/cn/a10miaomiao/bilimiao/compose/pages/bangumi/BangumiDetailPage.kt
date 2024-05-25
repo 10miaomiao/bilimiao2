@@ -30,7 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageMenuItemClick
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.DoubleColumnAutofitLayout
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.rememberChainScrollableLayoutState
@@ -408,7 +408,7 @@ internal fun BangumiDetailPageContent(
         }
     }
 
-    PageConfig(
+    val pageConfigId = PageConfig(
         title = detailInfo?.season_title ?: "番剧详情",
         menus = listOf(
             myMenuItem {
@@ -432,7 +432,10 @@ internal fun BangumiDetailPageContent(
         )
 
     )
-    PageMenuItemClick(viewModel::menuItemClick)
+    PageListener(
+        pageConfigId,
+        onMenuItemClick = viewModel::menuItemClick
+    )
 
     DoubleColumnAutofitLayout(
         modifier = Modifier.fillMaxSize(),

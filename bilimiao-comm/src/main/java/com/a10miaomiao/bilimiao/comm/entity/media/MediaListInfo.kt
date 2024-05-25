@@ -20,4 +20,5 @@ data class MediaListInfo(
 ) {
     // 0:公开,1:私有
     val privacy: Int get() = attr and 1
+
 }
