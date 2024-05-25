@@ -145,7 +145,13 @@ class UserFavouriteViewModel (
     fun toPlayList() {
         openedMedia.value?.let {
             viewModelScope.launch {
-                playerStore.setFavoriteList(it.id, it.title)
+                if(it.type == 21){
+                    //合集
+                    playerStore.setSeasonList(it.id,it.title,0)
+                } else {
+                    //收藏
+                    playerStore.setFavoriteList(it.id, it.title)
+                }
             }
         }
         val nav = fragment.findComposeNavController()

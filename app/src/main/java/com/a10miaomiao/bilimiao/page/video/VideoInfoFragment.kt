@@ -339,9 +339,8 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         val info = viewModel.info
         if (info != null) {
             // 设置播放列表
-            if(playerStore.state.playList?.type == 2
-                && playerStore.state.inPlayList(info.aid)) {
-                //视频已在收藏夹类型的列表中，不设置新的列表
+            if(playerStore.state.inPlayList(info.aid)) {
+                //视频已在列表中，不设置新的列表
             } else {
                 viewModel.ugcSeason?.let {
                     val index = if (it.sections.size > 1) {
