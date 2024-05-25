@@ -175,6 +175,26 @@ class UserApi {
         )
     }
 
+    fun favFavFolder(
+        mediaId: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v3/fav/folder/fav")
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "media_id" to mediaId,
+        )
+    }
+
+    fun favUnfavFolder(
+        mediaId: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v3/fav/folder/unfav")
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "media_id" to mediaId,
+        )
+    }
+
     /**
      * 收藏夹列表详情
      */

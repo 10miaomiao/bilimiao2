@@ -1,10 +1,12 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialogState
+import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFavouriteMorePopupMenu
 import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -27,6 +29,7 @@ internal class UserFavouriteViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val userStore: UserStore by instance()
 
     val createdList = FlowPaginationInfo<MediaListInfo>(
         pageSize = 10
@@ -142,6 +145,20 @@ internal class UserFavouriteViewModel(
     fun closeMediaDetail() {
         openedMedia.value = null
     }
+
+    fun showMorePopupMenu(
+        view: View,
+        mediaInfo: MediaListInfo?,
+    ) {
+        val pm = UserFavouriteMorePopupMenu(
+            fragment.requireActivity(),
+            this,
+            userStore,
+            mediaInfo,
+        )
+        pm.show(view)
+    }
+
 
     fun editFolder(
         mediaId: String,

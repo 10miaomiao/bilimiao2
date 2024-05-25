@@ -41,9 +41,11 @@ import cn.a10miaomiao.bilimiao.compose.comm.navigation.openSearch
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteFolderType
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.MyFollowMorePopupMenu
 import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFavouriteMorePopupMenu
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
@@ -57,6 +59,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -85,8 +88,7 @@ private class UserFavouriteDetailViewModel(
         }
     var mediaTitle: String = ""
 
-    var mediaInfo: MediaListInfo? = null
-
+    var mediaInfo = MutableStateFlow<MediaListInfo?>(null)
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<MediasInfo>()
     val keyword = MutableStateFlow("")
@@ -106,7 +108,7 @@ private class UserFavouriteDetailViewModel(
             if (res.code == 0) {
                 val result = res.data
                 val mediaList = result.medias ?: listOf()
-                mediaInfo = result.info
+                mediaInfo.value = result.info
                 if (pageNum == 1) {
                     list.data.value = mediaList
                 } else {
@@ -152,6 +154,46 @@ private class UserFavouriteDetailViewModel(
             )
     }
 
+    fun favFolder() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.userApi
+                .favFavFolder(
+                    mediaId = mediaId,
+                )
+                .awaitCall()
+                .gson<MessageInfo>(isLog = true)
+            if (res.isSuccess) {
+                PopTip.show("订阅成功")
+                refresh()
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
+    fun unfavFolder() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.userApi
+                .favUnfavFolder(
+                    mediaId = mediaId,
+                )
+                .awaitCall()
+                .gson<MessageInfo>(isLog = true)
+            if (res.isSuccess) {
+                PopTip.show("已取消订阅")
+                refresh()
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.search -> {
@@ -162,13 +204,17 @@ private class UserFavouriteDetailViewModel(
                 )
             }
             MenuKeys.more -> {
-                val pm = UserFavouriteMorePopupMenu(
-                    fragment.requireActivity(),
-                    parentViewModel,
-                    userStore,
-                    mediaInfo ?: return,
+                parentViewModel.showMorePopupMenu(
+                    view,
+                    mediaInfo.value,
                 )
-                pm.show(view)
+            }
+            MenuKeys.follow -> {
+                if (mediaInfo.value?.fav_state == 1) {
+                    unfavFolder()
+                } else {
+                    favFolder()
+                }
             }
         }
     }
@@ -177,6 +223,12 @@ private class UserFavouriteDetailViewModel(
         val nav = fragment.findNavController()
         val url = "bilimiao://user/fav/detail?id=${mediaId}&name=${mediaTitle}&keyword=${text}"
         nav.navigate(Uri.parse(url))
+    }
+
+    fun isSelfFav(): Boolean {
+        return mediaInfo.value?.let {
+            userStore.isSelf(it.mid.toString())
+        } ?: true
     }
 }
 
@@ -190,6 +242,7 @@ internal fun UserFavouriteDetailContent(
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
+    val detailInfo by viewModel.mediaInfo.collectAsState()
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
     val listFinished by viewModel.list.finished.collectAsState()
@@ -203,18 +256,31 @@ internal fun UserFavouriteDetailContent(
 
     val pageConfigId = PageConfig(
         title = mediaTitle,
-        menus = remember {
+        menus = remember(detailInfo) {
             listOf(
+                if (viewModel.isSelfFav()) {
+                    myMenuItem {
+                        key = MenuKeys.more
+                        iconFileName = "ic_more_vert_grey_24dp"
+                        title = "更多"
+                    }
+                } else {
+                    myMenuItem {
+                        key = MenuKeys.follow
+                        if (detailInfo?.fav_state == 1) {
+                            iconFileName = "ic_baseline_favorite_24"
+                            title = "已订阅"
+                        } else {
+                            iconFileName = "ic_outline_favorite_border_24"
+                            title = "订阅"
+                        }
+                    }
+                },
                 myMenuItem {
                     key = MenuKeys.search
                     iconFileName = "ic_search_gray"
                     title = "搜索"
                 },
-                myMenuItem {
-                    key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
-                    title = "更多"
-                }
             )
         },
         search = SearchConfigInfo(
