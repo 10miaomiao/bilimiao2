@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.app.Activity
+import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
@@ -38,12 +39,18 @@ import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.AutoTwoPaneLayout
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialog
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
+import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFavouriteMorePopupMenu
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.accompanist.adaptive.HorizontalTwoPaneStrategy
 import com.google.accompanist.adaptive.SplitResult
@@ -104,8 +111,27 @@ internal fun UserFavouritePageContent() {
         }
     }
 
-    PageConfig(
-        title = "${callName}的收藏"
+    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+        if (item.key == MenuKeys.more) {
+            viewModel.showMorePopupMenu(view, null)
+        }
+    }
+
+    val pageConfigId = PageConfig(
+        title = "${callName}的收藏",
+        menus = remember {
+            listOf(
+                myMenuItem {
+                    key = MenuKeys.more
+                    iconFileName = "ic_more_vert_grey_24dp"
+                    title = "更多"
+                },
+            )
+        },
+    )
+    PageListener(
+        pageConfigId,
+        onMenuItemClick = ::menuItemClick,
     )
 
     BackHandler(

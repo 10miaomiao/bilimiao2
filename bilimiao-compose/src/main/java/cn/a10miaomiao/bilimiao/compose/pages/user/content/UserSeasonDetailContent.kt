@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -37,9 +38,13 @@ import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
@@ -153,6 +158,10 @@ internal fun UserSeasonDetailContent(
 
     val sections by viewModel.sections.collectAsState()
     val curSection by viewModel.curSection.collectAsState()
+
+    val pageConfigId = PageConfig(
+        title = seasonTitle,
+    )
 
     LaunchedEffect(seasonId) {
         viewModel.sid = seasonId
