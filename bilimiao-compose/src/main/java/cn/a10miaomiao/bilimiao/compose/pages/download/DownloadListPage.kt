@@ -34,6 +34,7 @@ import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -216,13 +217,15 @@ internal fun DownloadListPageContent(
 ) {
     val pageConfigId = PageConfig(
         title = "下载列表",
-        menus = listOf(
-            MenuItemPropInfo(
-                key = 0,
-                iconFileName = "ic_baseline_lightbulb_24",
-                title = "提示",
-            )
-        )
+        menu = remember {
+            myMenu {
+                myItem {
+                    key = 0
+                    iconFileName = "ic_baseline_lightbulb_24"
+                    title = "提示"
+                }
+            }
+        }
     )
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value

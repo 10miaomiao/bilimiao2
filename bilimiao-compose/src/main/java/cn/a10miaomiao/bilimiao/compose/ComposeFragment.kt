@@ -92,7 +92,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     override val pageConfig = myPageConfig {
         val config = pageConfigInfo.lastConfig()
         title = config?.title ?: ""
-        menus = config?.menus ?: listOf()
+        menu = config?.menu
         search = config?.search
     }
 

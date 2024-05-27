@@ -14,20 +14,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -42,12 +49,14 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.AutoTwoPaneLayout
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialog
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditForm
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditFormState
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
-import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFavouriteMorePopupMenu
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
@@ -57,6 +66,8 @@ import com.google.accompanist.adaptive.SplitResult
 import com.google.accompanist.adaptive.TwoPane
 import com.google.accompanist.adaptive.TwoPaneStrategy
 import com.google.accompanist.adaptive.calculateDisplayFeatures
+import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -91,7 +102,7 @@ class UserFavouritePage : ComposePage() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun UserFavouritePageContent() {
+private fun UserFavouritePageContent() {
     val viewModel: UserFavouriteViewModel by rememberInstance()
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
@@ -100,6 +111,10 @@ internal fun UserFavouritePageContent() {
     val saveableStateHolder = rememberSaveableStateHolder()
     val listData = viewModel.createdList.data.collectAsState().value
     val openMediaDetail = viewModel.openedMedia.collectAsState().value
+
+    var showAddDialog by remember {
+        mutableStateOf(false)
+    }
 
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -112,21 +127,27 @@ internal fun UserFavouritePageContent() {
     }
 
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
-        if (item.key == MenuKeys.more) {
-            viewModel.showMorePopupMenu(view, null)
+        if (item.key == MenuKeys.add) {
+            showAddDialog = true
         }
     }
 
     val pageConfigId = PageConfig(
         title = "${callName}的收藏",
-        menus = remember {
-            listOf(
-                myMenuItem {
+        menu = remember {
+            myMenu {
+                myItem {
                     key = MenuKeys.more
                     iconFileName = "ic_more_vert_grey_24dp"
                     title = "更多"
-                },
-            )
+                    childMenu = myMenu {
+                        myItem {
+                            key = MenuKeys.add
+                            title = "新建收藏夹"
+                        }
+                    }
+                }
+            }
         },
     )
     PageListener(
@@ -199,7 +220,7 @@ internal fun UserFavouritePageContent() {
                         .weight(1f),
                     state = pagerState,
                 ) { index ->
-                    when(index) {
+                    when (index) {
                         0 -> {
                             // 创建的
                             UserFavouriteListContent(
@@ -207,6 +228,7 @@ internal fun UserFavouritePageContent() {
                                 folderType = UserFavouriteFolderType.Created,
                             )
                         }
+
                         1 -> {
                             // 订阅的
                             UserFavouriteListContent(
@@ -245,6 +267,68 @@ internal fun UserFavouritePageContent() {
         firstPaneMaxWidth = 400.dp
     )
 
-    FavouriteEditDialog()
+    if (showAddDialog) {
+        val formState = remember {
+            FavouriteEditFormState(
+                initialTitle = "",
+                initialIntro = "",
+                initialPrivacy = 0,
+            )
+        }
+        var loading by remember {
+            mutableStateOf(false)
+        }
+
+        fun handleSubmit() {
+            scope.launch(Dispatchers.IO) {
+                runCatching {
+                    viewModel.addFolder(
+                        cover = "",
+                        title = formState.title,
+                        intro = formState.intro,
+                        privacy = formState.privacy,
+                    )
+                }.onSuccess {
+                    PopTip.show("创建成功")
+                    showAddDialog = false
+                }.onFailure {
+                    PopTip.show(it.message ?: it.toString())
+                }
+            }
+        }
+
+        AlertDialog(
+            onDismissRequest = {
+                showAddDialog = false
+            },
+            title = {
+                Text(
+                    text = "新建收藏夹",
+                    fontWeight = FontWeight.W700,
+                    style = MaterialTheme.typography.titleSmall
+                )
+            },
+            text = {
+                FavouriteEditForm(formState)
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !loading,
+                    onClick = ::handleSubmit,
+                ) {
+                    Text(text = "添加")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showAddDialog = false
+                    },
+                ) {
+                    Text(text = "取消")
+                }
+            }
+        )
+    }
 
 }

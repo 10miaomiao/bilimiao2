@@ -21,4 +21,7 @@ data class MediaListInfo(
     // 0:公开,1:私有
     val privacy: Int get() = attr and 1
 
+    // 是否为默认收藏夹
+    val isDefaultFav: Boolean get () = attr or 1 == 1
+
 }

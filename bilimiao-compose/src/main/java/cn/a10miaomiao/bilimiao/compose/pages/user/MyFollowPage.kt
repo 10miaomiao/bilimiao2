@@ -56,9 +56,11 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.TagFollowContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.MessageDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.bindSingleton
@@ -97,6 +99,7 @@ private fun MyFollowPageContent() {
     val tagListFail by viewModel.tagList.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val orderType by viewModel.orderType.collectAsState()
+    val orderTypeToNameMap = viewModel.orderTypeToNameMap
     val isLogin = userStore.isLogin()
 
     val pagerState = rememberPagerState(pageCount = { tagList.size })
@@ -105,50 +108,91 @@ private fun MyFollowPageContent() {
 
     val pageConfigId = PageConfig(
         title = "我的关注",
-        menus = remember(currentPage, tagList) {
-            listOf(
-                myMenuItem {
-                    key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
-                    title = "更多"
-                    visibility = if (
-                        currentPage in tagList.indices
-                        && tagList[currentPage].tagid > 0
-                    ) {
-                        View.VISIBLE
-                    } else {
-                        View.GONE
+        menu = remember(currentPage, tagList, orderType) {
+            myMenu {
+                if (
+                    currentPage in tagList.indices
+                    && tagList[currentPage].tagid > 0
+                ) {
+                    myItem {
+                        key = MenuKeys.more
+                        iconFileName = "ic_more_vert_grey_24dp"
+                        title = "更多"
+                        childMenu = myMenu {
+                            myItem {
+                                key = MenuKeys.edit
+                                title = "修改分组"
+                            }
+                            myItem {
+                                key = MenuKeys.delete
+                                title = "删除分组"
+                            }
+                        }
                     }
-                },
-                myMenuItem {
+                }
+                myItem {
                     key = MenuKeys.search
                     iconFileName = "ic_search_gray"
                     title = "搜索"
-                },
-                myMenuItem {
+                }
+                myItem {
                     key = MenuKeys.filter
                     iconFileName = "ic_baseline_filter_list_grey_24"
                     title = viewModel.orderTypeToNameMap[orderType]
-                },
-            )
+                    childMenu = myMenu {
+                        checkable = true
+                        checkedKey = orderTypeToNameMap.keys.indexOf(orderType)
+                        orderTypeToNameMap.values.forEachIndexed { index, s ->
+                            myItem {
+                                key = index
+                                title = s
+                            }
+                        }
+                    }
+                }
+            }
         }
     )
 
     PageListener(
         configId = pageConfigId,
-        onMenuItemClick = remember(currentPage) {
-            { view, item ->
+        onMenuItemClick = remember(currentPage, tagList) {
+            { _, item ->
                 when (item.key) {
-                    MenuKeys.filter -> {
-                        viewModel.showOrderPopupMenu(view)
+                    in orderTypeToNameMap.keys.indices -> {
+                        val value = orderTypeToNameMap.keys.elementAt(item.key!!)
+                        viewModel.changeOrderType(value)
                     }
 
                     MenuKeys.search -> {
                         viewModel.toSearchPage()
                     }
 
-                    MenuKeys.more -> {
-                        viewModel.showMorePopupMenu(view, currentPage)
+                    MenuKeys.edit -> {
+                        val tagInfo = tagList[currentPage]
+                        viewModel.updateTagEditDialogState(
+                            TagEditDialogState.Update(
+                                tagInfo.tagid,
+                                tagInfo.name,
+                            )
+                        )
+                    }
+
+                    MenuKeys.delete -> {
+                        val tagInfo = tagList[currentPage]
+                        if (tagInfo.count > 0) {
+                            MessageDialog.build()
+                                .setTitle("提示")
+                                .setMessage("该分组下还有关注的人\n删除后将会放到默认分组")
+                                .setOkButton("确定") { _, _ ->
+                                    viewModel.deleteTag(tagInfo.tagid)
+                                    false
+                                }
+                                .setCancelButton("取消")
+                                .show()
+                        } else {
+                            viewModel.deleteTag(tagInfo.tagid)
+                        }
                     }
                 }
                 Unit

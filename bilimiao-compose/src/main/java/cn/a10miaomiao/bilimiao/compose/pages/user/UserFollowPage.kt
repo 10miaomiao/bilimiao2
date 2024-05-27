@@ -35,10 +35,10 @@ import cn.a10miaomiao.bilimiao.compose.commponents.dialogs.SingleChoiceItem
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
-import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFollowOrderPopupMenu
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -93,10 +93,6 @@ private class UserFollowPageViewModel(
     val listState = MutableStateFlow(LazyListState(0, 0))
     val list = FlowPaginationInfo<FollowingItemInfo>()
 
-    val orderTypeList = listOf(
-        SingleChoiceItem("最常访问", "attention"),
-        SingleChoiceItem("关注顺序", ""),
-    )
     val orderType = MutableStateFlow("attention")
     val orderTypeToNameMap = mapOf(
         "attention" to "最常访问",
@@ -104,11 +100,13 @@ private class UserFollowPageViewModel(
     )
 
     fun changeOrderType(value: String) {
-        orderType.value = value
-        list.data.value = emptyList()
-        list.finished.value = false
-        list.fail.value = ""
-        loadData(1)
+        if (orderType.value != value) {
+            orderType.value = value
+            list.data.value = emptyList()
+            list.finished.value = false
+            list.fail.value = ""
+            loadData(1)
+        }
     }
 
     fun loadData(
@@ -224,23 +222,6 @@ private class UserFollowPageViewModel(
             defaultNavOptions
         )
     }
-
-    fun showOrderPopupMenu(view: View) {
-        val pm = UserFollowOrderPopupMenu(
-            activity,
-            view,
-            checkedValue = orderType.value
-        )
-        pm.setOnMenuItemClickListener {
-            it.isChecked = true
-            val value = arrayOf("attention", "")[it.itemId]
-            if (value != orderType.value) {
-                changeOrderType(value)
-            }
-            false
-        }
-        pm.show()
-    }
 }
 
 @Composable
@@ -259,7 +240,7 @@ private fun UserFollowPageContent(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isLogin = userStore.isLogin()
 
-    val orderTypeList = viewModel.orderTypeList
+    val orderTypeToNameMap = viewModel.orderTypeToNameMap
     val orderType by viewModel.orderType.collectAsState()
 
     val pageConfigId = PageConfig(
@@ -268,23 +249,33 @@ private fun UserFollowPageContent(
         } else {
             "Ta的关注"
         },
-        menus = remember {
-            listOf(
-                myMenuItem {
+        menu = remember(orderType) {
+            myMenu {
+                myItem {
                     key = 1
                     iconFileName = "ic_baseline_filter_list_grey_24"
                     title = viewModel.orderTypeToNameMap[orderType]
+                    childMenu = myMenu {
+                        checkable = true
+                        checkedKey = orderTypeToNameMap.keys.indexOf(orderType)
+                        orderTypeToNameMap.values.forEachIndexed { index, s ->
+                            myItem {
+                                key = index
+                                title = s
+                            }
+                        }
+                    }
                 }
-            )
+            }
         }
     )
     PageListener(
         pageConfigId,
-        onMenuItemClick = fun(view, item) {
-            when (item.key) {
-                MenuKeys.filter -> {
-                    viewModel.showOrderPopupMenu(view)
-                }
+        onMenuItemClick = fun(_, item) {
+            val key = item.key ?: return
+            if (item.key in orderTypeToNameMap.keys.indices) {
+                val value = orderTypeToNameMap.keys.elementAt(key)
+                viewModel.changeOrderType(value)
             }
         }
     )
@@ -390,17 +381,7 @@ private fun UserFollowPageContent(
                 }
             }
         }
-//        LazyColumn(
-//            modifier = Modifier.padding(
-//                start = windowInsets.leftDp.dp,
-//                end = windowInsets.rightDp.dp,
-//            )
-//        ) {
-//            item(key = "top") {
-//                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
-//            }
-//
-//
-//        }
+
+
     }
 }

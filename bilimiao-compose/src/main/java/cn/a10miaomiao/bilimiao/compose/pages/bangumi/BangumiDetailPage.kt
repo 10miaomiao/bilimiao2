@@ -44,6 +44,7 @@ import com.a10miaomiao.bilimiao.comm.entity.bangumi.*
 import com.a10miaomiao.bilimiao.comm.entity.comm.ToastInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
@@ -410,26 +411,25 @@ internal fun BangumiDetailPageContent(
 
     val pageConfigId = PageConfig(
         title = detailInfo?.season_title ?: "番剧详情",
-        menus = listOf(
-            myMenuItem {
-                key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
-//                iconResource = R.drawable.ic_more_vert_grey_24dp
-                title = "更多"
-            },
-            myMenuItem {
-                key = MenuKeys.follow
-                if (isFollow) {
-                    iconFileName = "ic_baseline_favorite_24"
-//                    iconResource = R.drawable.ic_baseline_favorite_24
-                    title = "已追番"
-                } else {
-                    iconFileName = "ic_outline_favorite_border_24"
-//                    iconResource = R.drawable.ic_outline_favorite_border_24
-                    title = "追番"
+        menu = remember(isFollow) {
+            myMenu {
+                myItem {
+                    key = MenuKeys.more
+                    iconFileName = "ic_more_vert_grey_24dp"
+                    title = "更多"
                 }
-            },
-        )
+                myItem {
+                    key = MenuKeys.follow
+                    if (isFollow) {
+                        iconFileName = "ic_baseline_favorite_24"
+                        title = "已追番"
+                    } else {
+                        iconFileName = "ic_outline_favorite_border_24"
+                        title = "追番"
+                    }
+                }
+            }
+        }
 
     )
     PageListener(
