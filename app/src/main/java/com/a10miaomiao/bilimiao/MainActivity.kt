@@ -34,9 +34,12 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
+import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MyPopupMenu
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
@@ -213,9 +216,24 @@ class MainActivity
         ui.mAppBar.onBackClick = this.onBackClick
         ui.mAppBar.onBackLongClick = this.onBackLongClick
         ui.mAppBar.onMenuItemClick = {
-            val fragment = currentNav.childFragmentManager.primaryNavigationFragment
-            if (fragment is MyPage) {
-                fragment.onMenuItemClick(it, it.prop)
+            if (it.prop.action == MenuActions.search) {
+                openSearch(it)
+            } else {
+                val fragment = currentNav.childFragmentManager.primaryNavigationFragment
+                if (fragment is MyPage) {
+                    val childMenu = it.prop.childMenu
+                    if (childMenu != null) {
+                        val myPopupMenu = MyPopupMenu(
+                            activity = this,
+                            myPage = fragment,
+                            myPageMenu = childMenu,
+                            anchorView = it,
+                        )
+                        myPopupMenu.show()
+                    } else {
+                        fragment.onMenuItemClick(it, it.prop)
+                    }
+                }
             }
         }
         ui.mAppBar.onPointerClick = this.onPointerClick
@@ -320,7 +338,7 @@ class MainActivity
             pageConfig = config
             ui.mAppBar.setProp {
                 title = config.title
-                menus = config.menus
+                menus = config.getMenuItems()
             }
             ui.root.slideUpBottomAppBar()
         }
