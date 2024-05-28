@@ -46,6 +46,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.lyric.lib.KrcText
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricOffsetPopupMenu
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricSourcePopupMenu
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
@@ -457,14 +458,14 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                 }
             }
         },
-        menus = remember {
-            listOf(
-                myMenuItem {
+        menu = remember(offset) {
+            myMenu {
+                myItem {
                     key = 1
                     this.title = "歌词源"
                     iconFileName = "ic_more_vert_grey_24dp"
-                },
-                myMenuItem {
+                }
+                myItem {
                     key = 2
                     this.title = if(offset==0) {
                         "延迟"
@@ -475,7 +476,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                     }
                     iconFileName = "ic_history_gray_24dp"
                 }
-            )
+            }
         }
     )
     PageListener(

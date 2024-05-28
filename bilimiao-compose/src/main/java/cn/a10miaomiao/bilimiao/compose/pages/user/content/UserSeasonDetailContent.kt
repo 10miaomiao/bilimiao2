@@ -176,6 +176,10 @@ internal fun UserSeasonDetailContent(
     val sections by viewModel.sections.collectAsState()
     val curSection by viewModel.curSection.collectAsState()
 
+    val pageConfigId = PageConfig(
+        title = seasonTitle,
+    )
+
     LaunchedEffect(seasonId) {
         viewModel.sid = seasonId
     }

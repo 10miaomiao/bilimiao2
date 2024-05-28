@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 
 private var _configId = 0
@@ -57,7 +58,7 @@ class PageConfigInfo(
         val id: Int,
     ) {
         var title: String = ""
-        var menus: List<MenuItemPropInfo>? = null
+        var menu: MyPageMenu? = null
         var search: SearchConfigInfo? = null
     }
 }
@@ -68,7 +69,7 @@ internal val LocalPageConfigInfo: ProvidableCompositionLocal<PageConfigInfo?> =
 @Composable
 fun PageConfig(
     title: String = "",
-    menus: List<MenuItemPropInfo>? = null,
+    menu: MyPageMenu? = null,
     search: SearchConfigInfo? = null
 ): Int {
     val pageConfigInfo = LocalPageConfigInfo.current ?: return -1
@@ -77,11 +78,11 @@ fun PageConfig(
     }
     DisposableEffect(
         LocalLifecycleOwner.current.lifecycle,
-        title, menus, search
+        title, menu, search
     ) {
         pageConfigInfo.addConfig(configId) {
             it.title = title
-            it.menus = menus
+            it.menu = menu
             it.search = search
         }
         pageConfigInfo.page.pageConfig.notifyConfigChanged()

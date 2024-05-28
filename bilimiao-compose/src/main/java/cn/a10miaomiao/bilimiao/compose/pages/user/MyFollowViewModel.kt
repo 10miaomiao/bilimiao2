@@ -8,12 +8,8 @@ import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
-import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.MyFollowMorePopupMenu
-import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFollowOrderPopupMenu
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -202,29 +198,9 @@ internal class MyFollowViewModel(
             .navigate(SearchFollowPage())
     }
 
-    fun showOrderPopupMenu(view: View) {
-        val pm = UserFollowOrderPopupMenu(
-            activity,
-            view,
-            checkedValue = orderType.value
-        )
-        pm.setOnMenuItemClickListener {
-            it.isChecked = true
-            val value = arrayOf("attention", "")[it.itemId]
-            if (value != orderType.value) {
-                orderType.value = value
-            }
-            false
-        }
-        pm.show()
-    }
-
-    fun showMorePopupMenu(view: View, currentPage: Int) {
-        val tagListData = tagList.data.value
-        if (currentPage in tagListData.indices) {
-            val tagInfo = tagListData[currentPage]
-            val pm = MyFollowMorePopupMenu(activity, tagInfo, this)
-            pm.show(view)
+    fun changeOrderType(value: String) {
+        if (orderType.value != value) {
+            orderType.value = value
         }
     }
 
