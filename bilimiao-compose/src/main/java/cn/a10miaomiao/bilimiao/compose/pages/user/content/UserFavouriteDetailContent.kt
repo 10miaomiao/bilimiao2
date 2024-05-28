@@ -44,12 +44,9 @@ import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
-import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
-import cn.a10miaomiao.bilimiao.compose.comm.navigation.openSearch
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
-import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteFolderType
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditForm
@@ -321,7 +318,7 @@ internal fun UserFavouriteDetailContent(
                     action = MenuActions.search
                     iconFileName = "ic_search_gray"
                     title = "搜索"
-                },
+                }
                 myItem {
                     key = MenuKeys.playList
                     iconFileName = "ic_baseline_menu_24"
