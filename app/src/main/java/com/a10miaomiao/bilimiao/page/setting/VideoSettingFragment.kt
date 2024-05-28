@@ -29,12 +29,18 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.player.media3.Media3ExoPlayerManager
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import de.Maxr1998.modernpreferences.PreferencesAdapter
-import de.Maxr1998.modernpreferences.helpers.*
+import de.Maxr1998.modernpreferences.helpers.categoryHeader
+import de.Maxr1998.modernpreferences.helpers.onClick
+import de.Maxr1998.modernpreferences.helpers.pref
+import de.Maxr1998.modernpreferences.helpers.screen
+import de.Maxr1998.modernpreferences.helpers.seekBar
+import de.Maxr1998.modernpreferences.helpers.singleChoice
+import de.Maxr1998.modernpreferences.helpers.switch
 import de.Maxr1998.modernpreferences.preferences.SwitchPreference
 import de.Maxr1998.modernpreferences.preferences.choice.SelectionItem
 import kotlinx.coroutines.launch
@@ -76,6 +82,10 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
 
         const val PLAYER_AUTO_NEXT_VIDEO = "player_auto_next_video"
         const val PLAYER_AUTO_NEXT_BANGUMI = "player_auto_next_bangumi"
+        const val PLAYLIST_RANDOM_NEXT = "playlist_random_next"
+        const val PLAYLIST_AUTO_REPLAY = "playlist_auto_replay"
+
+        const val PLAYER_AUTO_STOP_DURATION = "player_auto_stop_duration"
 
         const val PLAYER_SUBTITLE_SHOW = "player_subtitle_show"
         const val PLAYER_AI_SUBTITLE_SHOW = "player_ai_subtitle_show"
@@ -336,10 +346,41 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             defaultValue = true
         }
 
+        seekBar(PLAYER_AUTO_STOP_DURATION) {
+            title = "播放器定时关闭"
+            summary = "视频播放的时长，而不是实际经过的时间"
+            max = 3600000
+            min = 0
+            default = 0
+            formatter = {
+                val second = value/1000
+                val minute = second/60
+                if(second == 0){
+                    "${value}ms"
+                } else if(minute == 0){
+                    "${second}s"
+                } else {
+                    "${minute}min${second-minute*60}s"
+                }
+            }
+        }
+
         switch(PLAYER_AUTO_NEXT_BANGUMI) {
             title = "番剧自动播放下一集"
             summary = ""
             defaultValue = true
+        }
+
+        switch(PLAYLIST_RANDOM_NEXT) {
+            title = "收藏夹列表随机播放"
+            summary = ""
+            defaultValue = false
+        }
+
+        switch(PLAYLIST_AUTO_REPLAY) {
+            title = "收藏夹列表单集循环"
+            summary = "优先级高于随机播放"
+            defaultValue = false
         }
 
         switch(PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR) {

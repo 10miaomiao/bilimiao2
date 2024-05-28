@@ -7,7 +7,8 @@ data class MediasInfo(
     val duration: Long,
     val title: String,
     val upper: MediaUpperInfo,
-    val cnt_info: CntInfo
+    val cnt_info: CntInfo,
+    val ugc: Ugc
 ) {
 
     data class CntInfo(
@@ -19,5 +20,8 @@ data class MediasInfo(
         val share: Int,
         val thumb_down: Int,
         val thumb_up: Int
+    )
+    data class Ugc(
+        val first_cid: String,
     )
 }

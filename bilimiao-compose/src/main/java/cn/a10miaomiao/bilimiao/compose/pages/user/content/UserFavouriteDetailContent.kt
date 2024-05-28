@@ -37,15 +37,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.openSearch
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteFolderType
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditForm
@@ -243,6 +247,7 @@ private class UserFavouriteDetailViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
             PopTip.show(e.message ?: e.toString())
+
         }
     }
 
@@ -251,12 +256,18 @@ private class UserFavouriteDetailViewModel(
         val url = "bilimiao://user/fav/detail?id=${mediaId}&name=${mediaTitle}&keyword=${text}"
         nav.navigate(Uri.parse(url))
     }
+    
+    fun toPlayList() {
+        parentViewModel::toPlayList.invoke()
+    }
+
 
     fun isSelfFav(): Boolean {
         return mediaInfo.value?.let {
             userStore.isSelf(it.mid.toString())
         } ?: true
     }
+
 }
 
 @Composable
@@ -310,6 +321,11 @@ internal fun UserFavouriteDetailContent(
                     action = MenuActions.search
                     iconFileName = "ic_search_gray"
                     title = "搜索"
+                },
+                myItem {
+                    key = MenuKeys.playList
+                    iconFileName = "ic_baseline_menu_24"
+                    title = "播放列表"
                 }
                 if (detailInfo != null && !selfFav) {
                     myItem {
@@ -357,6 +373,9 @@ internal fun UserFavouriteDetailContent(
 
                     MenuKeys.delete -> {
                         showDeleteDialog = true
+                    }
+                    MenuKeys.playList -> {
+                      viewModel.toPlayList()
                     }
                 }
             }

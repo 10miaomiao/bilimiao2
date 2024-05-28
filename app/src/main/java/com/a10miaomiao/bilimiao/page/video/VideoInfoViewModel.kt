@@ -13,12 +13,18 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.*
+import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoRelateInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoStaffInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
@@ -57,6 +63,8 @@ class VideoInfoViewModel(
     var state = ""
 
     val filterStore: FilterStore by instance()
+
+    val playerStore: PlayerStore by instance()
 
     init {
         val arguments = fragment.requireArguments()
@@ -343,6 +351,22 @@ class VideoInfoViewModel(
                     }
                     curInfo.req_user = reqUser
                     curInfo.stat = stat
+                }
+
+                //收藏夹变动，重新加载播放列表
+                val playList = playerStore.state.playList
+                if(playList != null && playList.type == PlayerStore.FAVORITE){
+                    //当前列表为收藏夹类型
+                    val currentId = playList.from
+                    if(addIds.contains(currentId) || delIds.contains(currentId)){
+                        if(delIds.contains(currentId) && curInfo.aid == playerStore.state.aid){
+                            //从收藏夹中删除的是当前播放的视频
+                            playerStore.setPlayList(null)
+                        } else {
+                            val currentName = playList.name
+                            playerStore.setFavoriteList(currentId,currentName)
+                        }
+                    }
                 }
             } else {
                 withContext(Dispatchers.Main) {
