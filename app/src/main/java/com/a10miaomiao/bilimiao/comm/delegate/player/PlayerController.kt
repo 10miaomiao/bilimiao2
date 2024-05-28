@@ -637,6 +637,21 @@ class PlayerController(
         val playeState = playerStore.state
         val playList = playeState.playList
         if (playList != null) {
+            if (playList.type == PlayerStore.FAVORITE){
+                if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_AUTO_REPLAY, false)){
+                    //播放收藏夹视频列表时 单集循环选项
+                    delegate.playerSource?.let { delegate.openPlayer(it) }
+                    return
+                }
+                if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_RANDOM_NEXT, false)){
+                    //播放收藏夹视频列表时 随机播放选项
+                    val count = playeState.getPlayListSize()
+                    val pos = (0..<count).random()
+                    val nextVideo = playList.items[pos]
+                    delegate.openPlayer(nextVideo.toVideoPlayerSource())
+                    return
+                }
+            }
             val currentPosition = playeState.getPlayListCurrentPosition()
             if (currentPosition != -1
                 && currentPosition < playeState.getPlayListSize() - 1) {
@@ -679,6 +694,7 @@ class PlayerController(
         scaffoldApp.animatePlayerHeight(scaffoldApp.smallModePlayerMaxHeight)
     }
 
+    private var lastRecordedPosition = 0L
     override fun onProgress(
         progress: Long,
         secProgress: Long,
@@ -691,5 +707,24 @@ class PlayerController(
             duration,
             currentPosition
         )
+
+        //定时关闭
+        val remainTime = prefs.getInt(VideoSettingFragment.PLAYER_AUTO_STOP_DURATION,0)
+        if(remainTime != 0){
+            val passedTime = (currentPosition - lastRecordedPosition).toInt()
+            if(passedTime > 0 && passedTime < 5000){
+                var remainTimeNew = remainTime - passedTime
+                if(remainTimeNew <= 0) {
+                    //时间被消耗完，暂停。
+                    remainTimeNew = 0
+                    delegate.views.videoPlayer.onVideoPause()
+                }
+                prefs.edit{
+                    putInt(VideoSettingFragment.PLAYER_AUTO_STOP_DURATION, remainTimeNew)
+                    commit()
+                }
+            }
+            lastRecordedPosition = currentPosition
+        }
     }
 }

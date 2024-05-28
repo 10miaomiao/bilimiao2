@@ -4,7 +4,10 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialogState
 import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -13,8 +16,7 @@ import com.a10miaomiao.bilimiao.comm.entity.media.MediaFoldersInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
-import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,8 @@ internal class UserFavouriteViewModel(
 
     private val fragment by instance<Fragment>()
     private val userStore: UserStore by instance()
+
+    private val playerStore by instance<PlayerStore>()
 
     val createdList = FlowPaginationInfo<MediaListInfo>(
         pageSize = 10
@@ -145,6 +149,21 @@ internal class UserFavouriteViewModel(
 
     fun closeMediaDetail() {
         openedMedia.value = null
+    }
+    fun toPlayList() {
+        openedMedia.value?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                if (it.type == 21) {
+                    //合集
+                    playerStore.setSeasonList(it.id, it.title, 0)
+                } else {
+                    //收藏
+                    playerStore.setFavoriteList(it.id, it.title)
+                }
+            }
+        }
+        val nav = fragment.findComposeNavController()
+        nav.navigate(PlayListPage())
     }
 
     fun updateOpenedMedia(

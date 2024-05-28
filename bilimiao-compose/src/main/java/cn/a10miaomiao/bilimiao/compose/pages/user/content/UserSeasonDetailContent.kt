@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.net.Uri
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,9 +40,16 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.openSearch
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.user.poup_menu.UserFavouriteMorePopupMenu
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
@@ -63,6 +71,7 @@ private class UserSeasonDetailViewModel(
 
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
+    val parentViewModel: UserFavouriteViewModel by instance()
 
     var sid: String = ""
         set(value) {
@@ -138,6 +147,14 @@ private class UserSeasonDetailViewModel(
         curSection.value = section
         list.data.value = section.episodes
     }
+
+    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+        when (item.key) {
+            MenuKeys.playList -> {
+                parentViewModel::toPlayList.invoke()
+            }
+        }
+    }
 }
 
 @Composable
@@ -166,6 +183,24 @@ internal fun UserSeasonDetailContent(
     LaunchedEffect(seasonId) {
         viewModel.sid = seasonId
     }
+
+    val pageConfigId = PageConfig(
+        title = seasonTitle,
+        menus = remember {
+            listOf(
+                myMenuItem {
+                    key = MenuKeys.playList
+                    iconFileName = "ic_baseline_menu_24"
+                    title = "播放列表"
+                },
+            )
+        },
+    )
+    PageListener(
+        pageConfigId,
+        onMenuItemClick = viewModel::menuItemClick,
+        onSearchSelfPage = null
+    )
 
     Column(
         modifier = Modifier

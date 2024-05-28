@@ -403,10 +403,12 @@ class StartFragment : Fragment(), DIAware, MyPage {
             padding = dip(10)
             backgroundColor = config.blockBackgroundColor
 
-            _show = playerState.cid.isNotBlank()
+            val playListVisible = playerState.playList != null || playerState.playListLoading
+            _show = playerState.cid.isNotBlank() || playListVisible // 可仅显示播放列表
 
             views {
                 val imageView = +rcImageView {
+                    _show = playerState.cid.isNotBlank()
                     radius = dip(10)
                     _network(playerState.cover, "@300w_300h_1c_")
                 }..lParams {
@@ -415,6 +417,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                 }
 
                 val statusView = +horizontalLayout {
+                    _show = playerState.cid.isNotBlank()
                     gravity = Gravity.START
                     views {
                         +textView {
@@ -442,6 +445,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                 }
 
                 val titleView = +textView {
+                    _show = playerState.cid.isNotBlank()
                     _text = playerState.title
                     setTextColor(config.foregroundAlpha45Color)
                     textSize = 16f
@@ -454,6 +458,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                 }
 
                 val buttonView = +horizontalLayout {
+                    _show = playerState.cid.isNotBlank()
                     views {
                         +view<MaterialButton> {
                             text = "关闭播放"
@@ -493,13 +498,14 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
                     views {
                         +textView {
-                            _text = "播放列表：${playList?.name}"
+                            _text = "播放列表：${if(playerState.playListLoading) "加载中" else playList?.name}"
                             setTextColor(config.foregroundColor)
                         }..lParams(matchParent, wrapContent) {
                             weight = 1f
                         }
 
                         +textView {
+                            _show = playerState.getPlayListCurrentPosition() >= 0
                             _text = "${currentPosition + 1}/${listSize}"
                             setTextColor(config.foregroundColor)
                         }..lParams(wrapContent, wrapContent)
@@ -513,7 +519,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                     setOnClickListener(handlePlayListClick)
                     strokeWidth = 0
                     radius = dip(10f)
-                    _show = playList != null
+                    _show = playListVisible
                 }..lParams(height = wrapContent) {
                     topToBottomOf(buttonView, dip(5))
                     leftOfParent()
