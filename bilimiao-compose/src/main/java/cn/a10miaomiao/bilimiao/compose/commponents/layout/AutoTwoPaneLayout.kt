@@ -72,6 +72,7 @@ fun AutoTwoPaneLayout(
     twoPaneMinWidth: Dp,
     firstPaneMaxWidth: Dp = 0.dp,
     secondPaneMaxWidth: Dp = 0.dp,
+    showFirstPane: Boolean = true,
     openedSecond: Boolean = false,
 ) {
     BoxWithConstraints(

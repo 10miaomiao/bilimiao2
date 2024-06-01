@@ -40,6 +40,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.AutoTwoPaneLayout
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialog
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditForm
@@ -126,18 +127,20 @@ private fun UserFavouritePageContent() {
 
     val pageConfigId = PageConfig(
         title = "${callName}的收藏",
-        menu = remember {
-            myMenu {
-                myItem {
-                    key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
-                    title = "更多"
-                    childMenu = myMenu {
-                        myItem {
-                            key = MenuKeys.add
-                            title = "新建收藏夹"
-                        }
+        menu = rememberMyMenu {
+            myItem {
+                key = MenuKeys.more
+                iconFileName = "ic_more_vert_grey_24dp"
+                title = "更多"
+                childMenu = myMenu {
+                    myItem {
+                        key = MenuKeys.add
+                        title = "新建收藏夹"
                     }
+                }
+                myItem {
+                    key = MenuKeys.add
+                    title = "新建收藏夹"
                 }
             }
         },
@@ -214,19 +217,27 @@ private fun UserFavouritePageContent() {
                 ) { index ->
                     when (index) {
                         0 -> {
-                            // 创建的
-                            UserFavouriteListContent(
-                                showTowPane = it.showTowPane,
-                                folderType = UserFavouriteFolderType.Created,
-                            )
+                            saveableStateHolder.SaveableStateProvider(
+                                UserFavouriteFolderType.Created
+                            ) {
+                                // 创建的
+                                UserFavouriteListContent(
+                                    showTowPane = it.showTowPane,
+                                    folderType = UserFavouriteFolderType.Created,
+                                )
+                            }
                         }
 
                         1 -> {
-                            // 订阅的
-                            UserFavouriteListContent(
-                                showTowPane = it.showTowPane,
-                                folderType = UserFavouriteFolderType.Collected,
-                            )
+                            saveableStateHolder.SaveableStateProvider(
+                                UserFavouriteFolderType.Collected
+                            ) {
+                                // 订阅的
+                                UserFavouriteListContent(
+                                    showTowPane = it.showTowPane,
+                                    folderType = UserFavouriteFolderType.Collected,
+                                )
+                            }
                         }
                     }
                 }

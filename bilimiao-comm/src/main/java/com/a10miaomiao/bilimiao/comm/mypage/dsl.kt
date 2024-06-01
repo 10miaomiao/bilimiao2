@@ -10,11 +10,17 @@ fun Fragment.myPageConfig (init: MyPageConfigInfo.() -> Unit): MyPageConfig {
     }
 }
 
-
+@Deprecated(
+    "请使用 myMenu + myItem",
+    ReplaceWith(
+    "myItem(init)"
+    )
+)
 fun myMenuItem (init: MenuItemPropInfo.() -> Unit): MenuItemPropInfo {
     return MenuItemPropInfo().apply(init)
 }
 
-fun myMenu (init: MyPageMenu.() -> Unit): MyPageMenu {
+inline fun myMenu (init: MyPageMenu.() -> Unit): MyPageMenu {
     return MyPageMenu().apply(init)
 }
+

@@ -21,6 +21,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
@@ -52,6 +53,7 @@ class PlayerController(
 
     private val userStore by instance<UserStore>()
     private val playerStore by instance<PlayerStore>()
+    private val playListStore by instance<PlayListStore>()
     private val statusBarHelper by instance<StatusBarHelper>()
     private val scaffoldApp get() = delegate.scaffoldApp
     private val views get() = delegate.views
@@ -624,37 +626,35 @@ class PlayerController(
         delegate.historyReport(views.videoPlayer.currentPosition)
         val nextPlayerSourceInfo = delegate.playerSource?.next()
         if (nextPlayerSourceInfo is VideoPlayerSource) {
+            // 自动播放下一P
             if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_NEXT_VIDEO, true)) {
                 delegate.openPlayer(nextPlayerSourceInfo)
                 return
             }
         } else if (nextPlayerSourceInfo is BangumiPlayerSource) {
+            // 自动播放下一集
             if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_NEXT_BANGUMI, true)) {
                 delegate.openPlayer(nextPlayerSourceInfo)
                 return
             }
         }
-        val playeState = playerStore.state
-        val playList = playeState.playList
-        if (playList != null) {
-            if (playList.type == PlayerStore.FAVORITE){
-                if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_AUTO_REPLAY, false)){
-                    //播放收藏夹视频列表时 单集循环选项
-                    delegate.playerSource?.let { delegate.openPlayer(it) }
-                    return
-                }
-                if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_RANDOM_NEXT, false)){
-                    //播放收藏夹视频列表时 随机播放选项
-                    val count = playeState.getPlayListSize()
-                    val pos = (0..<count).random()
-                    val nextVideo = playList.items[pos]
-                    delegate.openPlayer(nextVideo.toVideoPlayerSource())
-                    return
-                }
-            }
-            val currentPosition = playeState.getPlayListCurrentPosition()
+        val playerState = playerStore.state
+        val playList = playListStore.state
+        if (!playList.isEmpty()) {
+//            if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_AUTO_REPLAY, false)){
+//                //播放收藏夹视频列表时 单集循环选项
+//                delegate.playerSource?.let { delegate.openPlayer(it) }
+//            } else if(prefs.getBoolean(VideoSettingFragment.PLAYLIST_RANDOM_NEXT, false)){
+//                //播放收藏夹视频列表时 随机播放选项
+//                val count = playeState.getPlayListSize()
+//                val pos = (0..<count).random()
+//                val nextVideo = playList.items[pos]
+//                delegate.openPlayer(nextVideo.toVideoPlayerSource())
+//                return
+//            }
+            val currentPosition = playerStore.getPlayListCurrentPosition()
             if (currentPosition != -1
-                && currentPosition < playeState.getPlayListSize() - 1) {
+                && currentPosition < playList.items.size - 1) {
                 val nextVideo = playList.items[currentPosition + 1]
                 delegate.openPlayer(nextVideo.toVideoPlayerSource())
                 return
