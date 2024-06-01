@@ -12,6 +12,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import org.kodein.di.DI
@@ -28,6 +29,7 @@ class StartViewModel(
     val userStore: UserStore by instance()
     val messageStore: MessageStore by instance()
     val playerStore: PlayerStore by instance()
+    val playListStore: PlayListStore by instance()
 
     var config: SearchConfigInfo? = null
     var searchMode = 0 // 0为全站搜索，1为页面自身搜索

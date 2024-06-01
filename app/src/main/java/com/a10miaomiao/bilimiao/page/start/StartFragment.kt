@@ -397,13 +397,14 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     @InternalSplittiesApi
     fun MiaoUI.playerStateCard(): View {
+        val playListState = viewModel.playListStore.state
         val playerState = viewModel.playerStore.state
         return constraintLayout {
             apply(ViewStyle.roundRect(dip(10)))
             padding = dip(10)
             backgroundColor = config.blockBackgroundColor
 
-            val playListVisible = playerState.playList != null || playerState.playListLoading
+            val playListVisible = !playListState.isEmpty() || playListState.loading
             _show = playerState.cid.isNotBlank() || playListVisible // 可仅显示播放列表
 
             views {
@@ -488,9 +489,8 @@ class StartFragment : Fragment(), DIAware, MyPage {
                     rightOfParent()
                 }
 
-                val playList = playerState.playList
-                val listSize = playerState.getPlayListSize()
-                val currentPosition = playerState.getPlayListCurrentPosition()
+                val listSize = playListState.items.size
+                val currentPosition = viewModel.playerStore.getPlayListCurrentPosition()
                 +horizontalLayout {
                     setBackgroundResource(config.selectableItemBackground)
                     padding = dip(10)
@@ -498,14 +498,14 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
                     views {
                         +textView {
-                            _text = "播放列表：${if(playerState.playListLoading) "加载中" else playList?.name}"
+                            _text = "播放列表：${if(playListState.loading) "加载中" else playListState.name}"
                             setTextColor(config.foregroundColor)
                         }..lParams(matchParent, wrapContent) {
                             weight = 1f
                         }
 
                         +textView {
-                            _show = playerState.getPlayListCurrentPosition() >= 0
+                            _show = currentPosition >= 0
                             _text = "${currentPosition + 1}/${listSize}"
                             setTextColor(config.foregroundColor)
                         }..lParams(wrapContent, wrapContent)
@@ -747,6 +747,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
         connectStore(viewLifecycleOwner, viewModel.userStore)
         connectStore(viewLifecycleOwner, viewModel.messageStore)
         connectStore(viewLifecycleOwner, viewModel.playerStore)
+        connectStore(viewLifecycleOwner, viewModel.playListStore)
         val contentInsets = windowStore.state.windowInsets
 
         frameLayout {

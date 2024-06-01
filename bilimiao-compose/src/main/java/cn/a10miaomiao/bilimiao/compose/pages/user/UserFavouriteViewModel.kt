@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.entity.media.MediaFoldersInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -34,6 +35,7 @@ internal class UserFavouriteViewModel(
     private val userStore: UserStore by instance()
 
     private val playerStore by instance<PlayerStore>()
+    private val playListStore by instance<PlayListStore>()
 
     val createdList = FlowPaginationInfo<MediaListInfo>(
         pageSize = 10
@@ -156,10 +158,10 @@ internal class UserFavouriteViewModel(
             viewModelScope.launch(Dispatchers.IO) {
                 if (it.type == 21) {
                     //合集
-                    playerStore.setSeasonList(it.id, it.title, 0)
+                    playListStore.setSeasonList(it.id, it.title, 0)
                 } else {
                     //收藏
-                    playerStore.setFavoriteList(it.id, it.title)
+                    playListStore.setFavoriteList(it.id, it.title)
                 }
             }
         }

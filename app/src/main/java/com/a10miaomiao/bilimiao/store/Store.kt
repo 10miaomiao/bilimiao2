@@ -6,6 +6,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -19,6 +20,7 @@ class Store (
 ): DIAware {
 
         val windowStore: WindowStore by activity.diViewModel(di)
+        val playListStore: PlayListStore by activity.diViewModel(di)
         val playerStore: PlayerStore by activity.diViewModel(di)
         val userStore: UserStore by activity.diViewModel(di)
         val messageStore: MessageStore by activity.diViewModel(di)
@@ -28,6 +30,7 @@ class Store (
 
         fun loadStoreModules(diBuilder: DI.Builder) = diBuilder.run{
                 bindSingleton { windowStore }
+                bindSingleton { playListStore }
                 bindSingleton { playerStore }
                 bindSingleton { userStore }
                 bindSingleton { messageStore }

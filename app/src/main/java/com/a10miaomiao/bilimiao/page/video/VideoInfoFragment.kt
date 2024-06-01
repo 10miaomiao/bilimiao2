@@ -66,6 +66,7 @@ import com.a10miaomiao.bilimiao.comm.recycler.footerViews
 import com.a10miaomiao.bilimiao.comm.recycler.headerViews
 import com.a10miaomiao.bilimiao.comm.recycler.lParams
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
@@ -157,6 +158,8 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     private val userStore by instance<UserStore>()
 
     private val playerStore by instance<PlayerStore>()
+
+    private val playListStore by instance<PlayListStore>()
 
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
@@ -339,7 +342,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         val info = viewModel.info
         if (info != null) {
             // 设置播放列表
-            if(playerStore.state.inPlayList(info.aid)) {
+            if(playListStore.state.inListForAid(info.aid)) {
                 //视频已在列表中，不设置新的列表
             } else {
                 viewModel.ugcSeason?.let {
@@ -349,7 +352,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                         }
                     } else { 0 }
                     if (index != -1) {
-                        playerStore.setPlayList(it, index)
+                        playListStore.setPlayList(it, index)
                     }
                 }
             }

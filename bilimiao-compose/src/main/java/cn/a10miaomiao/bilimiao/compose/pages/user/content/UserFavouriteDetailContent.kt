@@ -11,14 +11,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuOpen
+import androidx.compose.material.icons.outlined.MenuOpen
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,6 +45,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menufold
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menuunfold
 import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
@@ -253,7 +265,7 @@ private class UserFavouriteDetailViewModel(
         val url = "bilimiao://user/fav/detail?id=${mediaId}&name=${mediaTitle}&keyword=${text}"
         nav.navigate(Uri.parse(url))
     }
-    
+
     fun toPlayList() {
         parentViewModel::toPlayList.invoke()
     }
@@ -290,16 +302,20 @@ internal fun UserFavouriteDetailContent(
     }
 
     val pageConfigId = PageConfig(
-        title = mediaTitle,
+        title = "收藏详情",
         menu = remember(detailInfo) {
             myMenu {
                 val selfFav = viewModel.isSelfFav()
-                if (detailInfo != null && selfFav) {
-                    myItem {
-                        key = MenuKeys.more
-                        iconFileName = "ic_more_vert_grey_24dp"
-                        title = "更多"
-                        childMenu = myMenu {
+                myItem {
+                    key = MenuKeys.more
+                    iconFileName = "ic_more_vert_grey_24dp"
+                    title = "更多"
+                    childMenu = myMenu {
+                        myItem {
+                            key = MenuKeys.playList
+                            title = "添加到播放列表"
+                        }
+                        if (detailInfo != null && selfFav) {
                             myItem {
                                 key = MenuKeys.edit
                                 title = "编辑收藏夹"
@@ -318,11 +334,6 @@ internal fun UserFavouriteDetailContent(
                     action = MenuActions.search
                     iconFileName = "ic_search_gray"
                     title = "搜索"
-                }
-                myItem {
-                    key = MenuKeys.playList
-                    iconFileName = "ic_baseline_menu_24"
-                    title = "播放列表"
                 }
                 if (detailInfo != null && !selfFav) {
                     myItem {
@@ -371,8 +382,9 @@ internal fun UserFavouriteDetailContent(
                     MenuKeys.delete -> {
                         showDeleteDialog = true
                     }
+
                     MenuKeys.playList -> {
-                      viewModel.toPlayList()
+                        viewModel.toPlayList()
                     }
                 }
             }
@@ -397,12 +409,44 @@ internal fun UserFavouriteDetailContent(
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                        .fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    Text(text = mediaTitle)
+                    Icon(
+                        imageVector = BilimiaoIcons.Common.Menufold,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(24.dp),
+                    )
+                    Text(
+                        text = mediaTitle,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Row(
+                        modifier = Modifier.padding(
+                            horizontal = 4.dp
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "自动连播",
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Checkbox(checked = true, onCheckedChange = {})
+//                        Switch(
+//                            modifier = Modifier.size(
+//                                height = 24.dp,
+//                                width = 48.dp,
+//                            ),
+//                            checked = true,
+//                            onCheckedChange = {
+//
+//                            },
+//                        )
+                    }
                 }
                 HorizontalDivider(
                     modifier = Modifier
@@ -523,6 +567,7 @@ internal fun UserFavouriteDetailContent(
         var loading by remember {
             mutableStateOf(false)
         }
+
         fun handleDelete() = scope.launch(Dispatchers.IO) {
             runCatching {
                 loading = true

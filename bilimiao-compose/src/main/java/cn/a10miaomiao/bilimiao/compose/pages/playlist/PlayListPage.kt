@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,12 +35,14 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.commponents.PlayListItemCard
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
+import kotlin.math.max
 
 class PlayListPage : ComposePage() {
     override val route: String
@@ -85,17 +88,19 @@ private fun PlayListPageContent(
         title = "播放列表"
     )
     val playerStore: PlayerStore by rememberInstance()
+    val playListStore: PlayListStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
+    val windowState by windowStore.stateFlow.collectAsState()
     val windowInsets = windowState.getContentInsets(localContainerView())
-    val playerState = playerStore.stateFlow.collectAsState().value
-    val playListInfo = playerState.playList
-    val playlistLoading = playerState.playListLoading
+    val playListState by playListStore.stateFlow.collectAsState()
+    val playerState by playerStore.stateFlow.collectAsState()
 
-    if(playlistLoading) {
+    if(playListState.loading) {
         Row (
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(top = windowInsets.topDp.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(top = windowInsets.topDp.dp)
+                .fillMaxWidth(),
         ){
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
@@ -108,12 +113,12 @@ private fun PlayListPageContent(
                 fontSize = 14.sp,
             )
         }
-    } else if (playListInfo != null) {
+    } else if (!playListState.isEmpty()) {
         val currentPosition = remember {
-            playerState.getPlayListCurrentPosition()
+            playerStore.getPlayListCurrentPosition()
         }
         val lazyListState = rememberLazyListState(
-            initialFirstVisibleItemIndex = if(currentPosition == -1) 0 else currentPosition
+            initialFirstVisibleItemIndex = max(0, currentPosition)
         )
         LazyColumn(
             state = lazyListState,
@@ -125,7 +130,7 @@ private fun PlayListPageContent(
             item {
                 Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
             }
-            val playListItems = playListInfo.items
+            val playListItems = playListState.items
             items(playListItems.size, { playListItems[it].cid }) { index ->
                 val item = playListItems[index]
                 Box(
