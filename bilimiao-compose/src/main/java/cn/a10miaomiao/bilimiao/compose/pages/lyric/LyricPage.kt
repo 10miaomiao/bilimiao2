@@ -312,7 +312,8 @@ internal class LyricPageViewModel(
                                             //将双语部分拼接进去。正常此时已读取到双语部分。
                                             val subText = language?.let { lang ->
                                                 var textString = ""
-                                                lang.content[0].lyricContent[list.size].forEach { str ->
+                                                //多种候选语言，last更容易是中文
+                                                lang.content.last().lyricContent[list.size].forEach { str ->
                                                     //酷狗的逐字歌词，直接拼接起来
                                                     textString += str
                                                 }
