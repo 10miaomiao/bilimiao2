@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -317,7 +315,7 @@ internal class LyricPageViewModel(
                                                     //酷狗的逐字歌词，直接拼接起来
                                                     textString += str
                                                 }
-                                                textString
+                                                textString.ifEmpty { null }
                                             }
                                             list.add(LyricLine(time.toLong(),text,subText))
                                         }
@@ -542,15 +540,13 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
 @Composable
 internal fun LyricLineItem(color: Color, alpha: Float, line: LyricLine){
     Box(modifier = Modifier
-        .height(100.dp)) {
+        .height(100.dp)
+        .wrapContentHeight(Alignment.CenterVertically)
+    ) {
         if (line.subText == null) {
             MainTextItem(color = color, alpha = alpha, text = line.mainText)
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentHeight(Alignment.CenterVertically)
-            ){
+            Column {
                 MainTextItem(color = color, alpha = alpha, text = line.mainText)
                 SubTextItem(color = color, alpha = alpha, text = line.subText)
             }
