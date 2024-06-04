@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.lyric
 
 import android.app.Activity
+import android.util.Base64
 import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Canvas
@@ -11,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -35,6 +34,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
@@ -64,7 +64,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
-import java.util.Base64
 
 class LyricPage :ComposePage(){
     override val route: String
@@ -117,11 +116,8 @@ internal class LyricPageViewModel(
         this.lyric.value.addAll(list)
     }
     @Synchronized
-    fun addSource(list:MutableList<LyricSource>): Int{
-        val originCount=source.value.count()
+    fun addSource(list:MutableList<LyricSource>){
         source.value.addAll(list)
-        // 返回值：新增项中的第一个序号
-        return if(list.isEmpty()) -1 else originCount
     }
     fun loadSource(videoTitle:String) = viewModelScope.launch(Dispatchers.IO){
         sourceMutex.withLock {
@@ -132,15 +128,27 @@ internal class LyricPageViewModel(
             } else {
                 loadingSource.value = true
                 setMessage("正在加载歌词源...")
-                val res1=async{ loadSourceFromKugou(videoTitle) }
-                val res2=async{ loadSourceFromNetease(videoTitle) }
-                res1.await()
-                res2.await()
+                val kugouRes=async{ loadSourceFromKugou(videoTitle) }
+                val neteaseRes=async{ loadSourceFromNetease(videoTitle) }
+                //优先读取酷狗歌词，因为有双语
+                kugouRes.await()
+                loadFirstLyricOf(KUGOU)
+                neteaseRes.await()
+                loadFirstLyricOf(NETEASE)
+
                 loadingSource.value = false
             }
         }
     }
-    suspend fun loadSourceFromNetease(videoTitle: String){
+    suspend fun loadFirstLyricOf(type: String){
+        source.value.forEachIndexed { index, lyricSource ->
+            if(lyricSource.type == type){
+                loadLyric(index,false)
+                return
+            }
+        }
+    }
+    private suspend fun loadSourceFromNetease(videoTitle: String){
         try {
             val res = MiaoHttp.request {
                 url ="https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s=$videoTitle&type=1&offset=0&total=true&limit=12"
@@ -153,8 +161,7 @@ internal class LyricPageViewModel(
                 res.result.songs.forEach {
                     addList.add(LyricSource(it.name,it.id, NETEASE,it.duration))
                 }
-                val shouldLoad = addSource(addList)
-                loadLyric(shouldLoad)
+                addSource(addList)
             } else {
                 withContext(Dispatchers.Main) {
                     PopTip.show("网易云歌词列表加载失败"+res.code.toString())
@@ -168,7 +175,7 @@ internal class LyricPageViewModel(
         }
     }
 
-    suspend fun loadSourceFromKugou(videoTitle: String){
+    private suspend fun loadSourceFromKugou(videoTitle: String){
         try {
             val res = MiaoHttp.request {
                 url ="https://mobileservice.kugou.com/api/v3/lyric/search?version=9108&highlight=1&keyword=$videoTitle&plat=0&pagesize=12&area_code=1&page=1&with_res_tag=1"
@@ -181,8 +188,7 @@ internal class LyricPageViewModel(
                 res.data.info.forEach {
                     addList.add(LyricSource(it.filename,it.hash, KUGOU,it.duration*100))
                 }
-                val shouldLoad = addSource(addList)
-                loadLyric(shouldLoad)
+                addSource(addList)
             } else {
                 withContext(Dispatchers.Main) {
                     PopTip.show("酷狗歌词列表加载失败"+res.error)
@@ -195,13 +201,40 @@ internal class LyricPageViewModel(
             }
         }
     }
-    fun String.decodeKrc():String{
-        val base64DecodedBytes= Base64.getDecoder().decode(this)
+    private fun String.base64Decode():ByteArray{
+        return Base64.decode(this,Base64.DEFAULT)
+    }
+    //酷狗歌词解密
+    private fun String.decodeKrc():String{
+        val base64DecodedBytes= base64Decode()
         val byteArray = base64DecodedBytes.copyOfRange(4,base64DecodedBytes.size)
         return KrcText().getKrcText(byteArray)
     }
+    //krc双语部分解密
+    private fun String.decodeKrcLanguage():String{
+        val base64DecodedBytes= base64Decode()
+        return String(base64DecodedBytes).decodeUnicode()
+    }
+    //酷狗歌词的双语部分，字符串格式需要unicode转义
+    private fun String.decodeUnicode(): String {
+        var str = ""
+        this.split("\\u").forEach {
+            if(it.length == 4){
+                str += it.toIntOrNull(16)?.toChar() ?: it
+            } else {
+                val first4 = it.substring(0..3)
+                val char = first4.toIntOrNull(16)?.toChar()
+                if(char == null){
+                    str += it
+                } else {
+                    str += (char + it.substring(4))
+                }
+            }
+        }
+        return str
+    }
 
-    suspend fun loadLyric(index:Int,replace:Boolean = false){
+    suspend fun loadLyric(index:Int, force:Boolean = false){
         lyricMutex.withLock {
             loadingLyric.value = true
             if(source.value.isEmpty()){
@@ -209,7 +242,7 @@ internal class LyricPageViewModel(
                 loadingLyric.value = false
                 return
             }
-            if(!replace && lyricTitle.value!=""){
+            if(!force && lyricTitle.value!=""){
                 //已有歌词时默认不覆盖
                 loadingLyric.value = false
                 return
@@ -242,7 +275,9 @@ internal class LyricPageViewModel(
                                 Gson().fromJson(jsonStr,KugouLyricItem::class.java)
                             }
                             if(res2.error_code==0){
-                                res2.content.decodeKrc().split('\n').forEach {
+                                val decoded = res2.content.decodeKrc()
+                                var language:KugouLyricLanguage? = null
+                                decoded.split('\n').forEach {
                                     val full=it.substringBefore(']').substringAfter('[')
                                     val body=it.substringAfter(']')
                                     if(full.contains(':')){
@@ -254,6 +289,13 @@ internal class LyricPageViewModel(
                                             by=right
                                         } else if(left=="ar"){
                                             author=right
+                                        } else if(left=="language"){
+                                            val k = right.decodeKrcLanguage()
+                                            try {
+                                                language = Gson().fromJson(k,KugouLyricLanguage::class.java)
+                                            } catch (e: Exception) {
+                                                e.printStackTrace()
+                                            }
                                         } else if(left=="offset"){
                                             val time = right.toIntOrNull()
                                             if(time!=null&&time!=0){
@@ -266,10 +308,21 @@ internal class LyricPageViewModel(
                                         if(time!=null){
                                             val regex="<.*?>".toRegex()
                                             val text=body.replace(regex,"")
-                                            list.add(LyricLine(time.toLong(),text))
+                                            //将双语部分拼接进去。正常此时已读取到双语部分。
+                                            val subText = language?.let { lang ->
+                                                var textString = ""
+                                                //多种候选语言，last更容易是中文
+                                                lang.content.last().lyricContent[list.size].forEach { str ->
+                                                    //酷狗的逐字歌词，直接拼接起来
+                                                    textString += str
+                                                }
+                                                textString.ifEmpty { null }
+                                            }
+                                            list.add(LyricLine(time.toLong(),text,subText))
                                         }
                                     }
                                 }
+
                             } else {
                                 PopTip.show(res2.info)
                                 list.add(LyricLine(0,"歌词详情获取失败"))
@@ -368,7 +421,7 @@ fun Preview(){
     val lyric = MutableStateFlow<List<LyricLine>>(listOf(test1,test2,test3)).collectAsState().value
     LazyColumn(){
         items(lyric){
-            LyricItem(Color(0xffffffff),alpha = 1f, line = it)
+            LyricLineItem(Color(0xffffffff),alpha = 1f, line = it)
         }
     }
 }
@@ -434,10 +487,10 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
             items(lyric) {
                 if (focusOn == lyric.indexOf(it)) {
                     //当前播放
-                    LyricItem(color = MaterialTheme.colorScheme.onSurface, alpha = 1f, line = it)
+                    LyricLineItem(color = MaterialTheme.colorScheme.onSurface, alpha = 1f, line = it)
                 } else {
                     //其他歌词
-                    LyricItem(color = MaterialTheme.colorScheme.onSurface, alpha = 0.5f, line = it)
+                    LyricLineItem(color = MaterialTheme.colorScheme.onSurface, alpha = 0.5f, line = it)
                 }
             }
             item {
@@ -486,45 +539,44 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
 }
 
 @Composable
-internal fun LyricItem(color: Color, alpha: Float, line: LyricLine){
+internal fun LyricLineItem(color: Color, alpha: Float, line: LyricLine){
     Box(modifier = Modifier
-        .height(100.dp)) {
+        .height(100.dp)
+        .wrapContentHeight(Alignment.CenterVertically)
+    ) {
         if (line.subText == null) {
-            Text(
-                text = line.mainText,
-                color = color,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center)
-                    .alpha(alpha),
-            )
+            MainTextItem(color = color, alpha = alpha, text = line.mainText)
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentHeight(Alignment.CenterVertically)){
-                Text(
-                    line.mainText,
-                    color = color,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                        .alpha(alpha),
-                )
-                Text(
-                    line.subText,
-                    color = color,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                        .alpha(alpha),
-                )
+            Column {
+                MainTextItem(color = color, alpha = alpha, text = line.mainText)
+                SubTextItem(color = color, alpha = alpha, text = line.subText)
             }
         }
     }
 }
 
+@Composable fun MainTextItem(color: Color, alpha: Float, text:String){
+    Text(
+        text = text,
+        color = color,
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(alpha),
+        fontSize = 20.sp,
+        textAlign = TextAlign.Center,
+    )
+}
+@Composable fun SubTextItem(color: Color, alpha: Float, text:String){
+    Text(
+        text = text,
+        color = color,
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(alpha),
+        fontSize = 16.sp,
+        textAlign = TextAlign.Center,
+    )
+}
 internal class LyricLine(
     val startTime:Long,
     val mainText:String,
