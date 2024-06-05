@@ -7,17 +7,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuOpen
 import androidx.compose.material.icons.outlined.MenuOpen
@@ -39,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -56,13 +60,18 @@ import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteFolderType
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditForm
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditFormState
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.TitleBar
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
@@ -75,6 +84,8 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -93,7 +104,10 @@ private class UserFavouriteDetailViewModel(
 
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
-    val parentViewModel: UserFavouriteViewModel by instance()
+    private val parentViewModel: UserFavouriteViewModel by instance()
+    private val playerDelegate: BasePlayerDelegate by instance()
+    private val playerStore by instance<PlayerStore>()
+    private val playListStore by instance<PlayListStore>()
 
     var mediaId: String = ""
         set(value) {
@@ -112,6 +126,7 @@ private class UserFavouriteDetailViewModel(
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<MediasInfo>()
     val keyword = MutableStateFlow("")
+    val isAutoPlay = MutableStateFlow(false)
 
 
     private fun loadData(
@@ -167,12 +182,49 @@ private class UserFavouriteDetailViewModel(
         }
     }
 
-    fun toVideoDetailPage(item: MediasInfo) {
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + item.id),
-                defaultNavOptions,
-            )
+    fun changeAutoPlay(value: Boolean) {
+        isAutoPlay.value = value
+    }
+
+    fun openVideo(item: MediasInfo) {
+        if (isAutoPlay.value) {
+            addPlayList()
+            if (playerStore.state.cid != item.id) {
+                playerDelegate.openPlayer(
+                    VideoPlayerSource(
+                        mainTitle = item.title,
+                        title = item.title,
+                        coverUrl = item.cover,
+                        aid = item.id,
+                        id = item.ugc.first_cid,
+                        ownerId = item.upper.mid,
+                        ownerName = item.upper.name,
+                    )
+                )
+            }
+        } else {
+            fragment.findNavController()
+                .navigate(
+                    Uri.parse("bilimiao://video/" + item.id),
+                    defaultNavOptions,
+                )
+        }
+    }
+
+    fun addPlayList() {
+        val media = mediaInfo.value
+        if (media == null) {
+            PopTip.show("数据加载中，请稍后再试")
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            playListStore.setFavoriteList(media.id, media.title)
+        }
+    }
+
+    fun toPlayListPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(PlayListPage())
     }
 
     suspend fun editFolder(
@@ -256,7 +308,6 @@ private class UserFavouriteDetailViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
             PopTip.show(e.message ?: e.toString())
-
         }
     }
 
@@ -264,10 +315,6 @@ private class UserFavouriteDetailViewModel(
         val nav = fragment.findNavController()
         val url = "bilimiao://user/fav/detail?id=${mediaId}&name=${mediaTitle}&keyword=${text}"
         nav.navigate(Uri.parse(url))
-    }
-
-    fun toPlayList() {
-        parentViewModel::toPlayList.invoke()
     }
 
 
@@ -283,6 +330,9 @@ private class UserFavouriteDetailViewModel(
 internal fun UserFavouriteDetailContent(
     mediaId: String,
     mediaTitle: String,
+    showTowPane: Boolean,
+    hideFirstPane: Boolean,
+    onChangeHideFirstPane: (hidden: Boolean) -> Unit,
 ) {
     val viewModel: UserFavouriteDetailViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
@@ -295,6 +345,7 @@ internal fun UserFavouriteDetailContent(
     val listFinished by viewModel.list.finished.collectAsState()
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isAutoPlay by viewModel.isAutoPlay.collectAsState()
 
     LaunchedEffect(mediaId) {
         viewModel.mediaId = mediaId
@@ -384,7 +435,8 @@ internal fun UserFavouriteDetailContent(
                     }
 
                     MenuKeys.playList -> {
-                        viewModel.toPlayList()
+                        viewModel.addPlayList()
+                        viewModel.toPlayListPage()
                     }
                 }
             }
@@ -396,72 +448,60 @@ internal fun UserFavouriteDetailContent(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
+        TitleBar(
+            modifier = Modifier.fillMaxWidth()
                 .height(48.dp + windowInsets.topDp.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = windowInsets.topDp.dp),
-            contentColor = MaterialTheme.colorScheme.onBackground,
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = BilimiaoIcons.Common.Menufold,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .size(24.dp),
-                    )
-                    Text(
-                        text = mediaTitle,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Row(
-                        modifier = Modifier.padding(
-                            horizontal = 4.dp
-                        ),
-                        verticalAlignment = Alignment.CenterVertically,
+            icon = {
+                if (showTowPane) {
+                    IconButton(
+                        onClick = {
+                            onChangeHideFirstPane(!hideFirstPane)
+                        }
                     ) {
-                        Text(
-                            text = "自动连播",
-                            style = MaterialTheme.typography.labelMedium,
+                        Icon(
+                            imageVector = if (hideFirstPane) {
+                                BilimiaoIcons.Common.Menufold
+                            } else {
+                                BilimiaoIcons.Common.Menuunfold
+                            },
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(24.dp),
                         )
-                        Checkbox(checked = true, onCheckedChange = {})
-//                        Switch(
-//                            modifier = Modifier.size(
-//                                height = 24.dp,
-//                                width = 48.dp,
-//                            ),
-//                            checked = true,
-//                            onCheckedChange = {
-//
-//                            },
-//                        )
                     }
+                } else {
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
-                HorizontalDivider(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
+            },
+            title = {
+                Text(
+                    text = mediaTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            },
+            action = {
+                Text(
+                    text = "自动连播",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Switch(
+                    modifier = Modifier.scale(0.75f),
+                    checked = isAutoPlay,
+                    onCheckedChange = viewModel::changeAutoPlay,
                 )
             }
-        }
+        )
         SwipeToRefresh(
             modifier = Modifier.weight(1f),
             refreshing = isRefreshing,
             onRefresh = { viewModel.refresh() },
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(400.dp),
+                columns = GridCells.Adaptive(300.dp),
             ) {
                 items(list) {
                     VideoItemBox(
@@ -472,7 +512,7 @@ internal fun UserFavouriteDetailContent(
                         damukuNum = it.cnt_info.danmaku,
                         duration = NumberUtil.converDuration(it.duration),
                         onClick = {
-                            viewModel.toVideoDetailPage(it)
+                            viewModel.openVideo(it)
                         }
                     )
                 }

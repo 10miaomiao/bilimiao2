@@ -108,6 +108,9 @@ private fun UserFavouritePageContent() {
     var showAddDialog by remember {
         mutableStateOf(false)
     }
+    var hideFirstPane by remember {
+        mutableStateOf(false)
+    }
 
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -136,11 +139,8 @@ private fun UserFavouritePageContent() {
                     myItem {
                         key = MenuKeys.add
                         title = "新建收藏夹"
+                        iconFileName = "ic_add_white_24dp"
                     }
-                }
-                myItem {
-                    key = MenuKeys.add
-                    title = "新建收藏夹"
                 }
             }
         },
@@ -153,6 +153,12 @@ private fun UserFavouritePageContent() {
     BackHandler(
         enabled = openMediaDetail != null,
         onBack = viewModel::closeMediaDetail
+    )
+    BackHandler(
+        enabled = hideFirstPane,
+        onBack = {
+            hideFirstPane = false
+        }
     )
 
     AutoTwoPaneLayout(
@@ -253,13 +259,23 @@ private fun UserFavouritePageContent() {
                         // 合集详情
                         UserSeasonDetailContent(
                             media.id,
-                            media.title
+                            media.title,
+                            showTowPane = it.showTowPane,
+                            hideFirstPane = hideFirstPane,
+                            onChangeHideFirstPane = { hidden ->
+                                hideFirstPane = hidden
+                            }
                         )
                     } else {
                         // 收藏详情
                         UserFavouriteDetailContent(
                             media.id,
-                            media.title
+                            media.title,
+                            showTowPane = it.showTowPane,
+                            hideFirstPane = hideFirstPane,
+                            onChangeHideFirstPane = { hidden ->
+                                hideFirstPane = hidden
+                            }
                         )
                     }
                 }
@@ -267,7 +283,8 @@ private fun UserFavouritePageContent() {
         },
         twoPaneMinWidth = 500.dp,
         openedSecond = openMediaDetail != null,
-        firstPaneMaxWidth = 400.dp
+        firstPaneMaxWidth = 400.dp,
+        hideFirstPane = hideFirstPane,
     )
 
     if (showAddDialog) {

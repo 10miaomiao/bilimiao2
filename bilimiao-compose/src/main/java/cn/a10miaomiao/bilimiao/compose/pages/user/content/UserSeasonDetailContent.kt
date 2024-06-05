@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -18,10 +21,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,22 +36,33 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import bilibili.app.view.v1.ViewGRPC
+import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menufold
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menuunfold
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.commponents.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.TitleBar
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
@@ -54,9 +71,12 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -71,7 +91,10 @@ private class UserSeasonDetailViewModel(
 
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
-    val parentViewModel: UserFavouriteViewModel by instance()
+    private val parentViewModel: UserFavouriteViewModel by instance()
+    private val playerDelegate: BasePlayerDelegate by instance()
+    private val playerStore by instance<PlayerStore>()
+    private val playListStore by instance<PlayListStore>()
 
     var sid: String = ""
         set(value) {
@@ -91,7 +114,7 @@ private class UserSeasonDetailViewModel(
     val curSection = MutableStateFlow<bilibili.app.view.v1.Section?>(null)
     val sections = MutableStateFlow<List<bilibili.app.view.v1.Section>>(listOf())
     val list = FlowPaginationInfo<bilibili.app.view.v1.Episode>()
-
+    val isAutoPlay = MutableStateFlow(false)
 
     private fun loadData(
         pageNum: Int = list.pageNum
@@ -135,12 +158,34 @@ private class UserSeasonDetailViewModel(
         }
     }
 
-    fun toVideoDetailPage(item: bilibili.app.view.v1.Episode) {
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + item.aid),
-                defaultNavOptions,
-            )
+    fun changeAutoPlay(value: Boolean) {
+        isAutoPlay.value = value
+    }
+
+    fun openVideo(item: bilibili.app.view.v1.Episode) {
+        if (isAutoPlay.value) {
+            addPlayList()
+            val id = item.cid.toString()
+            if (playerStore.state.cid != id) {
+                playerDelegate.openPlayer(
+                    VideoPlayerSource(
+                        mainTitle = item.title,
+                        title = item.title,
+                        coverUrl = item.cover,
+                        aid = item.aid.toString(),
+                        id = id,
+                        ownerId = item.author?.mid.toString(),
+                        ownerName = item.author?.name.toString(),
+                    )
+                )
+            }
+        } else {
+            fragment.findNavController()
+                .navigate(
+                    Uri.parse("bilimiao://video/" + item.aid),
+                    defaultNavOptions,
+                )
+        }
     }
 
     fun setCurrentSection(section: bilibili.app.view.v1.Section) {
@@ -148,10 +193,29 @@ private class UserSeasonDetailViewModel(
         list.data.value = section.episodes
     }
 
+    fun addPlayList() {
+        val season = seasonInfo.value
+        if (season == null) {
+            PopTip.show("数据加载中，请稍后再试")
+            return
+        }
+        val currentId = curSection.value?.id
+        val index = sections.value.indexOfFirst {
+            currentId == it.id
+        }
+        playListStore.setPlayList(season, index)
+    }
+
+    fun toPlayListPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(PlayListPage())
+    }
+
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.playList -> {
-                parentViewModel::toPlayList.invoke()
+                addPlayList()
+                toPlayListPage()
             }
         }
     }
@@ -161,6 +225,9 @@ private class UserSeasonDetailViewModel(
 internal fun UserSeasonDetailContent(
     seasonId: String,
     seasonTitle: String,
+    showTowPane: Boolean,
+    hideFirstPane: Boolean,
+    onChangeHideFirstPane: (hidden: Boolean) -> Unit,
 ) {
     val viewModel: UserSeasonDetailViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
@@ -172,6 +239,7 @@ internal fun UserSeasonDetailContent(
     val listFinished by viewModel.list.finished.collectAsState()
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val isAutoPlay by viewModel.isAutoPlay.collectAsState()
 
     val sections by viewModel.sections.collectAsState()
     val curSection by viewModel.curSection.collectAsState()
@@ -208,33 +276,53 @@ internal fun UserSeasonDetailContent(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
+        TitleBar(
+            modifier = Modifier.fillMaxWidth()
                 .height(48.dp + windowInsets.topDp.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = windowInsets.topDp.dp),
-            contentColor = MaterialTheme.colorScheme.onBackground,
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    Text(text = seasonTitle)
+            icon = {
+                if (showTowPane) {
+                    IconButton(
+                        onClick = {
+                            onChangeHideFirstPane(!hideFirstPane)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (hideFirstPane) {
+                                BilimiaoIcons.Common.Menufold
+                            } else {
+                                BilimiaoIcons.Common.Menuunfold
+                            },
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(24.dp),
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
-                HorizontalDivider(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
+            },
+            title = {
+                Text(
+                    text = seasonTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            },
+            action = {
+                Text(
+                    text = "自动连播",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Switch(
+                    modifier = Modifier.scale(0.75f),
+                    checked = isAutoPlay,
+                    onCheckedChange = viewModel::changeAutoPlay,
                 )
             }
-        }
+        )
         if (sections.size > 1) {
             LazyRow(
                 modifier = Modifier.padding(horizontal = 5.dp),
@@ -259,7 +347,7 @@ internal fun UserSeasonDetailContent(
             onRefresh = { viewModel.refresh() },
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(400.dp),
+                columns = GridCells.Adaptive(300.dp),
             ) {
                 items(list) {
                     VideoItemBox(
@@ -270,7 +358,7 @@ internal fun UserSeasonDetailContent(
                         damukuNum = it.stat?.danmaku.toString(),
                         duration = NumberUtil.converDuration(it.page?.duration ?: 0),
                         onClick = {
-                            viewModel.toVideoDetailPage(it)
+                            viewModel.openVideo(it)
                         }
                     )
                 }
