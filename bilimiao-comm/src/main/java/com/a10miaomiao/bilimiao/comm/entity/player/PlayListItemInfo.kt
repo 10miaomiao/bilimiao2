@@ -13,7 +13,7 @@ data class PlayListItemInfo(
     val cover: String,
     val ownerId: String,
     val ownerName: String,
-    val from: String,
+    val from: PlayListFrom,
 ) : Parcelable {
     fun toVideoPlayerSource(): VideoPlayerSource {
         return VideoPlayerSource(

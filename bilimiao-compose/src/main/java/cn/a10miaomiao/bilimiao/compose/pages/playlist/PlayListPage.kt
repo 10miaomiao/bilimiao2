@@ -131,7 +131,9 @@ private fun PlayListPageContent(
                 Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
             }
             val playListItems = playListState.items
-            items(playListItems.size, { playListItems[it].cid }) { index ->
+            items(playListItems.size, {
+                playListItems[it].aid + "-" + playListItems[it].cid
+            }) { index ->
                 val item = playListItems[index]
                 Box(
                     modifier = Modifier.padding(5.dp),

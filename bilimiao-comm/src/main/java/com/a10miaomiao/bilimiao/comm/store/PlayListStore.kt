@@ -15,6 +15,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,23 +39,23 @@ class PlayListStore(override val di: DI) :
             return items.isEmpty()
         }
 
-        fun indexOfAid(aid: String): Int{
+        fun indexOfAid(aid: String): Int {
             return items.indexOfFirst {
                 it.aid == aid
             }
         }
 
-        fun indexOfCid(cid: String): Int{
+        fun indexOfCid(cid: String): Int {
             return items.indexOfFirst {
                 it.cid == cid
             }
         }
 
-        fun inListForAid(aid: String): Boolean{
+        fun inListForAid(aid: String): Boolean {
             return indexOfAid(aid) != -1
         }
 
-        fun inListForCid(cid: String): Boolean{
+        fun inListForCid(cid: String): Boolean {
             return indexOfCid(cid) != -1
         }
     }
@@ -88,16 +89,26 @@ class PlayListStore(override val di: DI) :
 
     fun setPlayList(info: UgcSeasonInfo, index: Int) {
         val sectionInfo = info.sections[index]
+        val listFrom = PlayListFrom.Section(
+            seasonId = info.id,
+            sectionId = sectionInfo.id,
+        )
+        val currentFrom = state.from
+        if (currentFrom is PlayListFrom.Section
+            && currentFrom.seasonId == listFrom.seasonId
+            && currentFrom.sectionId == listFrom.sectionId) {
+            return
+        }
         val items = sectionInfo.episodes.map {
             PlayListItemInfo(
                 aid = it.aid,
                 cid = it.cid,
-                duration = it.duration,
+                duration = 0,
                 title = it.title,
                 cover = it.cover,
-                ownerId = it.author.mid,
-                ownerName = it.author.name,
-                from = info.id,
+                ownerId = it.author?.mid.toString(),
+                ownerName = it.author?.name.toString(),
+                from = listFrom,
             )
         }
         val title = if (info.sections.size > 1) {
@@ -107,125 +118,156 @@ class PlayListStore(override val di: DI) :
         }
         setPlayList(
             name = title,
-            from = PlayListFrom.Section(
-                seasonId = info.id,
-                sectionId = sectionInfo.id,
-            ),
+            from = listFrom,
             items = items,
         )
     }
 
-
+    fun setPlayList(season: bilibili.app.view.v1.UgcSeason, index: Int) {
+        val sectionInfo = season.sections[index]
+        val listFrom = PlayListFrom.Section(
+            seasonId = season.id.toString(),
+            sectionId = sectionInfo.id.toString(),
+        )
+        val currentFrom = state.from
+        if (currentFrom is PlayListFrom.Section
+            && currentFrom.seasonId == listFrom.seasonId
+            && currentFrom.sectionId == listFrom.sectionId) {
+            return
+        }
+        val items = sectionInfo.episodes.map {
+            PlayListItemInfo(
+                aid = it.aid.toString(),
+                cid = it.cid.toString(),
+                duration = 0,
+                title = it.title,
+                cover = it.cover,
+                ownerId = it.author?.mid.toString(),
+                ownerName = it.author?.name.toString(),
+                from = listFrom,
+            )
+        }
+        val title = if (season.sections.size > 1) {
+            season.title + "：" + sectionInfo.title
+        } else {
+            season.title
+        }
+        setPlayList(
+            name = title,
+            from = listFrom,
+            items = items,
+        )
+    }
 
     private val playListLoadingMutex = Mutex()
-    suspend fun setFavoriteList(mediaId: String, mediaTitle: String)
-            = playListLoadingMutex.withLock {
-        clearPlayList(
-            loading = true
-        )
-        val items = mutableListOf<PlayListItemInfo>()
-        val pageSize = 20
-        var pageNum = 1
-        var loadFinish = false
-        while(!loadFinish){
-            try {
-                val res = BiliApiService.userApi.mediaDetail(
-                    media_id = mediaId,
-                    keyword = "",
-                    pageNum = pageNum,
-                    pageSize = 20,
-                ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
-                if (res.code == 0) {
-                    val result = res.data.medias
-                    val newItems = result?.map {
-                        PlayListItemInfo(
-                            aid = it.id,
-                            cid = it.ugc.first_cid,
-                            duration = it.duration.toInt(),
-                            title = it.title,
-                            cover = it.cover,
-                            ownerId = it.upper.mid,
-                            ownerName = it.upper.name,
-                            from = mediaId,
-                        )
-                    }
-                    if(newItems != null){
-                        items.addAll(newItems)
-                        loadFinish = newItems.size != pageSize
+    suspend fun setFavoriteList(mediaId: String, mediaTitle: String) =
+        playListLoadingMutex.withLock {
+            val listFrom = PlayListFrom.Favorite(
+                mediaId = mediaId,
+            )
+            val currentFrom = state.from
+            if (currentFrom is PlayListFrom.Favorite
+                && currentFrom.mediaId == mediaId
+            ) {
+                return@withLock
+            }
+            clearPlayList(
+                loading = true
+            )
+            val items = mutableListOf<PlayListItemInfo>()
+            val pageSize = 20
+            var pageNum = 1
+            var loadFinish = false
+            while (!loadFinish) {
+                try {
+                    val res = BiliApiService.userApi.mediaDetail(
+                        media_id = mediaId,
+                        keyword = "",
+                        pageNum = pageNum,
+                        pageSize = 20,
+                    ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
+                    if (res.code == 0) {
+                        val result = res.data.medias
+                        val newItems = result?.filter {
+                            it.ugc.first_cid.isNotEmpty()
+                        }?.map {
+                            PlayListItemInfo(
+                                aid = it.id,
+                                cid = it.ugc.first_cid,
+                                duration = it.duration.toInt(),
+                                title = it.title,
+                                cover = it.cover,
+                                ownerId = it.upper.mid,
+                                ownerName = it.upper.name,
+                                from = listFrom,
+                            )
+                        }
+                        if (newItems != null) {
+                            items.addAll(newItems)
+                            loadFinish = newItems.size != pageSize
+                        } else {
+                            loadFinish = true
+                        }
+                        pageNum++
                     } else {
+                        withContext(Dispatchers.Main) {
+                            PopTip.show(res.message)
+                        }
                         loadFinish = true
                     }
-                    pageNum++
-                } else {
-                    withContext(Dispatchers.Main) {
-                        PopTip.show(res.message)
-                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
                     loadFinish = true
                 }
+            }
+            setPlayList(
+                name = mediaTitle,
+                from = listFrom,
+                items = items,
+            )
+        }
 
+    suspend fun setSeasonList(seasonId: String, seasonTitle: String, seasonIndex: Int) =
+        playListLoadingMutex.withLock {
+            clearPlayList(
+                loading = true
+            )
+            var items = listOf<PlayListItemInfo>()
+            try {
+                val req = bilibili.app.view.v1.SeasonReq(
+                    seasonId = seasonId.toLong(),
+                )
+                val res = BiliGRPCHttp.request {
+                    ViewGRPC.season(req)
+                }.awaitCall()
+                val season = res.season
+                val section = season?.sections?.get(seasonIndex)
+                val listFrom = PlayListFrom.Section(
+                    seasonId = season?.id.toString(),
+                    sectionId = section?.id.toString(),
+                )
+                items = (section?.episodes ?: listOf()).map {
+                    PlayListItemInfo(
+                        aid = it.aid.toString(),
+                        cid = it.cid.toString(),
+                        duration = 0,
+                        title = it.title,
+                        cover = it.cover,
+                        ownerId = it.author?.mid.toString(),
+                        ownerName = it.author?.name.toString(),
+                        from = listFrom,
+                    )
+                }
+                setPlayList(
+                    name = seasonTitle,
+                    from = listFrom,
+                    items = items,
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    e.toString().let {
-                        //收藏夹内视频个数为20的整倍数时会弹，但是不影响运行结果
-                        if(it != "java.lang.NullPointerException:" +
-                            " Parameter specified as non-null is null:" +
-                            " method kotlin.collections.CollectionsKt__IterablesKt.collectionSizeOrDefault," +
-                            " parameter <this>"){
-                            PopTip.show(it)
-                        }
-                    }
-                }
-                loadFinish = true
-            } finally {
+                PopTip.show(e.toString())
             }
         }
-        setPlayList(
-            name = mediaTitle,
-            from = PlayListFrom.Favorite(
-                mediaId = mediaId,
-            ),
-            items = items,
-        )
-    }
-
-    suspend fun setSeasonList(seasonId: String, seasonTitle: String, seasonIndex: Int)
-            = playListLoadingMutex.withLock{
-        clearPlayList(
-            loading = true
-        )
-        var items = listOf<PlayListItemInfo>()
-        try {
-            val req = bilibili.app.view.v1.SeasonReq(
-                seasonId = seasonId.toLong(),
-            )
-            val res = BiliGRPCHttp.request {
-                ViewGRPC.season(req)
-            }.awaitCall()
-            items = (res.season?.sections?.get(seasonIndex)?.episodes ?: listOf()).map{
-                PlayListItemInfo(
-                    aid = it.aid.toString(),
-                    cid = it.cid.toString(),
-                    duration = 0,
-                    title = it.title,
-                    cover = it.cover,
-                    ownerId = it.author?.mid.toString(),
-                    ownerName = it.author?.name.toString(),
-                    from = seasonId,
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            PopTip.show(e.toString())
-        } finally {
-        }
-        setPlayList(
-            name = seasonTitle,
-            from = PlayListFrom.Season(
-                seasonId = seasonId
-            ),
-            items = items,
-        )
-    }
 }
 

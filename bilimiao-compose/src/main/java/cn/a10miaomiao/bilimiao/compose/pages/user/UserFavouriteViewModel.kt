@@ -153,21 +153,6 @@ internal class UserFavouriteViewModel(
     fun closeMediaDetail() {
         openedMedia.value = null
     }
-    fun toPlayList() {
-        openedMedia.value?.let {
-            viewModelScope.launch(Dispatchers.IO) {
-                if (it.type == 21) {
-                    //合集
-                    playListStore.setSeasonList(it.id, it.title, 0)
-                } else {
-                    //收藏
-                    playListStore.setFavoriteList(it.id, it.title)
-                }
-            }
-        }
-        val nav = fragment.findComposeNavController()
-        nav.navigate(PlayListPage())
-    }
 
     fun updateOpenedMedia(
         mediaId: String,

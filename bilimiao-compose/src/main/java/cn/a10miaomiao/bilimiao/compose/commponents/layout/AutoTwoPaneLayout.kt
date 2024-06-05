@@ -72,7 +72,7 @@ fun AutoTwoPaneLayout(
     twoPaneMinWidth: Dp,
     firstPaneMaxWidth: Dp = 0.dp,
     secondPaneMaxWidth: Dp = 0.dp,
-    showFirstPane: Boolean = true,
+    hideFirstPane: Boolean = false,
     openedSecond: Boolean = false,
 ) {
     BoxWithConstraints(
@@ -80,7 +80,7 @@ fun AutoTwoPaneLayout(
     ) {
         val density = LocalDensity.current
         val splitPane = maxWidth > twoPaneMinWidth
-        val showFirst = splitPane || !openedSecond
+        val showFirst = !hideFirstPane && (splitPane || !openedSecond)
         val showSecond = splitPane || openedSecond
         Layout(
             modifier = Modifier.wrapContentSize(),
@@ -91,10 +91,12 @@ fun AutoTwoPaneLayout(
                         enter = firstEnter,
                         exit = firstExit,
                     ) {
-                        first(AutoTwoPaneLayoutState(
-                            visible = showFirst,
-                            showTowPane = splitPane,
-                        ))
+                        first(
+                            AutoTwoPaneLayoutState(
+                                visible = showFirst,
+                                showTowPane = splitPane,
+                            )
+                        )
                     }
                 }
                 Box(Modifier.layoutId(1)) {
@@ -103,10 +105,12 @@ fun AutoTwoPaneLayout(
                         enter = secondEnter,
                         exit = secondExit,
                     ) {
-                        second(AutoTwoPaneLayoutState(
-                            visible = showSecond,
-                            showTowPane = splitPane,
-                        ))
+                        second(
+                            AutoTwoPaneLayoutState(
+                                visible = showSecond,
+                                showTowPane = splitPane,
+                            )
+                        )
                     }
                 }
             }
@@ -128,21 +132,33 @@ fun AutoTwoPaneLayout(
                     } else {
                         constraints.maxWidth / 2
                     }
-                    val firstConstraints = constraints.copy(minWidth = splitWidth, maxWidth = splitWidth)
-                    val secondConstraints = constraints.copy(
-                        minWidth = constraints.maxWidth - splitWidth,
-                        maxWidth = constraints.maxWidth - splitWidth
-                    )
-                    val firstPlaceable = firstMeasurable.measure(constraints.constrain(firstConstraints))
-                    val secondPlaceable = secondMeasurable.measure(constraints.constrain(secondConstraints))
+                    val firstConstraints =
+                        constraints.copy(minWidth = splitWidth, maxWidth = splitWidth)
+                    val secondConstraints = if (hideFirstPane) {
+                        constraints.copy(
+                            minWidth = constraints.maxWidth,
+                            maxWidth = constraints.maxWidth
+                        )
+                    } else {
+                        constraints.copy(
+                            minWidth = constraints.maxWidth - splitWidth,
+                            maxWidth = constraints.maxWidth - splitWidth
+                        )
+                    }
+                    val firstPlaceable =
+                        firstMeasurable.measure(constraints.constrain(firstConstraints))
+                    val secondPlaceable =
+                        secondMeasurable.measure(constraints.constrain(secondConstraints))
                     firstPlaceable.placeRelative(0, 0)
                     val detailOffsetX = constraints.maxWidth - secondPlaceable.width
                     secondPlaceable.placeRelative(detailOffsetX, 0)
                 } else {
                     val firstConstraints = constraints.copy()
                     val secondConstraints = constraints.copy()
-                    val firstPlaceable = firstMeasurable.measure(constraints.constrain(firstConstraints))
-                    val secondPlaceable = secondMeasurable.measure(constraints.constrain(secondConstraints))
+                    val firstPlaceable =
+                        firstMeasurable.measure(constraints.constrain(firstConstraints))
+                    val secondPlaceable =
+                        secondMeasurable.measure(constraints.constrain(secondConstraints))
                     firstPlaceable.placeRelative(0, 0)
                     secondPlaceable.placeRelative(0, 0)
                 }
