@@ -54,6 +54,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
@@ -63,6 +64,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.TitleBar
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
@@ -70,11 +72,14 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -118,7 +123,7 @@ private class UserSeasonDetailViewModel(
 
     private fun loadData(
         pageNum: Int = list.pageNum
-    ) = viewModelScope.launch(Dispatchers.IO){
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             list.loading.value = true
             val req = bilibili.app.view.v1.SeasonReq(
@@ -211,11 +216,66 @@ private class UserSeasonDetailViewModel(
         nav.navigate(PlayListPage())
     }
 
+    fun favSeason() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.userApi
+                .favFavSeason(
+                    seasonId = sid,
+                )
+                .awaitCall()
+                .gson<MessageInfo>(isLog = true)
+            if (res.isSuccess) {
+                PopTip.show("订阅成功")
+//                refresh()
+                parentViewModel.updateOpenedSeason(
+                    seasonId = sid,
+                    favState = 1,
+                )
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
+    fun unfavSeason() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val res = BiliApiService.userApi
+                .favUnfavSeason(
+                    seasonId = sid,
+                )
+                .awaitCall()
+                .gson<MessageInfo>(isLog = true)
+            if (res.isSuccess) {
+                PopTip.show("已取消订阅")
+//                refresh()
+                parentViewModel.updateOpenedSeason(
+                    seasonId = sid,
+                    favState = 0,
+                )
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.playList -> {
                 addPlayList()
                 toPlayListPage()
+            }
+            MenuKeys.follow -> {
+                if (item.action == "fav") {
+                    favSeason()
+                } else {
+                    unfavSeason()
+                }
             }
         }
     }
@@ -228,6 +288,7 @@ internal fun UserSeasonDetailContent(
     showTowPane: Boolean,
     hideFirstPane: Boolean,
     onChangeHideFirstPane: (hidden: Boolean) -> Unit,
+    favState: Int,
 ) {
     val viewModel: UserSeasonDetailViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
@@ -241,6 +302,7 @@ internal fun UserSeasonDetailContent(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isAutoPlay by viewModel.isAutoPlay.collectAsState()
 
+    val detailInfo by viewModel.seasonInfo.collectAsState()
     val sections by viewModel.sections.collectAsState()
     val curSection by viewModel.curSection.collectAsState()
 
@@ -250,18 +312,28 @@ internal fun UserSeasonDetailContent(
 
     val pageConfigId = PageConfig(
         title = "合集详情",
-        menu = remember {
-            myMenu {
-                myItem {
-                    key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
-                    title = "更多"
-                    childMenu = myMenu {
-                        myItem {
-                            key = MenuKeys.playList
-                            title = "添加到播放列表"
-                        }
+        menu = rememberMyMenu(favState) {
+            myItem {
+                key = MenuKeys.more
+                iconFileName = "ic_more_vert_grey_24dp"
+                title = "更多"
+                childMenu = myMenu {
+                    myItem {
+                        key = MenuKeys.playList
+                        title = "添加到播放列表"
                     }
+                }
+            }
+            myItem {
+                key = MenuKeys.follow
+                if (favState == 1) {
+                    action = "unfav"
+                    iconFileName = "ic_baseline_favorite_24"
+                    title = "已订阅"
+                } else {
+                    action = "fav"
+                    iconFileName = "ic_outline_favorite_border_24"
+                    title = "订阅"
                 }
             }
         },
@@ -277,7 +349,8 @@ internal fun UserSeasonDetailContent(
             .fillMaxSize()
     ) {
         TitleBar(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .height(48.dp + windowInsets.topDp.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = windowInsets.topDp.dp),

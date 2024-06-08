@@ -614,7 +614,7 @@ internal fun UserFavouriteDetailContent(
                 viewModel.deleteFolder()
             }.onSuccess {
                 loading = false
-                PopTip.show("创建成功")
+                PopTip.show("修改成功")
                 showEditDialog = false
             }.onFailure {
                 loading = false

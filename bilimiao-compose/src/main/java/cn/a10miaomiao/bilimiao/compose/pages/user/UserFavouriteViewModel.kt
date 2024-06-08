@@ -183,6 +183,24 @@ internal class UserFavouriteViewModel(
         }
     }
 
+    fun updateOpenedSeason(
+        seasonId: String,
+        favState: Int,
+    ) {
+        val index = collectedList.data.value.indexOfFirst {
+            it.id == seasonId
+        }
+        if (index >= 0) {
+            val newList = collectedList.data.value.toMutableList()
+            val updateItem = newList[index]
+            newList[index] = updateItem.copy(
+                fav_state = favState,
+            )
+            collectedList.data.value = newList
+            openedMedia.value = newList[index]
+        }
+    }
+
     suspend fun addFolder(
         title: String,
         cover: String,
