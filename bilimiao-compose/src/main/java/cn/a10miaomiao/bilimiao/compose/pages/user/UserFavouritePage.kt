@@ -265,7 +265,12 @@ private fun UserFavouritePageContent() {
                             onChangeHideFirstPane = { hidden ->
                                 hideFirstPane = hidden
                             },
-                            media.fav_state,
+                            favState = if (userStore.isSelf(viewModel.mid)) {
+                                media.fav_state
+                            } else {
+                                // 无法知道是否订阅合集
+                                0
+                            },
                         )
                     } else {
                         // 收藏详情
