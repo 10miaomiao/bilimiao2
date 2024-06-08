@@ -371,17 +371,17 @@ class VideoSettingFragment : Fragment(), DIAware, MyPage
             defaultValue = true
         }
 
-        switch(PLAYLIST_RANDOM_NEXT) {
-            title = "收藏夹列表随机播放"
-            summary = ""
-            defaultValue = false
-        }
-
-        switch(PLAYLIST_AUTO_REPLAY) {
-            title = "收藏夹列表单集循环"
-            summary = "优先级高于随机播放"
-            defaultValue = false
-        }
+//        switch(PLAYLIST_RANDOM_NEXT) {
+//            title = "收藏夹列表随机播放"
+//            summary = ""
+//            defaultValue = false
+//        }
+//
+//        switch(PLAYLIST_AUTO_REPLAY) {
+//            title = "收藏夹列表单集循环"
+//            summary = "优先级高于随机播放"
+//            defaultValue = false
+//        }
 
         switch(PLAYER_FULL_SHOW_BOTTOM_PROGRESS_BAR) {
             title = "全屏时显示底部进度条"
