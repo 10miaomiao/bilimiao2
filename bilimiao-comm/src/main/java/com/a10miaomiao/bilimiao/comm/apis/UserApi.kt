@@ -195,6 +195,26 @@ class UserApi {
         )
     }
 
+    fun favFavSeason(
+        seasonId: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v3/fav/season/fav")
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "season_id" to seasonId,
+        )
+    }
+
+    fun favUnfavSeason(
+        seasonId: String,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v3/fav/season/unfav")
+        method = MiaoHttp.POST
+        formBody = ApiHelper.createParams(
+            "season_id" to seasonId,
+        )
+    }
+
     /**
      * 收藏夹列表详情
      */

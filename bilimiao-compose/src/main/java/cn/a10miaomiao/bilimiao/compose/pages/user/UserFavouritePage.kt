@@ -264,7 +264,8 @@ private fun UserFavouritePageContent() {
                             hideFirstPane = hideFirstPane,
                             onChangeHideFirstPane = { hidden ->
                                 hideFirstPane = hidden
-                            }
+                            },
+                            media.fav_state,
                         )
                     } else {
                         // 收藏详情
