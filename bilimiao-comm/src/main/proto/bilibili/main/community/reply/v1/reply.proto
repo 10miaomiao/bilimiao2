@@ -114,7 +114,7 @@ message Content {
     // 富文本
     RichText rich_text = 8;
     // 评论图片
-    repeated Picture pictures = 9;
+    repeated  Picture pictures = 9;
 }
 
 // 图片信息
@@ -142,7 +142,7 @@ message CursorReply {
     // 排序方式
     // 2:时间 3:热度
     Mode mode = 5;
-    // 当前排序mode在切换按钮上的展示文案
+    // 当前排序mode在切换按钮上的展示文案 
     string mode_text = 6;
 }
 
@@ -169,7 +169,6 @@ message DetailListReply {
     //
     LikeInfo likes = 5;
 }
-
 
 // 二级评论明细-请求
 message DetailListReq {
@@ -218,8 +217,6 @@ message DialogListReq {
     int64 rpid = 4;
     // 页面游标
     CursorReq cursor = 5;
-    // 来源标识
-    DetailListScene scene = 6;
 }
 
 // 特效

@@ -54,7 +54,7 @@ class BiliGRPCHttp<ReqT : Message, RespT : Message>(
     }
 
     private fun buildRequest(): Request {
-        val url = baseUrl + method.name.replace("interfaces", "interface")
+        val url = baseUrl + method.name
         val messageBytes = method.reqMessage.encodeToByteArray()
         // 校验用?第五位为数组长度
         val stateBytes = byteArrayOf(0, 0, 0, 0, messageBytes.size.toByte())
