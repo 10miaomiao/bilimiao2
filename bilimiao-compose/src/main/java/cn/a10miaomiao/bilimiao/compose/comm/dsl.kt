@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavOptions
 import cn.a10miaomiao.bilimiao.compose.R
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
 import org.kodein.di.bind
@@ -13,6 +14,7 @@ import org.kodein.di.compose.localDI
 import org.kodein.di.compose.subDI
 import org.kodein.di.compose.withDI
 import org.kodein.di.instance
+import org.kodein.di.newInstance
 import java.util.Dictionary
 
 val defaultNavOptions get() = NavOptions.Builder()
@@ -26,6 +28,7 @@ val defaultNavOptions get() = NavOptions.Builder()
 inline fun <reified VM : ViewModel> diViewModel(): VM {
     val di = localDI()
     return androidx.lifecycle.viewmodel.compose.viewModel<VM>(
+        key = di.hashCode().toString(),
         initializer = {
             val constructor = VM::class.java.getDeclaredConstructor(
                 DI::class.java
@@ -39,7 +42,7 @@ inline fun <reified VM : ViewModel> diViewModel(): VM {
 inline fun <reified VM : ViewModel> diViewModel(key: String): VM {
     val di = localDI()
     return androidx.lifecycle.viewmodel.compose.viewModel<VM>(
-        key = key,
+        key = key + di.hashCode(),
         initializer = {
             val constructor = VM::class.java.getDeclaredConstructor(
                 DI::class.java

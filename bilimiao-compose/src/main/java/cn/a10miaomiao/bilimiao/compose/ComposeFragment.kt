@@ -40,6 +40,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.subDI
@@ -140,12 +141,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        requireActivity().onBackPressedDispatcher
-//            .addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
-//                override fun handleOnBackPressed() {
-//                    composeNav.
-//                }
-//            })
     }
 
     fun onBackPressed(): Boolean {
@@ -159,16 +154,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                 if (!composeNav.popBackStack()) {
                     findNavController().popBackStack()
                 }
-            } catch (e: IllegalStateException) {
-                if (e.message != "Can not perform this action after onSaveInstanceState") {
-                    throw e
-                }
-            } catch (e: NullPointerException) {
-                if (e.message != "Attempt to invoke virtual method 'android.os.Handler " +
-                    "android.app.FragmentHostCallback.getHandler()' on a " +
-                    "null object reference") {
-                    throw e
-                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
