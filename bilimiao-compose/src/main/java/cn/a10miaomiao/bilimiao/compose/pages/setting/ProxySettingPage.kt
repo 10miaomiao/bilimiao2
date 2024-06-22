@@ -43,7 +43,7 @@ class ProxySettingPage : ComposePage() {
     }
 
 }
-internal class ProxySettingPageViewModel(
+private class ProxySettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -71,7 +71,7 @@ internal class ProxySettingPageViewModel(
 }
 
 @Composable
-internal fun ProxySettingPageContent(
+private fun ProxySettingPageContent(
     viewModel: ProxySettingPageViewModel
 ) {
     PageConfig(

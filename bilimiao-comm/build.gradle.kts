@@ -94,6 +94,7 @@ dependencies {
     implementation(Libraries.material)
     implementation(Libraries.lifecycle)
     implementation(Libraries.lifecycleViewModel)
+    implementation(Libraries.datastore)
     implementation(Libraries.browser)
 
     implementation(Libraries.kotlinxCoroutinesAndroid)

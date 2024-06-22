@@ -58,6 +58,7 @@ dependencies {
     implementation(Libraries.lifecycleViewModel)
     implementation(Libraries.navigationFragment)
     implementation(Libraries.navigationUi)
+    implementation(Libraries.datastore)
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi) // 依赖注入
@@ -75,6 +76,7 @@ dependencies {
 
     implementation(Libraries.accompanistDrawablePainter)
     implementation(Libraries.accompanistAdaptive)
+    implementation("me.zhanghai.compose.preference:library:1.0.0")
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
