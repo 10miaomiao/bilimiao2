@@ -7,13 +7,14 @@ import android.preference.PreferenceManager
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.service.notification.PlayingNotification
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class PlayerService : Service() {
 
@@ -82,11 +83,15 @@ class PlayerService : Service() {
     }
 
     fun setPlayingInfo(info: PlayingInfo) {
-        showNotification = getShowNotification()
         setupMediaSession(info)
         mediaSession?.isActive = true
-        if (showNotification) {
-            playingNotification.setPlayingInfo(mediaSession, info)
+        serviceScope.launch {
+            showNotification = SettingPreferences.mapData(this@PlayerService) {
+                it[PlayerNotification] ?: true
+            }
+            if (showNotification) {
+                playingNotification.setPlayingInfo(mediaSession, info)
+            }
         }
     }
 
@@ -99,14 +104,6 @@ class PlayerService : Service() {
     fun isPlaying(): Boolean {
         return playerState == GSYVideoPlayer.CURRENT_STATE_PLAYING ||
                 playerState == GSYVideoPlayer.CURRENT_STATE_PLAYING_BUFFERING_START
-    }
-
-    /**
-     * 是否显示通知栏控制器
-     */
-    private fun getShowNotification(): Boolean {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        return prefs.getBoolean(VideoSettingFragment.PLAYER_PLAYING_NOTIFICATION, true)!!
     }
 
     private fun updatePlayerState() {

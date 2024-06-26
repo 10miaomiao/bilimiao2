@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,10 +82,19 @@ fun ListStylePreference(
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val initialValue = remember { value }
     Preference(
         modifier = modifier,
         title = {
-            Text("列表样式")
+            Column {
+                Text("列表样式")
+                if (initialValue != value) {
+                    Text(
+                        "修改后重启APP生效",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         },
         summary = {
             Row(

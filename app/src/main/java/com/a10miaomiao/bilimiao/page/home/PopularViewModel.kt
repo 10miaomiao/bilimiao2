@@ -11,6 +11,7 @@ import bilibili.app.show.v1.EntranceShow
 import bilibili.app.show.v1.PopularGRPC
 import bilibili.app.show.v1.PopularResultReq
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -51,8 +52,9 @@ class PopularViewModel(
             ui.setState {
                 list.loading = true
             }
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val carryToken = prefs.getBoolean("home_popular_carry_token", true)
+            val carryToken = SettingPreferences.mapData(context) {
+                it[HomePopularCarryToken] ?: true
+            }
             val req = PopularResultReq(
                 idx = idx,
             )

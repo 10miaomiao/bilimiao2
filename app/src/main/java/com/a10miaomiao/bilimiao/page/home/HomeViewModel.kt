@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.Bilimiao
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
@@ -91,10 +92,18 @@ class HomeViewModel(
                 }
                 withContext(Dispatchers.Main) {
                     saveSettingList(res.data.settingList)
-                    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-                    val autoCheckUpdate = prefs.getBoolean("auto_check_update", true)
-                    if (autoCheckUpdate) {
-                        showUpdateDialog(res.data.version, longVersionCode)
+                    val (autoCheckUpdate, ignoreUpdateVersionCode) = SettingPreferences.mapData(context) {
+                        Pair(
+                            it[IsAutoCheckVersion] ?: true,
+                            it[IgnoreUpdateVersionCode] ?: 0L
+                        )
+                    }
+                    val version = res.data.version
+                    if (autoCheckUpdate
+                        && version.versionCode > longVersionCode
+                        && version.versionCode != ignoreUpdateVersionCode
+                    ) {
+                        showUpdateDialog(version, longVersionCode)
                     }
                 }
             }
@@ -103,17 +112,7 @@ class HomeViewModel(
         }
     }
 
-    fun showUpdateDialog(version: MiaoAdInfo.VersionBean, curVersionCode: Long) {
-        // 当前版本大于等于最新版本不提示更新
-        if (curVersionCode >= version.versionCode) {
-            return
-        }
-        // 最新版已记录为不更新版本并且当前大于等于最低版本，不提示更新
-        val sp = context.getSharedPreferences(Bilimiao.APP_NAME, Context.MODE_PRIVATE)
-        val noUpdateVersionCode = sp.getLong("no_update_version_code", 0L)
-        if (version.versionCode === noUpdateVersionCode && curVersionCode >= version.miniVersionCode) {
-            return
-        }
+    private fun showUpdateDialog(version: MiaoAdInfo.VersionBean, curVersionCode: Long) {
         val dialog = MaterialAlertDialogBuilder(context).apply {
             setTitle("有新版本：" + version.versionName)
             setMessage(version.content)
@@ -121,9 +120,7 @@ class HomeViewModel(
             if (curVersionCode >= version.miniVersionCode) {
                 setNegativeButton("取消", null)
                 setNeutralButton("不再提醒此版本") { dialog, which ->
-                    sp.edit()
-                        .putLong("no_update_version_code", version.versionCode)
-                        .apply()
+                    setIgnoreUpdateVersion(version.versionCode)
                 }
             } else {
                 // 小于最低版本，必须更新，对话框不能关闭
@@ -138,6 +135,14 @@ class HomeViewModel(
             context.startActivity(intent)
             if (curVersionCode >= version.miniVersionCode) {
                 dialog.dismiss()
+            }
+        }
+    }
+
+    fun setIgnoreUpdateVersion(versionCode: Long) {
+        viewModelScope.launch {
+            SettingPreferences.edit(context) {
+                it[IgnoreUpdateVersionCode] = versionCode
             }
         }
     }

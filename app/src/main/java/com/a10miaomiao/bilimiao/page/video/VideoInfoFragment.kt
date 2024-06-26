@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
@@ -40,6 +41,8 @@ import com.a10miaomiao.bilimiao.comm.MiaoUI
 import com.a10miaomiao.bilimiao.comm._isRefreshing
 import com.a10miaomiao.bilimiao.comm._network
 import com.a10miaomiao.bilimiao.comm.connectStore
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.diViewModel
@@ -71,13 +74,13 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
-import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -91,6 +94,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -322,11 +326,15 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
     override fun onDestroy() {
         super.onDestroy()
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_STOP, false)
-            && playerStore.state.aid == viewModel.id
-        ) {
-            basePlayerDelegate.closePlayer()
+        lifecycleScope.launch {
+            val openMode = SettingPreferences.mapData(requireActivity()) {
+                it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
+            }
+            if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_CLOSE != 0
+                && playerStore.state.aid == viewModel.id
+            ) {
+                basePlayerDelegate.closePlayer()
+            }
         }
     }
 
@@ -343,6 +351,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         if (info != null) {
             // 设置播放列表
             if(playListStore.state.inListForAid(info.aid)) {
+                miaoLogger() debug "inListForAid"
                 //视频已在列表中，不设置新的列表
             } else {
                 viewModel.ugcSeason?.let {
@@ -351,7 +360,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                             section.episodes.indexOfFirst { it.aid == info.aid } != -1
                         }
                     } else { 0 }
+                    miaoLogger() debug "index:$index"
                     if (index != -1) {
+                        miaoLogger() debug "setPlayList"
                         playListStore.setPlayList(it, index)
                     }
                 }
