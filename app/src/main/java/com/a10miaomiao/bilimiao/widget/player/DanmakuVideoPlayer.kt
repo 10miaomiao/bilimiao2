@@ -195,7 +195,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     var isHoldUp = false
 
     // 是否显示当面
-    var isShowDanmaKu = true
+    var isShowDanmaku = true
         set(value) {
             field = value
             resolveDanmakuShow()
@@ -263,6 +263,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     var showBottomProgressBarInFullMode = true
     // 小屏状态下显示底部进度条
     var showBottomProgressBarInSmallMode = true
+    // 画中画状态下显示底部进度条
+    var showBottomProgressBarInPipMode = true
     // 占用音频焦点
     var enabledAudioFocus = true
 
@@ -836,7 +838,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     private fun resolveDanmakuShow() {
         post {
             mDanmakuView.show()
-            if (isShowDanmaKu) {
+            if (isShowDanmaku) {
                 if (!mDanmakuView.isShown) {
                     mDanmakuView.show()
                 }

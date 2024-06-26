@@ -27,8 +27,11 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.comm.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.commponents.preference.glidePreference
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -135,12 +138,20 @@ private class SettingPageViewModel(
         nav.navigate(VideoSettingPage())
     }
 
+    fun toDanmakuSettingPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(DanmakuSettingPage())
+    }
+
     fun toFilterSettingPage() {
         val nav = fragment.findComposeNavController()
         nav.navigate(FilterSettingPage())
     }
 
-
+    fun toFlagsSettingPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(FlagsSettingPage())
+    }
 }
 
 
@@ -157,7 +168,13 @@ private fun SettingPageContent(
     val context = LocalContext.current
     val moreSettingList by viewModel.moreSettingList.collectAsState()
 
-    ProvidePreferenceLocals {
+    val dataStore = remember {
+        SettingPreferences.run { context.dataStore }
+    }
+
+    ProvidePreferenceLocals(
+        flow = rememberPreferenceFlow(dataStore)
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -178,7 +195,7 @@ private fun SettingPageContent(
                 }
             )
             switchPreference(
-                key = "is_best_region",
+                key = SettingPreferences.IsBestRegion.name,
                 defaultValue = false,
                 title = {
                     Text( "使用旧版分区")
@@ -235,9 +252,7 @@ private fun SettingPageContent(
                 summary = {
                     Text("相信的心就是你的魔法")
                 },
-                onClick = {
-
-                }
+                onClick = viewModel::toDanmakuSettingPage,
             )
             preference(
                 key = "filter",
@@ -250,7 +265,7 @@ private fun SettingPageContent(
                 onClick = viewModel::toFilterSettingPage
             )
             switchPreference(
-                key = "auto_check_update",
+                key = SettingPreferences.IsAutoCheckVersion.name,
                 title = {
                     Text("自动检测新版本")
                 },
@@ -271,9 +286,7 @@ private fun SettingPageContent(
                 summary = {
                     Text("自然选择号，前进四！")
                 },
-                onClick = {
-
-                }
+                onClick = viewModel::toFlagsSettingPage,
             )
 
             preferenceCategory(
@@ -319,7 +332,9 @@ private fun SettingPageContent(
             
             item("bottom") {
                 Spacer(
-                    modifier = Modifier.height(windowInsets.bottomDp.dp)
+                    modifier = Modifier.height(
+                        windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
+                    )
                 )
             }
         }

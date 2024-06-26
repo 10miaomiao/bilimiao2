@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
@@ -14,6 +15,9 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
@@ -29,7 +33,7 @@ class RecommendViewModel(
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
     val filterStore: FilterStore by instance()
-    var listStyle = "0"
+    var listStyle = 0
 
     private val _idx get() = if (list.data.size == 0) {
         0
@@ -40,13 +44,12 @@ class RecommendViewModel(
     var triggered = false
 
     init {
-        getListStyle()
-        loadData(0)
-    }
-
-    private fun getListStyle() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        listStyle = prefs.getString("home_recommend_list_style", "0")!!
+        viewModelScope.launch {
+            SettingPreferences.getData(context) {
+                it[HomeRecommendListStyle] ?: 0
+                loadData(0)
+            }
+        }
     }
 
     private fun loadData(

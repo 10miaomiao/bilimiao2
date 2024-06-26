@@ -11,6 +11,7 @@ import cn.a10miaomiao.miao.binding.miaoEffect
 import cn.a10miaomiao.miao.binding.miaoMemo
 import cn.a10miaomiao.miao.binding.miaoRef
 import com.a10miaomiao.bilimiao.comm.MiaoUI
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import splitties.views.dsl.core.wrapContent
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -45,14 +46,15 @@ fun <T> RecyclerView._miaoAdapter(
     val mAdapter = miaoMemo(itemUi) {
         object : MiaoBindingAdapter<T>(
             items,
-            it,
+            itemUi,
         ) {}
     }
     var isInit = false
     miaoEffect(mAdapter) {
         isInit = true
         adapterInit?.invoke(mAdapter)
-        this@_miaoAdapter.adapter = mAdapter
+        val that = this@miaoEffect
+        that.adapter = mAdapter
     }
     miaoEffect(arrayOf(items?.size, items, *depsAry), {
         if (!isInit) {

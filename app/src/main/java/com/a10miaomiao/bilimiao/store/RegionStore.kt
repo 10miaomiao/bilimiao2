@@ -5,16 +5,19 @@ import android.preference.PreferenceManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
@@ -24,55 +27,58 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
+import java.util.Date
 
 class RegionStore(override val di: DI) :
     ViewModel(), BaseStore<RegionStore.State> {
 
-    data class State (
+    data class State(
         var regions: MutableList<RegionInfo> = mutableListOf()
     )
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
 
-    private var isBestRegion = false
+    private var networkTime = 0L
 
     override fun init(context: Context) {
         super.init(context)
-        loadRegionData(context)
-    }
-
-    fun loadRegionData(context: Context) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val isBestRegionNow = prefs.getBoolean("is_best_region", false)
-        if (state.regions.size > 0 && isBestRegion == isBestRegionNow) {
-            return
-        }
-        isBestRegion = isBestRegionNow
         // 加载分区列表
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val jsonStr = readRegionJson(context)!!
-                val result = Gson().fromJson<ResultListInfo<RegionInfo>>(
-                    jsonStr,
-                    object : TypeToken<ResultListInfo<RegionInfo>>() {}.type
-                )
-                val data = result.data
-                data.forEachWithIndex(::regionIcon)
-                setState {
-                    regions = data.toMutableList()
-                }
-            } catch (e: Exception) {
-                context.toast("读取分区列表遇到错误")
-            }
-            // 从网络读取最新版本的分区列表
-            if (!isBestRegion) {
-                getRegionsByNetwork(context)
+        SettingPreferences.launch(viewModelScope, Dispatchers.IO) {
+            context.dataStore.data.map {
+                it[IsBestRegion] ?: false
+            }.collect {
+                loadRegionData(context, it)
             }
         }
     }
 
-    fun getRegionsByNetwork(context: Context) = viewModelScope.launch(Dispatchers.IO) {
+    suspend fun loadRegionData(
+        context: Context,
+        isBestRegion: Boolean,
+    ) {
+        // 加载分区列表
+        try {
+            val jsonStr = readRegionJson(context, isBestRegion)!!
+            val result = Gson().fromJson<ResultListInfo<RegionInfo>>(
+                jsonStr,
+                object : TypeToken<ResultListInfo<RegionInfo>>() {}.type
+            )
+            val data = result.data
+            data.forEachWithIndex(::regionIcon)
+            setState {
+                regions = data.toMutableList()
+            }
+        } catch (e: Exception) {
+            context.toast("读取分区列表遇到错误")
+        }
+        // 从网络读取最新版本的分区列表
+        if (!isBestRegion && System.currentTimeMillis() - networkTime > 3600000) {
+            getRegionsByNetwork(context)
+        }
+    }
+
+    suspend fun getRegionsByNetwork(context: Context) {
         try {
             val res = BiliApiService.regionAPI
                 .regions()
@@ -83,6 +89,7 @@ class RegionStore(override val di: DI) :
                 setState {
                     regions = regionList.toMutableList()
                 }
+                networkTime = System.currentTimeMillis()
                 // 保存到本地
                 writeRegionJson(
                     context,
@@ -105,7 +112,10 @@ class RegionStore(override val di: DI) :
     /**
      * 读取assets下的json数据
      */
-    private fun readRegionJson(context: Context): String? {
+    private fun readRegionJson(
+        context: Context,
+        isBestRegion: Boolean,
+    ): String? {
         try {
             val inputStream = if (isBestRegion || !File(context.filesDir, "region.json").exists()) {
                 context.assets.open("region.json")

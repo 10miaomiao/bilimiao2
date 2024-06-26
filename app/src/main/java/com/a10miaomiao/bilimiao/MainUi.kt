@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.fragment.app.FragmentContainerView
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
@@ -17,7 +18,6 @@ import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetUi
 import com.a10miaomiao.bilimiao.comm.shadowLayout
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.setting.FlagsSeetingFragment
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
@@ -138,7 +138,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         })
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
-        val enableSubContent = prefs.getBoolean(FlagsSeetingFragment.FLAGS_SUB_CONTENT_SHOW, false)
+        val enableSubContent = prefs.getBoolean(SettingConstants.FLAGS_SUB_CONTENT_SHOW, false)
         mAppBar.enableSubContent = enableSubContent
         if (enableSubContent) {
             addView(mSubContainerView, lParams {

@@ -1,16 +1,19 @@
 package com.a10miaomiao.bilimiao.page
 
 import android.content.Context
-import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.page.home.DynamicFragment
 import com.a10miaomiao.bilimiao.page.home.PopularFragment
 import com.a10miaomiao.bilimiao.page.home.HomeFragment
 import com.a10miaomiao.bilimiao.page.home.RecommendFragment
-import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -27,42 +30,30 @@ class MainViewModel(
 
     var position = -1
 
-    var navList = listOf<HomeNav>()
-
-    private var curHomeSettingVersion = -1
-
-    fun readNavList(): List<HomeNav> {
-        if (curHomeSettingVersion == HomeSettingFragment.homeSettingVersion) {
-            return navList
-        }
-        curHomeSettingVersion = HomeSettingFragment.homeSettingVersion
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val list = mutableListOf<HomeNav>(
-            HomeNav.Home
-        )
-        if (prefs.getBoolean("home_recommend_show", true)) {
-            list.add(HomeNav.Recommend)
-        }
-        if (prefs.getBoolean("home_popular_show", true)) {
-            list.add(HomeNav.Popular)
-        }
-        if (userStore.isLogin()) {
-            list.add(HomeNav.Dynamic)
-        }
-        return list
-    }
-
-    fun equalsNavList(oldList: List<HomeNav>, newList: List<HomeNav>): Boolean {
-        if (oldList.size != newList.size) {
-            return false
-        }
-        for (i in oldList.indices) {
-            if (oldList[i].id != newList[i].id) {
-                return false
+    val navListFlow = SettingPreferences.run {
+        context.dataStore.data.combine(
+            userStore.stateFlow
+        ) { preferences, userState ->
+            val list = mutableListOf<HomeNav>(
+                HomeNav.Home
+            )
+            if (preferences[HomeRecommendShow] != false) {
+                list.add(HomeNav.Recommend)
             }
+            if (preferences[HomePopularShow] != false) {
+                list.add(HomeNav.Popular)
+            }
+            if (userStore.isLogin()) {
+                list.add(HomeNav.Dynamic)
+            }
+            list.toList()
         }
-        return true
-    }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = listOf()
+    )
+    val navList get() = navListFlow.value
 
     sealed class HomeNav(
         val id: Long,

@@ -116,7 +116,6 @@ dependencies {
     implementation(Libraries.flexbox)
     implementation(Libraries.foregroundCompat)
     implementation(Libraries.drawer)
-    implementation(Libraries.modernAndroidPreferences)
     implementation(Libraries.dialogX) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }

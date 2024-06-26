@@ -9,6 +9,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -28,7 +30,6 @@ import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.chad.library.adapter.base.loadmore.LoadMoreStatus
 import com.kongzue.dialogx.dialogs.PopTip
@@ -168,28 +169,30 @@ class VideoInfoViewModel(
         }
     }
 
-    private fun autoStartPlay(info: VideoInfo) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(fragment.requireActivity())
+    private fun autoStartPlay(info: VideoInfo) = viewModelScope.launch {
+        val openMode = SettingPreferences.mapData(fragment.requireActivity()) {
+            it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
+        }
         if (scaffoldApp.showPlayer) {
             if (basePlayerDelegate.isPlaying()) {
                 // 自动替换正在播放的视频
-                if (prefs.getBoolean(VideoSettingFragment.PLAYER_PLAYING_AUTO_REPLACE, false)) {
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE != 0) {
                     playVideo(info, 0)
                 }
             } else if (basePlayerDelegate.isPause()) {
                 // 自动替换暂停的视频
-                if (prefs.getBoolean(VideoSettingFragment.PLAYER_PAUSE_AUTO_REPLACE, false)) {
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE_PAUSE != 0) {
                     playVideo(info, 0)
                 }
             } else {
                 // 自动替换完成的视频
-                if (prefs.getBoolean(VideoSettingFragment.PLAYER_COMPLETE_AUTO_REPLACE, false)) {
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE_COMPLETE != 0) {
                     playVideo(info, 0)
                 }
             }
         } else {
             // 自动播放新视频
-            if (prefs.getBoolean(VideoSettingFragment.PLAYER_AUTO_START, false)) {
+            if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_PLAY != 0) {
                 playVideo(info, 0)
             }
         }

@@ -32,7 +32,6 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.page.setting.HomeSettingFragment
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
@@ -106,9 +105,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
                 nav.navigateToCompose(DownloadListPage())
             }
             MenuKeys.search -> {
-//                val bsNav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-//                bsNav.navigate(SearchStartFragment.actionId)
-//                scaffoldApp.openSearchDrawer()
                 requireActivity().openSearch(view)
             }
         }
@@ -201,16 +197,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
         val tabLayout = view.findViewById<TabLayout>(ID_tabLayout)
         val viewPager = view.findViewById<ViewPager2>(ID_viewPager)
         val space = view.findViewById<Space>(ID_space)
-        val newNavList = viewModel.readNavList()
-        if (newNavList.size > 1) {
-            space.visibility = View.GONE
-            tabLayout.visibility = View.VISIBLE
-        } else {
-            space.visibility = View.VISIBLE
-            tabLayout.visibility = View.GONE
-        }
         if (viewPager.adapter == null) {
-            viewModel.navList = newNavList
             val mAdapter = object : FragmentStateAdapter(childFragmentManager, lifecycle) {
                 override fun getItemCount() = viewModel.navList.size
 
@@ -245,9 +232,16 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     pageConfig.notifyConfigChanged()
                 }
             })
-        } else {
-            if (!viewModel.equalsNavList(viewModel.navList, newNavList)) {
-                viewModel.navList = newNavList
+        }
+        lifecycleScope.launch {
+            viewModel.navListFlow.collect {
+                if (it.size > 1) {
+                    space.visibility = View.GONE
+                    tabLayout.visibility = View.VISIBLE
+                } else {
+                    space.visibility = View.VISIBLE
+                    tabLayout.visibility = View.GONE
+                }
                 viewPager.adapter?.notifyDataSetChanged()
             }
         }
@@ -260,7 +254,6 @@ class MainFragment : Fragment(), DIAware, MyPage {
         val contentInsets = windowStore.getContentInsets(parentView)
         miaoEffect(userStore.isLogin()) {
             pageConfig.notifyConfigChanged()
-            HomeSettingFragment.homeSettingVersion++
             viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
                     parentView?.let(::initView)
