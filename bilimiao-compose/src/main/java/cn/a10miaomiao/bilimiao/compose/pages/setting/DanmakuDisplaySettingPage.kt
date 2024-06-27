@@ -14,11 +14,13 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -52,15 +54,9 @@ class DanmakuDisplaySettingPage : ComposePage() {
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
         val viewModel: DanmakuDisplaySettingPageViewModel = diViewModel()
         val initialMode = navEntry.arguments?.get(name) ?: ""
-        val initialPage = remember(initialMode) {
-            viewModel.modeList.indexOfFirst {
-                it.first.name == initialMode
-            }
-        }
-        miaoLogger() debug "initialMode: $initialMode, initialPage: $initialPage"
         DanmakuDisplaySettingPageContent(
             viewModel,
-            initialPage,
+            initialMode,
         )
     }
 }
@@ -113,7 +109,7 @@ private class DanmakuDisplaySettingPageViewModel(
 @Composable
 private fun DanmakuDisplaySettingPageContent(
     viewModel: DanmakuDisplaySettingPageViewModel,
-    initialPage: Int,
+    initialMode: String,
 ) {
     PageConfig(
         title = "弹幕显示设置"
@@ -122,13 +118,27 @@ private fun DanmakuDisplaySettingPageContent(
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
-        initialPage = initialPage,
         pageCount = {
             viewModel.modeList.size
         }
     )
+    LaunchedEffect(initialMode) {
+        val page = viewModel.modeList.indexOfFirst {
+            it.first.name == initialMode
+        }
+        if (page != -1) {
+            val mode = viewModel.modeList[page]
+            val enable = SettingPreferences.mapData(context) {
+                it[mode.first.enable] ?: false
+            }
+            if (enable) {
+                pagerState.scrollToPage(page)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.padding(
@@ -161,7 +171,7 @@ private fun DanmakuDisplaySettingPageContent(
                     selected = selected,
                     onClick = {
                         scope.launch {
-                            pagerState.animateScrollToPage(0)
+                            pagerState.animateScrollToPage(index)
                         }
                     },
                 )
