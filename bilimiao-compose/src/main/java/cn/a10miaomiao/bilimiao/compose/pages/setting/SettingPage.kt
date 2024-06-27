@@ -1,2 +1,342 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.navigate
+import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
+import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
+import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.comm.preference.rememberPreferenceFlow
+import cn.a10miaomiao.bilimiao.compose.commponents.preference.glidePreference
+import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
+import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
+import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
+import com.a10miaomiao.bilimiao.store.WindowStore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.MutableStateFlow
+import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.preference
+import me.zhanghai.compose.preference.preferenceCategory
+import me.zhanghai.compose.preference.switchPreference
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.compose.rememberInstance
+import org.kodein.di.instance
+import java.io.BufferedReader
+import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
+
+class SettingPage : ComposePage() {
+    override val route: String
+        get() = "setting"
+
+    @Composable
+    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+        val viewModel: SettingPageViewModel = diViewModel()
+        SettingPageContent(viewModel)
+    }
+}
+
+private class SettingPageViewModel(
+    override val di: DI,
+) : ViewModel(), DIAware {
+
+    private val fragment by instance<Fragment>()
+
+    val moreSettingList = MutableStateFlow(listOf<MiaoSettingInfo>())
+
+    init {
+        loadMoreSettingList()
+    }
+
+    private fun loadMoreSettingList() {
+        try {
+            val context = fragment.requireContext()
+            val file = File(context.filesDir, "settingList.json")
+            if (!file.exists()) {
+                return
+            }
+            val inputStream = context.openFileInput("settingList.json")
+            val br = BufferedReader(InputStreamReader(inputStream))
+            val stringBuilder = StringBuilder()
+            var str: String? = br.readLine()
+            while (str != null) {
+                stringBuilder.append(str)
+                str = br.readLine()
+            }
+            val jsonStr = stringBuilder.toString()
+            moreSettingList.value = Gson().fromJson(
+                jsonStr,
+                object : TypeToken<List<MiaoSettingInfo>>() {}.type,
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun preferenceClick(item: MiaoSettingInfo) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        val activity = fragment.requireActivity()
+        try {
+            intent.data = Uri.parse(item.url)
+            activity.startActivity(intent)
+        } catch (e: Exception) {
+            if (item.backupUrl != null) {
+                intent.data = Uri.parse(item.backupUrl)
+                activity.startActivity(intent)
+            }
+        }
+    }
+
+    fun toThemePage() {
+        val nav = fragment.findNavController()
+        nav.navigate(
+            Uri.parse("bilimiao://setting/theme"),
+            defaultNavOptions
+        )
+    }
+
+    fun toDipSettingPage() {
+        val activity = fragment.requireActivity()
+        val className = "com.a10miaomiao.bilimiao.activity.DensitySettingActivity";
+        val intent = Intent(activity, Class.forName(className))
+        activity.startActivity(intent)
+    }
+
+    fun toHomeSettingPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(HomeSettingPage())
+    }
+
+    fun toVideoSettingPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(VideoSettingPage())
+    }
+
+    fun toDanmakuSettingPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(DanmakuSettingPage())
+    }
+
+    fun toFilterSettingPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(FilterSettingPage())
+    }
+
+    fun toFlagsSettingPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(FlagsSettingPage())
+    }
+}
+
+
+@Composable
+private fun SettingPageContent(
+    viewModel: SettingPageViewModel
+) {
+    PageConfig(
+        title = "设置"
+    )
+    val windowStore: WindowStore by rememberInstance()
+    val windowState = windowStore.stateFlow.collectAsState().value
+    val windowInsets = windowState.getContentInsets(localContainerView())
+    val context = LocalContext.current
+    val moreSettingList by viewModel.moreSettingList.collectAsState()
+
+    val dataStore = remember {
+        SettingPreferences.run { context.dataStore }
+    }
+
+    ProvidePreferenceLocals(
+        flow = rememberPreferenceFlow(dataStore)
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = windowInsets.leftDp.dp,
+                    end = windowInsets.rightDp.dp,
+                )
+        ) {
+            item("top") {
+                Spacer(
+                    modifier = Modifier.height(windowInsets.topDp.dp)
+                )
+            }
+            preferenceCategory(
+                key = "general",
+                title = {
+                    Text( "常规")
+                }
+            )
+            switchPreference(
+                key = SettingPreferences.IsBestRegion.name,
+                defaultValue = false,
+                title = {
+                    Text( "使用旧版分区")
+                },
+                summary = {
+                    Text("你知道雪为什么是白色的吗")
+                }
+            )
+            preference(
+                key = "theme",
+                title = {
+                    Text("切换主题")
+                },
+                summary = {
+                    Text("你知道雪为什么是白色的吗")
+                },
+                onClick = viewModel::toThemePage,
+            )
+            preference(
+                key = "dpi",
+                title = {
+                    Text("应用内DPI设置")
+                },
+                summary = {
+                    Text("当屏幕过大或过小时，可以尝试调整一下")
+                },
+                onClick = viewModel::toDipSettingPage,
+            )
+            preference(
+                key = "home",
+                title = {
+                    Text("首页设置")
+                },
+                summary = {
+                    Text("整个宇宙将为你闪烁")
+                },
+                onClick = viewModel::toHomeSettingPage
+            )
+            preference(
+                key = "video",
+                title = {
+                    Text("播放设置")
+                },
+                summary = {
+                    Text("咖啡拿铁,咖啡摩卡,卡布奇诺!")
+                },
+                onClick = viewModel::toVideoSettingPage
+            )
+            preference(
+                key = "danmaku",
+                title = {
+                    Text("弹幕设置")
+                },
+                summary = {
+                    Text("相信的心就是你的魔法")
+                },
+                onClick = viewModel::toDanmakuSettingPage,
+            )
+            preference(
+                key = "filter",
+                title = {
+                    Text("屏蔽管理")
+                },
+                summary = {
+                    Text("对时光机、首页推荐和热门生效")
+                },
+                onClick = viewModel::toFilterSettingPage
+            )
+            switchPreference(
+                key = SettingPreferences.IsAutoCheckVersion.name,
+                title = {
+                    Text("自动检测新版本")
+                },
+                summary = {
+                    Text("已经没有什么好害怕的了")
+                },
+                defaultValue = true,
+            )
+            glidePreference(
+                key = "glide_image_cache",
+            )
+
+            preference(
+                key = "flags_setting",
+                title = {
+                    Text("实验性功能")
+                },
+                summary = {
+                    Text("自然选择号，前进四！")
+                },
+                onClick = viewModel::toFlagsSettingPage,
+            )
+
+            preferenceCategory(
+                key = "other",
+                title = {
+                    Text( "其它")
+                }
+            )
+            preference(
+                key = "about",
+                title = {
+                    Text("关于")
+                },
+                summary = {
+                    val versionText = remember {
+                        val version = context.packageManager
+                            .getPackageInfo(context.packageName, 0)
+                            .versionName
+                        "版本：$version"
+                    }
+                    Text(versionText)
+                },
+                onClick = {
+
+                }
+            )
+            moreSettingList.forEach {
+                if (it.type == "pref") {
+                    preference(
+                        key = it.name,
+                        title = {
+                            Text(text = it.title)
+                        },
+                        summary = {
+                            Text(text = it.summary)
+                        },
+                        onClick = {
+                            viewModel.preferenceClick(it)
+                        },
+                    )
+                }
+            }
+            
+            item("bottom") {
+                Spacer(
+                    modifier = Modifier.height(
+                        windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
+                    )
+                )
+            }
+        }
+    }
+}

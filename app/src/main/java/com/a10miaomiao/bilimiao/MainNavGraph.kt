@@ -20,7 +20,6 @@ import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
 import com.a10miaomiao.bilimiao.page.setting.*
-import com.a10miaomiao.bilimiao.template.SettingFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.user.*
 import com.a10miaomiao.bilimiao.page.user.archive.UserArchiveListFragment
@@ -101,12 +100,7 @@ object MainNavGraph {
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 
             addFragment(AboutFragment::class, AboutFragment.Companion)
-            addFragment(DanmakuSettingFragment::class, DanmakuSettingFragment.Companion)
-            addFragment(HomeSettingFragment::class, HomeSettingFragment.Companion)
-            addFragment(SettingFragment::class, SettingFragment.Companion)
             addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
-            addFragment(VideoSettingFragment::class, VideoSettingFragment.Companion)
-            addFragment(FlagsSeetingFragment::class, FlagsSeetingFragment.Companion)
         }
     }
 

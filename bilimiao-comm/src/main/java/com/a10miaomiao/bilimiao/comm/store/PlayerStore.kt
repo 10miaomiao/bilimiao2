@@ -48,6 +48,10 @@ class PlayerStore(override val di: DI) :
         var playProgress: Long = 0,
     )
 
+    val autoStopDurationFlow = MutableStateFlow(0)
+
+    val autoStopDuration get() = autoStopDurationFlow.value
+
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
 
@@ -106,6 +110,39 @@ class PlayerStore(override val di: DI) :
             this.epid = ""
             this.playProgress = 0
         }
+    }
+
+    fun nextVideo(
+        isRandom: Boolean,
+        isLoop: Boolean,
+    ): PlayListItemInfo? {
+        val playList = playListStore.state
+        if (!playList.isEmpty()) {
+            val currentPosition = getPlayListCurrentPosition()
+            val listSize = playList.items.size
+            if (isRandom && listSize > 1) {
+                var randomPosition = (0 until listSize).random()
+                while (randomPosition == currentPosition) {
+                    randomPosition = (0 until listSize).random()
+                }
+                val nextVideo = playList.items[randomPosition]
+                return nextVideo
+            }
+            if (currentPosition != -1
+                && currentPosition < listSize - 1
+            ) {
+                val nextVideo = playList.items[currentPosition + 1]
+                return nextVideo
+            } else if (isLoop) {
+                val nextVideo = playList.items[0]
+                return nextVideo
+            }
+        }
+        return null
+    }
+
+    fun setAutoStopDuration(duration: Int) {
+        autoStopDurationFlow.value = duration
     }
 }
 
