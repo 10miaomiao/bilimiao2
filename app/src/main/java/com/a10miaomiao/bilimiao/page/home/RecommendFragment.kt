@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
@@ -13,9 +14,11 @@ import cn.a10miaomiao.miao.binding.Bind
 import cn.a10miaomiao.miao.binding.MiaoBinding
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.miaoEffect
+import cn.a10miaomiao.miao.binding.miaoMemo
 import cn.a10miaomiao.miao.binding.miaoRef
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.UgcSectionInfo
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
@@ -121,12 +124,22 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
                 +recyclerviewAtViewPager2 {
                     backgroundColor = config.windowBackgroundColor
                     miaoEffect(viewModel.listStyle) {
-                        mLayoutManager = if (viewModel.listStyle == 0) {
-                            GridAutofitLayoutManager(requireContext(), dip(300))
-                        } else {
-                            GridAutofitLayoutManager(requireContext(), dip(180))
+                        val columnWidth = if (it == 0) dip(300) else dip(180)
+                        mLayoutManager = GridAutofitLayoutManager(
+                            requireContext(),
+                            columnWidth
+                        ).apply {
+                            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                                override fun getSpanSize(position: Int): Int {
+                                    if (position >= viewModel.list.data.size) {
+                                        return spanCount
+                                    }
+                                    return 1
+                                }
+                            }
                         }
                         layoutManager = mLayoutManager
+                        recycledViewPool.clear()
                     }
                     val mAdapter =_miaoAdapter(
                         items = viewModel.list.data,
