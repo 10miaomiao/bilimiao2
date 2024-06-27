@@ -45,9 +45,13 @@ class RecommendViewModel(
 
     init {
         viewModelScope.launch {
-            SettingPreferences.getData(context) {
-                it[HomeRecommendListStyle] ?: 0
-                loadData(0)
+            loadData(1)
+            SettingPreferences.run {
+                context.dataStore.data.map {
+                    it[HomeRecommendListStyle] ?: 0
+                }
+            }.collect {
+                listStyle = it
             }
         }
     }
