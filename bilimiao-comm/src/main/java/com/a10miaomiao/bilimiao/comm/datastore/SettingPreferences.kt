@@ -181,4 +181,14 @@ object SettingPreferences {
         // 底部最大显示行数
         val fbMaxLine = intPreferencesKey("${name}_danmaku_fb_max_line")
     }
+
+    /**
+     * Flag
+     */
+    // 副屏显示
+    val FlagSubContentShow = booleanPreferencesKey("flag_sub_content_show")
+    // 主副屏分割比
+    val FlagContentSplit = intPreferencesKey("flag_content_split")
+    // 动画时长
+    val FlagContentAnimationDuration = intPreferencesKey("flag_content_animation_duration")
 }

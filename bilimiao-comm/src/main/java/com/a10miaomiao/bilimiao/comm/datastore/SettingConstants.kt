@@ -3,8 +3,6 @@ package com.a10miaomiao.bilimiao.comm.datastore
 object SettingConstants {
 
     const val FLAGS_SUB_CONTENT_SHOW = "flags_sub_content_show"
-    const val FLAGS_CONTENT_DEFAULT_SPLIT = "flags_content_default_split"
-    const val FLAGS_CONTENT_ANIMATION_DURATION = "flags_content_animation_duration"
 
     const val PLAYER_DECODER_DEFAULT = "default"
     const val PLAYER_DECODER_AV1 = "AV1"
