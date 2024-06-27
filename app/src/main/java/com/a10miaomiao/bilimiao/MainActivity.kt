@@ -22,12 +22,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -50,6 +53,7 @@ import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -140,6 +144,7 @@ class MainActivity
 
         initNavController()
         initAppBar()
+        initSettingPreferences()
 
 //        ui.mContainerView.addDrawerListener(onDrawer)
 //        lifecycleScope.launch(Dispatchers.IO){
@@ -257,6 +262,27 @@ class MainActivity
         }
         ui.root.subContent?.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) changeFocus(false)
+        }
+    }
+
+    private fun initSettingPreferences() = lifecycleScope.launch {
+        SettingPreferences.run {
+            val rootView = ui.root
+            dataStore.data.collect {
+                val playerSmallShowArea = it[PlayerSmallShowArea] ?: 480
+                val playerHoldShowArea = it[PlayerSmallShowArea] ?: 130
+                val contentDefaultSplit = (it[FlagContentSplit] ?: 35) / 100f
+                if (playerSmallShowArea != rootView.playerSmallShowArea
+                    || playerHoldShowArea != rootView.playerHoldShowArea
+                    || contentDefaultSplit != rootView.contentDefaultSplit) {
+                    rootView.playerSmallShowArea = playerSmallShowArea
+                    rootView.playerHoldShowArea = playerHoldShowArea
+                    rootView.contentDefaultSplit = contentDefaultSplit
+                    rootView.updateLayout()
+                }
+                rootView.fullScreenDraggable = it[PlayerSmallDraggable] ?: false
+                rootView.contentAnimationDuration = it[FlagContentAnimationDuration] ?: 0
+            }
         }
     }
 

@@ -6,19 +6,10 @@ object Bind {
 
 typealias ViewBindingFn<T, V> = V.(T) -> Unit
 
-inline fun <T, V> miaoMemo(value: V, noinline initialMemo: (V) -> T): T {
-    return Bind.binding!!.let {
-//        it.persist()
-        it.next(value) {
-            initialMemo(value)
-        } ?: it.cur().target as T
-    }
-}
-
 inline fun <T> miaoRef(initialTarget: T): MiaoBinding.RefData<T> {
     return Bind.binding!!.let {
         it.persist()
-        it.next(null, MiaoBinding.RefData(initialTarget))
+        it.next(Unit, MiaoBinding.RefData(initialTarget))
         it.cur().target as MiaoBinding.RefData<T>
     }
 }
@@ -39,4 +30,12 @@ inline fun <T, V> V.miaoEffect(value: T, viewBinding: ViewBindingFn<T, V>, viewU
             viewUpdate(it.target as V, value)
         }
     }
+}
+
+inline fun <T, V> miaoMemo(value: V, initialMemo: (V) -> T): T {
+    val ref = miaoRef<T?>(null)
+    ref.miaoEffect(value) {
+        ref.value = initialMemo(value)
+    }
+    return ref.value as T
 }

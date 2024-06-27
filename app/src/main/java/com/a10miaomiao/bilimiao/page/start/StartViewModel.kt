@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import com.a10miaomiao.bilimiao.R
@@ -81,8 +82,9 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "设置",
-            pageUrl = "bilimiao://setting",
+            pageUrl = SettingPage().url(),
             iconRes = R.drawable.ic_nav_setting,
+            isComposePage = true,
         ),
         StartNavInfo(
             title = "歌词",

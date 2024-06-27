@@ -15,19 +15,18 @@ import androidx.compose.ui.platform.LocalContext
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
 import com.kongzue.dialogx.dialogs.PopTip
 import me.zhanghai.compose.preference.Preference
-import me.zhanghai.compose.preference.PreferenceCategory
 
-fun LazyListScope.preferenceGlide(
+inline fun LazyListScope.glidePreference(
     key: String,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
-    item(key = key, contentType = "PreferenceGlide") {
-        PreferenceGlide(modifier = modifier)
+    item(key = key, contentType = "GlidePreference") {
+        GlidePreference(modifier = modifier)
     }
 }
 
 @Composable
-fun PreferenceGlide(
+fun GlidePreference(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current

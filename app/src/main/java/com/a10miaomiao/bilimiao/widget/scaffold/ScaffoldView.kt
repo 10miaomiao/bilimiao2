@@ -8,10 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.setting.FlagsSeetingFragment
-import com.a10miaomiao.bilimiao.page.setting.VideoSettingFragment
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
@@ -37,8 +36,8 @@ class ScaffoldView @JvmOverloads constructor(
     /**
      * 横盘时小窗大小
      */
-    var playerSmallShowArea: Int = 400
-    var playerHoldShowArea: Int = 400
+    var playerSmallShowArea: Int = 480
+    var playerHoldShowArea: Int = 130
 
     /**
      * 播放器比例
@@ -180,44 +179,6 @@ class ScaffoldView @JvmOverloads constructor(
 
     var maskView: View? = null
     var maskBehavior: MaskBehavior? = null
-
-    init {
-        updatePlayerSmallShowArea()
-        updatePlayerHoldShowArea()
-        updateContentDefaultSplit()
-        updateFullScreenDraggable()
-        updateContentAnimationDuration()
-    }
-
-    fun updatePlayerSmallShowArea() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        playerSmallShowArea = prefs.getInt(VideoSettingFragment.PLAYER_SMALL_SHOW_AREA, 480)
-        updateLayout()
-    }
-
-    fun updatePlayerHoldShowArea() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        playerHoldShowArea = prefs.getInt(VideoSettingFragment.PLAYER_HOLD_SHOW_AREA, 130)
-        updateLayout()
-    }
-
-    fun updateContentDefaultSplit() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        contentDefaultSplit =
-            prefs.getInt(FlagsSeetingFragment.FLAGS_CONTENT_DEFAULT_SPLIT, 35) / 100f
-        updateLayout()
-    }
-
-    fun updateFullScreenDraggable() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        fullScreenDraggable = prefs.getBoolean(VideoSettingFragment.FULL_SCREEN_DRAGGABLE, false)
-    }
-
-    fun updateContentAnimationDuration() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        contentAnimationDuration =
-            prefs.getInt(FlagsSeetingFragment.FLAGS_CONTENT_ANIMATION_DURATION, 0)
-    }
 
     fun updateLayout(contentAnimation: Boolean = true) {
         playerBehavior?.updateLayout()

@@ -10,8 +10,6 @@ import master.flame.danmaku.danmaku.model.BaseDanmaku
 interface BasePlayerDelegate: BaseDelegate {
     fun openPlayer(source: BasePlayerSource)
     fun closePlayer()
-    fun updateDanmukuSetting()
-    fun updateVideoSetting()
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?)
     fun isPlaying(): Boolean
     fun isPause(): Boolean

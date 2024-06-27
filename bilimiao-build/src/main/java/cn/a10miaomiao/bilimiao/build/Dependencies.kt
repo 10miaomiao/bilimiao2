@@ -12,6 +12,7 @@ object Versions {
     const val lifecycle = "2.5.1"
     const val navigation = "2.7.7"
     const val compose = "1.7.0-alpha08"
+    const val datastore = "1.1.1"
     const val media = "1.6.0"
     const val media3 = "1.3.1"
 
@@ -40,6 +41,7 @@ object Libraries {
     const val work = "androidx.work:work-runtime-ktx:2.7.1"
     const val navigationUi = "androidx.navigation:navigation-ui-ktx:${Versions.navigation}"
     const val navigationFragment = "androidx.navigation:navigation-fragment-ktx:${Versions.navigation}"
+    const val datastore = "androidx.datastore:datastore-preferences:${Versions.datastore}"
     const val media = "androidx.media:media:${Versions.media}"
     const val media3 = "androidx.media3:media3-common:${Versions.media3}"
     const val media3Ui = "androidx.media3:media3-ui:${Versions.media3}"
@@ -82,7 +84,6 @@ object Libraries {
     const val flexbox = "com.google.android.flexbox:flexbox:3.0.0"
     const val foregroundCompat = "me.zhanghai.android.foregroundcompat:library:1.0.2"
     const val drawer = "com.drakeet.drawer:drawer:1.0.3"
-    const val modernAndroidPreferences = "de.maxr1998:modernandroidpreferences:2.3.2"
     const val dialogX = "com.github.kongzue:DialogX:0.0.50.beta8"
     const val dialogXMaterialYou = "com.github.kongzue.DialogX:DialogXMaterialYou:0.0.50.beta8"
     const val zxingLite = "com.github.jenly1314:zxing-lite:2.1.0"
