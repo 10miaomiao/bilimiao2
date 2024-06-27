@@ -317,19 +317,14 @@ private fun VideoSettingPageContent(
             )
             // PlayerAutoStopDuration
             item(key = "auto_stop_duration", contentType = "SliderPreference") {
-                val state = remember {
-                    mutableIntStateOf(playerStore.autoStopDuration)
-                }
-                val value = state.value
+                val state = playerStore.autoStopDurationFlow.collectAsState()
                 val sliderState = remember {
-                    mutableFloatStateOf(value.toFloat())
+                    mutableFloatStateOf(state.value.toFloat())
                 }
                 SliderPreference(
-                    value = value.toFloat(),
+                    value = state.value.toFloat(),
                     onValueChange = {
-                        val v = it.toInt()
-                        state.value = v
-                        playerStore.setAutoStopDuration(v)
+                        playerStore.setAutoStopDuration(it.toInt())
                     },
                     sliderValue = sliderState.value,
                     onSliderValueChange = {
@@ -344,6 +339,7 @@ private fun VideoSettingPageContent(
                     },
                     valueRange = 0f..3600f,
                     valueText = {
+                        val value = sliderState.value.toInt()
                         if (value == 0) {
                             Text(text = "关闭")
                         } else {
@@ -384,7 +380,7 @@ private fun VideoSettingPageContent(
             sliderIntPreference(
                 key = SettingPreferences.PlayerSmallShowArea.name,
                 title = {
-                    Text(text = "小屏时整个屏幕可拖拽")
+                    Text(text = "小屏时播放面积")
                 },
                 valueRange = 150..600,
                 defaultValue = 480,
@@ -432,7 +428,7 @@ private fun VideoSettingPageContent(
                 summary = {
                     Text("此AI字幕是指UP主手动生成的AI字幕，并非每个视频都有")
                 },
-                defaultValue = true,
+                defaultValue = false,
             )
 
             item("bottom") {

@@ -86,15 +86,7 @@ fun ListStylePreference(
     Preference(
         modifier = modifier,
         title = {
-            Column {
-                Text("列表样式")
-                if (initialValue != value) {
-                    Text(
-                        "修改后重启APP生效",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
+            Text("列表样式")
         },
         summary = {
             Row(

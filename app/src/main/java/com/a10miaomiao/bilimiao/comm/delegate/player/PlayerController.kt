@@ -66,6 +66,8 @@ class PlayerController(
     private val danmakuContext = DanmakuContext.create()
 
     private var onlyFull = false // 仅全屏播放
+    private var showSubtitle = false // 默认显示字幕
+    private var showAiSubtitle = true // 默认显示AI字幕
 
     private var preparedRunQueue = mutableListOf<Pair<String, Runnable>>()
     private fun currentDanmakuMode(): SettingPreferences.Danmaku {
@@ -173,7 +175,7 @@ class PlayerController(
 
         scope.launch {
             SettingPreferences.getData(activity) {
-                initVideoPlayerSetting(it)
+                initVideoSetting(it)
                 initDanmakuContext(it)
             }
         }
@@ -192,7 +194,7 @@ class PlayerController(
 
         scope.launch {
             SettingPreferences.getData(activity) {
-                initVideoPlayerSetting(it)
+                initVideoSetting(it)
                 initDanmakuContext(it)
             }
         }
@@ -208,7 +210,7 @@ class PlayerController(
         }
     }
 
-    suspend fun initPlayerSetting() {
+    private suspend fun initPlayerSetting() {
         SettingPreferences.getData(activity) {
             GSYVideoType.setShowType(
                 it[PlayerScreenType] ?: GSYVideoType.SCREEN_TYPE_DEFAULT
@@ -224,7 +226,7 @@ class PlayerController(
         }
         SettingPreferences.run {
             activity.dataStore.data.collect {
-                initVideoPlayerSetting(it)
+                initVideoSetting(it)
                 initDanmakuContext(it)
             }
         }
@@ -240,8 +242,8 @@ class PlayerController(
                 SettingPreferences.DanmakuDefault
             }
         }
-        val danmakuShow = preferences[SettingPreferences.DanmakuEnable] == true &&
-                preferences[danmakuMode.show] == true
+        val danmakuShow = (preferences[SettingPreferences.DanmakuEnable] ?: true) &&
+                (preferences[danmakuMode.show] ?: true)
         views.videoPlayer.isShowDanmaku = danmakuShow
 
         // 滚动弹幕显示
@@ -284,7 +286,7 @@ class PlayerController(
             fbDanmakuVisibility = danmakuFBShow
             r2LDanmakuVisibility = danmakuR2LShow
             specialDanmakuVisibility = danmakuSpecialShow
-            setScrollSpeedFactor(danmakuSpeed)
+            setScrollSpeedFactor(1 / danmakuSpeed)
             setScaleTextSize(scaleTextSize)
             setMaximumLines(maxLinesPair)
             setDanmakuTransparency(danmakuOpacity)
@@ -299,18 +301,10 @@ class PlayerController(
             }
             if (isEnable) {
                 val show = !views.videoPlayer.isShowDanmaku
-                if (show) {
-                    views.videoPlayer.isShowDanmaku = false
-                    SettingPreferences.edit(activity) {
-                        it[DanmakuDefault.show] = false
-                        it[danmakuMode.show] = false
-                    }
-                } else {
-                    views.videoPlayer.isShowDanmaku = true
-                    SettingPreferences.edit(activity) {
-                        it[DanmakuDefault.show] = true
-                        it[danmakuMode.show] = true
-                    }
+                views.videoPlayer.isShowDanmaku = show
+                SettingPreferences.edit(activity) {
+                    it[DanmakuDefault.show] = show
+                    it[danmakuMode.show] = show
                 }
             } else {
                 PopTip.show("弹幕功能已关闭，请手动打开", "打开")
@@ -330,7 +324,7 @@ class PlayerController(
         }
     }
 
-    fun initVideoPlayerSetting(preferences: Preferences) {
+    fun initVideoSetting(preferences: Preferences) {
         val show = SettingPreferences.run {
             preferences[PlayerBottomProgressBarShow] ?: 0
         }
@@ -346,6 +340,8 @@ class PlayerController(
         views.videoPlayer.enabledAudioFocus = SettingPreferences.run {
             preferences[PlayerAudioFocus] ?: true
         }
+        showSubtitle = preferences[SettingPreferences.PlayerSubtitleShow] ?: true
+        showAiSubtitle = preferences[SettingPreferences.PlayerAiSubtitleShow] ?: false
     }
 
     /**
@@ -584,6 +580,18 @@ class PlayerController(
             }
         }
         return true
+    }
+
+    /**
+     * 获取默认字幕
+     */
+    fun getDefaultSubtitle(
+        list: List<DanmakuVideoPlayer.SubtitleSourceInfo>
+    ): DanmakuVideoPlayer.SubtitleSourceInfo? {
+        if (showSubtitle) {
+            return list.find { showAiSubtitle || it.ai_status == 0 }
+        }
+        return null
     }
 
     /**

@@ -48,9 +48,9 @@ class PlayerStore(override val di: DI) :
         var playProgress: Long = 0,
     )
 
-    private val autoStopDurationFlow = MutableStateFlow(0)
+    val autoStopDurationFlow = MutableStateFlow(0)
 
-    val autoStopDuration = autoStopDurationFlow.value
+    val autoStopDuration get() = autoStopDurationFlow.value
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()

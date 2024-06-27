@@ -186,7 +186,7 @@ internal fun DanmakuDisplaySettingContent(
                 defaultValue = 1f,
                 title = { Text(text = "字体大小") },
                 valueRange = 0.1f..4f,
-                valueSteps = 23,
+                valueSteps = 24,
                 valueText = {
                     Text(text = "%.1f倍".format(it))
                 }

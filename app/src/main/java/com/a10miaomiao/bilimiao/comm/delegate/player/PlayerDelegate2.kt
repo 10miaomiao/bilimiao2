@@ -170,7 +170,7 @@ class PlayerDelegate2(
         }
         controller.initController()
         views.videoPlayer.subtitleLoader = this::loadSubtitleData
-        views.videoPlayer.subtitleSourceSelector = this::selectSourceSubtitle
+        views.videoPlayer.subtitleSourceSelector = controller::getDefaultSubtitle
         //音频焦点冲突时是否释放
         views.videoPlayer.isReleaseWhenLossAudio = true
 
@@ -521,19 +521,6 @@ class PlayerDelegate2(
     }
 
     /**
-     * 字幕源选择
-     */
-    private fun selectSourceSubtitle(list: List<DanmakuVideoPlayer.SubtitleSourceInfo>): DanmakuVideoPlayer.SubtitleSourceInfo? {
-//        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-//        val showSubtitle = prefs.getBoolean(VideoSettingFragment.PLAYER_SUBTITLE_SHOW, true)
-//        val showAiSubtitle = prefs.getBoolean(VideoSettingFragment.PLAYER_AI_SUBTITLE_SHOW, false)
-//        if (showSubtitle) {
-//            return list.find { showAiSubtitle || it.ai_status == 0 }
-//        }
-        return null
-    }
-
-    /**
      * 记录播放位置
      */
     fun reloadPlayer() {
@@ -649,7 +636,7 @@ class PlayerDelegate2(
             }
             playerCoroutineScope.launch {
                 SettingPreferences.getData(activity) {
-                    controller.initVideoPlayerSetting(it)
+                    controller.initVideoSetting(it)
                     controller.initDanmakuContext(it)
                 }
             }

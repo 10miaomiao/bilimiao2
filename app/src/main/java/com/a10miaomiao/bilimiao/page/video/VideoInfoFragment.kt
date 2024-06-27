@@ -325,17 +325,18 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-        lifecycleScope.launch {
-            val openMode = SettingPreferences.mapData(requireActivity()) {
-                it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
-            }
-            if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_CLOSE != 0
-                && playerStore.state.aid == viewModel.id
-            ) {
-                basePlayerDelegate.closePlayer()
+        if (playerStore.state.aid == viewModel.id) {
+            requireActivity().lifecycleScope.launch {
+                val openMode = SettingPreferences.mapData(requireActivity()) {
+                    it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
+                }
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_CLOSE != 0) {
+                    // 自动关闭
+                    basePlayerDelegate.closePlayer()
+                }
             }
         }
+        super.onDestroy()
     }
 
     fun confirmCoin(num: Int) {
