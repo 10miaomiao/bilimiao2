@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable
 
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
@@ -9,7 +10,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Velocity
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 
 internal class ChainScrollableLayoutNestedScrollConnection(
@@ -61,29 +64,8 @@ fun ChainScrollableLayout(
         ChainScrollableLayoutNestedScrollConnection(state)
     }
     Box(
-        modifier
-            .nestedScroll(nestedScrollState),
+        modifier.nestedScroll(nestedScrollState),
     ) {
-//        Box(
-//            modifier = Modifier.offset {
-//                IntOffset(
-//                    0,
-//                    state.getOffsetYValue().roundToInt()
-//                )
-//            }
-//        ) {
-//            chainContent(state)
-//        }
-//        Box(
-//            modifier = Modifier.offset {
-//                IntOffset(
-//                    0,
-//                    (maxPx + state.getOffsetYValue()).roundToInt()
-//                )
-//            }
-//        ) {
-//            content(state)
-//        }
         content(state)
     }
 }

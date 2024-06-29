@@ -35,7 +35,9 @@ fun LazyListScope.multiSelectIntPreference(
         MultiSelectListPreference(
             value = intSet,
             onValueChange = {
-                state.value = it.reduce { acc, i -> acc or i }
+                state.value = it.fold(0) { acc, i ->
+                    acc or i
+                }
             },
             values = values,
             title = { title(state.value) },
