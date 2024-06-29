@@ -17,6 +17,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.AboutPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.FlagsSettingPage
@@ -77,6 +78,7 @@ class PageRouteBuilder (
         +AddProxyServerPage()
         +EditProxyServerPage()
         +SelectProxyServerPage()
+        +AboutPage()
 
         // time
         +TimeSettingPage()

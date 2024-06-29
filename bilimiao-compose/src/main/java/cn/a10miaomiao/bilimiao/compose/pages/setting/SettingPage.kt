@@ -33,6 +33,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.gson.Gson
@@ -100,15 +101,25 @@ private class SettingPageViewModel(
     }
 
     fun preferenceClick(item: MiaoSettingInfo) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        val activity = fragment.requireActivity()
-        try {
-            intent.data = Uri.parse(item.url)
-            activity.startActivity(intent)
-        } catch (e: Exception) {
-            if (item.backupUrl != null) {
-                intent.data = Uri.parse(item.backupUrl)
+        val url = item.url
+        val urlRegex = """^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$""".toRegex()
+        if (urlRegex.matches(url)) {
+            BiliUrlMatcher.toUrlLink(
+                fragment.requireActivity(),
+                url,
+            )
+            return
+        } else {
+            val intent = Intent(Intent.ACTION_VIEW)
+            val activity = fragment.requireActivity()
+            try {
+                intent.data = Uri.parse(item.url)
                 activity.startActivity(intent)
+            } catch (e: Exception) {
+                if (item.backupUrl != null) {
+                    intent.data = Uri.parse(item.backupUrl)
+                    activity.startActivity(intent)
+                }
             }
         }
     }
@@ -151,6 +162,11 @@ private class SettingPageViewModel(
     fun toFlagsSettingPage() {
         val nav = fragment.findComposeNavController()
         nav.navigate(FlagsSettingPage())
+    }
+
+    fun toAboutPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(AboutPage())
     }
 }
 
@@ -309,9 +325,7 @@ private fun SettingPageContent(
                     }
                     Text(versionText)
                 },
-                onClick = {
-
-                }
+                onClick = viewModel::toAboutPage
             )
             moreSettingList.forEach {
                 if (it.type == "pref") {
