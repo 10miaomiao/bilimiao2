@@ -443,10 +443,11 @@ internal fun BangumiDetailPageContent(
         chainScrollableLayoutState = chainScrollableLayoutState,
         leftMaxWidth = 600.dp,
         leftMaxHeight = 340.dp,
-        leftContent = {
+        leftContent = { _, innerPadding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(innerPadding)
                     .padding(5.dp),
             ) {
                 Surface(
@@ -509,21 +510,12 @@ internal fun BangumiDetailPageContent(
                 }
             }
         }
-    ) {
+    ) {_, innerPadding ->
         LazyColumn(
             state = episodesListState,
             modifier = Modifier
                 .fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 5.dp,
-                end = 5.dp,
-                top = if (it == Orientation.Vertical) {
-                    5.dp
-                } else {
-                    windowInsets.topDp.dp
-                },
-                bottom = windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
-            ),
+            contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item("evaluate") {
