@@ -99,7 +99,6 @@ object MainNavGraph {
 
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 
-            addFragment(AboutFragment::class, AboutFragment.Companion)
             addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
         }
     }
