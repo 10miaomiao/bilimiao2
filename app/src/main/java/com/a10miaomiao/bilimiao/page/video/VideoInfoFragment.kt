@@ -46,6 +46,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcEpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
@@ -243,7 +244,9 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 val pm = VideoMorePopupMenu(
                     activity = requireActivity(),
                     anchor = view,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    playerStore = viewModel.playerStore,
+                    playListStore = viewModel.playListStore,
                 )
                 pm.show()
             }
@@ -350,22 +353,29 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     private fun playVideo(cid: String, title: String) {
         val info = viewModel.info
         if (info != null) {
-            // 设置播放列表
-            if(playListStore.state.inListForAid(info.aid)) {
-                miaoLogger() debug "inListForAid"
-                //视频已在列表中，不设置新的列表
-            } else {
-                viewModel.ugcSeason?.let {
-                    val index = if (it.sections.size > 1) {
-                        it.sections.indexOfFirst { section ->
+            // 视频不在列表中，则不设置新的播放列表
+            if(!playListStore.state.inListForAid(info.aid)) {
+                val ugcSeason = viewModel.ugcSeason
+                if (ugcSeason == null) {
+                    // 将单个视频加入播放列表
+                    val playListItem = playListStore.run {
+                        info.toPlayListItem()
+                    }
+                    playListStore.setPlayList(
+                        name = info.title,
+                        from = playListItem.from,
+                        items = listOf(
+                            playListItem,
+                        )
+                    )
+                } else {
+                    // 将合集加入播放列表
+                    val index = if (ugcSeason.sections.size > 1) {
+                        ugcSeason.sections.indexOfFirst { section ->
                             section.episodes.indexOfFirst { it.aid == info.aid } != -1
                         }
                     } else { 0 }
-                    miaoLogger() debug "index:$index"
-                    if (index != -1) {
-                        miaoLogger() debug "setPlayList"
-                        playListStore.setPlayList(it, index)
-                    }
+                    playListStore.setPlayList(ugcSeason, index)
                 }
             }
             // 播放视频

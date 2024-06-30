@@ -6,6 +6,11 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 sealed class PlayListFrom : Parcelable {
     @Parcelize
+    class Video(
+        val aid: String
+    ): PlayListFrom()
+
+    @Parcelize
     class Favorite(
         val mediaId: String
     ): PlayListFrom()

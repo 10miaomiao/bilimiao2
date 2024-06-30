@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -84,6 +85,27 @@ class PlayListStore(override val di: DI) :
             this.from = from
             this.items = items
             this.loading = false
+        }
+    }
+
+    fun addItem(
+        item: PlayListItemInfo,
+        index: Int = -1,
+    ) {
+        if (state.items.isEmpty()) {
+            return
+        }
+        val items = state.items.filter {
+            // 去重
+            it.cid != item.cid
+        }.toMutableList()
+        if (index == -1) {
+            items.add(item)
+        } else {
+            items.add(index, item)
+        }
+        this.setState {
+            this.items = items
         }
     }
 
@@ -269,5 +291,21 @@ class PlayListStore(override val di: DI) :
                 PopTip.show(e.toString())
             }
         }
+
+    fun VideoInfo.toPlayListItem(): PlayListItemInfo {
+        val from = PlayListFrom.Video(
+            aid = aid,
+        )
+        return PlayListItemInfo(
+            aid = aid,
+            cid = pages[0].cid,
+            title = title,
+            cover = pic,
+            duration = duration,
+            ownerId = owner.mid,
+            ownerName = owner.name,
+            from = from,
+        )
+    }
 }
 
