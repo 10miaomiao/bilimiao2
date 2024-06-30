@@ -45,6 +45,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.lib.KrcText
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricOffsetPopupMenu
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricSourcePopupMenu
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
@@ -55,7 +56,12 @@ import com.google.gson.Gson
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -64,6 +70,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
+import kotlin.coroutines.coroutineContext
 
 class LyricPage :ComposePage(){
     override val route: String
@@ -86,6 +93,8 @@ internal class LyricPageViewModel(
     }
 
     private val activity by instance<Activity>()
+    private val playerDelegate by instance<BasePlayerDelegate>()
+
     var loadingSource = MutableStateFlow(false)
     var loadingLyric = MutableStateFlow(false)
 
@@ -102,6 +111,14 @@ internal class LyricPageViewModel(
 
     private val sourceMutex =Mutex()
     private val lyricMutex =Mutex()
+
+    val playProgress = flow<Long> {
+        while (coroutineContext.isActive) {
+            emit(playerDelegate.currentPosition())
+            delay(200)
+        }
+    }
+
 
     //加载过程中，一些提示信息放在歌词位置第一行
     fun setMessage(message:String){
@@ -440,11 +457,12 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
     val lyric = viewModel.lyric.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
     val title = viewModel.lyricTitle.collectAsState().value
-    val focusOn = remember (playerState.playProgress,lyric,offset){
+    val playProgress = viewModel.playProgress.collectAsState(initial = 0).value
+    val focusOn = remember (playProgress,lyric,offset){
         derivedStateOf{
             var focused = -100
             for (item in lyric) {
-                if (item.startTime + offset > playerStore.state.playProgress) {
+                if (item.startTime + offset > playProgress) {
                     focused = lyric.indexOf(item) - 1
                     break
                 }

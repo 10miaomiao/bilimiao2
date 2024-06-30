@@ -45,7 +45,6 @@ class PlayerStore(override val di: DI) :
         var mainTitle: String = "",
         var title: String = "",
         var cover: String = "",
-        var playProgress: Long = 0,
     )
 
     val autoStopDurationFlow = MutableStateFlow(0)

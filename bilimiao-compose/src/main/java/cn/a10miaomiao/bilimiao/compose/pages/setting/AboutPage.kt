@@ -286,7 +286,7 @@ private fun AboutPageContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface),
         innerPadding = windowInsets.toPaddingValues(
-            addBottomDp = windowStore.bottomAppBarHeightDp.dp,
+            addBottom = windowStore.bottomAppBarHeightDp.dp,
         ),
         chainScrollableLayoutState = chainScrollableLayoutState,
         leftMaxWidth = 600.dp,
