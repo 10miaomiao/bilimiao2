@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
+import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -64,11 +65,68 @@ class PlayerStore(override val di: DI) :
             .indexOfCid(state.cid)
     }
 
-    fun setPlayProgress(progress:Long){
-        this.setState {
-            playProgress = progress
+    fun addNextVideo(video: VideoInfo) {
+        val from = PlayListFrom.Video(
+            aid = state.aid,
+        )
+        val current = getPlayListCurrentPosition()
+        if (current == -1) {
+            playListStore.setPlayList(
+                name = state.title,
+                items = listOf(
+
+                ),
+                from = from
+            )
+        } else {
+            playListStore.addItem(
+                PlayListItemInfo(
+                    aid = video.aid,
+                    cid = video.pages[0].cid,
+                    title = video.title,
+                    cover = video.pic,
+                    duration = video.duration,
+                    ownerId = video.owner.mid,
+                    ownerName = video.owner.name,
+                    from = from,
+                ),
+                current + 1,
+            )
         }
+
     }
+
+    fun addLastVideo(video: VideoInfo) {
+        val from = PlayListFrom.Video(
+            aid = state.aid,
+        )
+        val current = getPlayListCurrentPosition()
+        if (current == -1) {
+            playListStore.setPlayList(
+                name = state.title,
+                items = listOf(
+
+                ),
+                from = from
+            )
+        } else {
+            playListStore.addItem(
+                PlayListItemInfo(
+                    aid = video.aid,
+                    cid = video.pages[0].cid,
+                    title = video.title,
+                    cover = video.pic,
+                    duration = video.duration,
+                    ownerId = video.owner.mid,
+                    ownerName = video.owner.name,
+                    from = from,
+                ),
+                playListStore.state.items.size,
+            )
+        }
+
+    }
+
 
     fun setPlayerSource(source: BasePlayerSource) {
         val ids = source.getSourceIds()
@@ -76,7 +134,6 @@ class PlayerStore(override val di: DI) :
             cid = source.id
             title = source.title
             cover = source.coverUrl
-            playProgress = 0
             if(source is VideoPlayerSource) {
                 mainTitle = source.mainTitle
             } else {
@@ -107,7 +164,6 @@ class PlayerStore(override val di: DI) :
             this.mainTitle = ""
             this.sid = ""
             this.epid = ""
-            this.playProgress = 0
         }
     }
 
@@ -142,6 +198,22 @@ class PlayerStore(override val di: DI) :
 
     fun setAutoStopDuration(duration: Int) {
         autoStopDurationFlow.value = duration
+    }
+
+    private fun VideoInfo.toPlayListItem(): PlayListItemInfo {
+        val from = PlayListFrom.Video(
+            aid = aid,
+        )
+        return PlayListItemInfo(
+            aid = aid,
+            cid = pages[0].cid,
+            title = title,
+            cover = pic,
+            duration = duration,
+            ownerId = owner.mid,
+            ownerName = owner.name,
+            from = from,
+        )
     }
 }
 

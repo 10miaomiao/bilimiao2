@@ -500,6 +500,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
                         +textView {
                             _text = "播放列表：${if(playListState.loading) "加载中" else playListState.name}"
                             setTextColor(config.foregroundColor)
+                            maxLines = 2
                         }..lParams(matchParent, wrapContent) {
                             weight = 1f
                         }
