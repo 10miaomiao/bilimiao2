@@ -9,17 +9,17 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 
 @Composable
 fun WindowStore.Insets.toPaddingValues(
-    addLeftDp: Dp = 0.dp,
-    addRightDp: Dp = 0.dp,
-    addTopDp: Dp = 0.dp,
-    addBottomDp: Dp = 0.dp,
+    addLeft: Dp = 0.dp,
+    addRight: Dp = 0.dp,
+    addTop: Dp = 0.dp,
+    addBottom: Dp = 0.dp,
 ): PaddingValues {
-    return remember(this, addLeftDp, addRightDp, addTopDp, addBottomDp) {
+    return remember(this, addLeft, addRight, addTop, addBottom) {
         PaddingValues.Absolute(
-            left = leftDp.dp + addLeftDp,
-            right = rightDp.dp + addRightDp,
-            top = topDp.dp + addTopDp,
-            bottom = bottomDp.dp + addBottomDp,
+            left = leftDp.dp + addLeft,
+            right = rightDp.dp + addRight,
+            top = topDp.dp + addTop,
+            bottom = bottomDp.dp + addBottom,
         )
     }
 }
