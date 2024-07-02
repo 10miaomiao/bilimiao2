@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -121,6 +122,8 @@ object SettingPreferences {
     val PlayerFullMode = intPreferencesKey("player_full_mode")
     // 底部进度条显示控制
     val PlayerBottomProgressBarShow = intPreferencesKey("player_bottom_progress_bar_show")
+    // 倍速菜单值
+    val PlayerSpeedValues = stringSetPreferencesKey("player_speed_values")
     // 占用音频焦点
     val PlayerAudioFocus = booleanPreferencesKey("player_audio_focus")
     // 字幕显示

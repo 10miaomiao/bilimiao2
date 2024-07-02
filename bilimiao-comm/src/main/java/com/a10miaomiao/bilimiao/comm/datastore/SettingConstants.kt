@@ -59,4 +59,7 @@ object SettingConstants {
     // 画中画时显示底部进度条
     const val  PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_PIP = 4
 
+    // 倍速值集合
+    val PLAYER_SPEED_SETS = setOf("0.5", "1.0", "2.0")
+
 }

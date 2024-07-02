@@ -379,13 +379,19 @@ class PlayerController(
     }
 
     fun showSpeedPopupMenu(view: View) {
-        val popup = SpeedPopupMenu(
-            activity = activity,
-            anchor = view,
-            value = delegate.speed
-        )
-        popup.setOnChangedSpeedListener(delegate::changedSpeed)
-        popup.show()
+        scope.launch {
+            val speedValueSets = SettingPreferences.mapData(activity) {
+                it[PlayerSpeedValues] ?: SettingConstants.PLAYER_SPEED_SETS
+            }
+            val popup = SpeedPopupMenu(
+                activity = activity,
+                anchor = view,
+                value = delegate.speed,
+                list = speedValueSets.map { it.toFloat() },
+            )
+            popup.setOnChangedSpeedListener(delegate::changedSpeed)
+            popup.show()
+        }
     }
 
     fun showFullModeMenu(view: View) {
@@ -635,7 +641,8 @@ class PlayerController(
     override fun onAutoCompletion() {
         delegate.historyReport(views.videoPlayer.currentPosition)
         scope.launch {
-            val nextPlayerSourceInfo = delegate.playerSource?.next()
+            val currentPlayerSourceInfo = delegate.playerSource ?: return@launch
+            val nextPlayerSourceInfo = currentPlayerSourceInfo.next()
             val (order, orderRandom) = SettingPreferences.mapData(activity) {
                 val order = it[PlayerOrder] ?: SettingConstants.PLAYER_ORDER_DEFAULT
                 val orderRandom = it[PlayerOrderRandom] ?: false
@@ -647,18 +654,26 @@ class PlayerController(
                 && order and SettingConstants.PLAYER_ORDER_NEXT_P != 0) {
                 // 自动播放下一P
                 delegate.openPlayer(nextPlayerSourceInfo)
+                return@launch
             } else if (nextPlayerSourceInfo is BangumiPlayerSource
                 && order and SettingConstants.PLAYER_ORDER_NEXT_EPISODE != 0) {
                 // 自动播放下一集
                 delegate.openPlayer(nextPlayerSourceInfo)
+                return@launch
             }
-            val nextVideo = playerStore.nextVideo(
-                orderRandom, isLoop
-            )
-            if (nextVideo != null) {
-                delegate.openPlayer(nextVideo.toVideoPlayerSource())
-            } else if (isLoop) {
-                // TODO: 从第一集或第一P开始
+            if (order and SettingConstants.PLAYER_ORDER_NEXT_VIDEO != 0) {
+                // 自动下一个视频
+                val nextVideo = playerStore.nextVideo(
+                    orderRandom, isLoop
+                )
+                if (nextVideo != null) {
+                    delegate.openPlayer(nextVideo.toVideoPlayerSource())
+                    return@launch
+                }
+            }
+            if (isLoop) {
+                // 单个视频循环
+                delegate.openPlayer(currentPlayerSourceInfo)
             } else {
                 delegate.completionBoxController.show()
             }
