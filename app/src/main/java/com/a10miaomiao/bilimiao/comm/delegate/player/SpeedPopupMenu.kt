@@ -9,9 +9,9 @@ class SpeedPopupMenu(
     private val activity: Activity,
     private val anchor: View,
     private val value: Float,
+    private val list: List<Float>,
 ) {
     private val popupMenu = PopupMenu(activity, anchor)
-    private val list: List<Float> = listOf(1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f)
 
     init {
         popupMenu.menu.apply {
