@@ -87,7 +87,7 @@ class BangumiDetailPage : ComposePage() {
 
 }
 
-internal class BangumiDetailPageViewModel(
+private class BangumiDetailPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -321,7 +321,7 @@ internal class BangumiDetailPageViewModel(
 
 
 @Composable
-internal fun BangumiDetailPageContent(
+private fun BangumiDetailPageContent(
     id: String,
     epid: String,
     mediaId: String,

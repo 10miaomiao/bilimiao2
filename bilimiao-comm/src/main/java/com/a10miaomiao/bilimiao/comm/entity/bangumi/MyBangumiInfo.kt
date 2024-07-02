@@ -1,7 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.entity.bangumi
 
+
 data class MyBangumiInfo(
     val badge: String,
+    val badge_info: BangumiBadgeInfo?,
     val badge_type: Int,
     val can_watch: Int,
     val cover: String,

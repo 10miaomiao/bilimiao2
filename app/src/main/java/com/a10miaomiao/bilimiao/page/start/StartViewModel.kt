@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
@@ -58,9 +59,10 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "追番",
-            pageUrl = "bilimiao://user/bangumi",
+            pageUrl = BangumiFollowPage().url(),
             iconRes = R.drawable.ic_nav_bangumi,
             isNeedAuth = true,
+            isComposePage = true,
         ),
         StartNavInfo(
             title = "下载",
