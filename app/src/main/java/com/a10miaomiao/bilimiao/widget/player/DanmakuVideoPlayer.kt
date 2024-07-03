@@ -605,12 +605,21 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     override fun hideAllWidget() {
         super.hideAllWidget()
-        if (mode == PlayerMode.FULL && showBottomProgressBarInFullMode) {
-            setViewShowState(mBottomProgressBar, VISIBLE)
-        } else if ((mode == PlayerMode.SMALL_FLOAT || mode == PlayerMode.SMALL_TOP) && showBottomProgressBarInSmallMode) {
-            setViewShowState(mBottomProgressBar, VISIBLE)
+        if (isPicInPicMode) {
+            if (showBottomProgressBarInPipMode) {
+                setViewShowState(mBottomProgressBar, VISIBLE)
+            } else {
+                setViewShowState(mBottomProgressBar, INVISIBLE)
+            }
         } else {
-            setViewShowState(mBottomProgressBar, INVISIBLE)
+            if (mode == PlayerMode.FULL && showBottomProgressBarInFullMode) {
+                setViewShowState(mBottomProgressBar, VISIBLE)
+            } else if ((mode == PlayerMode.SMALL_FLOAT || mode == PlayerMode.SMALL_TOP)
+                && showBottomProgressBarInSmallMode) {
+                setViewShowState(mBottomProgressBar, VISIBLE)
+            } else {
+                setViewShowState(mBottomProgressBar, INVISIBLE)
+            }
         }
     }
 

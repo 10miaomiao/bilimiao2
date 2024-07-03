@@ -332,7 +332,7 @@ class PlayerController(
             show and SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_SMALL != 0
         )
         views.videoPlayer.showBottomProgressBarInFullMode = (
-            show and SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_SMALL != 0
+            show and SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_FULL != 0
         )
         views.videoPlayer.showBottomProgressBarInPipMode = (
             show and SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_PIP != 0
