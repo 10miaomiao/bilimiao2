@@ -100,27 +100,16 @@ import org.kodein.di.instance
 
 private class UserFavouriteDetailViewModel(
     override val di: DI,
+    private val mediaId: String,
+    private val mediaTitle: String,
+    private val parentViewModel: UserFavouriteViewModel,
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
-    private val parentViewModel: UserFavouriteViewModel by instance()
     private val playerDelegate: BasePlayerDelegate by instance()
     private val playerStore by instance<PlayerStore>()
     private val playListStore by instance<PlayListStore>()
-
-    var mediaId: String = ""
-        set(value) {
-            if (field != value) {
-                field = value
-                mediaInfo.value = null
-                list.finished.value = false
-                list.fail.value = ""
-                list.data.value = listOf()
-                loadData(1)
-            }
-        }
-    var mediaTitle: String = ""
 
     var mediaInfo = MutableStateFlow<MediaListInfo?>(null)
     val isRefreshing = MutableStateFlow(false)
@@ -128,6 +117,9 @@ private class UserFavouriteDetailViewModel(
     val keyword = MutableStateFlow("")
     val isAutoPlay = MutableStateFlow(false)
 
+    init {
+        loadData(1)
+    }
 
     private fun loadData(
         pageNum: Int = list.pageNum
@@ -334,7 +326,12 @@ internal fun UserFavouriteDetailContent(
     hideFirstPane: Boolean,
     onChangeHideFirstPane: (hidden: Boolean) -> Unit,
 ) {
-    val viewModel: UserFavouriteDetailViewModel = diViewModel()
+    val parentViewModel: UserFavouriteViewModel by rememberInstance()
+    val viewModel = diViewModel(
+        key = mediaId + parentViewModel.hashCode(),
+    ) {
+        UserFavouriteDetailViewModel(it, mediaId, mediaTitle, parentViewModel)
+    }
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
@@ -346,11 +343,6 @@ internal fun UserFavouriteDetailContent(
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val isAutoPlay by viewModel.isAutoPlay.collectAsState()
-
-    LaunchedEffect(mediaId) {
-        viewModel.mediaId = mediaId
-        viewModel.mediaTitle = mediaTitle
-    }
 
     val pageConfigId = PageConfig(
         title = "收藏详情",
@@ -449,7 +441,8 @@ internal fun UserFavouriteDetailContent(
             .fillMaxSize()
     ) {
         TitleBar(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .height(48.dp + windowInsets.topDp.dp)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = windowInsets.topDp.dp),

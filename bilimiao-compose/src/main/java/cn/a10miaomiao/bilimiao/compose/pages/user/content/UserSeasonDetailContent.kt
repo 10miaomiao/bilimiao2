@@ -92,27 +92,15 @@ import org.kodein.di.instance
 
 private class UserSeasonDetailViewModel(
     override val di: DI,
+    private val sid: String,
+    private val parentViewModel: UserFavouriteViewModel,
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
     val userStore: UserStore by instance()
-    private val parentViewModel: UserFavouriteViewModel by instance()
     private val playerDelegate: BasePlayerDelegate by instance()
     private val playerStore by instance<PlayerStore>()
     private val playListStore by instance<PlayListStore>()
-
-    var sid: String = ""
-        set(value) {
-            if (field != value) {
-                field = value
-                list.finished.value = false
-                list.fail.value = ""
-                list.data.value = listOf()
-                loadData(1)
-            }
-        }
-
-    var keyword = ""
 
     var seasonInfo = MutableStateFlow<bilibili.app.view.v1.UgcSeason?>(null)
     val isRefreshing = MutableStateFlow(false)
@@ -120,6 +108,10 @@ private class UserSeasonDetailViewModel(
     val sections = MutableStateFlow<List<bilibili.app.view.v1.Section>>(listOf())
     val list = FlowPaginationInfo<bilibili.app.view.v1.Episode>()
     val isAutoPlay = MutableStateFlow(false)
+
+    init {
+        loadData(1)
+    }
 
     private fun loadData(
         pageNum: Int = list.pageNum
@@ -290,7 +282,12 @@ internal fun UserSeasonDetailContent(
     onChangeHideFirstPane: (hidden: Boolean) -> Unit,
     favState: Int,
 ) {
-    val viewModel: UserSeasonDetailViewModel = diViewModel()
+    val parentViewModel: UserFavouriteViewModel by rememberInstance()
+    val viewModel = diViewModel(
+        key = seasonId + parentViewModel.hashCode(),
+    ) {
+        UserSeasonDetailViewModel(it, seasonId, parentViewModel)
+    }
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
@@ -306,9 +303,6 @@ internal fun UserSeasonDetailContent(
     val sections by viewModel.sections.collectAsState()
     val curSection by viewModel.curSection.collectAsState()
 
-    LaunchedEffect(seasonId) {
-        viewModel.sid = seasonId
-    }
 
     val pageConfigId = PageConfig(
         title = "合集详情",

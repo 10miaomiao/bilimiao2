@@ -55,6 +55,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.accompanist.adaptive.HorizontalTwoPaneStrategy
 import com.google.accompanist.adaptive.SplitResult
@@ -77,10 +78,9 @@ class UserFavouritePage : ComposePage() {
 
     @Composable
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val viewModel: UserFavouriteViewModel = diViewModel()
         val mid = navEntry.arguments?.get(id) ?: ""
-        LaunchedEffect(mid) {
-            viewModel.mid = mid
+        val viewModel: UserFavouriteViewModel = diViewModel {
+            UserFavouriteViewModel(it, mid)
         }
         subDI(
             diBuilder = {
