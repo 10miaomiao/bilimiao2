@@ -483,7 +483,7 @@ class PlayerDelegate2(
             withContext(Dispatchers.Main) {
                 errorMessageBoxController.show("无法连接到御坂网络")
             }
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
                 errorMessageBoxController.show(e.message ?: e.toString())

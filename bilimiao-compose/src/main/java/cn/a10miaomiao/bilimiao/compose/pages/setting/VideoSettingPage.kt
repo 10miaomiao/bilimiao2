@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -33,6 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.comm.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.commponents.preference.SliderIntPreference
+import cn.a10miaomiao.bilimiao.compose.commponents.preference.customSetsPreference
 import cn.a10miaomiao.bilimiao.compose.commponents.preference.listStylePreference
 import cn.a10miaomiao.bilimiao.compose.commponents.preference.multiSelectIntPreference
 import cn.a10miaomiao.bilimiao.compose.commponents.preference.sliderIntPreference
@@ -314,6 +317,26 @@ private fun VideoSettingPageContent(
                 defaultValue = 0,
                 values = viewModel.bottomProgressBarShowSelectionList,
                 valueToText = viewModel::bottomProgressBarShowName
+            )
+            customSetsPreference(
+                key = SettingPreferences.PlayerSpeedValues.name,
+                title = {
+                    Text("自定义倍速菜单")
+                },
+                defaultValue = SettingConstants.PLAYER_SPEED_SETS,
+                valueText = {
+                    Text(
+                        text = it + "倍速",
+                        modifier = Modifier.widthIn(min = 48.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                },
+                valueCanEdit = {
+                    it !in SettingConstants.PLAYER_SPEED_SETS
+                },
+                canAdd = {
+                    it.size < 10
+                }
             )
             // PlayerAutoStopDuration
             item(key = "auto_stop_duration", contentType = "SliderPreference") {

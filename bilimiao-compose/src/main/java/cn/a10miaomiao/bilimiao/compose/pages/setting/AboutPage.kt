@@ -244,6 +244,21 @@ private class AboutPageViewModel(
         }
     }
 
+    fun openUpdateUrl() {
+        val version = versionState.value
+        if (version is AppVersionState.HasUpdate) {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(version.url)
+                fragment.requireActivity().startActivity(intent)
+            } catch (e: Exception) {
+                PopTip.show("打开失败:" + version.url)
+            }
+        } else {
+            PopTip.show("没有更新")
+        }
+    }
+
     data class ContributorInfo(
         val email: String,
         val name: String,
@@ -343,7 +358,7 @@ private fun AboutPageContent(
                     }
                     is AppVersionState.HasUpdate -> {
                         TextButton(
-                            onClick = viewModel::checkUpdate,
+                            onClick = viewModel::openUpdateUrl,
                         ) {
                             Text(text = "有新版本：" + versionState.version)
                         }
