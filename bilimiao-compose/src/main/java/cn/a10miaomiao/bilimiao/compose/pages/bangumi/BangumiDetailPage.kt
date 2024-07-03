@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.view.View
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,6 +37,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.DoubleColumnAutofitLayout
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.rememberChainScrollableLayoutState
+import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.commponents.BangumiEpisodeItem
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.popup_menu.BangumiMorePopupMenu
 import com.a10miaomiao.bilimiao.comm.delegate.player.BangumiPlayerSource
@@ -50,6 +54,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.gson.JsonObject
@@ -122,7 +127,7 @@ private class BangumiDetailPageViewModel(
     var sectionLoading = MutableStateFlow(false)
     var sectionList = MutableStateFlow<List<SeasonSectionInfo.SectionInfo>>(emptyList())
     val sectionId = MutableStateFlow("")
-
+    val isRefreshing = MutableStateFlow(false)
 //    val isFollow get() = detailInfo.value?.user_status?.follow == 1
 
     fun loadData() = viewModelScope.launch(Dispatchers.IO) {
@@ -158,9 +163,6 @@ private class BangumiDetailPageViewModel(
             }
         } finally {
             loading.value = false
-//            withContext(Dispatchers.Main) {
-//                myPage.pageConfig.notifyConfigChanged()
-//            }
         }
     }
 
@@ -199,6 +201,7 @@ private class BangumiDetailPageViewModel(
             }
         } finally {
             sectionLoading.value = false
+            isRefreshing.value = false
         }
     }
 
@@ -239,13 +242,12 @@ private class BangumiDetailPageViewModel(
         }
     }
 
-    fun refreshData() {
-//        ui.setState {
-//            list = PaginationInfo()
-//            triggered = true
-//        loadData()
-//        loadEpisodeList()
-//        }
+    fun refresh() {
+        if (seasonId.isBlank()) {
+            isRefreshing.value = true
+            loadData()
+            loadEpisodeList(seasonId)
+        }
     }
 
     fun changeSection(item: SeasonSectionInfo.SectionInfo) {
@@ -254,7 +256,8 @@ private class BangumiDetailPageViewModel(
 
     fun toCommentListPage(item: EpisodeInfo) {
         val id = item.aid
-        val title = Uri.encode(item.title + if (item.long_title.isBlank()) "" else "_" + item.long_title)
+        val title =
+            Uri.encode(item.title + if (item.long_title.isBlank()) "" else "_" + item.long_title)
         val cover = Uri.encode(item.cover)
         val name = Uri.encode(detailInfo.value?.season_title ?: "")
         val uri = Uri.parse("bilimiao://video/$id/comment?title=$title&cover=$cover&name=$name")
@@ -311,11 +314,23 @@ private class BangumiDetailPageViewModel(
                 )
                 pm.show(view)
             }
+
             MenuKeys.follow -> {
                 // 追番
                 followSeason()
             }
         }
+    }
+
+    fun findSectionEpisodeIndex(id: String): Pair<SeasonSectionInfo.SectionInfo?, Int> {
+        val sections = sectionList.value
+        var index: Int = -1
+        return sections.find {
+            index = it.episodes.indexOfFirst { ep ->
+                ep.id == id
+            }
+            index != -1
+        } to index
     }
 }
 
@@ -347,6 +362,7 @@ private fun BangumiDetailPageContent(
         }?.episodes ?: emptyList()
     }
 
+    val scope = rememberCoroutineScope()
     val chainScrollableLayoutState = rememberChainScrollableLayoutState(
         maxScrollPosition = 340.dp,
     )
@@ -437,23 +453,27 @@ private fun BangumiDetailPageContent(
         onMenuItemClick = viewModel::menuItemClick
     )
 
-    DoubleColumnAutofitLayout(
-        modifier = Modifier.fillMaxSize(),
-        innerPadding = windowInsets.toPaddingValues(),
-        chainScrollableLayoutState = chainScrollableLayoutState,
-        leftMaxWidth = 600.dp,
-        leftMaxHeight = 340.dp,
-        leftContent = { _, innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(5.dp),
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.surface
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+    SwipeToRefresh(
+        modifier = Modifier
+            .fillMaxSize(),
+        refreshing = isRefreshing,
+        onRefresh = { viewModel.refresh() },
+    ) {
+        DoubleColumnAutofitLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
+            innerPadding = windowInsets.toPaddingValues(),
+            chainScrollableLayoutState = chainScrollableLayoutState,
+            leftMaxWidth = 600.dp,
+            leftMaxHeight = 340.dp,
+            leftContent = { _, innerPadding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
                 ) {
                     if (detailInfo != null) {
                         Column(
@@ -509,100 +529,166 @@ private fun BangumiDetailPageContent(
                     }
                 }
             }
-        }
-    ) {_, innerPadding ->
-        LazyColumn(
-            state = episodesListState,
-            modifier = Modifier
-                .fillMaxSize(),
-            contentPadding = innerPadding,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item("evaluate") {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Column(
+        ) { _, innerPadding ->
+            LazyColumn(
+                state = episodesListState,
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentPadding = innerPadding,
+            ) {
+                item("evaluate") {
+                    Surface(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp),
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
                     ) {
-                        if (seasons.isNotEmpty()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = "选择系列：",
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                                LazyRow(
-                                    state = seasonsListState,
-                                    modifier = Modifier.weight(1f),
-                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                        ) {
+                            if (seasons.isNotEmpty()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    items(seasons, { it.season_id }) {
-                                        FilterChip(
-                                            selected = it.season_id == seasonId.value,
-                                            onClick = {
-                                                seasonId.value = it.season_id
-                                            },
-                                            label = {
-                                                Text(text = it.season_title)
-                                            }
-                                        )
+                                    Text(
+                                        text = "选择系列：",
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    LazyRow(
+                                        state = seasonsListState,
+                                        modifier = Modifier.weight(1f),
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                    ) {
+                                        items(seasons, { it.season_id }) {
+                                            FilterChip(
+                                                selected = it.season_id == seasonId.value,
+                                                onClick = {
+                                                    seasonId.value = it.season_id
+                                                },
+                                                label = {
+                                                    Text(text = it.season_title)
+                                                }
+                                            )
+                                        }
                                     }
                                 }
+                                Spacer(modifier = Modifier.height(5.dp))
                             }
-                            Spacer(modifier = Modifier.height(5.dp))
-                        }
-                        Text(
-                            text = detailInfo?.evaluate ?: "",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
-                }
-            }
-
-            if (sectionList.size > 1) {
-                item("sectionList") {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        items(sectionList, { it.id }) {
-                            FilterChip(
-                                selected = it.id == sectionId,
-                                onClick = {
-                                    viewModel.changeSection(it)
-                                },
-                                label = {
-                                    Text(
-                                        text = it.title
-                                    )
-                                }
+                            Text(
+                                text = detailInfo?.evaluate ?: "",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                     }
                 }
-            }
 
-            items(episodes, { it.id }) { item ->
-                BangumiEpisodeItem(
-                    item = item,
-                    playerState = playerState,
-                    onClick = {
-                        viewModel.startPlayBangumi(episodes, item)
-                    },
-                    onCommentClick = {
-                        viewModel.toCommentListPage(item)
-                    },
-                    onShareClick = {
-                        viewModel.shareEpisode(item)
+                if (sectionList.size > 1) {
+                    item("sectionList") {
+                        LazyRow(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            items(sectionList, { it.id }) {
+                                FilterChip(
+                                    selected = it.id == sectionId,
+                                    onClick = {
+                                        viewModel.changeSection(it)
+                                    },
+                                    label = {
+                                        Text(
+                                            text = it.title
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     }
-                )
+                }
+                val userProgress = detailInfo?.user_status?.progress
+                items(episodes, { it.id }) { item ->
+                    BangumiEpisodeItem(
+                        modifier = Modifier.padding(
+                            horizontal = 8.dp,
+                            vertical = 4.dp,
+                        ),
+                        item = item,
+                        desc = if (item.id == userProgress?.last_ep_id) {
+                            val time = NumberUtil.converDuration(userProgress.last_time)
+                            "上次看到 $time"
+                        } else null,
+                        playerState = playerState,
+                        onClick = {
+                            viewModel.startPlayBangumi(episodes, item)
+                        },
+                        onCommentClick = {
+                            viewModel.toCommentListPage(item)
+                        },
+                        onShareClick = {
+                            viewModel.shareEpisode(item)
+                        }
+                    )
+                }
+            }
+        }
+
+        detailInfo?.user_status?.progress?.let {
+            if (playerState.sid == detailInfo.season_id) {
+                return@let
+            }
+            val lastEpIndex = it.last_ep_index.ifBlank {
+                episodes.firstOrNull { episode ->
+                    it.last_ep_id == episode.id
+                }?.index ?: return@let
+            }
+            FloatingActionButton(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+                    .padding(
+                        bottom = windowStore.bottomAppBarHeightDp.dp
+                                + windowInsets.bottomDp.dp
+                    ),
+                onClick = {
+                    scope.launch {
+                        chainScrollableLayoutState.scrollToMax()
+                        val (section, index) = viewModel.findSectionEpisodeIndex(
+                            it.last_ep_id
+                        )
+                        if (section != null && index != -1) {
+                            val offset = if (sectionList.size > 1) {
+                                2
+                            } else {
+                                1
+                            }
+                            viewModel.changeSection(section)
+                            episodesListState.scrollToItem(
+                                index = index + offset,
+                                scrollOffset = -windowInsets.top
+                            )
+                        }
+                    }
+                }
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(text = "上次看到")
+                    Text(
+                        text = "${if (NumberUtil.isNumber(lastEpIndex)) {
+                            "第${lastEpIndex}话"
+                        } else {
+                            lastEpIndex
+                        }} ${NumberUtil.converDuration(it.last_time)}"
+                    )
+
+                }
             }
         }
 

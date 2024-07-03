@@ -23,7 +23,9 @@ import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun BangumiEpisodeItem(
+    modifier: Modifier = Modifier,
     item: EpisodeInfo,
+    desc: String? = null,
     playerState: PlayerStore.State,
     onClick: () -> Unit,
     onCommentClick: () -> Unit,
@@ -32,7 +34,7 @@ fun BangumiEpisodeItem(
     var expandedMoreMenu by remember{ mutableStateOf(false) }
     val isPlaying = playerState.type == PlayerStore.BANGUMI && playerState.epid == item.id
     Row(
-        modifier = Modifier
+        modifier = modifier
             .clickable(
                 enabled = !isPlaying,
                 onClick = onClick,
@@ -92,6 +94,11 @@ fun BangumiEpisodeItem(
                         Text(
                             text = "正在播放",
                             color = MaterialTheme.colorScheme.primary
+                        )
+                    } else if (!desc.isNullOrBlank()) {
+                        Text(
+                            text = desc,
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                 }

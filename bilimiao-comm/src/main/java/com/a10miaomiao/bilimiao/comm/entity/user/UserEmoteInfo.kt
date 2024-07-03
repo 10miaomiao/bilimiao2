@@ -6,10 +6,10 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class UserEmoteInfo (
     val id: Int,
-    val package_id: Int,
+//    val package_id: Int,
     val text: String,
     val url: String,
-    val mtime: Long,
-    val type: Int,
-    val attr: Int,
+//    val mtime: Long,
+//    val type: Int,
+//    val attr: Int,
 ): Parcelable

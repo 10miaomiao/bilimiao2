@@ -120,7 +120,7 @@ fun BangumiItemBox(
                     ) {
                         Text(
                             text = "国产动漫",
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = Color.White,
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
@@ -137,6 +137,7 @@ fun BangumiItemBox(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 2,
                     modifier = Modifier.padding(bottom = 5.dp),
                 )
@@ -145,6 +146,7 @@ fun BangumiItemBox(
                 Text(
                     text = statusText,
                     style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                     modifier = Modifier.padding(bottom = 5.dp),
                 )
@@ -153,6 +155,7 @@ fun BangumiItemBox(
                 Text(
                     text = desc,
                     style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
                     maxLines = 1,
                     modifier = Modifier.padding(),
                 )
@@ -175,6 +178,7 @@ fun BangumiItemBox(
                             }
                         ) {
                             Icon(
+                                tint = MaterialTheme.colorScheme.onBackground,
                                 imageVector = Icons.Filled.MoreVert,
                                 contentDescription = null,
                             )

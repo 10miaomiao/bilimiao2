@@ -93,4 +93,8 @@ object NumberUtil {
             else -> deltime.toString() + "秒前"
         }
     }
+
+    fun isNumber(text: String): Boolean {
+        return text.matches(Regex("^[0-9]+$"))
+    }
 }

@@ -29,6 +29,7 @@ import org.kodein.di.instance
 
 internal class UserFavouriteViewModel(
     override val di: DI,
+    val mid: String,
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
@@ -53,14 +54,10 @@ internal class UserFavouriteViewModel(
 
     val version = MutableStateFlow(0)
 
-    var mid = "0"
-        set(value) {
-            if (field != value) {
-                field = value
-                loadData(UserFavouriteFolderType.Created, 1)
-                loadData(UserFavouriteFolderType.Collected, 1)
-            }
-        }
+    init {
+        loadData(UserFavouriteFolderType.Created, 1)
+        loadData(UserFavouriteFolderType.Collected, 1)
+    }
 
     fun getListAndIsRefreshingFlow(
         type: UserFavouriteFolderType,

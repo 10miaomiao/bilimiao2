@@ -50,4 +50,9 @@ class ChainScrollableLayoutState(
             offsetYState.value = value
         }
     }
+
+    suspend fun scrollToMax() {
+        offsetY.snapTo(-maxPx)
+        offsetYState.value = -maxPx
+    }
 }
