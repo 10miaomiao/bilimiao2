@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.comm
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -19,11 +20,10 @@ val defaultNavOptions get() = NavOptions.Builder()
     .setPopExitAnim(R.anim.miao_fragment_close_exit)
     .build()
 
-@OptIn(ExperimentalStdlibApi::class)
 @Composable
 inline fun <reified VM : ViewModel> diViewModel(
     di: DI = localDI(),
-    key: String = di.hashCode().toHexString(),
+    key: String? = null,
 ): VM {
     return diViewModel(di, key) {
         val constructor = VM::class.java.getDeclaredConstructor(
@@ -37,11 +37,14 @@ inline fun <reified VM : ViewModel> diViewModel(
 @Composable
 inline fun <reified VM : ViewModel> diViewModel(
     di: DI = localDI(),
-    key: String = di.hashCode().toHexString(),
+    key: String? = null,
     crossinline initializer: ((di: DI) -> VM),
 ): VM {
     return androidx.lifecycle.viewmodel.compose.viewModel<VM>(
-        key = key,
+        key = remember(key, di) {
+            val diHex = di.hashCode().toHexString()
+            (key ?: VM::class.simpleName) + diHex
+        },
         initializer = {
             initializer(di)
         }
