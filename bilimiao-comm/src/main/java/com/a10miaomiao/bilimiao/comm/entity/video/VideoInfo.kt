@@ -21,6 +21,7 @@ data class VideoInfo(
     val duration: Int,
     val `dynamic`: String,
 //    val elec: Elec,
+    val history: VideoHistoryInfo?,
     val owner: VideoOwnerInfo,
 //    val owner_ext: OwnerExt,
     val pages: List<VideoPageInfo>,

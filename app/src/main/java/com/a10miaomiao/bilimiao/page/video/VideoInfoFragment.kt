@@ -115,7 +115,9 @@ import splitties.views.dsl.core.wrapContent
 import splitties.views.dsl.recyclerview.recyclerView
 import splitties.views.horizontalPadding
 import splitties.views.imageResource
+import splitties.views.leftPadding
 import splitties.views.padding
+import splitties.views.rightPadding
 import splitties.views.topPadding
 import splitties.views.verticalPadding
 
@@ -350,53 +352,10 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         viewModel.requestFavorite(favIds, addIds, delIds)
     }
 
-    private fun playVideo(cid: String, title: String) {
+    private fun playVideo(page: VideoPageInfo) {
         val info = viewModel.info
         if (info != null) {
-            // 视频不在列表中，则不设置新的播放列表
-            if(!playListStore.state.inListForAid(info.aid)) {
-                val ugcSeason = viewModel.ugcSeason
-                if (ugcSeason == null) {
-                    // 将单个视频加入播放列表
-                    val playListItem = playListStore.run {
-                        info.toPlayListItem()
-                    }
-                    playListStore.setPlayList(
-                        name = info.title,
-                        from = playListItem.from,
-                        items = listOf(
-                            playListItem,
-                        )
-                    )
-                } else {
-                    // 将合集加入播放列表
-                    val index = if (ugcSeason.sections.size > 1) {
-                        ugcSeason.sections.indexOfFirst { section ->
-                            section.episodes.indexOfFirst { it.aid == info.aid } != -1
-                        }
-                    } else { 0 }
-                    playListStore.setPlayList(ugcSeason, index)
-                }
-            }
-            // 播放视频
-            basePlayerDelegate.openPlayer(
-                VideoPlayerSource(
-                    mainTitle = info.title,
-                    title = title,
-                    coverUrl = info.pic,
-                    aid = info.aid,
-                    id = cid,
-                    ownerId = info.owner.mid,
-                    ownerName = info.owner.name,
-                ).apply {
-                    pages = viewModel.pages.map {
-                        VideoPlayerSource.PageInfo(
-                            cid = it.cid,
-                            title = it.part,
-                        )
-                    }
-                }
-            )
+            viewModel.playVideo(info, page)
         }
     }
 
@@ -461,6 +420,16 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleVideoHistoryClick = View.OnClickListener {
+        val history = viewModel.info?.history ?: return@OnClickListener
+        val page = viewModel.pages.find { it.cid == history.cid }
+        if (page == null) {
+            PopTip.show("未找到分P:" + history.cid)
+        } else {
+            playVideo(page)
+        }
+    }
+
     private val handleUpperItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.staffs[position]
         toUser(view, item.mid)
@@ -468,7 +437,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
     private val handlePageItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.pages[position]
-        playVideo(item.cid, item.part)
+        playVideo(item)
     }
 
     private val handleUgcEpisodeClick = OnItemClickListener { adapter, view, position ->
@@ -993,6 +962,51 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 +pageView()..lParams {
                     width = matchParent
                     height = dip(48)
+                    topMargin = dip(10)
+                }
+                +horizontalLayout {
+                    apply(ViewStyle.roundRect(dip(5)))
+                    backgroundColor = config.blockBackgroundColor
+
+                    val history = videoInfo?.history
+                    _show = history != null && playerStore.state.aid != videoInfo?.aid
+
+                    views {
+                        +textView {
+                            padding = dip(5)
+                            rightPadding = 0
+                            text = "上次看到："
+                        }
+                        +textView {
+                            setBackgroundResource(config.selectableItemBackground)
+                            setOnClickListener(handleVideoHistoryClick)
+                            setTextColor(config.themeColor)
+                            padding = dip(5)
+                            leftPadding = 0
+
+                            miaoEffect(history) {
+                                if (history == null) {
+                                    text = ""
+                                } else {
+                                    val pageName = viewModel.pages.find {
+                                        it.cid == history.cid
+                                    }?.part?.takeIf {
+                                        viewModel.pages.size > 1
+                                    }
+                                    visibility = View.VISIBLE
+                                    val progress = NumberUtil.converDuration(history.progress)
+                                    text = if (pageName.isNullOrEmpty()) {
+                                        progress
+                                    } else {
+                                        "$pageName $progress"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }..lParams {
+                    width = wrapContent
+                    height = matchParent
                     topMargin = dip(10)
                 }
 

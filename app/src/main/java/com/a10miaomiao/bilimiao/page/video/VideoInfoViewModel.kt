@@ -198,15 +198,51 @@ class VideoInfoViewModel(
         }
     }
 
-    private fun playVideo(info: VideoInfo, page: Int) {
+    fun playVideo(info: VideoInfo, page: Int) {
+        if (page in pages.indices){
+            playVideo(info, pages[page])
+        }
+    }
+
+    fun playVideo(info: VideoInfo, page: VideoPageInfo) {
         val videoPages = pages
         val aid = info.aid
-        val title = videoPages[page].part
-        val cid = videoPages[page].cid
+        val title = if (videoPages.size > 1) {
+            page.part
+        } else {
+            info.title
+        }
+        val cid = page.cid
         if (basePlayerDelegate.getSourceIds().aid == aid) {
             // 同个视频不替换播放
             return
         }
+        // 视频不在列表中，则不设置新的播放列表
+        if(!playListStore.state.inListForAid(info.aid)) {
+            val season = ugcSeason
+            if (season == null) {
+                // 将单个视频加入播放列表
+                val playListItem = playListStore.run {
+                    info.toPlayListItem()
+                }
+                playListStore.setPlayList(
+                    name = info.title,
+                    from = playListItem.from,
+                    items = listOf(
+                        playListItem,
+                    )
+                )
+            } else {
+                // 将合集加入播放列表
+                val index = if (season.sections.size > 1) {
+                    season.sections.indexOfFirst { section ->
+                        section.episodes.indexOfFirst { it.aid == info.aid } != -1
+                    }
+                } else { 0 }
+                playListStore.setPlayList(season, index)
+            }
+        }
+        // 播放视频
         basePlayerDelegate.openPlayer(
             VideoPlayerSource(
                 mainTitle = info.title,
