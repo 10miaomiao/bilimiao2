@@ -40,7 +40,11 @@ import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.bindProvider
+import org.kodein.di.bindSingleton
+import org.kodein.di.compose.localDI
 import org.kodein.di.compose.rememberInstance
+import org.kodein.di.compose.subDI
 import org.kodein.di.instance
 
 class MessagePage : ComposePage() {
@@ -55,31 +59,55 @@ class MessagePage : ComposePage() {
 
 }
 
-internal data class MessagePageTabInfo(
+private sealed class MessagePageTab(
     val id: Int,
     val name: String,
-)
+) {
+    @Composable
+    abstract fun PageContent()
+    data object Reply : MessagePageTab(
+        id = 0,
+        name = "回复我的"
+    ) {
+        @Composable
+        override fun PageContent() {
+            ReplyMessageContent()
+        }
+    }
 
-internal class MessagePageViewModel(
+    data object At : MessagePageTab(
+        id = 1,
+        name = "@我的"
+    ) {
+        @Composable
+        override fun PageContent() {
+            AtMessageContent()
+        }
+    }
+
+    data object Like : MessagePageTab(
+        id = 2,
+        name = "收到的赞"
+    ) {
+        @Composable
+        override fun PageContent() {
+            LikeMessageContent()
+        }
+    }
+
+}
+
+private class MessagePageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
     private val messageStore by instance<MessageStore>()
 
-    val tabs = listOf(
-        MessagePageTabInfo(
-            id = 0,
-            name = "回复我的",
-        ),
-        MessagePageTabInfo(
-            id = 1,
-            name = "@我的",
-        ),
-        MessagePageTabInfo(
-            id = 2,
-            name = "收到的赞",
-        ),
+    val tabs = listOf<MessagePageTab>(
+        MessagePageTab.Reply,
+        MessagePageTab.At,
+        MessagePageTab.Like,
     )
 
     init {
@@ -90,7 +118,7 @@ internal class MessagePageViewModel(
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-internal fun MessagePageContent(
+private fun MessagePageContent(
     viewModel: MessagePageViewModel
 ) {
     PageConfig(
@@ -169,24 +197,9 @@ internal fun MessagePageContent(
                 .weight(1f),
             state = pagerState,
         ) { index ->
-            val id = viewModel.tabs[index].id
-            saveableStateHolder.SaveableStateProvider(id) {
-                when(id) {
-                    0 -> {
-                        ReplyMessageContent()
-                    }
-                    1 -> {
-                        AtMessageContent()
-                    }
-                    2 -> {
-                        LikeMessageContent()
-                    }
-//                3 -> {
-//                    SystemMessagePage()
-//                }
-                }
+            saveableStateHolder.SaveableStateProvider(index) {
+                viewModel.tabs[index].PageContent()
             }
-
         }
     }
 }
