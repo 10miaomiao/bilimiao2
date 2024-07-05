@@ -45,13 +45,12 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun BangumiItemBox(
     modifier: Modifier = Modifier,
-    title: String? = null,
-    cover: String? = null,
+    title: String,
+    cover: String,
     statusText: String? = null,
     desc: String? = null,
-    isChinaMade: Boolean = false,
-    badgeText: String? = null,
-    badgeColor: Color = MaterialTheme.colorScheme.primary,
+    coverBadge1: @Composable () -> Unit = {},
+    coverBadge2: @Composable () -> Unit = {},
     moreMenu: List<Pair<Int, String>?> = listOf(),
     onMenuItemClick: ((Pair<Int, String>) -> Unit)? = null,
     onClick: () -> Unit,
@@ -62,9 +61,7 @@ fun BangumiItemBox(
             .padding(10.dp)
             .semantics(mergeDescendants = true) {
                 contentDescription = with(StringBuilder()) {
-                    if (!title.isNullOrBlank()) {
-                        append(title)
-                    }
+                    append(title)
                     if (!statusText.isNullOrBlank()) {
                         append(",")
                         append(statusText)
@@ -76,55 +73,24 @@ fun BangumiItemBox(
                 }.toString()
             }
     ) {
-        if (cover != null) {
+        Box(
+            modifier = Modifier
+                .size(width = 90.dp, height = 125.dp)
+                .clip(RoundedCornerShape(5.dp)),
+        ) {
+            GlideImage(
+                imageModel = UrlUtil.autoHttps(cover) + "@560w_746h",
+                modifier = Modifier.fillMaxSize(),
+            )
             Box(
-                modifier = Modifier
-                    .size(width = 90.dp, height = 125.dp)
-                    .clip(RoundedCornerShape(5.dp)),
+                modifier = Modifier.align(Alignment.TopEnd)
             ) {
-                GlideImage(
-                    imageModel = UrlUtil.autoHttps(cover) + "@560w_746h",
-                    modifier = Modifier.fillMaxSize(),
-                )
-                if (!badgeText.isNullOrBlank()) {
-                    Box(
-                        modifier = Modifier
-                            .wrapContentHeight()
-                            .align(Alignment.TopEnd)
-                            .padding(5.dp)
-                            .background(
-                                color = badgeColor,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .padding(vertical = 2.dp, horizontal = 4.dp),
-                    ) {
-                        Text(
-                            text = badgeText,
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                }
-                if (isChinaMade) {
-                    Box(
-                        modifier = Modifier
-                            .wrapContentHeight()
-                            .align(Alignment.BottomStart)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(
-                                    topEnd = 10.dp,
-                                )
-                            )
-                            .padding(vertical = 2.dp, horizontal = 4.dp),
-                    ) {
-                        Text(
-                            text = "国产动漫",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                }
+                coverBadge1()
+            }
+            Box(
+                modifier = Modifier.align(Alignment.BottomStart)
+            ) {
+                coverBadge2()
             }
         }
         Column(
@@ -133,15 +99,13 @@ fun BangumiItemBox(
                 .height(130.dp)
                 .padding(start = 5.dp),
         ) {
-            if (title != null) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 2,
-                    modifier = Modifier.padding(bottom = 5.dp),
-                )
-            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+                modifier = Modifier.padding(bottom = 5.dp),
+            )
             if (statusText != null) {
                 Text(
                     text = statusText,
