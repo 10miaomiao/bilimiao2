@@ -23,13 +23,13 @@ class Bilimiao: Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppCrashHandler.getInstance(this)
         ThemeDelegate.setNightMode(this)
         Mojito.initialize(
             GlideImageLoader.with(this),
             SketchImageLoadFactory()
         )
         commApp.onCreate()
-
     }
 
 }

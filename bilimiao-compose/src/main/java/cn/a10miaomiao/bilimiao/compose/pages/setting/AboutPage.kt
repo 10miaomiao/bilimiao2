@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -39,16 +41,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.DoubleColumnAutofitLayout
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.rememberChainScrollableLayoutState
+import cn.a10miaomiao.bilimiao.compose.pages.TestPage
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.kongzue.dialogx.dialogs.PopTip
@@ -259,6 +265,11 @@ private class AboutPageViewModel(
         }
     }
 
+    fun toTestPage() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(TestPage())
+    }
+
     data class ContributorInfo(
         val email: String,
         val name: String,
@@ -321,6 +332,13 @@ private fun AboutPageContent(
                     modifier = Modifier
                         .size(100.dp, 100.dp)
                         .padding(8.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onLongPress = {
+                                    viewModel.toTestPage()
+                                }
+                            )
+                        }
                 )
                 Text(
                     text = "bilimiao",
