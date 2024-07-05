@@ -969,7 +969,8 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     backgroundColor = config.blockBackgroundColor
 
                     val history = videoInfo?.history
-                    _show = history != null && playerStore.state.aid != videoInfo?.aid
+                    _show = history != null && history.progress > 0
+                            && playerStore.state.aid != videoInfo?.aid
 
                     views {
                         +textView {
