@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import cn.a10miaomiao.miao.binding.android.view._show
+import cn.a10miaomiao.miao.binding.android.view._tooltipText
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
@@ -154,6 +155,7 @@ class EmojiGridFragment : Fragment(), DIAware {
     private val emojiItemUi = miaoBindingItemUi<UserEmoteInfo> { item, _ ->
         frameLayout {
             padding = dip(5)
+            _tooltipText = item.text
             views {
                 +imageView {
                     _network(item.url)
