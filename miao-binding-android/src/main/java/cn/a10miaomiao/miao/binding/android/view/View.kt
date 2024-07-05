@@ -1,6 +1,7 @@
 package cn.a10miaomiao.miao.binding.android.view
 
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.annotation.Px
@@ -48,6 +49,14 @@ inline var View._backgroundResource: Int
     @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
     set(value) = miaoEffect(value) {
         setBackgroundResource(value)
+    }
+
+inline var View._tooltipText: String
+    @Deprecated(NO_GETTER, level = DeprecationLevel.HIDDEN) get() = noGetter
+    set(value) = miaoEffect(value) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            tooltipText = value
+        }
     }
 
 inline var View._contentDescription: String
