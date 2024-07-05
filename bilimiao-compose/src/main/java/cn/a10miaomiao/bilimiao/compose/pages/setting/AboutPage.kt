@@ -342,12 +342,14 @@ private fun AboutPageContent(
                 )
                 Text(
                     text = "bilimiao",
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Text(
                     text = "哔哩喵~",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 val versionState = viewModel.versionState.collectAsState().value
@@ -392,6 +394,7 @@ private fun AboutPageContent(
                 Text(
                     text = "当前版本：" + viewModel.versionName,
                     style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.outline,
                 )
             }
         }

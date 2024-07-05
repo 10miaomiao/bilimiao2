@@ -499,6 +499,7 @@ private fun BangumiDetailPageContent(
                                 text = detailInfo.new_ep.desc,
                                 style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Row() {
                                 Text(
