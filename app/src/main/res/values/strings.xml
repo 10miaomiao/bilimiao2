@@ -5,6 +5,7 @@
     <string name="search">搜索</string>
     <string name="qrcode_scan">二维码扫描</string>
     <string name="density_setting">DPI设置</string>
+    <string name="log_viewer">程序日志</string>
     <string name="view_cover" tools:ignore="ExtraTranslation">查看b站封面</string>
 
     <string name="playing_notification_description">播放通知提供播放暂停等操作。</string>

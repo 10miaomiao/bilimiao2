@@ -40,7 +40,7 @@
         <!-- 是否开启错误日志统计，默认为false -->
         <meta-data
             android:name="BaiduMobAd_EXCEPTION_LOG"
-            android:value="true" />
+            android:value="false" />
         <!-- 日志仅在wifi网络下发送，默认为false -->
         <meta-data
             android:name="BaiduMobAd_ONLY_WIFI"
@@ -79,6 +79,10 @@
                 <data android:scheme="bilimiao" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activity.LogViewerActivity"
+            android:label="@string/density_setting"
+            android:theme="@style/Theme.Bilimiao"/>
         <activity
             android:name=".activity.SearchActivity"
             android:label="@string/search"

@@ -14,7 +14,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
-import java.lang.Exception
 
 typealias NavComposableContent = @Composable AnimatedContentScope.(@JvmSuppressWildcards NavBackStackEntry) -> Unit
 
