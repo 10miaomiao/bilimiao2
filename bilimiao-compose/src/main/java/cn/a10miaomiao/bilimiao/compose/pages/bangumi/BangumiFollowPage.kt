@@ -312,7 +312,7 @@ private fun BangumiFollowPageContent(
                                             shape = RoundedCornerShape(5.dp)
                                         )
                                         .padding(vertical = 2.dp, horizontal = 4.dp),
-                                    text = "国产动漫",
+                                    text = badge.text,
                                     color = Color.White,
                                     style = MaterialTheme.typography.labelSmall,
                                 )
