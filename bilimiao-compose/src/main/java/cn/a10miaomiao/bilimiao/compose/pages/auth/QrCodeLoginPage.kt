@@ -33,10 +33,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.PageRouteBuilder
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -176,8 +178,10 @@ internal class QrCodeLoginPageViewModel(
                 .gson<ResultInfo<UserInfo>>()
         }
         if (res.isSuccess) {
-            userStore.setUserInfo(res.data)
-            fragment.findNavController().tryPopBackStack()
+            withContext(Dispatchers.Main) {
+                userStore.setUserInfo(res.data)
+                fragment.findNavController().tryPopBackStack()
+            }
         } else {
             throw Exception(res.message)
         }
