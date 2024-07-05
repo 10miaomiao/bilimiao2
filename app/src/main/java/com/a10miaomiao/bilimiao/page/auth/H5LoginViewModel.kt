@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.tryPopBackStack
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.BiliJsBridge
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
@@ -165,8 +166,11 @@ class H5LoginViewModel(
                     .gson<ResultInfo<UserInfo>>()
             }
             if (res.isSuccess) {
-                userStore.setUserInfo(res.data)
-                fragment.findNavController().popBackStack(MainNavGraph.dest.main, false)
+                withContext(Dispatchers.Main) {
+                    userStore.setUserInfo(res.data)
+                    fragment.findNavController()
+                        .popBackStack(MainNavGraph.dest.main, false)
+                }
             } else {
                 alert("获取用户信息失败，请稍后重试：" + res.message)
                 throw Exception(res.message)

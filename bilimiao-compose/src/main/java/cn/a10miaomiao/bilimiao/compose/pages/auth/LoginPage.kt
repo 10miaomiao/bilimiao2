@@ -74,7 +74,7 @@ class LoginPage : ComposePage() {
 
 internal class LoginPageViewModel(
     override val di: DI,
-): ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
+) : ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
 
     private var verifyUrl = ""
     private var recaptchaToken = ""
@@ -141,7 +141,7 @@ internal class LoginPageViewModel(
                     if (loginInfo.status == 0) {
                         BilimiaoCommApp.commApp.saveAuthInfo(loginInfo.toLoginInfo())
                         authInfo()
-                    } else if (loginInfo.url != null && "tmp_token=" in loginInfo.url){
+                    } else if (loginInfo.url != null && "tmp_token=" in loginInfo.url) {
                         alert("提示") {
                             setMessage(loginInfo.message)
                             setNegativeButton("取消", null)
@@ -150,7 +150,8 @@ internal class LoginPageViewModel(
                                 val nav = fragment.findComposeNavController()
                                 if (params.containsKey("tmp_token")
                                     && params.containsKey("request_id")
-                                    && params.containsKey("source")) {
+                                    && params.containsKey("source")
+                                ) {
                                     nav.navigate(TelVerifyPage()) {
                                         code set params["tmp_token"]!!
                                         requestId set params["request_id"]!!
@@ -169,7 +170,7 @@ internal class LoginPageViewModel(
                             }
                         }
                     } else {
-                        alert( "登录失败，请稍后重试：" + loginInfo.status) {
+                        alert("登录失败，请稍后重试：" + loginInfo.status) {
                             setMessage(loginInfo.message)
                             setNegativeButton("关闭", null)
                             if (loginInfo.url != null) {
@@ -217,8 +218,10 @@ internal class LoginPageViewModel(
                 .gson<ResultInfo<UserInfo>>()
         }
         if (res.isSuccess) {
-            userStore.setUserInfo(res.data)
-            fragment.findNavController().tryPopBackStack()
+            withContext(Dispatchers.Main) {
+                userStore.setUserInfo(res.data)
+                fragment.findNavController().tryPopBackStack()
+            }
         } else {
             throw Exception(res.message)
         }
@@ -365,7 +368,7 @@ internal fun LoginPageContent(
             }
             TextField(
                 label = {
-                        Text(text = "用户名/邮箱/手机号")
+                    Text(text = "用户名/邮箱/手机号")
                 },
                 value = userName,
                 onValueChange = viewModel::setUserName,
@@ -387,7 +390,10 @@ internal fun LoginPageContent(
                     .onFocusChanged { passwordIsFocus = it.isFocused },
                 singleLine = true,
                 // 显示密码样式
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 // 显示密码样式
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardActions = passwordKeyboardActions,
