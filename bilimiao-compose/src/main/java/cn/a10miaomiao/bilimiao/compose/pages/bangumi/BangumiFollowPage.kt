@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.bangumi
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,9 +31,11 @@ import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -126,7 +131,9 @@ private class BangumiFollowPageViewModel(
                     list.data.value = result.follow_list
                 } else {
                     val listData = list.data.value.toMutableList()
-                    listData.addAll(result.follow_list)
+                    listData.addAll(result.follow_list.filter { row ->
+                        listData.indexOfFirst { it.season_id == row.season_id } == -1
+                    })
                     list.data.value = listData
                 }
             } else {
@@ -284,7 +291,7 @@ private fun BangumiFollowPageContent(
             onRefresh = { viewModel.refresh() },
         ) {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(400.dp),
+                columns = GridCells.Adaptive(300.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
                 items(list, { it.season_id }) {
@@ -293,12 +300,41 @@ private fun BangumiFollowPageContent(
                         cover = it.cover,
                         statusText = it.new_ep.index_show,
                         desc = it.progress?.index_show,
-                        isChinaMade = it.season_type == 4,
-                        badgeText = it.badge_info?.text,
-                        badgeColor = it.badge_info?.bg_color?.let {
-                            Color(android.graphics.Color.parseColor(it))
-                        } ?: MaterialTheme.colorScheme.primary,
                         moreMenu = moreMenu,
+                        coverBadge1 = {
+                            val badge = it.badge_info
+                            if (badge != null) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(5.dp)
+                                        .background(
+                                            color = Color(badge.bg_color.toColorInt()),
+                                            shape = RoundedCornerShape(5.dp)
+                                        )
+                                        .padding(vertical = 2.dp, horizontal = 4.dp),
+                                    text = "国产动漫",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        },
+                        coverBadge2 = {
+                            if (it.season_type == 4) {
+                                Text(
+                                    modifier = Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shape = RoundedCornerShape(
+                                                topEnd = 10.dp,
+                                            )
+                                        )
+                                        .padding(vertical = 2.dp, horizontal = 4.dp),
+                                    text = "国产动漫",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        },
                         onMenuItemClick = { menu ->
                             viewModel.changeFollowStatus(it, menu.first)
                         },
