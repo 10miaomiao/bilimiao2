@@ -328,7 +328,8 @@ internal fun UserFavouriteDetailContent(
 ) {
     val parentViewModel: UserFavouriteViewModel by rememberInstance()
     val viewModel = diViewModel(
-        key = mediaId + parentViewModel.hashCode(),
+        di = parentViewModel.di,
+        key = mediaId,
     ) {
         UserFavouriteDetailViewModel(it, mediaId, mediaTitle, parentViewModel)
     }

@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
+        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -40,7 +40,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.13"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     namespace = "cn.a10miaomiao.bilimiao.compose"
     packaging {
@@ -62,8 +62,10 @@ dependencies {
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi) // 依赖注入
-    implementation(Libraries.kodeinDiCompose) // 依赖注入
+    implementation(Libraries.kodeinDiCompose)
 
+    val composeBom = platform(Libraries.composeBom)
+    implementation(composeBom)
     implementation(Libraries.composeUi)
     implementation(Libraries.composeFoundation)
     implementation(Libraries.composeMaterial)
@@ -91,12 +93,11 @@ dependencies {
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
-    implementation(platform("androidx.compose:compose-bom:2024.03.00"))
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.espresso)
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.03.00"))
+    androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

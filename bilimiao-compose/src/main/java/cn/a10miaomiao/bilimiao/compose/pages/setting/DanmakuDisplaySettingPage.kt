@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.setting
 
 import android.os.Build
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -105,7 +106,7 @@ private class DanmakuDisplaySettingPageViewModel(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun DanmakuDisplaySettingPageContent(
     viewModel: DanmakuDisplaySettingPageViewModel,

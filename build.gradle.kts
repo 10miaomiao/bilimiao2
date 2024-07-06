@@ -5,7 +5,7 @@ buildscript {
         set("compile_sdk_version", 32)
         set("build_tools_version", 32)
         set("target_sdk_version", 32)
-        set("kotlin_version", "1.9.23")
+        set("kotlin_version", "1.9.24")
     }
 
     repositories {

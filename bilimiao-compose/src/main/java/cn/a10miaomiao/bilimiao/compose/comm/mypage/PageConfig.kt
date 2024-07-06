@@ -3,7 +3,6 @@ package cn.a10miaomiao.bilimiao.compose.comm.mypage
 import android.content.Context
 import android.view.View
 import androidx.compose.runtime.*
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
@@ -77,7 +76,6 @@ fun PageConfig(
         _configId++
     }
     DisposableEffect(
-        LocalLifecycleOwner.current.lifecycle,
         title, menu, search
     ) {
         pageConfigInfo.addConfig(configId) {
@@ -106,8 +104,7 @@ fun PageListener(
     if (configId == -1 || pageConfigInfo == null) {
         return
     }
-    DisposableEffect(LocalLifecycleOwner.current,
-        configId, onSearchSelfPage, onMenuItemClick) {
+    DisposableEffect(configId, onSearchSelfPage, onMenuItemClick) {
         val listener = object : OnMyPageListener {
             override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
                 onMenuItemClick?.invoke(view, menuItem)
