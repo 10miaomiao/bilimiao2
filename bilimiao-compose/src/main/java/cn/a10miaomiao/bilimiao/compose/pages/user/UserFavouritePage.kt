@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -92,7 +93,7 @@ class UserFavouritePage : ComposePage() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun UserFavouritePageContent() {
     val viewModel: UserFavouriteViewModel by rememberInstance()

@@ -284,7 +284,8 @@ internal fun UserSeasonDetailContent(
 ) {
     val parentViewModel: UserFavouriteViewModel by rememberInstance()
     val viewModel = diViewModel(
-        key = seasonId + parentViewModel.hashCode(),
+        di = parentViewModel.di,
+        key = seasonId,
     ) {
         UserSeasonDetailViewModel(it, seasonId, parentViewModel)
     }
