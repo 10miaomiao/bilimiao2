@@ -151,8 +151,8 @@ class PlayerDelegate2(
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        playerCoroutineScope.onCreate()
         initPlayer()
-
         val intentFilter = IntentFilter().apply {
             addAction(PlayerService.ACTION_CREATED)
             addAction(PlayerService.ACTION_DESTROY)
@@ -201,27 +201,21 @@ class PlayerDelegate2(
     }
 
     override fun onStart() {
-        playerCoroutineScope.onStart()
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        if (!prefs.getBoolean("player_background", true)
-            && !views.videoPlayer.isInPlayingState
-        ) {
+        if (!controller.isBackgroundPlay
+            && views.videoPlayer.isInPlayingState) {
             views.videoPlayer.onVideoResume()
         }
     }
 
     override fun onStop() {
-        playerCoroutineScope.onStop()
-        val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
-        if (!prefs.getBoolean("player_background", true)
-            && views.videoPlayer.isInPlayingState
-        ) {
-//            lastPosition = mPlayer.currentPosition
+        if (!controller.isBackgroundPlay
+            && views.videoPlayer.isInPlayingState) {
             views.videoPlayer.onVideoPause()
         }
     }
 
     override fun onDestroy() {
+        playerCoroutineScope.onDestroy()
         activity.unregisterReceiver(broadcastReceiver)
     }
 
@@ -536,10 +530,10 @@ class PlayerDelegate2(
         areaLimitBoxController.hide()
         lastPosition = 0L
         if (playerSource != null) {
-            playerCoroutineScope.onStop()
+            playerCoroutineScope.onDestroy()
             views.videoPlayer.release()
         }
-        playerCoroutineScope.onStart()
+        playerCoroutineScope.onCreate()
         playerCoroutineScope.launch(Dispatchers.IO) {
             SettingPreferences.getData(activity) {
                 fnval = it[PlayerFnval] ?: SettingConstants.PLAYER_FNVAL_DASH
@@ -581,7 +575,7 @@ class PlayerDelegate2(
 
     override fun closePlayer() {
         scaffoldApp.showPlayer = false
-        playerCoroutineScope.onStop()
+        playerCoroutineScope.onDestroy()
         playerSource = null
         playerSourceInfo = null
 
