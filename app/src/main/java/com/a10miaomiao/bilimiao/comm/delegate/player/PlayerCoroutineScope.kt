@@ -13,11 +13,11 @@ class PlayerCoroutineScope: CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    fun onStart () {
+    fun onCreate () {
         job = Job()
     }
 
-    fun onStop () {
+    fun onDestroy () {
         job.cancel()
     }
 

@@ -68,6 +68,8 @@ class PlayerController(
     private var onlyFull = false // 仅全屏播放
     private var showSubtitle = false // 默认显示字幕
     private var showAiSubtitle = true // 默认显示AI字幕
+    var isBackgroundPlay = true // 后台播放
+        private set
 
     private var preparedRunQueue = mutableListOf<Pair<String, Runnable>>()
     private fun currentDanmakuMode(): SettingPreferences.Danmaku {
@@ -342,6 +344,7 @@ class PlayerController(
         }
         showSubtitle = preferences[SettingPreferences.PlayerSubtitleShow] ?: true
         showAiSubtitle = preferences[SettingPreferences.PlayerAiSubtitleShow] ?: false
+        isBackgroundPlay = preferences[SettingPreferences.PlayerBackground] ?: true
     }
 
     /**
