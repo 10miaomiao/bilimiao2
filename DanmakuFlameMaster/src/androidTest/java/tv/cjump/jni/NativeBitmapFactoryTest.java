@@ -9,11 +9,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Debug;
 import master.flame.danmaku.danmaku.util.SystemClock;
-import android.test.InstrumentationTestCase;
 import android.util.Log;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import org.junit.Assert;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -21,7 +25,8 @@ import java.util.Locale;
 /**
  * Created by ch on 15-6-12.
  */
-public class NativeBitmapFactoryTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class NativeBitmapFactoryTest {
 
     private static final int DEFAULT_MESSAGE_SIZE = 1024;
     private static final int BYTES_IN_MEGABYTE = 1024 * 1024;
@@ -30,12 +35,14 @@ public class NativeBitmapFactoryTest extends InstrumentationTestCase {
     private static final int BITMAP_HEIGHT = 200;
     private static final String TAG = NativeBitmapFactoryTest.class.getSimpleName();
 
+    @Test
     public void testLoadLibs() {
         NativeBitmapFactory.loadLibs();
         boolean isInNativeAlloc = NativeBitmapFactory.isInNativeAlloc();
         Assert.assertTrue("NativeBitmapFactory is not supported on your OS", isInNativeAlloc);
     }
 
+    @Test
     public void testNativeBitmap() {
         Bitmap bitmap = NativeBitmapFactory.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
         accessBitmap(bitmap);
@@ -43,6 +50,7 @@ public class NativeBitmapFactoryTest extends InstrumentationTestCase {
         gcAndWait();
     }
 
+    @Test
     public void testDalvikBitmap() {
         Bitmap bitmap = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
         accessBitmap(bitmap);
@@ -50,6 +58,7 @@ public class NativeBitmapFactoryTest extends InstrumentationTestCase {
         gcAndWait();
     }
 
+    @Test
     public void testNativeBitmaps() {
         StringBuilder sb = new StringBuilder(DEFAULT_MESSAGE_SIZE);
         appendValue(sb, "\n\n", "===== before create 50 NativeBitmap", "\n\n");
@@ -72,7 +81,7 @@ public class NativeBitmapFactoryTest extends InstrumentationTestCase {
     }
 
     public Context getContext(){
-        return getInstrumentation().getTargetContext();
+        return InstrumentationRegistry.getInstrumentation().getTargetContext();
     }
 
     private void updateHeapValue(StringBuilder sb) {
