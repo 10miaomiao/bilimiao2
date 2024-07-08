@@ -170,6 +170,10 @@ class VideoInfoViewModel(
     }
 
     private fun autoStartPlay(info: VideoInfo) = viewModelScope.launch {
+        if (basePlayerDelegate.getSourceIds().aid == info.aid) {
+            // 同个视频不替换播放
+            return@launch
+        }
         val openMode = SettingPreferences.mapData(fragment.requireActivity()) {
             it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
         }
@@ -213,10 +217,6 @@ class VideoInfoViewModel(
             info.title
         }
         val cid = page.cid
-        if (basePlayerDelegate.getSourceIds().aid == aid) {
-            // 同个视频不替换播放
-            return
-        }
         // 视频不在列表中，则不设置新的播放列表
         if(!playListStore.state.inListForAid(info.aid)) {
             val season = ugcSeason
