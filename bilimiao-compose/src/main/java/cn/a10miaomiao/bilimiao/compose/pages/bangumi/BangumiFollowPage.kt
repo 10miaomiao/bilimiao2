@@ -126,12 +126,13 @@ private class BangumiFollowPageViewModel(
             if (res.isSuccess) {
                 list.pageNum = pageNum
                 val result = res.result
+                val followList = result.follow_list ?: listOf()
                 list.finished.value = result.has_next != 1
                 if (pageNum == 1) {
-                    list.data.value = result.follow_list
+                    list.data.value = followList
                 } else {
                     val listData = list.data.value.toMutableList()
-                    listData.addAll(result.follow_list.filter { row ->
+                    listData.addAll(followList.filter { row ->
                         listData.indexOfFirst { it.season_id == row.season_id } == -1
                     })
                     list.data.value = listData
