@@ -68,6 +68,7 @@ dependencies {
     implementation(composeBom)
     implementation(Libraries.composeUi)
     implementation(Libraries.composeFoundation)
+//    implementation(Libraries.composeAnimation)
     implementation(Libraries.composeMaterial)
     implementation(Libraries.composeMaterialIconsExtended)
     implementation(Libraries.composeMaterial3)
