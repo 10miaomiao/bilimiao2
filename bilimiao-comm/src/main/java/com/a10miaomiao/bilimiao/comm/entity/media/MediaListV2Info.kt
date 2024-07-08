@@ -76,7 +76,7 @@ data class MediaListV2Info(
         val face: String,
         val fans: Int,
         val followed: Int,
-        val mid: Int,
+        val mid: String,
         val name: String,
         val official_desc: String,
         val official_role: Int,
