@@ -263,7 +263,7 @@ class PlayerAPI {
         val id: Int,
         val bandwidth: Int,
         val base_url: String,
-        val backup_url: List<String>,
+        val backup_url: List<String>?,
         val mime_type: String,
         val codecid: Int,
         val codecs: String,
