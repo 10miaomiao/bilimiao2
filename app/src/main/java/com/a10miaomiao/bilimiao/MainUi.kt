@@ -58,6 +58,23 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         setOnClickListener {  }
     }
 
+    val mVideoPlayerView = PlayerService.selfInstance?.videoPlayerView?.apply {
+        try {
+            (parent as? ViewGroup)?.removeAllViews()
+            // 直接替换旧PlayerView的Context
+            val clazz = View::class.java
+            val mContextField = clazz.getDeclaredField("mContext")
+            mContextField.isAccessible = true
+            if (mContextField.get(this) is Context) {
+                mContextField.set(this, ctx)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    } ?: inflate<DanmakuVideoPlayer>(R.layout.include_palyer2) {
+        PlayerService.selfInstance?.videoPlayerView = this
+    }
+
     val mPlayerLayout = frameLayout {
         backgroundColor = 0xFF000000.toInt()
         elevation = dip(19).toFloat()
@@ -65,17 +82,11 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             outlineSpotShadowColor = config.shadowColor
         }
 
-        val videoPlayerView = PlayerService.selfInstance?.videoPlayerView?.apply {
-            (parent as? ViewGroup)?.removeAllViews()
-        } ?: inflate<DanmakuVideoPlayer>(R.layout.include_palyer2) {
-            PlayerService.selfInstance?.videoPlayerView = this
-        }
-
         val completionView = inflate<RelativeLayout>(R.layout.include_completion_box)
         val errorMessageView = inflate<RelativeLayout>(R.layout.include_error_message_box)
         val areaLimitView = inflate<RelativeLayout>(R.layout.include_area_limit_box)
 
-        addView(videoPlayerView, lParams(matchParent, matchParent))
+        addView(mVideoPlayerView, lParams(matchParent, matchParent))
         addView(completionView, lParams(matchParent, matchParent))
         addView(errorMessageView, lParams(matchParent, matchParent))
         addView(areaLimitView, lParams(matchParent, matchParent))
