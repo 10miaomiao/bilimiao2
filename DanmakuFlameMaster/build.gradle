@@ -23,7 +23,12 @@ android {
         minSdkVersion 9
         targetSdkVersion rootProject.ext.target_sdk_version
     }
-    namespace 'master.flame.danmaku'
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    namespace = "master.flame.danmaku"
 }
 
 dependencies {
@@ -31,4 +36,7 @@ dependencies {
     implementation "com.github.ctiao:ndkbitmap-armv7a:$version"
     implementation "com.github.ctiao:ndkbitmap-armv5:$version"
     implementation "com.github.ctiao:ndkbitmap-x86:$version"
+
+    testImplementation "junit:junit:4.+"
+    androidTestImplementation "androidx.test.ext:junit:1.1.3"
 }
