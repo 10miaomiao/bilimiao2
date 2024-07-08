@@ -56,7 +56,7 @@ class ArchiveInfo(
 //    val cursor_attr: CursorAttr,
     val danmaku: String,
     val duration: Long,
-    val first_cid: Int,
+    val first_cid: String,
     val goto: String,
     val icon_type: Int,
     val is_cooperation: Boolean,
