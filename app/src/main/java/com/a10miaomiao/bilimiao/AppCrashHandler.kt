@@ -8,6 +8,7 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.core.content.pm.PackageInfoCompat
 import com.a10miaomiao.bilimiao.activity.LogViewerActivity
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.baidu.mobstat.StatService
 import java.text.SimpleDateFormat
 import java.util.*
@@ -62,6 +63,8 @@ class AppCrashHandler private constructor(
      * @param e
      */
     private fun handleException(e: Throwable) {
+        miaoLogger() error e.message
+        e.printStackTrace()
         Thread {
             Looper.prepare()
             Toast.makeText(context, "程序崩溃了喵＞﹏＜", Toast.LENGTH_SHORT).show()
