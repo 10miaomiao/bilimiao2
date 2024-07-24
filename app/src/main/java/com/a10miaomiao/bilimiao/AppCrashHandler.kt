@@ -8,8 +8,8 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.core.content.pm.PackageInfoCompat
 import com.a10miaomiao.bilimiao.activity.LogViewerActivity
+import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.baidu.mobstat.StatService
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.system.exitProcess
@@ -80,7 +80,7 @@ class AppCrashHandler private constructor(
          * 这里可以执行一些业务操作
          * 比如保存崩溃日志到文件等等
          */
-        StatService.recordException(context, e)
+        BilimiaoStatService.recordException(context, e)
     }
 
     /**

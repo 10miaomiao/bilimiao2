@@ -53,11 +53,11 @@ import kotlin.contracts.contract
 
 class TelVerifyPage : ComposePage() {
 
-    val code = stringPageArg("code")
+    val code = stringPageArg("code", "")
 
-    val requestId = stringPageArg("request_id")
+    val requestId = stringPageArg("request_id", "")
 
-    val source = stringPageArg("source")
+    val source = stringPageArg("source", "")
 
     override val route: String
         get() = "auth/tel_verify?code=${code}&request_id=${requestId}&source=${source}"
@@ -93,8 +93,7 @@ internal class TelVerifyPageViewModel(
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
 
-    private val biliGeetestUtil =
-        BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
+    private val biliGeetestUtil by instance<BiliGeetestUtil>()
 
     val verifyType = MutableStateFlow(VerifyType.TEL)
     val tmpAccountInfo = MutableStateFlow<TmpUserInfo.AccountInfo?>(null)
@@ -258,7 +257,7 @@ internal class TelVerifyPageViewModel(
     }
 
     fun sendClick() {
-        biliGeetestUtil.startCustomFlow()
+        biliGeetestUtil.startCustomFlow(this@TelVerifyPageViewModel)
     }
 
     /**

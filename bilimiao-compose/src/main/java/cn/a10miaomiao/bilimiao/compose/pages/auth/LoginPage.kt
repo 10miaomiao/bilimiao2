@@ -81,8 +81,7 @@ internal class LoginPageViewModel(
 
     private val fragment by instance<Fragment>()
     private val userStore by instance<UserStore>()
-
-    private val biliGeetestUtil = BiliGeetestUtil(fragment.requireActivity(), fragment.lifecycle, this)
+    private val biliGeetestUtil by instance<BiliGeetestUtil>()
 
     val loading = MutableStateFlow(false)
     val userName = MutableStateFlow("")
@@ -184,7 +183,7 @@ internal class LoginPageViewModel(
                     }
                 } else if (res.code == -105 && gt3Result == null) {
                     verifyUrl = res.data.url ?: ""
-                    biliGeetestUtil.startCustomFlow()
+                    biliGeetestUtil.startCustomFlow(this@LoginPageViewModel)
                 } else {
                     alert(res.message)
                 }

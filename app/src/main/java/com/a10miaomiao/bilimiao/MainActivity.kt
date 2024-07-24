@@ -29,6 +29,8 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
+import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
+import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
@@ -43,6 +45,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPopupMenu
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
+import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
@@ -51,7 +54,6 @@ import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
-import com.baidu.mobstat.StatService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -75,7 +77,7 @@ class MainActivity
         bindSingleton { themeDelegate }
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
-
+        bindSingleton { biliGeetestUtil }
     }
 
     private val store by lazy { Store(this, di) }
@@ -84,6 +86,7 @@ class MainActivity
     private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val supportHelper by lazy { SupportHelper(this) }
+    private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
 
     private lateinit var leftFragment: StartFragment
     private lateinit var navHostFragment: NavHostFragment
@@ -157,9 +160,9 @@ class MainActivity
 //            DebugMiao.log("oauth2", res.body?.string())
 //        }
 
-        // 百度统计
-        StatService.setAuthorizedState(this, false)
-        StatService.start(this)
+        // 统计服务
+        BilimiaoStatService.setAuthorizedState(this, false)
+        BilimiaoStatService.start(this)
 
         // 安卓13开始手动申请通知权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -536,7 +539,7 @@ class MainActivity
         basePlayerDelegate.onResume()
 
         // 百度移动统计埋点
-        StatService.onResume(this)
+        BilimiaoStatService.onResume(this)
     }
 
     override fun onPause() {
@@ -544,7 +547,7 @@ class MainActivity
         basePlayerDelegate.onPause()
 
         // 百度移动统计埋点
-        StatService.onPause(this)
+        BilimiaoStatService.onPause(this)
     }
 
     override fun onDestroy() {

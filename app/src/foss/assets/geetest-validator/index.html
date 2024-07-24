@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div>
+    <div class="captcha-title">完成人机验证以继续</div>
+    <div id="captcha">
+        <div id="text">
+            请先生成
+        </div>
+        <div id="wait" class="show">
+            <div class="loading">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<br>
+<div id="btn-cancel" class="text-btn">取消验证</div>
+
+<script src="js/jquery.js"></script>
+<script src="js/gt.js"></script>
+
+<script>
+    function getUrlParam2() {
+        url = window.location.href;// 通过 ? 分割获取后面的参数字符串
+        let urlStr = url.split('?')[1];// 创建空对象存储参数
+        let obj = {};// 再通过 & 将每一个参数单独分割出来
+        let paramsArr = urlStr.split('&');
+        for (let i = 0, len = paramsArr.length; i < len; i++) {// 再通过 = 将每一个参数分割为 key:value 的形式
+            let arr = paramsArr[i].split('=');
+            obj[arr[0]] = arr[1];
+        }
+        return obj
+    }
+    var handler = function (captchaObj) {
+        captchaObj.appendTo('#captcha');
+        captchaObj.onReady(function () {
+            $("#wait").hide();
+        });
+        captchaObj.onSuccess(function () {
+            var result = captchaObj.getValidate();
+            if (!result) {
+                return alert('请完成验证');
+            }
+            window.JsBridge.postMessage(result.geetest_challenge, result.geetest_validate, result.geetest_seccode);
+        });
+    };
+    function setGeetestConfig(gt, challenge) {
+        $('#text').hide();
+        $('#wait').show();
+        initGeetest({
+            // 以下 4 个配置参数为必须，不能缺少
+            gt: gt,
+            challenge: challenge,
+            offline: false, // 表示用户后台检测极验服务器是否宕机
+            new_captcha: true, // 用于宕机时表示是新验证码的宕机
+
+            product: "popup", // 产品形式，包括：float，popup
+            width: "300px",
+            https: true
+
+            // 更多前端配置参数说明请参见：http://docs.geetest.com/install/client/web-front/
+        }, handler);
+    }
+    window.onload = function() {
+        var params = getUrlParam2();
+        if (!!params['gt'] && !!params['challenge']) {
+            setGeetestConfig(params['gt'], params['challenge'])
+        } else {
+            alert("缺少参数")
+        }
+        $('#btn-cancel').click(function () {
+            window.JsBridge.close();
+        });
+    };
+
+</script>
+</body>
+
+</html>

@@ -1,4 +1,6 @@
 import cn.a10miaomiao.bilimiao.build.*
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -31,9 +33,24 @@ android {
         }
     }
 
+    val signingFile = file("signing.properties")
+    if (signingFile.exists()) {
+        val props = Properties()
+        props.load(FileInputStream(file("signing.properties")))
+        signingConfigs {
+            create("miao") {
+                keyAlias = props.getProperty("KEY_ALIAS")
+                keyPassword = props.getProperty("KEY_PASSWORD")
+                storeFile = file(props.getProperty("KEYSTORE_FILE"))
+                storePassword = props.getProperty("KEYSTORE_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "bilimiao dev")
+            manifestPlaceholders["channel"] = "Development"
         }
         release {
             isMinifyEnabled = false
@@ -41,6 +58,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfigs.asMap["miao"]?.let {
+                signingConfig = it
+            }
         }
         create("benchmark") {
             initWith(buildTypes.getByName("release"))
@@ -50,32 +70,15 @@ android {
         }
     }
 
-    fun createManifestPlaceholders(
-        channelName: String
-    ) = mapOf(
-        "APP_CHANNEL_VALUE" to channelName,
-    )
-
     productFlavors {
-        create("dev") {
-            val manifestPlaceholders = createManifestPlaceholders("Development")
-            addManifestPlaceholders(manifestPlaceholders)
+        create("full") {
+            dimension = flavorDimensionList[0]
+            val channelName = project.properties["channel"] ?: "Unknown"
+            manifestPlaceholders["channel"] = channelName
         }
-        create("github") {
-            val manifestPlaceholders = createManifestPlaceholders("Github")
-            addManifestPlaceholders(manifestPlaceholders)
-        }
-        create("gitee") {
-            val manifestPlaceholders = createManifestPlaceholders("Gitee")
-            addManifestPlaceholders(manifestPlaceholders)
-        }
-        create("qq") {
-            val manifestPlaceholders = createManifestPlaceholders("QQ")
-            addManifestPlaceholders(manifestPlaceholders)
-        }
-        create("miao") {
-            val manifestPlaceholders = createManifestPlaceholders("10miaomiao")
-            addManifestPlaceholders(manifestPlaceholders)
+        create("foss") {
+            dimension = flavorDimensionList[0]
+            manifestPlaceholders["channel"] = "FOSS"
         }
     }
 
@@ -152,8 +155,9 @@ dependencies {
     // 弹幕引擎
     implementation(project(":DanmakuFlameMaster"))
 
-    // 百度统计
-    implementation(Libraries.baiduMobstat)
+    // 闭源库：百度统计、极验验证
+    "fullImplementation"(Libraries.baiduMobstat)
+    "fullImplementation"(Libraries.sensebot)
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
