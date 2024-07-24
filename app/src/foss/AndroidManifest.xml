@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name=".activity.GeetestValidatorActivity"
+            android:label="@string/geetest_validator"
+            android:theme="@style/Theme.Bilimiao"/>
+    </application>
+
+</manifest>

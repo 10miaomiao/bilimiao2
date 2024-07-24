@@ -110,9 +110,6 @@ dependencies {
 
     implementation("javax.annotation:javax.annotation-api:1.2")
 
-    // 极验验证
-    implementation(Libraries.sensebot)
-
     implementation(project(":DanmakuFlameMaster"))
 
     testImplementation(Libraries.junit)
