@@ -4,7 +4,6 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven("https://dl.bintray.com/kotlin/kotlin-eap")
     }
 }
 dependencyResolutionManagement {

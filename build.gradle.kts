@@ -26,6 +26,16 @@ buildscript {
     }
 }
 
+allprojects {
+    configurations.all {
+        resolutionStrategy.dependencySubstitution {
+            // This lib is used by com.github.mikaelzero.mojito:SketchImageViewLoader:1.8.7 and only available in bintray
+            // It has been moved to mavenCentral with a different module name
+            substitute(module("me.panpf:sketch-gif:2.7.1")).using(module("io.github.panpf.sketch:sketch-gif:2.7.1"))
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }
