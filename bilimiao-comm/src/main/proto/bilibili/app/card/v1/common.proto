@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package bilibili.app.card.v1;
 
-import "bilibili/app/card/v1/ad.proto";
-
 //
 message Args {
     //
@@ -74,7 +72,7 @@ message Base {
     // 条目排位序号
     int64 idx = 11;
     //
-    AdInfo ad_info = 12;
+//    AdInfo ad_info = 12;
     //
     Mask mask = 13;
     //来源标识
