@@ -36,7 +36,7 @@ android {
     val signingFile = file("signing.properties")
     if (signingFile.exists()) {
         val props = Properties()
-        props.load(FileInputStream(file("signing.properties")))
+        props.load(FileInputStream(signingFile))
         signingConfigs {
             create("miao") {
                 keyAlias = props.getProperty("KEY_ALIAS")
@@ -137,7 +137,7 @@ dependencies {
     implementation(Libraries.media3ExoPlayer)
     implementation(Libraries.media3ExoPlayerDash)
     implementation(Libraries.gsyVideoPlayer)
-    implementation(files("libs/lib-decoder-av1-release.aar"))
+
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
@@ -158,6 +158,8 @@ dependencies {
     // 闭源库：百度统计、极验验证
     "fullImplementation"(Libraries.baiduMobstat)
     "fullImplementation"(Libraries.sensebot)
+    // av1解码器：https://github.com/google/ExoPlayer/tree/release-v2/extensions/av1
+    "fullImplementation"(files("libs/lib-decoder-av1-release.aar"))
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
