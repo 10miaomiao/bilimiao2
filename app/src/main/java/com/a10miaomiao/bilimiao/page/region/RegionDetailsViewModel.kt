@@ -5,14 +5,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
-import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
+import com.a10miaomiao.bilimiao.comm.entity.region.RegionVideoInfo
+import com.a10miaomiao.bilimiao.comm.entity.region.RegionVideosRankInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -36,7 +38,7 @@ class RegionDetailsViewModel(
     val rid by lazy { fragment.requireArguments().getInt(RegionDetailsFragment.TID) }
     var rankOrder = "click"  //排行依据
     var triggered = false
-    var list = PaginationInfo<RegionTypeDetailsInfo>()
+    var list = PaginationInfo<RegionVideoInfo>()
 
 
     init {
@@ -64,10 +66,10 @@ class RegionDetailsViewModel(
                     timeFrom = timeFrom.getValue(),
                     timeTo = timeTo.getValue(),
                 )
-                .call()
-                .gson<ResultInfo2<List<RegionTypeDetailsInfo>>>()
+                .awaitCall()
+                .gson<ResultInfo<RegionVideosRankInfo>>()
             if (res.code == 0) {
-                var result = res.result
+                var result = res.data.result
                 var totalCount = 0 // 屏蔽前数量
                 if (result.size < list.pageSize) {
                     ui.setState { list.finished = true }
@@ -88,7 +90,7 @@ class RegionDetailsViewModel(
                     _loadData(pageNum + 1)
                 }
             } else {
-                context.toast(res.message)
+                PopTip.show(res.message)
                 throw Exception(res.message)
             }
         } catch (e: Exception) {
