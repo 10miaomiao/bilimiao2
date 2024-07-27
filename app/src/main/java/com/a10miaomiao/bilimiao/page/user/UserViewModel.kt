@@ -12,9 +12,7 @@ import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
-import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -45,7 +43,6 @@ class UserViewModel(
 
     var loading = false
     var dataInfo: SpaceInfo? = null
-    var channelList = listOf<UpperChannelInfo>()
 
     var noLike = false // 不喜欢，是否屏蔽
 
@@ -82,13 +79,6 @@ class UserViewModel(
                     PopTip.show(res.message)
                 }
             }
-            val res2 = UserApi().upperChanne(id).awaitCall().gson<ResultListInfo<UpperChannelInfo>>()
-            if (res.code == 0) {
-                ui.setState {
-                    channelList = res2.data
-                }
-            }
-
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
                 PopTip.show("网络错误")

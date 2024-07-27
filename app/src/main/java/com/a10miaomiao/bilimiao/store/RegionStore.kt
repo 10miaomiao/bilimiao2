@@ -1,24 +1,22 @@
 package com.a10miaomiao.bilimiao.store
 
 import android.content.Context
-import android.preference.PreferenceManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import splitties.collections.forEachWithIndex
@@ -27,7 +25,6 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
-import java.util.Date
 
 class RegionStore(override val di: DI) :
     ViewModel(), BaseStore<RegionStore.State> {
@@ -60,9 +57,9 @@ class RegionStore(override val di: DI) :
         // 加载分区列表
         try {
             val jsonStr = readRegionJson(context, isBestRegion)!!
-            val result = Gson().fromJson<ResultListInfo<RegionInfo>>(
+            val result = Gson().fromJson<ResultInfo<List<RegionInfo>>>(
                 jsonStr,
-                object : TypeToken<ResultListInfo<RegionInfo>>() {}.type
+                object : TypeToken<ResultInfo<List<RegionInfo>>>() {}.type
             )
             val data = result.data
             data.forEachWithIndex(::regionIcon)
@@ -83,7 +80,7 @@ class RegionStore(override val di: DI) :
             val res = BiliApiService.regionAPI
                 .regions()
                 .awaitCall()
-                .gson<ResultListInfo<RegionInfo>>()
+                .gson<ResultInfo<List<RegionInfo>>>()
             if (res.isSuccess) {
                 val regionList = res.data.filter { it.children != null && it.children.isNotEmpty() }
                 setState {
@@ -93,15 +90,16 @@ class RegionStore(override val di: DI) :
                 // 保存到本地
                 writeRegionJson(
                     context,
-                    ResultListInfo(
+                    ResultInfo(
                         code = 0,
                         data = regionList,
-                        msg = "",
+                        message = "",
+                        ttl = 0,
                     )
                 )
             } else {
                 withContext(Dispatchers.Main) {
-                    PopTip.show(res.msg)
+                    PopTip.show(res.message)
                 }
             }
         } catch (e: Exception) {
@@ -136,7 +134,7 @@ class RegionStore(override val di: DI) :
         }
     }
 
-    private fun writeRegionJson(context: Context, region: ResultListInfo<RegionInfo>) {
+    private fun writeRegionJson(context: Context, region: ResultInfo<List<RegionInfo>>) {
         try {
             val jsonStr = Gson().toJson(region)
             val outputStream = context.openFileOutput("region.json", Context.MODE_PRIVATE);

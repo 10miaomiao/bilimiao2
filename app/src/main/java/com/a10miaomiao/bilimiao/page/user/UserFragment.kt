@@ -25,7 +25,6 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
-import com.a10miaomiao.bilimiao.comm.entity.user.UpperChannelInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -253,15 +252,6 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     )
                     Navigation.findNavController(view)
                         .navigate(UserFavouriteDetailFragment.actionId, args)
-                }
-                is UpperChannelInfo -> {
-                    val args = UserChannelDetailFragment.createArguments(
-                        id = item.cid,
-                        parent = item.mid,
-                        name = item.name
-                    )
-                    Navigation.findNavController(view)
-                        .navigate(UserChannelDetailFragment.actionId, args)
                 }
                 // 跳转番剧
                 is SpaceInfo.SeasonItem -> {
@@ -526,39 +516,6 @@ class UserFragment : Fragment(), DIAware, MyPage {
                     }
                     _miaoAdapter(
                         items = viewModel.dataInfo?.archive?.item?.toMutableList(),
-                        itemUi = itemUi,
-                    ) {
-                        setOnItemClickListener(handleItemClick)
-                    }
-                }..lParams(matchParent, wrapContent)
-
-                // 频道
-                isShow = viewModel.channelList.isNotEmpty()
-                +mediaTitleView(
-                    title = "${subject}的频道",
-                    isShow = isShow,
-                )..lParams(matchParent, wrapContent) {
-                    horizontalMargin = config.pagePadding
-                    _topMargin = config.dividerSize
-                }
-                +recyclerView {
-                    horizontalPadding = config.pagePadding
-                    _show = isShow
-                    isNestedScrollingEnabled = false
-                    _miaoLayoutManage(
-                        GridAutofitLayoutManager(requireContext(), requireContext().dip(150))
-                    )
-                    val itemUi = miaoMemo(null) {
-                        miaoBindingItemUi<UpperChannelInfo> { item, _ ->
-                            mediaItemView(
-                                title = item.name,
-                                subtitle = "共${item.count}个视频",
-                                cover = item.cover,
-                            )
-                        }
-                    }
-                    _miaoAdapter(
-                        items = viewModel.channelList.toMutableList(),
                         itemUi = itemUi,
                     ) {
                         setOnItemClickListener(handleItemClick)

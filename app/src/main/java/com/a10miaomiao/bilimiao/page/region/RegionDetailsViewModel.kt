@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo2
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionTypeDetailsInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -65,7 +65,7 @@ class RegionDetailsViewModel(
                     timeTo = timeTo.getValue(),
                 )
                 .call()
-                .gson<ResultListInfo2<RegionTypeDetailsInfo>>()
+                .gson<ResultInfo2<List<RegionTypeDetailsInfo>>>()
             if (res.code == 0) {
                 var result = res.result
                 var totalCount = 0 // 屏蔽前数量
@@ -88,8 +88,8 @@ class RegionDetailsViewModel(
                     _loadData(pageNum + 1)
                 }
             } else {
-                context.toast(res.msg)
-                throw Exception(res.msg)
+                context.toast(res.message)
+                throw Exception(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
