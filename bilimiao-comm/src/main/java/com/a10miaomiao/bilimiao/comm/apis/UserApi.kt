@@ -17,13 +17,6 @@ class UserApi {
     }
 
     /**
-     * 获取up主的频道列表
-     */
-    fun upperChanne(mid: String) = MiaoHttp.request {
-        url = "https://api.bilibili.com/x/space/channel/index?mid=$mid&guest=false&jsonp=jsonp"
-    }
-
-    /**
      * 获取up主频道的视频列表
      */
     fun upperChanneVideo(mid: String, cid: String, pageNum: Int, pageSize: Int) = MiaoHttp.request {
