@@ -9,7 +9,6 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.DisplayCutout
 import android.view.WindowManager
 import android.widget.ImageView
@@ -45,6 +44,7 @@ import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.network
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.player.BilimiaoPlayerManager
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -56,7 +56,6 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
-import com.a10miaomiao.bilimiao.widget.player.media3.Libgav1Media3ExoPlayerManager
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
@@ -232,8 +231,7 @@ class PlayerDelegate2(
 
     @OptIn(markerClass = [UnstableApi::class])
     private fun initPlayer() {
-        // AV1
-        PlayerFactory.setPlayManager(Libgav1Media3ExoPlayerManager::class.java)
+        BilimiaoPlayerManager.initConfig()
         ExoSourceManager.setExoMediaSourceInterceptListener(this)
     }
 
