@@ -25,7 +25,13 @@ class UserStore(override val di: DI) :
 
     data class State (
         var info: UserInfo? = null
-    )
+    ) {
+        fun isSelf(mid: String) = info?.mid == mid.toLong()
+
+        fun isLogin() = info != null
+
+        fun isVip() = (info?.vip_type ?: 0) > 0
+    }
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()

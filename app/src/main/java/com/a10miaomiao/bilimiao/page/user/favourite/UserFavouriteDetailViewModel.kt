@@ -4,16 +4,11 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultListInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
-import com.a10miaomiao.bilimiao.comm.entity.media.MediaInfo
-import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.SubmitVideosInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
