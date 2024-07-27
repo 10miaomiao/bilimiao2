@@ -34,6 +34,7 @@ class RegionAPI {
             "main_ver" to "v3",
             "search_type" to "video",
             "view_type" to  "hot_rank",
+            "new_web_tag" to "1",
             "cate_id" to rid.toString(),
             "order" to rankOrder,
             "copy_right" to "-1",
@@ -42,6 +43,6 @@ class RegionAPI {
             "time_from" to timeFrom,
             "time_to" to timeTo
         )
-        url = "https://s.search.bilibili.com/cate/search?" + ApiHelper.urlencode(params)
+        url = "https://api.bilibili.com/x/web-interface/newlist_rank?" + ApiHelper.urlencode(params)
     }
 }
