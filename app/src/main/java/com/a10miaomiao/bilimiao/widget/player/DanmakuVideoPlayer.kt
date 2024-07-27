@@ -764,6 +764,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
+    override fun onVideoResume() {
+        onVideoResume(true)
+    }
+
     override fun clickStartIcon() {
         super.clickStartIcon()
         if (mCurrentState == CURRENT_STATE_PLAYING) {
@@ -827,7 +831,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     }
 
     protected fun danmakuOnResume() {
-        if (mDanmakuView != null && mDanmakuView.isPaused) {
+        if (mDanmakuView != null && mDanmakuView.isPrepared) {
             mDanmakuView.start(currentPositionWhenPlaying)
         }
     }
