@@ -65,6 +65,15 @@ object NumberUtil {
             min = "0$min"
         return "$min:$s"
     }
+
+    fun converDuration(duration: String): String {
+        return try {
+            converDuration(Integer.valueOf(duration))
+        } catch (e: NumberFormatException) {
+            duration
+        }
+    }
+
     fun converDuration(duration: Int): String {
         var s = (duration % 60).toString()
         var min = (duration / 60).toString()
