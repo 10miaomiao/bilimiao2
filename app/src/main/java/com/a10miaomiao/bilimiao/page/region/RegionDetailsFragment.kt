@@ -99,7 +99,7 @@ class RegionDetailsFragment : RecyclerViewFragment(), DIAware {
             upperName = item.author,
             playNum = item.play,
             damukuNum = item.video_review,
-            duration = NumberUtil.converString(item.duration),
+            duration = NumberUtil.converDuration(item.duration),
         )
     }
 
