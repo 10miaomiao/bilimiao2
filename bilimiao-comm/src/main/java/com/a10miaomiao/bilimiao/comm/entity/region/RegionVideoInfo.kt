@@ -10,7 +10,7 @@ data class RegionVideoInfo(
     val id: String,
     val is_pay: Int,
     val is_union_video: Int,
-    val mid: Int,
+    val mid: String,
     val pic: String,
     val play: String,
     val pubdate: String,
