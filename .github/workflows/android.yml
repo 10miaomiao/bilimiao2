@@ -1,0 +1,51 @@
+name: Android CI
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "2.*" # Push events to matching 2.*, i.e. 2.0, 2.1.3
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    - name: Generate signing.properties
+      run: |
+        rm -rf 10miaomiao.jks
+        ${{ secrets.BASH_DOWNLOAD_JKS }}
+        echo "KEYSTORE_FILE = ${{github.workspace}}/10miaomiao.jks" > app/signing.properties
+        echo "KEYSTORE_PASSWORD = ${{ secrets.KEYSTORE_PASSWORD }}" >> app/signing.properties
+        echo "KEY_ALIAS = ${{ secrets.KEY_ALIAS }}" >> app/signing.properties
+        echo "KEY_PASSWORD = ${{ secrets.KEY_PASSWORD }}" >> app/signing.properties
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew -Pchannel=Github app:assembleRelease
+    - name: Move apk to release
+      run: |
+        release_dir=${{ github.workspace }}/release
+        if [ ! -d "$release_dir" ];then
+            mkdir $release_dir
+        fi
+        mv ${{ github.workspace }}/app/build/outputs/apk/full/release/app-full-release.apk $release_dir/bilimiao-github-${{ github.ref_name }}.apk
+        mv ${{ github.workspace }}/app/build/outputs/apk/foss/release/app-foss-release.apk $release_dir/bilimiao-foss-${{ github.ref_name }}.apk
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ github.workspace }}/release/*.apk
+        tag: ${{ github.ref }}
+        release_name: bilimiao ${{ github.ref_name }}
+        overwrite: true
+        file_glob: true
+        body: ""
