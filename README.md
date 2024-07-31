@@ -23,10 +23,15 @@ bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在
 本项目使用安卓原生技术开发，后续UI将逐步改用Jetpack Compose。
 
 ### 下载及使用
-#### 下载 
+#### 下载
 1. 从[10miaomiao.cn](https://10miaomiao.cn/project/1)下载
 2. 从[GithubRelease](https://github.com/10miaomiao/bilimiao2/releases)下载
 3. 从[GiteeRelease](https://gitee.com/10miaomiao/bilimiao2/releases)下载
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on-zh-hans.png"
+    alt="下载应用请到 F-Droid"
+    height="80">](https://f-droid.org/packages/com.a10miaomiao.bilimiao)
+
 #### 使用说明
 1. [手表使用说明](doc/手表使用说明.md)
 2. [时光机](doc/时光机.md)
