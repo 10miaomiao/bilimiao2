@@ -1,8 +1,7 @@
-Bilimiao is a third-party Bilibili client.
+bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在每个时间段的热门视频列表，后经不断改进，功能不断完善，形成了一款安卓上的哔哩哔哩的第三方APP。
 
-Top Features:
-
-+Bilibili Time Machine, view popular videos from different periods
-+Recommended and popular video list
-+Play videos and bangumi
-+Download videos and bangumi
+主要功能：
+* 哔哩哔哩时光机，查看不同时期的热门视频
+* 推荐及热门视频列表
+* 播放视频及番剧
+* 下载视频及番剧等
