@@ -1,0 +1,8 @@
+Bilimiao is a third-party Bilibili client.
+
+Top Features:
+
++Bilibili Time Machine, view popular videos from different periods
++Recommended and popular video list
++Play videos and bangumi
++Download videos and bangumi
