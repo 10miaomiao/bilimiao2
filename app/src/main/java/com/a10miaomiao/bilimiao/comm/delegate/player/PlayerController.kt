@@ -390,7 +390,7 @@ class PlayerController(
                 activity = activity,
                 anchor = view,
                 value = delegate.speed,
-                list = speedValueSets.map { it.toFloat() },
+                list = speedValueSets.map { it.toFloat() }.sorted(),
             )
             popup.setOnChangedSpeedListener(delegate::changedSpeed)
             popup.show()
