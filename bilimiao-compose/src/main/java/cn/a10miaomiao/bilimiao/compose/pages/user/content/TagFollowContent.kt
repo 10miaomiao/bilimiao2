@@ -53,12 +53,16 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.string
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -180,14 +184,26 @@ private class TagFollowContentModel(
         list: List<FollowingItemInfo>,
         defaultInterrelation: InterrelationInfo,
     ): List<FollowingItemInfo> {
-        val res = BiliApiService.userRelationApi
+        var interrelationMap = JsonObject()
+        val resText = BiliApiService.userRelationApi
             .interrelations(list.map { it.mid })
             .awaitCall()
-            .gson<ResultInfo<JsonObject>>()
-        val interrelationMap = if (res.isSuccess) {
-            res.data
-        } else {
-            JsonObject()
+            .string()
+        try {
+            val res = resText.gson<ResultInfo<JsonObject>>()
+            if (res.isSuccess) {
+                interrelationMap = res.data
+            } else {
+                // TODO: message
+            }
+        } catch (e: JsonSyntaxException) {
+            e.printStackTrace()
+            val res = resText.gson<MessageInfo>()
+            if (res.isSuccess) {
+                interrelationMap = JsonObject()
+            } else {
+                // TODO: message
+            }
         }
         return list.map {
             var interrelation = defaultInterrelation
