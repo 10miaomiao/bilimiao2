@@ -124,13 +124,17 @@ class MiaoHttp(var url: String? = null) {
             return this.body!!.string()
         }
 
-        inline fun <reified T> Response.gson(isLog: Boolean = false): T {
-            val jsonStr = this.string()
+        inline fun <reified T> String.gson(isLog: Boolean = false): T {
+            val jsonStr = this
             if (isLog) {
                 miaoLogger() debug jsonStr
             }
             val type = object : TypeToken<T>() {}.type
             return fromJson(jsonStr, type)
+        }
+
+        inline fun <reified T> Response.gson(isLog: Boolean = false): T {
+            return this.string().gson<T>(isLog)
         }
 
         const val GET = "GET"
