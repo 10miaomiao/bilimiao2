@@ -121,7 +121,8 @@ class RegionDetailsFragment : RecyclerViewFragment(), DIAware {
                             viewModel.list.fail -> ListState.FAIL
                             viewModel.list.finished -> ListState.NOMORE
                             else -> ListState.NORMAL
-                        }
+                        },
+                        onFailRefreshClick = viewModel::tryAgainLoadData,
                     )
                     footerView..lParams(matchParent, wrapContent) {
                         bottomMargin = contentInsets.bottom

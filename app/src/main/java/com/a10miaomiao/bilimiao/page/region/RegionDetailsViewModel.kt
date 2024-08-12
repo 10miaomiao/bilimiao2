@@ -87,7 +87,7 @@ class RegionDetailsViewModel(
                 }
                 list.pageNum = pageNum
                 if (list.data.size < 10 && totalCount != result.size) {
-                    _loadData(pageNum + 1)
+                    tryAgainLoadData(pageNum + 1)
                 }
             } else {
                 PopTip.show(res.message)
@@ -106,7 +106,7 @@ class RegionDetailsViewModel(
         }
     }
 
-    private fun _loadData(pageNum: Int = list.pageNum) {
+    fun tryAgainLoadData(pageNum: Int = list.pageNum) {
         loadData(pageNum)
     }
 
