@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose
 
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -100,6 +101,10 @@ class PageRouteBuilder (
             route = route,
             arguments = arguments,
             deepLinks = deepLinks,
+            enterTransition = ::enterTransition,
+            exitTransition = ::exitTransition,
+            popEnterTransition = ::popEnterTransition,
+            popExitTransition = ::popExitTransition,
         ) {
             Content(it)
         }
