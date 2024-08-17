@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Looper
@@ -14,6 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.system.exitProcess
 
+
 /**
  * 参考：https://www.jianshu.com/p/0ea4615674f0
  */
@@ -22,6 +24,11 @@ class AppCrashHandler private constructor(
 ) : Thread.UncaughtExceptionHandler {
     // 用于格式化日期
     private val mDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    private val appChannel = context.packageManager
+        .getApplicationInfo(
+            context.packageName,
+            PackageManager.GET_META_DATA
+        ).metaData.getString("app_channel") ?: "Unknown"
 
     // 单例模式
     companion object {
@@ -94,6 +101,7 @@ class AppCrashHandler private constructor(
         info["硬件制造商"] = Build.MANUFACTURER
         info["系统版本"] = Build.VERSION.RELEASE
         info["系统版本号"] = "${Build.VERSION.SDK_INT}"
+        info["渠道标识"] = appChannel
 
         val pm = context.packageManager
         val pi = pm.getPackageInfo(context.packageName, PackageManager.GET_ACTIVITIES)
