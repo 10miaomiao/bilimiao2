@@ -2,12 +2,17 @@ package cn.a10miaomiao.bilimiao.compose.base
 
 import android.os.Bundle
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
+import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughOut
 
 abstract class ComposePage {
 
@@ -63,6 +68,22 @@ abstract class ComposePage {
         }.mapNotNull {
             (it.invoke(this) as? PageArg<*>)?.namedNavArgument
         }
+    }
+
+    open fun enterTransition(scope: @JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>): EnterTransition? {
+        return materialFadeThroughIn(initialScale = 0.85f)
+    }
+
+    open fun exitTransition(scope: @JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>): ExitTransition? {
+        return materialFadeThroughOut()
+    }
+
+    open fun popEnterTransition(scope: @JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>): EnterTransition? {
+        return materialFadeThroughIn(initialScale = 1.15f)
+    }
+
+    open fun popExitTransition(scope: @JvmSuppressWildcards AnimatedContentTransitionScope<NavBackStackEntry>): ExitTransition? {
+        return materialFadeThroughOut()
     }
 
 }
