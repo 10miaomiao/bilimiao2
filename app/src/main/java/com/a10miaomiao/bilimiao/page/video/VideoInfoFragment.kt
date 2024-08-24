@@ -9,8 +9,11 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.scaleMatrix
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -23,12 +26,14 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.cover.CoverActivity
 import cn.a10miaomiao.miao.binding.android.view._isEnabled
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topPadding
+import cn.a10miaomiao.miao.binding.android.widget._isChecked
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.android.widget._textColor
 import cn.a10miaomiao.miao.binding.android.widget._textColorResource
@@ -46,6 +51,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcEpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSectionInfo
@@ -62,6 +68,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -94,6 +101,8 @@ import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -107,6 +116,7 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
+import splitties.views.dsl.core.margin
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.verticalLayout
@@ -475,6 +485,16 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    private val handleAutoPlaySeasonCheckedChange = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+        viewModel.updateIsAutoPlaySeason(isChecked)
+    }
+
+    private val handlePlayListClick = View.OnClickListener {
+        findNavController().navigateToCompose(
+            PlayListPage()
+        )
+    }
+
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
         viewModel.loadData()
     }
@@ -593,6 +613,66 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    fun MiaoUI.playListView(): View {
+        val playListState = playListStore.state
+        return horizontalLayout {
+            backgroundColor = config.blockBackgroundColor
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(
+                config.smallPadding,
+                config.pagePadding,
+                config.smallPadding,
+                config.pagePadding,
+            )
+            apply(ViewStyle.roundRect(dip(10)))
+            _show = !playListState.isEmpty()
+            val currentPosition = playListState.indexOfAid(viewModel.id)
+            val listSize = playListState.items.size
+            val inList = currentPosition > -1
+            setOnClickListener(handlePlayListClick)
+
+            views {
+                +verticalLayout {
+                    views {
+                        +textView {
+                            _text = if(inList) {
+                                "当前播放列表："
+                            } else {
+                                "不在当前播放列表中："
+                            }
+                            textSize = 14f
+                        }
+                        +textView {
+                            _text = if(playListState.loading){
+                                "加载中"
+                            } else {
+                                playListState.name ?: ""
+                            }
+                            textSize = 14f
+                            setTextColor(config.foregroundAlpha45Color)
+                        }
+                    }
+                }..lParams(matchParent, wrapContent) {
+                    weight = 1f
+                }
+                +textView {
+//                    _show = currentPosition >= 0
+                    _text = if (inList) {
+                        "${currentPosition + 1}/${listSize}"
+                    } else {
+                        "${listSize}个视频"
+                    }
+                    setTextColor(config.foregroundColor)
+                }..lParams(wrapContent, wrapContent)
+                +imageView {
+                    setImageResource(R.drawable.ic_navigate_next_black_24dp)
+                    imageTintList = ColorStateList.valueOf(config.foregroundColor)
+                    setBackgroundResource(config.selectableItemBackgroundBorderless)
+                }..lParams(dip(24), dip(24))
+            }
+        }
+    }
+
     @OptIn(InternalSplittiesApi::class)
     val ugcSeasonEpisodeUi = miaoBindingItemUi<Any> { item, index ->
         if (item is UgcEpisodeInfo) {
@@ -665,6 +745,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
         }
     }
 
+    @OptIn(InternalSplittiesApi::class)
     fun MiaoUI.ugcSeasonView(): View {
         val ugcSeason = viewModel.ugcSeason
         return verticalLayout {
@@ -679,7 +760,29 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                         +textView {
                             _text = "合集 · ${ugcSeason?.title}"
                             textSize = 14f
+                        }..lParams(matchParent, wrapContent) {
+                            weight = 1f
                         }
+                        +view<MaterialSwitch> {
+                            text = "自动连播"
+                            thumbTintList = ColorStateList(
+                                arrayOf(
+                                    intArrayOf(android.R.attr.state_checked),
+                                    intArrayOf()
+                                ),
+                                intArrayOf(
+                                    config.colorSurface,
+                                    config.foregroundAlpha45Color,
+                                )
+                            )
+                            padding = 0
+                            switchPadding = dip(5)
+                            scaleX = 0.8f
+                            scaleY = 0.8f
+                            translationX = dip(10f)
+                            _isChecked = viewModel.isAutoPlaySeason
+                            setOnCheckedChangeListener(handleAutoPlaySeasonCheckedChange)
+                        }..lParams(wrapContent, dip(10))
                     }
                 }
                 +recyclerView {
@@ -717,6 +820,21 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                 }..lParams {
                     width = matchParent
                     height = wrapContent
+                }
+
+                +textView {
+                    text = "查看合集>"
+                    setTextColor(config.themeColor)
+                    setBackgroundResource(config.selectableItemBackgroundBorderless)
+                    setOnClickListener {
+
+                    }
+                    padding = config.smallPadding
+                }..lParams {
+                    width = wrapContent
+                    height = wrapContent
+                    gravity = Gravity.CENTER_HORIZONTAL
+                    bottomMargin = config.smallPadding
                 }
             }
         }
@@ -1028,6 +1146,28 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     topMargin = dip(10)
                 }
 
+                +playListView()..lParams {
+                    width = matchParent
+                    topMargin = dip(10)
+                }
+                +textView {
+                    val playListFrom = playListStore.state.from
+                    val ugcSeason = viewModel.ugcSeason
+                    _show = viewModel.isAutoPlaySeason &&
+                            ugcSeason != null &&
+                            playListFrom != null &&
+                            ugcSeason.id != playListFrom.let {
+                                (it as? PlayListFrom.Season)?.seasonId ?:
+                                (it as? PlayListFrom.Section)?.seasonId
+                            }
+                    text = "将自动替换当前播放列表"
+                    textSize = 12f
+                    setTextColor(0xFFFF2222.toInt())
+                    gravity = Gravity.END
+                }..lParams {
+                    width = matchParent
+                    topMargin = dip(10)
+                }
                 +ugcSeasonView()..lParams {
                     width = matchParent
                     topMargin = dip(10)
@@ -1057,6 +1197,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     val ui = miaoBindingUi {
         connectStore(viewLifecycleOwner, windowStore)
         connectStore(viewLifecycleOwner, playerStore)
+        connectStore(viewLifecycleOwner, playListStore)
         val contentInsets = windowStore.getContentInsets(parentView)
         val info = viewModel.info
         // 监听info改变，修改页面标题
