@@ -1,22 +1,27 @@
 package cn.a10miaomiao.bilimiao.compose.pages.playlist
 
+import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,12 +37,18 @@ import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.commponents.PlayListItemCard
+import cn.a10miaomiao.bilimiao.compose.pages.user.TagEditDialogState
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.MessageDialog
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
@@ -84,9 +95,6 @@ private class PlayListPageViewModel(
 private fun PlayListPageContent(
     viewModel: PlayListPageViewModel
 ) {
-    PageConfig(
-        title = "播放列表"
-    )
     val playerStore: PlayerStore by rememberInstance()
     val playListStore: PlayListStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
@@ -94,6 +102,40 @@ private fun PlayListPageContent(
     val windowInsets = windowState.getContentInsets(localContainerView())
     val playListState by playListStore.stateFlow.collectAsState()
     val playerState by playerStore.stateFlow.collectAsState()
+
+    val showClearTipsDialog = remember {
+        mutableStateOf(false)
+    }
+
+    fun clearPlayList() {
+        showClearTipsDialog.value = false
+        playListStore.clearPlayList()
+    }
+
+    fun menuItemClick (view: View, menuItem: MenuItemPropInfo) {
+        when(menuItem.key) {
+            MenuKeys.clear -> {
+                showClearTipsDialog.value = true
+            }
+        }
+    }
+
+    val pageConfigId = PageConfig(
+        title = "播放列表",
+        menu = remember {
+            myMenu {
+                myItem {
+                    key = MenuKeys.clear
+                    title = "清空列表"
+                    iconFileName = "ic_baseline_clear_all_24"
+                }
+            }
+        }
+    )
+    PageListener(
+        configId = pageConfigId,
+        onMenuItemClick = ::menuItemClick,
+    )
 
     if(playListState.loading) {
         Row (
@@ -156,6 +198,47 @@ private fun PlayListPageContent(
             }
         }
     } else {
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .padding(
+                    top = windowInsets.topDp.dp,
+                    bottom = windowInsets.bottomDp.dp,
+                    start = windowInsets.leftDp.dp,
+                    end = windowInsets.rightDp.dp,
+                )
+        ) {
+            Text(
+                text = "当前播放列表为空",
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.outline,
+                fontSize = 20.sp,
+            )
+        }
+    }
 
+    if (showClearTipsDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showClearTipsDialog.value = false
+            },
+            title = {
+                Text(text = "提示")
+            },
+            text = {
+                Text(text = "确认清空播放列表(⊙ˍ⊙)？")
+            },
+            confirmButton = {
+               TextButton(onClick = ::clearPlayList) {
+                   Text(text = "确认")
+               }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showClearTipsDialog.value = false
+                }) {
+                    Text(text = "取消")
+                }
+            }
+        )
     }
 }
