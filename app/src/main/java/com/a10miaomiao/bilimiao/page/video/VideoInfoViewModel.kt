@@ -62,6 +62,8 @@ class VideoInfoViewModel(
 
     var loading = false
     var loadState = LoadMoreStatus.Loading
+    // 自动连播合集
+    var isAutoPlaySeason = true
 
     var state = ""
 
@@ -210,30 +212,21 @@ class VideoInfoViewModel(
 
     fun playVideo(info: VideoInfo, page: VideoPageInfo) {
         val videoPages = pages
-        val aid = info.aid
         val title = if (videoPages.size > 1) {
             page.part
         } else {
             info.title
         }
         val cid = page.cid
-        // 视频不在列表中，则不设置新的播放列表
-        if(!playListStore.state.inListForAid(info.aid)) {
-            val season = ugcSeason
-            if (season == null) {
-                // 将单个视频加入播放列表
-                val playListItem = playListStore.run {
-                    info.toPlayListItem()
-                }
-                playListStore.setPlayList(
-                    name = info.title,
-                    from = playListItem.from,
-                    items = listOf(
-                        playListItem,
-                    )
-                )
-            } else {
-                // 将合集加入播放列表
+        val season = ugcSeason
+        if (isAutoPlaySeason && season != null) {
+            // 将合集加入播放列表
+            val playListFromId = (playListStore.state.from as? PlayListFrom.Season)?.seasonId
+                ?: (playListStore.state.from as? PlayListFrom.Section)?.seasonId
+            if (playListFromId != season.id ||
+                !playListStore.state.inListForAid(info.aid)) {
+                // 当前播放列表来源不是当前合集或视频不在播放列表中时，创建新播放列表
+                // 以合集创建播放列表
                 val index = if (season.sections.size > 1) {
                     season.sections.indexOfFirst { section ->
                         section.episodes.indexOfFirst { it.aid == info.aid } != -1
@@ -241,7 +234,25 @@ class VideoInfoViewModel(
                 } else { 0 }
                 playListStore.setPlayList(season, index)
             }
+        } else if (playListStore.state.items.isEmpty()) {
+            // 不自动播放合集，以当前视频创建新的播放列表
+            val playListItem = playListStore.run {
+                info.toPlayListItem()
+            }
+            playListStore.setPlayList(
+                name = info.title,
+                from = playListItem.from,
+                items = listOf(
+                    playListItem,
+                )
+            )
+        } else if (!playListStore.state.inListForAid(info.aid)) {
+            // 将视频添加到播放列表末尾
+            playListStore.addItem(playListStore.run {
+                info.toPlayListItem()
+            })
         }
+
         // 播放视频
         basePlayerDelegate.openPlayer(
             VideoPlayerSource(
@@ -450,6 +461,12 @@ class VideoInfoViewModel(
             withContext(Dispatchers.Main) {
                 PopTip.show(e.toString())
             }
+        }
+    }
+
+    fun updateIsAutoPlaySeason(isChecked: Boolean) {
+        ui.setState {
+            isAutoPlaySeason = isChecked
         }
     }
 
