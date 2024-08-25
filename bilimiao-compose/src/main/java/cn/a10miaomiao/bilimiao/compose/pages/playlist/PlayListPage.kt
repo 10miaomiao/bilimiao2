@@ -1,19 +1,25 @@
 package cn.a10miaomiao.bilimiao.compose.pages.playlist
 
+import android.view.HapticFeedbackConstants
 import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,10 +27,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -38,8 +46,8 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.commponents.PlayListItemCard
-import cn.a10miaomiao.bilimiao.compose.pages.user.TagEditDialogState
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
@@ -48,11 +56,13 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.kongzue.dialogx.dialogs.MessageDialog
+import com.kongzue.dialogx.dialogs.PopTip
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.max
 
 class PlayListPage : ComposePage() {
@@ -91,6 +101,7 @@ private class PlayListPageViewModel(
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlayListPageContent(
     viewModel: PlayListPageViewModel
@@ -106,6 +117,12 @@ private fun PlayListPageContent(
     val showClearTipsDialog = remember {
         mutableStateOf(false)
     }
+    val enableEditMode = remember {
+        mutableStateOf(false)
+    }
+    val selectedItemsMap = remember {
+        mutableStateMapOf<String, Int>()
+    }
 
     fun clearPlayList() {
         showClearTipsDialog.value = false
@@ -117,13 +134,47 @@ private fun PlayListPageContent(
             MenuKeys.clear -> {
                 showClearTipsDialog.value = true
             }
+            MenuKeys.edit -> {
+                selectedItemsMap.clear()
+                enableEditMode.value = true
+            }
+            MenuKeys.delete -> {
+                val selectedKeys = selectedItemsMap.keys
+                selectedKeys.remove(playerState.cid) // 移除当前播放的视频
+                if (selectedKeys.isEmpty()) {
+                    PopTip.show("未选中任何视频")
+                } else {
+                    playListStore.removeItems(selectedKeys)
+                }
+            }
+            MenuKeys.complete -> {
+                enableEditMode.value = false
+            }
         }
     }
 
     val pageConfigId = PageConfig(
         title = "播放列表",
-        menu = remember {
+        menu = remember(enableEditMode.value) {
             myMenu {
+                if (enableEditMode.value) {
+                    myItem {
+                        key = MenuKeys.complete
+                        title = "完成编辑"
+                        iconFileName = "ic_baseline_check_24"
+                    }
+                    myItem {
+                        key = MenuKeys.delete
+                        title = "移除选中"
+                        iconFileName = "ic_baseline_delete_outline_24"
+                    }
+                } else {
+                    myItem {
+                        key = MenuKeys.edit
+                        title = "编辑列表"
+                        iconFileName = "ic_baseline_edit_note_24"
+                    }
+                }
                 myItem {
                     key = MenuKeys.clear
                     title = "清空列表"
@@ -135,6 +186,12 @@ private fun PlayListPageContent(
     PageListener(
         configId = pageConfigId,
         onMenuItemClick = ::menuItemClick,
+    )
+    BackHandler(
+        enabled = enableEditMode.value,
+        onBack = {
+            enableEditMode.value = false
+        }
     )
 
     if(playListState.loading) {
@@ -162,44 +219,108 @@ private fun PlayListPageContent(
         val lazyListState = rememberLazyListState(
             initialFirstVisibleItemIndex = max(0, currentPosition)
         )
+        val view = LocalView.current
+        val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+            playListStore.moveItem(from.index, to.index)
+            view.performHapticFeedback(HapticFeedbackConstants.SEGMENT_FREQUENT_TICK)
+        }
         LazyColumn(
             state = lazyListState,
-            modifier = Modifier.padding(
-                start = windowInsets.leftDp.dp,
-                end = windowInsets.rightDp.dp,
-            )
+            contentPadding = windowInsets.toPaddingValues()
         ) {
-            item {
-                Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
-            }
             val playListItems = playListState.items
+            val currentPlayCid = playerState.cid
             items(playListItems.size, {
-                playListItems[it].aid + "-" + playListItems[it].cid
+                playListItems[it].cid
             }) { index ->
                 val item = playListItems[index]
-                Box(
+                ReorderableItem(
+                    reorderableLazyListState,
+                    key = item.cid,
                     modifier = Modifier.padding(5.dp),
-                ) {
+                ) { isDragging ->
                     PlayListItemCard(
+                        modifier = Modifier.fillMaxWidth()
+                            .longPressDraggableHandle(
+                                onDragStarted = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                },
+                                onDragStopped = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.GESTURE_END)
+                                },
+                            ),
                         index = index,
                         item = item,
-                        currentPlayCid = playerState.cid,
-                        onPlayClick = {
-                            viewModel.playVideo(item)
-                        },
                         onClick = {
-                            viewModel.toVideoInfoPage(item)
-                        }
+                           if (enableEditMode.value) {
+                               if (selectedItemsMap.contains(item.cid)) {
+                                   selectedItemsMap.remove(item.cid)
+                               } else {
+                                   selectedItemsMap[item.cid] = index
+                               }
+                           } else {
+                               viewModel.toVideoInfoPage(item)
+                           }
+                        },
+                        action = {
+                           if (currentPlayCid == item.cid) {
+                               Box(
+                                   modifier = Modifier
+                                       .sizeIn(
+                                           minWidth = 50.dp,
+                                           minHeight = 30.dp
+                                       ),
+                                   contentAlignment = Alignment.Center,
+                               ) {
+                                   Text(
+                                       color = MaterialTheme.colorScheme.primary,
+                                       text = "播放中",
+                                       fontSize = 12.sp
+                                   )
+                               }
+                           } else if (enableEditMode.value) {
+                               Checkbox(
+                                   checked = selectedItemsMap.contains(item.cid),
+                                   onCheckedChange = {
+                                       if (it) {
+                                           selectedItemsMap[item.cid] = index
+                                       } else {
+                                           selectedItemsMap.remove(item.cid)
+                                       }
+                                   }
+                               )
+                           } else {
+                               Button(
+                                   onClick = {
+                                       viewModel.playVideo(item)
+                                   },
+                                   shape = MaterialTheme.shapes.small,
+                                   contentPadding = PaddingValues(
+                                       vertical = 4.dp,
+                                       horizontal = 12.dp,
+                                   ),
+                                   modifier = Modifier
+                                       .sizeIn(
+                                           minWidth = 40.dp,
+                                           minHeight = 30.dp
+                                       )
+                                       .padding(0.dp)
+                               ) {
+                                   Text(
+                                       text = "播放",
+                                       fontSize = 12.sp
+                                   )
+                               }
+                           }
+                       }
                     )
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
             }
         }
     } else {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(
                     top = windowInsets.topDp.dp,
                     bottom = windowInsets.bottomDp.dp,

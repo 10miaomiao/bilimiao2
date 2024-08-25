@@ -109,6 +109,37 @@ class PlayListStore(override val di: DI) :
         }
     }
 
+    fun moveItem(fromIndex: Int, toIndex: Int) {
+        if (fromIndex == toIndex ||
+            fromIndex < 0 || fromIndex >= state.items.size ||
+            toIndex < 0 || toIndex >= state.items.size) {
+            return
+        }
+        val items = state.items.toMutableList()
+        val item = items.removeAt(fromIndex)
+        items.add(toIndex, item)
+        this.setState {
+            this.items = items
+        }
+    }
+
+    fun removeItems(keys: Set<String>) {
+        val originalItems = state.items.toMutableList()
+        this.setState {
+            this.items = originalItems.filter {
+                !keys.contains(it.cid)
+            }
+        }
+        PopTip.show("已移除选中视频", "恢复")
+            .showLong()
+            .setButton { _, _ ->
+                this.setState {
+                    this.items = originalItems
+                }
+                false
+            }
+    }
+
     fun setPlayList(info: UgcSeasonInfo, index: Int) {
         val sectionInfo = info.sections[index]
         val listFrom = PlayListFrom.Section(

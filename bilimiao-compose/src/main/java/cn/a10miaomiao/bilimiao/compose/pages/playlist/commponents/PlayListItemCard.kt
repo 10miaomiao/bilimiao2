@@ -32,14 +32,14 @@ import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 internal fun PlayListItemCard(
+    modifier: Modifier = Modifier,
     index: Int,
     item: PlayListItemInfo,
-    currentPlayCid: String,
-    onPlayClick: () -> Unit,
     onClick: () -> Unit,
+    action: @Composable () -> Unit,
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         shape = RoundedCornerShape(10.dp),
         color = MaterialTheme.colorScheme.background
     ) {
@@ -104,43 +104,7 @@ internal fun PlayListItemCard(
                 modifier = Modifier.fillMaxHeight(),
                 contentAlignment = Alignment.Center,
             ) {
-                if (currentPlayCid == item.cid) {
-                    Box(
-                        modifier = Modifier
-                            .sizeIn(
-                                minWidth = 50.dp,
-                                minHeight = 30.dp
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            color = MaterialTheme.colorScheme.primary,
-                            text = "播放中",
-                            fontSize = 12.sp
-                        )
-                    }
-                } else {
-                    Button(
-                        onClick = onPlayClick,
-                        shape = MaterialTheme.shapes.small,
-                        contentPadding = PaddingValues(
-                            vertical = 4.dp,
-                            horizontal = 12.dp,
-                        ),
-                        modifier = Modifier
-                            .sizeIn(
-                                minWidth = 40.dp,
-                                minHeight = 30.dp
-                            )
-                            .padding(0.dp)
-                    ) {
-                        Text(
-                            text = "播放",
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-
+                action()
             }
         }
     }
