@@ -18,6 +18,7 @@ object MenuKeys {
     val delete = id_counter++
     val clear = id_counter++
     val select = id_counter++
+    val complete = id_counter++
     val send = id_counter++
 
     val more = id_counter++
