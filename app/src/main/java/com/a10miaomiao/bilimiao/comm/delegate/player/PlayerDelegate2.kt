@@ -50,6 +50,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -90,6 +91,9 @@ class PlayerDelegate2(
     }
     val completionBoxController by lazy {
         CompletionBoxController(activity, this, di)
+    }
+    val loadingBoxController by lazy {
+        LoadingBoxController(activity, this)
     }
     val scaffoldApp by lazy { activity.getScaffoldView() }
 
@@ -371,7 +375,7 @@ class PlayerDelegate2(
             lastPosition = views.videoPlayer.currentPositionWhenPlaying
             quality = newQuality
             PopTip.show("正在切换清晰度").showTop()
-            playerCoroutineScope.launch(Dispatchers.IO) {
+            playerCoroutineScope.launch(Dispatchers.Main) {
                 loadPlayerSource(
                     isChangedQuality = true
                 )
@@ -387,99 +391,95 @@ class PlayerDelegate2(
     ) {
         val source = playerSource ?: return
         try {
-            source.getSubtitles()
-            val danmukuParser = source.getDanmakuParser()
-            val sourceInfo = source.getPlayerUrl(quality, fnval)
-//                DebugMiao.log("playerSourceInfo", sourceInfo.url)
-            withContext(Dispatchers.Main) {
-                // 设置通知栏控制器
-                PlayerService.selfInstance?.setPlayingInfo(
-                    PlayerService.PlayingInfo(
-                        title = source.title,
-                        author = source.ownerName,
-                        cover = source.coverUrl,
-                        duration = sourceInfo.duration,
-                    )
+            loadingBoxController.print("装载弹幕数据...")
+            val danmukuParser = withContext(Dispatchers.IO) {
+                source.getDanmakuParser()
+            }
+            loadingBoxController.println("成功")
+            loadingBoxController.print("获取视频信息...")
+            val sourceInfo = withContext(Dispatchers.IO) {
+                source.getPlayerUrl(quality, fnval)
+            }
+            loadingBoxController.print("成功")
+            // 设置通知栏控制器
+            PlayerService.selfInstance?.setPlayingInfo(
+                PlayerService.PlayingInfo(
+                    title = source.title,
+                    author = source.ownerName,
+                    cover = source.coverUrl,
+                    duration = sourceInfo.duration,
                 )
-                views.videoPlayer.releaseDanmaku()
-                views.videoPlayer.danmakuParser = danmukuParser
-                val header = getDefaultRequestProperties()
-                views.videoPlayer.setUp(
-                    sourceInfo.url,
-                    false,
-                    null,
-                    header,
-                    source.title
-                )
-                if (lastPosition > 0L) {
-                    views.videoPlayer.seekOnStart = lastPosition
-                    lastPosition = 0L
-                } else if (
-                    sourceInfo.lastPlayCid == source.id
-                    && sourceInfo.lastPlayTime > 0L
-                    && sourceInfo.lastPlayTime < sourceInfo.duration - 10000
-                ) {
-                    views.videoPlayer.seekOnStart = sourceInfo.lastPlayTime
-                    lastPosition = 0L
-                    val lastTimeStr = NumberUtil.converDuration(sourceInfo.lastPlayTime / 1000)
-                    controller.postPrepared(sourceInfo.lastPlayCid) {
-                        PopTip.show("自动恢复:$lastTimeStr", "重新开始")
-                            .showTop()
-                            .showLong()
-                            .setButton { dialog, v ->
-                                views.videoPlayer.startPlayLogic()
-                                false
-                            }
-                    }
-                } else if (sourceInfo.lastPlayCid == source.id) {
-                    // 从进度0开始记录播放历史
-                    historyReport(0L)
-                }
-                lastReportProgress = 0L
-                views.videoPlayer.startPlayLogic()
-
-                if (isChangedQuality) {
-                    if (sourceInfo.quality == quality) {
-                        PopTip.show("已切换至【${sourceInfo.description}】").showTop()
-                    } else {
-                        PopTip.show("清晰度切换失败").showTop()
-                    }
-                } else {
-                    views.videoPlayer.subtitleSourceList = withContext(Dispatchers.IO) {
-                        source.getSubtitles().map {
-                            DanmakuVideoPlayer.SubtitleSourceInfo(
-                                id = it.id,
-                                lan = it.lan,
-                                lan_doc = it.lan_doc,
-                                subtitle_url = it.subtitle_url,
-                                ai_status = it.ai_status,
-                            )
+            )
+            views.videoPlayer.releaseDanmaku()
+            views.videoPlayer.danmakuParser = danmukuParser
+            val header = getDefaultRequestProperties()
+            views.videoPlayer.setUp(
+                sourceInfo.url,
+                false,
+                null,
+                header,
+                source.title
+            )
+            loadingBoxController.hideLoading()
+            if (lastPosition > 0L) {
+                views.videoPlayer.seekOnStart = lastPosition
+                lastPosition = 0L
+            } else if (
+                sourceInfo.lastPlayCid == source.id
+                && !source.isLoop // 循环的视频不恢复播放
+                && sourceInfo.lastPlayTime > 0L
+                && sourceInfo.lastPlayTime < sourceInfo.duration - 10000
+            ) {
+                views.videoPlayer.seekOnStart = sourceInfo.lastPlayTime
+                lastPosition = 0L
+                val lastTimeStr = NumberUtil.converDuration(sourceInfo.lastPlayTime / 1000)
+                controller.postPrepared(sourceInfo.lastPlayCid) {
+                    PopTip.show("自动恢复:$lastTimeStr", "重新开始")
+                        .showTop()
+                        .showLong()
+                        .setButton { dialog, v ->
+                            views.videoPlayer.startPlayLogic()
+                            false
                         }
+                }
+            } else if (sourceInfo.lastPlayCid == source.id) {
+                // 从进度0开始记录播放历史
+                historyReport(0L)
+            }
+            lastReportProgress = 0L
+            views.videoPlayer.startPlayLogic()
+
+            if (isChangedQuality) {
+                if (sourceInfo.quality == quality) {
+                    PopTip.show("已切换至【${sourceInfo.description}】").showTop()
+                } else {
+                    PopTip.show("清晰度切换失败").showTop()
+                }
+            } else {
+                views.videoPlayer.subtitleSourceList = withContext(Dispatchers.IO) {
+                    source.getSubtitles().map {
+                        DanmakuVideoPlayer.SubtitleSourceInfo(
+                            id = it.id,
+                            lan = it.lan,
+                            lan_doc = it.lan_doc,
+                            subtitle_url = it.subtitle_url,
+                            ai_status = it.ai_status,
+                        )
                     }
                 }
             }
             quality = sourceInfo.quality
             playerSourceInfo = sourceInfo
-
         } catch (e: DabianException) {
-            withContext(Dispatchers.Main) {
-                errorMessageBoxController.show("少儿不宜，禁止观看", canRetry = false)
-            }
+            errorMessageBoxController.show("少儿不宜，禁止观看", canRetry = false)
         } catch (e: AreaLimitException) {
-            withContext(Dispatchers.Main) {
-                (playerSource as? BangumiPlayerSource)?.let {
-                    areaLimitBoxController.show(it)
-                } ?: errorMessageBoxController.show("抱歉你所在的地区不可观看！")
-            }
+            (playerSource as? BangumiPlayerSource)?.let {
+                areaLimitBoxController.show(it)
+            } ?: errorMessageBoxController.show("抱歉你所在的地区不可观看！")
         } catch (e: UnknownHostException) {
-            withContext(Dispatchers.Main) {
-                errorMessageBoxController.show("无法连接到御坂网络")
-            }
+            errorMessageBoxController.show("无法连接到御坂网络")
         } catch (e: Exception) {
-            e.printStackTrace()
-            withContext(Dispatchers.Main) {
-                errorMessageBoxController.show(e.message ?: e.toString())
-            }
+            errorMessageBoxController.show(e.message ?: e.toString())
         }
     }
 
@@ -517,22 +517,30 @@ class PlayerDelegate2(
      */
     fun reloadPlayer() {
         lastPosition = views.videoPlayer.currentPositionWhenPlaying
-        playerCoroutineScope.launch(Dispatchers.IO) {
+        playerCoroutineScope.launch(Dispatchers.Main) {
             loadPlayerSource()
         }
     }
 
     override fun openPlayer(source: BasePlayerSource) {
+        loadingBoxController.showLoading(source.title, source.coverUrl)
+        loadingBoxController.print("初始化播放器...")
         completionBoxController.hide()
         errorMessageBoxController.hide()
         areaLimitBoxController.hide()
         lastPosition = 0L
         if (playerSource != null) {
-            playerCoroutineScope.onDestroy()
             views.videoPlayer.release()
+            playerCoroutineScope.onDestroy()
+            playerSource = null
         }
         playerCoroutineScope.onCreate()
-        playerCoroutineScope.launch(Dispatchers.IO) {
+        scaffoldApp.showPlayer = true
+        playerSource = source
+        setThumbImageView(source.coverUrl)
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        loadingBoxController.println("成功")
+        playerCoroutineScope.launch(Dispatchers.Main) {
             SettingPreferences.getData(activity) {
                 fnval = it[PlayerFnval] ?: SettingConstants.PLAYER_FNVAL_DASH
                 quality = it[PlayerQuality] ?: 64
@@ -546,18 +554,12 @@ class PlayerDelegate2(
                 speed = it[PlayerSpeed] ?: 1f
             }
             loadPlayerSource()
-            withContext(Dispatchers.Main) {
-                views.videoPlayer.setSpeed(speed, true)
-                // 播放倍速提示
-                if (speed != 1f) {
-                    PopTip.show("注意，当前为${speed}倍速").showTop()
-                }
+            views.videoPlayer.setSpeed(speed, true)
+            // 播放倍速提示
+            if (speed != 1f) {
+                PopTip.show("注意，当前为${speed}倍速").showTop()
             }
         }
-        scaffoldApp.showPlayer = true
-        playerSource = source
-        setThumbImageView(source.coverUrl)
-        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         // 播放器是否默认全屏播放
         controller.checkIsPlayerDefaultFull()
         if (source is VideoPlayerSource && source.pages.size > 1) {
@@ -605,6 +607,13 @@ class PlayerDelegate2(
         displayCutout: DisplayCutout?
     ) {
         views.videoPlayer.setWindowInsets(left, top, right, bottom, displayCutout)
+        if (views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.FULL) {
+            loadingBoxController.setWindowInsets(left, top, right, bottom)
+        } else if (views.videoPlayer.mode == DanmakuVideoPlayer.PlayerMode.SMALL_FLOAT) {
+            loadingBoxController.setWindowInsets(0, 0, 0, 0)
+        } else {
+            loadingBoxController.setWindowInsets(left, 0, right, 0)
+        }
     }
 
     override fun onPictureInPictureModeChanged(

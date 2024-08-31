@@ -15,6 +15,7 @@ class PlayerCoroutineScope: CoroutineScope {
 
     fun onCreate () {
         job = Job()
+        job.start()
     }
 
     fun onDestroy () {

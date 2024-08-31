@@ -96,18 +96,7 @@ class PlayerController(
         isFullHideActionBar = true
         backButton.setOnClickListener { onBackClick() }
         setIsTouchWiget(true)
-        fullscreenButton.setOnClickListener {
-            scope.launch {
-                if (scaffoldApp.fullScreenPlayer) {
-                    smallScreen()
-                } else {
-                    val fullMode = SettingPreferences.mapData(activity) {
-                        getFullMode(it)
-                    }
-                    fullScreen(fullMode)
-                }
-            }
-        }
+        fullscreenButton.setOnClickListener(::chageFullscreen)
         fullscreenButton.setOnLongClickListener {
             showFullModeMenu(it)
             true
@@ -142,6 +131,19 @@ class PlayerController(
                         showController()
                     }
                 }
+            }
+        }
+    }
+
+    fun chageFullscreen(view: View) {
+        scope.launch {
+            if (scaffoldApp.fullScreenPlayer) {
+                smallScreen()
+            } else {
+                val fullMode = SettingPreferences.mapData(activity) {
+                    getFullMode(it)
+                }
+                fullScreen(fullMode)
             }
         }
     }
@@ -676,6 +678,7 @@ class PlayerController(
             }
             if (isLoop) {
                 // 单个视频循环
+                currentPlayerSourceInfo.isLoop = true
                 delegate.openPlayer(currentPlayerSourceInfo)
             } else {
                 delegate.completionBoxController.show()

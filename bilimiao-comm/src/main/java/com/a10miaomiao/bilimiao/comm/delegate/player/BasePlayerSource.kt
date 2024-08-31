@@ -23,4 +23,5 @@ abstract class BasePlayerSource() {
 
     var proxyServer: ProxyServerInfo? = null
     var uposHost: String = ""
+    var isLoop: Boolean = false // 循环播放
 }

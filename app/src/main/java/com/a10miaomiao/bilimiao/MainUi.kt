@@ -7,6 +7,7 @@ import android.preference.PreferenceManager
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.fragment.app.FragmentContainerView
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -85,11 +86,13 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         val completionView = inflate<RelativeLayout>(R.layout.include_completion_box)
         val errorMessageView = inflate<RelativeLayout>(R.layout.include_error_message_box)
         val areaLimitView = inflate<RelativeLayout>(R.layout.include_area_limit_box)
+        val loadingView = inflate<FrameLayout>(R.layout.include_player_loading)
 
         addView(mVideoPlayerView, lParams(matchParent, matchParent))
         addView(completionView, lParams(matchParent, matchParent))
         addView(errorMessageView, lParams(matchParent, matchParent))
         addView(areaLimitView, lParams(matchParent, matchParent))
+        addView(loadingView, lParams(matchParent, matchParent))
     }
 
     var mBottomSheetTitleView = textView {
