@@ -60,6 +60,7 @@ class ErrorMessageBoxController(
         errorMessageLayout.visibility = View.VISIBLE
         errorMessageRetryBtn.isEnabled = canRetry
         delegate.views.videoPlayer.visibility = View.GONE
+        delegate.loadingBoxController.hideLoading()
     }
     fun hide() {
         errorMessageText.text = ""

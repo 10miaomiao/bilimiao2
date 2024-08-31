@@ -32,5 +32,5 @@ object BiliApiService {
     val messageApi = MessageAPI()
     val authApi = AuthApi()
     val homeApi = HomeApi()
-
+    val archiveApi = ArchiveApi()
 }
