@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,6 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Upper
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.skydoves.landscapist.glide.GlideImage
@@ -92,13 +96,26 @@ internal fun PlayListItemCard(
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.titleSmall,
                 )
-                Text(
-                    text = "UP:" + item.ownerName,
-                    maxLines = 1,
-                    color = MaterialTheme.colorScheme.outline,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelMedium,
-                )
+                Row {
+                    Icon(
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        imageVector = BilimiaoIcons.Common.Upper,
+                        contentDescription = null,
+                    )
+                    val pagesSize = item.videoPages.size
+                    Text(
+                        modifier = Modifier.padding(start = 2.dp),
+                        text = if (pagesSize < 2)
+                            item.ownerName
+                        else
+                            "${item.ownerName} · ${pagesSize}个分P",
+                        maxLines = 1,
+                        color = MaterialTheme.colorScheme.outline,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
             }
             Box(
                 modifier = Modifier.fillMaxHeight(),

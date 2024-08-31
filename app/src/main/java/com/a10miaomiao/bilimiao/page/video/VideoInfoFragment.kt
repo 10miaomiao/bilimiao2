@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonPage
 import cn.a10miaomiao.bilimiao.cover.CoverActivity
 import cn.a10miaomiao.miao.binding.android.view._isEnabled
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -490,9 +491,17 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     }
 
     private val handlePlayListClick = View.OnClickListener {
-        findNavController().navigateToCompose(
-            PlayListPage()
-        )
+        val nav = findNavController()
+        nav.navigateToCompose(PlayListPage())
+    }
+
+    private val handleUgcSeasonDetailClick = View.OnClickListener {
+        val ugcSeason = viewModel.ugcSeason ?: return@OnClickListener
+        val nav = findNavController()
+        nav.navigateToCompose(UserSeasonPage()) {
+            this.id set ugcSeason.id
+            this.title set ugcSeason.title
+        }
     }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {
@@ -826,9 +835,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
                     text = "查看合集>"
                     setTextColor(config.themeColor)
                     setBackgroundResource(config.selectableItemBackgroundBorderless)
-                    setOnClickListener {
-
-                    }
+                    setOnClickListener(handleUgcSeasonDetailClick)
                     padding = config.smallPadding
                 }..lParams {
                     width = wrapContent

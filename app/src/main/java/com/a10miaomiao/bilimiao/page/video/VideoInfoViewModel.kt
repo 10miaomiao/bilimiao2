@@ -234,23 +234,27 @@ class VideoInfoViewModel(
                 } else { 0 }
                 playListStore.setPlayList(season, index)
             }
-        } else if (playListStore.state.items.isEmpty()) {
-            // 不自动播放合集，以当前视频创建新的播放列表
-            val playListItem = playListStore.run {
-                info.toPlayListItem()
-            }
-            playListStore.setPlayList(
-                name = info.title,
-                from = playListItem.from,
-                items = listOf(
-                    playListItem,
-                )
-            )
         } else if (!playListStore.state.inListForAid(info.aid)) {
-            // 将视频添加到播放列表末尾
-            playListStore.addItem(playListStore.run {
-                info.toPlayListItem()
-            })
+            // 当前视频不在播放列表中时，如果未正在播放或播放列表为空则创建新的播放列表，否则将视频加入列表尾部
+            if (playListStore.state.items.isEmpty()
+                || playerStore.state.aid.isEmpty()) {
+                // 以当前视频创建新的播放列表
+                val playListItem = playListStore.run {
+                    info.toPlayListItem()
+                }
+                playListStore.setPlayList(
+                    name = info.title,
+                    from = playListItem.from,
+                    items = listOf(
+                        playListItem,
+                    )
+                )
+            } else {
+                // 将视频添加到播放列表末尾
+                playListStore.addItem(playListStore.run {
+                    info.toPlayListItem()
+                })
+            }
         }
 
         // 播放视频

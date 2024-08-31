@@ -14,7 +14,16 @@ data class PlayListItemInfo(
     val ownerId: String,
     val ownerName: String,
     val from: PlayListFrom,
+    val videoPages: List<VideoPageInfo> = listOf(),
 ) : Parcelable {
+    @Parcelize
+    data class VideoPageInfo(
+        val cid: String,
+        val page: Int,
+        val part: String,
+        val duration: Int,
+    ): Parcelable
+
     fun toVideoPlayerSource(): VideoPlayerSource {
         return VideoPlayerSource(
             mainTitle = title,
@@ -24,6 +33,13 @@ data class PlayListItemInfo(
             id = cid,
             ownerId = ownerId,
             ownerName = ownerName,
-        )
+        ).apply {
+            pages = videoPages.map {
+                VideoPlayerSource.PageInfo(
+                    cid = it.cid,
+                    title = it.part,
+                )
+            }
+        }
     }
 }

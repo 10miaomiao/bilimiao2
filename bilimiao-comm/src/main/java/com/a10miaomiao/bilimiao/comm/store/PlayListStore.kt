@@ -336,6 +336,14 @@ class PlayListStore(override val di: DI) :
             ownerId = owner.mid,
             ownerName = owner.name,
             from = from,
+            videoPages = pages.map {
+                PlayListItemInfo.VideoPageInfo(
+                    cid = it.cid,
+                    page = it.page,
+                    part = it.part,
+                    duration = it.duration,
+                )
+            }
         )
     }
 }
