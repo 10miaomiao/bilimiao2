@@ -14,11 +14,11 @@ import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
 import android.view.DisplayCutout
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -402,10 +402,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
     }
 
-    // start 长按倍速播放
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private val vibrator = context.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
-
     private var touchSurfaceDownTime = Long.MAX_VALUE
     private var isSpeedPlaying = false
     private var lastSpeed = 0f  // init an invalid value
@@ -428,15 +424,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mSpeedTips.visibility = View.VISIBLE
         mTouchingProgressBar = false
         (mSpeedTipsIV.drawable as? AnimationDrawable)?.start()
-        // 震动效果
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            vibrator.vibrate(
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
-            )
-        } else {
-            // 这种震动不舒服不自然
-            // vibrator.vibrate(longArrayOf(0, 50), -1)
-        }
+        // 震动反馈
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
     }
 
     /**

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:duration="100" android:drawable="@drawable/bili_anim_tv_chan_1"/>
+    <item android:duration="100" android:drawable="@drawable/bili_anim_tv_chan_3"/>
+    <item android:duration="100" android:drawable="@drawable/bili_anim_tv_chan_5"/>
+    <item android:duration="100" android:drawable="@drawable/bili_anim_tv_chan_7"/>
+    <item android:duration="100" android:drawable="@drawable/bili_anim_tv_chan_9"/>
+</animation-list>
