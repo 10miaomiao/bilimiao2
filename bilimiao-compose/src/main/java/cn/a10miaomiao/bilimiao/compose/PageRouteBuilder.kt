@@ -35,6 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonPage
 
 class PageRouteBuilder (
     val builder: NavGraphBuilder
@@ -91,6 +92,7 @@ class PageRouteBuilder (
         +UserFollowPage()
         +SearchFollowPage()
         +UserFavouritePage()
+        +UserSeasonPage()
 
         //lyric
         +LyricPage()

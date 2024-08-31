@@ -65,8 +65,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.TitleBar
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
-import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
-import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveRelationInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
@@ -93,7 +93,6 @@ import org.kodein.di.instance
 private class UserSeasonDetailViewModel(
     override val di: DI,
     private val sid: String,
-    private val parentViewModel: UserFavouriteViewModel,
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
@@ -106,6 +105,7 @@ private class UserSeasonDetailViewModel(
     val isRefreshing = MutableStateFlow(false)
     val curSection = MutableStateFlow<bilibili.app.view.v1.Section?>(null)
     val sections = MutableStateFlow<List<bilibili.app.view.v1.Section>>(listOf())
+    val favState = MutableStateFlow(-1)
     val list = FlowPaginationInfo<bilibili.app.view.v1.Episode>()
     val isAutoPlay = MutableStateFlow(false)
 
@@ -131,12 +131,38 @@ private class UserSeasonDetailViewModel(
             }
             list.finished.value = true
             list.pageNum = pageNum
+            if (favState.value == -1) {
+                // 获取订阅状态
+                val firstEp = sections.value.firstOrNull()
+                    ?.episodes
+                    ?.firstOrNull()
+                if (firstEp == null) {
+                    favState.value = 1
+                } else {
+                    getFavState(firstEp.aid.toString())
+                }
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             list.fail.value = "无法连接到御坂网络"
         } finally {
             list.loading.value = false
             isRefreshing.value = false
+        }
+    }
+
+    /**
+     * 获取订阅状态
+     */
+    private suspend fun getFavState(aid: String) {
+        try {
+            val res = BiliApiService.archiveApi.relation(
+                aid = aid
+            ).awaitCall().gson<ResultInfo<ArchiveRelationInfo>>()
+            favState.value = if (res.data.season_fav) 1 else 0
+        } catch (e: Exception) {
+            PopTip.show("获取订阅状态失败")
+            e.printStackTrace()
         }
     }
 
@@ -218,11 +244,7 @@ private class UserSeasonDetailViewModel(
                 .gson<MessageInfo>(isLog = true)
             if (res.isSuccess) {
                 PopTip.show("订阅成功")
-//                refresh()
-                parentViewModel.updateOpenedSeason(
-                    seasonId = sid,
-                    favState = 1,
-                )
+                favState.value = 1
             } else {
                 PopTip.show(res.message)
             }
@@ -242,11 +264,7 @@ private class UserSeasonDetailViewModel(
                 .gson<MessageInfo>(isLog = true)
             if (res.isSuccess) {
                 PopTip.show("已取消订阅")
-//                refresh()
-                parentViewModel.updateOpenedSeason(
-                    seasonId = sid,
-                    favState = 0,
-                )
+                favState.value = 0
             } else {
                 PopTip.show(res.message)
             }
@@ -263,11 +281,10 @@ private class UserSeasonDetailViewModel(
                 toPlayListPage()
             }
             MenuKeys.follow -> {
-                if (item.action == "fav") {
-                    favSeason()
-                } else {
-                    unfavSeason()
-                }
+                favSeason()
+            }
+            -MenuKeys.follow -> {
+                unfavSeason()
             }
         }
     }
@@ -280,14 +297,11 @@ internal fun UserSeasonDetailContent(
     showTowPane: Boolean,
     hideFirstPane: Boolean,
     onChangeHideFirstPane: (hidden: Boolean) -> Unit,
-    favState: Int,
 ) {
-    val parentViewModel: UserFavouriteViewModel by rememberInstance()
     val viewModel = diViewModel(
-        di = parentViewModel.di,
         key = seasonId,
     ) {
-        UserSeasonDetailViewModel(it, seasonId, parentViewModel)
+        UserSeasonDetailViewModel(it, seasonId)
     }
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -303,7 +317,7 @@ internal fun UserSeasonDetailContent(
     val detailInfo by viewModel.seasonInfo.collectAsState()
     val sections by viewModel.sections.collectAsState()
     val curSection by viewModel.curSection.collectAsState()
-
+    val favState by viewModel.favState.collectAsState()
 
     val pageConfigId = PageConfig(
         title = "合集详情",
@@ -319,14 +333,15 @@ internal fun UserSeasonDetailContent(
                     }
                 }
             }
-            myItem {
-                key = MenuKeys.follow
-                if (favState == 1) {
-                    action = "unfav"
+            if (favState == 1) {
+                myItem {
+                    key = -MenuKeys.follow
                     iconFileName = "ic_baseline_favorite_24"
                     title = "已订阅"
-                } else {
-                    action = "fav"
+                }
+            } else if (favState == 0){
+                myItem {
+                    key = MenuKeys.follow
                     iconFileName = "ic_outline_favorite_border_24"
                     title = "订阅"
                 }
