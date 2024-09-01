@@ -29,6 +29,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -111,23 +112,20 @@ private class ReplyMessageContentModel(
         fragment.findNavController().navigate(uri, defaultNavOptions)
     }
 
-    fun toMessagePage(item: ReplyMessageInfo) {
-        // 评论
-        val sourceId = item.item.source_id
-        val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
-    }
-
-    fun toDetailPage(item: ReplyMessageInfo) {
+    fun toDetailPage(item: ReplyMessageInfo, isDetail: Boolean) {
         val type = item.item.type
         if (type == "reply") {
             // 评论
             val rootId = item.item.root_id
             val sourceId = item.item.source_id
-            val uri = Uri.parse("bilimiao://video/comment/${rootId}/detail/${sourceId}")
+            val uri = if (isDetail) {
+                Uri.parse("bilimiao://video/comment/${rootId}/detail/${sourceId}")
+            } else {
+                Uri.parse("bilimiao://video/comment/${sourceId}/detail")
+            }
             fragment.findNavController().navigate(uri, defaultNavOptions)
-        } else if (type == "album") {
-            // 动态
+//        } else if (type == "album") {
+//            // 动态
         } else if (type == "danmu") {
             // 弹幕
             val aid = item.item.subject_id
@@ -138,6 +136,8 @@ private class ReplyMessageContentModel(
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
             fragment.findNavController().navigate(uri, defaultNavOptions)
+        } else {
+            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
         }
     }
 }
@@ -181,10 +181,10 @@ internal fun ReplyMessageContent() {
                             viewModel.toUserPage(item)
                         },
                         onDetailClick = {
-                            viewModel.toDetailPage(item)
+                            viewModel.toDetailPage(item, true)
                         },
                         onMessageClick = {
-                            viewModel.toMessagePage(item)
+                            viewModel.toDetailPage(item, false)
                         }
                     )
                 }
