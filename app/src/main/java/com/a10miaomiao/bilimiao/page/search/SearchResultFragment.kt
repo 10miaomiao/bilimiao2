@@ -158,6 +158,7 @@ class SearchResultFragment : Fragment(), DIAware, MyPage, ViewPager.OnPageChange
                     _topPadding = contentInsets.top
                     _leftPadding = contentInsets.left
                     _rightPadding = contentInsets.right
+                    tabGravity = TabLayout.GRAVITY_CENTER
                 }..lParams(matchParent, wrapContent)
                 +viewPager(ID_viewPager) {
                     _leftPadding = contentInsets.left

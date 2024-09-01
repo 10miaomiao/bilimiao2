@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -272,6 +273,7 @@ class MainFragment : Fragment(), DIAware, MyPage {
                     _leftPadding = contentInsets.left
                     _rightPadding = contentInsets.right
                     tabMode = TabLayout.MODE_SCROLLABLE
+                    tabGravity = TabLayout.GRAVITY_CENTER
                 }..lParams(matchParent, wrapContent)
                 +view<ViewPager2>(ID_viewPager) {
                     _leftPadding = contentInsets.left
