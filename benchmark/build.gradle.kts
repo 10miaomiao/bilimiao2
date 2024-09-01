@@ -38,11 +38,7 @@ android {
 
     flavorDimensions += listOf("default")
     productFlavors {
-        create("dev") { dimension = "default" }
-        create("github") { dimension = "default" }
-        create("gitee") { dimension = "default" }
-        create("qq") { dimension = "default" }
-        create("miao") { dimension = "default" }
+        create("foss") { dimension = "default" }
     }
 
     targetProjectPath = ":app"
