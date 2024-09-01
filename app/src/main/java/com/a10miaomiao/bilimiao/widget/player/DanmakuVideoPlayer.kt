@@ -149,11 +149,12 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     private val mDanmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
         override fun currMillisecond(): Long {
-            return try {
+            lastTime = try {
                 gsyVideoManager.currentPosition
             } catch (e: Exception) {
                 0L
             }
+            return lastTime
         }
 
         override fun update(curr: Long): Long {

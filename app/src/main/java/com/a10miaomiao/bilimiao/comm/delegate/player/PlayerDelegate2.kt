@@ -60,6 +60,7 @@ import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.player.PlayerFactory
+import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -236,6 +237,7 @@ class PlayerDelegate2(
     @OptIn(markerClass = [UnstableApi::class])
     private fun initPlayer() {
         BilimiaoPlayerManager.initConfig()
+        GSYVideoType.setRenderType(GSYVideoType.SUFRACE);
         ExoSourceManager.setExoMediaSourceInterceptListener(this)
     }
 
