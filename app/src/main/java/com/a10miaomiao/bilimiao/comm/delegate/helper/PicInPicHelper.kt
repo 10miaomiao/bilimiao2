@@ -11,6 +11,7 @@ import android.content.IntentFilter
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Rational
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 //import cn.a10miaomiao.player.callback.MediaPlayerListener
@@ -67,6 +68,12 @@ class PicInPicHelper(
             // 设置画中画窗口的宽高比例
             builder.setAspectRatio(aspectRatio)
             builder.setActions(getActions(videoPlayer.currentState))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                builder.setSeamlessResizeEnabled(true)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                builder.setTitle(videoPlayer.findViewById<TextView>(R.id.title).text)
+            }
             // 进入画中画模式，注意enterPictureInPictureMode是Android8.0之后新增的方法
             activity.enterPictureInPictureMode(builder.build());
         };
