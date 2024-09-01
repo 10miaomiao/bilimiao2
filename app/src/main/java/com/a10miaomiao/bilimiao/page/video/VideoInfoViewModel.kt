@@ -1,7 +1,7 @@
 package com.a10miaomiao.bilimiao.page.video
 
+import android.app.Activity
 import android.content.Context
-import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -44,11 +44,11 @@ class VideoInfoViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    val context: Context by instance()
+    val activity: Activity by instance()
     val ui: MiaoBindingUi by instance()
     val fragment: Fragment by instance()
     val basePlayerDelegate by instance<BasePlayerDelegate>()
-    val scaffoldApp by lazy { fragment.requireActivity().getScaffoldView() }
+    val scaffoldApp by lazy { activity.getScaffoldView() }
 
     //    val type by lazy { fragment.requireArguments().getString(MainNavArgs.type, "AV") }
     var id: String = ""
@@ -171,12 +171,12 @@ class VideoInfoViewModel(
         }
     }
 
-    private fun autoStartPlay(info: VideoInfo) = viewModelScope.launch {
+    private fun autoStartPlay(info: VideoInfo) = viewModelScope.launch(Dispatchers.Main) {
         if (basePlayerDelegate.getSourceIds().aid == info.aid) {
             // 同个视频不替换播放
             return@launch
         }
-        val openMode = SettingPreferences.mapData(fragment.requireActivity()) {
+        val openMode = SettingPreferences.mapData(activity) {
             it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
         }
         if (scaffoldApp.showPlayer) {

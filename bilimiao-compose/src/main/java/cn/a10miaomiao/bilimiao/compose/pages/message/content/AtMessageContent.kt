@@ -35,6 +35,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -119,9 +120,13 @@ private class AtMessageContentModel(
 
     fun toMessagePage(item: AtMessageInfo) {
         // 评论
-        val sourceId = item.item.source_id
-        val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        if (item.item.type == "reply") {
+            val sourceId = item.item.source_id
+            val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
+            fragment.findNavController().navigate(uri, defaultNavOptions)
+        } else {
+            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
+        }
     }
 
     fun toDetailPage(item: AtMessageInfo) {
@@ -132,15 +137,17 @@ private class AtMessageContentModel(
             val id = item.item.target_id
             val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
             fragment.findNavController().navigate(uri)
-        } else if (type == "album") {
-            // 动态
-        } else if (type == "danmu") {
-            // 弹幕
+//        } else if (type == "album") {
+//            // 动态
+//        } else if (type == "danmu") {
+//            // 弹幕
         } else if (type == "video") {
             // 视频
             val aid = item.item.subject_id
             val uri = Uri.parse("bilimiao://video/$aid")
             fragment.findNavController().navigate(uri, defaultNavOptions)
+        } else {
+            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
         }
     }
 

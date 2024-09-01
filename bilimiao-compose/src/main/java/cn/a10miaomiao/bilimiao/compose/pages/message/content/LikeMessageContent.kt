@@ -33,6 +33,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -132,6 +133,8 @@ private class LikeMessageContentModel(
             val aid = item.item.item_id
             val uri = Uri.parse("bilimiao://video/$aid")
             fragment.findNavController().navigate(uri, defaultNavOptions)
+        } else {
+            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
         }
     }
 }
