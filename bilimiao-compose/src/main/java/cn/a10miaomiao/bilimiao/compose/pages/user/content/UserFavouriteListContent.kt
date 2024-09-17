@@ -50,10 +50,10 @@ import org.kodein.di.compose.rememberInstance
 
 @Composable
 internal fun UserFavouriteListContent(
+    viewModel: UserFavouriteViewModel,
     showTowPane: Boolean,
     folderType: UserFavouriteFolderType,
 ) {
-    val viewModel: UserFavouriteViewModel by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())

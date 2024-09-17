@@ -33,9 +33,11 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 
 class PageRouteBuilder (
     val builder: NavGraphBuilder
@@ -88,10 +90,12 @@ class PageRouteBuilder (
         +TimeSettingPage()
 
         // user
+        +UserSpacePage()
         +MyFollowPage()
         +UserFollowPage()
         +SearchFollowPage()
         +UserFavouritePage()
+        +UserFavouriteDetailPage()
         +UserSeasonPage()
 
         //lyric

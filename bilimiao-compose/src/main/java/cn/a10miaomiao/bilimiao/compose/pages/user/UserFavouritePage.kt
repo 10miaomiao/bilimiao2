@@ -83,20 +83,15 @@ class UserFavouritePage : ComposePage() {
         val viewModel: UserFavouriteViewModel = diViewModel {
             UserFavouriteViewModel(it, mid)
         }
-        subDI(
-            diBuilder = {
-                bindSingleton { viewModel }
-            }
-        ) {
-            UserFavouritePageContent()
-        }
+        UserFavouritePageContent(viewModel)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun UserFavouritePageContent() {
-    val viewModel: UserFavouriteViewModel by rememberInstance()
+private fun UserFavouritePageContent(
+    viewModel: UserFavouriteViewModel,
+) {
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val playerStore: PlayerStore by rememberInstance()
@@ -229,6 +224,7 @@ private fun UserFavouritePageContent() {
                             ) {
                                 // 创建的
                                 UserFavouriteListContent(
+                                    viewModel = viewModel,
                                     showTowPane = it.showTowPane,
                                     folderType = UserFavouriteFolderType.Created,
                                 )
@@ -241,6 +237,7 @@ private fun UserFavouritePageContent() {
                             ) {
                                 // 订阅的
                                 UserFavouriteListContent(
+                                    viewModel = viewModel,
                                     showTowPane = it.showTowPane,
                                     folderType = UserFavouriteFolderType.Collected,
                                 )
@@ -276,6 +273,12 @@ private fun UserFavouritePageContent() {
                             hideFirstPane = hideFirstPane,
                             onChangeHideFirstPane = { hidden ->
                                 hideFirstPane = hidden
+                            },
+                            onRefresh = {
+                                viewModel.refresh(UserFavouriteFolderType.Created)
+                            },
+                            onClose = {
+                                viewModel.closeMediaDetail()
                             }
                         )
                     }

@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.view.View
+import androidx.compose.runtime.Stable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

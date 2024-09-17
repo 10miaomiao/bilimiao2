@@ -39,15 +39,18 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingListAction
 import cn.a10miaomiao.bilimiao.compose.pages.user.InterrelationInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserTagSetDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -287,11 +290,10 @@ private class TagFollowContentModel(
     }
 
     fun toUserDetailPage(id: String) {
-        val nav = fragment.findNavController()
-        nav.navigate(
-            "bilimiao://user/$id".toUri(),
-            defaultNavOptions
-        )
+        val nav = fragment.findComposeNavController()
+        nav.navigate(UserSpacePage()) {
+            this.id set id
+        }
     }
 }
 

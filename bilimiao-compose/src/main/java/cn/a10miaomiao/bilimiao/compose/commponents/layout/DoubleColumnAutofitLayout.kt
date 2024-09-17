@@ -23,32 +23,6 @@ import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.Chain
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlin.math.roundToInt
 
-internal class DoubleColumnAutofitLayoutTopNestedScrollConnection(
-    val state: ChainScrollableLayoutState,
-) : NestedScrollConnection {
-    override fun onPreScroll(
-        available: Offset,
-        source: NestedScrollSource
-    ): Offset {
-        if (
-            available.y > 0
-            && state.getOffsetYValue() < 0
-        ) {
-            state.setOffsetY(minOf(state.getOffsetYValue() + available.y, 0f))
-            return available
-        }
-        return Offset.Zero
-    }
-
-    override fun onPostScroll(
-        consumed: Offset,
-        available: Offset,
-        source: NestedScrollSource
-    ): Offset {
-        return super.onPostScroll(consumed, available, source)
-    }
-}
-
 @Composable
 fun DoubleColumnAutofitLayout(
     modifier: Modifier = Modifier,
@@ -95,9 +69,6 @@ fun DoubleColumnAutofitLayout(
                 density.run { leftMaxHeight.roundToPx().toFloat() }
             }
             val scrollableState = rememberScrollState()
-            val nestedScrollState = remember(chainScrollableLayoutState) {
-                DoubleColumnAutofitLayoutTopNestedScrollConnection(chainScrollableLayoutState)
-            }
             ChainScrollableLayout(
                 modifier = modifier,
                 state = chainScrollableLayoutState,
@@ -115,7 +86,7 @@ fun DoubleColumnAutofitLayout(
                             )
                         }
                         .alpha(alpha)
-                        .nestedScroll(nestedScrollState)
+                        .nestedScroll(state.nestedScroll)
                         .scrollable(scrollableState, Orientation.Vertical),
                 ) {
                     leftContent(
