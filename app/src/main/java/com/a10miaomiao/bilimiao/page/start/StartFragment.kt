@@ -27,6 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -297,8 +298,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val userStore = viewModel.userStore
         if (userStore.isLogin()) {
             val mid = userStore.state.info?.mid ?: return@OnClickListener
-            val args = UserFragment.createArguments(mid.toString())
-            nav.navigate(UserFragment.actionId, args)
+            nav.navigateToCompose(UserSpacePage()) {
+                id set mid.toString()
+            }
         } else {
             nav.navigateToCompose(LoginPage())
         }

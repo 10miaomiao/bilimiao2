@@ -102,7 +102,6 @@ private class UserFavouriteDetailViewModel(
     override val di: DI,
     private val mediaId: String,
     private val mediaTitle: String,
-    private val parentViewModel: UserFavouriteViewModel,
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
@@ -238,15 +237,6 @@ private class UserFavouriteDetailViewModel(
         if (!res.isSuccess) {
             throw Exception(res.message)
         }
-//        parentViewModel.refresh(UserFavouriteFolderType.Created)
-        parentViewModel.updateOpenedMedia(
-            mediaId = mediaId,
-            title = title,
-            cover = cover,
-            intro = intro,
-            privacy = privacy,
-        )
-        refresh()
     }
 
     suspend fun deleteFolder() {
@@ -259,8 +249,6 @@ private class UserFavouriteDetailViewModel(
         if (!res.isSuccess) {
             throw Exception(res.message)
         }
-        parentViewModel.refresh(UserFavouriteFolderType.Created)
-        parentViewModel.closeMediaDetail()
     }
 
     fun favFolder() = viewModelScope.launch(Dispatchers.IO) {
@@ -325,14 +313,13 @@ internal fun UserFavouriteDetailContent(
     showTowPane: Boolean,
     hideFirstPane: Boolean,
     onChangeHideFirstPane: (hidden: Boolean) -> Unit,
+    onClose: () -> Unit,
+    onRefresh: () -> Unit,
 ) {
-    val parentViewModel: UserFavouriteViewModel by rememberInstance()
-    val viewModel = diViewModel(
-        di = parentViewModel.di,
-        key = mediaId,
-    ) {
-        UserFavouriteDetailViewModel(it, mediaId, mediaTitle, parentViewModel)
+    val viewModel = diViewModel(key = mediaId) {
+        UserFavouriteDetailViewModel(it, mediaId, mediaTitle)
     }
+
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
@@ -554,8 +541,9 @@ internal fun UserFavouriteDetailContent(
                         )
                     }.onSuccess {
                         loading = false
-                        PopTip.show("创建成功")
+                        PopTip.show("修改成功")
                         showEditDialog = false
+                        onRefresh()
                     }.onFailure {
                         loading = false
                         PopTip.show(it.message ?: it.toString())
@@ -606,6 +594,8 @@ internal fun UserFavouriteDetailContent(
             runCatching {
                 loading = true
                 viewModel.deleteFolder()
+                onRefresh()
+                onClose()
             }.onSuccess {
                 loading = false
                 PopTip.show("修改成功")

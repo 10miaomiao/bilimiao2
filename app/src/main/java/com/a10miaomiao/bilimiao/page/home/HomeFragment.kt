@@ -14,6 +14,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import cn.a10miaomiao.miao.binding.miaoEffect
@@ -79,8 +80,9 @@ class HomeFragment : Fragment(), DIAware {
         if (userInfo != null) {
             // 跳转个人中心
             val nav = Navigation.findNavController(it)
-            val args = UserFragment.createArguments(userInfo.mid.toString())
-            nav.navigate(UserFragment.actionId, args)
+            nav.navigateToCompose(UserSpacePage()){
+                id set userInfo.mid.toString()
+            }
         } else {
             // 跳转登录
             val nav = Navigation.findNavController(it)

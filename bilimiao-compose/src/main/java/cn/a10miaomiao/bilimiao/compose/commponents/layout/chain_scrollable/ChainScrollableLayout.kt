@@ -24,9 +24,9 @@ internal class ChainScrollableLayoutNestedScrollConnection(
     ): Offset {
         if (
             available.y < 0
-            && state.getOffsetYValue() > -state.maxPx
+            && state.getOffsetYValue() > state.minPx - state.maxPx
         ) {
-            state.setOffsetY(maxOf(state.getOffsetYValue() + available.y, -state.maxPx))
+            state.setOffsetY(maxOf(state.getOffsetYValue() + available.y, state.minPx - state.maxPx))
             return available
         }
 

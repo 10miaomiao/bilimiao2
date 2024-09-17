@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
+import cn.a10miaomiao.bilimiao.compose.comm.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
@@ -210,7 +211,6 @@ private fun MyFollowPageContent() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
-                    .wrapContentWidth()
                     .padding(
                         top = windowInsets.topDp.dp,
                         start = windowInsets.leftDp.dp,
@@ -224,7 +224,6 @@ private fun MyFollowPageContent() {
                             modifier = Modifier.tabIndicatorOffset(
                                 positions[currentPage],
                             ),
-                            width = Dp.Unspecified,
                         )
                     }
                 },

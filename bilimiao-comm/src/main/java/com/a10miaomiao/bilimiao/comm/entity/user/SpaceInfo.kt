@@ -23,6 +23,7 @@ data class SpaceInfo(
         val fans: Int,
         val friend: Int,
         val level_info: LevelInfo,
+        val likes: LikesInfo,
         val mid: String,
         val name: String,
         val place: String,
@@ -31,7 +32,8 @@ data class SpaceInfo(
         val relation: RelationInfo,
         val sex: String,
         val sign: String,
-        val spacesta: Int
+        val spacesta: Int,
+        val space_tag: List<SpaceTagInfo>?,
     )
 
     data class RelationInfo(
@@ -44,6 +46,11 @@ data class SpaceInfo(
         val current_level: Int,
         val current_min: Int,
         val next_exp: String
+    )
+
+    data class LikesInfo(
+        val skr_tip: String,
+        val like_num: Int,
     )
 
     data class ImagesInfo(
@@ -104,14 +111,15 @@ data class SpaceInfo(
     )
 
     data class ArchiveItem(
+        val author: String,
         val cover: String,
-        val ctime: Int,
-        val danmaku: Int,
+        val ctime: Long,
+        val danmaku: String,
         val duration: Int,
         val goto: String,
         val length: String,
         val `param`: String,
-        val play: Int,
+        val play: String,
         val state: Boolean,
         val title: String,
         val tname: String,
@@ -134,5 +142,10 @@ data class SpaceInfo(
         val title: String,
         val total_count: String,
         val uri: String
+    )
+
+    data class SpaceTagInfo(
+        val type: String,
+        val title: String,
     )
 }
