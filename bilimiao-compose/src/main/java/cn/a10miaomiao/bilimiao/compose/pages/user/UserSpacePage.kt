@@ -22,15 +22,12 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,12 +46,18 @@ import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
+import cn.a10miaomiao.bilimiao.compose.comm.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.ChainScrollableLayout
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.rememberChainScrollableLayoutState
+import cn.a10miaomiao.bilimiao.compose.pages.message.content.AtMessageContent
+import cn.a10miaomiao.bilimiao.compose.pages.message.content.LikeMessageContent
+import cn.a10miaomiao.bilimiao.compose.pages.message.content.ReplyMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserSpaceHeader
+import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserArchiveListContent
+import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserDynamicListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSpaceIndexContent
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
@@ -72,29 +75,21 @@ class UserSpacePage : ComposePage() {
 
     @Composable
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val viewModel = diViewModel<UserSpaceViewModel>()
-        val uid = navEntry.arguments?.get(id) ?: ""
-        LaunchedEffect(uid) {
-            viewModel.id = uid
+        val vmid = navEntry.arguments?.get(id) ?: ""
+        val viewModel = diViewModel() {
+            UserSpaceViewModel(it, vmid)
         }
-        subDI(
-            diBuilder = {
-                bindSingleton { viewModel }
-            }
-        ) {
-            UserSpacePageContent()
-        }
+        UserSpacePageContent(viewModel)
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun UserSpacePageContent() {
+private fun UserSpacePageContent(
+    viewModel: UserSpaceViewModel
+) {
     PageConfig(
         title = "用户详情"
     )
-    val viewModel: UserSpaceViewModel by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
@@ -123,8 +118,6 @@ private fun UserSpacePageContent() {
     }
     val scrollableState = rememberScrollState()
 
-
-    val saveableStateHolder = rememberSaveableStateHolder()
     val scope = rememberCoroutineScope()
 
     ChainScrollableLayout(
@@ -174,7 +167,7 @@ private fun UserSpacePageContent() {
                     )
                 },
         ) {
-            PrimaryTabRow(
+            TabRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
@@ -185,12 +178,17 @@ private fun UserSpacePageContent() {
                     .nestedScroll(state.nestedScroll)
                     .scrollable(scrollableState, Orientation.Vertical),
                 selectedTabIndex = viewModel.pagerState.currentPage,
+                indicator = { positions ->
+                    TabRowDefaults.PrimaryIndicator(
+                        Modifier.pagerTabIndicatorOffset(viewModel.pagerState, positions),
+                    )
+                },
             ) {
-                viewModel.tabs.forEachIndexed { index, name ->
+                viewModel.tabs.forEachIndexed { index, tab ->
                     Tab(
                         text = {
                             Text(
-                                text = name,
+                                text = tab.name,
                                 color = if (index == viewModel.currentPage) {
                                     MaterialTheme.colorScheme.primary
                                 } else {
@@ -207,6 +205,7 @@ private fun UserSpacePageContent() {
                     )
                 }
             }
+            val saveableStateHolder = rememberSaveableStateHolder()
             HorizontalPager(
                 modifier = Modifier
                     .fillMaxSize()
@@ -215,10 +214,7 @@ private fun UserSpacePageContent() {
                 state = viewModel.pagerState,
             ) { index ->
                 saveableStateHolder.SaveableStateProvider(index) {
-                    when (index) {
-                        0 -> UserSpaceIndexContent()
-                        else -> Box {}
-                    }
+                    viewModel.tabs[index].PageContent()
                 }
             }
         }

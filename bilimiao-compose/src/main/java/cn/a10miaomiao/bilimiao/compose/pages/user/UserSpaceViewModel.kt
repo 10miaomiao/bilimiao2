@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.user
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,8 @@ import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserDynamicListContent
+import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSpaceIndexContent
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -33,21 +36,13 @@ import org.kodein.di.instance
 
 class UserSpaceViewModel(
     override val di: DI,
+    val vmid: String,
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
     val activity: AppCompatActivity by instance()
     val userStore: UserStore by instance()
     val filterStore: FilterStore by instance()
-    private val myPage: MyPage by instance()
-
-    var id: String = ""
-        set(value) {
-            if (value != field) {
-                field = value
-                init()
-            }
-        }
 
     private val _loading = MutableStateFlow(false);
     val loading: StateFlow<Boolean> get() = _loading
@@ -55,14 +50,20 @@ class UserSpaceViewModel(
     private val _detailData = MutableStateFlow<SpaceInfo?>(null)
     val detailData: StateFlow<SpaceInfo?> get() = _detailData
 
-    val isSelf get() = userStore.isSelf(id)
+    val isSelf get() = userStore.isSelf(vmid)
     val isFollow get() = detailData.value?.card?.relation?.is_follow == 1
 
-    val tabs = listOf("主页", "动态", "投稿")
+    val tabs = listOf(
+        UserSpacePageTabs.Index(this),
+        UserSpacePageTabs.Dynamic(vmid),
+        UserSpacePageTabs.Archive(vmid),
+    )
+
     val pagerState = PagerState{ tabs.size }
     val currentPage get() = pagerState.currentPage
-    fun init() {
-        if (id.isNotBlank()) {
+
+    init {
+        if (vmid.isNotBlank()) {
             loadData()
         }
     }
@@ -78,7 +79,7 @@ class UserSpaceViewModel(
     fun loadData() = viewModelScope.launch(Dispatchers.IO) {
         try {
             _loading.value = true
-            val res = UserApi().space(id).awaitCall().gson<ResultInfo<SpaceInfo>>()
+            val res = UserApi().space(vmid).awaitCall().gson<ResultInfo<SpaceInfo>>()
             if (res.code == 0) {
                 _detailData.value = res.data
             } else {
@@ -93,7 +94,7 @@ class UserSpaceViewModel(
     }
 
     fun filterUpperDelete () {
-        filterStore.deleteUpper(id.toLong())
+        filterStore.deleteUpper(vmid.toLong())
     }
 
     fun filterUpperAdd () {
@@ -109,21 +110,7 @@ class UserSpaceViewModel(
     }
 
     fun getUserSpaceUrl (): String {
-        return "https://space.bilibili.com/${id}"
-    }
-
-    fun logout() {
-//        MaterialAlertDialogBuilder(activity).apply {
-//            setTitle("确定退出登录，喵？")
-//            setNegativeButton("确定退出") { dialog, which ->
-//                userStore.logout()
-//                val nav = (activity as? MainActivity)?.pointerNav?.navController
-//                    ?: activity.findNavController(R.id.nav_host_fragment)
-//                nav.popBackStack()
-//                PopTip.show("已退出登录了喵")
-//            }
-//            setPositiveButton("取消", null)
-//        }.show()
+        return "https://space.bilibili.com/${vmid}"
     }
 
     fun attention() = viewModelScope.launch(Dispatchers.IO) {
@@ -131,7 +118,7 @@ class UserSpaceViewModel(
             val data = detailData.value ?: return@launch
             val mode = if (isFollow) { 2 } else { 1 }
             val res = BiliApiService.userRelationApi
-                .modify(id, mode)
+                .modify(vmid, mode)
                 .awaitCall().gson<MessageInfo>()
             if (res.code == 0) {
                 data.card.relation.is_follow = 2 - mode
@@ -154,7 +141,7 @@ class UserSpaceViewModel(
         val name = detailData.value?.card?.name ?: return
         fragment.findNavController()
             .navigate(
-                Uri.parse("bilimiao://user/follow?id=${id}&type=fans&name=${name}"),
+                Uri.parse("bilimiao://user/follow?id=${vmid}&type=fans&name=${name}"),
                 defaultNavOptions,
             )
     }
@@ -165,7 +152,7 @@ class UserSpaceViewModel(
             nav.navigate(MyFollowPage())
         } else {
             nav.navigate(UserFollowPage()) {
-                id set this@UserSpaceViewModel.id
+                id set this@UserSpaceViewModel.vmid
             }
         }
     }
@@ -188,7 +175,7 @@ class UserSpaceViewModel(
     fun toFavouriteList() {
         fragment.findComposeNavController()
             .navigate(UserFavouritePage()) {
-                id set this@UserSpaceViewModel.id
+                id set this@UserSpaceViewModel.vmid
             }
     }
 

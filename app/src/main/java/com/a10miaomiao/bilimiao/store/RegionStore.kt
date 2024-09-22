@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import splitties.collections.forEachWithIndex
-import splitties.toast.toast
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -67,7 +66,7 @@ class RegionStore(override val di: DI) :
                 regions = data.toMutableList()
             }
         } catch (e: Exception) {
-            context.toast("读取分区列表遇到错误")
+            PopTip.show("读取分区列表遇到错误")
         }
         // 从网络读取最新版本的分区列表
         if (!isBestRegion && System.currentTimeMillis() - networkTime > 3600000) {
