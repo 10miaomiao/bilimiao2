@@ -44,11 +44,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.commponents.input.SearchBox
 import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserInfoCard
@@ -154,11 +156,10 @@ private class SearchFollowPageViewModel(
     }
 
     fun toUserDetailPage(id: String) {
-        val nav = fragment.findNavController()
-        nav.navigate(
-            "bilimiao://user/$id".toUri(),
-            defaultNavOptions
-        )
+        val nav = fragment.findComposeNavController()
+        nav.navigate(UserSpacePage()) {
+            this.id set id
+        }
     }
 
 }

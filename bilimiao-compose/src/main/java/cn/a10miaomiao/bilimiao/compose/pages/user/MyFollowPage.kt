@@ -221,9 +221,7 @@ private fun MyFollowPageContent() {
                 indicator = { positions ->
                     if (currentPage > -1 && currentPage < positions.size) {
                         TabRowDefaults.PrimaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(
-                                positions[currentPage],
-                            ),
+                            Modifier.pagerTabIndicatorOffset(pagerState, positions),
                         )
                     }
                 },

@@ -98,12 +98,13 @@ private fun IndexTitle(
 
 
 @Composable
-fun UserSpaceIndexContent() {
+fun UserSpaceIndexContent(
+    viewModel: UserSpaceViewModel
+) {
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
-    val viewModel: UserSpaceViewModel by rememberInstance()
     val detailData = viewModel.detailData.collectAsState().value ?: return Box {}
 
     val scope = rememberCoroutineScope()
@@ -142,6 +143,7 @@ fun UserSpaceIndexContent() {
                             playNum = it.play,
                             damukuNum = it.danmaku,
                             duration = NumberUtil.converDuration(it.duration),
+                            remark = NumberUtil.converCTime(it.ctime),
                             onClick = {
                                 viewModel.toVideoDetail(it)
                             }
