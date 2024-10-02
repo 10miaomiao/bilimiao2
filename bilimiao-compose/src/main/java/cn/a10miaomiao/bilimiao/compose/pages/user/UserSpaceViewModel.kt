@@ -168,6 +168,13 @@ class UserSpaceViewModel(
         }
     }
 
+    fun toLikeArchive() {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(UserLikeArchivePage()) {
+            id set this@UserSpaceViewModel.vmid
+        }
+    }
+
     fun toVideoDetail(item: SpaceInfo.ArchiveItem) {
         fragment.findNavController()
             .navigate(

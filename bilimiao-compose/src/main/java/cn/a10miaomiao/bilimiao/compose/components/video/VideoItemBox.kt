@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.components.video
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,11 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Danmukunum
@@ -79,7 +82,8 @@ fun VideoItemBox(
                         append(remark)
                     }
                 }.toString()
-            }.then(modifier)
+            }
+            .then(modifier)
     ) {
         if (pic != null) {
             Box(
@@ -90,6 +94,23 @@ fun VideoItemBox(
                 GlideImage(
                     imageModel = UrlUtil.autoHttps(pic) + "@672w_378h_1c_",
                     modifier = Modifier.fillMaxSize(),
+                    previewPlaceholder = R.drawable.bili_default_placeholder_img_tv,
+                    loading = {
+                        Image(
+                            modifier = Modifier.fillMaxSize(),
+                            alignment = Alignment.BottomEnd,
+                            painter = painterResource(R.drawable.bili_default_placeholder_img_tv),
+                            contentDescription = null,
+                        )
+                    },
+                    failure = {
+                        Image(
+                            modifier = Modifier.fillMaxSize(),
+                            alignment = Alignment.BottomEnd,
+                            painter = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+                            contentDescription = null,
+                        )
+                    }
                 )
                 if (duration != null) {
                     Box(
@@ -163,7 +184,8 @@ fun VideoItemBox(
 
             if (playNum != null && damukuNum != null) {
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(top = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

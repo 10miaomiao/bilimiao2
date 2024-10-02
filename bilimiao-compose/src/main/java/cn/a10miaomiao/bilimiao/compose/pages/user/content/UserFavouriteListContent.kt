@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -100,7 +103,23 @@ internal fun UserFavouriteListContent(
                                         imageModel = UrlUtil.autoHttps(it.cover) + "@672w_378h_1c_",
                                         modifier = Modifier
                                             .size(width = 120.dp, height = 80.dp)
-                                            .clip(RoundedCornerShape(5.dp))
+                                            .clip(RoundedCornerShape(5.dp)),
+                                        loading = {
+                                            Image(
+                                                modifier = Modifier.fillMaxSize(),
+                                                alignment = Alignment.BottomEnd,
+                                                painter = painterResource(R.drawable.bili_default_placeholder_img_tv),
+                                                contentDescription = null,
+                                            )
+                                        },
+                                        failure = {
+                                            Image(
+                                                modifier = Modifier.fillMaxSize(),
+                                                alignment = Alignment.BottomEnd,
+                                                painter = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+                                                contentDescription = null,
+                                            )
+                                        }
                                     )
 
                                     Column(

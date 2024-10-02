@@ -5,13 +5,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesListInfo
+import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.kongzue.dialogx.dialogs.PopTip
@@ -135,6 +138,23 @@ class UserArchiveViewModel(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+
+    fun toSeriesDetail(item: SeriesInfo) {
+        val type = when(item.type) {
+            "series" -> "5"
+            "season" -> "8"
+            else -> {
+                PopTip.show("未知类型：" + item.type)
+                return
+            }
+        }
+        fragment.findComposeNavController()
+            .navigate(UserFavouriteDetailPage()) {
+                id set item.param
+                title set item.title
+            }
     }
 
     fun toVideoDetail(item: ArchiveInfo) {

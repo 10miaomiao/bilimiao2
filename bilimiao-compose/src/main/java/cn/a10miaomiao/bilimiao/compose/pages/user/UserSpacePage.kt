@@ -61,7 +61,7 @@ class UserSpacePage : ComposePage() {
     val id = stringPageArg("id")
 
     override val route: String
-        get() = "user/space/${id}"
+        get() = "user/${id}/space"
 
     @Composable
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {

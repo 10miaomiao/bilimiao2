@@ -17,14 +17,6 @@ class UserApi {
     }
 
     /**
-     * 获取up主频道的视频列表
-     */
-    fun upperChanneVideo(mid: String, cid: String, pageNum: Int, pageSize: Int) = MiaoHttp.request {
-        url =
-            "https://api.bilibili.com/x/space/channel/video?mid=$mid&cid=$cid&pn=$pageNum&ps=$pageSize&order=0&jsonp=jsonp"
-    }
-
-    /**
      * 获取up主的视频投稿
      */
     fun upperVideoList(
@@ -76,16 +68,16 @@ class UserApi {
     }
 
     /**
-     * 用户空间的收藏夹列表
+     * 用户点赞的视频
      */
-    fun favSpaceFolder(
-        up_mid: String,
+    fun likeVideoList(
+        vmid: String,
         pageNum: Int,
         pageSize: Int,
     ) = MiaoHttp.request {
-        url = BiliApiService.biliApi(
-            "x/v3/fav/folder/space",
-            "up_mid" to up_mid,
+        url = BiliApiService.biliApp(
+            "x/v2/space/likearc",
+            "vmid" to vmid,
             "pn" to pageNum.toString(),
             "ps" to pageSize.toString(),
         )
