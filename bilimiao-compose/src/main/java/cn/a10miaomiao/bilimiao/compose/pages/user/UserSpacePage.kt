@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 
+import android.view.Menu
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -49,9 +50,12 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.comm.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.ChainScrollableLayout
 import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.rememberChainScrollableLayoutState
+import cn.a10miaomiao.bilimiao.compose.commponents.status.BiliLoadingBox
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.AtMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.LikeMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.ReplyMessageContent
@@ -59,6 +63,12 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserSpaceHeader
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserArchiveListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserDynamicListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSpaceIndexContent
+import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
+import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
+import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import org.kodein.di.bindSingleton
@@ -76,20 +86,21 @@ class UserSpacePage : ComposePage() {
     @Composable
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
         val vmid = navEntry.arguments?.get(id) ?: ""
-        val viewModel = diViewModel() {
-            UserSpaceViewModel(it, vmid)
+        val archiveViewModel = diViewModel(key = "archive$vmid") {
+            UserArchiveViewModel(it, vmid)
         }
-        UserSpacePageContent(viewModel)
+        val viewModel = diViewModel() {
+            UserSpaceViewModel(it, vmid, archiveViewModel)
+        }
+        UserSpacePageContent(viewModel, archiveViewModel)
     }
 }
 
 @Composable
 private fun UserSpacePageContent(
-    viewModel: UserSpaceViewModel
+    viewModel: UserSpaceViewModel,
+    archiveViewModel: UserArchiveViewModel,
 ) {
-    PageConfig(
-        title = "用户详情"
-    )
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
@@ -97,15 +108,115 @@ private fun UserSpacePageContent(
     val detailData = viewModel.detailData.collectAsState().value
 
     if (detailData == null) {
-        Box(modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column {
-                Text("加载中")
-            }
+        PageConfig(
+            title = "个人中心"
+        )
+        val loading = viewModel.loading.collectAsState().value
+        if (loading) {
+            BiliLoadingBox(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(windowInsets.toPaddingValues())
+            )
         }
         return
     }
+
+    val isFollow = viewModel.isFollow.collectAsState().value
+    val rankOrder = archiveViewModel.rankOrder.collectAsState().value
+    val pageConfigId = PageConfig(
+        title = detailData.card?.name ?: "个人中心",
+        menu = rememberMyMenu(isFollow, viewModel.isFiltered, viewModel.currentPage, rankOrder) {
+            myItem {
+                key = MenuKeys.more
+                iconFileName = "ic_more_vert_grey_24dp"
+                title = "更多"
+                childMenu = myMenu {
+                    if (!viewModel.isSelf) {
+                        if (viewModel.isFiltered) {
+                            myItem {
+                                key = 1
+                                title = "取消屏蔽该UP主"
+                            }
+                        } else {
+                            myItem {
+                                key = 2
+                                title = "屏蔽该UP主"
+                            }
+                        }
+                    }
+                    myItem {
+                        key = 3
+                        title = "用浏览器打开"
+                    }
+                    myItem {
+                        key = 4
+                        title = "复制链接"
+                    }
+                    myItem {
+                        key = 5
+                        title = "分享"
+                    }
+                }
+            }
+            if (viewModel.currentPage == 2) {
+                myItem {
+                    key = MenuKeys.filter
+                    title = when(rankOrder) {
+                        "pubdate" -> "最新发布"
+                        "click" -> "最多播放"
+                        else -> "排序"
+                    }
+                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    childMenu = myMenu {
+                        checkable = true
+                        checkedKey = when(rankOrder) {
+                            "pubdate" -> 11
+                            "click" -> 12
+                            else -> 11
+                        }
+                        myItem {
+                            key = 11
+                            action = "pubdate"
+                            title = "最新发布"
+                        }
+                        myItem {
+                            key = 12
+                            action = "click"
+                            title = "最多播放"
+                        }
+                    }
+                }
+            }
+            myItem {
+                key = MenuKeys.search
+                title = "搜索"
+                iconFileName = "ic_search_gray"
+                action = MenuActions.search
+            }
+            if (!viewModel.isSelf) {
+                myItem {
+                    key = MenuKeys.follow
+                    if (isFollow) {
+                        iconFileName = "ic_baseline_favorite_24"
+                        title = "已关注"
+                    } else {
+                        iconFileName = "ic_outline_favorite_border_24"
+                        title = "关注"
+                    }
+                }
+            }
+        },
+        search = SearchConfigInfo(
+            name = "搜索投稿列表",
+            keyword = "",
+        )
+    )
+    PageListener(
+        pageConfigId,
+        onMenuItemClick = viewModel::menuItemClick,
+        onSearchSelfPage = viewModel::searchSelfPage
+    )
 
     val maxHeaderSize = remember { mutableStateOf(0 to 0) }
     val density = LocalDensity.current
@@ -156,6 +267,7 @@ private fun UserSpacePageContent(
                     },
                 isLargeScreen = isLargeScreen,
                 viewModel = viewModel,
+                archiveViewModel = archiveViewModel,
             )
         }
         Column(

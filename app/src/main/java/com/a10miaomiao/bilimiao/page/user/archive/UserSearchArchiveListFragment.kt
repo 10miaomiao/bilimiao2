@@ -52,6 +52,7 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "user.archive.search"
         override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://user/{id}/search?name={name}&text={text}")
             argument(MainNavArgs.id) {
                 type = NavType.StringType
                 nullable = false
@@ -82,7 +83,7 @@ class UserSearchArchiveListFragment  : Fragment(), DIAware, MyPage {
         title = if (viewModel.keyword?.isBlank() == true) {
             "${viewModel.name}\n的\n投稿列表"
         } else {
-            "搜索\n-\n投稿列表\n-\n${viewModel.keyword}"
+            "搜索\n-\n${viewModel.name}\n-\n${viewModel.keyword}"
         }
         menus = listOf(
             myMenuItem {

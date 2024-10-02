@@ -37,14 +37,14 @@ sealed class UserSpacePageTabs(
     }
 
     data class Archive(
-        val vmid: String,
+        val viewModel: UserArchiveViewModel,
     ) : UserSpacePageTabs(
         id = 2,
         name = "投稿"
     ) {
         @Composable
         override fun PageContent() {
-            UserArchiveListContent(vmid);
+            UserArchiveListContent(viewModel)
         }
     }
 

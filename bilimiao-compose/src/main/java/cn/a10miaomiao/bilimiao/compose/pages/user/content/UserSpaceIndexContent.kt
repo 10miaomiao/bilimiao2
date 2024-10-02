@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.comm.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.commponents.bangumi.MiniBangumiItemBox
@@ -111,7 +112,7 @@ fun UserSpaceIndexContent(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = windowInsets.toPaddingValues(
+        contentPadding = windowInsets.addPaddingValues(
             addTop = -windowInsets.topDp.dp,
             addBottom = 40.dp,
         )
