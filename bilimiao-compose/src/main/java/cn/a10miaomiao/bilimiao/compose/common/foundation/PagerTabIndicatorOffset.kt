@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.comm.foundation
+package cn.a10miaomiao.bilimiao.compose.common.foundation
 
 
 import androidx.compose.material3.TabPosition

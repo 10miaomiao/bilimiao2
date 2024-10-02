@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
-import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
-import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware

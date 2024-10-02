@@ -5,8 +5,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
-import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
+import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo

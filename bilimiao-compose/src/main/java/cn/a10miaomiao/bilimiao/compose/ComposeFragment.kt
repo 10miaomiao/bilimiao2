@@ -1,10 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,18 +26,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.comm.*
-import cn.a10miaomiao.bilimiao.compose.comm.LocalContainerView
-import cn.a10miaomiao.bilimiao.compose.comm.LocalFragment
-import cn.a10miaomiao.bilimiao.compose.comm.LocalNavController
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.LocalPageConfigInfo
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfigInfo
+import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
+import cn.a10miaomiao.bilimiao.compose.common.LocalFragment
+import cn.a10miaomiao.bilimiao.compose.common.LocalNavController
+import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigInfo
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.subDI

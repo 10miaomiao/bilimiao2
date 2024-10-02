@@ -38,9 +38,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.navigate
-import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
-import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo

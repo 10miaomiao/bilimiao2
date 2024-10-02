@@ -21,18 +21,16 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
-import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.AtMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.LikeMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.ReplyMessageContent
@@ -40,11 +38,7 @@ import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.bindProvider
-import org.kodein.di.bindSingleton
-import org.kodein.di.compose.localDI
 import org.kodein.di.compose.rememberInstance
-import org.kodein.di.compose.subDI
 import org.kodein.di.instance
 
 class MessagePage : ComposePage() {
