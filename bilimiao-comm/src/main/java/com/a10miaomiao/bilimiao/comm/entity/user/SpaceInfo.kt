@@ -26,6 +26,7 @@ data class SpaceInfo(
         val likes: LikesInfo,
         val mid: String,
         val name: String,
+        val official_verify: OfficialVerifyInfo,
         val place: String,
         val rank: String,
         val regtime: Int,
@@ -46,6 +47,14 @@ data class SpaceInfo(
         val current_level: Int,
         val current_min: Int,
         val next_exp: String
+    )
+
+    data class OfficialVerifyInfo(
+        val desc: String,
+        val type: Int,
+        val role: Int,
+        val title: String,
+        val icon: String,
     )
 
     data class LikesInfo(

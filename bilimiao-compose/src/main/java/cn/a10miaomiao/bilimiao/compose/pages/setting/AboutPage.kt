@@ -42,6 +42,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.navigate
+import cn.a10miaomiao.bilimiao.compose.comm.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
@@ -311,7 +312,7 @@ private fun AboutPageContent(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface),
-        innerPadding = windowInsets.toPaddingValues(
+        innerPadding = windowInsets.addPaddingValues(
             addBottom = windowStore.bottomAppBarHeightDp.dp,
         ),
         chainScrollableLayoutState = chainScrollableLayoutState,

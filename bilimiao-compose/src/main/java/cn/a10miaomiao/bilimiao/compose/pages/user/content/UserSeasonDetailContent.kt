@@ -434,6 +434,7 @@ internal fun UserSeasonDetailContent(
             ) {
                 items(list) {
                     VideoItemBox(
+                        modifier = Modifier.padding(10.dp),
                         title = it.title,
                         pic = it.cover,
                         upperName = it.author?.name,

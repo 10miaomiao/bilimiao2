@@ -27,12 +27,12 @@ class MyPopupMenu(
                     isChecked = myMenu.checkedKey == key
                 }
             }
-            if (myMenu.checkable) {
-                setGroupCheckable(key, true, true)
-            }
             it.childMenu?.let { childMenu ->
                 addItems(key, childMenu)
             }
+        }
+        if (myMenu.checkable) {
+            setGroupCheckable(groupId, true, true)
         }
     }
 

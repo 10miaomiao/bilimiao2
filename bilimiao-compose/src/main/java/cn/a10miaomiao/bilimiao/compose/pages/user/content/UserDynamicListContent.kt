@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bilibili.app.dynamic.v2.DynamicGRPC
+import cn.a10miaomiao.bilimiao.compose.comm.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
@@ -29,6 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -130,7 +132,7 @@ fun UserDynamicListContent(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = windowInsets.toPaddingValues(
+        contentPadding = windowInsets.addPaddingValues(
             addTop = -windowInsets.topDp.dp + 10.dp,
             addBottom = 10.dp
         ),
@@ -144,7 +146,7 @@ fun UserDynamicListContent(
                     .fillMaxWidth(),
                 item = it,
                 onClick = {
-
+                    PopTip.show("施工中，ヽ(￣ω￣(￣ω￣〃)ゝ")
                 },
             )
         }
