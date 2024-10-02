@@ -43,7 +43,7 @@ fun ImagesGrid(
                     GlideImage(
                         imageModel = UrlUtil.autoHttps(it),
                         modifier = Modifier.size((width / 2 - 2).dp),
-                        previewPlaceholder = R.drawable.bili_default_img_tv,
+                        previewPlaceholder = R.drawable.bili_default_placeholder_img_tv,
                     )
                 }
             }

@@ -290,7 +290,7 @@ fun UserSpaceIndexContent(
                     title = "最近点赞",
                     num = likeArchiveData.count.toString(),
                     onClick = {
-
+                        viewModel.toLikeArchive()
                     }
                 )
             }

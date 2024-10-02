@@ -18,7 +18,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.Note
+import androidx.compose.material.icons.automirrored.filled.Segment
+import androidx.compose.material.icons.automirrored.filled.Subject
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,10 +40,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.common.localNavController
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserArchiveViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceViewModel
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.kongzue.dialogx.dialogs.PopTip
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -249,19 +258,25 @@ fun UserSpaceHeader(
                     items(seriesList, { it.param }) {
                         Row(
                             modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable {
+                                    archiveViewModel.toSeriesDetail(it)
+                                }
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .height(seriesHeight)
                                 .padding(horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             // collections
                             Icon(
-                                imageVector = Icons.AutoMirrored.Default.List,
+                                imageVector = when(it.type) {
+                                    "series" -> Icons.AutoMirrored.Default.List
+                                    "season" -> Icons.AutoMirrored.Default.Article
+                                    else -> Icons.AutoMirrored.Default.ViewList
+                                },
                                 contentDescription = null,
-                                modifier = Modifier.padding(end = 5.dp)
+                                modifier = Modifier
+                                    .padding(end = 5.dp)
                                     .size(20.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
