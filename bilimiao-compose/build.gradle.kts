@@ -79,7 +79,7 @@ dependencies {
 
     implementation(Libraries.accompanistDrawablePainter)
     implementation(Libraries.accompanistAdaptive)
-    implementation("me.zhanghai.compose.preference:library:1.0.0")
+    implementation("me.zhanghai.compose.preference:library:1.1.1")
     implementation("sh.calvin.reorderable:reorderable:2.3.1")
 
     implementation(Libraries.gson)

@@ -68,6 +68,7 @@ fun GlidePreference(
                         showDialog = false
                         GlideCacheUtil.clearImageAllCache(context)
                         PopTip.show("清理完成，已清理$cacheSize")
+                        cacheSize = "0Byte"
                     }
                 ) {
                     Text("确认")
