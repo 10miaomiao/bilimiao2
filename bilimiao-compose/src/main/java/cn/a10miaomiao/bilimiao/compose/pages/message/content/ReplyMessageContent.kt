@@ -19,9 +19,9 @@ import cn.a10miaomiao.bilimiao.compose.comm.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
-import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
-import cn.a10miaomiao.bilimiao.compose.commponents.list.SwipeToRefresh
-import cn.a10miaomiao.bilimiao.compose.pages.message.commponents.MessageItemBox
+import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
+import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
+import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo

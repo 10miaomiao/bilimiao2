@@ -22,10 +22,10 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
-import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.KeyValueInputStateCarrier
-import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerForm
-import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerFormState
-import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.rememberProxyServerFormState
+import cn.a10miaomiao.bilimiao.compose.pages.setting.components.KeyValueInputStateCarrier
+import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerForm
+import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerFormState
+import cn.a10miaomiao.bilimiao.compose.pages.setting.components.rememberProxyServerFormState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.store.WindowStore

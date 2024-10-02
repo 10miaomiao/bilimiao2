@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting
 
-import android.content.SharedPreferences
 import android.os.Build
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Spacer
@@ -13,11 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -26,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
@@ -34,17 +29,13 @@ import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.comm.preference.rememberPreferenceFlow
-import cn.a10miaomiao.bilimiao.compose.commponents.preference.SliderIntPreference
-import cn.a10miaomiao.bilimiao.compose.commponents.preference.customSetsPreference
-import cn.a10miaomiao.bilimiao.compose.commponents.preference.listStylePreference
-import cn.a10miaomiao.bilimiao.compose.commponents.preference.multiSelectIntPreference
-import cn.a10miaomiao.bilimiao.compose.commponents.preference.sliderIntPreference
+import cn.a10miaomiao.bilimiao.compose.components.preference.customSetsPreference
+import cn.a10miaomiao.bilimiao.compose.components.preference.multiSelectIntPreference
+import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import me.zhanghai.compose.preference.ListPreferenceType
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SliderPreference
 import me.zhanghai.compose.preference.listPreference

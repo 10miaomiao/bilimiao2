@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,10 +33,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.comm.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
-import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
-import cn.a10miaomiao.bilimiao.compose.commponents.bangumi.MiniBangumiItemBox
-import cn.a10miaomiao.bilimiao.compose.commponents.favourite.MiniFavouriteItemBox
-import cn.a10miaomiao.bilimiao.compose.commponents.video.MiniVideoItemBox
+import cn.a10miaomiao.bilimiao.compose.components.bangumi.MiniBangumiItemBox
+import cn.a10miaomiao.bilimiao.compose.components.favourite.MiniFavouriteItemBox
+import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceViewModel
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore

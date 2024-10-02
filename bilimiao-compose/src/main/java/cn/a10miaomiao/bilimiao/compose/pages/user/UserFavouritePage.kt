@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import android.app.Activity
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
@@ -19,20 +18,15 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -42,10 +36,9 @@ import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.rememberMyMenu
-import cn.a10miaomiao.bilimiao.compose.commponents.layout.AutoTwoPaneLayout
-import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditDialog
-import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditForm
-import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.FavouriteEditFormState
+import cn.a10miaomiao.bilimiao.compose.components.layout.AutoTwoPaneLayout
+import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditForm
+import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditFormState
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
@@ -53,22 +46,12 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
-import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.accompanist.adaptive.HorizontalTwoPaneStrategy
-import com.google.accompanist.adaptive.SplitResult
-import com.google.accompanist.adaptive.TwoPane
-import com.google.accompanist.adaptive.TwoPaneStrategy
-import com.google.accompanist.adaptive.calculateDisplayFeatures
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
-import org.kodein.di.compose.subDI
 
 class UserFavouritePage : ComposePage() {
 
