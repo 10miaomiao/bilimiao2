@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,14 +34,12 @@ import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.comm.preference.rememberPreferenceFlow
-import cn.a10miaomiao.bilimiao.compose.commponents.preference.glidePreference
+import cn.a10miaomiao.bilimiao.compose.components.preference.glidePreference
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

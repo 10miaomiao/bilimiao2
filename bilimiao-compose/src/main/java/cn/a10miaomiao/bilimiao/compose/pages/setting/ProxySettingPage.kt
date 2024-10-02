@@ -20,7 +20,7 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
-import cn.a10miaomiao.bilimiao.compose.pages.setting.commponents.ProxyServerCard
+import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerCard
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper

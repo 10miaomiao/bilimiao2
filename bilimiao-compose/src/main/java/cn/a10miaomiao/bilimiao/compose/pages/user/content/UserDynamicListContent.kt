@@ -1,10 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
@@ -24,9 +20,8 @@ import cn.a10miaomiao.bilimiao.compose.comm.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
-import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
-import cn.a10miaomiao.bilimiao.compose.commponents.dyanmic.DynamicItemCard
-import cn.a10miaomiao.bilimiao.compose.commponents.list.ListStateBox
+import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicItemCard
+import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore

@@ -20,8 +20,8 @@ import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.navigation.findComposeNavController
-import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadDetailItem
-import cn.a10miaomiao.bilimiao.compose.pages.download.commponents.DownloadListItem
+import cn.a10miaomiao.bilimiao.compose.pages.download.components.DownloadDetailItem
+import cn.a10miaomiao.bilimiao.compose.pages.download.components.DownloadListItem
 import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.LocalPlayerSource
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo

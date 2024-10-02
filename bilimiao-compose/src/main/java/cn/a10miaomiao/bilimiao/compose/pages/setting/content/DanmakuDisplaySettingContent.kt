@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
 import cn.a10miaomiao.bilimiao.compose.comm.preference.rememberPreferenceFlow
-import cn.a10miaomiao.bilimiao.compose.commponents.preference.sliderIntPreference
+import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.map

@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 
-import android.view.Menu
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -14,33 +13,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
@@ -53,27 +43,17 @@ import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.comm.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.comm.toPaddingValues
-import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.ChainScrollableLayout
-import cn.a10miaomiao.bilimiao.compose.commponents.layout.chain_scrollable.rememberChainScrollableLayoutState
-import cn.a10miaomiao.bilimiao.compose.commponents.status.BiliLoadingBox
-import cn.a10miaomiao.bilimiao.compose.pages.message.content.AtMessageContent
-import cn.a10miaomiao.bilimiao.compose.pages.message.content.LikeMessageContent
-import cn.a10miaomiao.bilimiao.compose.pages.message.content.ReplyMessageContent
-import cn.a10miaomiao.bilimiao.compose.pages.user.commponents.UserSpaceHeader
-import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserArchiveListContent
-import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserDynamicListContent
-import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSpaceIndexContent
+import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.ChainScrollableLayout
+import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememberChainScrollableLayoutState
+import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
+import cn.a10miaomiao.bilimiao.compose.pages.user.components.UserSpaceHeader
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
-import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
-import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
-import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
-import org.kodein.di.compose.subDI
 import kotlin.math.roundToInt
 
 class UserSpacePage : ComposePage() {
