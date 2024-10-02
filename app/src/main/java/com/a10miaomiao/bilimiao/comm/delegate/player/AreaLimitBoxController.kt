@@ -44,6 +44,7 @@ class AreaLimitBoxController(
     fun show(source: BangumiPlayerSource) {
         areaLimitLayout.visibility = View.VISIBLE
         delegate.views.videoPlayer.visibility = View.GONE
+        delegate.loadingBoxController.hideLoading()
     }
     fun hide() {
         areaLimitLayout.visibility = View.GONE
