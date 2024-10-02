@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.comm.navigation
+package cn.a10miaomiao.bilimiao.compose.common.navigation
 
 import android.app.Activity
 import android.content.Context

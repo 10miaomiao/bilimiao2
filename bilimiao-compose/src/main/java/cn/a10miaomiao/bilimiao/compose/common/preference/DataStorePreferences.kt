@@ -1,15 +1,11 @@
-package cn.a10miaomiao.bilimiao.compose.comm.preference
+package cn.a10miaomiao.bilimiao.compose.common.preference
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import me.zhanghai.compose.preference.MutablePreferences
 import me.zhanghai.compose.preference.Preferences
 

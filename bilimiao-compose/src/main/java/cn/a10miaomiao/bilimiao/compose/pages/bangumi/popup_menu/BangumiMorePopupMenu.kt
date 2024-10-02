@@ -10,8 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
-import androidx.navigation.NavHostController
-import cn.a10miaomiao.bilimiao.compose.comm.navigation.BottomSheetNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonV2Info
 import com.kongzue.dialogx.dialogs.PopTip

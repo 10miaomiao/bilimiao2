@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.comm
+package cn.a10miaomiao.bilimiao.compose.common
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets

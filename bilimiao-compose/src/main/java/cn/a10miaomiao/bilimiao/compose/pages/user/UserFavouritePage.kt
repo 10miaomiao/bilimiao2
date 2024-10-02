@@ -31,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
-import cn.a10miaomiao.bilimiao.compose.comm.diViewModel
-import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.PageListener
-import cn.a10miaomiao.bilimiao.compose.comm.mypage.rememberMyMenu
+import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.components.layout.AutoTwoPaneLayout
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditForm
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditFormState

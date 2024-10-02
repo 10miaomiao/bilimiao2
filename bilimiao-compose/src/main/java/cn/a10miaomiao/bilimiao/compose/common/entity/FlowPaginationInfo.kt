@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.comm.entity
+package cn.a10miaomiao.bilimiao.compose.common.entity
 
 import kotlinx.coroutines.flow.MutableStateFlow
 

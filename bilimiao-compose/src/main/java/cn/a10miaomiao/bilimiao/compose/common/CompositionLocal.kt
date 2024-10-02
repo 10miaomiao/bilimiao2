@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.comm
+package cn.a10miaomiao.bilimiao.compose.common
 
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable

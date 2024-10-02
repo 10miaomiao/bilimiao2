@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.comm.mypage
+package cn.a10miaomiao.bilimiao.compose.common.mypage
 
 import android.content.Context
 import android.view.View

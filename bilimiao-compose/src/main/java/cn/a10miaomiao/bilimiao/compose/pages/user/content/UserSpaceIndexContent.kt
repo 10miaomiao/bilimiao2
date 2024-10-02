@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.comm.addPaddingValues
-import cn.a10miaomiao.bilimiao.compose.comm.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
+import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.components.bangumi.MiniBangumiItemBox
 import cn.a10miaomiao.bilimiao.compose.components.favourite.MiniFavouriteItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
