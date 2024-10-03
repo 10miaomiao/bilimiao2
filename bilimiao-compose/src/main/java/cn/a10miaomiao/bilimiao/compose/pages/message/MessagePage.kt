@@ -3,6 +3,8 @@ package cn.a10miaomiao.bilimiao.compose.pages.message
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +17,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -23,14 +27,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.AtMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.LikeMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.ReplyMessageContent
@@ -131,16 +138,17 @@ private fun MessagePageContent(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        PrimaryTabRow(
+        TabRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(
-                    top = windowInsets.topDp.dp,
-                    start = windowInsets.leftDp.dp,
-                    end = windowInsets.rightDp.dp,
-                ),
+                .padding(windowInsets.toPaddingValues(bottom = 0.dp)),
             selectedTabIndex = pagerState.currentPage,
+            indicator = { positions ->
+                TabRowDefaults.PrimaryIndicator(
+                    Modifier.pagerTabIndicatorOffset(pagerState, positions),
+                )
+            },
         ) {
             viewModel.tabs.forEachIndexed { index, tab ->
                 Tab(
