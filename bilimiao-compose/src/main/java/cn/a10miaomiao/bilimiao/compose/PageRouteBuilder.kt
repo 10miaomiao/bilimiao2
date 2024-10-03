@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose
 
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -37,7 +36,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserLikeArchivePage
-import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 
 class PageRouteBuilder (
@@ -98,7 +97,7 @@ class PageRouteBuilder (
         +UserLikeArchivePage()
         +UserFavouritePage()
         +UserFavouriteDetailPage()
-        +UserSeasonPage()
+        +UserSeasonDetailPage()
 
         //lyric
         +LyricPage()
