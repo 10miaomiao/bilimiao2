@@ -15,6 +15,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,6 +34,7 @@ import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -147,14 +150,21 @@ private fun UserFavouritePageContent(
         ),
         first = {
             Column {
-                PrimaryTabRow(
+                TabRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.background)
                         .padding(
                             top = windowInsets.topDp.dp,
+                            start = windowInsets.leftDp.dp,
+                            end = if (it.showTowPane) 0.dp else windowInsets.rightDp.dp
                         ),
                     selectedTabIndex = pagerState.currentPage,
+                    indicator = { positions ->
+                        TabRowDefaults.PrimaryIndicator(
+                            Modifier.pagerTabIndicatorOffset(pagerState, positions),
+                        )
+                    },
                 ) {
                     Tab(
                         text = {
