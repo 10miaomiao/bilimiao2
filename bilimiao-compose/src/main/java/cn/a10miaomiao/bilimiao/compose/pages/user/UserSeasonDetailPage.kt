@@ -16,7 +16,7 @@ import org.kodein.di.compose.rememberDI
 import org.kodein.di.instance
 
 
-class UserSeasonPage : ComposePage() {
+class UserSeasonDetailPage : ComposePage() {
 
     val id = stringPageArg("id")
 
@@ -27,37 +27,14 @@ class UserSeasonPage : ComposePage() {
 
     @Composable
     override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val viewModel: UserSeasonPageViewModel = diViewModel()
         val seasonId = navEntry.arguments?.get(id) ?: ""
         val seasonTitle = navEntry.arguments?.get(title) ?: ""
-        UserSeasonPageContent(viewModel, seasonId, seasonTitle)
+        UserSeasonDetailContent(
+            seasonId = seasonId,
+            seasonTitle = seasonTitle,
+            showTowPane = false,
+            hideFirstPane = false,
+            onChangeHideFirstPane = {}
+        )
     }
-}
-
-private class UserSeasonPageViewModel(
-    override val di: DI,
-) : ViewModel(), DIAware {
-
-    private val userStore by instance<UserStore>()
-
-}
-
-
-@Composable
-private fun UserSeasonPageContent(
-    viewModel: UserSeasonPageViewModel,
-    seasonId: String,
-    seasonTitle: String,
-) {
-    val windowStore: WindowStore by rememberDI { instance() }
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.windowInsets
-
-    UserSeasonDetailContent(
-        seasonId = seasonId,
-        seasonTitle = seasonTitle,
-        showTowPane = false,
-        hideFirstPane = false,
-        onChangeHideFirstPane = {}
-    )
 }

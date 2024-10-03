@@ -3,7 +3,6 @@ package com.a10miaomiao.bilimiao.page.video
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.text.TextUtils
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -12,8 +11,6 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.graphics.scaleMatrix
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -27,7 +24,7 @@ import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
-import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.cover.CoverActivity
 import cn.a10miaomiao.miao.binding.android.view._isEnabled
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -50,10 +47,8 @@ import com.a10miaomiao.bilimiao.comm.connectStore
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
-import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
-import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcEpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoPageInfo
@@ -83,7 +78,6 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
@@ -102,7 +96,6 @@ import com.chad.library.adapter.base.listener.OnItemClickListener
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
@@ -117,7 +110,6 @@ import splitties.views.dsl.core.frameLayout
 import splitties.views.dsl.core.horizontalLayout
 import splitties.views.dsl.core.imageView
 import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.margin
 import splitties.views.dsl.core.matchParent
 import splitties.views.dsl.core.textView
 import splitties.views.dsl.core.verticalLayout
@@ -498,7 +490,7 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     private val handleUgcSeasonDetailClick = View.OnClickListener {
         val ugcSeason = viewModel.ugcSeason ?: return@OnClickListener
         val nav = findNavController()
-        nav.navigateToCompose(UserSeasonPage()) {
+        nav.navigateToCompose(UserSeasonDetailPage()) {
             this.id set ugcSeason.id
             this.title set ugcSeason.title
         }
