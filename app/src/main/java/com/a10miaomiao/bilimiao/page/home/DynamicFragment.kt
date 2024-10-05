@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._tag
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.comm.*
@@ -20,7 +21,6 @@ import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
-import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.recyclerviewAtViewPager2
@@ -89,9 +89,10 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
             val (type, id) = tag as Pair<Int, String>
             when(type) {
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
-                    val args = UserFragment.createArguments(id)
-                    Navigation.findNavController(it)
-                        .navigate(UserFragment.actionId, args)
+                    val nav = Navigation.findNavController(it)
+                    nav.navigateToCompose(UserSpacePage()) {
+                        this.id set id
+                    }
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
                     Navigation.findNavController(it)

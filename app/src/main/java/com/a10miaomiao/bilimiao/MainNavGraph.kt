@@ -22,13 +22,7 @@ import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
 import com.a10miaomiao.bilimiao.page.setting.*
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.user.*
-import com.a10miaomiao.bilimiao.page.user.archive.UserArchiveListFragment
 import com.a10miaomiao.bilimiao.page.user.archive.UserSearchArchiveListFragment
-import com.a10miaomiao.bilimiao.page.user.archive.UserSeriesDetailFragment
-import com.a10miaomiao.bilimiao.page.user.bangumi.MyBangumiFragment
-import com.a10miaomiao.bilimiao.page.user.bangumi.UserBangumiFragment
-import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteDetailFragment
-import com.a10miaomiao.bilimiao.page.user.favourite.UserFavouriteListFragment
 import com.a10miaomiao.bilimiao.page.video.*
 import com.a10miaomiao.bilimiao.page.video.comment.*
 import kotlin.reflect.KClass
@@ -80,14 +74,7 @@ object MainNavGraph {
 
             addFragment(H5LoginFragment::class, H5LoginFragment.Companion)
 
-            addFragment(UserFragment::class, UserFragment.Companion)
-            addFragment(MyBangumiFragment::class, MyBangumiFragment.Companion)
-            addFragment(UserBangumiFragment::class, UserBangumiFragment.Companion)
-            addFragment(UserFavouriteListFragment::class, UserFavouriteListFragment.Companion)
-            addFragment(UserFavouriteDetailFragment::class, UserFavouriteDetailFragment.Companion)
-            addFragment(UserArchiveListFragment::class, UserArchiveListFragment.Companion)
             addFragment(UserSearchArchiveListFragment::class, UserSearchArchiveListFragment.Companion)
-            addFragment(UserSeriesDetailFragment::class, UserSeriesDetailFragment.Companion)
             addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
             addFragment(HistoryFragment::class, HistoryFragment.Companion)
             addFragment(WatchLaterFragment::class, WatchLaterFragment.Companion)

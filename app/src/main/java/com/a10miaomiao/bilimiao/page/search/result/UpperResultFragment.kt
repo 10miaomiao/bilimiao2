@@ -8,19 +8,20 @@ import androidx.core.os.bundleOf
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.entity.search.SearchUpperInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.*
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.commponents.upper.upperItem
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.chad.library.adapter.base.listener.OnItemClickListener
 import org.kodein.di.DI
@@ -80,9 +81,10 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
 
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
-        val args = UserFragment.createArguments(item.param)
-        Navigation.findNavController(view)
-            .navigate(UserFragment.actionId, args)
+        val nav = Navigation.findNavController(view)
+        nav.navigateToCompose(UserSpacePage()) {
+            this.id set item.param
+        }
     }
 
     val itemUi = miaoBindingItemUi<SearchUpperInfo> { item, index ->

@@ -27,7 +27,6 @@ object BiliApiService {
     val searchApi = SearchApi()
     val playerAPI = PlayerAPI()
     val userApi = UserApi()
-    val userBangumiAPI = UserBangumiAPI()
     val userRelationApi = UserRelationApi()
     val messageApi = MessageAPI()
     val authApi = AuthApi()
