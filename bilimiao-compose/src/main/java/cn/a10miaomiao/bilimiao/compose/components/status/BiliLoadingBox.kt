@@ -1,5 +1,8 @@
 package cn.a10miaomiao.bilimiao.compose.components.status
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -24,6 +27,8 @@ fun BiliLoadingBox(modifier: Modifier) {
         delay(100)
         i = 1 - i
     }
+    val img1 = painterResource(id = R.drawable.bili_loading_img1)
+    val img2 = painterResource(id = R.drawable.bili_loading_img2)
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
@@ -32,10 +37,7 @@ fun BiliLoadingBox(modifier: Modifier) {
             modifier = Modifier
                 .widthIn(max = 150.dp)
                 .aspectRatio(1f),
-            painter = if (i == 0)
-                painterResource(id = R.drawable.bili_loading_img1)
-            else
-                painterResource(id = R.drawable.bili_loading_img2),
+            painter = if (i == 0) img1 else img2,
             contentDescription = "loading",
         )
     }

@@ -59,111 +59,108 @@ internal fun UserFavouriteListContent(
 
     val openedMedia by viewModel.openedMedia.collectAsState()
 
-    Column(
-        modifier = Modifier.fillMaxSize()
+    SwipeToRefresh(
+        modifier = Modifier.fillMaxSize(),
+        refreshing = isRefreshing,
+        onRefresh = { viewModel.refresh(folderType) },
     ) {
-        SwipeToRefresh(
-            refreshing = isRefreshing,
-            onRefresh = { viewModel.refresh(folderType) },
-        ) {
-            LazyColumn {
-                val selectedMedia = openedMedia ?: list.firstOrNull()?.takeIf {
-                    folderType == UserFavouriteFolderType.Created
-                }
-                items(list, { it.id }) {
-                    val isSelected = if (showTowPane) {
-                        selectedMedia?.id == it.id
-                    } else false
-                    Box(
-                        modifier = Modifier.padding(5.dp),
+        LazyColumn {
+            val selectedMedia = openedMedia ?: list.firstOrNull()?.takeIf {
+                folderType == UserFavouriteFolderType.Created
+            }
+            items(list, { it.id }) {
+                val isSelected = if (showTowPane) {
+                    selectedMedia?.id == it.id
+                } else false
+                Box(
+                    modifier = Modifier.padding(5.dp),
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (isSelected) {
+                            Color.Transparent
+                        } else {
+                            MaterialTheme.colorScheme.background
+                        }
                     ) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (isSelected) {
-                                Color.Transparent
-                            } else {
-                                MaterialTheme.colorScheme.background
-                            }
-                        ) {
-                            Column() {
-                                Row(
-                                    modifier = Modifier
-                                        .clickable(
-                                            onClick = {
-                                                viewModel.openMediaDetail(it)
-                                            },
-                                            enabled = !isSelected,
-                                        )
-                                        .padding(10.dp)
-                                        .fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    GlideImage(
-                                        imageModel = UrlUtil.autoHttps(it.cover) + "@672w_378h_1c_",
-                                        modifier = Modifier
-                                            .size(width = 120.dp, height = 80.dp)
-                                            .clip(RoundedCornerShape(5.dp)),
-                                        loading = {
-                                            Image(
-                                                modifier = Modifier.fillMaxSize(),
-                                                alignment = Alignment.BottomEnd,
-                                                painter = painterResource(R.drawable.bili_default_placeholder_img_tv),
-                                                contentDescription = null,
-                                            )
+                        Column() {
+                            Row(
+                                modifier = Modifier
+                                    .clickable(
+                                        onClick = {
+                                            viewModel.openMediaDetail(it)
                                         },
-                                        failure = {
-                                            Image(
-                                                modifier = Modifier.fillMaxSize(),
-                                                alignment = Alignment.BottomEnd,
-                                                painter = painterResource(R.drawable.bili_fail_placeholder_img_tv),
-                                                contentDescription = null,
-                                            )
-                                        }
+                                        enabled = !isSelected,
                                     )
-
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(80.dp)
-                                            .padding(horizontal = 10.dp),
-                                    ) {
-                                        Text(
-                                            text = it.title,
-                                            maxLines = 2,
-                                            modifier = Modifier.weight(1f),
-                                            overflow = TextOverflow.Ellipsis,
-                                            color = MaterialTheme.colorScheme.onBackground,
+                                    .padding(10.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                GlideImage(
+                                    imageModel = UrlUtil.autoHttps(it.cover) + "@672w_378h_1c_",
+                                    modifier = Modifier
+                                        .size(width = 120.dp, height = 80.dp)
+                                        .clip(RoundedCornerShape(5.dp)),
+                                    loading = {
+                                        Image(
+                                            modifier = Modifier.fillMaxSize(),
+                                            alignment = Alignment.BottomEnd,
+                                            painter = painterResource(R.drawable.bili_default_placeholder_img_tv),
+                                            contentDescription = null,
                                         )
-                                        Text(
-                                            text = if (folderType == UserFavouriteFolderType.Created) {
-                                                "${it.media_count}个视频 · ${if (it.privacy == 1) "私密" else "公开"}"
-                                            } else {
-                                                "${it.media_count}个视频"
-                                            },
-                                            maxLines = 1,
-                                            color = MaterialTheme.colorScheme.outline,
-                                            overflow = TextOverflow.Ellipsis,
+                                    },
+                                    failure = {
+                                        Image(
+                                            modifier = Modifier.fillMaxSize(),
+                                            alignment = Alignment.BottomEnd,
+                                            painter = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+                                            contentDescription = null,
                                         )
                                     }
+                                )
+
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(80.dp)
+                                        .padding(horizontal = 10.dp),
+                                ) {
+                                    Text(
+                                        text = it.title,
+                                        maxLines = 2,
+                                        modifier = Modifier.weight(1f),
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                    )
+                                    Text(
+                                        text = if (folderType == UserFavouriteFolderType.Created) {
+                                            "${it.media_count}个视频 · ${if (it.privacy == 1) "私密" else "公开"}"
+                                        } else {
+                                            "${it.media_count}个视频"
+                                        },
+                                        maxLines = 1,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                item {
-                    ListStateBox(
-                        modifier = Modifier.padding(
-                            bottom = windowInsets.bottomDp.dp
-                        ),
-                        loading = listLoading,
-                        finished = listFinished,
-                        fail = listFail,
-                        listData = list,
-                    ) {
-                        viewModel.loadMore(folderType)
-                    }
+            item {
+                ListStateBox(
+                    modifier = Modifier.padding(
+                        bottom = windowInsets.bottomDp.dp
+                    ),
+                    loading = listLoading,
+                    finished = listFinished,
+                    fail = listFail,
+                    listData = list,
+                ) {
+                    viewModel.loadMore(folderType)
                 }
             }
         }

@@ -192,9 +192,7 @@ private class UserFavouriteDetailViewModel(
             PopTip.show("数据加载中，请稍后再试")
             return
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            playListStore.setFavoriteList(media.id, media.title)
-        }
+        playListStore.setFavoriteList(media.id, media.title)
     }
 
     fun toPlayListPage() {

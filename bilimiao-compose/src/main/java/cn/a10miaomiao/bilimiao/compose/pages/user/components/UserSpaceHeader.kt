@@ -291,10 +291,11 @@ fun UserSpaceHeader(
                         item {
                             Row(
                                 modifier = Modifier
-                                    .background(
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        shape = RoundedCornerShape(4.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .clickable(
+                                        onClick = archiveViewModel::toSeriesList,
                                     )
+                                    .background(MaterialTheme.colorScheme.surfaceVariant,)
                                     .height(seriesHeight)
                                     .padding(horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,

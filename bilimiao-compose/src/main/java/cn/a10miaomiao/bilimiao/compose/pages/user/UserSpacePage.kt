@@ -45,6 +45,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.ChainScrollableLayout
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememberChainScrollableLayoutState
+import cn.a10miaomiao.bilimiao.compose.components.status.BiliFailBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.UserSpaceHeader
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
@@ -94,6 +95,14 @@ private fun UserSpacePageContent(
         val loading = viewModel.loading.collectAsState().value
         if (loading) {
             BiliLoadingBox(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(windowInsets.toPaddingValues())
+            )
+        } else {
+            val fail = viewModel.fail.collectAsState().value
+            BiliFailBox(
+                e = fail ?: "未知错误",
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(windowInsets.toPaddingValues())

@@ -218,21 +218,7 @@ class UserApi {
         )
     }
 
-    /**
-     * 追番列表
-     */
-    fun followBangumi(
-        pageNum: Int,
-        pageSize: Int,
-    ) = MiaoHttp.request {
-        url = BiliApiService.biliApi(
-            "pgc/app/follow/bangumi",
-            "pn" to pageNum.toString(),
-            "ps" to pageSize.toString()
-        )
-    }
-
-    fun followBangumi(
+    fun bangumiList(
         vmid: String,
         pageNum: Int,
         pageSize: Int,

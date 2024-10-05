@@ -19,7 +19,7 @@ fun TitleBar(
     modifier: Modifier = Modifier,
     title: @Composable () -> Unit,
     icon: @Composable () -> Unit,
-    action: @Composable RowScope.() -> Unit,
+    action: @Composable RowScope.() -> Unit = {},
 ) {
     Surface(
         modifier = modifier,

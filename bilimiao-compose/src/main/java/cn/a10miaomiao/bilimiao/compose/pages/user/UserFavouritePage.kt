@@ -73,7 +73,6 @@ class UserFavouritePage : ComposePage() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun UserFavouritePageContent(
     viewModel: UserFavouriteViewModel,

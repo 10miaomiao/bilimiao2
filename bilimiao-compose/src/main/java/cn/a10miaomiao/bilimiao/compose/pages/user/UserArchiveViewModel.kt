@@ -141,19 +141,20 @@ class UserArchiveViewModel(
     }
 
 
-    fun toSeriesDetail(item: SeriesInfo) {
-        val type = when(item.type) {
-            "series" -> "5"
-            "season" -> "8"
-            else -> {
-                PopTip.show("未知类型：" + item.type)
-                return
-            }
-        }
+    fun toSeriesList() {
         fragment.findComposeNavController()
-            .navigate(UserFavouriteDetailPage()) {
-                id set item.param
-                title set item.title
+            .navigate(UserMedialistPage()) {
+                mid set vmid
+            }
+    }
+
+    fun toSeriesDetail(item: SeriesInfo) {
+        fragment.findComposeNavController()
+            .navigate(UserMedialistPage()) {
+                mid set vmid
+                bizId set item.param
+                bizType set item.type
+                bizTitle set item.title
             }
     }
 

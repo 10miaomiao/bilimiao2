@@ -218,7 +218,7 @@ fun UserSpaceIndexContent(
                     title = "追番",
                     num = seasonData.count.toString(),
                     onClick = {
-
+                        viewModel.toBangumiFollow()
                     }
                 )
             }

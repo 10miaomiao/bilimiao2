@@ -43,6 +43,22 @@ class BangumiAPI {
     }
 
     /**
+     * 追番列表
+     */
+    fun followList(
+        status: Int,
+        pageNum: Int,
+        pageSize: Int,
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi(
+            "pgc/app/follow/v2/bangumi",
+            "status" to status.toString(),
+            "pn" to pageNum.toString(),
+            "ps" to pageSize.toString()
+        )
+    }
+
+    /**
      * 收藏番剧
      */
     fun followSeason(seasonId: String) = MiaoHttp.request {
@@ -56,7 +72,7 @@ class BangumiAPI {
     /**
      * 取消收藏番剧
      */
-    fun cancelFollowSeason(seasonId: String) = MiaoHttp.request {
+    fun cancelFollow(seasonId: String) = MiaoHttp.request {
         url = BiliApiService.biliApi("pgc/app/follow/del")
         formBody = ApiHelper.createParams(
             "season_id" to seasonId,
@@ -67,7 +83,7 @@ class BangumiAPI {
     /**
      * 设置状态
      */
-    fun setSeasonStatus(seasonId: String, status: Int) = MiaoHttp.request {
+    fun setFollowStatus(seasonId: String, status: Int) = MiaoHttp.request {
         url = BiliApiService.biliApi("pgc/view/app/season")
         formBody = ApiHelper.createParams(
             "season_id" to seasonId,

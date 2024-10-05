@@ -98,7 +98,7 @@ private class BangumiFollowPageViewModel(
         try {
             list.loading.value = true
             val status = currentStatus.value
-            val res = BiliApiService.userBangumiAPI
+            val res = BiliApiService.bangumiAPI
                 .followList(
                     status = status,
                     pageNum = pageNum,
@@ -166,15 +166,15 @@ private class BangumiFollowPageViewModel(
     ) = viewModelScope.launch {
         try {
             val res = if (status == 0) {
-                BiliApiService.userBangumiAPI
-                    .followDel(
+                BiliApiService.bangumiAPI
+                    .cancelFollow(
                         seasonId = item.season_id,
                     )
                     .awaitCall()
                     .gson<MessageInfo>()
             } else {
-                BiliApiService.userBangumiAPI
-                    .followUpdate(
+                BiliApiService.bangumiAPI
+                    .setFollowStatus(
                         seasonId = item.season_id,
                         status = status,
                     )
