@@ -17,6 +17,7 @@ import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -50,6 +51,9 @@ class UserSpaceViewModel(
 
     private val _loading = MutableStateFlow(false);
     val loading: StateFlow<Boolean> get() = _loading
+
+    private val _fail = MutableStateFlow<Any?>(null)
+    val fail: StateFlow<Any?> get() = _fail
 
     private val _detailData = MutableStateFlow<SpaceInfo?>(null)
     val detailData: StateFlow<SpaceInfo?> get() = _detailData
@@ -88,14 +92,17 @@ class UserSpaceViewModel(
     fun loadData() = viewModelScope.launch(Dispatchers.IO) {
         try {
             _loading.value = true
+            _fail.value = null
             val res = UserApi().space(vmid).awaitCall().gson<ResultInfo<SpaceInfo>>()
             if (res.code == 0) {
                 _detailData.value = res.data
                 _isFollow.value = res.data.card.relation.is_follow == 1
             } else {
+                _fail.value = res.message
                 PopTip.show(res.message)
             }
         } catch (e: Exception) {
+            _fail.value = e
             PopTip.show("网络错误")
             e.printStackTrace()
         } finally {
@@ -167,6 +174,18 @@ class UserSpaceViewModel(
             }
         }
     }
+
+    fun toBangumiFollow() {
+        val nav = fragment.findComposeNavController()
+        if (isSelf) {
+            nav.navigate(BangumiFollowPage())
+        } else {
+            nav.navigate(UserBangumiPage()) {
+                id set this@UserSpaceViewModel.vmid
+            }
+        }
+    }
+
 
     fun toLikeArchive() {
         val nav = fragment.findComposeNavController()

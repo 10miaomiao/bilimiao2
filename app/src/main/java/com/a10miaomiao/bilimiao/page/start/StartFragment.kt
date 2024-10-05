@@ -66,7 +66,6 @@ import com.a10miaomiao.bilimiao.comm.views
 import com.a10miaomiao.bilimiao.comm.wrapInMaterialCardView
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.badgeTextView

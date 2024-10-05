@@ -32,10 +32,12 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserLikeArchivePage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserMedialistPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 
@@ -93,11 +95,13 @@ class PageRouteBuilder (
         +UserSpacePage()
         +MyFollowPage()
         +UserFollowPage()
+        +UserBangumiPage()
         +SearchFollowPage()
         +UserLikeArchivePage()
         +UserFavouritePage()
         +UserFavouriteDetailPage()
         +UserSeasonDetailPage()
+        +UserMedialistPage()
 
         //lyric
         +LyricPage()

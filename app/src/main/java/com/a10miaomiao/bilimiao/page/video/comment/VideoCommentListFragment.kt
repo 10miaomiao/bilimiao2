@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -32,6 +33,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.MiaoBindingAdapter
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
@@ -44,7 +46,6 @@ import com.a10miaomiao.bilimiao.commponents.comment.videoCommentView
 import com.a10miaomiao.bilimiao.commponents.loading.ListState
 import com.a10miaomiao.bilimiao.commponents.loading.listStateView
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.expandabletext.ExpandableTextView
@@ -233,9 +234,10 @@ class VideoCommentListFragment : RecyclerViewFragment(), DIAware, MyPage {
     private val handleUserClick = View.OnClickListener {
         val id = it.tag
         if (id != null && id is String) {
-            val args = UserFragment.createArguments(id)
-            Navigation.findNavController(it)
-                .navigate(UserFragment.actionId, args)
+            val nav = Navigation.findNavController(it)
+            nav.navigateToCompose(UserSpacePage()) {
+                this.id set id
+            }
         }
     }
 

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view.*
 import com.a10miaomiao.bilimiao.comm.*
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -19,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -109,9 +111,10 @@ class UserFollowFragment : Fragment(), DIAware, MyPage {
             val matcher = compile.matcher(url)
             if (matcher.find()) {
                 val id = matcher.group(1)
-                val args = UserFragment.createArguments(id)
-                Navigation.findNavController(view)
-                    .navigate(UserFragment.actionId, args)
+                val nav = Navigation.findNavController(view)
+                nav.navigateToCompose(UserSpacePage()) {
+                    this.id set id
+                }
                 return true
             }
             if (isNightTheme()){

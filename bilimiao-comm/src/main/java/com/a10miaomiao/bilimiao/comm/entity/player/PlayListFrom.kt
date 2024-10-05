@@ -25,4 +25,10 @@ sealed class PlayListFrom : Parcelable {
         val seasonId: String,
         val sectionId: String,
     ): PlayListFrom()
+
+    @Parcelize
+    class Medialist(
+        val bizId: String,
+        val bizType: String,
+    ): PlayListFrom()
 }

@@ -41,12 +41,14 @@ fun DynamicModuleStatBox(
                 Icon(
                     BilimiaoIcons.Common.Share,
                     contentDescription = "share",
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(end = 4.dp)
                         .size(16.dp)
                 )
                 Text(
                     text = stat.repost.toString(),
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -61,12 +63,14 @@ fun DynamicModuleStatBox(
                 Icon(
                     BilimiaoIcons.Common.Reply,
                     contentDescription = "reply",
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(end = 4.dp)
                         .size(16.dp)
                 )
                 Text(
                     text = stat.reply.toString(),
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -90,13 +94,15 @@ fun DynamicModuleStatBox(
                     Icon(
                         BilimiaoIcons.Common.Like,
                         contentDescription = "like",
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(end = 4.dp)
                             .size(16.dp)
                     )
                 }
                 Text(
                     text = stat.like.toString(),
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }

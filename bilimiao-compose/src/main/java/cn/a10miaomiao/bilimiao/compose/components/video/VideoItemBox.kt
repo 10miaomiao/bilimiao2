@@ -97,7 +97,8 @@ fun VideoItemBox(
                     previewPlaceholder = R.drawable.bili_default_placeholder_img_tv,
                     loading = {
                         Image(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize()
+                                .align(Alignment.BottomEnd),
                             alignment = Alignment.BottomEnd,
                             painter = painterResource(R.drawable.bili_default_placeholder_img_tv),
                             contentDescription = null,
@@ -105,7 +106,8 @@ fun VideoItemBox(
                     },
                     failure = {
                         Image(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize()
+                                .align(Alignment.BottomEnd),
                             alignment = Alignment.BottomEnd,
                             painter = painterResource(R.drawable.bili_fail_placeholder_img_tv),
                             contentDescription = null,

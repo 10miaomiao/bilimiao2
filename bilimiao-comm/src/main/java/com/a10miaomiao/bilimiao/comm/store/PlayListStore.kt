@@ -1,15 +1,18 @@
 package com.a10miaomiao.bilimiao.comm.store
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import bilibili.app.dynamic.v2.ThreePointType
 import bilibili.app.view.v1.ViewGRPC
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
+import com.a10miaomiao.bilimiao.comm.entity.media.MediaResponseV2Info
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
+import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -20,6 +23,7 @@ import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -213,7 +217,13 @@ class PlayListStore(override val di: DI) :
     }
 
     private val playListLoadingMutex = Mutex()
-    suspend fun setFavoriteList(mediaId: String, mediaTitle: String) =
+
+    fun setFavoriteList(mediaId: String, mediaTitle: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _setFavoriteList(mediaId, mediaTitle)
+        }
+    }
+    private suspend fun _setFavoriteList(mediaId: String, mediaTitle: String) =
         playListLoadingMutex.withLock {
             val listFrom = PlayListFrom.Favorite(
                 mediaId = mediaId,
@@ -281,7 +291,13 @@ class PlayListStore(override val di: DI) :
             )
         }
 
-    suspend fun setSeasonList(seasonId: String, seasonTitle: String, seasonIndex: Int) =
+    fun setSeasonList(seasonId: String, seasonTitle: String, seasonIndex: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _setSeasonList(seasonId, seasonTitle, seasonIndex)
+        }
+    }
+
+    private suspend fun _setSeasonList(seasonId: String, seasonTitle: String, seasonIndex: Int) =
         playListLoadingMutex.withLock {
             clearPlayList(
                 loading = true
@@ -321,6 +337,83 @@ class PlayListStore(override val di: DI) :
                 e.printStackTrace()
                 PopTip.show(e.toString())
             }
+        }
+
+    fun setMedialistList(bizId: String, bizType: String, bizTitle: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _setMedialistList(bizId, bizType, bizTitle)
+        }
+    }
+    private suspend fun _setMedialistList(bizId: String, bizType: String, bizTitle: String) =
+        playListLoadingMutex.withLock {
+            val listFrom = PlayListFrom.Medialist(
+                bizId = bizId,
+                bizType = bizType,
+            )
+            val currentFrom = state.from
+            if (currentFrom is PlayListFrom.Medialist
+                && currentFrom.bizId == bizId
+                && currentFrom.bizType == bizType
+            ) {
+                return@withLock
+            }
+            clearPlayList(
+                loading = true
+            )
+            val items = mutableListOf<PlayListItemInfo>()
+            var lastOid = ""
+            var loadFinish = false
+            while (!loadFinish) {
+                try {
+                    val res = BiliApiService.userApi
+                        .medialistResourceList(
+                            bizId = bizId,
+                            type = bizType,
+                            oid = lastOid,
+                        )
+                        .awaitCall()
+                        .gson<ResultInfo<MediaResponseV2Info>>()
+                    if (res.code == 0) {
+                        val mediaList = res.data.media_list ?: break
+                        lastOid = mediaList.lastOrNull()?.id ?: ""
+                        val newItems = mediaList.map {
+                            PlayListItemInfo(
+                                aid = it.id,
+                                cid = it.pages[0].id,
+                                duration = it.duration.toInt(),
+                                title = it.title,
+                                cover = it.cover,
+                                ownerId = it.upper.mid,
+                                ownerName = it.upper.name,
+                                videoPages = it.pages.map {
+                                    VideoPageInfo(
+                                        cid = it.id,
+                                        page = it.page,
+                                        part = it.title,
+                                        duration = it.duration,
+                                    )
+                                },
+                                from = listFrom,
+                            )
+                        }.filter { item ->
+                            items.indexOfFirst { it.aid == item.aid } == -1
+                        }
+                        items.addAll(newItems)
+                        loadFinish = !res.data.has_more
+                    } else {
+                        PopTip.show(res.message)
+                        loadFinish = true
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    loadFinish = true
+                }
+            }
+            setPlayList(
+                name = bizTitle,
+                from = listFrom,
+                items = items,
+            )
         }
 
     fun VideoInfo.toPlayListItem(): PlayListItemInfo {

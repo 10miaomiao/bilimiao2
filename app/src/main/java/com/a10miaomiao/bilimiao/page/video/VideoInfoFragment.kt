@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.cover.CoverActivity
 import cn.a10miaomiao.miao.binding.android.view._isEnabled
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -84,7 +85,6 @@ import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
-import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget._setContent
@@ -383,9 +383,10 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     }
 
     private fun toUser(view: View, mid: String) {
-        val args = UserFragment.createArguments(mid)
-        Navigation.findNavController(view)
-            .navigate(UserFragment.actionId, args)
+        val nav = Navigation.findNavController(view)
+        nav.navigateToCompose(UserSpacePage()) {
+            this.id set mid
+        }
     }
 
     private val handleUpperClick = View.OnClickListener {

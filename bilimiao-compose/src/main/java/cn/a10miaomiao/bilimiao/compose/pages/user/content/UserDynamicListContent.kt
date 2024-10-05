@@ -52,7 +52,6 @@ private class UserDynamicListContentViewModel(
     private fun loadData(
         pageNum: Int = list.pageNum
     ) = viewModelScope.launch(Dispatchers.IO) {
-        miaoLogger() debug "loadData, pageNum:${pageNum}"
         try {
             list.loading.value = true
             val req = bilibili.app.dynamic.v2.DynSpaceReq(
