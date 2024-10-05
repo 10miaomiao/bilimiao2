@@ -13,12 +13,12 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.page.user.UserFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.page.web.WebFragment
 import java.util.regex.Pattern
@@ -84,7 +84,10 @@ object BiliNavigation {
         if (host == "space.bilibili.com") {
             val path = uri.path!!.replace("/", "")
             argId = if (isNumeric(path)) { path } else { "" }
-            actionId = UserFragment.actionId
+            nav.navigateToCompose(UserSpacePage()) {
+                id set argId
+            }
+            return true
         }
         if (queryParameterNames.contains("avid")) {
             argId = uri.getQueryParameter("avid")!!
