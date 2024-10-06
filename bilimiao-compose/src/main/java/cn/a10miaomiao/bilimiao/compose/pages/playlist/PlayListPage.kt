@@ -7,6 +7,7 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
@@ -228,14 +230,15 @@ private fun PlayListPageContent(
             contentPadding = windowInsets.toPaddingValues()
         ) {
             val playListItems = playListState.items
+            val currentPlayAid = playerState.aid
             val currentPlayCid = playerState.cid
             items(playListItems.size, {
-                playListItems[it].cid
+                playListItems[it].aid
             }) { index ->
                 val item = playListItems[index]
                 ReorderableItem(
                     reorderableLazyListState,
-                    key = item.cid,
+                    key = item.aid,
                     modifier = Modifier.padding(5.dp),
                 ) { isDragging ->
                     PlayListItemCard(
@@ -262,20 +265,28 @@ private fun PlayListPageContent(
                            }
                         },
                         action = {
-                           if (currentPlayCid == item.cid) {
-                               Box(
+                           if (currentPlayAid == item.aid) {
+                               Column(
                                    modifier = Modifier
-                                       .sizeIn(
-                                           minWidth = 50.dp,
-                                           minHeight = 30.dp
-                                       ),
-                                   contentAlignment = Alignment.Center,
+                                       .widthIn(min = 50.dp),
+                                   verticalArrangement = Arrangement.Center,
+                                   horizontalAlignment = Alignment.CenterHorizontally
                                ) {
                                    Text(
                                        color = MaterialTheme.colorScheme.primary,
                                        text = "播放中",
                                        fontSize = 12.sp
                                    )
+                                   if (item.videoPages.size > 1) {
+                                       val i = item.videoPages.indexOfFirst {
+                                           it.cid == currentPlayCid
+                                       }
+                                       Text(
+                                           color = MaterialTheme.colorScheme.primary,
+                                           text = "P${i + 1}",
+                                           fontSize = 12.sp
+                                       )
+                                   }
                                }
                            } else if (enableEditMode.value) {
                                Checkbox(

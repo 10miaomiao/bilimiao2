@@ -62,7 +62,7 @@ class PlayerStore(override val di: DI) :
             return -1
         }
         return playListStore.state
-            .indexOfCid(state.cid)
+            .indexOfAid(state.aid)
     }
 
     fun addNextVideo(video: VideoInfo) {
@@ -148,7 +148,7 @@ class PlayerStore(override val di: DI) :
                 VIDEO
             }
         }
-        if (!playListStore.state.inListForCid(state.cid)) {
+        if (!playListStore.state.inListForAid(state.aid)) {
             // 当前视频，不在播放列表中，清除播放列表信息
             playListStore.clearPlayList()
         }
