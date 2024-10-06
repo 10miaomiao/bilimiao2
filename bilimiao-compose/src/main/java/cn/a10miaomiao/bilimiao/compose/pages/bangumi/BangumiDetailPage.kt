@@ -210,7 +210,7 @@ private class BangumiDetailPageViewModel(
                 1
             }
             val res = (if (mode == 2) {
-                BiliApiService.bangumiAPI.cancelFollowSeason(detail.season_id)
+                BiliApiService.bangumiAPI.cancelFollow(detail.season_id)
             } else {
                 BiliApiService.bangumiAPI.followSeason(detail.season_id)
             }).awaitCall().gson<ResultInfo2<ToastInfo>>()

@@ -11,7 +11,6 @@ import com.a10miaomiao.bilimiao.page.MainFragment
 //import com.a10miaomiao.bilimiao.page.TestFragment
 import com.a10miaomiao.bilimiao.page.web.WebFragment
 import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.rank.RankFragment
@@ -69,7 +68,6 @@ object MainNavGraph {
             addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
             addFragment(SendCommentFragment::class, SendCommentFragment.Companion)
 
-            addFragment(BangumiDetailFragment::class, BangumiDetailFragment.Companion)
             addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)
 
             addFragment(H5LoginFragment::class, H5LoginFragment.Companion)
