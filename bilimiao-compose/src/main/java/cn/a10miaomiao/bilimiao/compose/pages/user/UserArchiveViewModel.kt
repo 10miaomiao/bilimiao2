@@ -53,11 +53,16 @@ class UserArchiveViewModel(
 
     //
     init {
-//        loadData("")
         loadSeriesList()
     }
 
-    fun loadData(
+    fun initData() {
+        if (!list.loading.value && list.data.value.isEmpty()) {
+            loadData("")
+        }
+    }
+
+    private fun loadData(
         aid: String = lastAid
     ) = viewModelScope.launch(Dispatchers.IO){
         try {

@@ -132,7 +132,13 @@ private class UserMedialistPageViewModel(
         }
     }
 
-    fun loadData(
+    fun initData() {
+        if (!list.loading.value && list.data.value.isEmpty()) {
+            loadData(1)
+        }
+    }
+
+    private fun loadData(
         pageNum: Int = list.pageNum
     ) = viewModelScope.launch(Dispatchers.IO){
         try {
@@ -302,7 +308,7 @@ private fun UserMedialistListContent(
     val listFail by listFlow.fail.collectAsState()
 
     LaunchedEffect(viewModel) {
-        viewModel.loadData(1)
+        viewModel.initData()
     }
 
     Column(
