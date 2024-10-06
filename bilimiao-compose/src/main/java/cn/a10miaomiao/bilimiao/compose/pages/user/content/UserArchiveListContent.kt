@@ -30,7 +30,7 @@ fun UserArchiveListContent(
     val windowInsets = windowState.getContentInsets(localContainerView())
 
     LaunchedEffect(true) {
-        viewModel.loadData("")
+        viewModel.initData()
     }
 
     val listFlow = viewModel.list
