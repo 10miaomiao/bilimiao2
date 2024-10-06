@@ -16,6 +16,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
 import com.a10miaomiao.bilimiao.MainActivity
@@ -27,12 +28,12 @@ import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
+import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
 import com.a10miaomiao.bilimiao.comm.recycler.miaoBindingItemUi
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiDetailFragment
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
@@ -208,8 +209,9 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
 //                    Navigation.findNavController(view).popBackStack()
                     val nav = (activity as? MainActivity)?.pointerNav?.navController
                         ?: requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = BangumiDetailFragment.createArguments(item.value)
-                    nav.navigate(BangumiDetailFragment.actionId, args)
+                    nav.navigateToCompose(BangumiDetailPage()) {
+                        this.id set item.value
+                    }
                 }
                 else -> {
                     val keyword = item.text
