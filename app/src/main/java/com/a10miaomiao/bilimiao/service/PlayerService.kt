@@ -79,6 +79,7 @@ class PlayerService : Service() {
     override fun onDestroy() {
         selfInstance = null
         sendBroadcast(Intent(ACTION_DESTROY))
+        playingNotification.cancel()
         super.onDestroy()
     }
 

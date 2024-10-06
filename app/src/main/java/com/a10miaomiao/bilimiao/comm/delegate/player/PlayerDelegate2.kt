@@ -450,6 +450,7 @@ class PlayerDelegate2(
             }
             lastReportProgress = 0L
             views.videoPlayer.startPlayLogic()
+            views.videoPlayer.requestLayout()
 
             if (isChangedQuality) {
                 if (sourceInfo.quality == quality) {
