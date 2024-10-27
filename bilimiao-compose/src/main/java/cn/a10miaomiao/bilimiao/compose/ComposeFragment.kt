@@ -12,14 +12,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelLazy
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -29,17 +34,27 @@ import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
 import cn.a10miaomiao.bilimiao.compose.common.LocalFragment
 import cn.a10miaomiao.bilimiao.compose.common.LocalNavController
+import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
+import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigInfo
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
+import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
+import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPageContent
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPageViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.subDI
 import org.kodein.di.android.x.closestDI
 import org.kodein.di.bindSingleton
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.compose.withDI
 
 class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwner {
@@ -91,6 +106,20 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         search = config?.search
     }
 
+    private val viewModel by ViewModelLazy(
+        DynamicPageViewModel::class,
+        { this.viewModelStore },
+        ::newViewModelFactory
+    )
+
+    fun newViewModelFactory(): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
+            override fun <R : ViewModel> create(modelClass: Class<R>): R {
+                return DynamicPageViewModel(di) as R
+            }
+        }
+    }
+
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
         pageConfigInfo.onMenuItemClick(view, menuItem)
@@ -124,8 +153,23 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                     LocalOnBackPressedDispatcherOwner provides this@ComposeFragment,
                 ) {
                     withDI(di = di) {
+                        val windowStore: WindowStore by rememberInstance()
+                        val windowState = windowStore.stateFlow.collectAsState().value
+                        val windowInsets = windowState.getContentInsets(localContainerView())
                         BilimiaoTheme {
-                            MyNavHost(composeNav, connection, url)
+                            ImagePreviewerProvider(
+                                previewer = { state, models ->
+                                    MyImagePreviewer(
+                                        previewerState = state,
+                                        imageModels = models,
+                                        contentPadding = windowInsets.addPaddingValues(
+                                            addBottom = windowStore.bottomAppBarHeightDp.dp
+                                        )
+                                    )
+                                }
+                            ) {
+                                MyNavHost(composeNav, connection, url)
+                            }
                         }
                     }
                 }

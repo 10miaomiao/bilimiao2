@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,14 +18,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.filled.Note
-import androidx.compose.material.icons.automirrored.filled.Segment
-import androidx.compose.material.icons.automirrored.filled.Subject
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material3.Icon
@@ -32,21 +29,83 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import cn.a10miaomiao.bilimiao.compose.R
-import cn.a10miaomiao.bilimiao.compose.common.localNavController
+import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
+import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
+import cn.a10miaomiao.bilimiao.compose.components.image.provider.localImagePreviewerController
+import cn.a10miaomiao.bilimiao.compose.components.image.viewer.ModelProcessor
+import cn.a10miaomiao.bilimiao.compose.components.scale.DetectScaleGridGesture
+import cn.a10miaomiao.bilimiao.compose.components.scale.ScaleGrid
+import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.TransformItemView
+import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.VerticalDragType
+import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberPreviewerState
+import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberTransformItemState
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserArchiveViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceViewModel
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.kongzue.dialogx.dialogs.PopTip
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+@Composable
+private fun UserFaceImage(
+    face: String,
+) {
+    val previewerController = localImagePreviewerController()
+    val previewerState = rememberPreviewerState(
+        verticalDragType = VerticalDragType.Down,
+        pageCount = { 1 },
+        getKey = { face },
+    )
+    val itemState = rememberTransformItemState(
+        intrinsicSize = Size(200f, 200f),
+    )
+    Box(
+        modifier = Modifier.size(80.dp, 80.dp)
+            .clip(CircleShape)
+            .clickable {
+                previewerController.enterTransform(
+                    previewerState,
+                    listOf(
+                        PreviewImageModel(
+                            originalUrl = UrlUtil.autoHttps(face),
+                            previewUrl = UrlUtil.autoHttps(face) + "@200w_200h",
+                            height = 200f,
+                            width = 200f
+                        )
+                    ),
+                )
+            },
+    ) {
+        TransformItemView(
+            key = face,
+            itemState = itemState,
+            transformState = previewerState,
+        ) {
+            GlideImage(
+                modifier = Modifier.fillMaxSize()
+                    .clip(CircleShape),
+                imageModel = UrlUtil.autoHttps(face) + "@200w_200h",
+            )
+        }
+    }
+}
 
 @Composable
 private fun UserNameBox(
@@ -168,12 +227,7 @@ fun UserSpaceHeader(
                     .padding(bottom = 5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                GlideImage(
-                    imageModel = UrlUtil.autoHttps(cardData.face) + "@200w_200h",
-                    modifier = Modifier
-                        .size(80.dp, 80.dp)
-                        .clip(CircleShape)
-                )
+                UserFaceImage(cardData.face)
                 if (isLargeScreen) {
                     Box(
                         modifier = Modifier
