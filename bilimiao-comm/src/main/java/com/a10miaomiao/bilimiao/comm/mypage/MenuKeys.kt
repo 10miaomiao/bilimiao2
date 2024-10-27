@@ -5,6 +5,10 @@ object MenuKeys {
 
     val back = -233
 
+    val menu = id_counter++
+    val home = id_counter++
+    val dynamic = id_counter++
+
     val setting = id_counter++
     val history = id_counter++
     val download = id_counter++
@@ -20,6 +24,7 @@ object MenuKeys {
     val select = id_counter++
     val complete = id_counter++
     val send = id_counter++
+    val save = id_counter++
 
     val more = id_counter++
     val follow = id_counter++
