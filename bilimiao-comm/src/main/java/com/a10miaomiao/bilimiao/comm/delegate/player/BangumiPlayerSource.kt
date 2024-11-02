@@ -1,17 +1,17 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 
+import bilibili.community.service.dm.v1.DMGRPC
+import bilibili.community.service.dm.v1.DmViewReq
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.player.PlayerV2Info
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
@@ -89,18 +89,26 @@ class BangumiPlayerSource(
 
     override suspend fun getSubtitles(): List<SubtitleSourceInfo> {
         try {
-            val res = BiliApiService.playerAPI
-                .getPlayerV2Info(aid = aid, cid = id, epId = epid, seasonId = sid)
-                .awaitCall()
-                .gson<ResultInfo<PlayerV2Info>>()
-            if (res.isSuccess) {
-                return res.data.subtitle.subtitles.map {
+            val req = DmViewReq(
+                pid = aid.toLong(),
+                oid = id.toLong(),
+                type = 1,
+                spmid = "pgc.pgc-video-detail.0.0"
+            )
+            val res = BiliGRPCHttp.request {
+                DMGRPC.dmView(req)
+            }.awaitCall()
+            val subtitle = res.subtitle
+            return if (subtitle == null) {
+                listOf()
+            } else {
+                subtitle.subtitles.map {
                     SubtitleSourceInfo(
-                        id = it.id,
+                        id = it.id.toString(),
                         lan = it.lan,
-                        lan_doc = it.lan_doc,
-                        subtitle_url = it.subtitle_url,
-                        ai_status = it.ai_status,
+                        lan_doc = it.lanDoc,
+                        subtitle_url = it.subtitleUrl,
+                        ai_status = it.aiStatus.value,
                     )
                 }
             }
