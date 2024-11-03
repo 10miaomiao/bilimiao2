@@ -19,10 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MiniBangumiItemBox(
     modifier: Modifier = Modifier,
@@ -37,7 +40,9 @@ fun MiniBangumiItemBox(
             .clickable(onClick = onClick)
     ) {
         GlideImage(
-            imageModel = UrlUtil.autoHttps(cover) + "@560w_746h",
+            model = UrlUtil.autoHttps(cover) + "@560w_746h",
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
         )
         Column(

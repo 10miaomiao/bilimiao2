@@ -11,15 +11,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadInfo
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadType
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun DownloadListItem(
     curDownload: CurrentDownloadInfo?,
@@ -43,7 +48,11 @@ fun DownloadListItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     GlideImage(
-                        imageModel = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                        model = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                        loading = placeholder(R.drawable.bili_default_placeholder_img_tv),
+                        failure = placeholder(R.drawable.bili_fail_placeholder_img_tv),
                         modifier = Modifier
                             .size(width = 120.dp, height = 80.dp)
                             .clip(RoundedCornerShape(5.dp))

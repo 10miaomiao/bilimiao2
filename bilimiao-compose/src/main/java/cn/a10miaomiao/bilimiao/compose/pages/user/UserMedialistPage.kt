@@ -70,8 +70,10 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.store.WindowStore.Insets
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import com.kongzue.dialogx.dialogs.PopTip
-import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -294,6 +296,7 @@ private fun UserMedialistPageContent(
     )
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun UserMedialistListContent(
     showTowPane: Boolean,
@@ -370,26 +373,13 @@ private fun UserMedialistListContent(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     GlideImage(
-                                        imageModel = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                                        model = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                                        contentDescription = null,
                                         modifier = Modifier
                                             .size(width = 120.dp, height = 80.dp)
                                             .clip(RoundedCornerShape(5.dp)),
-                                        loading = {
-                                            Image(
-                                                modifier = Modifier.fillMaxSize(),
-                                                alignment = Alignment.BottomEnd,
-                                                painter = painterResource(R.drawable.bili_default_placeholder_img_tv),
-                                                contentDescription = null,
-                                            )
-                                        },
-                                        failure = {
-                                            Image(
-                                                modifier = Modifier.fillMaxSize(),
-                                                alignment = Alignment.BottomEnd,
-                                                painter = painterResource(R.drawable.bili_fail_placeholder_img_tv),
-                                                contentDescription = null,
-                                            )
-                                        }
+                                        loading = placeholder(R.drawable.bili_default_placeholder_img_tv),
+                                        failure = placeholder(R.drawable.bili_fail_placeholder_img_tv),
                                     )
 
                                     Column(

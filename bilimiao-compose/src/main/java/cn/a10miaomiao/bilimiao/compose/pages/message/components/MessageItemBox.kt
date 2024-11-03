@@ -22,8 +22,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 internal fun MessageItemBox(
     avatar: String,
@@ -42,7 +44,8 @@ internal fun MessageItemBox(
             .padding(10.dp),
     ) {
         GlideImage(
-            imageModel = UrlUtil.autoHttps(avatar) + "@200w_200h",
+            model = UrlUtil.autoHttps(avatar) + "@200w_200h",
+            contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)

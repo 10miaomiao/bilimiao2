@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,8 +20,10 @@ import androidx.core.graphics.toColorInt
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun BangumiEpisodeItem(
     modifier: Modifier = Modifier,
@@ -47,7 +50,9 @@ fun BangumiEpisodeItem(
             contentAlignment = Alignment.TopEnd
         ) {
             GlideImage(
-                imageModel = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                model = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
                 modifier = Modifier
                     .size(width = 120.dp, height = 80.dp)
                     .clip(RoundedCornerShape(5.dp))

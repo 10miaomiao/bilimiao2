@@ -53,9 +53,10 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.google.gson.JsonObject
 import com.kongzue.dialogx.dialogs.PopTip
-import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -331,6 +332,7 @@ private class BangumiDetailPageViewModel(
 }
 
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun BangumiDetailPageContent(
     id: String,
@@ -478,7 +480,8 @@ private fun BangumiDetailPageContent(
                             verticalArrangement = Arrangement.Center,
                         ) {
                             GlideImage(
-                                imageModel = UrlUtil.autoHttps(detailInfo.cover) + "@560w_746h",
+                                model = UrlUtil.autoHttps(detailInfo.cover) + "@560w_746h",
+                                contentDescription = null,
                                 modifier = Modifier
                                     .size(120.dp, 166.dp)
                                     .clip(RoundedCornerShape(10.dp)),

@@ -59,10 +59,12 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserArchiveViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceViewModel
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun UserFaceImage(
     face: String,
@@ -101,12 +103,15 @@ private fun UserFaceImage(
             GlideImage(
                 modifier = Modifier.fillMaxSize()
                     .clip(CircleShape),
-                imageModel = UrlUtil.autoHttps(face) + "@200w_200h",
+                model = UrlUtil.autoHttps(face) + "@200w_200h",
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
             )
         }
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun UserNameBox(
     userName: String,
@@ -151,7 +156,8 @@ private fun UserNameBox(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 GlideImage(
-                    imageModel = UrlUtil.autoHttps(officialVerifyIcon),
+                    model = UrlUtil.autoHttps(officialVerifyIcon),
+                    contentDescription = null,
                     modifier = Modifier
                         .padding(end = 2.dp)
                         .size(16.dp),
@@ -190,6 +196,7 @@ private fun NumBox(
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun UserSpaceHeader(
     modifier: Modifier = Modifier,
@@ -211,7 +218,9 @@ fun UserSpaceHeader(
         modifier = modifier,
     ) {
         GlideImage(
-            imageModel = UrlUtil.autoHttps(detailData.images.imgUrl),
+            model = UrlUtil.autoHttps(detailData.images.imgUrl),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .height(120.dp)
                 .fillMaxWidth()

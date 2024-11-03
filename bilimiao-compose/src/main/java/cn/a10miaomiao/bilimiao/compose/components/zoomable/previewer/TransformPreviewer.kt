@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
@@ -94,6 +95,8 @@ open class TransformPreviewerState(
 
     val displayOffsetY = Animatable(0F)
 
+    var offsetSize = Size(0f, 0f)
+
     // 查找key关联的transformItem
     private fun findTransformItem(key: Any): TransformItemState? {
         return itemStateMap[key]
@@ -149,8 +152,8 @@ open class TransformPreviewerState(
                     getDisplaySize(containerSize.value, containerSize.value)
                 }
 //                val displaySize = getDisplaySize(intrinsicSize ?: Size.Zero, containerSize.value)
-                val targetX = (containerSize.value.width - displaySize.width).div(2)
-                val targetY = (containerSize.value.height - displaySize.height).div(2)
+                val targetX = (containerSize.value.width - displaySize.width).div(2) + offsetSize.width
+                val targetY = (containerSize.value.height - displaySize.height).div(2) + offsetSize.height
 //                val animationSpec = tween<Float>(600)f
                 try {
                     listOf(

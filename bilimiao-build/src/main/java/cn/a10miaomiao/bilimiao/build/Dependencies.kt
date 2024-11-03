@@ -63,7 +63,7 @@ object Libraries {
     const val activityCompose = "androidx.activity:activity-compose:1.9.0"
     const val navigationCompose = "androidx.navigation:navigation-compose:${Versions.navigation}"
     const val composeMaterialIconsExtended = "androidx.compose.material:material-icons-extended"
-    const val glideCompose = "com.github.skydoves:landscapist-glide:2.0.0"
+    const val glideCompose = "com.github.bumptech.glide:compose:1.0.0-beta01"
     // compose控件
     const val accompanistDrawablePainter = "com.google.accompanist:accompanist-drawablepainter:${Versions.accompanist}"
     const val accompanistAdaptive = "com.google.accompanist:accompanist-adaptive:${Versions.accompanist}"

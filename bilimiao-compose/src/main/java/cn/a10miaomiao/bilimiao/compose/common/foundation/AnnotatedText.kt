@@ -11,7 +11,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
 @Stable
 sealed class AnnotatedTextNode {
@@ -28,6 +29,7 @@ sealed class AnnotatedTextNode {
     class Link(val text: String, val url: String) : AnnotatedTextNode()
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun inlineAnnotatedContent(
     nodes: List<AnnotatedTextNode>,
@@ -42,7 +44,8 @@ fun inlineAnnotatedContent(
             ),
             children = {
                 GlideImage(
-                    imageModel = UrlUtil.autoHttps(node.url),
+                    model = UrlUtil.autoHttps(node.url),
+                    contentDescription = null,
                 )
             }
         )
