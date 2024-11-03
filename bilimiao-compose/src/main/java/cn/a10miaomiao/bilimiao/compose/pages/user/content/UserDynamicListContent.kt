@@ -94,9 +94,7 @@ private class UserDynamicListContentViewModel(
     }
 
     fun loadMore() {
-        miaoLogger() debug "loadMore, ${list.finished.value}, ${list.loading.value} "
         if (!list.finished.value && !list.loading.value) {
-            miaoLogger() debug "loadMore, ${list.pageNum + 1} "
             loadData(list.pageNum + 1)
         }
     }

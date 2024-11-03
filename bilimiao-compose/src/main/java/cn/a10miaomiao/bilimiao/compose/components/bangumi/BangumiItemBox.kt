@@ -24,13 +24,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun BangumiItemBox(
     modifier: Modifier = Modifier,
@@ -68,7 +71,9 @@ fun BangumiItemBox(
                 .clip(RoundedCornerShape(5.dp)),
         ) {
             GlideImage(
-                imageModel = UrlUtil.autoHttps(cover) + "@560w_746h",
+                model = UrlUtil.autoHttps(cover) + "@560w_746h",
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
             Box(

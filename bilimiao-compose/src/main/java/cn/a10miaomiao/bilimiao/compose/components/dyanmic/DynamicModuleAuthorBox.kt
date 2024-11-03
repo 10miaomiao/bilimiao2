@@ -14,11 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
 /**
  * 动态作者
  */
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 internal fun DynamicModuleAuthorBox(
     author: bilibili.app.dynamic.v2.ModuleAuthor
@@ -30,7 +32,8 @@ internal fun DynamicModuleAuthorBox(
             .padding(10.dp)
     ) {
         GlideImage(
-            imageModel = UrlUtil.autoHttps(authorData.face) + "@200w_200h",
+            model = UrlUtil.autoHttps(authorData.face) + "@200w_200h",
+            contentDescription = null,
             modifier = Modifier
                 .size(40.dp, 40.dp)
                 .clip(CircleShape),

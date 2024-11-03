@@ -29,8 +29,10 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Upper
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 internal fun PlayListItemCard(
     modifier: Modifier = Modifier,
@@ -57,7 +59,8 @@ internal fun PlayListItemCard(
                     .clip(RoundedCornerShape(10.dp)),
             ) {
                 GlideImage(
-                    imageModel = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                    model = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                    contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                 )
                 Box(

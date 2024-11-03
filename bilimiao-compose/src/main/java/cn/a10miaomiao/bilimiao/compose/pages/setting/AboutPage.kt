@@ -34,6 +34,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
+import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
@@ -49,9 +50,11 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.kongzue.dialogx.dialogs.PopTip
-import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -282,6 +285,7 @@ private const val WARN_TEXT = """1、本程序为哔哩哔哩动画的第三方A
 private const val MY_WEBSITE_URL = "https://10miaomiao.cn"
 private const val GITHUB_PROJECT_URL = "https://github.com/10miaomiao/bilimiao2"
 private const val GITEE_PROJECT_URL = "https://gitee.com/10miaomiao/bilimiao2"
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun AboutPageContent(
     viewModel: AboutPageViewModel
@@ -474,7 +478,10 @@ private fun AboutPageContent(
                         icon = it.avatar_url?.let { avatarUrl ->
                             {
                                 GlideImage(
-                                    imageModel = avatarUrl,
+                                    model = avatarUrl,
+                                    contentDescription = null,
+                                    loading = placeholder(R.drawable.bili_akari_img),
+                                    failure = placeholder(R.drawable.bili_akari_img),
                                     modifier = Modifier
                                         .padding(end = 8.dp)
                                         .size(48.dp)

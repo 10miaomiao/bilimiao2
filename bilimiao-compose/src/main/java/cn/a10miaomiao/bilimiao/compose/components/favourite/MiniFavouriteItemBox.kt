@@ -18,11 +18,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MiniFavouriteItemBox(
     modifier: Modifier = Modifier,
@@ -61,7 +64,9 @@ fun MiniFavouriteItemBox(
                     ),
             ) {
                 GlideImage(
-                    imageModel = UrlUtil.autoHttps(cover),
+                    model = UrlUtil.autoHttps(cover),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                         .clip(RoundedCornerShape(5.dp))
                 )

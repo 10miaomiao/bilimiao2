@@ -21,8 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 internal fun UserInfoCard(
     name: String,
@@ -44,7 +46,8 @@ internal fun UserInfoCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             GlideImage(
-                imageModel = UrlUtil.autoHttps(face) + "@200w_200h",
+                model = UrlUtil.autoHttps(face) + "@200w_200h",
+                contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)

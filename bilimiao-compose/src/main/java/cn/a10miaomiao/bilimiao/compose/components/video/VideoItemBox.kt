@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -37,8 +38,11 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Playnum
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Upper
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.skydoves.landscapist.glide.GlideImage
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun VideoItemBox(
     modifier: Modifier = Modifier,
@@ -92,27 +96,12 @@ fun VideoItemBox(
                     .clip(RoundedCornerShape(5.dp)),
             ) {
                 GlideImage(
-                    imageModel = UrlUtil.autoHttps(pic) + "@672w_378h_1c_",
+                    model = UrlUtil.autoHttps(pic) + "@672w_378h_1c_",
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
-                    previewPlaceholder = R.drawable.bili_default_placeholder_img_tv,
-                    loading = {
-                        Image(
-                            modifier = Modifier.fillMaxSize()
-                                .align(Alignment.BottomEnd),
-                            alignment = Alignment.BottomEnd,
-                            painter = painterResource(R.drawable.bili_default_placeholder_img_tv),
-                            contentDescription = null,
-                        )
-                    },
-                    failure = {
-                        Image(
-                            modifier = Modifier.fillMaxSize()
-                                .align(Alignment.BottomEnd),
-                            alignment = Alignment.BottomEnd,
-                            painter = painterResource(R.drawable.bili_fail_placeholder_img_tv),
-                            contentDescription = null,
-                        )
-                    }
+                    loading = placeholder(R.drawable.bili_default_placeholder_img_tv),
+                    failure = placeholder(R.drawable.bili_fail_placeholder_img_tv),
                 )
                 if (duration != null) {
                     Box(
