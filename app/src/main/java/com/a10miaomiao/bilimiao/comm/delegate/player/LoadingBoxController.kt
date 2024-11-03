@@ -36,7 +36,7 @@ class LoadingBoxController(
             delegate.controller.onBackClick()
         }
         loadingMoreBtn.setOnClickListener(delegate.controller::showMoreMenu)
-        loadingFullscreenBtn.setOnClickListener(delegate.controller::chageFullscreen)
+        loadingFullscreenBtn.setOnClickListener(delegate.controller::changeFullscreen)
         loadingFullscreenBtn.setOnLongClickListener {
             delegate.controller.showFullModeMenu(it)
             true
