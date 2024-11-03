@@ -158,15 +158,10 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                         val windowInsets = windowState.getContentInsets(localContainerView())
                         BilimiaoTheme {
                             ImagePreviewerProvider(
-                                previewer = { state, models ->
-                                    MyImagePreviewer(
-                                        previewerState = state,
-                                        imageModels = models,
-                                        contentPadding = windowInsets.addPaddingValues(
-                                            addBottom = windowStore.bottomAppBarHeightDp.dp
-                                        )
-                                    )
-                                }
+                                contentPadding = windowInsets.addPaddingValues(
+                                    addBottom = windowStore.bottomAppBarHeightDp.dp
+                                ),
+                                previewer = { MyImagePreviewer(it) }
                             ) {
                                 MyNavHost(composeNav, connection, url)
                             }

@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.components.image.provider
 import androidx.activity.compose.BackHandler
 import androidx.collection.mutableIntSetOf
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.IntState
@@ -17,11 +18,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.LayoutDirection
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.viewer.AnyComposable
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.PreviewerState
 import com.bumptech.glide.Glide
-import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -31,6 +33,13 @@ class PreviewImageModel(
     val height: Float,
     val previewUrl: String,
     val originalUrl: String,
+)
+
+@Stable
+class ImagePreviewerState(
+    val previewerState: PreviewerState,
+    val imageModels: List<PreviewImageModel>,
+    val contentPadding: PaddingValues
 )
 
 class ImagePreviewerController {
@@ -77,7 +86,8 @@ fun localImagePreviewerController() = LocalImagePreviewerController.current
 
 @Composable
 fun ImagePreviewerProvider(
-    previewer: @Composable (PreviewerState, List<PreviewImageModel>) -> Unit,
+    contentPadding: PaddingValues = PaddingValues(),
+    previewer: @Composable (ImagePreviewerState) -> Unit,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -90,15 +100,31 @@ fun ImagePreviewerProvider(
     )
     val previewerState = controller.previewerState.value
     if (previewerState != null) {
-        previewer(previewerState, controller.imageModels)
+        previewer(
+            ImagePreviewerState(
+                previewerState = previewerState,
+                imageModels = controller.imageModels,
+                contentPadding = contentPadding,
+            )
+        )
         val enterIndex = controller.enterIndex.value
-        LaunchedEffect(enterIndex) {
-            if (enterIndex != -1) {
-                previewerState.enterTransform(
-                    enterIndex,
-                    controller.enterAnimationSpec
-                )
-                controller.clearEnter()
+        LocalDensity.current.apply {
+            LaunchedEffect(enterIndex) {
+                if (enterIndex != -1) {
+                    val left = contentPadding.calculateLeftPadding(LayoutDirection.Ltr).toPx()
+                    val right = contentPadding.calculateLeftPadding(LayoutDirection.Ltr).toPx()
+                    val top = contentPadding.calculateTopPadding().toPx()
+                    val bottom = contentPadding.calculateBottomPadding().toPx()
+                    previewerState.offsetSize = Size(
+                        height = (top - bottom).div(2f),
+                        width = (left - right).div(2f),
+                    )
+                    previewerState.enterTransform(
+                        enterIndex,
+                        controller.enterAnimationSpec
+                    )
+                    controller.clearEnter()
+                }
             }
         }
         LaunchedEffect(
@@ -112,10 +138,8 @@ fun ImagePreviewerProvider(
                 controller.clearState()
             }
         }
-        BackHandler(
-            enabled = previewerState.canClose || previewerState.animating
-        ) {
-            if (previewerState.canClose) scope.launch {
+        BackHandler {
+            if (!previewerState.animating) scope.launch {
                 previewerState.exitTransform()
             }
         }
