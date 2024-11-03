@@ -28,6 +28,7 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
@@ -96,7 +97,7 @@ class PlayerController(
         isFullHideActionBar = true
         backButton.setOnClickListener { onBackClick() }
         setIsTouchWiget(true)
-        fullscreenButton.setOnClickListener(::chageFullscreen)
+        fullscreenButton.setOnClickListener(::changeFullscreen)
         fullscreenButton.setOnLongClickListener {
             showFullModeMenu(it)
             true
@@ -135,7 +136,7 @@ class PlayerController(
         }
     }
 
-    fun chageFullscreen(view: View) {
+    fun changeFullscreen(view: View) {
         scope.launch {
             if (scaffoldApp.fullScreenPlayer) {
                 smallScreen()
@@ -151,7 +152,8 @@ class PlayerController(
     /**
      * 全屏
      */
-    fun fullScreen(fullMode: Int) {
+    fun fullScreen(fullMode: Int, onlyFull: Boolean = false) {
+        this.onlyFull = onlyFull
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.FULL
         scaffoldApp.fullScreenPlayer = true
         activity.requestedOrientation = when (fullMode) {
@@ -210,6 +212,34 @@ class PlayerController(
                 DanmakuVideoPlayer.PlayerMode.SMALL_TOP
             } else {
                 DanmakuVideoPlayer.PlayerMode.SMALL_FLOAT
+            }
+        }
+    }
+
+    /**
+     * 屏幕方向改变
+     */
+    fun onChangedScreenOrientation(
+        orientation: Int
+    ) {
+        if (!scaffoldApp.showPlayer) {
+            return
+        }
+        scope.launch {
+            val openMode = SettingPreferences.mapData(activity) {
+                it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
+            }
+            val autoFullScreen = if (orientation == ScaffoldView.VERTICAL) {
+                openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN != 0
+            } else {
+                openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE != 0
+            }
+            if (autoFullScreen && !scaffoldApp.fullScreenPlayer) {
+                // 自动切换全屏
+                fullScreen(SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED)
+            } else if (!autoFullScreen && scaffoldApp.fullScreenPlayer) {
+                // 自动切回小屏
+                smallScreen()
             }
         }
     }
@@ -353,20 +383,16 @@ class PlayerController(
      * 播放器是否默认全屏播放
      */
     fun checkIsPlayerDefaultFull() = scope.launch {
-        onlyFull = false
-        val (openMode, fullMode) = SettingPreferences.mapData(activity)  {
-            val openMode = it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
-            openMode to getFullMode(it)
+        val openMode = SettingPreferences.mapData(activity)  {
+            it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
         }
         if (scaffoldApp.orientation == ScaffoldView.VERTICAL
             && openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN != 0) {
-            fullScreen(fullMode)
-            onlyFull = true
+            fullScreen(SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED, onlyFull = true)
         } else if (scaffoldApp.orientation == ScaffoldView.HORIZONTAL
             && openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE != 0
         ){
-            fullScreen(fullMode)
-            onlyFull = true
+            fullScreen(SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED, onlyFull = true)
         }
     }
 
