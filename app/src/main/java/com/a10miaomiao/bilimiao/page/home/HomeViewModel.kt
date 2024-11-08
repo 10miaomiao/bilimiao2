@@ -87,8 +87,9 @@ class HomeViewModel(
             }
             val res = getMiaoInitData(longVersionCode.toString())
             if (res.code == 0) {
+                val adData = res.data.ad
                 ui.setState {
-                    adInfo = res.data.ad
+                    adInfo = adData
                 }
                 withContext(Dispatchers.Main) {
                     saveSettingList(res.data.settingList)
