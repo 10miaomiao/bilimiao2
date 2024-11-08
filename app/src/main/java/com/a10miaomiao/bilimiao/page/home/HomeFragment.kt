@@ -130,9 +130,14 @@ class HomeFragment : Fragment(), DIAware {
                                 .load(item.icon)
                                 .override(dip(24), dip(24))
                                 .into(this)
-                        } else if (item.logo != null) {
+                        } else if (!item.logo.isNullOrBlank()) {
                             Glide.with(context)
                                 .loadImageUrl(item.logo!!)
+                                .override(dip(24), dip(24))
+                                .into(this)
+                        } else {
+                            Glide.with(context)
+                                .load(R.drawable.bili_default_image_tv)
                                 .override(dip(24), dip(24))
                                 .into(this)
                         }

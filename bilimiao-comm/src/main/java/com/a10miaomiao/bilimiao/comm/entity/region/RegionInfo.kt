@@ -13,7 +13,7 @@ data class RegionInfo(
     var icon: Int?,
     var logo: String?,
     var name: String,
-    var uri: String,
+    var uri: String? = null,
     var type: Int,
     var children: List<RegionChildrenInfo>
 ) : Parcelable
