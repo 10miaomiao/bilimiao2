@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -40,6 +41,7 @@ class RegionDetailsViewModel(
     var triggered = false
     var list = PaginationInfo<RegionVideoInfo>()
 
+    var tryAgainTimes = 0
 
     init {
         val timeSettingState = timeSettingStore.state
@@ -70,6 +72,19 @@ class RegionDetailsViewModel(
                 .gson<ResultInfo<RegionVideosRankInfo>>()
             if (res.code == 0) {
                 var result = res.data.result
+                if (result == null) {
+                    // result为null重新请求
+                    tryAgainTimes++
+                    // 只重试5次
+                    if (tryAgainTimes > 5) {
+                        PopTip.show("获取不到列表数据")
+                        throw Exception(res.message)
+                    }
+                    delay(2000L)
+                    tryAgainLoadData(pageNum)
+                    return@launch
+                }
+                tryAgainTimes = 0
                 var totalCount = 0 // 屏蔽前数量
                 if (result.size < list.pageSize) {
                     ui.setState { list.finished = true }
@@ -98,6 +113,7 @@ class RegionDetailsViewModel(
             ui.setState {
                 list.fail = true
             }
+            tryAgainTimes = 0
         } finally {
             ui.setState {
                 list.loading = false
