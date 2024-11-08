@@ -15,7 +15,7 @@ object Versions {
     const val composeBom = "2024.09.00"
     const val datastore = "1.1.1"
     const val media = "1.6.0"
-    const val media3 = "1.3.1"
+    const val media3 = "1.4.1"
 
     const val accompanist = "0.35.0-alpha"
 
@@ -49,6 +49,7 @@ object Libraries {
     const val media3Decoder = "androidx.media3:media3-decoder:${Versions.media3}"
     const val media3ExoPlayer = "androidx.media3:media3-exoplayer:${Versions.media3}"
     const val media3ExoPlayerDash = "androidx.media3:media3-exoplayer-dash:${Versions.media3}"
+    const val media3Session = "androidx.media3:media3-session:${Versions.media3}"
     const val browser = "androidx.browser:browser:1.7.0"
 
     // compose基础组件

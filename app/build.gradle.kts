@@ -132,6 +132,7 @@ dependencies {
 
     // 播放器相关
     implementation(Libraries.media3)
+    implementation(Libraries.media3Session)
     implementation(Libraries.media3Decoder)
     implementation(Libraries.media3Ui)
     implementation(Libraries.media3ExoPlayer)

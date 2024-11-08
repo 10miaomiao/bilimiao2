@@ -200,6 +200,7 @@ public class ExoMediaPlayer extends AbstractMediaPlayer implements Player.Listen
     public void stop() throws IllegalStateException {
         if (mInternalPlayer == null)
             return;
+        mInternalPlayer.stop(); // 调用stop时，媒体通知才会自动关闭
         mInternalPlayer.release();
     }
 
@@ -404,6 +405,12 @@ public class ExoMediaPlayer extends AbstractMediaPlayer implements Player.Listen
                         mInternalPlayer.setMediaSource(mMediaSource);
                         mInternalPlayer.prepare();
                         mInternalPlayer.setPlayWhenReady(false);
+
+                        // 加个补丁，用于控制后台播放媒体通知
+                        PlaybackService playbackInstance = PlaybackService.Companion.getInstance();
+                        if (playbackInstance != null) {
+                            playbackInstance.setPlayer(mInternalPlayer);
+                        }
                     }
                 }
         );
