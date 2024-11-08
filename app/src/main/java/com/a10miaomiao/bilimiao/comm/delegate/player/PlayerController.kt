@@ -33,7 +33,6 @@ import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
 import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
 import com.a10miaomiao.bilimiao.page.video.VideoPagesParam
-import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
@@ -727,7 +726,6 @@ class PlayerController(
                 }
             }
         }
-        PlayerService.selfInstance?.playerState = state
         if (state >= GSYVideoView.CURRENT_STATE_PAUSE) {
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
@@ -751,10 +749,6 @@ class PlayerController(
         duration: Long
     ) {
         delegate.historyReport(currentPosition)
-        PlayerService.selfInstance?.setProgress(
-            duration,
-            currentPosition
-        )
 
         //定时关闭
         val autoStopDuration = playerStore.autoStopDuration

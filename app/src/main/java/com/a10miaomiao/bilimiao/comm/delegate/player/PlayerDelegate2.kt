@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -19,6 +20,7 @@ import androidx.core.content.ContextCompat.registerReceiver
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
@@ -30,7 +32,8 @@ import androidx.media3.exoplayer.source.ConcatenatingMediaSource
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import com.a10miaomiao.bilimiao.R
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
@@ -50,16 +53,15 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.service.PlayerService
+import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
+import com.google.common.util.concurrent.MoreExecutors
 import com.kongzue.dialogx.dialogs.PopTip
-import com.shuyu.gsyvideoplayer.player.PlayerFactory
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 import kotlinx.coroutines.Dispatchers
@@ -136,14 +138,6 @@ class PlayerDelegate2(
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
-                // 播放器后台服务开启
-                PlayerService.ACTION_CREATED -> {
-                    PlayerService.selfInstance?.videoPlayerView = activity.findViewById(R.id.video_player)
-                }
-                // 播放器后台服务被杀
-                PlayerService.ACTION_DESTROY -> {
-                    startPlayerService()
-                }
                 // 耳机检测
                 AudioManager.ACTION_AUDIO_BECOMING_NOISY -> {
                     //暂停播放
@@ -158,8 +152,6 @@ class PlayerDelegate2(
         playerCoroutineScope.onCreate()
         initPlayer()
         val intentFilter = IntentFilter().apply {
-            addAction(PlayerService.ACTION_CREATED)
-            addAction(PlayerService.ACTION_DESTROY)
             addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
             addAction(Intent.ACTION_MEDIA_BUTTON)
         }
@@ -183,21 +175,33 @@ class PlayerDelegate2(
             val themeColor = activity.config.themeColor
             views.videoPlayer.updateThemeColor(activity, themeColor)
         })
+
+        if (isPlaying()) {
+            loadingBoxController.hideLoading()
+            areaLimitBoxController.hide()
+            errorMessageBoxController.hide()
+            completionBoxController.hide()
+        }
     }
 
-    private fun startPlayerService() {
-        try {
-            val intent = Intent(activity, PlayerService::class.java)
-            activity.startService(intent)
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun startPlaybackService() {
+        val instance = PlaybackService.instance
+        if (instance == null) {
+            val sessionToken = SessionToken(
+                activity,
+                ComponentName(activity, PlaybackService::class.java)
+            )
+            val mediaControllerFuture = MediaController.Builder(activity, sessionToken).buildAsync()
+            mediaControllerFuture.addListener( {
+                PlaybackService.instance?.setPlayerDelegate(this@PlayerDelegate2)
+            }, MoreExecutors.directExecutor())
+        } else {
+            instance.setPlayerDelegate(this)
         }
     }
 
     override fun onResume() {
-        if (PlayerService.selfInstance == null) {
-            startPlayerService()
-        }
+        startPlaybackService()
     }
 
     override fun onPause() {
@@ -256,7 +260,7 @@ class PlayerDelegate2(
                 val localSourceFactory = DefaultDataSource.Factory(activity)
                 val videoMedia = MediaItem.fromUri(dataSourceArr[1])
                 val audioMedia = MediaItem.fromUri(dataSourceArr[2])
-                return MergingMediaSource(
+                MergingMediaSource(
                     ProgressiveMediaSource.Factory(localSourceFactory)
                         .createMediaSource(videoMedia),
                     ProgressiveMediaSource.Factory(localSourceFactory)
@@ -272,7 +276,7 @@ class PlayerDelegate2(
                 dataSourceFactory.setDefaultRequestProperties(header)
                 val videoMedia = MediaItem.fromUri(dataSourceArr[1])
                 val audioMedia = MediaItem.fromUri(dataSourceArr[2])
-                return MergingMediaSource(
+                MergingMediaSource(
                     ProgressiveMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(videoMedia),
                     ProgressiveMediaSource.Factory(dataSourceFactory)
@@ -286,7 +290,7 @@ class PlayerDelegate2(
                 val header = getDefaultRequestProperties()
                 dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
                 dataSourceFactory.setDefaultRequestProperties(header)
-                return ConcatenatingMediaSource().apply {
+                ConcatenatingMediaSource().apply {
                     for (i in 1 until dataSourceArr.size) {
                         addMediaSource(
                             ProgressiveMediaSource.Factory(dataSourceFactory)
@@ -310,8 +314,24 @@ class PlayerDelegate2(
                 val mediaSource = DashMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(dashManifest)
 //                    mediaSource.prepareSource()
-                return mediaSource
+                mediaSource
             }
+            else -> null
+        }?.run {
+            playerSource?.let {
+                val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl))
+                val metaData = MediaMetadata.Builder()
+                    .setTitle(it.title)
+                    .setArtworkUri(artworkUri)
+                    .setAlbumTitle(it.ownerName)
+                    .build()
+                updateMediaItem(
+                    MediaItem.Builder()
+                        .setMediaMetadata(metaData)
+                        .build()
+                )
+            }
+            return this
         }
         return null
     }
@@ -403,15 +423,6 @@ class PlayerDelegate2(
                 source.getPlayerUrl(quality, fnval)
             }
             loadingBoxController.print("成功")
-            // 设置通知栏控制器
-            PlayerService.selfInstance?.setPlayingInfo(
-                PlayerService.PlayingInfo(
-                    title = source.title,
-                    author = source.ownerName,
-                    cover = source.coverUrl,
-                    duration = sourceInfo.duration,
-                )
-            )
             views.videoPlayer.releaseDanmaku()
             views.videoPlayer.danmakuParser = danmukuParser
             val header = getDefaultRequestProperties()
@@ -586,9 +597,6 @@ class PlayerDelegate2(
         views.videoPlayer.hideExpandButton()
         lastPosition = 0L
 
-        // 设置通知栏控制器
-        PlayerService.selfInstance?.clearPlayingInfo()
-
         activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
@@ -650,6 +658,9 @@ class PlayerDelegate2(
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         controller.updatePlayerMode(newConfig)
+        if (scaffoldApp.orientation != newConfig.orientation) {
+            controller.onChangedScreenOrientation(newConfig.orientation)
+        }
     }
 
     override fun getSourceIds(): PlayerSourceIds {

@@ -19,7 +19,6 @@ import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetUi
 import com.a10miaomiao.bilimiao.comm.shadowLayout
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.service.PlayerService
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.limitedFrameLayout
@@ -35,6 +34,10 @@ import splitties.views.dsl.core.*
 @OptIn(InternalSplittiesApi::class)
 class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
 
+    companion object {
+        // 重启activiry时保持播放
+        private var keepPlayerView: DanmakuVideoPlayer? = null
+    }
 
     val mLeftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
         backgroundColor = config.windowBackgroundColor
@@ -59,7 +62,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         setOnClickListener {  }
     }
 
-    val mVideoPlayerView = PlayerService.selfInstance?.videoPlayerView?.apply {
+    val mVideoPlayerView = keepPlayerView?.apply {
         try {
             (parent as? ViewGroup)?.removeAllViews()
             // 直接替换旧PlayerView的Context
@@ -73,7 +76,7 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             e.printStackTrace()
         }
     } ?: inflate<DanmakuVideoPlayer>(R.layout.include_palyer2) {
-        PlayerService.selfInstance?.videoPlayerView = this
+        keepPlayerView = this
     }
 
     val mPlayerLayout = frameLayout {
