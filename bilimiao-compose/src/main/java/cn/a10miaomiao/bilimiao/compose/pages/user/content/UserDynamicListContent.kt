@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,14 +16,18 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import bilibili.app.dynamic.v2.DynamicGRPC
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
+import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicItemCard
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -99,9 +104,24 @@ private class UserDynamicListContentViewModel(
         }
     }
 
-    override fun onCleared() {
-        miaoLogger() debug "onCleared"
-        super.onCleared()
+    fun toDetailPage(
+        item: bilibili.app.dynamic.v2.DynamicItem
+    ) {
+        val extend = item.extend ?: return
+        val toUrl = extend.cardUrl
+        try {
+            if (toUrl.startsWith("bilibili://video")) {
+                // bilibili://video/113448641892661?aid=113448641892661&cid=26675709168
+                val nav = fragment.findNavController()
+                nav.navigate(Uri.parse(toUrl), defaultNavOptions)
+            } else {
+                // bilibili://opus/detail/997652183402938377
+                val nav = fragment.findComposeNavController()
+                nav.navigate(Uri.parse(toUrl))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
 
@@ -138,7 +158,7 @@ fun UserDynamicListContent(
                     .fillMaxWidth(),
                 item = it,
                 onClick = {
-                    PopTip.show("施工中，ヽ(￣ω￣(￣ω￣〃)ゝ")
+                    viewModel.toDetailPage(it)
                 },
             )
         }

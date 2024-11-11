@@ -13,39 +13,11 @@ import bilibili.app.dynamic.v2.Paragraph;
 import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedText
 import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedTextNode
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
-
-@Composable
-fun Paragraph.toAnnotatedTextNode(): List<AnnotatedTextNode> {
-    return text?.nodes?.map {
-        val node = it.text
-        when (node) {
-            is TextNode.Text.Word -> {
-                AnnotatedTextNode.Text(node.value.words)
-            }
-
-            is TextNode.Text.Link -> {
-                AnnotatedTextNode.Link(node.value.showText, node.value.link)
-            }
-
-            is TextNode.Text.Emote -> {
-                val emote = node.value
-                val emoteId = emote.rawText?.words ?: emote.emoteUrl
-                AnnotatedTextNode.Emote(
-                    text = emoteId,
-                    url = emote.emoteUrl,
-//                        width = emote.emoteWidth?.width?.toInt() ?: 20,
-//                        height = (emote.emoteWidth?.emojiSize ?: 2) * 16,
-                )
-            }
-
-            null -> null
-        }
-    }?.filterNotNull() ?: listOf()
-}
+import cn.a10miaomiao.bilimiao.compose.common.foundation.toAnnotatedTextNode
 
 @Composable
 private fun DynamicParagraphRender(p: Paragraph) {
-    val nodes = p.toAnnotatedTextNode()
+    val nodes = p.text?.nodes?.toAnnotatedTextNode() ?: listOf()
     val emoteMap = inlineAnnotatedContent(nodes)
     Text(
         AnnotatedText(nodes),

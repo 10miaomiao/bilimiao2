@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -26,9 +27,40 @@ import kotlinx.coroutines.launch
  * 页面根据Key获取对应小图转换的状态数据
  */
 val LocalTransformItemStateMap =
-    compositionLocalOf<MutableMap<Any, TransformItemState>> { mutableStateMapOf() }
+    compositionLocalOf<ItemStateMap> { ItemStateMap() }
 
-typealias ItemStateMap = MutableMap<Any, TransformItemState>
+@Stable
+class ItemStateMap {
+    val map = mutableStateMapOf<Any, List<TransformItemState>>()
+
+    operator fun set(key: Any, value: TransformItemState) {
+        val originalValue = map[key]
+        if (originalValue == null) {
+            map[key] = listOf(value)
+        } else {
+            map[key] = listOf(
+                *originalValue.toTypedArray(),
+                value
+            )
+        }
+    }
+
+    operator fun get(key: Any): TransformItemState? {
+        return map[key]?.lastOrNull()
+    }
+
+    fun remove(key: Any, state: TransformItemState) {
+        val value = map[key] ?: return
+        if (value.size > 1) {
+            map[key] = value.filter {
+                it !== state
+            }
+        } else {
+            map.remove(key)
+        }
+    }
+}
+//typealias ItemStateMap = MutableMap<Any, TransformItemState>
 
 /**
  * 在compose中获取一个TransformItemState的方式
@@ -129,7 +161,7 @@ class TransformItemState(
         // TODO mutex
         val currentKey = key ?: this.key
         if (checkInBound != null) return
-        itemMap.remove(currentKey)
+        itemMap.remove(currentKey, this)
     }
 }
 

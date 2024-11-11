@@ -10,4 +10,12 @@ class FlowPaginationInfo<T>(
     var pageNum = 1
     var data = MutableStateFlow(emptyList<T>())
     var fail = MutableStateFlow("")
+
+    fun reset() {
+        loading.value = false
+        finished.value = false
+        pageNum = 1
+        data.value = emptyList()
+        fail.value = ""
+    }
 }
