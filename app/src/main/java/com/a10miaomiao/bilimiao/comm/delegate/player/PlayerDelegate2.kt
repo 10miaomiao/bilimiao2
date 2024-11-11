@@ -29,6 +29,7 @@ import androidx.media3.datasource.TransferListener
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.dash.manifest.DashManifestParser
 import androidx.media3.exoplayer.source.ConcatenatingMediaSource
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
@@ -53,6 +54,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -254,12 +256,19 @@ class PlayerDelegate2(
         cacheDir: File?
     ): MediaSource? {
         val dataSourceArr = dataSource.split("\n")
-        when (dataSourceArr[0]) {
+        val mediaMetadata = getMediaMetadata()
+        return when (dataSourceArr[0]) {
             "[local-merging]" -> {
                 // 本地音视频分离
                 val localSourceFactory = DefaultDataSource.Factory(activity)
-                val videoMedia = MediaItem.fromUri(dataSourceArr[1])
-                val audioMedia = MediaItem.fromUri(dataSourceArr[2])
+                val videoMedia = MediaItem.Builder().apply {
+                    setUri(dataSourceArr[1])
+                    mediaMetadata?.let(::setMediaMetadata)
+                }.build()
+                val audioMedia = MediaItem.Builder().apply {
+                    setUri(dataSourceArr[2])
+                    mediaMetadata?.let(::setMediaMetadata)
+                }.build()
                 MergingMediaSource(
                     ProgressiveMediaSource.Factory(localSourceFactory)
                         .createMediaSource(videoMedia),
@@ -274,8 +283,14 @@ class PlayerDelegate2(
                 val header = getDefaultRequestProperties()
                 dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
                 dataSourceFactory.setDefaultRequestProperties(header)
-                val videoMedia = MediaItem.fromUri(dataSourceArr[1])
-                val audioMedia = MediaItem.fromUri(dataSourceArr[2])
+                val videoMedia = MediaItem.Builder().apply {
+                    setUri(dataSourceArr[1])
+                    mediaMetadata?.let(::setMediaMetadata)
+                }.build()
+                val audioMedia = MediaItem.Builder().apply {
+                    setUri(dataSourceArr[2])
+                    mediaMetadata?.let(::setMediaMetadata)
+                }.build()
                 MergingMediaSource(
                     ProgressiveMediaSource.Factory(dataSourceFactory)
                         .createMediaSource(videoMedia),
@@ -292,9 +307,13 @@ class PlayerDelegate2(
                 dataSourceFactory.setDefaultRequestProperties(header)
                 ConcatenatingMediaSource().apply {
                     for (i in 1 until dataSourceArr.size) {
+                        val mediaItem = MediaItem.Builder().apply {
+                            setUri(dataSourceArr[2])
+                            mediaMetadata?.let(::setMediaMetadata)
+                        }.build()
                         addMediaSource(
                             ProgressiveMediaSource.Factory(dataSourceFactory)
-                                .createMediaSource(MediaItem.fromUri(dataSourceArr[i]))
+                                .createMediaSource(mediaItem)
                         )
                     }
                 }
@@ -313,27 +332,37 @@ class PlayerDelegate2(
                     DashManifestParser().parse(uri, dashStr.toByteArray().inputStream())
                 val mediaSource = DashMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(dashManifest)
-//                    mediaSource.prepareSource()
+                mediaMetadata?.let {
+                    mediaSource.updateMediaItem(
+                        MediaItem.Builder()
+                            .setMediaMetadata(it)
+                            .build()
+                    )
+                }
                 mediaSource
             }
-            else -> null
-        }?.run {
-            playerSource?.let {
-                val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl))
-                val metaData = MediaMetadata.Builder()
-                    .setTitle(it.title)
-                    .setArtworkUri(artworkUri)
-                    .setAlbumTitle(it.ownerName)
-                    .build()
-                updateMediaItem(
-                    MediaItem.Builder()
-                        .setMediaMetadata(metaData)
-                        .build()
-                )
+            else -> {
+                val mediaItem = MediaItem.Builder().apply {
+                    setUri(dataSource)
+                    mediaMetadata?.let(::setMediaMetadata)
+                }.build()
+                val context = PlaybackService.instance ?: activity
+                DefaultMediaSourceFactory(context)
+                    .createMediaSource(mediaItem)
             }
-            return this
         }
-        return null
+    }
+
+    private fun getMediaMetadata(): MediaMetadata? {
+        return playerSource?.let {
+            val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl))
+            val metaData = MediaMetadata.Builder()
+                .setTitle(it.title)
+                .setArtworkUri(artworkUri)
+                .setAlbumTitle(it.ownerName)
+                .build()
+            return metaData
+        } ?: null
     }
 
     @UnstableApi
