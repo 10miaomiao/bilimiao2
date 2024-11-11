@@ -20,9 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.R
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -47,6 +49,7 @@ internal fun UserInfoCard(
         ) {
             GlideImage(
                 model = UrlUtil.autoHttps(face) + "@200w_200h",
+                loading = placeholder(R.drawable.bili_akari_img),
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)

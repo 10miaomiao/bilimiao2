@@ -1,13 +1,27 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,12 +42,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
+import cn.a10miaomiao.bilimiao.compose.animation.materialFadeIn
+import cn.a10miaomiao.bilimiao.compose.animation.materialFadeOut
+import cn.a10miaomiao.bilimiao.compose.animation.materialSharedAxisY
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
@@ -48,11 +66,13 @@ import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememb
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliFailBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.UserSpaceHeader
+import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.store.WindowStore
+import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
 import kotlin.math.roundToInt
@@ -73,10 +93,12 @@ class UserSpacePage : ComposePage() {
         val viewModel = diViewModel() {
             UserSpaceViewModel(it, vmid, archiveViewModel)
         }
+//        AnimatedContent()
         UserSpacePageContent(viewModel, archiveViewModel)
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun UserSpacePageContent(
     viewModel: UserSpaceViewModel,
@@ -87,30 +109,71 @@ private fun UserSpacePageContent(
     val windowInsets = windowState.getContentInsets(localContainerView())
 
     val detailData = viewModel.detailData.collectAsState().value
-
-    if (detailData == null) {
-        PageConfig(
-            title = "个人中心"
-        )
-        val loading = viewModel.loading.collectAsState().value
-        if (loading) {
-            BiliLoadingBox(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(windowInsets.toPaddingValues())
+//    val slideDistance = LocalDensity.current.run {
+//        100.dp.toPx()
+//    }
+    AnimatedContent(
+        modifier = Modifier.fillMaxSize(),
+        targetState = detailData == null,
+        label = "UserSpacePageContent",
+        transitionSpec = {
+            // Follow M3 Clean fades
+            val fadeIn = fadeIn(
+                tween(),
+            )
+            val fadeOut = fadeOut()
+            fadeIn.togetherWith(fadeOut)
+        }
+    ) {
+        if (it || detailData == null) {
+            UserSpacePageLoadingContent(
+                loading = viewModel.loading.collectAsState().value,
+                fail = viewModel.fail.collectAsState().value,
+                innerPadding = windowInsets.toPaddingValues()
             )
         } else {
-            val fail = viewModel.fail.collectAsState().value
-            BiliFailBox(
-                e = fail ?: "未知错误",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(windowInsets.toPaddingValues())
+            UserSpacePageDetailContent(
+                viewModel = viewModel,
+                archiveViewModel = archiveViewModel,
+                windowInsets = windowInsets,
+                detailData = detailData,
             )
         }
-        return
     }
+}
 
+@Composable
+private fun UserSpacePageLoadingContent(
+    loading: Boolean,
+    fail: Any?,
+    innerPadding: PaddingValues,
+) {
+    PageConfig(
+        title = "个人中心"
+    )
+    if (loading) {
+        BiliLoadingBox(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        )
+    } else if (fail != null) {
+        BiliFailBox(
+            e = fail,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+private fun UserSpacePageDetailContent(
+    viewModel: UserSpaceViewModel,
+    archiveViewModel: UserArchiveViewModel,
+    windowInsets: Insets,
+    detailData: SpaceInfo,
+) {
     val isFollow = viewModel.isFollow.collectAsState().value
     val rankOrder = archiveViewModel.rankOrder.collectAsState().value
     val pageConfigId = PageConfig(
@@ -300,7 +363,7 @@ private fun UserSpacePageContent(
                         selected = viewModel.currentPage == index,
                         onClick = {
                             scope.launch {
-                               viewModel.changeTab(index, true)
+                                viewModel.changeTab(index, true)
                             }
                         },
                     )

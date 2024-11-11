@@ -33,14 +33,15 @@ sealed class AnnotatedTextNode {
 @Composable
 fun inlineAnnotatedContent(
     nodes: List<AnnotatedTextNode>,
-    size: TextUnit = 20.sp
+    size: TextUnit = 20.sp,
+    inlineVerticalAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
 ):  Map<String, InlineTextContent> {
     return nodes.filterIsInstance<AnnotatedTextNode.Emote>().map { node ->
         node.text to InlineTextContent(
             placeholder = Placeholder(
                 width = size,
                 height = size,
-                placeholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
+                placeholderVerticalAlign = inlineVerticalAlign,
             ),
             children = {
                 GlideImage(

@@ -23,7 +23,7 @@ fun DynamicItemCard(
             .background(
                 color = MaterialTheme.colorScheme.surface,
             )
-//            .clickable(onClick = onClick),
+            .clickable(onClick = onClick),
     ) {
         for(module in item.modules) {
             DynamicModuleBox(module = module)

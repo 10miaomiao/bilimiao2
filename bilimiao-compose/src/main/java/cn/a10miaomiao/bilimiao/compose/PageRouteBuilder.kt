@@ -13,6 +13,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
@@ -57,6 +59,10 @@ class PageRouteBuilder (
         // bangumi
         +BangumiFollowPage()
         +BangumiDetailPage()
+
+        // dynamic
+        +DynamicPage()
+        +DynamicDetailPage()
 
         // download
         +DownloadListPage()

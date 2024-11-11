@@ -43,8 +43,6 @@ import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
-import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPageContent
-import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPageViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -106,19 +104,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         search = config?.search
     }
 
-    private val viewModel by ViewModelLazy(
-        DynamicPageViewModel::class,
-        { this.viewModelStore },
-        ::newViewModelFactory
-    )
-
-    fun newViewModelFactory(): ViewModelProvider.Factory {
-        return object : ViewModelProvider.Factory {
-            override fun <R : ViewModel> create(modelClass: Class<R>): R {
-                return DynamicPageViewModel(di) as R
-            }
-        }
-    }
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)

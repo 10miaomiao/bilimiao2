@@ -54,12 +54,15 @@ fun VideoItemBox(
     damukuNum: String? = null,
     duration: String? = null,
     isHtml: Boolean = false,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
 ) {
 
     Row(
         modifier = Modifier
-            .clickable(onClick = onClick)
+            .run {
+                if (onClick == null) this
+                else clickable(onClick = onClick)
+            }
             .semantics(mergeDescendants = true) {
                 contentDescription = with(StringBuilder()) {
                     if (!title.isNullOrBlank()) {

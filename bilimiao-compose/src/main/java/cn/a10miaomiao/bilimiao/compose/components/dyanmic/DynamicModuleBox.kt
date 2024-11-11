@@ -16,6 +16,8 @@ fun DynamicModuleBox(
 ) {
     val moduleItem = module.moduleItem ?: return
     when(moduleItem) {
+        is ModuleItem.ModuleTop -> Unit
+        is ModuleItem.ModuleButtom -> Unit
         is ModuleItem.ModuleAuthor -> {
             DynamicModuleAuthorBox(moduleItem.value)
         }
@@ -30,6 +32,10 @@ fun DynamicModuleBox(
         }
         is ModuleItem.ModuleDynamic -> {
             DynamicModuleDynamicBox(moduleItem.value)
+        }
+        is ModuleItem.ModuleParagraph -> {
+            DynamicModuleParagraphBox(moduleItem.value)
+
         }
         else -> {
             Box(

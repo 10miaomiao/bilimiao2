@@ -48,7 +48,7 @@ fun MiniFavouriteItemBox(
                 modifier = Modifier.fillMaxSize()
                     .scale(0.85f)
                     .background(
-                        color = Color.Black.copy(alpha = 0.1f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(5.dp)
                     ),
             ) {}
@@ -56,7 +56,7 @@ fun MiniFavouriteItemBox(
                 modifier = Modifier.fillMaxSize()
                     .scale(0.85f)
                     .background(
-                        color = Color.Black.copy(alpha = 0.3f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                         shape = RoundedCornerShape(5.dp)
                     )
                     .graphicsLayer(

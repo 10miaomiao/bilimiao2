@@ -49,8 +49,6 @@ import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.localImagePreviewerController
 import cn.a10miaomiao.bilimiao.compose.components.image.viewer.ModelProcessor
-import cn.a10miaomiao.bilimiao.compose.components.scale.DetectScaleGridGesture
-import cn.a10miaomiao.bilimiao.compose.components.scale.ScaleGrid
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.TransformItemView
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.VerticalDragType
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberPreviewerState

@@ -185,7 +185,7 @@ fun UserSpaceIndexContent(
                                     .size(120.dp, 120.dp)
                                     .scale(0.85f)
                                     .background(
-                                        color = Color.Black.copy(alpha = 0.3f),
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(5.dp)
                                     )
                                     .clickable(onClick = viewModel::toFavouriteList),

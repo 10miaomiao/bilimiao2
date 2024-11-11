@@ -27,24 +27,27 @@ import kotlinx.coroutines.launch
 const val DEFAULT_GRID_SCALE_SIZE = 0.84F
 const val DEFAULT_LONG_PRESS_TIME = 400L
 
-class DetectScaleGridGesture(
+private class DetectScaleButtonGesture(
     var onPress: () -> Unit = {},
     var onLongPress: () -> Unit = {},
 )
 
 @Composable
-fun ScaleGrid(
+fun ScaleButton(
     modifier: Modifier = Modifier,
     scaleSize: Float = DEFAULT_GRID_SCALE_SIZE,
     longPressTime: Long = DEFAULT_LONG_PRESS_TIME,
-    detectGesture: DetectScaleGridGesture? = null,
+    onPress: () -> Unit = {},
+    onLongPress: () -> Unit = {},
     content: @Composable (Float) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val itemScale = remember { Animatable(1F) }
+    val detectGesture = remember(onPress, onLongPress) {
+        DetectScaleButtonGesture(onPress, onLongPress)
+    }
     Box(
         modifier = modifier
-            .fillMaxSize()
             .graphicsLayer {
                 scaleX = itemScale.value
                 scaleY = itemScale.value
