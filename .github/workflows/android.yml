@@ -30,14 +30,15 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew -Pchannel=Github app:assembleRelease
+#      run: ./gradlew -Pchannel=Github app:assembleRelease
+      run: ./gradlew app:assembleFossRelease
     - name: Move apk to release
       run: |
         release_dir=${{ github.workspace }}/release
         if [ ! -d "$release_dir" ];then
             mkdir $release_dir
         fi
-        mv ${{ github.workspace }}/app/build/outputs/apk/full/release/app-full-release.apk $release_dir/bilimiao-github-${{ github.ref_name }}.apk
+#        mv ${{ github.workspace }}/app/build/outputs/apk/full/release/app-full-release.apk $release_dir/bilimiao-github-${{ github.ref_name }}.apk
         mv ${{ github.workspace }}/app/build/outputs/apk/foss/release/app-foss-release.apk $release_dir/bilimiao-foss-${{ github.ref_name }}.apk
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
