@@ -8,8 +8,8 @@ class PlayerSourceInfo {
 
     val description: String get() = acceptList.find { it.quality == quality }?.description ?: "未知清晰度"
 
-    var height = 1600
-    var width = 900
+    var height = 900 // 默认 16:9
+    var width = 1600
     val screenProportion get() = width.toFloat() / height.toFloat() // 视频画面比例
     var lastPlayTime = 0L
     var lastPlayCid = ""
