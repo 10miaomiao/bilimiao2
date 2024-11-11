@@ -59,14 +59,14 @@ class BangumiPlayerSource(
             } else {
                 val durl = res.durl!!
                 if (durl.size == 1) {
-                    it.duration = durl[0].length * 1000L
+                    it.duration = durl[0].length
                     it.url = if (uposHost.isNotBlank()) {
                         UrlUtil.replaceHost(durl[0].url, uposHost)
                     } else { durl[0].url }
                 } else {
                     var duration = 0L
                     it.url = "[concatenating]\n" + durl.joinToString("\n") { d ->
-                        duration += d.length * 1000L
+                        duration += d.length
                         if (uposHost.isNotBlank()) {
                             UrlUtil.replaceHost(d.url, uposHost)
                         } else { d.url }

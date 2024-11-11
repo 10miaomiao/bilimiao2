@@ -101,7 +101,7 @@ private fun DynamicPageContent(
                 iconFileName = "ic_baseline_home_24"
             }
             myItem {
-                action = MenuActions.openMenu
+//                action = MenuActions.openMenu
                 key = MenuKeys.menu
                 title = "菜单"
                 iconFileName = "ic_baseline_menu_24"
