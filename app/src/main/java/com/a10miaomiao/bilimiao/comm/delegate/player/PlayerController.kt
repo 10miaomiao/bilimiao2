@@ -68,6 +68,7 @@ class PlayerController(
     private var onlyFull = false // 仅全屏播放
     private var showSubtitle = false // 默认显示字幕
     private var showAiSubtitle = true // 默认显示AI字幕
+    private var canAutoCloseFullScreen = false
     var isBackgroundPlay = true // 后台播放
         private set
 
@@ -153,6 +154,7 @@ class PlayerController(
      */
     fun fullScreen(fullMode: Int, onlyFull: Boolean = false) {
         this.onlyFull = onlyFull
+        canAutoCloseFullScreen = false
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.FULL
         scaffoldApp.fullScreenPlayer = true
         activity.requestedOrientation = when (fullMode) {
@@ -236,7 +238,8 @@ class PlayerController(
             if (autoFullScreen && !scaffoldApp.fullScreenPlayer) {
                 // 自动切换全屏
                 fullScreen(SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED)
-            } else if (!autoFullScreen && scaffoldApp.fullScreenPlayer) {
+                canAutoCloseFullScreen = true
+            } else if (!autoFullScreen && canAutoCloseFullScreen && scaffoldApp.fullScreenPlayer) {
                 // 自动切回小屏
                 smallScreen()
             }
