@@ -30,7 +30,9 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew -Pchannel=Github app:assembleRelease
+      run: |
+        ./gradlew -Pchannel=Github app:assembleFullRelease
+        ./gradlew app:assembleFossRelease
     - name: Move apk to release
       run: |
         release_dir=${{ github.workspace }}/release
