@@ -256,7 +256,7 @@ class PlayerDelegate2(
         cacheDir: File?
     ): MediaSource? {
         val dataSourceArr = dataSource.split("\n")
-        val mediaMetadata = getMediaMetadata()
+        val mediaMetadata = getMediaMetadata(dataSource)
         return when (dataSourceArr[0]) {
             "[local-merging]" -> {
                 // 本地音视频分离
@@ -342,18 +342,12 @@ class PlayerDelegate2(
                 mediaSource
             }
             else -> {
-                val mediaItem = MediaItem.Builder().apply {
-                    setUri(dataSource)
-                    mediaMetadata?.let(::setMediaMetadata)
-                }.build()
-                val context = PlaybackService.instance ?: activity
-                DefaultMediaSourceFactory(context)
-                    .createMediaSource(mediaItem)
+                return null
             }
         }
     }
 
-    private fun getMediaMetadata(): MediaMetadata? {
+    override fun getMediaMetadata(dataSource: String): MediaMetadata? {
         return playerSource?.let {
             val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl))
             val metaData = MediaMetadata.Builder()

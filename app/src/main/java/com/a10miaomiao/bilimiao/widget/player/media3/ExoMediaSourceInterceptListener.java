@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.widget.player.media3;
 
 import androidx.annotation.Nullable;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.TransferListener;
 import androidx.media3.exoplayer.source.MediaSource;
@@ -22,6 +23,7 @@ public interface ExoMediaSourceInterceptListener {
      */
     MediaSource getMediaSource(String dataSource, boolean preview, boolean cacheEnable, boolean isLooping, File cacheDir);
 
+    MediaMetadata getMediaMetadata(String dataSource);
 
     /**
      * @return 返回不为空时，使用返回的自定义 HttpDataSource
