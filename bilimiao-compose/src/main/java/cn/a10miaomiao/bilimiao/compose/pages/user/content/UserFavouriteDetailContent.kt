@@ -52,6 +52,7 @@ import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditForm
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditFormState
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.TitleBar
@@ -86,6 +87,7 @@ private class UserFavouriteDetailViewModel(
     override val di: DI,
     private val mediaId: String,
     private val mediaTitle: String,
+    private val keyword: String = "",
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
@@ -97,7 +99,6 @@ private class UserFavouriteDetailViewModel(
     var mediaInfo = MutableStateFlow<MediaListInfo?>(null)
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<MediasInfo>()
-    val keyword = MutableStateFlow("")
     val isAutoPlay = MutableStateFlow(false)
 
     init {
@@ -111,7 +112,7 @@ private class UserFavouriteDetailViewModel(
             list.loading.value = true
             val res = BiliApiService.userApi.mediaDetail(
                 media_id = mediaId,
-                keyword = keyword.value,
+                keyword = keyword,
                 pageNum = pageNum,
                 pageSize = list.pageSize
             ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
@@ -274,9 +275,12 @@ private class UserFavouriteDetailViewModel(
     }
 
     fun searchSelfPage(text: String) {
-        val nav = fragment.findNavController()
-        val url = "bilimiao://user/fav/detail?id=${mediaId}&name=${mediaTitle}&keyword=${text}"
-        nav.navigate(Uri.parse(url))
+        val nav = fragment.findComposeNavController()
+        nav.navigate(UserFavouriteDetailPage()) {
+            this.id set mediaId
+            this.title set mediaTitle
+            this.keyword set text
+        }
     }
 
 
@@ -292,14 +296,15 @@ private class UserFavouriteDetailViewModel(
 internal fun UserFavouriteDetailContent(
     mediaId: String,
     mediaTitle: String,
+    keyword: String = "",
     showTowPane: Boolean,
     hideFirstPane: Boolean,
     onChangeHideFirstPane: (hidden: Boolean) -> Unit,
     onClose: () -> Unit,
     onRefresh: () -> Unit,
 ) {
-    val viewModel = diViewModel(key = mediaId) {
-        UserFavouriteDetailViewModel(it, mediaId, mediaTitle)
+    val viewModel = diViewModel(key = mediaId + keyword) {
+        UserFavouriteDetailViewModel(it, mediaId, mediaTitle, keyword)
     }
 
     val windowStore: WindowStore by rememberInstance()
@@ -315,7 +320,7 @@ internal fun UserFavouriteDetailContent(
     val isAutoPlay by viewModel.isAutoPlay.collectAsState()
 
     val pageConfigId = PageConfig(
-        title = "收藏详情",
+        title = if (keyword.isBlank()) "收藏详情" else "搜索\n-\n${keyword}",
         menu = remember(detailInfo) {
             myMenu {
                 val selfFav = viewModel.isSelfFav()
