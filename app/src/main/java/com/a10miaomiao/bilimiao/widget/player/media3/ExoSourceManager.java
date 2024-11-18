@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import androidx.annotation.Nullable;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.common.util.Util;
 import androidx.media3.database.DatabaseProvider;
@@ -90,15 +91,18 @@ public class ExoSourceManager{
      */
     public MediaSource getMediaSource(String dataSource, boolean preview, boolean cacheEnable, boolean isLooping, File cacheDir, @Nullable String overrideExtension) {
         MediaSource mediaSource = null;
+        MediaMetadata mediaMetadata = null;
         if (sExoMediaSourceInterceptListener != null) {
             mediaSource = sExoMediaSourceInterceptListener.getMediaSource(dataSource, preview, cacheEnable, isLooping, cacheDir);
+            mediaMetadata = sExoMediaSourceInterceptListener.getMediaMetadata(dataSource);
         }
         if (mediaSource != null) {
             return mediaSource;
         }
         mDataSource = dataSource;
         Uri contentUri = Uri.parse(dataSource);
-        MediaItem mediaItem = MediaItem.fromUri(contentUri);
+        MediaItem mediaItem = mediaMetadata == null ? MediaItem.fromUri(contentUri)
+                : new MediaItem.Builder().setUri(dataSource).setMediaMetadata(mediaMetadata).build();
         int contentType = inferContentType(dataSource, overrideExtension);
 
         String uerAgent = null;
