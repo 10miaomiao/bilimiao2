@@ -317,7 +317,7 @@ internal fun UserSeasonDetailContent(
                 childMenu = myMenu {
                     myItem {
                         key = MenuKeys.playList
-                        title = "添加到播放列表"
+                        title = "设置为播放列表"
                     }
                 }
             }
