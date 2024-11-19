@@ -15,13 +15,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
@@ -30,6 +33,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,22 +112,29 @@ private class ReplyMessageContentModel(
 
     fun toUserPage(item: ReplyMessageInfo) {
         val mid = item.user.mid
-        val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        fragment.findComposeNavController()
+            .navigate(UserSpacePage()) {
+                id set mid.toString()
+            }
     }
 
     fun toDetailPage(item: ReplyMessageInfo, isDetail: Boolean) {
         val type = item.item.type
+                val enterPage =
         if (type == "reply") {
             // 评论
             val rootId = item.item.root_id
             val sourceId = item.item.source_id
-            val uri = if (isDetail) {
-                Uri.parse("bilimiao://video/comment/${rootId}/detail/${sourceId}")
+            var toPageUrl = if (isDetail) {
+                "bilimiao://video/comment/${rootId}/detail?"
             } else {
-                Uri.parse("bilimiao://video/comment/${sourceId}/detail")
+                "bilimiao://video/comment/${rootId}/detail/${sourceId}"
             }
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            if (item.item.business_id == 1) {
+                val videoPageUrl = "bilimiao://video/${item.item.subject_id}"
+                toPageUrl += "?enterUrl=${Uri.encode(videoPageUrl)}"
+            }
+            fragment.findNavController().navigate(Uri.parse(toPageUrl), defaultNavOptions)
 //        } else if (type == "album") {
 //            // 动态
         } else if (type == "danmu") {
@@ -134,7 +145,13 @@ private class ReplyMessageContentModel(
         } else if (type == "video") {
             // 视频
             val aid = item.item.subject_id
-            val uri = Uri.parse("bilimiao://video/$aid")
+            val sourceId = item.item.source_id
+            val videoPageUrl = "bilimiao://video/$aid"
+            val uri = if (isDetail) {
+                Uri.parse(videoPageUrl)
+            } else {
+                Uri.parse("bilimiao://video/comment/${sourceId}/detail?enterPageUrl=${Uri.encode(videoPageUrl)}")
+            }
             fragment.findNavController().navigate(uri, defaultNavOptions)
         } else {
             BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)

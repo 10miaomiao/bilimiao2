@@ -20,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.commponents.comment.VideoCommentViewInfo
 import com.kongzue.dialogx.dialogs.PopTip
 import com.kongzue.dialogx.dialogs.TipDialog
@@ -49,13 +50,27 @@ class VideoCommentDetailViewModel(
     var triggered = false
     var list = PaginationInfo<VideoCommentViewInfo>()
     var upMid = 0L
+    var enterPageUrl: String? = null
     private var _cursor: CursorReply? = null
 
     init {
         val arguments = fragment.requireArguments()
+        if (arguments.containsKey("enterUrl")) {
+            enterPageUrl = arguments.getString("enterUrl")
+        }
         if (arguments.containsKey(MainNavArgs.root)) {
             val rootId = arguments.getString(MainNavArgs.root, "0").toLong()
-            getRootReplyInfo(rootId)
+            val sourceId = arguments.getString(MainNavArgs.id, "0").toLong()
+            if (sourceId == 0L) {
+                getRootReplyInfo(rootId)
+            } else {
+                getRootReplyInfo(sourceId)
+                enterPageUrl = if (enterPageUrl == null) {
+                    "bilimiao://video/comment/${rootId}/detail"
+                } else {
+                    "bilimiao://video/comment/${rootId}/detail?enterUrl=${enterPageUrl}"
+                }
+            }
         } else if (arguments.containsKey(MainNavArgs.reply)) {
             reply = arguments.getParcelable(MainNavArgs.reply)
             loadData()
@@ -77,7 +92,10 @@ class VideoCommentDetailViewModel(
                 ReplyGRPC.replyInfo(req)
             }.awaitCall()
             ui.setState {
-                reply = VideoCommentViewAdapter.convertToVideoCommentViewInfo(res.reply!!)
+                miaoLogger() debug res.reply
+                reply = res.reply?.let {
+                    VideoCommentViewAdapter.convertToVideoCommentViewInfo(it)
+                }
                 _cursor == null
                 loadData()
             }

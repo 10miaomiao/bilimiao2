@@ -15,13 +15,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.AtMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
@@ -108,15 +111,27 @@ private class AtMessageContentModel(
 
     fun toUserPage(item: AtMessageInfo) {
         val mid = item.user.mid
-        val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        fragment.findComposeNavController()
+            .navigate(UserSpacePage()) {
+                id set mid.toString()
+            }
     }
 
     fun toMessagePage(item: AtMessageInfo) {
         // 评论
         if (item.item.type == "reply") {
             val sourceId = item.item.source_id
-            val uri = Uri.parse("bilimiao://video/comment/${sourceId}/detail")
+            val targetId = item.item.target_id
+            var toPageUrl = if (targetId == 0L) {
+                "bilimiao://video/comment/${sourceId}/detail"
+            } else {
+                "bilimiao://video/comment/${targetId}/detail/${sourceId}"
+            }
+            if (item.item.business_id == 1) {
+                val enterUrl = "bilimiao://video/${item.item.subject_id}"
+                toPageUrl += "?enterUrl=${Uri.encode(enterUrl)}"
+            }
+            val uri = Uri.parse(toPageUrl)
             fragment.findNavController().navigate(uri, defaultNavOptions)
         } else {
             BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
@@ -125,20 +140,15 @@ private class AtMessageContentModel(
 
     fun toDetailPage(item: AtMessageInfo) {
         val type = item.item.type
-        if (type == "reply") {
-            // 评论
-//            val id = item.item.target_id
-            val id = item.item.target_id
-            val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
-            fragment.findNavController().navigate(uri)
-//        } else if (type == "album") {
-//            // 动态
-//        } else if (type == "danmu") {
-//            // 弹幕
-        } else if (type == "video") {
-            // 视频
+        if (item.item.business_id == 1) {
+            val targetId = item.item.target_id
             val aid = item.item.subject_id
-            val uri = Uri.parse("bilimiao://video/$aid")
+            var toPageUrl = if (targetId == 0L) {
+                "bilimiao://video/$aid"
+            } else {
+                "bilimiao://video/comment/${targetId}/detail"
+            }
+            val uri = Uri.parse(toPageUrl)
             fragment.findNavController().navigate(uri, defaultNavOptions)
         } else {
             BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
