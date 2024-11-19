@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.page.video.comment
 
 import android.content.DialogInterface
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -30,6 +32,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
@@ -69,13 +72,17 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "video.comment.detail"
         override fun FragmentNavigatorDestinationBuilder.init() {
-            deepLink("bilimiao://video/comment/{root}/detail")
-            deepLink("bilimiao://video/comment/{root}/detail/{id}")
+         deepLink("bilimiao://video/comment/{root}/detail?enterUrl={enterUrl}")
+         deepLink("bilimiao://video/comment/{root}/detail/{id}?enterUrl={enterUrl}")
             argument(MainNavArgs.root) {
                 type = NavType.StringType
                 nullable = true
             }
             argument(MainNavArgs.id) {
+                type = NavType.StringType
+                nullable = true
+            }
+             argument("enterUrl") {
                 type = NavType.StringType
                 nullable = true
             }
@@ -104,24 +111,28 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         title = "评论详情"
-
-        menus = listOf(
-            myMenuItem {
+        menu = myMenu {
+            myItem {
                 key = MenuKeys.send
                 iconResource = R.drawable.ic_baseline_send_24
                 title = "回复评论"
-            },
-            myMenuItem {
-                key = MenuKeys.delete
-                iconResource = R.drawable.ic_baseline_delete_outline_24
-                title = "删除评论"
-                visibility = if (viewModel.isSelfReply()) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
+            }
+            if (viewModel.isSelfReply()) {
+                myItem {
+                    key = MenuKeys.delete
+                    iconResource = R.drawable.ic_baseline_delete_outline_24
+                    title = "删除评论"
                 }
             }
-        )
+            if (viewModel.enterPageUrl != null) {
+                myItem {
+                    key = MenuKeys.url
+                    iconResource = R.drawable.ic_link_black_24dp
+                    title = "评论来源"
+                }
+            }
+
+        }
     }
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
@@ -149,6 +160,14 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
             }
             MenuKeys.delete -> {
                 viewModel.delete()
+            }
+            MenuKeys.url -> {
+                viewModel.enterPageUrl?.let {
+                     findNavController().navigate(
+                         Uri.parse(it),
+                         defaultNavOptions,
+                     )
+                }
             }
         }
     }

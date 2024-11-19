@@ -14,13 +14,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageResponseInfo
@@ -108,8 +111,10 @@ private class LikeMessageContentModel(
 
     fun toUserPage(item: LikeMessageInfo) {
         val mid = item.users[0].mid
-        val uri = Uri.parse("bilimiao://user/$mid")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        fragment.findComposeNavController()
+            .navigate(UserSpacePage()) {
+                id set mid.toString()
+            }
     }
 
     fun toDetailPage(item: LikeMessageInfo) {
@@ -117,7 +122,12 @@ private class LikeMessageContentModel(
         if (type == "reply") {
             // 评论
             val id = item.item.item_id
-            val uri = Uri.parse("bilimiao://video/comment/${id}/detail")
+            var toPageUrl = "bilimiao://video/comment/${id}/detail"
+            if (item.item.uri.startsWith("https://www.bilibili.com/video/")) {
+                val bvID = item.item.uri.substring(31, item.item.uri.length)
+                toPageUrl += "?enterUrl=${Uri.encode("bilimiao://video/${bvID}")}"
+            }
+            val uri = Uri.parse(toPageUrl)
             fragment.findNavController().navigate(uri, defaultNavOptions)
         } else if (type == "album") {
             // 动态
