@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -32,17 +31,17 @@ import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+@Serializable
 class SelectProxyServerPage : ComposePage() {
-    override val route: String
-        get() = "setting/proxy/select"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: SelectProxyServerPageViewModel = diViewModel()
         SelectProxyServerPageContent(viewModel)
     }
@@ -135,9 +134,9 @@ internal class SelectProxyServerPageViewModel(
         index: Int
     ) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(EditProxyServerPage()) {
-            this.index set index
-        }
+        nav.navigate(EditProxyServerPage(
+            index = index
+        ))
     }
 }
 

@@ -1,9 +1,11 @@
 package cn.a10miaomiao.bilimiao.compose.pages.bangumi
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.View
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -22,21 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.layout.DoubleColumnAutofitLayout
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememberChainScrollableLayoutState
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.components.BangumiEpisodeItem
-import cn.a10miaomiao.bilimiao.compose.pages.bangumi.popup_menu.BangumiMorePopupMenu
 import com.a10miaomiao.bilimiao.comm.delegate.player.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -50,6 +51,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -61,28 +63,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class BangumiDetailPage : ComposePage() {
-
+@Serializable
+data class BangumiDetailPage(
     // 三选其一
-    val id = stringPageArg("id", "")
-    val epId = stringPageArg("epid", "")
-    val mediaId = stringPageArg("mediaid", "")
+    private val id: String = "",
+    private val epId: String = "",
+    private val mediaId: String = "",
+) : ComposePage() {
 
-    override val route: String
-        get() = "bangumi/detail?id=${id}&epid=${epId}%mediaid=${mediaId}"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: BangumiDetailPageViewModel = diViewModel()
         BangumiDetailPageContent(
-            id = navEntry.arguments?.get(id) ?: "",
-            epid = navEntry.arguments?.get(epId) ?: "",
-            mediaId = navEntry.arguments?.get(mediaId) ?: "",
+            id = id,
+            epid = epId,
+            mediaId = mediaId,
             viewModel = viewModel,
         )
     }
@@ -303,13 +305,62 @@ private class BangumiDetailPageViewModel(
 
     fun menuItemClick(view: View, menuItem: MenuItemPropInfo) {
         when (menuItem.key) {
-            MenuKeys.more -> {
-                // 更多
-                val pm = BangumiMorePopupMenu(
-                    activity = fragment.requireActivity(),
-                    detailInfo = detailInfo.value,
-                )
-                pm.show(view)
+            1 -> {
+                // 用浏览器打开
+                val info = detailInfo.value
+                if (info != null) {
+                    val id = info.season_id
+                    var url = "https://www.bilibili.com/bangumi/play/ss$id"
+                    BiliUrlMatcher.toUrlLink(fragment.requireContext(), url)
+                } else {
+                    PopTip.show("请等待信息加载完成")
+                }
+            }
+            2 -> {
+                // 分享番剧
+                val info = detailInfo.value
+                if (info != null) {
+                    val activity = fragment.requireActivity()
+                    var shareIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, "bilibili番剧分享")
+                        putExtra(Intent.EXTRA_TEXT, "${info.season_title} https://www.bilibili.com/bangumi/play/ss${info.season_id}")
+                    }
+                    activity.startActivity(Intent.createChooser(shareIntent, "分享"))
+                } else {
+                    PopTip.show("请等待信息加载完成")
+                }
+
+            }
+            3 -> {
+                // 复制链接
+                val info = detailInfo.value
+                if (info != null) {
+                    val activity = fragment.requireActivity()
+                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    var label = "url"
+                    var text = "https://www.bilibili.com/bangumi/play/ss${info.season_id}"
+                    val clip = ClipData.newPlainText(label, text)
+                    clipboard.setPrimaryClip(clip)
+                    PopTip.show("已复制：$text")
+                } else {
+                    PopTip.show("请等待信息加载完成")
+                }
+            }
+            4 -> {
+                // 下载番剧
+                val info = detailInfo.value
+                if (info != null) {
+                    val activity = fragment.requireActivity()
+                    BottomSheetNavigation.navigate(
+                        activity,
+                        BilimiaoPageRoute.Entry.DownloadBangumiCreate,
+                        info.season_id
+                    )
+                } else {
+                    PopTip.show("请等待信息加载完成")
+                }
             }
 
             MenuKeys.follow -> {
@@ -431,6 +482,29 @@ private fun BangumiDetailPageContent(
                     key = MenuKeys.more
                     iconFileName = "ic_more_vert_grey_24dp"
                     title = "更多"
+
+                    childMenu = myMenu {
+                        myItem {
+                            key = 1
+                            title = "用浏览器打开"
+                        }
+                        myItem {
+                            key = 2
+                            title = if (detailInfo != null) {
+                                "分享番剧(${detailInfo.stat.share})"
+                            } else {
+                                "分享番剧"
+                            }
+                        }
+                        myItem {
+                            key = 3
+                            title = "复制链接"
+                        }
+                        myItem {
+                            key = 4
+                            title = "下载番剧"
+                        }
+                    }
                 }
                 myItem {
                     key = MenuKeys.follow

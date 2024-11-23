@@ -16,10 +16,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
+import androidx.navigation.ui.setupWithNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainActivity
@@ -33,11 +37,13 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.recycler.RecyclerViewFragment
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.page.user.HistoryFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.a10miaomiao.bilimiao.widget.wrapInViewPager2Container
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kongzue.dialogx.dialogs.PopTip
@@ -52,6 +58,10 @@ class MainFragment : Fragment(), DIAware, MyPage {
     companion object : FragmentNavigatorBuilder() {
         override val name = "main"
 
+        override fun FragmentNavigatorDestinationBuilder.init() {
+            deepLink("bilimiao://home")
+        }
+
         private val ID_viewPager = View.generateViewId()
         private val ID_tabLayout = View.generateViewId()
         private val ID_space = View.generateViewId()
@@ -61,33 +71,25 @@ class MainFragment : Fragment(), DIAware, MyPage {
 
     override val pageConfig = myPageConfig {
         title = pageTitle
-        menus = listOf(
-            myMenuItem {
-                key = MenuKeys.search
-                title = "搜索"
-                iconResource = R.drawable.ic_search_gray
-            },
-            myMenuItem {
-                key = MenuKeys.history
-                title = "历史"
-                iconResource = R.drawable.ic_history_gray_24dp
-                visibility = if (userStore.isLogin()) {
-                    View.VISIBLE
-                } else {
-                    View.GONE
-                }
-            },
-            myMenuItem {
-                key = MenuKeys.download
-                title = "下载"
-                iconResource = R.drawable.ic_arrow_downward_gray_24dp
-            },
-            myMenuItem {
-                key = MenuKeys.setting
+        menu = myMenu {
+            checkable = true
+            checkedKey = MenuKeys.home
+            myItem {
+                key = MenuKeys.dynamic
+                title = "动态"
+                iconResource = R.drawable.ic_baseline_icecream_24
+            }
+            myItem {
+                key = MenuKeys.home
+                title = "首页"
+                iconResource = R.drawable.ic_baseline_home_24
+            }
+            myItem {
+                key = MenuKeys.menu
                 title = "菜单"
                 iconResource = R.drawable.ic_baseline_menu_24
-            },
-        )
+            }
+        }
     }
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
@@ -95,18 +97,13 @@ class MainFragment : Fragment(), DIAware, MyPage {
         val nav = (activity as? MainActivity)?.pointerNav?.navController
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
         when (menuItem.key) {
-            MenuKeys.setting -> {
-                val scaffoldApp = requireActivity().getScaffoldView()
-                scaffoldApp.openDrawer()
-            }
-            MenuKeys.history -> {
-                nav.navigate(HistoryFragment.actionId)
-            }
-            MenuKeys.download -> {
-                nav.navigateToCompose(DownloadListPage())
-            }
-            MenuKeys.search -> {
-                requireActivity().openSearch(view)
+            MenuKeys.dynamic -> {
+//                val navOptions = NavOptions.Builder()
+//                    .setLaunchSingleTop(true) // 设置singleTop属性
+//                    .setPopUpTo(MainFragment.id, false, true) // 三个参数分别为popUpToId, popUpToInclusive, popUpToSaveState
+//                    .setRestoreState(true) // 设置restoreState属性
+//                    .build()
+//                nav.navigateToCompose(DynamicPage(), navOptions)
             }
         }
     }

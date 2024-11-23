@@ -20,6 +20,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._tag
@@ -56,6 +57,8 @@ class SearchActivity : AppCompatActivity() {
         const val KEY_MODE = "mode"
         const val KEY_NAME = "name"
         const val KEY_URL = "url"
+        const val KEY_COMPOSE_ENTRY = "entry"
+        const val KEY_COMPOSE_PARAM = "param"
         const val KEY_IS_COMPOSE_PAGE = "is_compose_page"
         const val REQUEST_CODE = 1234
 
@@ -275,10 +278,8 @@ class SearchActivity : AppCompatActivity() {
                     }
                     SearchViewModel.SuggestType.SS -> {
                         val intent = Intent()
-                        val url = BangumiDetailPage().apply {
-                            id set item.value
-                        }.url()
-                        intent.putExtra(KEY_URL, url)
+                        intent.putExtra(KEY_COMPOSE_ENTRY, BilimiaoPageRoute.Entry.BangumiDetail.ordinal)
+                        intent.putExtra(KEY_COMPOSE_PARAM, "id=${item.value}")
                         intent.putExtra(KEY_IS_COMPOSE_PAGE, true)
                         setResult(REQUEST_CODE, intent)
                         finishAfterTransition()

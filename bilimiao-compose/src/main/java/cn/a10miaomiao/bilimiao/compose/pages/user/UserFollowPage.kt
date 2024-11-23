@@ -20,10 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
-import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -44,23 +41,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 
-class UserFollowPage() : ComposePage() {
-
-    val id = stringPageArg("id")
-
-    override val route: String
-        get() = "user/${id}/follow"
+@Serializable
+class UserFollowPage(
+    private val id: String
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel = diViewModel<UserFollowPageViewModel>()
-        val mid = navEntry.arguments?.get(id) ?: ""
+        val mid = id
         LaunchedEffect(mid) {
             viewModel.mid = mid
         }
@@ -212,9 +208,7 @@ private class UserFollowPageViewModel(
 
     fun toUserDetailPage(id: String) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(UserSpacePage()) {
-            this.id set id
-        }
+        nav.navigate(UserSpacePage(id))
     }
 }
 

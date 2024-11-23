@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.MainActivity
@@ -53,25 +54,28 @@ object BiliNavigation {
             compile = Pattern.compile("ss(\\d+)")
             matcher = compile.matcher(url)
             if (matcher.find()) {
-                nav.navigateToCompose(BangumiDetailPage()) {
-                    id set matcher.group(1)
-                }
+                nav.navigateToCompose(
+                    BilimiaoPageRoute.Entry.BangumiDetail,
+                    "id=${matcher.group(1)}"
+                )
                 return true
             }
             compile = Pattern.compile("ep(\\d+)")
             matcher = compile.matcher(url)
             if (matcher.find()) {
-                nav.navigateToCompose(BangumiDetailPage()) {
-                    epId set matcher.group(1)
-                }
+                nav.navigateToCompose(
+                    BilimiaoPageRoute.Entry.BangumiDetail,
+                    "epid=${matcher.group(1)}"
+                )
                 return true
             }
             compile = Pattern.compile("md(\\d+)")
             matcher = compile.matcher(url)
             if (matcher.find()) {
-                nav.navigateToCompose(BangumiDetailPage()) {
-                    mediaId set matcher.group(1)
-                }
+                 nav.navigateToCompose(
+                    BilimiaoPageRoute.Entry.BangumiDetail,
+                    "mediaid=${matcher.group(1)}"
+                )
                 return true
             }
         }
@@ -84,9 +88,7 @@ object BiliNavigation {
         if (host == "space.bilibili.com") {
             val path = uri.path!!.replace("/", "")
             argId = if (isNumeric(path)) { path } else { "" }
-            nav.navigateToCompose(UserSpacePage()) {
-                id set argId
-            }
+            nav.navigateToCompose(BilimiaoPageRoute.Entry.UserSpace, argId)
             return true
         }
         if (queryParameterNames.contains("avid")) {

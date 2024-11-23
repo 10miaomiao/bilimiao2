@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -38,17 +37,17 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+@Serializable
 class DownloadListPage : ComposePage() {
-    override val route: String
-        get() = "download/list"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: DownloadListPageViewModel = diViewModel()
         DownloadListPageContent(viewModel)
     }
@@ -184,9 +183,9 @@ internal class DownloadListPageViewModel(
 
     fun toDetailPage(item: DownloadInfo) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(DownloadDetailPage()) {
-            path set item.dir_path
-        }
+        nav.navigate(DownloadDetailPage(
+            path = item.dir_path
+        ))
     }
 
     fun openBiliDownOutGithubWebsite() {

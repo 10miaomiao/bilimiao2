@@ -30,20 +30,19 @@ import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class EditProxyServerPage : ComposePage() {
-
-    val index = intPageArg("index")
-    override val route: String
-        get() = "bilimiao://setting/proxy/${index}/edit"
+@Serializable
+class EditProxyServerPage(
+    private val index: Int = 0,
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val index = navEntry.arguments?.get(index) ?: 0
+    override fun Content() {
         val viewModel: EditProxyServerPageViewModel = diViewModel()
         EditProxyServerPageContent(index, viewModel)
     }

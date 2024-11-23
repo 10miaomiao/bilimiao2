@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
@@ -79,13 +80,14 @@ class HomeFragment : Fragment(), DIAware {
         if (userInfo != null) {
             // 跳转个人中心
             val nav = Navigation.findNavController(it)
-            nav.navigateToCompose(UserSpacePage()){
-                id set userInfo.mid.toString()
-            }
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.UserSpace,
+                userInfo.mid.toString(),
+            )
         } else {
             // 跳转登录
             val nav = Navigation.findNavController(it)
-            nav.navigateToCompose(LoginPage())
+            nav.navigateToCompose(BilimiaoPageRoute.Entry.Login)
         }
     }
 
@@ -93,7 +95,7 @@ class HomeFragment : Fragment(), DIAware {
         if (viewModel.userStore.state.info == null) {
             // 跳转登录
             val nav = Navigation.findNavController(it)
-            nav.navigateToCompose(LoginPage())
+            nav.navigateToCompose(BilimiaoPageRoute.Entry.Login)
             true
         } else {
             false
@@ -102,9 +104,7 @@ class HomeFragment : Fragment(), DIAware {
 
     val handleTimeSettingClick = View.OnClickListener {
         val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-        nav.navigateToCompose(
-            TimeSettingPage()
-        )
+        nav.navigateToCompose(BilimiaoPageRoute.Entry.TimeSetting)
     }
 
     val handleAdClick = View.OnClickListener {

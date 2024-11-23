@@ -5,6 +5,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
@@ -39,7 +40,7 @@ class ErrorMessageBoxController(
         errorMessageRetryBtn.setOnClickListener {
             if (delegate.playerSource?.proxyServer != null) {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                nav.navigateToCompose(SelectProxyServerPage())
+                nav.navigateToCompose(BilimiaoPageRoute.Entry.SelectProxyServer)
             } else {
                 hide()
                 delegate.reloadPlayer()

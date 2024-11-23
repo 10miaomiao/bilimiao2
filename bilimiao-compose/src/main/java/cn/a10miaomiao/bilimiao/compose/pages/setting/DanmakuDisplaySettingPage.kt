@@ -37,22 +37,21 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.content.DanmakuDisplaySetti
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class DanmakuDisplaySettingPage : ComposePage() {
-
-    val name = stringPageArg("name", "default")
-
-    override val route: String
-        get() = "setting/danmaku/display/${name}"
+@Serializable
+data class DanmakuDisplaySettingPage(
+    val name: String = "default"
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: DanmakuDisplaySettingPageViewModel = diViewModel()
-        val initialMode = navEntry.arguments?.get(name) ?: ""
+        val initialMode = name
         DanmakuDisplaySettingPageContent(
             viewModel,
             initialMode,

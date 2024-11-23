@@ -40,7 +40,6 @@ import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menufold
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menuunfold
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
@@ -276,11 +275,11 @@ private class UserFavouriteDetailViewModel(
 
     fun searchSelfPage(text: String) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(UserFavouriteDetailPage()) {
-            this.id set mediaId
-            this.title set mediaTitle
-            this.keyword set text
-        }
+        nav.navigate(UserFavouriteDetailPage(
+            id = mediaId,
+            title = mediaTitle,
+            keyword = text,
+        ))
     }
 
 

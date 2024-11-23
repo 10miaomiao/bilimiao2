@@ -35,21 +35,21 @@ import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterUpperListConte
 import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterWordListContent
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-
+@Serializable
 class FilterSettingPage : ComposePage() {
-    override val route: String
-        get() = "filter/setting"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: FilterSettingPageViewModel = diViewModel()
         FilterSettingPageContent(viewModel)
     }
+
 }
 
 private class FilterSettingPageViewModel(

@@ -74,32 +74,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import kotlin.math.min
 
-
-class DynamicDetailPage : ComposePage() {
-
-    val id = stringPageArg("id")
-
-    override val deepLinks: List<NavDeepLink>
-        get() = listOf(
-            navDeepLink {
-                uriPattern = "bilibili://opus/detail/${id}"
-            }
-        )
-
-    override val route: String
-        get() = "dynamic/${id}"
+@Serializable
+data class DynamicDetailPage(
+    private val id: String,
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val dynId = navEntry.arguments?.get(id) ?: ""
-        val viewModel = diViewModel(key = "dynamic$dynId") {
-            DynamicDetailPageViewModel(it, dynId)
+    override fun Content() {
+        val viewModel = diViewModel(key = "dynamic$id") {
+            DynamicDetailPageViewModel(it, id)
         }
         DynamicDetailPageContent(viewModel)
     }

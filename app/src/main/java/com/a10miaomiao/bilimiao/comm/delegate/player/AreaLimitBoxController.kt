@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
@@ -33,7 +34,7 @@ class AreaLimitBoxController(
         }
         areaLimitOkBtn.setOnClickListener {
             val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-            nav.navigateToCompose(SelectProxyServerPage())
+            nav.navigateToCompose(BilimiaoPageRoute.Entry.SelectProxyServer)
         }
         areaLimitCloseBtn.setOnClickListener {
             hide()

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
@@ -39,10 +40,10 @@ class StartViewModel(
     val navList = mutableListOf(
         StartNavInfo(
             title = "关注",
-            pageUrl = MyFollowPage().url(),
             iconRes = R.drawable.ic_nav_following,
             isNeedAuth = true,
             isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.MyFollow,
         ),
         StartNavInfo(
             title = "粉丝",
@@ -52,23 +53,24 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "收藏",
-            pageUrl = UserFavouritePage().url(),
             iconRes = R.drawable.ic_nav_fav,
             isNeedAuth = true,
             isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.UserFavourite,
+            composeParam = "{mid}"
         ),
         StartNavInfo(
             title = "追番",
-            pageUrl = BangumiFollowPage().url(),
             iconRes = R.drawable.ic_nav_bangumi,
             isNeedAuth = true,
             isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.BangumiFollow,
         ),
         StartNavInfo(
             title = "下载",
-            pageUrl = DownloadListPage().url(),
             iconRes = R.drawable.ic_nav_download,
             isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.DownloadList,
         ),
         StartNavInfo(
             title = "历史",
@@ -84,15 +86,15 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "设置",
-            pageUrl = SettingPage().url(),
             iconRes = R.drawable.ic_nav_setting,
             isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.Setting,
         ),
         StartNavInfo(
             title = "歌词",
-            pageUrl = LyricPage().url(),
             iconRes = R.drawable.ic_nav_lyric,
             isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.Lyric,
         ),
     )
 
@@ -111,12 +113,14 @@ class StartViewModel(
 
     data class StartNavInfo(
         val title: String,
-        val pageUrl: String,
+        val pageUrl: String? = null,
         @DrawableRes
         val iconRes: Int? = null,
         val iconUrl: String? = null,
         val isNeedAuth: Boolean = false,
         val isComposePage: Boolean = false,
+        val composeEntry: BilimiaoPageRoute.Entry? = null,
+        val composeParam: String? = null,
     )
 
 }

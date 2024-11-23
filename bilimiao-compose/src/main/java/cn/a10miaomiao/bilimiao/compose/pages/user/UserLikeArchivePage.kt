@@ -49,23 +49,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class UserLikeArchivePage : ComposePage() {
-
-    val id = stringPageArg("id")
-
-    override val route: String
-        get() = "user/${id}/like/archive"
+@Serializable
+data class UserLikeArchivePage(
+    private val mid: String,
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val vmid = navEntry.arguments?.get(id) ?: ""
-        val viewModel = diViewModel(key = vmid) {
-            UserLikeArchivePageViewModel(it, vmid)
+    override fun Content() {
+        val viewModel = diViewModel(key = mid) {
+            UserLikeArchivePageViewModel(it, mid)
         }
         UserLikeArchivePageContent(viewModel)
     }

@@ -59,17 +59,16 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.MessageDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.compose.subDI
 
+@Serializable
 class MyFollowPage() : ComposePage() {
 
-    override val route: String
-        get() = "follow"
-
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel = diViewModel<MyFollowViewModel>()
         subDI(
             diBuilder = {

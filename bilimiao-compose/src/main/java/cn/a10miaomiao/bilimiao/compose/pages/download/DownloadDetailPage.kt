@@ -30,26 +30,22 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.io.File
 
-class DownloadDetailPage : ComposePage() {
-
-    val path = stringPageArg("path")
-
-    override val route: String
-        get() = "download/detail?path=${path}"
+@Serializable
+data class DownloadDetailPage(
+    private val path: String,
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: DownloadDetailPageViewModel = diViewModel()
-        DownloadDetailPageContent(
-            navEntry.arguments?.get(path) ?: "",
-            viewModel
-        )
+        DownloadDetailPageContent(path, viewModel)
     }
 
 }

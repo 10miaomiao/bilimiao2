@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -287,13 +288,12 @@ class VideoInfoViewModel(
                 val nav = fragment.findNavController()
                 val previousId = nav.previousBackStackEntry?.destination?.id
                 nav.navigateToCompose(
-                    BangumiDetailPage(),
+                    BilimiaoPageRoute.Entry.BangumiDetail,
+                    "id=${it.season_id}",
                     navOptions {
                         previousId?.let(::popUpTo)
                     }
-                ) {
-                    id set it.season_id
-                }
+                )
                 return true
             }
         }

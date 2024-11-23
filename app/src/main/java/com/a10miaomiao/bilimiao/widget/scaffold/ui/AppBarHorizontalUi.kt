@@ -7,10 +7,14 @@ import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.a10miaomiao.bilimiao.comm.attr
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
+import com.a10miaomiao.bilimiao.widget.scaffold.MenuCheckableItemView
 import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView
 import splitties.dimensions.dip
 import splitties.views.*
@@ -20,8 +24,8 @@ class AppBarHorizontalUi(
     override val ctx: Context,
     val menuItemClick: View.OnClickListener,
     val menuItemLongClick: View.OnLongClickListener,
-    val backClick: View.OnClickListener,
-    val backLongClick: View.OnLongClickListener,
+    val navigationClick: View.OnClickListener,
+    val navigationLongClick: View.OnLongClickListener,
     val enableSubContent: Boolean,
     val pointerClick: View.OnClickListener,
     val pointerLongClick: View.OnLongClickListener,
@@ -42,8 +46,8 @@ class AppBarHorizontalUi(
     val mNavigationIconLayout = frameLayout {
         padding = dip(10)
         bottomPadding = 0
-        setOnClickListener(backClick)
-        setOnLongClickListener(backLongClick)
+        setOnClickListener(navigationClick)
+        setOnLongClickListener(navigationLongClick)
         addView(mNavigationIcon, lParams {
             gravity = Gravity.CENTER
             width = dip(24)
@@ -130,11 +134,16 @@ class AppBarHorizontalUi(
         })
     }
 
+    val mSelectBgView = frameLayout {
+        backgroundColor = config.themeColor
+    }
+
     private val lineView = textView {
         backgroundColor = ctx.config.colorSurfaceVariant
     }
 
     override val root = frameLayout {
+        addView(mSelectBgView, lParams(dip(30), dip(30)))
         addView(mNavigationLayout.wrapInScrollView {
             scrollBarSize = 0
         }, lParams {
@@ -149,9 +158,9 @@ class AppBarHorizontalUi(
 
     override fun setProp(prop: AppBarView.PropInfo?) {
         if (prop != null) {
-            if (prop.navigationIcon != null) {
+            if (prop.navigationButtonIcon != null) {
                 mNavigationIconLayout.visibility = View.VISIBLE
-                mNavigationIcon.imageDrawable = prop.navigationIcon
+                mNavigationIcon.imageDrawable = prop.navigationButtonIcon
             } else {
                 mNavigationIconLayout.visibility = View.GONE
             }
@@ -178,35 +187,130 @@ class AppBarHorizontalUi(
             val menus = prop.menus
             if (menus == null) {
                 mNavigationMemuLayout.removeAllViews()
+            } else if (prop.isNavigationMenu) {
+                // 导航栏
+                mNavigationMemuLayout.apply {
+                    var menuViewIndex = 0
+                    menus.forEachIndexed { index, itemProp ->
+                        val i = indexOfMenuItemViewByKey(itemProp.key, menuViewIndex)
+                        val menuItemView = getChildAt(i) as? MenuCheckableItemView
+                        val isChecked = prop.navigationKey == itemProp.key
+                        if (menuItemView == null) {
+                            val view = newMenuCheckableItemView(ctx, itemProp)
+                            view.checked = isChecked
+                            addView(
+                                view,
+                                menuViewIndex,
+                                lParams(wrapContent, wrapContent) {
+                                    verticalMargin = dip(10)
+                                }
+                            )
+//                            view.startAnimation(translateMenuItemAniShow)
+                            menuViewIndex++
+                        } else {
+                            menuItemView.prop = itemProp
+                            menuItemView.checked = isChecked
+                            if (i > menuViewIndex) {
+                                removeViews(menuViewIndex, i - menuViewIndex)
+                            }
+                            menuViewIndex++
+                        }
+                    }
+                    if (childCount > menuViewIndex) {
+                        removeViews(
+                            menuViewIndex,
+                            childCount - menuViewIndex
+                        )
+                    }
+                }
             } else {
                 mNavigationMemuLayout.apply {
-                    menus.forEachIndexed { index, menu ->
-                        var menuItemView: MenuItemView
-                        if (index >= childCount) {
-                            menuItemView = MenuItemView(ctx)
-                            menuItemView.orientation = LinearLayout.HORIZONTAL
-                            menuItemView.minimumHeight = dip(40)
-                            menuItemView.setOnClickListener(menuItemClick)
-                            menuItemView.setBackgroundResource(config.selectableItemBackground)
-                            addView(menuItemView, lParams {
-                                width = matchParent
-                                height = wrapContent
-                            })
+                    var menuViewIndex = 0
+                    menus.forEachIndexed { index, itemProp ->
+                        val i = indexOfMenuItemViewByKey(itemProp.key, menuViewIndex)
+                        val menuItemView = getChildAt(i) as? MenuItemView
+                        if (menuItemView == null) {
+                            val view = newMenuItemView(ctx, itemProp)
+                            addView(
+                                view,
+                                menuViewIndex,
+                                lParams(matchParent, wrapContent)
+                            )
+//                            view.startAnimation(translateMenuItemAniShow)
+                            menuViewIndex++
                         } else {
-                            menuItemView = getChildAt(index) as MenuItemView
+                            menuItemView.prop = itemProp
+                            if (i > menuViewIndex) {
+                                removeViews(menuViewIndex, i - menuViewIndex)
+                            }
+                            menuViewIndex++
                         }
-                        menuItemView.prop = menu
                     }
-                    if (childCount > menus.size) {
+                    if (childCount > menuViewIndex) {
                         removeViews(
-                            menus.size,
-                            childCount - menus.size
+                            menuViewIndex,
+                            childCount - menuViewIndex
                         )
                     }
                 }
             }
+
+            if (prop.isNavigationMenu) {
+                val selectIndex = menus?.indexOfFirst {
+                    it.key == prop.navigationKey
+                } ?: -1
+                if (selectIndex == -1) {
+                    mSelectBgView.visibility = View.GONE
+                } else {
+                    val itemView = mNavigationMemuLayout.getChildAt(selectIndex)
+//                    mSelectBgView.translationX = itemView.left.toFloat()
+//                    mSelectBgView.translationY = itemView.top.toFloat()
+                    mSelectBgView.visibility = View.VISIBLE
+                }
+            } else {
+                mSelectBgView.visibility = View.GONE
+            }
         }
     }
+
+    private fun ViewGroup.indexOfMenuItemViewByKey(key: Int?, start: Int = 0): Int {
+        if (start > childCount) return -1
+        for (i in start until childCount) {
+            val view = getChildAt(i) as? MenuItemView ?: return -1
+            if (view.prop.key == key) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private fun newMenuItemView(
+        context: Context,
+        data: MenuItemPropInfo,
+    ) = MenuItemView(context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        minimumHeight = dip(40)
+        setOnClickListener(menuItemClick)
+        if (data.key == MenuKeys.back) {
+            setOnLongClickListener(menuItemLongClick)
+        }
+        prop = data
+    }
+
+    private fun newMenuCheckableItemView(
+        context: Context,
+        data: MenuItemPropInfo,
+    ) = MenuCheckableItemView(context).apply {
+        orientation = LinearLayout.VERTICAL
+        minimumWidth = dip(60)
+        minimumHeight = dip(60)
+        setOnClickListener(menuItemClick)
+        if (data.key == MenuKeys.back) {
+            setOnLongClickListener(menuItemLongClick)
+        }
+        prop = data
+    }
+
 
     override fun updateTheme() {
         lineView.backgroundColor = ctx.config.colorSurfaceVariant

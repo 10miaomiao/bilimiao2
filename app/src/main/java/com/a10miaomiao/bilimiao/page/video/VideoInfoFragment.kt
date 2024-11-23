@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
@@ -384,9 +385,10 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
     private fun toUser(view: View, mid: String) {
         val nav = Navigation.findNavController(view)
-        nav.navigateToCompose(UserSpacePage()) {
-            this.id set mid
-        }
+        nav.navigateToCompose(
+            BilimiaoPageRoute.Entry.UserSpace,
+            mid,
+        )
     }
 
     private val handleUpperClick = View.OnClickListener {
@@ -485,16 +487,16 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
 
     private val handlePlayListClick = View.OnClickListener {
         val nav = findNavController()
-        nav.navigateToCompose(PlayListPage())
+        nav.navigateToCompose(BilimiaoPageRoute.Entry.PlayList)
     }
 
     private val handleUgcSeasonDetailClick = View.OnClickListener {
         val ugcSeason = viewModel.ugcSeason ?: return@OnClickListener
         val nav = findNavController()
-        nav.navigateToCompose(UserSeasonDetailPage()) {
-            this.id set ugcSeason.id
-            this.title set ugcSeason.title
-        }
+        nav.navigateToCompose(
+            BilimiaoPageRoute.Entry.UserSeasonDetail,
+            "id=${ugcSeason.id}&title=${ugcSeason.title}"
+        )
     }
 
     private val handleRefresh = SwipeRefreshLayout.OnRefreshListener {

@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
@@ -148,19 +147,17 @@ class UserArchiveViewModel(
 
     fun toSeriesList() {
         fragment.findComposeNavController()
-            .navigate(UserMedialistPage()) {
-                mid set vmid
-            }
+            .navigate(UserMedialistPage(vmid))
     }
 
     fun toSeriesDetail(item: SeriesInfo) {
         fragment.findComposeNavController()
-            .navigate(UserMedialistPage()) {
-                mid set vmid
-                bizId set item.param
-                bizType set item.type
-                bizTitle set item.title
-            }
+            .navigate(UserMedialistPage(
+                mid = vmid,
+                bizId = item.param,
+                bizType = item.type,
+                bizTitle = item.title,
+            ))
     }
 
     fun toVideoDetail(item: ArchiveInfo) {

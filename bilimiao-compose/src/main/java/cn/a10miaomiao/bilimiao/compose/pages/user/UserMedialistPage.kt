@@ -77,29 +77,22 @@ import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-
-class UserMedialistPage : ComposePage() {
-
-    val mid = stringPageArg("mid")
-
-    val bizId = stringPageArg("bizid", "")
-    val bizType = stringPageArg("biztype", "")
-    val bizTitle = stringPageArg("biztitle", "")
-
-    override val route: String
-        get() = "user/${mid}/medialist?bizid=${bizId}&biztype=${bizType}&biztitle=${bizTitle}"
+@Serializable
+data class UserMedialistPage(
+    private val mid: String,
+    private val bizId : String = "",
+    private val bizType: String = "",
+    private val bizTitle: String = "",
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val mid = navEntry.arguments?.get(mid) ?: ""
-        val bizId = navEntry.arguments?.get(bizId) ?: ""
-        val bizType = navEntry.arguments?.get(bizType) ?: ""
-        val bizTitle = navEntry.arguments?.get(bizTitle) ?: ""
+    override fun Content() {
         val defaultMedia = if (bizId.isNotBlank() && bizType.isNotBlank()) {
             UserMedialistPageViewModel.OpenedMediaInfo(
                 id = bizId,

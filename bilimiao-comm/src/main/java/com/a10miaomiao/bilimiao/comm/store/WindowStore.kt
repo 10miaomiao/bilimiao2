@@ -73,7 +73,7 @@ class WindowStore(
         val top: Int = 0,
         val right: Int = 0,
         val bottom: Int = 0,
-        private val density: Float = 0f,
+        private val density: Float = 1f,
     ) {
         val leftDp = left / density
         val topDp = top / density

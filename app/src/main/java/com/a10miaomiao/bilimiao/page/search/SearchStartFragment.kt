@@ -16,6 +16,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view.*
 import cn.a10miaomiao.miao.binding.android.widget._text
@@ -209,9 +210,10 @@ class SearchStartFragment : Fragment(), DIAware, MyPage {
 //                    Navigation.findNavController(view).popBackStack()
                     val nav = (activity as? MainActivity)?.pointerNav?.navController
                         ?: requireActivity().findNavController(R.id.nav_host_fragment)
-                    nav.navigateToCompose(BangumiDetailPage()) {
-                        this.id set item.value
-                    }
+                    nav.navigateToCompose(
+                        BilimiaoPageRoute.Entry.BangumiDetail,
+                        "id=${item.value}"
+                    )
                 }
                 else -> {
                     val keyword = item.text

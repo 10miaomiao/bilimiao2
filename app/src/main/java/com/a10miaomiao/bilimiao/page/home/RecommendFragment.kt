@@ -9,6 +9,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.Bind
 import cn.a10miaomiao.miao.binding.MiaoBinding
@@ -80,9 +81,10 @@ class RecommendFragment: RecyclerViewFragment(), DIAware {
             val args = VideoInfoFragment.createArguments(item.param)
             nav.navigate(VideoInfoFragment.actionId, args)
         } else if (item.goto == "bangumi") {
-            nav.navigateToCompose(BangumiDetailPage()) {
-                epId set item.param
-            }
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.BangumiDetail,
+                "epid=${item.param}"
+            )
         } else if (!BiliNavigation.navigationTo(view, item.uri)){
             BiliNavigation.navigationToWeb(requireActivity(), item.uri)
         }

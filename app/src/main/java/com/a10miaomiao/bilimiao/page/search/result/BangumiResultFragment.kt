@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import com.a10miaomiao.bilimiao.comm.*
@@ -79,10 +80,10 @@ class BangumiResultFragment : BaseResultFragment(), DIAware {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
         Navigation.findNavController(view)
-            .navigateToCompose(BangumiDetailPage()) {
-                //api原因，从param改为season_id.toString()
-                id set item.season_id.toString()
-            }
+            .navigateToCompose(
+                BilimiaoPageRoute.Entry.BangumiDetail,
+                "id=${item.season_id}"
+            )
     }
 
     val itemUi = miaoBindingItemUi<SearchBangumiInfo> { item, index ->
