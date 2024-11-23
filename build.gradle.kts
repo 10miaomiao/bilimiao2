@@ -5,7 +5,6 @@ buildscript {
         set("compile_sdk_version", 32)
         set("build_tools_version", 32)
         set("target_sdk_version", 32)
-        set("kotlin_version", "1.9.24")
     }
 
     repositories {
@@ -16,14 +15,16 @@ buildscript {
         maven("https://jitpack.io")
     }
 
-    val kotlin_version: String by extra
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.1.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-        classpath("com.google.protobuf:protobuf-gradle-plugin:0.9.4")
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
+}
+
+plugins {
+    val kotlinVersion = "2.0.20"
+    id("com.android.application") version "8.5.1" apply false
+    id("com.android.library") version "8.5.1" apply false
+    id("org.jetbrains.kotlin.android") version kotlinVersion apply false
+    id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion apply false
+    id("com.google.protobuf") version "0.9.4" apply false
 }
 
 allprojects {

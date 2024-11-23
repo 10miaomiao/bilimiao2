@@ -10,9 +10,9 @@ object Versions {
     const val appcompat = "1.6.1"
     const val material = "1.12.0"
     const val lifecycle = "2.8.3"
-    const val navigation = "2.7.7"
+    const val navigation = "2.8.0"
 //    const val compose = "1.7.0-beta04"
-    const val composeBom = "2024.09.00"
+    const val composeBom = "2024.10.00"
     const val datastore = "1.1.1"
     const val media = "1.6.0"
     const val media3 = "1.4.1"
@@ -70,7 +70,7 @@ object Libraries {
     const val accompanistAdaptive = "com.google.accompanist:accompanist-adaptive:${Versions.accompanist}"
 
     // 通用库
-    const val kotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9"
+    const val kotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
     const val kodeinDi = "org.kodein.di:kodein-di-framework-android-x:${Versions.kodein_di}"
     const val kodeinDiCompose = "org.kodein.di:kodein-di-framework-compose:${Versions.kodein_di}"
     const val gson = "com.google.code.gson:gson:${Versions.gson}"

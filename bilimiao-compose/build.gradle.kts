@@ -5,6 +5,8 @@ plugins {
     id("kotlin-android")
     id("kotlin-parcelize")
     id("bilimiao-build")
+    kotlin("plugin.compose")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -39,9 +41,7 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
+
     namespace = "cn.a10miaomiao.bilimiao.compose"
     packaging {
         resources {
@@ -60,6 +60,7 @@ dependencies {
     implementation(Libraries.navigationUi)
     implementation(Libraries.datastore)
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi) // 依赖注入
     implementation(Libraries.kodeinDiCompose)
