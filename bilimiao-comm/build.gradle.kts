@@ -8,7 +8,6 @@ plugins {
     id("kotlin-parcelize")
     id("com.google.protobuf") // proto
     id("bilimiao-build")
-//    id("com.toasttab.protokt") version "1.0.0-beta.1"
 }
 
 android {
