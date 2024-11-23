@@ -18,7 +18,7 @@ import splitties.dimensions.dip
 import splitties.views.dsl.core.*
 import splitties.views.rightPadding
 
-class MenuItemView @JvmOverloads constructor(
+open class MenuItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 

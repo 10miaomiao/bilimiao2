@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
@@ -40,18 +39,17 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-
+@Serializable
 class SearchFollowPage : ComposePage() {
-    override val route: String
-        get() = "follow/search"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: SearchFollowPageViewModel = diViewModel()
         SearchFollowPageContent(viewModel)
     }
@@ -133,9 +131,7 @@ private class SearchFollowPageViewModel(
 
     fun toUserDetailPage(id: String) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(UserSpacePage()) {
-            this.id set id
-        }
+        nav.navigate(UserSpacePage(id))
     }
 
 }

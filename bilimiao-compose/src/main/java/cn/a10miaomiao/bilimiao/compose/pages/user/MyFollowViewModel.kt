@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo

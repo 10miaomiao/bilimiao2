@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
@@ -169,9 +168,7 @@ class UserSpaceViewModel(
         if (isSelf) {
             nav.navigate(MyFollowPage())
         } else {
-            nav.navigate(UserFollowPage()) {
-                id set this@UserSpaceViewModel.vmid
-            }
+            nav.navigate(UserFollowPage(vmid))
         }
     }
 
@@ -180,18 +177,14 @@ class UserSpaceViewModel(
         if (isSelf) {
             nav.navigate(BangumiFollowPage())
         } else {
-            nav.navigate(UserBangumiPage()) {
-                id set this@UserSpaceViewModel.vmid
-            }
+            nav.navigate(UserBangumiPage(vmid))
         }
     }
 
 
     fun toLikeArchive() {
         val nav = fragment.findComposeNavController()
-        nav.navigate(UserLikeArchivePage()) {
-            id set this@UserSpaceViewModel.vmid
-        }
+        nav.navigate(UserLikeArchivePage(vmid))
     }
 
     fun toVideoDetail(item: SpaceInfo.ArchiveItem) {
@@ -204,24 +197,24 @@ class UserSpaceViewModel(
 
     fun toBangumiDetail(item: SpaceInfo.SeasonItem) {
         fragment.findComposeNavController()
-            .navigate(BangumiDetailPage()) {
-                id set item.param
-            }
+            .navigate(BangumiDetailPage(
+                id = item.param
+            ))
     }
 
     fun toFavouriteList() {
         fragment.findComposeNavController()
-            .navigate(UserFavouritePage()) {
-                id set this@UserSpaceViewModel.vmid
-            }
+            .navigate(UserFavouritePage(
+                mid = vmid
+            ))
     }
 
     fun toFavouriteDetail(item: SpaceInfo.Favourite2Item) {
         fragment.findComposeNavController()
-            .navigate(UserFavouriteDetailPage()) {
-                id set item.media_id
-                title set item.title
-            }
+            .navigate(UserFavouriteDetailPage(
+                id = item.media_id,
+                title = item.title
+            ))
     }
 
     fun menuItemClick(view: View, item: MenuItemPropInfo) {

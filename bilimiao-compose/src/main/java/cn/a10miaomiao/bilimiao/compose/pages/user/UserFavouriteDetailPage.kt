@@ -7,23 +7,18 @@ import bilibili.polymer.app.search.v1.Item
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
+import kotlinx.serialization.Serializable
 
-class UserFavouriteDetailPage : ComposePage() {
-
-    val id = stringPageArg("id")
-    val title = stringPageArg("title")
-    val keyword = stringPageArg("keyword", "")
-
-
-    override val route: String
-        get() = "user/favourite/${id}?title=${title}&keyword=${keyword}"
+@Serializable
+data class UserFavouriteDetailPage(
+    private val id: String,
+    private val title : String,
+    private val keyword: String = "",
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val mediaId = navEntry.arguments?.get(id) ?: ""
-        val mediaTitle = navEntry.arguments?.get(title) ?: ""
-        val keyword = navEntry.arguments?.get(keyword) ?: ""
-        UserFavouriteDetailPageContent(mediaId, mediaTitle, keyword)
+    override fun Content() {
+        UserFavouriteDetailPageContent(id, title, keyword)
     }
 }
 

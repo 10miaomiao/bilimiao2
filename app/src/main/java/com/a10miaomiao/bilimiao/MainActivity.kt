@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -23,10 +24,13 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
@@ -47,14 +51,18 @@ import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.start.StartFragment
+import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
+import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -100,7 +108,7 @@ class MainActivity
     val anotherNav: NavHostFragment
         get() = if (!ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
 
-    //指示器，指示新页面该出现的地方
+    // 指示器，指示新页面该出现的地方
     val pointerNav: NavHostFragment get() {
         return if (ui.root.subContentShown) {
             if (ui.root.pointerExchanged == ui.root.contentExchanged) {
@@ -192,7 +200,7 @@ class MainActivity
         navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-        MainNavGraph.createGraph(navController, MainNavGraph.dest.main)
+        MainNavGraph.createGraph(navController, MainNavGraph.dest.compose)
         navController.addOnDestinationChangedListener(this)
         navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
 
@@ -222,6 +230,7 @@ class MainActivity
 
     private fun initAppBar() {
         ui.mAppBar.onBackClick = this.onBackClick
+        ui.mAppBar.onOpenMenuClick = this.onOpenMenuClick
         ui.mAppBar.onBackLongClick = this.onBackLongClick
         ui.mAppBar.onMenuItemClick = {
             if (it.prop.action == MenuActions.search) {
@@ -320,7 +329,7 @@ class MainActivity
         destination: NavDestination,
         arguments: Bundle?
     ) {
-        ui.mAppBar.canBack = destination.id != MainNavGraph.dest.main
+//        ui.mAppBar.canBack = destination.id != MainNavGraph.dest.main
 //        ui.mAppBar.cleanProp()
 
         //将焦点给新页面
@@ -347,8 +356,8 @@ class MainActivity
     }
 
     fun notifyFocusChanged() {
-        ui.mAppBar.canBack =
-            currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
+//        ui.mAppBar.canBack =
+//            currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
         ui.mAppBar.showPointer = ui.root.subContentShown
         ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
         notifyConfigChanged()
@@ -368,7 +377,10 @@ class MainActivity
             ui.mAppBar.setProp {
                 title = config.title
                 menus = config.getMenuItems()
+                isNavigationMenu = config.menu?.checkable == true
+                navigationKey = config.menu?.checkedKey ?: 0
             }
+            ui.mAppBar.canBack =  config.menu?.checkable != true
             ui.root.slideUpBottomAppBar()
         }
         leftFragment.setConfig(config.search)
@@ -378,8 +390,12 @@ class MainActivity
         return currentNav.navController.popBackStack(MainNavGraph.dest.main, false)
     }
 
-    val onBackClick = View.OnClickListener {
+    private val onBackClick = View.OnClickListener {
         onBackPressed()
+    }
+
+    private val onOpenMenuClick = View.OnClickListener {
+        ui.root.openDrawer()
     }
 
     private val onBackLongClick = View.OnLongClickListener {
@@ -580,7 +596,12 @@ class MainActivity
                     val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
                     val isComposePage = arguments.getBoolean(SearchActivity.KEY_IS_COMPOSE_PAGE, false)
                     if (isComposePage) {
-                        pointerNav.navController.navigateToCompose(pageUrl)
+                        val composeEntry = arguments.getInt(SearchActivity.KEY_COMPOSE_ENTRY, 0)
+                        val composeParam = arguments.getString(SearchActivity.KEY_COMPOSE_PARAM, "")
+                        pointerNav.navController.navigateToCompose(
+                            BilimiaoPageRoute.Entry.entries[composeEntry],
+                            composeParam
+                        )
                     } else {
                         val navOptions = NavOptions.Builder()
                             .setEnterAnim(R.anim.miao_fragment_open_enter)
@@ -693,7 +714,7 @@ class MainActivity
     }
 
     private fun onHostNavBack(): Boolean {
-        if (ui.mAppBar.canBack) {
+//        if (ui.mAppBar.canBack) {
             val currentDestinationId = currentNav.navController.currentDestination?.id
             if (currentDestinationId == MainNavGraph.dest.compose) {
                 (currentNav.childFragmentManager.fragments.last()
@@ -702,9 +723,9 @@ class MainActivity
             }
             currentNav.navController.popBackStack()
             return true
-        } else {
-            return false
-        }
+//        } else {
+//            return false
+//        }
     }
 
     override fun onBackPressed() {
@@ -718,7 +739,7 @@ class MainActivity
         if (bottomSheetDelegate.onBackPressed()) {
             return
         }
-        if (basePlayerDelegate.onBackPressed()) {
+        if (ui.root.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
         if (onHostNavBack()) {

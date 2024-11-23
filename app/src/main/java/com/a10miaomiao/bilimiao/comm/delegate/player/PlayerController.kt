@@ -15,6 +15,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuSettingPage
@@ -549,7 +550,7 @@ class PlayerController(
         val nav = Navigation.findNavController(
             activity, R.id.nav_bottom_sheet_fragment
         )
-        nav.navigateToCompose(SendDanmakuPage())
+        nav.navigateToCompose(BilimiaoPageRoute.Entry.SendDanmaku)
     }
 
     fun holdUpPlayer(view: View) {
@@ -581,7 +582,7 @@ class PlayerController(
 
             R.id.video_setting -> {
                 val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                nav.navigateToCompose(VideoSettingPage())
+                nav.navigateToCompose(BilimiaoPageRoute.Entry.VideoSetting)
             }
 
             R.id.danmuku_setting -> {
@@ -591,9 +592,10 @@ class PlayerController(
                 } else {
                     SettingPreferences.DanmakuSmallMode.name
                 }
-                nav.navigateToCompose(DanmakuDisplaySettingPage()) {
-                    name set tabName
-                }
+                nav.navigateToCompose(
+                    BilimiaoPageRoute.Entry.DanmakuDisplaySetting,
+                    tabName
+                )
             }
 
             R.id.scale_1,

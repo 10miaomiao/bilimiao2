@@ -24,17 +24,17 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberDI
 import org.kodein.di.instance
+import kotlinx.serialization.Serializable
 
-
+@Serializable
 class TestPage : ComposePage() {
-    override val route: String
-        get() = "test"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: TestPageViewModel = diViewModel()
         TestPageContent(viewModel)
     }
+
 }
 
 private class TestPageViewModel(

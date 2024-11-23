@@ -58,6 +58,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
@@ -66,12 +67,11 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.max
 
+@Serializable
 class PlayListPage : ComposePage() {
-    override val route: String
-        get() = "playlist"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: PlayListPageViewModel = diViewModel()
         PlayListPageContent(viewModel)
     }

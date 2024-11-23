@@ -41,21 +41,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class DownloadBangumiCreatePage : ComposePage() {
-
-    val id = stringPageArg("id")
-    override val route: String
-        get() = "download/bangumi/create?id=${id}"
+@Serializable
+class DownloadBangumiCreatePage(
+    private val id: String,
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: DownloadBangumiCreatePageViewModel = diViewModel()
-        val id = navEntry.arguments?.get(id) ?: ""
         LaunchedEffect(id) {
             viewModel.loadEpisodeList(id)
         }

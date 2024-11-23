@@ -31,7 +31,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
@@ -51,18 +50,18 @@ import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 
+@Serializable
 class BangumiFollowPage : ComposePage() {
-    override val route: String
-        get() = "bangumi/follow"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: BangumiFollowPageViewModel = diViewModel()
         BangumiFollowPageContent(viewModel)
     }
@@ -155,9 +154,9 @@ private class BangumiFollowPageViewModel(
 
     fun toDetailPage(item: MyBangumiInfo) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(BangumiDetailPage()) {
-            id set item.season_id
-        }
+        nav.navigate(BangumiDetailPage(
+            id = item.season_id,
+        ))
     }
 
     fun changeFollowStatus(

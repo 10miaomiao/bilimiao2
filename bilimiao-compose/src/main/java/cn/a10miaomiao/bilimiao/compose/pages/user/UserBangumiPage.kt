@@ -22,10 +22,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
-import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
-import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
@@ -56,23 +53,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-class UserBangumiPage : ComposePage() {
+@Serializable
+data class UserBangumiPage(
+    private val mid: String,
+) : ComposePage() {
 
-    val id = stringPageArg("id")
-
-    override val route: String
-        get() = "user/${id}/bangumi"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val vmid = navEntry.arguments?.get(id) ?: ""
-        val viewModel = diViewModel(key = vmid) {
-            UserBangumiPageViewModel(it, vmid)
+    override fun Content() {
+        val viewModel = diViewModel(key = mid) {
+            UserBangumiPageViewModel(it, mid)
         }
         UserBangumiPageContent(viewModel)
     }
@@ -149,9 +145,7 @@ private class UserBangumiPageViewModel(
 
     fun toBangumiDetail(item: SpaceInfo.SeasonItem) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(BangumiDetailPage()) {
-            this.id set item.param
-        }
+        nav.navigate(BangumiDetailPage(id = item.param))
     }
 }
 

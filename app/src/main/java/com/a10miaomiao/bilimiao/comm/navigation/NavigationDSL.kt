@@ -7,6 +7,7 @@ import android.view.View
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import com.a10miaomiao.bilimiao.MainActivity
@@ -30,39 +31,30 @@ fun NavController.tryPopBackStack(): Boolean {
 
 @SuppressLint("RestrictedApi")
 fun NavController.navigateToCompose(
-    url: String,
+    entry: BilimiaoPageRoute.Entry,
+    param: String = "",
     navOptions: NavOptions? = null,
 ) {
     val curFragment = (context as? MainActivity)
         ?.getPrimaryNavigationFragment(this)
     if (curFragment is ComposeFragment) {
         val composeNav = curFragment.composeNav
-        val arguments = composeNav.currentBackStackEntry?.arguments
-        val intent = arguments?.getParcelable<Intent>(NavController.KEY_DEEP_LINK_INTENT)
-        val curUrl = intent?.data?.toString()
-        if (curUrl != null && curUrl == NavDestination.createRoute(url)) {
-            return
-        }
-        composeNav.navigate(url)
+        val composePage = BilimiaoPageRoute.getEntryRoute(entry, param)
+//        val arguments = composeNav.currentBackStackEntry?.arguments
+//        val intent = arguments?.getParcelable<Intent>(NavController.KEY_DEEP_LINK_INTENT)
+//        val curUrl = intent?.data?.toString()
+//        if (curUrl != null && curUrl == NavDestination.createRoute(url)) {
+//            return
+//        }
+        composeNav.navigate(composePage)
         return
     }
     navigate(
         ComposeFragmentNavigatorBuilder.actionId,
-        ComposeFragmentNavigatorBuilder.createArguments(url),
+        ComposeFragmentNavigatorBuilder.createArguments(entry, param),
         navOptions,
     )
 }
-
-fun NavController.navigateToCompose(
-    page: ComposePage,
-    navOptions: NavOptions? = null,
-) = navigateToCompose(page.url(), navOptions,)
-
-inline fun <T : ComposePage> NavController.navigateToCompose(
-    page: T,
-    navOptions: NavOptions? = null,
-    initArgs: T.() -> Unit,
-) = navigateToCompose(page.also(initArgs), navOptions)
 
 fun Activity.openSearch(view: View) {
     val searchConfig = (this as? MainActivity)?.pageConfig?.search

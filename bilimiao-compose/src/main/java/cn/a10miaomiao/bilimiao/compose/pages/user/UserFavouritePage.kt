@@ -54,18 +54,16 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.compose.rememberInstance
 
-class UserFavouritePage : ComposePage() {
-
-    val id = stringPageArg("mid")
-
-    override val route: String
-        get() = "user/${id}/favourite"
+@Serializable
+data class UserFavouritePage(
+    private val mid: String,
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val mid = navEntry.arguments?.get(id) ?: ""
+    override fun Content() {
         val viewModel: UserFavouriteViewModel = diViewModel {
             UserFavouriteViewModel(it, mid)
         }

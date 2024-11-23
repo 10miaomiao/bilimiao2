@@ -11,7 +11,6 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -22,9 +21,6 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelLazy
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -32,20 +28,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
-import cn.a10miaomiao.bilimiao.compose.common.LocalFragment
-import cn.a10miaomiao.bilimiao.compose.common.LocalNavController
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
-import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigInfo
-import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
-import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -59,6 +51,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
 
     companion object {
         const val KEY_URL = "url"
+        const val KEY_ENTRY = "entry"
+        const val KEY_PARAM = "param"
 
         var id: Int = 0
             private set
@@ -77,6 +71,14 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                     type = NavType.StringType
                     nullable = true
                 }
+                argument(KEY_ENTRY) {
+                    type = NavType.IntType
+                    defaultValue = 0
+                }
+                argument(KEY_PARAM) {
+                    type = NavType.StringType
+                    nullable = true
+                }
                 deepLink("bilimiao://compose?url={url}")
             }
         }
@@ -86,6 +88,16 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         ): Bundle {
             return bundleOf(
                 KEY_URL to url
+            )
+        }
+
+        fun createArguments(
+            entry: BilimiaoPageRoute.Entry,
+            param: String,
+        ): Bundle {
+            return bundleOf(
+                KEY_ENTRY to entry.ordinal,
+                KEY_PARAM to param,
             )
         }
     }
@@ -126,14 +138,19 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val arguments = requireArguments()
+        val entry = arguments.getInt(KEY_ENTRY, 0)
+        val param = arguments.getString(KEY_PARAM, "")
+        val startRoute = BilimiaoPageRoute.getEntryRoute(
+            BilimiaoPageRoute.Entry.entries[entry],
+            param
+        )
         return ComposeView(requireContext()).apply {
             setContent {
                 val connection = rememberNestedScrollInteropConnection(container ?: LocalView.current)
                 composeNav = rememberNavController()
                 CompositionLocalProvider(
                     LocalContainerView provides container,
-                    LocalFragment provides this@ComposeFragment,
-                    LocalNavController provides composeNav,
                     LocalPageConfigInfo provides pageConfigInfo,
                     LocalOnBackPressedDispatcherOwner provides this@ComposeFragment,
                 ) {
@@ -148,7 +165,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                 ),
                                 previewer = { MyImagePreviewer(it) }
                             ) {
-                                MyNavHost(composeNav, connection, url)
+                                MyNavHost(composeNav, connection, startRoute)
                             }
                         }
                     }
@@ -163,6 +180,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
 
     fun onBackPressed(): Boolean {
         onBackPressedDispatcher.onBackPressed()
+        miaoLogger() debug "onBackPressed"
         return true
     }
 
@@ -184,26 +202,32 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
 fun MyNavHost(
     navController: NavHostController,
     connection: NestedScrollConnection,
-    startRoute: String,
+    startRoute: Any,
 ) {
+//    val startDestination = remember {
+//        if (startRoute == null) BlankPage()
+//        else HomePage()
+//    }
     Box(
         modifier = Modifier.nestedScroll(connection),
     ) {
         NavHost(
             navController = navController,
-            startDestination = BlankPage().url(),
+            startDestination = startRoute,
         ) {
-            PageRouteBuilder(this)
+            BilimiaoPageRoute(this)
                 .initRoute()
         }
     }
-    LaunchedEffect(startRoute) {
-        navController.navigate(startRoute) {
-            popUpTo(0) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-    }
+//    startRoute?.let {
+//        LaunchedEffect(it) {
+//            navController.navigate(it) {
+//                popUpTo(0) {
+//                    saveState = true
+//                }
+//                launchSingleTop = true
+//                restoreState = true
+//            }
+//        }
+//    }
 }

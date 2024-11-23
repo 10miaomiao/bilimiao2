@@ -1,57 +1,94 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
-import android.net.Uri
 import android.view.View
 import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Button
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Badge
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
-import cn.a10miaomiao.bilimiao.compose.common.navigation.tryPopBackStack
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
-import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.content.DynamicAllListContent
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.content.DynamicVideoListContent
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
+import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomePopularContent
+import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeRecommendContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.store.WindowStore
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-
+@Serializable
 class DynamicPage : ComposePage() {
-    override val route: String
-        get() = "dynamic"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: DynamicPageViewModel = diViewModel()
         DynamicPageContent(viewModel)
     }
+}
+
+private sealed class DynamicPageTab(
+    val id: Int,
+    val name: String,
+) {
+    @Composable
+    abstract fun PageContent()
+
+    data object All : DynamicPageTab(
+        id = 0,
+        name = "全部"
+    ) {
+        @Composable
+        override fun PageContent() {
+            DynamicAllListContent()
+        }
+    }
+
+    data object Video : DynamicPageTab(
+        id = 1,
+        name = "视频"
+    ) {
+        @Composable
+        override fun PageContent() {
+            DynamicVideoListContent()
+        }
+    }
+
 }
 
 private class DynamicPageViewModel(
@@ -60,24 +97,26 @@ private class DynamicPageViewModel(
 
     private val fragment by instance<Fragment>()
 
-    val i = mutableIntStateOf(1)
-    val i2 = MutableStateFlow(1)
+    val tabs = listOf<DynamicPageTab>(
+        DynamicPageTab.All,
+        DynamicPageTab.Video,
+    )
 
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.home -> {
-                val nav = fragment.findNavController()
-                val mainDestinationId = 100
-                val navOptions = NavOptions.Builder()
-                    .setLaunchSingleTop(true)
-                    .setPopUpTo(nav.graph.findStartDestination().id, false, true)
-                    .setRestoreState(true)
-                    .build()
-                defaultNavOptions
-                nav.navigate(Uri.parse("bilimiao://home"), navOptions)
+                val nav = fragment.findComposeNavController()
+                nav.navigate(HomePage(), navOptions {
+                    popUpTo(nav.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                })
             }
         }
     }
+
 }
 
 
@@ -90,21 +129,16 @@ private fun DynamicPageContent(
         menu = rememberMyMenu {
             checkable = true
             checkedKey = MenuKeys.dynamic
-            myItem {
-                key = MenuKeys.dynamic
-                title = "动态"
-                iconFileName = "ic_baseline_icecream_24"
-            }
+
             myItem {
                 key = MenuKeys.home
                 title = "首页"
                 iconFileName = "ic_baseline_home_24"
             }
             myItem {
-//                action = MenuActions.openMenu
-                key = MenuKeys.menu
-                title = "菜单"
-                iconFileName = "ic_baseline_menu_24"
+                key = MenuKeys.dynamic
+                title = "动态"
+                iconFileName = "ic_baseline_icecream_24"
             }
         }
     )
@@ -113,18 +147,59 @@ private fun DynamicPageContent(
         onMenuItemClick = viewModel::menuItemClick,
     )
 
+    val scope = rememberCoroutineScope()
+
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
-    val i2 = viewModel.i2.collectAsState().value
-
+    val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
     Column(
-        modifier = Modifier.padding(windowInsets.toPaddingValues())
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(i2.toString())
-        Button(onClick = { viewModel.i2.value++ }) {
-            Text("+")
+        TabRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(windowInsets.toPaddingValues(bottom = 0.dp)),
+            selectedTabIndex = pagerState.currentPage,
+            indicator = { positions ->
+                TabRowDefaults.PrimaryIndicator(
+                    Modifier.pagerTabIndicatorOffset(pagerState, positions),
+                )
+            },
+        ) {
+            viewModel.tabs.forEachIndexed { index, tab ->
+                Tab(
+                    text = {
+                        Text(
+                            text = tab.name,
+                            color = if (index == pagerState.currentPage) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onBackground
+                            }
+                        )
+                    },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
+                )
+            }
+        }
+        val saveableStateHolder = rememberSaveableStateHolder()
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            state = pagerState,
+        ) { index ->
+            saveableStateHolder.SaveableStateProvider(index) {
+                viewModel.tabs[index].PageContent()
+            }
         }
     }
 }

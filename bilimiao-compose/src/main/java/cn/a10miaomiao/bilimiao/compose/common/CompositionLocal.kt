@@ -18,20 +18,11 @@ internal val LocalContainerView = staticCompositionLocalOf<ViewGroup?> {
 @Composable
 fun localContainerView() = LocalContainerView.current
 
-
-internal val LocalFragment = staticCompositionLocalOf<Fragment> {
-    noLocalProvidedFor("LocalFragment")
+internal val LocalPageRouter = staticCompositionLocalOf<PageRouter> {
+    noLocalProvidedFor("LocalPageRouter")
 }
 
 @Composable
-fun localFragment() = LocalFragment.current
-
-
-internal val LocalNavController = staticCompositionLocalOf<NavHostController> {
-    noLocalProvidedFor("LocalFragment")
-}
-
-@Composable
-fun localNavController() = LocalNavController.current
+fun localPageRouter() = LocalPageRouter.current
 
 

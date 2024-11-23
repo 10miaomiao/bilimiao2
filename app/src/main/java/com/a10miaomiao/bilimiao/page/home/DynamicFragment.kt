@@ -8,6 +8,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._tag
@@ -89,15 +90,17 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
             when(type) {
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_ARCHIVE.value -> {
                     val nav = Navigation.findNavController(it)
-                    nav.navigateToCompose(UserSpacePage()) {
-                        this.id set id
-                    }
+                    nav.navigateToCompose(
+                        BilimiaoPageRoute.Entry.UserSpace,
+                        id,
+                    )
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
                     Navigation.findNavController(it)
-                        .navigateToCompose(BangumiDetailPage()) {
-                            this.id set id
-                        }
+                        .navigateToCompose(
+                            BilimiaoPageRoute.Entry.BangumiDetail,
+                            "id=${id}"
+                        )
                 }
                 else -> {
                     toast("未知跳转类型")
@@ -118,9 +121,10 @@ class DynamicFragment: RecyclerViewFragment(), DIAware {
                 }
                 bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
                     Navigation.findNavController(it)
-                        .navigateToCompose(BangumiDetailPage()) {
-                            this.id set item.dynamicContent.id
-                        }
+                        .navigateToCompose(
+                            BilimiaoPageRoute.Entry.BangumiDetail,
+                            "id=${item.dynamicContent.id}"
+                        )
                 }
                 else -> {
                     toast("未知跳转类型")

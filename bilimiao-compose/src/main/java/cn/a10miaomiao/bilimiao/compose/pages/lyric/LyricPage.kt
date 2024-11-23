@@ -63,18 +63,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import kotlin.coroutines.coroutineContext
 
+@Serializable
 class LyricPage :ComposePage(){
-    override val route: String
-        get() = "lyric"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: LyricPageViewModel = diViewModel()
         LyricPageContent(viewModel)
     }

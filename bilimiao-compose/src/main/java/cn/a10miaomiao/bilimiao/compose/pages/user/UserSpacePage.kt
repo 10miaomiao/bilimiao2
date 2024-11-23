@@ -74,24 +74,22 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.compose.rememberInstance
 import kotlin.math.roundToInt
 
-class UserSpacePage : ComposePage() {
-
-    val id = stringPageArg("id")
-
-    override val route: String
-        get() = "user/${id}/space"
+@Serializable
+data class UserSpacePage(
+    val id: String,
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val vmid = navEntry.arguments?.get(id) ?: ""
-        val archiveViewModel = diViewModel(key = "archive$vmid") {
-            UserArchiveViewModel(it, vmid)
+    override fun Content() {
+        val archiveViewModel = diViewModel(key = "archive$id") {
+            UserArchiveViewModel(it, id)
         }
         val viewModel = diViewModel() {
-            UserSpaceViewModel(it, vmid, archiveViewModel)
+            UserSpaceViewModel(it, id, archiveViewModel)
         }
 //        AnimatedContent()
         UserSpacePageContent(viewModel, archiveViewModel)

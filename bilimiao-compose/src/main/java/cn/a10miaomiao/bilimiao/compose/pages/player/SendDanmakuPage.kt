@@ -47,17 +47,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+@Serializable
 class SendDanmakuPage : ComposePage() {
-    override val route: String
-        get() = "player/danmaku/send"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: SendDanmakuViewModel = diViewModel()
         SendDanmakuPageContent(viewModel)
     }

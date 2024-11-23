@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -27,6 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
@@ -36,13 +36,11 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-
+@Serializable
 class DanmakuSettingPage : ComposePage() {
-    override val route: String
-        get() = "setting/danmaku"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: DanmakuSettingPageViewModel = diViewModel()
         DanmakuSettingPageContent(viewModel)
     }
@@ -59,9 +57,9 @@ private class DanmakuSettingPageViewModel(
         name: String,
     ) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(DanmakuDisplaySettingPage()) {
-            this.name set name
-        }
+        nav.navigate(DanmakuDisplaySettingPage(
+            name = name
+        ))
     }
 
     fun defaultDisplayClick() {

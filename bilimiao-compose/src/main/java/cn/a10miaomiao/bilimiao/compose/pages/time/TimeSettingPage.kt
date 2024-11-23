@@ -25,18 +25,18 @@ import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.util.*
 
+@Serializable
 class TimeSettingPage : ComposePage() {
-    override val route: String
-        get() = "time/setting"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel = diViewModel<TimeSettingPageViewMode>()
         TimeSettingPageContent(viewModel)
     }

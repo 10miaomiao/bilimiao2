@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
@@ -286,9 +285,7 @@ private class TagFollowContentModel(
 
     fun toUserDetailPage(id: String) {
         val nav = fragment.findComposeNavController()
-        nav.navigate(UserSpacePage()) {
-            this.id set id
-        }
+        nav.navigate(UserSpacePage(id))
     }
 }
 

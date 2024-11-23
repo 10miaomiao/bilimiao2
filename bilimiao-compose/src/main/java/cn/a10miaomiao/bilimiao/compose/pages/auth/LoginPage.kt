@@ -30,7 +30,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
@@ -51,6 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -60,19 +60,18 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+@Serializable
 class LoginPage : ComposePage() {
-    override val route: String
-        get() = "auth/login"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: LoginPageViewModel = diViewModel()
         LoginPageContent(viewModel)
     }
 
 }
 
-internal class LoginPageViewModel(
+private class LoginPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
 
@@ -151,11 +150,11 @@ internal class LoginPageViewModel(
                                     && params.containsKey("request_id")
                                     && params.containsKey("source")
                                 ) {
-                                    nav.navigate(TelVerifyPage()) {
-                                        code set params["tmp_token"]!!
-                                        requestId set params["request_id"]!!
-                                        source set params["source"]!!
-                                    }
+                                    nav.navigate(TelVerifyPage(
+                                        code = params["tmp_token"]!!,
+                                        requestId = params["request_id"]!!,
+                                        source = params["source"]!!,
+                                    ))
                                 } else {
                                     val intent = Intent(Intent.ACTION_VIEW)
                                     intent.data = Uri.parse(loginInfo.url)
@@ -276,7 +275,7 @@ internal class LoginPageViewModel(
 }
 
 @Composable
-internal fun LoginPageContent(
+private fun LoginPageContent(
     viewModel: LoginPageViewModel
 ) {
     PageConfig(title = "登录BILIBILI")

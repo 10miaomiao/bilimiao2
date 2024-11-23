@@ -2,6 +2,10 @@ package com.a10miaomiao.bilimiao.widget.scaffold.ui
 
 import android.animation.*
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.RectShape
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
+import com.a10miaomiao.bilimiao.widget.scaffold.MenuCheckableItemView
 import com.a10miaomiao.bilimiao.widget.scaffold.MenuItemView
 import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
@@ -54,7 +59,7 @@ class AppBarVerticalUi(
         return ObjectAnimator.ofPropertyValuesHolder(this, trY, trAlpha, trX)
     }
 
-    val mNavigationMemuLayout = horizontalLayout {
+    val mNavigationMenuLayout = horizontalLayout {
         gravity = Gravity.CENTER_HORIZONTAL
         val layoutTransition = LayoutTransition()
 
@@ -78,22 +83,23 @@ class AppBarVerticalUi(
     }
 
     @OptIn(InternalSplittiesApi::class)
-    override val root = frameLayout {
+    private val mNavigationScroller = view<HorizontalScrollView> {
+        scrollBarSize = 0
+        addView(
+            mNavigationMenuLayout, lParams {
+                width = matchParent
+                height = mMenuHeight + mTitleHeight
+            }
+        )
+    }
 
+    override val root = frameLayout {
         addView(mTitle, lParams {
             width = matchParent
             height = mTitleHeight
         })
         addView(
-            view<HorizontalScrollView> {
-                scrollBarSize = 0
-                addView(
-                    mNavigationMemuLayout, lParams {
-                        width = matchParent
-                        height = mMenuHeight + mTitleHeight
-                    }
-                )
-            },
+            mNavigationScroller,
             lParams {
                 gravity = Gravity.CENTER_HORIZONTAL
                 width = wrapContent
@@ -108,20 +114,65 @@ class AppBarVerticalUi(
         if (prop != null) {
             mTitle.text = (prop.title ?: "").replace("\n", " ")
             val menus = mutableListOf<MenuItemPropInfo>()
-            prop.navigationIcon?.let {
+            prop.navigationButtonIcon?.let {
+                val buttonKey = prop.navigationButtonKey
+                val buttonTitle = when(buttonKey) {
+                    MenuKeys.menu -> "菜单"
+                    else ->  "返回"
+                }
                 menus.add(
                     MenuItemPropInfo(
-                        key = MenuKeys.back,
-                        title = "返回",
-                        iconResource = com.a10miaomiao.bilimiao.R.drawable.ic_back_24dp
+                        key = buttonKey,
+                        title = buttonTitle,
+                        iconDrawable = it
                     )
                 )
             }
-            prop.menus?.let { menus.addAll(it.reversed()) }
+            prop.menus?.let {
+                if (prop.isNavigationMenu) menus.addAll(it)
+                else menus.addAll(it.reversed())
+            }
             if (menus.isEmpty()) {
-                mNavigationMemuLayout.removeAllViews()
+                mNavigationMenuLayout.removeAllViews()
+            } else if (prop.isNavigationMenu) {
+                // 导航栏
+                mNavigationMenuLayout.apply {
+                    var menuViewIndex = 0
+                    menus.forEachIndexed { index, itemProp ->
+                        val i = indexOfMenuItemViewByKey(itemProp.key, menuViewIndex)
+                        val menuItemView = getChildAt(i) as? MenuCheckableItemView
+                        val isChecked = prop.navigationKey == itemProp.key
+                        if (menuItemView == null) {
+                            val view = newMenuCheckableItemView(ctx, itemProp)
+                            view.checked = isChecked
+                            addView(
+                                view,
+                                menuViewIndex,
+                                lParams(wrapContent, matchParent) {
+                                    horizontalMargin = dip(10)
+                                }
+                            )
+//                            view.startAnimation(translateMenuItemAniShow)
+                            menuViewIndex++
+                        } else {
+                            menuItemView.prop = itemProp
+                            menuItemView.checked = isChecked
+                            if (i > menuViewIndex) {
+                                removeViews(menuViewIndex, i - menuViewIndex)
+                            }
+                            menuViewIndex++
+                        }
+                    }
+                    if (childCount > menuViewIndex) {
+                        removeViews(
+                            menuViewIndex,
+                            childCount - menuViewIndex
+                        )
+                    }
+                }
             } else {
-                mNavigationMemuLayout.apply {
+                // 正常栏
+                mNavigationMenuLayout.apply {
                     var menuViewIndex = 0
                     menus.forEachIndexed { index, prop ->
                         val i = indexOfMenuItemViewByKey(prop.key, menuViewIndex)
@@ -171,7 +222,19 @@ class AppBarVerticalUi(
     ) = MenuItemView(context).apply {
         orientation = LinearLayout.VERTICAL
         minimumWidth = dip(60)
-        setBackgroundResource(config.selectableItemBackgroundBorderless)
+        setOnClickListener(menuItemClick)
+        if (data.key == MenuKeys.back) {
+            setOnLongClickListener(menuItemLongClick)
+        }
+        prop = data
+    }
+
+    private fun newMenuCheckableItemView(
+        context: Context,
+        data: MenuItemPropInfo,
+    ) = MenuCheckableItemView(context).apply {
+        orientation = LinearLayout.VERTICAL
+        minimumWidth = dip(60)
         setOnClickListener(menuItemClick)
         if (data.key == MenuKeys.back) {
             setOnLongClickListener(menuItemLongClick)
@@ -227,18 +290,18 @@ class AppBarVerticalUi(
         setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                mNavigationMemuLayout.visibility = View.GONE
+                mNavigationMenuLayout.visibility = View.GONE
             }
             override fun onAnimationRepeat(animation: Animation) {}
         })
     }
 
     fun showMenu() {
-        mNavigationMemuLayout.startAnimation(translateAniShow)
-        mNavigationMemuLayout.visibility = View.VISIBLE
+        mNavigationMenuLayout.startAnimation(translateAniShow)
+        mNavigationMenuLayout.visibility = View.VISIBLE
     }
 
     fun hideMenu() {
-        mNavigationMemuLayout.startAnimation(translateAniHide)
+        mNavigationMenuLayout.startAnimation(translateAniHide)
     }
 }

@@ -26,6 +26,7 @@ class AppBarView @JvmOverloads constructor(
     var showPointer = false
     var pointerOrientation = true
     var onBackClick: View.OnClickListener? = null
+    var onOpenMenuClick: View.OnClickListener? = null
     var onBackLongClick: View.OnLongClickListener? = null
     var onMenuItemClick: ((MenuItemView) -> Unit)? = null
     var onPointerClick: View.OnClickListener? = null
@@ -58,18 +59,23 @@ class AppBarView @JvmOverloads constructor(
             updateProp()
         }
 
-    private val backClick = OnClickListener { view ->
-        onBackClick?.onClick(view)
-
+    private val navigationClick = OnClickListener { view ->
+        if (canBack) {
+            onBackClick?.onClick(view)
+        } else {
+            onOpenMenuClick?.onClick(view)
+        }
     }
-    private val backLongClick = OnLongClickListener { view ->
+    private val navigationLongClick = OnLongClickListener { view ->
         onBackLongClick?.onLongClick(view) ?: false
     }
 
     private val menuItemClick = OnClickListener { view ->
         (view as? MenuItemView)?.let {
             if (it.prop.key == MenuKeys.back) {
-                onBackClick?.onClick(view)
+                onBackClick?.onClick(it)
+            } else if (it.prop.key == MenuKeys.menu) {
+                onOpenMenuClick?.onClick(it)
             } else {
                 onMenuItemClick?.invoke(it)
             }
@@ -110,8 +116,8 @@ class AppBarView @JvmOverloads constructor(
                 context,
                 menuItemClick = menuItemClick,
                 menuItemLongClick = menuItemLongClick,
-                backClick = backClick,
-                backLongClick = backLongClick,
+                navigationClick = navigationClick,
+                navigationLongClick = navigationLongClick,
                 enableSubContent = enableSubContent,
                 pointerClick = pointerClick,
                 pointerLongClick = pointerLongClick,
@@ -123,8 +129,6 @@ class AppBarView @JvmOverloads constructor(
                 context,
                 menuItemClick = menuItemClick,
                 menuItemLongClick = menuItemLongClick,
-//                backClick = backClick,
-//                backLongClick = backLongClick,
             )
         }
     }
@@ -174,9 +178,13 @@ class AppBarView @JvmOverloads constructor(
     private fun newProp (): PropInfo {
         val prop = PropInfo()
         val theme = context.theme
-        if (canBack) {
+        if (canBack && !prop.isNavigationMenu) {
 //            prop.onNavigationClick = onBackClick
-            prop.navigationIcon = resources.getDrawable(R.drawable.ic_back_24dp, theme)
+            prop.navigationButtonIcon = resources.getDrawable(R.drawable.ic_back_24dp, theme)
+            prop.navigationButtonKey = MenuKeys.back
+        } else {
+            prop.navigationButtonIcon = resources.getDrawable(R.drawable.ic_baseline_menu_24, theme)
+            prop.navigationButtonKey = MenuKeys.menu
         }
         if (showPointer) {
             prop.navigationPointerIcon = resources.getDrawable(R.drawable.ic_pointer_24dp, theme)
@@ -203,11 +211,14 @@ class AppBarView @JvmOverloads constructor(
 
     class PropInfo (
         var title: String? = null,
-        var navigationIcon: Drawable? = null,
+        var navigationButtonIcon: Drawable? = null,
+        var navigationButtonKey: Int = 0,
         var navigationPointerIcon: Drawable? = null,
         var pointerIconOrientation: Boolean = true,
         var navigationExchangeIcon: Drawable? = null,
         var menus: List<MenuItemPropInfo>? = null,
+        var isNavigationMenu: Boolean = false,
+        var navigationKey: Int = 0,
     )
 
 }

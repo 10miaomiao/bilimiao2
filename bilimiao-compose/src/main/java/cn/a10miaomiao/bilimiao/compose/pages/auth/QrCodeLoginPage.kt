@@ -52,18 +52,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
+@Serializable
 class QrCodeLoginPage : ComposePage() {
-    override val route: String
-        get() = "auth/qr_login"
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
-        val viewModel: QrCodeLoginPageViewModel = diViewModel()
+    override fun Content() {
+         val viewModel: QrCodeLoginPageViewModel = diViewModel()
         QrCodeLoginPageContent(viewModel)
     }
 

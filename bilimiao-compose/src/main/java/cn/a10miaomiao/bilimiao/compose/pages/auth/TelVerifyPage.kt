@@ -42,6 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -51,23 +52,16 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-class TelVerifyPage : ComposePage() {
-
-    val code = stringPageArg("code", "")
-
-    val requestId = stringPageArg("request_id", "")
-
-    val source = stringPageArg("source", "")
-
-    override val route: String
-        get() = "auth/tel_verify?code=${code}&request_id=${requestId}&source=${source}"
+@Serializable
+data class TelVerifyPage(
+    private val code: String = "",
+    private val requestId: String = "",
+    private val source: String = "",
+) : ComposePage() {
 
     @Composable
-    override fun AnimatedContentScope.Content(navEntry: NavBackStackEntry) {
+    override fun Content() {
         val viewModel: TelVerifyPageViewModel = diViewModel()
-        val code = navEntry.arguments?.get(code) ?: ""
-        val requestId = navEntry.arguments?.get(requestId) ?: ""
-        val source = navEntry.arguments?.get(source) ?: ""
         LaunchedEffect(code, requestId, source) {
             viewModel.code = code
             viewModel.requestId = requestId

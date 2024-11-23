@@ -23,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withStarted
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
@@ -115,6 +116,7 @@ import splitties.views.horizontalPadding
 import splitties.views.imageResource
 import splitties.views.padding
 import splitties.views.textColorResource
+import java.io.File
 
 
 class StartFragment : Fragment(), DIAware, MyPage {
@@ -274,10 +276,10 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val nav = (activity as? MainActivity)?.pointerNav?.navController
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
         if (playerState.sid.isNotBlank()) {
-            nav.navigateToCompose(BangumiDetailPage()) {
-                id set playerState.sid
-                epId set playerState.epid
-            }
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.BangumiDetail,
+                "id=${playerState.sid}&epid=${playerState.epid}"
+            )
             scaffoldView.closeDrawer()
         } else if (playerState.aid.isNotBlank()) {
             val args = VideoInfoFragment.createArguments(playerState.aid)
@@ -297,11 +299,12 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val userStore = viewModel.userStore
         if (userStore.isLogin()) {
             val mid = userStore.state.info?.mid ?: return@OnClickListener
-            nav.navigateToCompose(UserSpacePage()) {
-                id set mid.toString()
-            }
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.UserSpace,
+                param = mid.toString(),
+            )
         } else {
-            nav.navigateToCompose(LoginPage())
+            nav.navigateToCompose(BilimiaoPageRoute.Entry.Login)
         }
         scaffoldView.closeDrawer()
     }
@@ -312,7 +315,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val nav = (activity as? MainActivity)?.pointerNav?.navController
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
 //        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-        nav.navigateToCompose(PlayListPage())
+        nav.navigateToCompose(BilimiaoPageRoute.Entry.PlayList)
         scaffoldView.closeDrawer()
     }
 
@@ -320,7 +323,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
         val scaffoldView = requireActivity().getScaffoldView()
         val nav = (activity as? MainActivity)?.pointerNav?.navController
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
-        nav.navigateToCompose(MessagePage())
+        nav.navigateToCompose(BilimiaoPageRoute.Entry.Message)
         scaffoldView.closeDrawer()
     }
 
@@ -365,6 +368,7 @@ class StartFragment : Fragment(), DIAware, MyPage {
             ?: requireActivity().findNavController(R.id.nav_host_fragment)
         val scaffoldView = requireActivity().getScaffoldView()
         var pageUrl = item.pageUrl
+        var param = item.composeParam ?: ""
         if (item.isNeedAuth) {
             val userInfo = viewModel.userStore.state.info
             if (userInfo == null) {
@@ -372,11 +376,14 @@ class StartFragment : Fragment(), DIAware, MyPage {
                 return@OnItemClickListener
             }
             pageUrl = item.pageUrl
-                .replace("{mid}", userInfo.mid.toString())
+                ?.replace("{mid}", userInfo.mid.toString())
+                ?.replace("{name}", userInfo.name)
+            param = param.replace("{mid}", userInfo.mid.toString())
                 .replace("{name}", userInfo.name)
         }
         if (item.isComposePage) {
-            nav.navigateToCompose(pageUrl, navOptions)
+            val entry = item.composeEntry ?: return@OnItemClickListener
+            nav.navigateToCompose(entry, param)
             scaffoldView.closeDrawer()
         } else {
             nav.navigate(Uri.parse(pageUrl), navOptions)

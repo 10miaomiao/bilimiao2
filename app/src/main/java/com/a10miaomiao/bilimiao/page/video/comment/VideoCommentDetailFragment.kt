@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
@@ -264,9 +265,10 @@ class VideoCommentDetailFragment : RecyclerViewFragment(), DIAware, MyPage {
         val id = it.tag
         if (id != null && id is String) {
             val nav = Navigation.findNavController(it)
-            nav.navigateToCompose(UserSpacePage()) {
-                this.id set id
-            }
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.UserSpace,
+                id,
+            )
         }
     }
 

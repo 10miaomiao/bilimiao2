@@ -8,6 +8,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import com.a10miaomiao.bilimiao.MainNavGraph
@@ -82,9 +83,10 @@ class UpperResultFragment : BaseResultFragment(), DIAware {
     private val handleItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.list.data[position]
         val nav = Navigation.findNavController(view)
-        nav.navigateToCompose(UserSpacePage()) {
-            this.id set item.param
-        }
+        nav.navigateToCompose(
+            BilimiaoPageRoute.Entry.UserSpace,
+            item.param
+        )
     }
 
     val itemUi = miaoBindingItemUi<SearchUpperInfo> { item, index ->

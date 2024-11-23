@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.base.navigate
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
@@ -112,9 +111,7 @@ private class LikeMessageContentModel(
     fun toUserPage(item: LikeMessageInfo) {
         val mid = item.users[0].mid
         fragment.findComposeNavController()
-            .navigate(UserSpacePage()) {
-                id set mid.toString()
-            }
+            .navigate(UserSpacePage(mid.toString()))
     }
 
     fun toDetailPage(item: LikeMessageInfo) {

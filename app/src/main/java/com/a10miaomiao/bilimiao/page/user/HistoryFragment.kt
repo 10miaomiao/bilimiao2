@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import bilibili.app.interfaces.v1.CursorItem
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
@@ -153,9 +154,10 @@ class HistoryFragment : Fragment(), DIAware, MyPage {
                     .navigate(VideoInfoFragment.actionId, args)
             }
             "pgc" -> {
-                nav.navigateToCompose(BangumiDetailPage()) {
-                    id set item.kid.toString()
-                }
+                nav.navigateToCompose(
+                    BilimiaoPageRoute.Entry.BangumiDetail,
+                    "id=${item.kid}"
+                )
             }
             else -> {
                 toast("未知跳转类型")
