@@ -67,8 +67,8 @@ class RegionDetailsFragment : RecyclerViewFragment(), DIAware {
         lifecycle.coroutineScope.launchWhenResumed {
             timeSettingStore.stateFlow.collect {
                 if (
-                    viewModel.timeFrom.diff(it.timeFrom)
-                    || viewModel.timeTo.diff(it.timeTo)
+                    viewModel.timeFrom != it.timeFrom
+                    || viewModel.timeTo != it.timeTo
                     || viewModel.rankOrder != it.rankOrder
                 ) {
                     viewModel.timeFrom = it.timeFrom

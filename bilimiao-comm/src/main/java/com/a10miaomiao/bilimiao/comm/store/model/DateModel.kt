@@ -26,11 +26,14 @@ class DateModel() {
         return this
     }
 
-    fun diff(value: DateModel) = when {
-        value.year != year -> true
-        value.month != month -> true
-        value.date != date -> true
-        else -> false
+    override fun equals(other: Any?): Boolean {
+        if (other is DateModel
+            && other.year == year
+            && other.month == month
+            && other.date == date) {
+            return true
+        }
+        return false
     }
 
 //        fun save(context: Context, type: String) {

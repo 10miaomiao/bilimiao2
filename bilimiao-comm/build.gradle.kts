@@ -96,6 +96,7 @@ dependencies {
     implementation(Libraries.datastore)
     implementation(Libraries.browser)
 
+    implementation(Libraries.kotlinxSerializationJson)
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi)
     implementation(Libraries.glide)

@@ -1,8 +1,11 @@
 package com.a10miaomiao.bilimiao.comm.entity.miao
 
+import kotlinx.serialization.Serializable
+
 /**
  * 视频推荐（广告）
  */
+@Serializable
 data class MiaoAdInfo (
     var code: Int,
     var msg: String,

@@ -1,12 +1,12 @@
-package com.a10miaomiao.bilimiao.store
+package com.a10miaomiao.bilimiao.comm.store
 
+import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a10miaomiao.bilimiao.R
+import com.a10miaomiao.bilimiao.comm.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
-import splitties.collections.forEachWithIndex
+import org.kodein.di.instance
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -34,6 +34,8 @@ class RegionStore(override val di: DI) :
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
+
+    private val activity: Activity by di.instance()
 
     private var networkTime = 0L
 
@@ -61,7 +63,7 @@ class RegionStore(override val di: DI) :
                 object : TypeToken<ResultInfo<List<RegionInfo>>>() {}.type
             )
             val data = result.data
-            data.forEachWithIndex(::regionIcon)
+            data.forEachIndexed(::regionIcon)
             setState {
                 regions = data.toMutableList()
             }

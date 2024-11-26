@@ -2,10 +2,14 @@ package com.a10miaomiao.bilimiao.comm.network
 
 import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -102,9 +106,20 @@ class MiaoHttp(var url: String? = null) {
 
         private val gson = Gson()
 
+        val kotlinJson = Json {  }
+
         fun <T> fromJson(json: String, typeOfT: Type): T {
             try {
                 return gson.fromJson(json, typeOfT)
+            } catch (e: IllegalStateException) {
+                miaoLogger().i("GSON解析出错", json)
+                throw e
+            }
+        }
+
+        fun <T> fromJson(json: String, deserializer: DeserializationStrategy<T>): T {
+            try {
+                return kotlinJson.decodeFromString(deserializer, json)
             } catch (e: IllegalStateException) {
                 miaoLogger().i("GSON解析出错", json)
                 throw e
@@ -135,6 +150,15 @@ class MiaoHttp(var url: String? = null) {
 
         inline fun <reified T> Response.gson(isLog: Boolean = false): T {
             return this.string().gson<T>(isLog)
+        }
+
+        inline fun <reified T> Response.json(isLog: Boolean = false): T {
+            val jsonStr = this.string()
+            if (isLog) {
+                miaoLogger() debug jsonStr
+            }
+            val deserializer = kotlinJson.serializersModule.serializer<T>()
+            return fromJson(jsonStr, deserializer)
         }
 
         const val GET = "GET"

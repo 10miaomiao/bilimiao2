@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.store.RegionStore
+import com.a10miaomiao.bilimiao.comm.store.RegionStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
