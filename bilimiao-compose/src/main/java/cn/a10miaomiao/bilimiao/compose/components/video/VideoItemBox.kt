@@ -26,10 +26,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.semantics.textSubstitution
+import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
@@ -63,33 +70,6 @@ fun VideoItemBox(
                 if (onClick == null) this
                 else clickable(onClick = onClick)
             }
-            .semantics(mergeDescendants = true) {
-                contentDescription = with(StringBuilder()) {
-                    if (!title.isNullOrBlank()) {
-                        append(title)
-                    }
-                    if (!upperName.isNullOrBlank()) {
-                        append(",")
-                        append("up主：$upperName")
-                    }
-                    if (!duration.isNullOrBlank()) {
-                        append(",")
-                        append("视频时长：$duration")
-                    }
-                    if (!playNum.isNullOrBlank()) {
-                        append(",")
-                        append("播放量：$playNum")
-                    }
-                    if (!playNum.isNullOrBlank()) {
-                        append(",")
-                        append("弹幕数：$damukuNum")
-                    }
-                    if (!remark.isNullOrBlank()) {
-                        append(",")
-                        append(remark)
-                    }
-                }.toString()
-            }
             .then(modifier)
     ) {
         if (pic != null) {
@@ -122,6 +102,9 @@ fun VideoItemBox(
                             text = duration,
                             color = Color.White,
                             style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.semantics {
+                                contentDescription = "视频时长：$duration"
+                            }
                         )
                     }
                 }
@@ -132,7 +115,8 @@ fun VideoItemBox(
             modifier = Modifier
                 .weight(1f)
                 .height(85.dp)
-                .padding(start = 5.dp),
+                .padding(start = 5.dp)
+                .zIndex(-1f), // 适配无障碍功能，优先播报视频标题
         ) {
             if (title != null) {
                 Text(
@@ -159,7 +143,10 @@ fun VideoItemBox(
                         contentDescription = null,
                     )
                     Text(
-                        modifier = Modifier.padding(start = 2.dp),
+                        modifier = Modifier.padding(start = 2.dp)
+                            .semantics {
+                                contentDescription = "up主：$upperName"
+                            },
                         text = upperName,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
@@ -190,7 +177,10 @@ fun VideoItemBox(
                         contentDescription = null,
                     )
                     Text(
-                        modifier = Modifier.padding(start = 2.dp),
+                        modifier = Modifier.padding(start = 2.dp)
+                            .semantics {
+                                contentDescription = "播放量：$playNum"
+                            },
                         text = NumberUtil.converString(playNum),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
@@ -203,7 +193,10 @@ fun VideoItemBox(
                         contentDescription = null,
                     )
                     Text(
-                        modifier = Modifier.padding(start = 2.dp),
+                        modifier = Modifier.padding(start = 2.dp)
+                            .semantics {
+                                contentDescription = "弹幕数：$damukuNum"
+                            },
                         text = NumberUtil.converString(damukuNum),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
