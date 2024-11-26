@@ -26,8 +26,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
@@ -93,7 +96,7 @@ fun MiniVideoItemBox(
                         modifier = Modifier.size(16.dp),
                         tint = Color.White,
                         imageVector = BilimiaoIcons.Common.Playnum,
-                        contentDescription = null,
+                        contentDescription = "播放量"
                     )
                     Text(
                         modifier = Modifier.padding(start = 2.dp),
@@ -106,7 +109,7 @@ fun MiniVideoItemBox(
                         modifier = Modifier.size(16.dp),
                         tint = Color.White,
                         imageVector = BilimiaoIcons.Common.Danmukunum,
-                        contentDescription = null,
+                        contentDescription = "弹幕数"
                     )
                     Text(
                         modifier = Modifier.padding(start = 2.dp),
@@ -118,7 +121,10 @@ fun MiniVideoItemBox(
                 Spacer(modifier = Modifier.weight(1f))
                 if (duration != null) {
                     Text(
-                        modifier = Modifier.padding(start = 2.dp),
+                        modifier = Modifier.padding(start = 2.dp)
+                            .semantics {
+                                contentDescription = "视频时长：$duration"
+                            },
                         text = duration,
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall,
@@ -131,7 +137,8 @@ fun MiniVideoItemBox(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp, vertical = 2.dp)
-                    .heightIn(min = 40.dp),
+                    .heightIn(min = 40.dp)
+                    .zIndex(-1f),
             ) {
                 Text(
                     text = title,
@@ -152,7 +159,7 @@ fun MiniVideoItemBox(
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     imageVector = BilimiaoIcons.Common.Upper,
-                    contentDescription = null,
+                    contentDescription = "UP主",
                 )
                 Text(
                     modifier = Modifier.padding(start = 2.dp),
