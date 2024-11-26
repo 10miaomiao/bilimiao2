@@ -3,7 +3,7 @@ package com.a10miaomiao.bilimiao.page.rank
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
-import com.a10miaomiao.bilimiao.store.RegionStore
+import com.a10miaomiao.bilimiao.comm.store.RegionStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance

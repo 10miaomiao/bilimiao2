@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.miao
 
+import kotlinx.serialization.Serializable
+
 
 /**
  * {“name”: "donate", "type": "pref", "title": "捐助",
@@ -15,6 +17,7 @@ package com.a10miaomiao.bilimiao.comm.entity.miao
 /**
  * 设置菜单
  */
+@Serializable
 data class MiaoSettingInfo(
     val type: String,
     val name: String,

@@ -1,10 +1,151 @@
 package cn.a10miaomiao.bilimiao.compose.pages.home.content
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Chip
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
+import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
+import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
+import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineRegionCard
+import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineTimeCard
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
+import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.store.RegionStore
+import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.store.WindowStore
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.compose.rememberInstance
+import org.kodein.di.instance
+
+private class HomeTimeMachineContentViewModel(
+    override val di: DI,
+) : ViewModel(), DIAware {
+
+    val fragment: Fragment by instance()
+
+    val timeSettingStore: TimeSettingStore by instance()
+    val regionStore: RegionStore by instance()
+    val userStore: UserStore by instance()
+
+    val regionList = regionStore.stateFlow.stateMap { it.regions }
+
+    val timeText = timeSettingStore.stateFlow.stateMap {
+        it.timeFrom.getValue("-") + " 至 " + it.timeTo.getValue("-")
+    }
+
+    val timeSeason = timeSettingStore.stateFlow.stateMap {
+        val month = it.timeFrom.month
+        if (month < 3) 0
+        else if (month < 6) 1
+        else if (month < 9) 2
+        else if (month < 12) 3
+        else 0
+    }
+
+    fun toRegionDetailPage(
+        region: RegionInfo,
+        initialIndex: Int,
+    ) {
+        val nav = fragment.findComposeNavController()
+        nav.navigate(TimeRegionDetailPage(
+            tid = region.tid,
+            name = region.name,
+            childIds = region.children.map { it.tid },
+            childNames = region.children.map { it.name },
+            initialIndex = initialIndex,
+        ))
+    }
+
+    fun openTimeSetting() {
+        BottomSheetNavigation.navigate(
+            fragment.requireActivity(),
+            entry = BilimiaoPageRoute.Entry.TimeSetting,
+            param = ""
+        )
+    }
+
+}
 
 @Composable
-internal fun HomeTimeMachineContent(
+internal fun HomeTimeMachineContent() {
+    val viewModel: HomeTimeMachineContentViewModel = diViewModel()
+    val windowStore: WindowStore by rememberInstance()
+    val windowState = windowStore.stateFlow.collectAsState().value
+    val windowInsets = windowState.getContentInsets(localContainerView())
 
-) {
+    val regionList by viewModel.regionList.collectAsState()
+    val timeText by viewModel.timeText.collectAsState()
+    val timeSeason by viewModel.timeSeason.collectAsState()
+
+    LazyVerticalStaggeredGrid(
+        modifier = Modifier.fillMaxSize(),
+        columns = StaggeredGridCells.Adaptive(300.dp),
+        contentPadding = windowInsets.toPaddingValues(
+            top = 0.dp
+        )
+    ) {
+        item() {
+            HomeTimeMachineTimeCard(
+                timeText,
+                timeSeason,
+                onClick = viewModel::openTimeSetting
+            )
+        }
+        items(regionList, { it.tid }, ) { region ->
+            HomeTimeMachineRegionCard(
+                region,
+                onClick = viewModel::toRegionDetailPage
+            )
+        }
+    }
 
 }

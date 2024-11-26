@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPageViewMode
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingViewMode
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import kotlin.math.abs
 
@@ -226,7 +226,7 @@ fun Header(
 
 @Composable
 internal fun CustomTime(
-    viewModel: TimeSettingPageViewMode
+    viewModel: TimeSettingViewMode
 ) {
     val customTime = viewModel.customTime.collectAsState()
     val timeFrom = customTime.value.timeFrom
@@ -328,7 +328,7 @@ internal fun CustomTime(
 
                             val status = if (_startTime == null) {
                                 TextBoxStatus.Enable
-                            } else if (!curTime.diff(_startTime)) {
+                            } else if (curTime == _startTime) {
                                 TextBoxStatus.Start
                             } else if (_endTime == null) {
                                 if (abs(_startTime.getGapCount(curTime)) > 30) {
@@ -336,7 +336,7 @@ internal fun CustomTime(
                                 } else {
                                     TextBoxStatus.Enable
                                 }
-                            } else if (!curTime.diff(_endTime)) {
+                            } else if (curTime == _endTime) {
                                 TextBoxStatus.End
                             } else {
                                 if (_startTime.getGapCount(curTime) > 0

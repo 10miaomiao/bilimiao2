@@ -46,6 +46,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
@@ -204,6 +205,7 @@ class BilimiaoPageRoute (
 
         // time
         composable<TimeSettingPage>()
+        composable<TimeRegionDetailPage>()
 
         // user
         composable<UserSpacePage>()
@@ -279,5 +281,4 @@ class BilimiaoPageRoute (
             page.Content()
         }
     }
-// 2822.62-2800=22.62
 }

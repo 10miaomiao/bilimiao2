@@ -60,7 +60,7 @@ dependencies {
     implementation(Libraries.navigationUi)
     implementation(Libraries.datastore)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(Libraries.kotlinxSerializationJson)
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi) // 依赖注入
     implementation(Libraries.kodeinDiCompose)

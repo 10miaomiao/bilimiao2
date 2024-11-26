@@ -8,11 +8,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPageViewMode
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingViewMode
 
 @Composable
 internal fun CurrentTime(
-    viewModel: TimeSettingPageViewMode
+    viewModel: TimeSettingViewMode
 ) {
     val currentTime = viewModel.currentTime.collectAsState()
     val timeFrom = currentTime.value.timeFrom

@@ -17,6 +17,7 @@ object Versions {
     const val media = "1.6.0"
     const val media3 = "1.4.1"
 
+    const val serialization = "1.7.3"
     const val accompanist = "0.35.0-alpha"
 
     //
@@ -70,6 +71,7 @@ object Libraries {
     const val accompanistAdaptive = "com.google.accompanist:accompanist-adaptive:${Versions.accompanist}"
 
     // 通用库
+    const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}"
     const val kotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
     const val kodeinDi = "org.kodein.di:kodein-di-framework-android-x:${Versions.kodein_di}"
     const val kodeinDiCompose = "org.kodein.di:kodein-di-framework-compose:${Versions.kodein_di}"

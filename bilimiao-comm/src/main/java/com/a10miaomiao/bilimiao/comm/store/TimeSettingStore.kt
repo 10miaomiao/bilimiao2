@@ -31,7 +31,18 @@ class TimeSettingStore(override val di: DI) :
         var timeTo: DateModel,
         var timeType: Int = TIME_TYPE_CURRENT,
         var rankOrder: String = "click"
-    )
+    ) {
+        fun getRankOrderKey(): Int {
+            return when (rankOrder) {
+                "click" -> 0
+                "scores" -> 1
+                "stow" -> 2
+                "coin" ->3
+                "dm" -> 4
+                else -> 0
+            }
+        }
+    }
 
     override val stateFlow = MutableStateFlow(State(
         timeFrom = DateModel(),
@@ -65,6 +76,12 @@ class TimeSettingStore(override val di: DI) :
             "coin" -> "硬币数"
             "dm" -> "弹幕数"
             else -> "播放数"
+        }
+    }
+
+    fun setRankOrder(key: Int) {
+        setState {
+            rankOrder = arrayOf("click", "scores", "stow", "coin", "dm")[key]
         }
     }
 
@@ -110,8 +127,8 @@ class TimeSettingStore(override val di: DI) :
     ) {
         if (
             tType != state.timeType
-            || state.timeFrom.diff(tFrom)
-            || state.timeTo.diff(tTo)
+            || state.timeFrom != tFrom
+            || state.timeTo != tTo
         ) {
             setState {
                 timeType= tType
