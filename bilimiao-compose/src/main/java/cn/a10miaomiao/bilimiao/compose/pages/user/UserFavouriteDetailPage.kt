@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavBackStackEntry
 import bilibili.polymer.app.search.v1.Item
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
 import kotlinx.serialization.Serializable
 
