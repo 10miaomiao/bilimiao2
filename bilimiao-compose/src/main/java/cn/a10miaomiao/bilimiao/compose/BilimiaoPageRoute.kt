@@ -35,6 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
+import cn.a10miaomiao.bilimiao.compose.pages.rank.RankPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.AboutPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuSettingPage
@@ -168,7 +169,16 @@ class BilimiaoPageRoute (
         composable<DynamicDetailPage>(
             deepLinks = listOf(
                 navDeepLink<DynamicDetailPage>(
-                    basePath = "bilibili://opus/detail/{id}"
+                    basePath = "bilibili://opus/detail"
+                )
+            )
+        )
+
+        // rank
+        composable<RankPage>(
+            deepLinks = listOf(
+                navDeepLink<RankPage>(
+                    basePath = "bilibili://rank"
                 )
             )
         )
@@ -238,7 +248,7 @@ class BilimiaoPageRoute (
     fun defaultPopEnterTransition(
         scope: AnimatedContentTransitionScope<NavBackStackEntry>
     ): @JvmSuppressWildcards EnterTransition? {
-        return materialFadeThroughIn(initialScale = 0.85f)
+        return materialFadeThroughIn(initialScale = 1.15f)
     }
 
     fun defaultPopExitTransition(

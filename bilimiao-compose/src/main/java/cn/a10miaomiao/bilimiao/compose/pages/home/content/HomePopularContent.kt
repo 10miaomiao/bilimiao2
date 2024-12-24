@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.home.content
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,7 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -164,6 +166,10 @@ private class HomePopularContentViewModel(
             )
     }
 
+    fun toPageByUrl(url: String) {
+        fragment.findComposeNavController()
+            .navigate(Uri.parse(url))
+    }
 
 }
 
@@ -177,7 +183,10 @@ private fun EntranceListBox(
         items(topEntranceList, { it.uri }) {
             Column(
                 modifier = Modifier.width(80.dp)
-                    .padding(top = 10.dp, bottom = 5.dp),
+                    .padding(top = 10.dp, bottom = 5.dp)
+                    .clickable {
+                        viewModel.toPageByUrl(it.uri)
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 GlideImage(
