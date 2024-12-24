@@ -5,7 +5,6 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.stringPageArg
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
 import com.a10miaomiao.bilimiao.comm.store.UserStore
