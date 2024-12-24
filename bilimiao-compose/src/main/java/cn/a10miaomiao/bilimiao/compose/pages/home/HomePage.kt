@@ -8,12 +8,21 @@ import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Badge
@@ -25,10 +34,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -38,6 +49,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -54,11 +66,9 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -66,6 +76,10 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -97,16 +111,22 @@ private sealed class HomePageTab(
     val id: Int,
     val name: String,
 ) {
+    protected val sharedFlow = MutableSharedFlow<HomePageAction>()
+
+    suspend fun emit(action: HomePageAction) {
+        sharedFlow.emit(action)
+    }
+
     @Composable
     abstract fun PageContent()
 
-    data object TimeMachine : HomePageTab(
+    data object TimeMachine: HomePageTab(
         id = 0,
-        name = "时光姬"
+        name = "时光姬",
     ) {
         @Composable
         override fun PageContent() {
-            HomeTimeMachineContent()
+            HomeTimeMachineContent(sharedFlow)
         }
     }
 
@@ -116,7 +136,7 @@ private sealed class HomePageTab(
     ) {
         @Composable
         override fun PageContent() {
-            HomeRecommendContent()
+            HomeRecommendContent(sharedFlow)
         }
     }
 
@@ -126,7 +146,7 @@ private sealed class HomePageTab(
     ) {
         @Composable
         override fun PageContent() {
-            HomePopularContent()
+            HomePopularContent(sharedFlow)
         }
     }
 
@@ -346,6 +366,17 @@ private fun HomePageContent(
 
 
     val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
+    val combinedTabClick = combinedTabDoubleClick(
+        pagerState = pagerState,
+        onDoubleClick = {
+            scope.launch {
+                viewModel.tabs[it].emit(
+                    HomePageAction.DoubleClickTab
+                )
+            }
+        }
+    )
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -374,11 +405,7 @@ private fun HomePageContent(
                         )
                     },
                     selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
+                    onClick = { combinedTabClick(index) },
                 )
             }
         }

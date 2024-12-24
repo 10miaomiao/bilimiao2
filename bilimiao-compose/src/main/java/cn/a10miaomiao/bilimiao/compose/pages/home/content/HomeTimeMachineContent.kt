@@ -19,9 +19,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
@@ -30,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,6 +48,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineRegionCard
 import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineTimeCard
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
@@ -57,6 +61,7 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,7 +121,9 @@ private class HomeTimeMachineContentViewModel(
 }
 
 @Composable
-internal fun HomeTimeMachineContent() {
+internal fun HomeTimeMachineContent(
+    action: Flow<HomePageAction>,
+) {
     val viewModel: HomeTimeMachineContentViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -126,8 +133,21 @@ internal fun HomeTimeMachineContent() {
     val timeText by viewModel.timeText.collectAsState()
     val timeSeason by viewModel.timeSeason.collectAsState()
 
+    val listState = rememberLazyStaggeredGridState()
+    LaunchedEffect(Unit) {
+        action.collect {
+            when (it) {
+                is HomePageAction.DoubleClickTab -> {
+                    if (listState.firstVisibleItemIndex != 0) {
+                        listState.animateScrollToItem(0)
+                    }
+                }
+            }
+        }
+    }
     LazyVerticalStaggeredGrid(
         modifier = Modifier.fillMaxSize(),
+        state = listState,
         columns = StaggeredGridCells.Adaptive(300.dp),
         contentPadding = windowInsets.toPaddingValues(
             top = 0.dp
