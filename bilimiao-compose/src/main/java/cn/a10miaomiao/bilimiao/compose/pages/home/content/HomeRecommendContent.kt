@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,6 +45,7 @@ import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
@@ -56,6 +60,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -172,7 +177,9 @@ private class HomeRecommendContentViewModel(
 }
 
 @Composable
-internal fun HomeRecommendContent() {
+internal fun HomeRecommendContent(
+    action: Flow<HomePageAction>,
+) {
     val viewModel: HomeRecommendContentViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -185,12 +192,28 @@ internal fun HomeRecommendContent() {
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val listStyle by viewModel.listStyle.collectAsState()
 
+    val listState = rememberLazyGridState()
+    LaunchedEffect(Unit) {
+        action.collect {
+            when (it) {
+                is HomePageAction.DoubleClickTab -> {
+                    if (listState.firstVisibleItemIndex == 0) {
+                        viewModel.refresh()
+                    } else {
+                        listState.animateScrollToItem(0)
+                    }
+                }
+            }
+        }
+    }
+
     SwipeToRefresh(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refresh() },
     ) {
         LazyVerticalGrid(
             modifier = Modifier.fillMaxSize(),
+            state = listState,
             columns = if (listStyle == 0) GridCells.Adaptive(300.dp)
                 else GridCells.Adaptive(180.dp),
             contentPadding = windowInsets.toPaddingValues(
