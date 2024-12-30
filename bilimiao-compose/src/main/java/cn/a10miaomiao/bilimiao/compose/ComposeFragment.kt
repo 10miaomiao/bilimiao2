@@ -33,6 +33,8 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialog
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
@@ -106,6 +108,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     override val di: DI = subDI(closestDI()) {
         bindSingleton { this@ComposeFragment }
         bindSingleton { this@ComposeFragment.requireArguments() }
+        bindSingleton { messageDialogState }
         bindSingleton {
             PageNavigation(
                 this@ComposeFragment,
@@ -134,9 +137,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         pageConfigInfo.onSearchSelfPage(context, keyword)
     }
 
-    private val url by lazy {
-        requireArguments().getString("url", "")
-    }
+    private val messageDialogState = MessageDialogState()
 
     lateinit var composeNav: NavHostController
 
@@ -174,6 +175,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                             ) {
                                 MyNavHost(composeNav, connection, startRoute)
                             }
+                            MessageDialog(messageDialogState)
                         }
                     }
                 }

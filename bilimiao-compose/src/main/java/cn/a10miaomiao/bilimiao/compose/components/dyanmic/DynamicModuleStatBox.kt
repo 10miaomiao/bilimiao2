@@ -20,10 +20,27 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Like
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Likefill
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Reply
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Share
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
+
 
 @Composable
 fun DynamicModuleStatBox(
     stat: bilibili.app.dynamic.v2.ModuleStat,
+) {
+    DynamicModuleStatBox(
+        share = stat.repost,
+        reply = stat.reply,
+        like = stat.like,
+        isLike = stat.likeInfo?.isLike == true,
+    )
+}
+
+@Composable
+fun DynamicModuleStatBox(
+    share: Long,
+    reply: Long,
+    like: Long,
+    isLike: Boolean,
 ) {
     Row(
         modifier = Modifier
@@ -46,7 +63,7 @@ fun DynamicModuleStatBox(
                         .size(16.dp)
                 )
                 Text(
-                    text = stat.repost.toString(),
+                    text = NumberUtil.converString(share),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -68,7 +85,7 @@ fun DynamicModuleStatBox(
                         .size(16.dp)
                 )
                 Text(
-                    text = stat.reply.toString(),
+                    text = NumberUtil.converString(reply),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -82,7 +99,7 @@ fun DynamicModuleStatBox(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (stat.likeInfo?.isLike == true) {
+                if (isLike) {
                     Icon(
                         BilimiaoIcons.Common.Likefill,
                         contentDescription = "like",
@@ -100,7 +117,7 @@ fun DynamicModuleStatBox(
                     )
                 }
                 Text(
-                    text = stat.like.toString(),
+                    text = NumberUtil.converString(like),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )

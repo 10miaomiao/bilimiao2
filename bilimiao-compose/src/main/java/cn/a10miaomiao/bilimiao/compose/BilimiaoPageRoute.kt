@@ -19,8 +19,10 @@ import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughOut
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
+import cn.a10miaomiao.bilimiao.compose.pages.auth.H5LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.QrCodeLoginPage
+import cn.a10miaomiao.bilimiao.compose.pages.auth.SMSLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
@@ -160,6 +162,8 @@ class BilimiaoPageRoute (
         composable<LoginPage>()
         composable<QrCodeLoginPage>()
         composable<TelVerifyPage>()
+        composable<H5LoginPage>()
+        composable<SMSLoginPage>()
 
         // bangumi
         composable<BangumiFollowPage>()

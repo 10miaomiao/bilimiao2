@@ -1,11 +1,15 @@
 package com.a10miaomiao.bilimiao.comm.entity.auth
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class LoginInfo(
     val token_info: TokenInfo,
     val sso: List<String>?,
     val cookie_info: CookieInfo?,
 ){
 
+    @Serializable
     data class PasswordLoginInfo(
         val cookie_info: CookieInfo,
         val sso: List<String>,
@@ -21,6 +25,7 @@ data class LoginInfo(
         )
     }
 
+    @Serializable
     data class QrLoginInfo(
         val is_new: Boolean,
         val mid: Long,
@@ -38,11 +43,13 @@ data class LoginInfo(
         )
     }
 
+    @Serializable
     data class CookieInfo(
         val cookies: List<Cookie>,
         val domains: List<String>
     )
 
+    @Serializable
     data class Cookie(
         val expires: Int,
         val http_only: Int,
@@ -54,6 +61,7 @@ data class LoginInfo(
         }
     }
 
+    @Serializable
     data class TokenInfo(
         val access_token: String,
         val expires_in: Int,

@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class MessageInfo(
     val code: Int,
     val message: String,

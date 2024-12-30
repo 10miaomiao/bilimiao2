@@ -1,4 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.user
+
+import kotlinx.serialization.Serializable
+
 /**
 // "mid": 6789810,
 // "name": "10喵喵",
@@ -21,11 +24,11 @@ package com.a10miaomiao.bilimiao.comm.entity.user
 //   "desc": ""
 // }
  */
+@Serializable
 data class UserInfo (
     var mid: Long,
     var name: String,
     var face: String,
-    val sign: String,
     var coin: Double,
     var bcoin: Double,
     var sex: Int,
