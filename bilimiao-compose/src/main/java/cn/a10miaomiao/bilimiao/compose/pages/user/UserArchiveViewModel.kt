@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
@@ -31,6 +31,7 @@ class UserArchiveViewModel(
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
+    private val pageNavigation by instance<PageNavigation>()
     //    var regionList = listOf<CheckPopupMenu.MenuItemInfo<Int>>(
 //        CheckPopupMenu.MenuItemInfo("全部(0)", 0),
 //    )
@@ -146,18 +147,16 @@ class UserArchiveViewModel(
 
 
     fun toSeriesList() {
-        fragment.findComposeNavController()
-            .navigate(UserMedialistPage(vmid))
+        pageNavigation.navigate(UserMedialistPage(vmid))
     }
 
     fun toSeriesDetail(item: SeriesInfo) {
-        fragment.findComposeNavController()
-            .navigate(UserMedialistPage(
-                mid = vmid,
-                bizId = item.param,
-                bizType = item.type,
-                bizTitle = item.title,
-            ))
+        pageNavigation.navigate(UserMedialistPage(
+            mid = vmid,
+            bizId = item.param,
+            bizType = item.type,
+            bizTitle = item.title,
+        ))
     }
 
     fun toVideoDetail(item: ArchiveInfo) {

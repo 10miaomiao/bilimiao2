@@ -18,7 +18,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerForm
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerFormState
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.rememberProxyServerFormState
@@ -46,7 +46,10 @@ class AddProxyServerPage : ComposePage() {
 internal class AddProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
+
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
+
     fun addProxyServer(
         formState: ProxyServerFormState
     ) {
@@ -82,8 +85,7 @@ internal class AddProxyServerPageViewModel(
             )
         )
         PopTip.show("添加成功")
-        val nav = fragment.findComposeNavController()
-        nav.popBackStack()
+        pageNavigation.popBackStack()
     }
 }
 

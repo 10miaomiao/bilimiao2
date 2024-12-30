@@ -94,7 +94,7 @@ class BilimiaoPageRoute (
             param: String,
         ): ComposePage {
             return when(entry) {
-                Entry.Default -> HomePage()
+                Entry.Default -> HomePage
                 Entry.Login -> LoginPage()
                 Entry.DownloadList -> DownloadListPage()
                 Entry.PlayList -> PlayListPage()

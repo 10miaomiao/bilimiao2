@@ -159,7 +159,7 @@ class AppBarView @JvmOverloads constructor(
         }
     }
 
-    fun cleanProp() {
+    fun clearProp() {
         this.prop = newProp()
     }
 

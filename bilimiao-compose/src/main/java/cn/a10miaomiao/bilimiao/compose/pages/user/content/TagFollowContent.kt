@@ -39,7 +39,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo
@@ -78,6 +78,7 @@ private class TagFollowContentModel(
 
     private val activity by instance<Activity>()
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
     private val myFollowViewModel by instance<MyFollowViewModel>()
 
@@ -284,8 +285,7 @@ private class TagFollowContentModel(
     }
 
     fun toUserDetailPage(id: String) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(UserSpacePage(id))
+        pageNavigation.navigate(UserSpacePage(id))
     }
 }
 

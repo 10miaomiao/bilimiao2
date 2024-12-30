@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
@@ -44,6 +44,7 @@ class UserSpaceViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     val activity: AppCompatActivity by instance()
     val userStore: UserStore by instance()
     val filterStore: FilterStore by instance()
@@ -164,57 +165,47 @@ class UserSpaceViewModel(
     }
 
     fun toFollow() {
-        val nav = fragment.findComposeNavController()
         if (isSelf) {
-            nav.navigate(MyFollowPage())
+            pageNavigation.navigate(MyFollowPage())
         } else {
-            nav.navigate(UserFollowPage(vmid))
+            pageNavigation.navigate(UserFollowPage(vmid))
         }
     }
 
     fun toBangumiFollow() {
-        val nav = fragment.findComposeNavController()
         if (isSelf) {
-            nav.navigate(BangumiFollowPage())
+            pageNavigation.navigate(BangumiFollowPage())
         } else {
-            nav.navigate(UserBangumiPage(vmid))
+            pageNavigation.navigate(UserBangumiPage(vmid))
         }
     }
 
 
     fun toLikeArchive() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(UserLikeArchivePage(vmid))
+        pageNavigation.navigate(UserLikeArchivePage(vmid))
     }
 
     fun toVideoDetail(item: SpaceInfo.ArchiveItem) {
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + item.param),
-                defaultNavOptions,
-            )
+        pageNavigation.navigateToVideoInfo(item.param)
     }
 
     fun toBangumiDetail(item: SpaceInfo.SeasonItem) {
-        fragment.findComposeNavController()
-            .navigate(BangumiDetailPage(
-                id = item.param
-            ))
+        pageNavigation.navigate(BangumiDetailPage(
+            id = item.param
+        ))
     }
 
     fun toFavouriteList() {
-        fragment.findComposeNavController()
-            .navigate(UserFavouritePage(
-                mid = vmid
-            ))
+        pageNavigation.navigate(UserFavouritePage(
+            mid = vmid
+        ))
     }
 
     fun toFavouriteDetail(item: SpaceInfo.Favourite2Item) {
-        fragment.findComposeNavController()
-            .navigate(UserFavouriteDetailPage(
-                id = item.media_id,
-                title = item.title
-            ))
+        pageNavigation.navigate(UserFavouriteDetailPage(
+            id = item.media_id,
+            title = item.title
+        ))
     }
 
     fun menuItemClick(view: View, item: MenuItemPropInfo) {

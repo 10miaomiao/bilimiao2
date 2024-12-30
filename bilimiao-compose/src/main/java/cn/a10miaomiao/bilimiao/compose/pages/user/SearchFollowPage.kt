@@ -27,7 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.input.SearchBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.UserInfoCard
@@ -61,6 +61,7 @@ private class SearchFollowPageViewModel(
 
     private val activity by instance<Activity>()
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
 
     val searchText = MutableStateFlow("")
@@ -130,8 +131,7 @@ private class SearchFollowPageViewModel(
     }
 
     fun toUserDetailPage(id: String) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(UserSpacePage(id))
+        pageNavigation.navigate(UserSpacePage(id))
     }
 
 }

@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -25,6 +25,7 @@ internal class MyFollowViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val activity by instance<Activity>()
     private val userStore by instance<UserStore>()
 
@@ -192,8 +193,7 @@ internal class MyFollowViewModel(
     }
 
     fun toSearchPage() {
-        fragment.findComposeNavController()
-            .navigate(SearchFollowPage())
+        pageNavigation.navigate(SearchFollowPage())
     }
 
     fun changeOrderType(value: String) {

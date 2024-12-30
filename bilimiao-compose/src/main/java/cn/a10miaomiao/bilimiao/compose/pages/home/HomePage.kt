@@ -55,7 +55,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomePopularContent
@@ -96,7 +96,7 @@ import java.util.GregorianCalendar
 import java.util.Random
 
 @Serializable
-class HomePage : ComposePage() {
+object HomePage : ComposePage() {
 
     @Composable
     override fun Content() {
@@ -157,6 +157,7 @@ private class HomePageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     private val playerDelegate by instance<BasePlayerDelegate>()
 
@@ -301,7 +302,7 @@ private class HomePageViewModel(
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.dynamic -> {
-                val nav = fragment.findComposeNavController()
+                val nav = pageNavigation.hostController
                 nav.navigate(DynamicPage(), navOptions {
                     popUpTo(nav.graph.findStartDestination().id) {
                         saveState = true

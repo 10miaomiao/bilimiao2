@@ -38,7 +38,8 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -78,6 +79,7 @@ private class HomeRecommendContentViewModel(
 
     private val context: Context by instance()
     private val fragment: Fragment by instance()
+    private val pageNavigation: PageNavigation by instance()
     private val filterStore: FilterStore by instance()
 
     private val lastIdx
@@ -157,20 +159,14 @@ private class HomeRecommendContentViewModel(
 
     fun toVideoDetail(item: RecommendCardInfo) {
         if (item.goto == "av" || item.goto == "vertical_av") {
-            val nav = fragment.findNavController()
-            nav.navigate(
-                Uri.parse("bilimiao://video/" + item.param),
-                defaultNavOptions,
-            )
+            pageNavigation.navigateToVideoInfo(item.param)
         } else if (item.goto == "bangumi") {
-            val nav = fragment.findComposeNavController()
-            nav.navigate(BangumiDetailPage(
+            pageNavigation.navigate(BangumiDetailPage(
                 epId = item.param
             ))
+        } else if (!BilibiliNavigation.navigationTo(pageNavigation, item.uri)){
+            BilibiliNavigation.navigationToWeb(pageNavigation, item.uri)
         }
-//        else if (!BiliNavigation.navigationTo(view, item.uri)){
-//            BiliNavigation.navigationToWeb(requireActivity(), item.uri)
-//        }
     }
 
 

@@ -23,7 +23,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerCard
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.proxy.BiliUposInfo
@@ -53,6 +53,7 @@ internal class SelectProxyServerPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())
@@ -126,15 +127,13 @@ internal class SelectProxyServerPageViewModel(
     }
 
     fun toAddPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(AddProxyServerPage())
+        pageNavigation.navigate(AddProxyServerPage())
     }
 
     fun toEditPage(
         index: Int
     ) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(EditProxyServerPage(
+        pageNavigation.navigate(EditProxyServerPage(
             index = index
         ))
     }
