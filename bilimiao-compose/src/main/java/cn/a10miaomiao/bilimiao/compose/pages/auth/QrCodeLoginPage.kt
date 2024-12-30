@@ -35,7 +35,8 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.tryPopBackStack
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
@@ -69,11 +70,12 @@ class QrCodeLoginPage : ComposePage() {
 
 }
 
-internal class QrCodeLoginPageViewModel(
+private class QrCodeLoginPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
 
     private val loginSessionId = ApiHelper.getUUID()
@@ -92,11 +94,12 @@ internal class QrCodeLoginPageViewModel(
             val res = BiliApiService.authApi
                 .qrCode(loginSessionId)
                 .awaitCall()
-                .gson<ResultInfo<QRLoginInfo>>()
+                .gson<ResultInfo<QRLoginInfo?>>()
             if (res.isSuccess) {
-                renderQrcode(res.data.url)
+                val resData = res.data!!
+                renderQrcode(resData.url)
                 launch {
-                    val authCode = res.data.auth_code
+                    val authCode = resData.auth_code
                     _authCode = authCode
                     checkQRCode(authCode)
                 }
@@ -176,7 +179,7 @@ internal class QrCodeLoginPageViewModel(
         if (res.isSuccess) {
             withContext(Dispatchers.Main) {
                 userStore.setUserInfo(res.data)
-                fragment.findNavController().tryPopBackStack()
+                pageNavigation.popBackStack(HomePage, true)
             }
         } else {
             throw Exception(res.message)
@@ -186,7 +189,7 @@ internal class QrCodeLoginPageViewModel(
 
 
 @Composable
-internal fun QrCodeLoginPageContent(
+private fun QrCodeLoginPageContent(
     viewModel: QrCodeLoginPageViewModel
 ) {
     PageConfig(

@@ -9,6 +9,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.google.gson.Gson
 import com.kongzue.dialogx.dialogs.PopTip
@@ -96,7 +97,7 @@ class UserStore(override val di: DI) :
             val res = BiliApiService.authApi
                 .account()
                 .call()
-                .gson<ResultInfo<UserInfo>>()
+                .json<ResultInfo<UserInfo>>()
             if (res.code == 0) {
                 setState {
                     info = res.data

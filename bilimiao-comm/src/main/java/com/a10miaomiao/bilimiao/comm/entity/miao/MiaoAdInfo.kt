@@ -11,20 +11,24 @@ data class MiaoAdInfo (
     var msg: String,
     var data: DataBean
 ){
+    @Serializable
     data class DataBean(
         var ad: AdBean,
         var version: VersionBean,
         var settingList: List<MiaoSettingInfo>
     )
+    @Serializable
     data class AdBean(
         var isShow: Boolean,
         var title: String,
         var link: LinkBean
     )
+    @Serializable
     data class LinkBean(
         var text: String,
         var url: String
     )
+    @Serializable
     data class VersionBean(
         var versionCode: Long,
         var versionName: String,

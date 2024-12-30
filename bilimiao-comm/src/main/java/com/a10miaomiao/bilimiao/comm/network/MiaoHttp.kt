@@ -106,7 +106,9 @@ class MiaoHttp(var url: String? = null) {
 
         private val gson = Gson()
 
-        val kotlinJson = Json {  }
+        val kotlinJson = Json {
+            ignoreUnknownKeys = true
+        }
 
         fun <T> fromJson(json: String, typeOfT: Type): T {
             try {
@@ -117,11 +119,11 @@ class MiaoHttp(var url: String? = null) {
             }
         }
 
-        fun <T> fromJson(json: String, deserializer: DeserializationStrategy<T>): T {
+        inline fun <reified T> fromJson(json: String): T {
             try {
-                return kotlinJson.decodeFromString(deserializer, json)
+                return kotlinJson.decodeFromString<T>(json)
             } catch (e: IllegalStateException) {
-                miaoLogger().i("GSON解析出错", json)
+                miaoLogger().i("JSON解析出错", json)
                 throw e
             }
         }
@@ -157,8 +159,7 @@ class MiaoHttp(var url: String? = null) {
             if (isLog) {
                 miaoLogger() debug jsonStr
             }
-            val deserializer = kotlinJson.serializersModule.serializer<T>()
-            return fromJson(jsonStr, deserializer)
+            return fromJson(jsonStr)
         }
 
         const val GET = "GET"

@@ -4,6 +4,7 @@ import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
+import com.a10miaomiao.bilimiao.comm.network.ApiHelper.BILI_APP_VERSION
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.RSAUtil
@@ -242,6 +243,65 @@ class AuthApi {
     }
 
     /**
+     * 短信验证码登录
+     */
+    fun smsLogin(
+        cid: String, // 国际区号
+        tel: String ,
+        code: String ,
+        captchaKey: String ,
+        key: String,
+    ) = MiaoHttp.request {
+        val rsaKey = key.replace("-----BEGIN PUBLIC KEY-----\n", "")
+            .replace("-----END PUBLIC KEY-----\n", "")
+        url = "https://passport.bilibili.com/x/passport-login/login/sms"
+        formBody = ApiHelper.createParams(
+            "cid" to cid,
+            "tel" to tel,
+            "code" to code,
+            "captcha_key" to captchaKey,
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+            "password" to RSAUtil.decryptByPublicKey(ApiHelper.getUUID().substring(0..15), rsaKey),
+        )
+        method = MiaoHttp.POST
+    }
+
+    fun smsLoginSend(
+        cid: String, // 国际区号
+        tel: String,
+        geeChallenge: String,
+        geeSeccode: String,
+        geeValidate: String,
+        recaptchaToken: String,
+    ) = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/passport-login/sms/send"
+        formBody = ApiHelper.createParams(
+            "cid" to cid,
+            "tel" to tel,
+            "gee_challenge" to geeChallenge,
+            "gee_seccode" to geeSeccode,
+            "gee_validate" to geeValidate,
+            "recaptcha_token" to recaptchaToken,
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+        )
+        method = MiaoHttp.POST
+    }
+
+    fun smsLoginSend(
+        cid: String, // 国际区号
+        tel: String,
+    ) = MiaoHttp.request {
+        url = "https://passport.bilibili.com/x/passport-login/sms/send"
+        formBody = ApiHelper.createParams(
+            "cid" to cid,
+            "tel" to tel,
+            "local_id" to BilimiaoCommApp.commApp.getBilibiliBuvid(),
+        )
+        method = MiaoHttp.POST
+    }
+
+
+    /**
      * 获取登录二维码
      */
     fun qrCode(
@@ -289,7 +349,12 @@ class AuthApi {
         formBody = ApiHelper.createParams(
             "auth_code" to authCode,
             "csrf" to biliJct,
+            "build" to "7082000",
+            "statistics" to """{"appId":6,"platform":3,"version":"7.82.0","abtest":""}""",
+            appKey = "27eb53fc9058f8c3",
+            appSecrer = "c2ed53a74eeefe3cf99fbd01d8c9c375"
         )
+
         headers["cookie"] = cookie
     }
 }

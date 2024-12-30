@@ -32,15 +32,15 @@ import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
-import cn.a10miaomiao.bilimiao.compose.common.navigation.tryPopBackStack
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.WebKeyInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
@@ -66,6 +66,9 @@ class LoginPage : ComposePage() {
     @Composable
     override fun Content() {
         val viewModel: LoginPageViewModel = diViewModel()
+        LaunchedEffect(Unit) {
+            viewModel.checkLogin()
+        }
         LoginPageContent(viewModel)
     }
 
@@ -79,6 +82,7 @@ private class LoginPageViewModel(
     private var recaptchaToken = ""
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
     private val biliGeetestUtil by instance<BiliGeetestUtil>()
 
@@ -132,7 +136,7 @@ private class LoginPageViewModel(
                     geeSeccode = gt3Result.geetest_seccode,
                     geeChallenge = gt3Result.geetest_challenge,
                 )
-            }.awaitCall().gson<ResultInfo<LoginInfo.PasswordLoginInfo>>()
+            }.awaitCall().json<ResultInfo<LoginInfo.PasswordLoginInfo>>()
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val loginInfo = res.data
@@ -145,12 +149,11 @@ private class LoginPageViewModel(
                             setNegativeButton("取消", null)
                             setPositiveButton("请往验证") { _, _ ->
                                 val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
-                                val nav = fragment.findComposeNavController()
                                 if (params.containsKey("tmp_token")
                                     && params.containsKey("request_id")
                                     && params.containsKey("source")
                                 ) {
-                                    nav.navigate(TelVerifyPage(
+                                    pageNavigation.navigate(TelVerifyPage(
                                         code = params["tmp_token"]!!,
                                         requestId = params["request_id"]!!,
                                         source = params["source"]!!,
@@ -201,7 +204,7 @@ private class LoginPageViewModel(
         val res = BiliApiService.authApi
             .webKey()
             .awaitCall()
-            .gson<ResultInfo<WebKeyInfo>>()
+            .json<ResultInfo<WebKeyInfo>>()
         if (res.isSuccess) {
             return res.data
         }
@@ -213,15 +216,21 @@ private class LoginPageViewModel(
             BiliApiService.authApi
                 .account()
                 .awaitCall()
-                .gson<ResultInfo<UserInfo>>()
+                .json<ResultInfo<UserInfo>>()
         }
         if (res.isSuccess) {
             withContext(Dispatchers.Main) {
                 userStore.setUserInfo(res.data)
-                fragment.findNavController().tryPopBackStack()
+                pageNavigation.popBackStack()
             }
         } else {
             throw Exception(res.message)
+        }
+    }
+
+    fun checkLogin() {
+        if (userStore.isLogin()) {
+            pageNavigation.popBackStack()
         }
     }
 
@@ -264,13 +273,15 @@ private class LoginPageViewModel(
     }
 
     fun toH5LoginPage() {
-        fragment.findNavController()
-            .navigate(Uri.parse("bilimiao://auth/h5"))
+        pageNavigation.navigate(H5LoginPage())
     }
 
     fun toQrLogin() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(QrCodeLoginPage())
+        pageNavigation.navigate(QrCodeLoginPage())
+    }
+
+    fun toSMSLogin() {
+        pageNavigation.navigate(SMSLoginPage())
     }
 }
 
@@ -419,8 +430,8 @@ private fun LoginPageContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                TextButton(onClick = viewModel::toH5LoginPage) {
-                    Text(text = "网页登录")
+                TextButton(onClick = viewModel::toSMSLogin) {
+                    Text(text = "手机号登录")
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 TextButton(onClick = viewModel::toQrLogin) {

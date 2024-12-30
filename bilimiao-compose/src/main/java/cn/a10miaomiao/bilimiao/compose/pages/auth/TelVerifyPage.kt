@@ -25,13 +25,14 @@ import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.tryPopBackStack
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.*
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -72,7 +73,7 @@ data class TelVerifyPage(
 
 }
 
-internal class TelVerifyPageViewModel(
+private class TelVerifyPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware, BiliGeetestUtil.GTCallBack {
 
@@ -84,6 +85,7 @@ internal class TelVerifyPageViewModel(
     private var captchaKey = ""
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
 
     private val biliGeetestUtil by instance<BiliGeetestUtil>()
@@ -117,7 +119,7 @@ internal class TelVerifyPageViewModel(
             val res = withContext(Dispatchers.IO) {
                 BiliApiService.authApi.tmpUserInfo(tmpCode = code)
                     .awaitCall()
-                    .gson<ResultInfo<TmpUserInfo>>()
+                    .json<ResultInfo<TmpUserInfo>>()
             }
             if (res.isSuccess) {
                 val info = res.data.account_info
@@ -131,7 +133,7 @@ internal class TelVerifyPageViewModel(
                         setTitle("不支持验证")
                         setMessage("此帐号不支持手机号及邮箱验证，请去B站官方客户端或PC网页版完善帐号信息后再重新登录")
                         setNegativeButton("确定") { _, _ ->
-                            fragment.findNavController().tryPopBackStack()
+                            pageNavigation.popBackStack()
                         }
                     }.show()
                 }
@@ -161,7 +163,7 @@ internal class TelVerifyPageViewModel(
                         requestId = requestId,
                         source = source,
                         captcha_key = captchaKey,
-                    ).awaitCall().gson<ResultInfo<VerifyTelInfo>>()
+                    ).awaitCall().json<ResultInfo<VerifyTelInfo>>()
                 } else {
                     BiliApiService.authApi.emailVerify(
                         code = verifyCode.value,
@@ -169,7 +171,7 @@ internal class TelVerifyPageViewModel(
                         requestId = requestId,
                         source = source,
                         captcha_key = captchaKey,
-                    ).awaitCall().gson<ResultInfo<VerifyTelInfo>>()
+                    ).awaitCall().json<ResultInfo<VerifyTelInfo>>()
                 }
             }
             if (res.isSuccess) {
@@ -194,7 +196,7 @@ internal class TelVerifyPageViewModel(
             val res = BiliApiService.authApi
                 .oauth2AccessToken(
                     code = code
-                ).awaitCall().gson<ResultInfo<LoginInfo>>()
+                ).awaitCall().json<ResultInfo<LoginInfo>>()
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val loginInfo = res.data
@@ -219,11 +221,11 @@ internal class TelVerifyPageViewModel(
             BiliApiService.authApi
                 .account()
                 .awaitCall()
-                .gson<ResultInfo<UserInfo>>()
+                .json<ResultInfo<UserInfo>>()
         }
         if (res.isSuccess) {
             userStore.setUserInfo(res.data)
-            fragment.findNavController().tryPopBackStack()
+            pageNavigation.popBackStack()
         } else {
             throw Exception(res.message)
         }
@@ -266,7 +268,7 @@ internal class TelVerifyPageViewModel(
                 geeSeccode = result.geetest_seccode,
                 geeValidate = result.geetest_validate,
                 recaptchaToken = recaptchaToken,
-            ).awaitCall().gson<ResultInfo<SmsSendInfo>>()
+            ).awaitCall().json<ResultInfo<SmsSendInfo>>()
         }
         if (res.isSuccess) {
             startCountdown(60)
@@ -294,7 +296,7 @@ internal class TelVerifyPageViewModel(
                 geeSeccode = result.geetest_seccode,
                 geeValidate = result.geetest_validate,
                 recaptchaToken = recaptchaToken,
-            ).awaitCall().gson<ResultInfo<SmsSendInfo>>()
+            ).awaitCall().json<ResultInfo<SmsSendInfo>>()
         }
         if (res.isSuccess) {
             startCountdown(60)
@@ -330,7 +332,7 @@ internal class TelVerifyPageViewModel(
         val res = withContext(Dispatchers.IO) {
             BiliApiService.authApi.captchaPre()
                 .awaitCall()
-                .gson<ResultInfo<CaptchaPreInfo>>()
+                .json<ResultInfo<CaptchaPreInfo>>()
         }
         if (res.isSuccess) {
             val geeGt = res.data.gee_gt
@@ -354,7 +356,7 @@ internal class TelVerifyPageViewModel(
 }
 
 @Composable
-internal fun TelVerifyPageCompose(
+private fun TelVerifyPageCompose(
     viewModel: TelVerifyPageViewModel
 ) {
     PageConfig(title = "帐号验证")

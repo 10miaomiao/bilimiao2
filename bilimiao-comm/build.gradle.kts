@@ -8,6 +8,7 @@ plugins {
     id("kotlin-parcelize")
     id("com.google.protobuf") // proto
     id("bilimiao-build")
+    kotlin("plugin.serialization")
 }
 
 android {
