@@ -58,6 +58,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserLikeArchivePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserMedialistPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.serialization.serializer
@@ -231,6 +232,9 @@ class BilimiaoPageRoute (
 
         //lyric
         composable<LyricPage>()
+
+        // web
+        composable<WebPage>()
     }
 
     fun defaultEnterTransition(

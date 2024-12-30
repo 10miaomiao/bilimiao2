@@ -32,6 +32,7 @@ import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigInfo
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
@@ -105,6 +106,12 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     override val di: DI = subDI(closestDI()) {
         bindSingleton { this@ComposeFragment }
         bindSingleton { this@ComposeFragment.requireArguments() }
+        bindSingleton {
+            PageNavigation(
+                this@ComposeFragment,
+                navHostController = { composeNav },
+            )
+        }
     }
 
     private val pageConfigInfo = PageConfigInfo(this)
