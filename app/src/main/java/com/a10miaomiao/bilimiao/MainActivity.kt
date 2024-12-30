@@ -330,7 +330,7 @@ class MainActivity
         arguments: Bundle?
     ) {
 //        ui.mAppBar.canBack = destination.id != MainNavGraph.dest.main
-//        ui.mAppBar.cleanProp()
+        ui.mAppBar.clearProp()
 
         //将焦点给新页面
         if (controller == anotherNav.navController) {
@@ -374,13 +374,13 @@ class MainActivity
     fun setMyPageConfig(config: MyPageConfigInfo) {
         if (config.title.isNotBlank()) {
             pageConfig = config
+            ui.mAppBar.canBack =  config.menu?.checkable != true
             ui.mAppBar.setProp {
                 title = config.title
                 menus = config.getMenuItems()
                 isNavigationMenu = config.menu?.checkable == true
                 navigationKey = config.menu?.checkedKey ?: 0
             }
-            ui.mAppBar.canBack =  config.menu?.checkable != true
             ui.root.slideUpBottomAppBar()
         }
         leftFragment.setConfig(config.search)

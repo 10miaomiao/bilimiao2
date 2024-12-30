@@ -35,7 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.content.DynamicAllListContent
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.content.DynamicVideoListContent
@@ -96,6 +96,7 @@ private class DynamicPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     val tabs = listOf<DynamicPageTab>(
         DynamicPageTab.All,
@@ -105,8 +106,8 @@ private class DynamicPageViewModel(
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.home -> {
-                val nav = fragment.findComposeNavController()
-                nav.navigate(HomePage(), navOptions {
+                val nav = pageNavigation.hostController
+                nav.navigate(HomePage, navOptions {
                     popUpTo(nav.graph.findStartDestination().id) {
                         saveState = true
                     }

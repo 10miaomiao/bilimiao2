@@ -26,7 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.customSetsPreference
 import cn.a10miaomiao.bilimiao.compose.components.preference.multiSelectIntPreference
@@ -62,7 +62,7 @@ private class VideoSettingPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
-
+    private val pageNavigation by instance<PageNavigation>()
 
     private val fnvalSelection = mapOf(
         SettingConstants.PLAYER_FNVAL_DASH to AnnotatedString("dash(支持4K)"),
@@ -137,8 +137,7 @@ private class VideoSettingPageViewModel(
     val bottomProgressBarShowSelectionList = bottomProgressBarShowSelection.keys.toList()
 
     fun proxyClick() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(ProxySettingPage())
+        pageNavigation.navigate(ProxySettingPage())
     }
 
 }

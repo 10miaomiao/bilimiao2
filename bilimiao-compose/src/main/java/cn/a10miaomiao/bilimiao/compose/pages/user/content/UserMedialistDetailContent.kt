@@ -43,7 +43,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
@@ -83,6 +83,7 @@ private class UserMedialistDetailViewMode(
 
     val userStore: UserStore by instance()
     private val fragment: Fragment by instance()
+    private val pageNavigation: PageNavigation by instance()
     private val playerDelegate: BasePlayerDelegate by instance()
     private val playerStore by instance<PlayerStore>()
     private val playListStore by instance<PlayListStore>()
@@ -209,8 +210,7 @@ private class UserMedialistDetailViewMode(
     }
 
     fun toPlayListPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(PlayListPage())
+        pageNavigation.navigate(PlayListPage())
     }
 
     fun changeAutoPlay(value: Boolean) {

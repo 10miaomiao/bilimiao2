@@ -27,7 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.bangumi.MiniBangumiItemBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
@@ -80,6 +80,7 @@ private class UserBangumiPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<SpaceInfo.SeasonItem>()
@@ -144,8 +145,7 @@ private class UserBangumiPageViewModel(
     }
 
     fun toBangumiDetail(item: SpaceInfo.SeasonItem) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(BangumiDetailPage(id = item.param))
+        pageNavigation.navigate(BangumiDetailPage(id = item.param))
     }
 }
 

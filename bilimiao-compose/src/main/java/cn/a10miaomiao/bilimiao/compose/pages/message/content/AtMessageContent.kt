@@ -19,7 +19,7 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
@@ -46,6 +46,7 @@ private class AtMessageContentModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val messageStore by instance<MessageStore>()
 
     val isRefreshing = MutableStateFlow(false)
@@ -110,8 +111,7 @@ private class AtMessageContentModel(
 
     fun toUserPage(item: AtMessageInfo) {
         val mid = item.user.mid
-        fragment.findComposeNavController()
-            .navigate(UserSpacePage(mid.toString()))
+        pageNavigation.navigate(UserSpacePage(mid.toString()))
     }
 
     fun toMessagePage(item: AtMessageInfo) {

@@ -21,7 +21,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -51,13 +51,13 @@ private class DanmakuSettingPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
 
     private fun toDisplaySettingPage(
         name: String,
     ) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(DanmakuDisplaySettingPage(
+        pageNavigation.navigate(DanmakuDisplaySettingPage(
             name = name
         ))
     }

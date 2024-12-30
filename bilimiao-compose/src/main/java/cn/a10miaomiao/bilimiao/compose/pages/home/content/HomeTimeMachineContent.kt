@@ -46,7 +46,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineRegionCard
@@ -76,6 +76,7 @@ private class HomeTimeMachineContentViewModel(
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
+    private val pageNavigation: PageNavigation by instance()
 
     val timeSettingStore: TimeSettingStore by instance()
     val regionStore: RegionStore by instance()
@@ -100,8 +101,7 @@ private class HomeTimeMachineContentViewModel(
         region: RegionInfo,
         initialIndex: Int,
     ) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(TimeRegionDetailPage(
+        pageNavigation.navigate(TimeRegionDetailPage(
             tid = region.tid,
             name = region.name,
             childIds = region.children.map { it.tid },

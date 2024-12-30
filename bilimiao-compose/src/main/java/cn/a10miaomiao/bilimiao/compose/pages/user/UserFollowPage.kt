@@ -25,7 +25,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.UserInfoCard
@@ -69,6 +69,7 @@ private class UserFollowPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val activity by instance<Activity>()
     private val userStore by instance<UserStore>()
 
@@ -207,8 +208,7 @@ private class UserFollowPageViewModel(
     }
 
     fun toUserDetailPage(id: String) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(UserSpacePage(id))
+        pageNavigation.navigate(UserSpacePage(id))
     }
 }
 

@@ -31,7 +31,7 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.glidePreference
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
@@ -72,6 +72,7 @@ private class SettingPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     val moreSettingList = MutableStateFlow(listOf<MiaoSettingInfo>())
 
@@ -144,33 +145,27 @@ private class SettingPageViewModel(
     }
 
     fun toHomeSettingPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(HomeSettingPage())
+        pageNavigation.navigate(HomeSettingPage())
     }
 
     fun toVideoSettingPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(VideoSettingPage())
+        pageNavigation.navigate(VideoSettingPage())
     }
 
     fun toDanmakuSettingPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(DanmakuSettingPage())
+        pageNavigation.navigate(DanmakuSettingPage())
     }
 
     fun toFilterSettingPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(FilterSettingPage())
+        pageNavigation.navigate(FilterSettingPage())
     }
 
     fun toFlagsSettingPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(FlagsSettingPage())
+        pageNavigation.navigate(FlagsSettingPage())
     }
 
     fun toAboutPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(AboutPage())
+        pageNavigation.navigate(AboutPage())
     }
 }
 

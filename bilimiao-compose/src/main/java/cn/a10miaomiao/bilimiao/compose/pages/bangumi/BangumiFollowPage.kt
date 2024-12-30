@@ -35,7 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.bangumi.BangumiItemBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -72,6 +72,7 @@ private class BangumiFollowPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     val statusList = listOf(
         0 to "全部番剧",
@@ -153,8 +154,7 @@ private class BangumiFollowPageViewModel(
     }
 
     fun toDetailPage(item: MyBangumiInfo) {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(BangumiDetailPage(
+        pageNavigation.navigate(BangumiDetailPage(
             id = item.season_id,
         ))
     }

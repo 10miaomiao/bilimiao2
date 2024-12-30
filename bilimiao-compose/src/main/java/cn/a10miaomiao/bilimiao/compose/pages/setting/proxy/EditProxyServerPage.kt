@@ -20,7 +20,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.KeyValueInputStateCarrier
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerForm
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerFormState
@@ -50,7 +50,9 @@ class EditProxyServerPage(
 internal class EditProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
+
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     var index = -1
 
     fun getProxyServer(): ProxyServerInfo? {
@@ -97,8 +99,7 @@ internal class EditProxyServerPageViewModel(
             index,
         )
         PopTip.show("修改成功")
-        val nav = fragment.findComposeNavController()
-        nav.popBackStack()
+        pageNavigation.popBackStack()
     }
 
     fun deleteProxyServer() {
@@ -108,8 +109,7 @@ internal class EditProxyServerPageViewModel(
             index,
         )
         PopTip.show("删除成功")
-        val nav = fragment.findComposeNavController()
-        nav.popBackStack()
+        pageNavigation.popBackStack()
     }
 }
 

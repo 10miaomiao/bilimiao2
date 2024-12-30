@@ -42,13 +42,15 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
@@ -57,6 +59,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -77,6 +80,7 @@ private class HomePopularContentViewModel(
 
     private val context: Context by instance()
     private val fragment: Fragment by instance()
+    private val pageNavigation: PageNavigation by instance()
     private val filterStore: FilterStore by instance()
 
     private val lastIdx
@@ -159,16 +163,14 @@ private class HomePopularContentViewModel(
 
     fun toVideoDetail(item: SmallCoverV5) {
         val base = item.base ?: return
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + base.param),
-                defaultNavOptions,
-            )
+        pageNavigation.navigateToVideoInfo(base.param)
     }
 
     fun toPageByUrl(url: String) {
-        fragment.findComposeNavController()
-            .navigate(Uri.parse(url))
+        if (!BilibiliNavigation.navigationTo(pageNavigation, url)) {
+            miaoLogger() debug "toPageByUrl" + url
+            BilibiliNavigation.navigationToWeb(pageNavigation, url)
+        }
     }
 
 }
@@ -183,10 +185,10 @@ private fun EntranceListBox(
         items(topEntranceList, { it.uri }) {
             Column(
                 modifier = Modifier.width(80.dp)
-                    .padding(top = 10.dp, bottom = 5.dp)
                     .clickable {
                         viewModel.toPageByUrl(it.uri)
-                    },
+                    }
+                    .padding(top = 10.dp, bottom = 5.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 GlideImage(

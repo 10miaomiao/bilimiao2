@@ -40,7 +40,7 @@ import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.layout.DoubleColumnAutofitLayout
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememberChainScrollableLayoutState
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
@@ -100,6 +100,7 @@ private class AboutPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     val applicationIcon: Drawable = with(fragment.requireActivity()) {
         val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
@@ -260,8 +261,7 @@ private class AboutPageViewModel(
     }
 
     fun toTestPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(TestPage())
+        pageNavigation.navigate(TestPage())
     }
 
     data class ContributorInfo(

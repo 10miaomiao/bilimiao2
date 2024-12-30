@@ -40,7 +40,6 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.content.TimeRegionDetailListContent

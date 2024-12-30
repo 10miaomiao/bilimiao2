@@ -46,7 +46,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
@@ -83,6 +83,7 @@ private class UserSeasonDetailViewModel(
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
+    private val pageNavigation: PageNavigation by instance()
     val userStore: UserStore by instance()
     private val playerDelegate: BasePlayerDelegate by instance()
     private val playerStore by instance<PlayerStore>()
@@ -217,8 +218,7 @@ private class UserSeasonDetailViewModel(
     }
 
     fun toPlayListPage() {
-        val nav = fragment.findComposeNavController()
-        nav.navigate(PlayListPage())
+        pageNavigation.navigate(PlayListPage())
     }
 
     fun favSeason() = viewModelScope.launch(Dispatchers.IO) {

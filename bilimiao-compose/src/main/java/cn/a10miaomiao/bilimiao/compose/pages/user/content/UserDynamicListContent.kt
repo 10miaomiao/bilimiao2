@@ -23,7 +23,7 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
-import cn.a10miaomiao.bilimiao.compose.common.navigation.findComposeNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicItemCard
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
@@ -45,6 +45,7 @@ private class UserDynamicListContentViewModel(
 ) : ViewModel(), DIAware {
 
     val fragment: Fragment by instance()
+    private val pageNavigation: PageNavigation by instance()
 
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<bilibili.app.dynamic.v2.DynamicItem>()
@@ -110,15 +111,7 @@ private class UserDynamicListContentViewModel(
         val extend = item.extend ?: return
         val toUrl = extend.cardUrl
         try {
-            if (toUrl.startsWith("bilibili://video")) {
-                // bilibili://video/113448641892661?aid=113448641892661&cid=26675709168
-                val nav = fragment.findNavController()
-                nav.navigate(Uri.parse(toUrl), defaultNavOptions)
-            } else {
-                // bilibili://opus/detail/997652183402938377
-                val nav = fragment.findComposeNavController()
-                nav.navigate(Uri.parse(toUrl))
-            }
+            pageNavigation.navigateByUri(Uri.parse(toUrl))
         } catch (e: Exception) {
             e.printStackTrace()
         }

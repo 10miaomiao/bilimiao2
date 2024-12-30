@@ -59,6 +59,7 @@ dependencies {
     implementation(Libraries.navigationFragment)
     implementation(Libraries.navigationUi)
     implementation(Libraries.datastore)
+    implementation(Libraries.browser)
 
     implementation(Libraries.kotlinxSerializationJson)
     implementation(Libraries.kotlinxCoroutinesAndroid)
