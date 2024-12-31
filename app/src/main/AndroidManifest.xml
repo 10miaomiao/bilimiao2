@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -23,9 +24,9 @@
         android:name=".Bilimiao"
         android:allowBackup="true"
         android:allowNativeHeapPointerTagging="false"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_bilimiao_33"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_bilimiao_33_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Bilimiao"
         android:largeHeap="true">
