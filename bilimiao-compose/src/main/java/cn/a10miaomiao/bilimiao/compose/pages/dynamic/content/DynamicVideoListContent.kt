@@ -22,8 +22,10 @@ import androidx.navigation.Navigation
 import bilibili.app.dynamic.v2.DynamicGRPC
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicModuleAuthorBox
@@ -35,7 +37,6 @@ import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicVideoContentInfo
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicVideoInfo
-import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -212,19 +213,18 @@ fun DynamicVideoListContent() {
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val listState = rememberLazyGridState()
-//    LaunchedEffect(Unit) {
-//        action.collect {
-//            when (it) {
-//                is HomePageAction.DoubleClickTab -> {
-//                    if (listState.firstVisibleItemIndex == 0) {
-//                        viewModel.refresh()
-//                    } else {
-//                        listState.animateScrollToItem(0)
-//                    }
-//                }
-//            }
-//        }
-//    }
+    val emitter = localEmitter()
+    LaunchedEffect(Unit) {
+        emitter.collectAction<EmitterAction.DoubleClickTab> {
+            if (it.tab == "dynamic.video") {
+                if (listState.firstVisibleItemIndex == 0) {
+                    viewModel.refresh()
+                } else {
+                    listState.animateScrollToItem(0)
+                }
+            }
+        }
+    }
 
     SwipeToRefresh(
         refreshing = isRefreshing,

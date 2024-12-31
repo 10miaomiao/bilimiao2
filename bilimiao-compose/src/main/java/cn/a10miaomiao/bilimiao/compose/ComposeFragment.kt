@@ -28,7 +28,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
+import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
+import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
+import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigInfo
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigInfo
@@ -109,15 +112,15 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         bindSingleton { this@ComposeFragment }
         bindSingleton { this@ComposeFragment.requireArguments() }
         bindSingleton { messageDialogState }
-        bindSingleton {
-            PageNavigation(
-                this@ComposeFragment,
-                navHostController = { composeNav },
-            )
-        }
+        bindSingleton { emitter }
+        bindSingleton { pageNavigation }
     }
 
+    private val pageNavigation = PageNavigation(
+        this,  { composeNav }
+    )
     private val pageConfigInfo = PageConfigInfo(this)
+    private val emitter = SharedFlowEmitter()
 
     override val pageConfig = myPageConfig {
         val config = pageConfigInfo.lastConfig()
@@ -161,6 +164,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                     LocalContainerView provides container,
                     LocalPageConfigInfo provides pageConfigInfo,
                     LocalOnBackPressedDispatcherOwner provides this@ComposeFragment,
+                    LocalPageNavigation provides pageNavigation,
+                    LocalEmitter provides emitter,
                 ) {
                     withDI(di = di) {
                         val windowStore: WindowStore by rememberInstance()

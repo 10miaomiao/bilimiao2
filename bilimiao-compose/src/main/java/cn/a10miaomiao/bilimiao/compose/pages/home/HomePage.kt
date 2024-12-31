@@ -49,9 +49,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -72,6 +74,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
@@ -108,45 +111,40 @@ object HomePage : ComposePage() {
 
 @Stable
 private sealed class HomePageTab(
-    val id: Int,
+    val id: String,
     val name: String,
 ) {
-    protected val sharedFlow = MutableSharedFlow<HomePageAction>()
-
-    suspend fun emit(action: HomePageAction) {
-        sharedFlow.emit(action)
-    }
 
     @Composable
-    abstract fun PageContent()
+    abstract fun PageContent(pageState: HomePageState)
 
     data object TimeMachine: HomePageTab(
-        id = 0,
+        id = "home.time-machine",
         name = "时光姬",
     ) {
         @Composable
-        override fun PageContent() {
-            HomeTimeMachineContent(sharedFlow)
+        override fun PageContent(pageState: HomePageState) {
+            HomeTimeMachineContent(pageState)
         }
     }
 
     data object Recommend : HomePageTab(
-        id = 1,
+        id = "home.recommend",
         name = "推荐"
     ) {
         @Composable
-        override fun PageContent() {
-            HomeRecommendContent(sharedFlow)
+        override fun PageContent(pageState: HomePageState) {
+            HomeRecommendContent()
         }
     }
 
     data object Popular : HomePageTab(
-        id = 2,
+        id = "home.popular",
         name = "热门"
     ) {
         @Composable
-        override fun PageContent() {
-            HomePopularContent(sharedFlow)
+        override fun PageContent(pageState: HomePageState) {
+            HomePopularContent()
         }
     }
 
@@ -168,11 +166,8 @@ private class HomePageViewModel(
         HomePageTab.Recommend,
         HomePageTab.Popular,
     )
-
+    val pageState = HomePageState(pageNavigation)
     val context: Context by instance()
-
-    var title = "时光姬"
-    var adInfo: MiaoAdInfo.AdBean? = null
 
     init {
         loadAdData()
@@ -215,10 +210,8 @@ private class HomePageViewModel(
             val res = getMiaoInitData(longVersionCode.toString())
             if (res.code == 0) {
                 val adData = res.data.ad
-//                ui.setState {
-//                    adInfo = adData
-//                }
                 withContext(Dispatchers.Main) {
+                    pageState.setAdInfo(adData)
                     saveSettingList(res.data.settingList)
                     val (autoCheckUpdate, ignoreUpdateVersionCode) = SettingPreferences.mapData(context) {
                         Pair(
@@ -367,13 +360,14 @@ private fun HomePageContent(
 
 
     val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
+    val emitter = localEmitter()
     val combinedTabClick = combinedTabDoubleClick(
         pagerState = pagerState,
         onDoubleClick = {
             scope.launch {
-                viewModel.tabs[it].emit(
-                    HomePageAction.DoubleClickTab
-                )
+                emitter.emit(EmitterAction.DoubleClickTab(
+                    tab = viewModel.tabs[it].id
+                ))
             }
         }
     )
@@ -418,7 +412,7 @@ private fun HomePageContent(
             state = pagerState,
         ) { index ->
             saveableStateHolder.SaveableStateProvider(index) {
-                viewModel.tabs[index].PageContent()
+                viewModel.tabs[index].PageContent(viewModel.pageState)
             }
         }
     }

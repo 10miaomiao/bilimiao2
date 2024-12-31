@@ -40,15 +40,16 @@ import bilibili.app.show.v1.PopularGRPC
 import bilibili.app.show.v1.PopularResultReq
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
-import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
@@ -168,7 +169,6 @@ private class HomePopularContentViewModel(
 
     fun toPageByUrl(url: String) {
         if (!BilibiliNavigation.navigationTo(pageNavigation, url)) {
-            miaoLogger() debug "toPageByUrl" + url
             BilibiliNavigation.navigationToWeb(pageNavigation, url)
         }
     }
@@ -209,9 +209,7 @@ private fun EntranceListBox(
 }
 
 @Composable
-internal fun HomePopularContent(
-    action: Flow<HomePageAction>,
-) {
+internal fun HomePopularContent() {
     val viewModel: HomePopularContentViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -224,15 +222,14 @@ internal fun HomePopularContent(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val listState = rememberLazyGridState()
+    val emitter = localEmitter()
     LaunchedEffect(Unit) {
-        action.collect {
-            when (it) {
-                is HomePageAction.DoubleClickTab -> {
-                    if (listState.firstVisibleItemIndex == 0) {
-                        viewModel.refresh()
-                    } else {
-                        listState.animateScrollToItem(0)
-                    }
+        emitter.collectAction<EmitterAction.DoubleClickTab> {
+            if (it.tab == "home.popular") {
+                if (listState.firstVisibleItemIndex == 0) {
+                    viewModel.refresh()
+                } else {
+                    listState.animateScrollToItem(0)
                 }
             }
         }

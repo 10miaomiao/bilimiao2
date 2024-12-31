@@ -30,8 +30,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
+import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -63,14 +66,14 @@ class DynamicPage : ComposePage() {
 }
 
 private sealed class DynamicPageTab(
-    val id: Int,
+    val id: String,
     val name: String,
 ) {
     @Composable
     abstract fun PageContent()
 
     data object All : DynamicPageTab(
-        id = 0,
+        id = "dynamic.all",
         name = "全部"
     ) {
         @Composable
@@ -80,7 +83,7 @@ private sealed class DynamicPageTab(
     }
 
     data object Video : DynamicPageTab(
-        id = 1,
+        id = "dynamic.video",
         name = "视频"
     ) {
         @Composable
@@ -155,6 +158,18 @@ private fun DynamicPageContent(
     val windowInsets = windowState.getContentInsets(localContainerView())
 
     val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
+    val emitter = localEmitter()
+    val combinedTabClick = combinedTabDoubleClick(
+        pagerState = pagerState,
+        onDoubleClick = {
+            scope.launch {
+                emitter.emit(EmitterAction.DoubleClickTab(
+                    tab = viewModel.tabs[it].id
+                ))
+            }
+        }
+    )
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -183,11 +198,7 @@ private fun DynamicPageContent(
                         )
                     },
                     selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
+                    onClick = { combinedTabClick(index) },
                 )
             }
         }
