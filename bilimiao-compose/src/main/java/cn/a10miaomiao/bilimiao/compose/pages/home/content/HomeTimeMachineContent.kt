@@ -1,7 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.pages.home.content
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -30,6 +32,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,12 +46,14 @@ import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
-import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageState
 import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineRegionCard
 import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineTimeCard
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
@@ -57,6 +62,7 @@ import com.a10miaomiao.bilimiao.comm.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -122,7 +128,7 @@ private class HomeTimeMachineContentViewModel(
 
 @Composable
 internal fun HomeTimeMachineContent(
-    action: Flow<HomePageAction>,
+    pageState: HomePageState
 ) {
     val viewModel: HomeTimeMachineContentViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
@@ -134,13 +140,12 @@ internal fun HomeTimeMachineContent(
     val timeSeason by viewModel.timeSeason.collectAsState()
 
     val listState = rememberLazyStaggeredGridState()
+    val emitter = localEmitter()
     LaunchedEffect(Unit) {
-        action.collect {
-            when (it) {
-                is HomePageAction.DoubleClickTab -> {
-                    if (listState.firstVisibleItemIndex != 0) {
-                        listState.animateScrollToItem(0)
-                    }
+        emitter.collectAction<EmitterAction.DoubleClickTab> {
+            if (it.tab == "home.time-machine") {
+                if (listState.firstVisibleItemIndex != 0) {
+                    listState.animateScrollToItem(0)
                 }
             }
         }
@@ -159,6 +164,39 @@ internal fun HomeTimeMachineContent(
                 timeSeason,
                 onClick = viewModel::openTimeSetting
             )
+        }
+        item() {
+            val adInfo = pageState.adInfo.value
+            if (adInfo != null && adInfo.isShow) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(5.dp)
+                    ) {
+                        Text(
+                            adInfo.title,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                    TextButton(
+                        onClick = pageState::openLinkUrl
+                    ) {
+                        Text(adInfo.link.text)
+                    }
+                }
+            }
         }
         items(regionList, { it.tid }, ) { region ->
             HomeTimeMachineRegionCard(

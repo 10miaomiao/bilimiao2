@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavHostController
+import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 
 
 private fun noLocalProvidedFor(name: String): Nothing {
@@ -18,11 +20,16 @@ internal val LocalContainerView = staticCompositionLocalOf<ViewGroup?> {
 @Composable
 fun localContainerView() = LocalContainerView.current
 
-internal val LocalPageRouter = staticCompositionLocalOf<PageRouter> {
-    noLocalProvidedFor("LocalPageRouter")
+internal val LocalPageNavigation = staticCompositionLocalOf<PageNavigation> {
+    noLocalProvidedFor("PageNavigation")
 }
 
 @Composable
-fun localPageRouter() = LocalPageRouter.current
+fun localPageNavigation() = LocalPageNavigation.current
 
+internal val LocalEmitter = staticCompositionLocalOf<SharedFlowEmitter> {
+    noLocalProvidedFor("SharedFlowEmitter")
+}
 
+@Composable
+fun localEmitter() = LocalEmitter.current

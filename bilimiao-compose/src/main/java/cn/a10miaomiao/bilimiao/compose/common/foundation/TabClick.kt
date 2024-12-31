@@ -4,7 +4,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import kotlinx.coroutines.launch
 
 @Composable

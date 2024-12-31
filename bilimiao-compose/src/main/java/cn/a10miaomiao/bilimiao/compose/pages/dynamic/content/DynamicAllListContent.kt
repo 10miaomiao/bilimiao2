@@ -15,7 +15,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,8 +29,10 @@ import bilibili.app.dynamic.v2.DynamicGRPC
 import bilibili.app.dynamic.v2.DynamicItem
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicItemCard
@@ -161,26 +165,26 @@ fun DynamicAllListContent() {
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-    val listState = rememberLazyGridState()
-//    LaunchedEffect(Unit) {
-//        action.collect {
-//            when (it) {
-//                is HomePageAction.DoubleClickTab -> {
-//                    if (listState.firstVisibleItemIndex == 0) {
-//                        viewModel.refresh()
-//                    } else {
-//                        listState.animateScrollToItem(0)
-//                    }
-//                }
-//            }
-//        }
-//    }
+    val listState = rememberLazyListState()
+    val emitter = localEmitter()
+    LaunchedEffect(Unit) {
+        emitter.collectAction<EmitterAction.DoubleClickTab> {
+            if (it.tab == "dynamic.all") {
+                if (listState.firstVisibleItemIndex == 0) {
+                    viewModel.refresh()
+                } else {
+                    listState.animateScrollToItem(0)
+                }
+            }
+        }
+    }
 
     SwipeToRefresh(
         refreshing = isRefreshing,
         onRefresh = { viewModel.refresh() },
     ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = windowInsets.addPaddingValues(
                 addTop = -windowInsets.topDp.dp + 10.dp,

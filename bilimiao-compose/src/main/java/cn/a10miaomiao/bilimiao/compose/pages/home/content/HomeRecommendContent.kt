@@ -36,8 +36,10 @@ import bilibili.app.show.v1.PopularGRPC
 import bilibili.app.show.v1.PopularResultReq
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
@@ -46,7 +48,6 @@ import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
-import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageAction
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
@@ -173,9 +174,7 @@ private class HomeRecommendContentViewModel(
 }
 
 @Composable
-internal fun HomeRecommendContent(
-    action: Flow<HomePageAction>,
-) {
+internal fun HomeRecommendContent() {
     val viewModel: HomeRecommendContentViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -189,15 +188,14 @@ internal fun HomeRecommendContent(
     val listStyle by viewModel.listStyle.collectAsState()
 
     val listState = rememberLazyGridState()
+    val emitter = localEmitter()
     LaunchedEffect(Unit) {
-        action.collect {
-            when (it) {
-                is HomePageAction.DoubleClickTab -> {
-                    if (listState.firstVisibleItemIndex == 0) {
-                        viewModel.refresh()
-                    } else {
-                        listState.animateScrollToItem(0)
-                    }
+        emitter.collectAction<EmitterAction.DoubleClickTab> {
+            if (it.tab == "home.recommend") {
+                if (listState.firstVisibleItemIndex == 0) {
+                    viewModel.refresh()
+                } else {
+                    listState.animateScrollToItem(0)
                 }
             }
         }
