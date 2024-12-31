@@ -47,5 +47,16 @@ fun MessageDialog(
                 confirmButton = {  }
             )
         }
+        is MessageDialogState.CustomState -> {
+            AlertDialog(
+                onDismissRequest = messageState.onDismissRequest,
+                confirmButton = messageState.confirmButton,
+                modifier = messageState.modifier,
+                dismissButton = messageState.dismissButton,
+                icon = messageState.icon,
+                title = messageState.title,
+                text = messageState.text,
+            )
+        }
     }
 }

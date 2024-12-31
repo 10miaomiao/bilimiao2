@@ -26,9 +26,10 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.auth.*
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -36,7 +37,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -48,9 +49,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 
 @Serializable
 data class TelVerifyPage(
@@ -84,9 +82,9 @@ private class TelVerifyPageViewModel(
 
     private var captchaKey = ""
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
+    private val messageDialog by instance<MessageDialogState>()
 
     private val biliGeetestUtil by instance<BiliGeetestUtil>()
 
@@ -119,31 +117,27 @@ private class TelVerifyPageViewModel(
             val res = withContext(Dispatchers.IO) {
                 BiliApiService.authApi.tmpUserInfo(tmpCode = code)
                     .awaitCall()
-                    .json<ResultInfo<TmpUserInfo>>()
+                    .json<ResponseData<TmpUserInfo>>()
             }
             if (res.isSuccess) {
-                val info = res.data.account_info
+                val info = res.requireData().account_info
                 tmpAccountInfo.value = info
                 if (info.bind_tel && info.tel_verify) {
                     verifyType.value = VerifyType.TEL
                 } else if (info.bind_mail && info.mail_verify) {
                     verifyType.value = VerifyType.EMAIL
                 } else {
-                    MaterialAlertDialogBuilder(fragment.requireActivity()).apply {
-                        setTitle("不支持验证")
-                        setMessage("此帐号不支持手机号及邮箱验证，请去B站官方客户端或PC网页版完善帐号信息后再重新登录")
-                        setNegativeButton("确定") { _, _ ->
-                            pageNavigation.popBackStack()
-                        }
-                    }.show()
+                    messageDialog.alert(
+                        text = "此帐号不支持手机号及邮箱验证，请去B站官方客户端或PC网页版完善帐号信息后再重新登录",
+                        title = "不支持验证"
+                    )
+                    pageNavigation.popBackStack()
                 }
             } else {
-                Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
-                    .show()
+                PopTip.show(res.message)
             }
         } catch (e: Exception) {
-            Toast.makeText(fragment.requireActivity(), "网络错误：$e", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("网络错误：$e")
             e.printStackTrace()
         }
     }
@@ -151,7 +145,7 @@ private class TelVerifyPageViewModel(
     fun verifyTel() = viewModelScope.launch(Dispatchers.Main) {
         try {
             if (verifyCode.value.isBlank()) {
-                alert("请输入验证码")
+                messageDialog.alert("请输入验证码")
                 return@launch
             }
             loading.value = true
@@ -163,7 +157,7 @@ private class TelVerifyPageViewModel(
                         requestId = requestId,
                         source = source,
                         captcha_key = captchaKey,
-                    ).awaitCall().json<ResultInfo<VerifyTelInfo>>()
+                    ).awaitCall().json<ResponseData<VerifyTelInfo>>(isLog = true)
                 } else {
                     BiliApiService.authApi.emailVerify(
                         code = verifyCode.value,
@@ -171,19 +165,17 @@ private class TelVerifyPageViewModel(
                         requestId = requestId,
                         source = source,
                         captcha_key = captchaKey,
-                    ).awaitCall().json<ResultInfo<VerifyTelInfo>>()
+                    ).awaitCall().json<ResponseData<VerifyTelInfo>>(isLog = true)
                 }
             }
             if (res.isSuccess) {
-                getOauth2AccessToken(res.data.code)
+                getOauth2AccessToken(res.requireData().code)
             } else {
-                Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
-                    .show()
+                PopTip.show(res.message)
                 loading.value = false
             }
         } catch (e: Exception) {
-            Toast.makeText(fragment.requireActivity(), "网络错误：$e", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("网络错误：$e")
             e.printStackTrace()
             loading.value = false
         }
@@ -196,21 +188,19 @@ private class TelVerifyPageViewModel(
             val res = BiliApiService.authApi
                 .oauth2AccessToken(
                     code = code
-                ).awaitCall().json<ResultInfo<LoginInfo>>()
+                ).awaitCall().json<ResponseData<LoginInfo>>()
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
-                    val loginInfo = res.data
+                    val loginInfo = res.data!!
                     BilimiaoCommApp.commApp.saveAuthInfo(loginInfo)
                     authInfo()
                 } else {
-                    alert(res.message)
+                    messageDialog.alert(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            withContext(Dispatchers.Main) {
-                alert(e.message ?: e.toString())
-            }
+            messageDialog.alert(e.message ?: e.toString())
         } finally {
             loading.value = false
         }
@@ -221,7 +211,7 @@ private class TelVerifyPageViewModel(
             BiliApiService.authApi
                 .account()
                 .awaitCall()
-                .json<ResultInfo<UserInfo>>()
+                .json<ResponseData<UserInfo>>()
         }
         if (res.isSuccess) {
             userStore.setUserInfo(res.data)
@@ -229,22 +219,6 @@ private class TelVerifyPageViewModel(
         } else {
             throw Exception(res.message)
         }
-    }
-
-    private fun alert(title: String) {
-        alert(title) {}
-    }
-
-    @OptIn(ExperimentalContracts::class)
-    private inline fun alert(title: String, initBuilder: (MaterialAlertDialogBuilder.() -> Unit)) {
-        contract {
-            callsInPlace(initBuilder, InvocationKind.EXACTLY_ONCE)
-        }
-        MaterialAlertDialogBuilder(fragment.requireActivity()).apply {
-            setTitle(title)
-            setNegativeButton("关闭", null)
-            initBuilder()
-        }.show()
     }
 
     fun setVerifyType(value: VerifyType) {
@@ -268,17 +242,15 @@ private class TelVerifyPageViewModel(
                 geeSeccode = result.geetest_seccode,
                 geeValidate = result.geetest_validate,
                 recaptchaToken = recaptchaToken,
-            ).awaitCall().json<ResultInfo<SmsSendInfo>>()
+            ).awaitCall().json<ResponseData<SmsSendInfo>>(isLog = true)
         }
         if (res.isSuccess) {
             startCountdown(60)
-            captchaKey = res.data.captcha_key
-            Toast.makeText(fragment.requireActivity(), "已发送短信验证码", Toast.LENGTH_SHORT)
-                .show()
+            captchaKey = res.requireData().captcha_key!!
+            PopTip.show("已发送短信验证码")
             return true
         } else {
-            Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show(res.message)
             return false
         }
     }
@@ -296,17 +268,15 @@ private class TelVerifyPageViewModel(
                 geeSeccode = result.geetest_seccode,
                 geeValidate = result.geetest_validate,
                 recaptchaToken = recaptchaToken,
-            ).awaitCall().json<ResultInfo<SmsSendInfo>>()
+            ).awaitCall().json<ResponseData<SmsSendInfo>>()
         }
         if (res.isSuccess) {
             startCountdown(60)
-            captchaKey = res.data.captcha_key
-            Toast.makeText(fragment.requireActivity(), "已发送邮箱验证码", Toast.LENGTH_SHORT)
-                .show()
+            captchaKey = res.requireData().captcha_key!!
+            PopTip.show("已发送邮箱验证码")
             return true
         } else {
-            Toast.makeText(fragment.requireActivity(), res.message, Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show(res.message)
             return false
         }
     }
@@ -322,8 +292,7 @@ private class TelVerifyPageViewModel(
         } else if (verifyType.value == VerifyType.EMAIL) {
             return sendEmail(result)
         } else {
-            Toast.makeText(fragment.requireActivity(), "未知类型", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("未知类型")
             return false
         }
     }
@@ -332,12 +301,13 @@ private class TelVerifyPageViewModel(
         val res = withContext(Dispatchers.IO) {
             BiliApiService.authApi.captchaPre()
                 .awaitCall()
-                .json<ResultInfo<CaptchaPreInfo>>()
+                .json<ResponseData<CaptchaPreInfo>>()
         }
         if (res.isSuccess) {
-            val geeGt = res.data.gee_gt
-            val geeChallenge = res.data.gee_challenge
-            recaptchaToken = res.data.recaptcha_token
+            val resData = res.requireData()
+            val geeGt = resData.gee_gt
+            val geeChallenge = resData.gee_challenge
+            recaptchaToken = resData.recaptcha_token
             return JSONObject().apply {
                 put("success", 1)
                 put("challenge", geeChallenge)
@@ -361,7 +331,6 @@ private fun TelVerifyPageCompose(
 ) {
     PageConfig(title = "帐号验证")
 
-    val viewModel: TelVerifyPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(LocalView.current)
