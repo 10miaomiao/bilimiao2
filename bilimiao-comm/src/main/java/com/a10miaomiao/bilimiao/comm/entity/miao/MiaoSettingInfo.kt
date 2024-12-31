@@ -24,5 +24,5 @@ data class MiaoSettingInfo(
     val title: String,
     val summary: String,
     val url: String,
-    val backupUrl: String?,
+    val backupUrl: String? = null,
 )

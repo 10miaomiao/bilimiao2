@@ -42,6 +42,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.QRLoginInfo
@@ -236,10 +237,10 @@ private class H5LoginPageViewModel(
             val res = BiliApiService.authApi
                 .qrCode(loginSessionId)
                 .awaitCall()
-                .json<ResultInfo<QRLoginInfo>>()
+                .json<ResponseData<QRLoginInfo>>()
             if (res.isSuccess) {
-                _authUrl = res.data.url
-                _authCode = res.data.auth_code
+                _authUrl = res.requireData().url
+                _authCode = res.requireData().auth_code
                 delay((200 * Math.random()).toLong() + 200L)
                 if (!confirmQRCode(_authCode)) {
                     withContext(Dispatchers.Main) {
@@ -286,7 +287,7 @@ private class H5LoginPageViewModel(
                 BiliApiService.authApi
                     .checkQrCode(authCode)
                     .awaitCall()
-                    .json<ResultInfo<LoginInfo.QrLoginInfo?>>()
+                    .json<ResponseData<LoginInfo.QrLoginInfo>>()
             }
             when (res.code) {
                 86039, 86090 -> {
@@ -302,7 +303,7 @@ private class H5LoginPageViewModel(
                 }
                 0 -> {
                     // 成功
-                    val loginInfo = res.data!!.toLoginInfo()
+                    val loginInfo = res.requireData().toLoginInfo()
                     BilimiaoCommApp.commApp.saveAuthInfo(loginInfo)
                     authInfo()
                 }
@@ -330,11 +331,11 @@ private class H5LoginPageViewModel(
                 BiliApiService.authApi
                     .account()
                     .awaitCall()
-                    .json<ResultInfo<UserInfo>>()
+                    .json<ResponseData<UserInfo>>()
             }
             if (res.isSuccess) {
                 withContext(Dispatchers.Main) {
-                    userStore.setUserInfo(res.data)
+                    userStore.setUserInfo(res.requireData())
                     pageNavigation.popBackStack()
                 }
                 messageDialog.close()

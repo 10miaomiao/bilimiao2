@@ -23,19 +23,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
-import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.WebKeyInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
@@ -45,7 +42,6 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -81,10 +77,10 @@ private class LoginPageViewModel(
     private var verifyUrl = ""
     private var recaptchaToken = ""
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
     private val biliGeetestUtil by instance<BiliGeetestUtil>()
+    private val messageDialog by instance<MessageDialogState>()
 
     val loading = MutableStateFlow(false)
     val userName = MutableStateFlow("")
@@ -103,15 +99,11 @@ private class LoginPageViewModel(
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             if (userName.value.isBlank()) {
-                withContext(Dispatchers.Main) {
-                    alert("请输入用户名/邮箱/手机号")
-                }
+                messageDialog.alert("请输入用户名/邮箱/手机号")
                 return@launch
             }
             if (password.value.isBlank()) {
-                withContext(Dispatchers.Main) {
-                    alert("请输入密码")
-                }
+                messageDialog.alert("请输入密码")
                 return@launch
             }
             loading.value = true
@@ -136,65 +128,67 @@ private class LoginPageViewModel(
                     geeSeccode = gt3Result.geetest_seccode,
                     geeChallenge = gt3Result.geetest_challenge,
                 )
-            }.awaitCall().json<ResultInfo<LoginInfo.PasswordLoginInfo>>()
+            }.awaitCall().json<ResponseData<LoginInfo.PasswordLoginInfo>>()
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
-                    val loginInfo = res.data
+                    val loginInfo = res.requireData()
                     if (loginInfo.status == 0) {
                         BilimiaoCommApp.commApp.saveAuthInfo(loginInfo.toLoginInfo())
                         authInfo()
                     } else if (loginInfo.url != null && "tmp_token=" in loginInfo.url) {
-                        alert("提示") {
-                            setMessage(loginInfo.message)
-                            setNegativeButton("取消", null)
-                            setPositiveButton("请往验证") { _, _ ->
-                                val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
-                                if (params.containsKey("tmp_token")
-                                    && params.containsKey("request_id")
-                                    && params.containsKey("source")
+                        messageDialog.open(
+                            title = "提示",
+                            text = loginInfo.message,
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
+                                        if (params.containsKey("tmp_token")
+                                            && params.containsKey("request_id")
+                                            && params.containsKey("source")
+                                        ) {
+                                            pageNavigation.navigate(TelVerifyPage(
+                                                code = params["tmp_token"]!!,
+                                                requestId = params["request_id"]!!,
+                                                source = params["source"]!!,
+                                            ))
+                                        } else {
+                                            pageNavigation.launchWebBrowser(loginInfo.url)
+                                        }
+                                        messageDialog.close()
+                                    }
                                 ) {
-                                    pageNavigation.navigate(TelVerifyPage(
-                                        code = params["tmp_token"]!!,
-                                        requestId = params["request_id"]!!,
-                                        source = params["source"]!!,
-                                    ))
-                                } else {
-                                    val intent = Intent(Intent.ACTION_VIEW)
-                                    intent.data = Uri.parse(loginInfo.url)
-                                    fragment.requireActivity().startActivity(intent)
+                                    Text("请往验证")
                                 }
                             }
-                            setNeutralButton("使用原始网页") { _, _ ->
-                                fragment.findNavController().navigate(
-                                    Uri.parse("bilimiao://auth/h5/" + Uri.encode(loginInfo.url))
-                                )
-                            }
-                        }
+                        )
                     } else {
-                        alert("登录失败，请稍后重试：" + loginInfo.status) {
-                            setMessage(loginInfo.message)
-                            setNegativeButton("关闭", null)
-                            if (loginInfo.url != null) {
-                                setPositiveButton("查看") { _, _ ->
-                                    val intent = Intent(Intent.ACTION_VIEW)
-                                    intent.data = Uri.parse(loginInfo.url)
-                                    fragment.requireActivity().startActivity(intent)
+                        messageDialog.open(
+                            title = "登录失败，请稍后重试：" + loginInfo.status,
+                            text = loginInfo.message,
+                            confirmButton = {
+                                if (!loginInfo.url.isNullOrBlank()) {
+                                    TextButton(
+                                        onClick = {
+                                            pageNavigation.launchWebBrowser(loginInfo.url)
+                                        }
+                                    ) {
+                                        Text("查看")
+                                    }
                                 }
                             }
-                        }
+                        )
                     }
                 } else if (res.code == -105 && gt3Result == null) {
-                    verifyUrl = res.data.url ?: ""
+                    verifyUrl = res.data!!.url ?: ""
                     biliGeetestUtil.startCustomFlow(this@LoginPageViewModel)
                 } else {
-                    alert(res.message)
+                    messageDialog.alert(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            withContext(Dispatchers.Main) {
-                alert(e.message ?: e.toString())
-            }
+            messageDialog.alert(e.message ?: e.toString())
         } finally {
             loading.value = false
         }
@@ -204,9 +198,9 @@ private class LoginPageViewModel(
         val res = BiliApiService.authApi
             .webKey()
             .awaitCall()
-            .json<ResultInfo<WebKeyInfo>>()
+            .json<ResponseData<WebKeyInfo>>()
         if (res.isSuccess) {
-            return res.data
+            return res.requireData()
         }
         throw Exception(res.message)
     }
@@ -216,11 +210,11 @@ private class LoginPageViewModel(
             BiliApiService.authApi
                 .account()
                 .awaitCall()
-                .json<ResultInfo<UserInfo>>()
+                .json<ResponseData<UserInfo>>()
         }
         if (res.isSuccess) {
             withContext(Dispatchers.Main) {
-                userStore.setUserInfo(res.data)
+                userStore.setUserInfo(res.requireData())
                 pageNavigation.popBackStack()
             }
         } else {
@@ -232,22 +226,6 @@ private class LoginPageViewModel(
         if (userStore.isLogin()) {
             pageNavigation.popBackStack()
         }
-    }
-
-    private fun alert(title: String) {
-        alert(title) {}
-    }
-
-    @OptIn(ExperimentalContracts::class)
-    private inline fun alert(title: String, initBuilder: (MaterialAlertDialogBuilder.() -> Unit)) {
-        contract {
-            callsInPlace(initBuilder, InvocationKind.EXACTLY_ONCE)
-        }
-        MaterialAlertDialogBuilder(fragment.requireActivity()).apply {
-            setTitle(title)
-            setNegativeButton("关闭", null)
-            initBuilder()
-        }.show()
     }
 
     override suspend fun onGTDialogResult(
@@ -267,7 +245,7 @@ private class LoginPageViewModel(
                 put("gt", queryMap["gee_gt"] ?: "")
             }
         } else {
-            alert("加载验证码出现错误")
+            messageDialog.alert("加载验证码出现错误")
             return null
         }
     }

@@ -43,7 +43,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -52,14 +51,11 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.auth.components.InternationalDialingPrefixSelect
-import cn.a10miaomiao.bilimiao.compose.pages.time.components.MonthTextBox
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.auth.CaptchaPreInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.SmsSendInfo
-import com.a10miaomiao.bilimiao.comm.entity.auth.TmpUserInfo
-import com.a10miaomiao.bilimiao.comm.entity.auth.VerifyTelInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.WebKeyInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -68,7 +64,6 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -86,10 +81,6 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
-
 @Serializable
 class SMSLoginPage : ComposePage() {
 
@@ -110,7 +101,6 @@ private class SMSLoginPageViewModel(
 
     private var captchaKey = ""
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
     private val messageDialog by instance<MessageDialogState>()
@@ -171,13 +161,13 @@ private class SMSLoginPageViewModel(
                 BiliApiService.authApi
                     .webKey()
                     .awaitCall()
-                    .json<ResultInfo<WebKeyInfo?>>(isLog = true)
+                    .json<ResponseData<WebKeyInfo>>(isLog = true)
             }
             if (!webKeyRes.isSuccess) {
                 messageDialog.alert(webKeyRes.message)
                 return@launch
             }
-            val key = webKeyRes.data!!.key
+            val key = webKeyRes.requireData().key
             val res = withContext(Dispatchers.IO) {
                 BiliApiService.authApi
                     .smsLogin(
@@ -188,11 +178,11 @@ private class SMSLoginPageViewModel(
                         key = key,
                     )
                     .awaitCall()
-                    .json<ResultInfo<LoginInfo?>>(isLog = true)
+                    .json<ResponseData<LoginInfo>>()
             }
             if (res.isSuccess) {
-                val loginInfo = res.data
-                BilimiaoCommApp.commApp.saveAuthInfo(loginInfo!!)
+                val loginInfo = res.requireData()
+                BilimiaoCommApp.commApp.saveAuthInfo(loginInfo)
                 authInfo()
             } else {
                 messageDialog.alert(res.message)
@@ -210,7 +200,7 @@ private class SMSLoginPageViewModel(
             BiliApiService.authApi
                 .account()
                 .awaitCall()
-                .json<ResultInfo<UserInfo>>()
+                .json<ResponseData<UserInfo>>()
         }
         if (res.isSuccess) {
             userStore.setUserInfo(res.data)
@@ -243,7 +233,7 @@ private class SMSLoginPageViewModel(
                 BiliApiService.authApi.smsLoginSend(
                     cid = cid,
                     tel = tel,
-                ).awaitCall().json<ResultInfo<SmsSendInfo?>>()
+                ).awaitCall().json<ResponseData<SmsSendInfo>>()
             } else {
                 BiliApiService.authApi.smsLoginSend(
                     cid = cid,
@@ -252,7 +242,7 @@ private class SMSLoginPageViewModel(
                     geeSeccode = gt3Result.geetest_seccode,
                     geeValidate = gt3Result.geetest_validate,
                     recaptchaToken = recaptchaToken,
-                ).awaitCall().json<ResultInfo<SmsSendInfo?>>()
+                ).awaitCall().json<ResponseData<SmsSendInfo>>()
             }
         }
         if (res.isSuccess) {
@@ -262,12 +252,12 @@ private class SMSLoginPageViewModel(
                 biliGeetestUtil.startCustomFlow(this)
                 return false
             }
-            captchaKey = res.data!!.captcha_key
+            captchaKey = res.requireData().captcha_key!!
             startCountdown(60)
             PopTip.show("已发送短信验证码")
             return true
         } else if (res.code == -105 && gt3Result == null) {
-            recaptchaUrl = res.data!!.recaptcha_url ?: ""
+            recaptchaUrl = res.requireData().recaptcha_url!!
             biliGeetestUtil.startCustomFlow(this)
             return false
         } else {
@@ -308,7 +298,6 @@ private fun SMSLoginPageCompose(
 ) {
     PageConfig(title = "手机号登录")
 
-    val viewModel: SMSLoginPageViewModel = diViewModel()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(LocalView.current)

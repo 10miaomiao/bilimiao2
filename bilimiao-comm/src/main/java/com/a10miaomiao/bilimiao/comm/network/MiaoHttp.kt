@@ -107,7 +107,9 @@ class MiaoHttp(var url: String? = null) {
         private val gson = Gson()
 
         val kotlinJson = Json {
-            ignoreUnknownKeys = true
+            ignoreUnknownKeys = true // 忽略未知 Key
+            explicitNulls = true // 空值填充
+            isLenient = true // 宽松校验
         }
 
         fun <T> fromJson(json: String, typeOfT: Type): T {

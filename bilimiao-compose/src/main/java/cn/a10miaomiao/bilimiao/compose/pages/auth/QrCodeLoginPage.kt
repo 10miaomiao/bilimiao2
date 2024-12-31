@@ -29,8 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
@@ -38,7 +36,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.auth.QRLoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
@@ -74,7 +72,6 @@ private class QrCodeLoginPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
 
@@ -94,9 +91,9 @@ private class QrCodeLoginPageViewModel(
             val res = BiliApiService.authApi
                 .qrCode(loginSessionId)
                 .awaitCall()
-                .gson<ResultInfo<QRLoginInfo?>>()
+                .gson<ResponseData<QRLoginInfo>>()
             if (res.isSuccess) {
-                val resData = res.data!!
+                val resData = res.requireData()
                 renderQrcode(resData.url)
                 launch {
                     val authCode = resData.auth_code
@@ -130,7 +127,7 @@ private class QrCodeLoginPageViewModel(
             val res = BiliApiService.authApi
                 .checkQrCode(authCode)
                 .awaitCall()
-                .gson<ResultInfo<LoginInfo.QrLoginInfo>>()
+                .gson<ResponseData<LoginInfo.QrLoginInfo>>()
             when(res.code) {
                 86039 -> {
                     // 未确认
@@ -153,7 +150,7 @@ private class QrCodeLoginPageViewModel(
                 }
                 0 -> {
                     // 成功
-                    val loginInfo = res.data.toLoginInfo()
+                    val loginInfo = res.requireData().toLoginInfo()
                     BilimiaoCommApp.commApp.saveAuthInfo(loginInfo)
                     authInfo()
                 }
@@ -174,12 +171,12 @@ private class QrCodeLoginPageViewModel(
             BiliApiService.authApi
                 .account()
                 .awaitCall()
-                .gson<ResultInfo<UserInfo>>()
+                .gson<ResponseData<UserInfo>>()
         }
         if (res.isSuccess) {
             withContext(Dispatchers.Main) {
-                userStore.setUserInfo(res.data)
-                pageNavigation.popBackStack(HomePage, true)
+                userStore.setUserInfo(res.requireData())
+                pageNavigation.popBackStack()
             }
         } else {
             throw Exception(res.message)

@@ -11,15 +11,15 @@ data class LoginInfo(
 
     @Serializable
     data class PasswordLoginInfo(
-        val cookie_info: CookieInfo,
-        val sso: List<String>,
+        val cookie_info: CookieInfo? = null,
+        val sso: List<String>? = null,
         val status: Int,
         val message: String,
         val url: String,
-        val token_info: TokenInfo
+        val token_info: TokenInfo? = null,
     ){
         fun toLoginInfo() = LoginInfo(
-            token_info = token_info,
+            token_info = token_info!!,
             cookie_info = cookie_info,
             sso = sso,
         )
