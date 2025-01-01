@@ -53,6 +53,7 @@ bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在
 * [DanmakuFlameMaster](https://github.com/bilibili/DanmakuFlameMaster)
 * [mojito](https://github.com/mikaelzero/mojito)
 * [DialogX](https://github.com/kongzue/DialogX)
+* [scale](https://github.com/jvziyaoyao/scale)
 
 
 ### 关于我
