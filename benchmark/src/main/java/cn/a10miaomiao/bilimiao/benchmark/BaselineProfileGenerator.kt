@@ -33,8 +33,6 @@ class BaselineProfileGenerator {
         ) {
             pressHome()
             startActivityAndWait()
-            clickOnText("去设置>")
-            device.pressBack()
             clickOnText("菜单")
             clickOnText("设置")
         }
