@@ -29,6 +29,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
@@ -73,7 +74,7 @@ private sealed class DynamicPageTab(
     abstract fun PageContent()
 
     data object All : DynamicPageTab(
-        id = "dynamic.all",
+        id = PageTabIds.DynamicAll,
         name = "全部"
     ) {
         @Composable
@@ -83,7 +84,7 @@ private sealed class DynamicPageTab(
     }
 
     data object Video : DynamicPageTab(
-        id = "dynamic.video",
+        id = PageTabIds.DynamicVideo,
         name = "视频"
     ) {
         @Composable
