@@ -10,6 +10,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
@@ -31,7 +32,7 @@ internal class BlankPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
 }
 
