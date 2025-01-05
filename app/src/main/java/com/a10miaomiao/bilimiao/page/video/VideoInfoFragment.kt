@@ -85,7 +85,6 @@ import com.a10miaomiao.bilimiao.comm.wrapInSwipeRefreshLayout
 import com.a10miaomiao.bilimiao.commponents.video.videoItem
 import com.a10miaomiao.bilimiao.config.ViewStyle
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.video.comment.VideoCommentListFragment
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget._setContent
@@ -456,8 +455,10 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     private val handleTagsItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.tags[position]
         val nav = findNavController()
-        val args = SearchResultFragment.createArguments(item.tag_name)
-        nav.navigate(SearchResultFragment.actionId, args)
+        nav.navigateToCompose(
+            BilimiaoPageRoute.Entry.Search,
+            param = item.tag_name
+        )
     }
 
     private val handleRelateItemClick = OnItemClickListener { adapter, view, position ->

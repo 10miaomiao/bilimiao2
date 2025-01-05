@@ -11,9 +11,6 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.page.web.WebFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
-import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
-import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
-import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
 import com.a10miaomiao.bilimiao.page.setting.*
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.user.*
@@ -66,10 +63,6 @@ object MainNavGraph {
             addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
             addFragment(HistoryFragment::class, HistoryFragment.Companion)
             addFragment(WatchLaterFragment::class, WatchLaterFragment.Companion)
-
-            addFragment(SearchStartFragment::class, SearchStartFragment.Companion)
-            addFragment(SearchResultFragment::class, SearchResultFragment.Companion)
-            addFragment(VideoRegionFragment::class, VideoRegionFragment.Companion)
 
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 
