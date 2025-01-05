@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +44,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
@@ -143,7 +143,7 @@ internal fun HomeTimeMachineContent(
     val emitter = localEmitter()
     LaunchedEffect(Unit) {
         emitter.collectAction<EmitterAction.DoubleClickTab> {
-            if (it.tab == "home.time-machine") {
+            if (it.tab == PageTabIds.HomeTimeMachine) {
                 if (listState.firstVisibleItemIndex != 0) {
                     listState.animateScrollToItem(0)
                 }

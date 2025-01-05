@@ -28,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import bilibili.app.dynamic.v2.DynamicGRPC
 import bilibili.app.dynamic.v2.DynamicItem
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
@@ -169,7 +170,7 @@ fun DynamicAllListContent() {
     val emitter = localEmitter()
     LaunchedEffect(Unit) {
         emitter.collectAction<EmitterAction.DoubleClickTab> {
-            if (it.tab == "dynamic.all") {
+            if (it.tab == PageTabIds.DynamicAll) {
                 if (listState.firstVisibleItemIndex == 0) {
                     viewModel.refresh()
                 } else {

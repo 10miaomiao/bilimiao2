@@ -21,6 +21,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.Navigation
 import bilibili.app.dynamic.v2.DynamicGRPC
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
@@ -216,7 +217,7 @@ fun DynamicVideoListContent() {
     val emitter = localEmitter()
     LaunchedEffect(Unit) {
         emitter.collectAction<EmitterAction.DoubleClickTab> {
-            if (it.tab == "dynamic.video") {
+            if (it.tab == PageTabIds.DynamicVideo) {
                 if (listState.firstVisibleItemIndex == 0) {
                     viewModel.refresh()
                 } else {

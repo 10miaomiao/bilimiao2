@@ -38,6 +38,7 @@ import bilibili.app.card.v1.SmallCoverV5
 import bilibili.app.show.v1.EntranceShow
 import bilibili.app.show.v1.PopularGRPC
 import bilibili.app.show.v1.PopularResultReq
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
@@ -225,7 +226,7 @@ internal fun HomePopularContent() {
     val emitter = localEmitter()
     LaunchedEffect(Unit) {
         emitter.collectAction<EmitterAction.DoubleClickTab> {
-            if (it.tab == "home.popular") {
+            if (it.tab == PageTabIds.HomePopular) {
                 if (listState.firstVisibleItemIndex == 0) {
                     viewModel.refresh()
                 } else {

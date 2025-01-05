@@ -48,6 +48,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
@@ -119,7 +120,7 @@ private sealed class HomePageTab(
     abstract fun PageContent(pageState: HomePageState)
 
     data object TimeMachine: HomePageTab(
-        id = "home.time-machine",
+        id = PageTabIds.HomeTimeMachine,
         name = "时光姬",
     ) {
         @Composable
@@ -129,7 +130,7 @@ private sealed class HomePageTab(
     }
 
     data object Recommend : HomePageTab(
-        id = "home.recommend",
+        id = PageTabIds.HomeRecommend,
         name = "推荐"
     ) {
         @Composable
@@ -139,7 +140,7 @@ private sealed class HomePageTab(
     }
 
     data object Popular : HomePageTab(
-        id = "home.popular",
+        id = PageTabIds.HomePopular,
         name = "热门"
     ) {
         @Composable
