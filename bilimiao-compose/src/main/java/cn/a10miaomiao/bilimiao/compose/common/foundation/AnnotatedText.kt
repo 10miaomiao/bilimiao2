@@ -54,7 +54,7 @@ fun inlineAnnotatedContent(
 }
 
 @Composable
-fun AnnotatedText(
+fun annotatedText(
     nodes: List<AnnotatedTextNode>
 ): AnnotatedString {
     return buildAnnotatedString {

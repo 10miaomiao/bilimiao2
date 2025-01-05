@@ -43,6 +43,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Danmukunum
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Playnum
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Upper
+import cn.a10miaomiao.bilimiao.compose.common.foundation.htmlText
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -119,16 +120,29 @@ fun VideoItemBox(
                 .zIndex(-1f), // 适配无障碍功能，优先播报视频标题
         ) {
             if (title != null) {
-                Text(
-                    text = title,
-                    maxLines = 2,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleSmall,
-                )
+                if (isHtml) {
+                    Text(
+                        text = htmlText(title),
+                        maxLines = 2,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                } else {
+                    Text(
+                        text = title,
+                        maxLines = 2,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                }
             }
 
             if (upperName != null) {

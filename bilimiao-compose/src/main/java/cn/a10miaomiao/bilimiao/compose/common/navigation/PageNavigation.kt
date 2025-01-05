@@ -18,6 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 class PageNavigation(
     private val fragment: Fragment,
@@ -32,7 +33,9 @@ class PageNavigation(
         }.isSuccess || runCatching {
             val nav = fragment.findNavController()
             nav.navigate(deepLink, defaultNavOptions)
-        }.isSuccess
+        }.isSuccess.also {
+            if (!it) miaoLogger() debug "[NotFoundPage]:deepLink=${deepLink}"
+        }
     }
 
     fun <T : ComposePage> navigate(

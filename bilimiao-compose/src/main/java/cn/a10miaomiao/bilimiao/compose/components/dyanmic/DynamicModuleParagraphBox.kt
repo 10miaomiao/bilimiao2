@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import bilibili.app.dynamic.v2.ModuleParagraph
 import bilibili.app.dynamic.v2.Paragraph
 import bilibili.app.dynamic.v2.PicParagraph
-import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedText
+import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 import cn.a10miaomiao.bilimiao.compose.common.foundation.toAnnotatedTextNode
 import cn.a10miaomiao.bilimiao.compose.components.image.ImagesGrid
@@ -28,7 +28,7 @@ fun DynamicModuleParagraphBox(
             val nodes = content.value.nodes.toAnnotatedTextNode()
             val emoteMap = inlineAnnotatedContent(nodes)
             Text(
-                AnnotatedText(nodes),
+                annotatedText(nodes),
                 modifier = Modifier.padding(horizontal = 10.dp),
                 inlineContent = emoteMap,
                 color = MaterialTheme.colorScheme.onSurface,

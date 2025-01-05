@@ -13,7 +13,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.serialization.decodeArguments
-import androidx.navigation.toRoute
 import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
 import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughOut
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -38,6 +37,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.rank.RankPage
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.AboutPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuSettingPage
@@ -62,7 +62,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.serialization.serializer
 
 class BilimiaoPageRoute (
@@ -89,6 +88,7 @@ class BilimiaoPageRoute (
         SelectProxyServer,
         SendDanmaku,
         Lyric,
+        Search,
     }
 
     companion object {
@@ -143,6 +143,7 @@ class BilimiaoPageRoute (
                 Entry.SelectProxyServer -> SelectProxyServerPage()
                 Entry.SendDanmaku -> SendDanmakuPage()
                 Entry.Lyric -> LyricPage()
+                Entry.Search -> SearchResultPage(param)
             }
         }
     }
@@ -157,6 +158,9 @@ class BilimiaoPageRoute (
 //            val page = it.toRoute<HomePage>()
 //            page.Content()
 //        }
+        
+        // search
+        composable<SearchResultPage>()
 
         // auth
         composable<LoginPage>()
@@ -167,7 +171,13 @@ class BilimiaoPageRoute (
 
         // bangumi
         composable<BangumiFollowPage>()
-        composable<BangumiDetailPage>()
+        composable<BangumiDetailPage>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://www.bilibili.com/bangumi/play/ss{id}/"
+                }
+            )
+        )
 
         // dynamic
         composable<DynamicPage>()
@@ -223,7 +233,13 @@ class BilimiaoPageRoute (
         composable<TimeRegionDetailPage>()
 
         // user
-        composable<UserSpacePage>()
+        composable<UserSpacePage>(
+            deepLinks = listOf(
+                navDeepLink<UserSpacePage>(
+                    basePath = "bilibili://author"
+                )
+            )
+        )
         composable<MyFollowPage>()
         composable<SearchFollowPage>()
         composable<UserBangumiPage>()

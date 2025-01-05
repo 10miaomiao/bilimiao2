@@ -30,7 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Like
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Likefill
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Reply
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Share
-import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedText
+import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedTextNode
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 import cn.a10miaomiao.bilimiao.compose.components.image.ImagesGrid
@@ -256,7 +256,7 @@ fun ReplyItemBox(
                 val nodes = content.toAnnotatedTextNode()
                 val emoteMap = inlineAnnotatedContent(nodes)
                 Text(
-                    AnnotatedText(nodes),
+                    annotatedText(nodes),
                     inlineContent = emoteMap,
                     color = MaterialTheme.colorScheme.onSurface,
                 )

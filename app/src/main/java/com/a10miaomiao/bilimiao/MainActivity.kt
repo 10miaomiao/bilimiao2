@@ -616,9 +616,9 @@ class MainActivity
                 val mode = arguments.getInt(SearchActivity.KEY_MODE)
                 val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
                 if (mode == 0) {
-                    pointerNav.navController.navigate(
-                        SearchResultFragment.actionId,
-                        SearchResultFragment.createArguments(keyword),
+                    pointerNav.navController.navigateToCompose(
+                        BilimiaoPageRoute.Entry.Search,
+                        param = keyword,
                     )
                 } else {
                     searchSelfPage(keyword)
