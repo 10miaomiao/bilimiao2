@@ -7,14 +7,10 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
-import com.a10miaomiao.bilimiao.page.MainFragment
 //import com.a10miaomiao.bilimiao.page.TestFragment
 import com.a10miaomiao.bilimiao.page.web.WebFragment
-import com.a10miaomiao.bilimiao.page.auth.H5LoginFragment
 import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
-import com.a10miaomiao.bilimiao.page.rank.RankFragment
-import com.a10miaomiao.bilimiao.page.region.RegionFragment
 import com.a10miaomiao.bilimiao.page.search.SearchResultFragment
 import com.a10miaomiao.bilimiao.page.search.SearchStartFragment
 import com.a10miaomiao.bilimiao.page.search.result.VideoRegionFragment
@@ -49,14 +45,10 @@ object MainNavGraph {
 
     fun createGraph(navController: NavController, startDestination: Int) {
         navController.graph = navController.createGraph(0, startDestination) {
-            addFragment(MainFragment::class, MainFragment.Companion, dest.main)
             addFragment(TemplateFragment::class, TemplateFragment.Companion, dest.template)
             addFragment(WebFragment::class, WebFragment.Companion, dest.web)
             addFragment(ComposeFragment::class, ComposeFragmentNavigatorBuilder, dest.compose)
 //            addFragment(TestFragment::class, TestFragment.Companion)
-
-            addFragment(RegionFragment::class, RegionFragment.Companion)
-            addFragment(RankFragment::class, RankFragment.Companion)
 
             addFragment(VideoInfoFragment::class, VideoInfoFragment.Companion)
             addFragment(VideoCoinFragment::class, VideoCoinFragment.Companion)
@@ -69,8 +61,6 @@ object MainNavGraph {
             addFragment(SendCommentFragment::class, SendCommentFragment.Companion)
 
             addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)
-
-            addFragment(H5LoginFragment::class, H5LoginFragment.Companion)
 
             addFragment(UserSearchArchiveListFragment::class, UserSearchArchiveListFragment.Companion)
             addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
