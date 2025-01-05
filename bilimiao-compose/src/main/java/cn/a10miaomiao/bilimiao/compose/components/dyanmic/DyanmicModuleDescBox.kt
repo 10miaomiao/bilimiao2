@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import bilibili.app.dynamic.v2.DescType
-import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedText
+import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedTextNode
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 
@@ -29,7 +29,7 @@ fun DyanmicModuleDescBox(
 ) {
     val nodes = desc.toAnnotatedTextNode()
     Text(
-        text = AnnotatedText(nodes),
+        text = annotatedText(nodes),
         inlineContent = inlineAnnotatedContent(nodes),
         modifier = Modifier
             .fillMaxWidth()

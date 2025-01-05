@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.foundation.htmlText
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -43,14 +44,17 @@ fun BangumiItemBox(
     desc: String? = null,
     coverBadge1: @Composable () -> Unit = {},
     coverBadge2: @Composable () -> Unit = {},
+    isHtml: Boolean = false,
     moreMenu: List<Pair<Int, String>?> = listOf(),
     onMenuItemClick: ((Pair<Int, String>) -> Unit)? = null,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
 ) {
     Row(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .padding(10.dp)
+        modifier = Modifier
+            .run {
+                if (onClick == null) this
+                else clickable(onClick = onClick)
+            }
             .semantics(mergeDescendants = true) {
                 contentDescription = with(StringBuilder()) {
                     append(title)
@@ -64,6 +68,7 @@ fun BangumiItemBox(
                     }
                 }.toString()
             }
+            .then(modifier)
     ) {
         Box(
             modifier = Modifier
@@ -93,13 +98,23 @@ fun BangumiItemBox(
                 .height(130.dp)
                 .padding(start = 5.dp),
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                modifier = Modifier.padding(bottom = 5.dp),
-            )
+            if (isHtml) {
+                Text(
+                    text = htmlText(title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 2,
+                    modifier = Modifier.padding(bottom = 5.dp),
+                )
+            } else {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 2,
+                    modifier = Modifier.padding(bottom = 5.dp),
+                )
+            }
             if (statusText != null) {
                 Text(
                     text = statusText,

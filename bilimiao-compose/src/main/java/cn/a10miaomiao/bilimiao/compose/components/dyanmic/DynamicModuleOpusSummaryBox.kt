@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import bilibili.app.dynamic.v2.TextNode
 import bilibili.app.dynamic.v2.Paragraph;
-import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedText
+import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedTextNode
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 import cn.a10miaomiao.bilimiao.compose.common.foundation.toAnnotatedTextNode
@@ -20,7 +20,7 @@ private fun DynamicParagraphRender(p: Paragraph) {
     val nodes = p.text?.nodes?.toAnnotatedTextNode() ?: listOf()
     val emoteMap = inlineAnnotatedContent(nodes)
     Text(
-        AnnotatedText(nodes),
+        annotatedText(nodes),
         inlineContent = emoteMap,
         color = MaterialTheme.colorScheme.onSurface,
     )

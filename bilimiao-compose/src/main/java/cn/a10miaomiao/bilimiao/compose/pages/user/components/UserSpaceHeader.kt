@@ -49,6 +49,7 @@ import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.localImagePreviewerController
 import cn.a10miaomiao.bilimiao.compose.components.image.viewer.ModelProcessor
+import cn.a10miaomiao.bilimiao.compose.components.user.UserLevelIcon
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.TransformItemView
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.VerticalDragType
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberPreviewerState
@@ -119,18 +120,6 @@ private fun UserNameBox(
     officialVerifyTitle: String,
     officialVerifyIcon: String,
 ) {
-    val levelImgRes = when (level) {
-        0 -> R.drawable.ic_bili_lv0
-        1 -> R.drawable.ic_bili_lv1
-        2 -> R.drawable.ic_bili_lv2
-        3 -> R.drawable.ic_bili_lv3
-        4 -> R.drawable.ic_bili_lv4
-        5 -> R.drawable.ic_bili_lv5
-        6 -> R.drawable.ic_bili_lv6
-        7 -> R.drawable.ic_bili_lv7
-        8 -> R.drawable.ic_bili_lv8
-        else -> R.drawable.ic_bili_lv9
-    }
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -140,12 +129,11 @@ private fun UserNameBox(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            Image(
+            UserLevelIcon(
                 modifier = Modifier
                     .padding(start = 5.dp)
                     .size(24.dp, 18.dp),
-                painter = painterResource(levelImgRes),
-                contentDescription = "lv${level}"
+                level = level,
             )
         }
         if (officialVerify) {
