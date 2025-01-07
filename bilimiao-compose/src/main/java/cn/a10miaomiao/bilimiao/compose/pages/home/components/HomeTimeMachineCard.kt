@@ -13,14 +13,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Chip
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,7 +72,6 @@ internal fun HomeTimeMachineCard(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun HomeTimeMachineTimeCard(
     timeText: String,
@@ -102,7 +101,7 @@ internal fun HomeTimeMachineTimeCard(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            Chip(
+            AssistChip(
                 onClick = onClick,
                 leadingIcon = {
                     Image(
@@ -110,14 +109,15 @@ internal fun HomeTimeMachineTimeCard(
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
+                },
+                label = {
+                    Text(
+                        text = timeText,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
                 }
-            ) {
-                Text(
-                    text = timeText,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelSmall,
-                )
-            }
+            )
         }
         Text(
             modifier = Modifier.fillMaxWidth(),
@@ -129,7 +129,7 @@ internal fun HomeTimeMachineTimeCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun HomeTimeMachineRegionCard(
     region: RegionInfo,
@@ -148,18 +148,19 @@ internal fun HomeTimeMachineRegionCard(
     ) {
         FlowRow(
             modifier = Modifier,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             region.children.forEachIndexed { index, child ->
-                Chip(
-                    onClick = { onClick(region, index) }
-                ) {
-                    Text(
-                        text = child.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
+                AssistChip(
+                    onClick = { onClick(region, index) },
+                    label = {
+                        Text(
+                            text = child.name,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                )
             }
         }
     }
