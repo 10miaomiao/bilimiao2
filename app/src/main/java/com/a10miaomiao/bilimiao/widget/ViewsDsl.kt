@@ -9,8 +9,6 @@ import com.a10miaomiao.bilimiao.widget.gridimage.NineGridImageView
 import com.a10miaomiao.bilimiao.widget.image.RCImageView
 import com.a10miaomiao.bilimiao.widget.layout.LimitedFrameLayout
 import com.a10miaomiao.bilimiao.widget.recycler.ViewPager2Container
-import com.a10miaomiao.bilimiao.widget.picker.DatePickerView
-import com.a10miaomiao.bilimiao.widget.picker.MonthPickerView
 import com.a10miaomiao.bilimiao.widget.recycler.RecyclerviewAtViewPager2
 import com.a10miaomiao.bilimiao.widget.text.BadgeTextView
 import splitties.views.dsl.core.*
@@ -79,22 +77,6 @@ inline fun View.recyclerviewAtViewPager2(
     return view({ RecyclerviewAtViewPager2(it) }, id).apply(initView)
 }
 
-
-inline fun View.datePickerView(
-    @IdRes id: Int = View.NO_ID,
-    @StyleRes theme: Int = NO_THEME,
-    initView: DatePickerView.() -> Unit = {}
-): DatePickerView {
-    return view({ DatePickerView(it) }, id).apply(initView)
-}
-
-inline fun View.monthPickerView(
-    @IdRes id: Int = View.NO_ID,
-    @StyleRes theme: Int = NO_THEME,
-    initView: MonthPickerView.() -> Unit = {}
-): MonthPickerView {
-    return view({ MonthPickerView(it) }, id).apply(initView)
-}
 
 inline fun View.nineGridImageView(
     @IdRes id: Int = View.NO_ID,

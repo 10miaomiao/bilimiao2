@@ -32,7 +32,7 @@ class MiaoHttp(var url: String? = null) {
     private fun buildRequest(): Request {
         requestBuilder.addHeader("User-Agent", ApiHelper.USER_AGENT)
         requestBuilder.addHeader("Referer", ApiHelper.REFERER)
-
+        requestBuilder.addHeader("buvid", BilimiaoCommApp.commApp.getBilibiliBuvid())
         if (url?.let { "bilibili.com" in it } == true) {
             requestBuilder.addHeader("env", "prod")
             requestBuilder.addHeader("app-key", "android_hd")

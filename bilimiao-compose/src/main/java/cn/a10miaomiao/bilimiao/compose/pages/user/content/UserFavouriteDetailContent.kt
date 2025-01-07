@@ -89,7 +89,6 @@ private class UserFavouriteDetailViewModel(
     private val keyword: String = "",
 ) : ViewModel(), DIAware {
 
-    val fragment: Fragment by instance()
     private val pageNavigation: PageNavigation by instance()
     val userStore: UserStore by instance()
     private val playerDelegate: BasePlayerDelegate by instance()
@@ -163,27 +162,33 @@ private class UserFavouriteDetailViewModel(
     }
 
     fun openVideo(item: MediasInfo) {
+        val ugcInfo = item.ugc
+        val ogvInfo = item.ogv
         if (isAutoPlay.value) {
-            addPlayList()
-            if (playerStore.state.cid != item.id) {
-                playerDelegate.openPlayer(
-                    VideoPlayerSource(
-                        mainTitle = item.title,
-                        title = item.title,
-                        coverUrl = item.cover,
-                        aid = item.id,
-                        id = item.ugc.first_cid,
-                        ownerId = item.upper.mid,
-                        ownerName = item.upper.name,
+            if (ugcInfo != null) {
+                addPlayList()
+                if (playerStore.state.aid != item.id) {
+                    playerDelegate.openPlayer(
+                        VideoPlayerSource(
+                            mainTitle = item.title,
+                            title = item.title,
+                            coverUrl = item.cover,
+                            aid = item.id,
+                            id = ugcInfo.first_cid,
+                            ownerId = item.upper.mid,
+                            ownerName = item.upper.name,
+                        )
                     )
-                )
+                }
+                return
+            } else {
+                PopTip.show("自动连播仅支持普通视频")
             }
-        } else {
-            fragment.findNavController()
-                .navigate(
-                    Uri.parse("bilimiao://video/" + item.id),
-                    defaultNavOptions,
-                )
+        }
+        if (ugcInfo != null) {
+            pageNavigation.navigateToVideoInfo(item.id)
+        } else if (ogvInfo != null) {
+            pageNavigation.navigateToVideoInfo(ogvInfo.season_id)
         }
     }
 

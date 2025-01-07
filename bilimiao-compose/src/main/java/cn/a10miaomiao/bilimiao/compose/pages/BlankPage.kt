@@ -28,7 +28,7 @@ class BlankPage : ComposePage() {
     }
 }
 
-internal class BlankPageViewModel(
+private class BlankPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
@@ -38,7 +38,7 @@ internal class BlankPageViewModel(
 
 
 @Composable
-internal fun BlankPageContent(
+private fun BlankPageContent(
     viewModel: BlankPageViewModel
 ) {
     PageConfig(

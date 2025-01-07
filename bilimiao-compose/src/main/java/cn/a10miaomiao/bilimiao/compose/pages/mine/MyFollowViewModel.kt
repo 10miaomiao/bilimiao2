@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.pages.user
+package cn.a10miaomiao.bilimiao.compose.pages.mine
 
 import android.app.Activity
 import androidx.fragment.app.Fragment
@@ -6,6 +6,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo
+import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingListAction
+import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.TagEditDialogState
+import cn.a10miaomiao.bilimiao.compose.pages.user.TagInfo
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserTagSetDialogState
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService

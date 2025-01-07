@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.app.Activity
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -28,7 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
-import cn.a10miaomiao.bilimiao.compose.pages.user.components.UserInfoCard
+import cn.a10miaomiao.bilimiao.compose.components.user.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu

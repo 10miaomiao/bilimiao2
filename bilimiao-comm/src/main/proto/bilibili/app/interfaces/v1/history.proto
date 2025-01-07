@@ -256,7 +256,7 @@ enum DT {
 // 删除历史记录-请求
 message DeleteReq {
     // 历史记录信息
-    HisInfo his_info = 1;
+    repeated HisInfo his_info = 1;
 }
 
 // 设备类型

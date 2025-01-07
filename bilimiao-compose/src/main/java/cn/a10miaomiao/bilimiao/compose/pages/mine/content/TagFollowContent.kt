@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.pages.user.content
+package cn.a10miaomiao.bilimiao.compose.pages.mine.content
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Box
@@ -45,10 +45,10 @@ import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingListAction
 import cn.a10miaomiao.bilimiao.compose.pages.user.InterrelationInfo
-import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserTagSetDialogState
-import cn.a10miaomiao.bilimiao.compose.pages.user.components.UserInfoCard
+import cn.a10miaomiao.bilimiao.compose.components.user.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService

@@ -9,7 +9,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
-import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
@@ -74,15 +74,17 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "历史",
-            pageUrl = "bilimiao://history",
             iconRes = R.drawable.ic_nav_history,
-            isNeedAuth = true,
+            isNeedAuth = false,
+            isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.History,
         ),
         StartNavInfo(
             title = "稍后看",
-            pageUrl = "bilimiao://watchlater",
             iconRes = R.drawable.ic_nav_watchlater,
             isNeedAuth = true,
+            isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.WatchLater,
         ),
         StartNavInfo(
             title = "设置",

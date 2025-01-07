@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.comm.entity.video
 import android.os.Parcelable
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonInfo
 import kotlinx.android.parcel.Parcelize
+import kotlinx.serialization.Serializable
 
 @Parcelize
 data class VideoInfo(

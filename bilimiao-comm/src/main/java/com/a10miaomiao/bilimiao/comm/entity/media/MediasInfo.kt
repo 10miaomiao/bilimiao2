@@ -8,7 +8,8 @@ data class MediasInfo(
     val title: String,
     val upper: MediaUpperInfo,
     val cnt_info: CntInfo,
-    val ugc: Ugc
+    val ugc: Ugc? = null,
+    val ogv: Ogv? = null,
 ) {
 
     data class CntInfo(
@@ -23,5 +24,8 @@ data class MediasInfo(
     )
     data class Ugc(
         val first_cid: String,
+    )
+    data class Ogv(
+        val season_id: String,
     )
 }

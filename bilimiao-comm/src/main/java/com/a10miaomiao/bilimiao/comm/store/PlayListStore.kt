@@ -252,11 +252,11 @@ class PlayListStore(override val di: DI) :
                     if (res.code == 0) {
                         val result = res.data.medias
                         val newItems = result?.filter {
-                            it.ugc.first_cid.isNotEmpty()
+                            it.ugc != null
                         }?.map {
                             PlayListItemInfo(
                                 aid = it.id,
-                                cid = it.ugc.first_cid,
+                                cid = it.ugc!!.first_cid,
                                 duration = it.duration.toInt(),
                                 title = it.title,
                                 cover = it.cover,
