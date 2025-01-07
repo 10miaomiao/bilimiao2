@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,8 +34,8 @@ import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
-import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigInfo
-import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigInfo
+import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialog
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
@@ -45,6 +46,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.android.subDI
@@ -119,25 +121,26 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     private val pageNavigation = PageNavigation(
         this,  { composeNav }
     )
-    private val pageConfigInfo = PageConfigInfo(this)
+    private val pageConfigState = PageConfigState()
     private val emitter = SharedFlowEmitter()
 
+    private var _pageConfig = PageConfigState.Cofing(-1)
     override val pageConfig = myPageConfig {
-        val config = pageConfigInfo.lastConfig()
-        title = config?.title ?: ""
-        menu = config?.menu
-        search = config?.search
+        val config = _pageConfig
+        title = config.title
+        menu = config.menu
+        search = config.search
     }
 
 
     override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
         super.onMenuItemClick(view, menuItem)
-        pageConfigInfo.onMenuItemClick(view, menuItem)
+        pageConfigState.onMenuItemClick(view, menuItem)
     }
 
     override fun onSearchSelfPage(context: Context, keyword: String) {
         super.onSearchSelfPage(context, keyword)
-        pageConfigInfo.onSearchSelfPage(context, keyword)
+        pageConfigState.onSearchSelfPage(context, keyword)
     }
 
     private val messageDialogState = MessageDialogState()
@@ -162,7 +165,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                 composeNav = rememberNavController()
                 CompositionLocalProvider(
                     LocalContainerView provides container,
-                    LocalPageConfigInfo provides pageConfigInfo,
+                    LocalPageConfigState provides pageConfigState,
                     LocalOnBackPressedDispatcherOwner provides this@ComposeFragment,
                     LocalPageNavigation provides pageNavigation,
                     LocalEmitter provides emitter,
@@ -190,6 +193,12 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        lifecycleScope.launch {
+            pageConfigState.collectConfig {
+                _pageConfig = it
+                pageConfig.notifyConfigChanged()
+            }
+        }
     }
 
     fun onBackPressed(): Boolean {
