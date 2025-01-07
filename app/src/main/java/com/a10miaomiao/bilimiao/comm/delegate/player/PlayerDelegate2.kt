@@ -393,9 +393,9 @@ class PlayerDelegate2(
     }
 
     internal fun historyReport(currentPosition: Long) {
-        if (!userStore.isLogin()) {
-            return
-        }
+//        if (!userStore.isLogin()) {
+//            return
+//        }
         // 5秒记录一次
         if (currentPosition > 0 && currentPosition - lastReportProgress < 5000) {
             return

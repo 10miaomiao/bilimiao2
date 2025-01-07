@@ -60,8 +60,6 @@ object MainNavGraph {
             addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)
 
             addFragment(UserSearchArchiveListFragment::class, UserSearchArchiveListFragment.Companion)
-            addFragment(UserFollowFragment::class, UserFollowFragment.Companion)
-            addFragment(HistoryFragment::class, HistoryFragment.Companion)
             addFragment(WatchLaterFragment::class, WatchLaterFragment.Companion)
 
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)

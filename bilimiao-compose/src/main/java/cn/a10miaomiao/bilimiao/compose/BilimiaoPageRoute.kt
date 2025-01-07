@@ -34,6 +34,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.HistoryPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.WatchLaterPage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.rank.RankPage
@@ -51,11 +53,12 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
-import cn.a10miaomiao.bilimiao.compose.pages.user.MyFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserLikeArchivePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserMedialistPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
@@ -89,6 +92,8 @@ class BilimiaoPageRoute (
         SendDanmaku,
         Lyric,
         Search,
+        History,
+        WatchLater,
     }
 
     companion object {
@@ -144,6 +149,8 @@ class BilimiaoPageRoute (
                 Entry.SendDanmaku -> SendDanmakuPage()
                 Entry.Lyric -> LyricPage()
                 Entry.Search -> SearchResultPage(param)
+                Entry.History -> HistoryPage()
+                Entry.WatchLater -> WatchLaterPage()
             }
         }
     }
@@ -232,15 +239,23 @@ class BilimiaoPageRoute (
         composable<TimeSettingPage>()
         composable<TimeRegionDetailPage>()
 
+        // mine
+        composable<HistoryPage>()
+        composable<WatchLaterPage>()
+
         // user
         composable<UserSpacePage>(
             deepLinks = listOf(
                 navDeepLink<UserSpacePage>(
                     basePath = "bilibili://author"
+                ),
+                navDeepLink<UserSpacePage>(
+                    basePath = "bilibili://space"
                 )
             )
         )
         composable<MyFollowPage>()
+        composable<UserFollowPage>()
         composable<SearchFollowPage>()
         composable<UserBangumiPage>()
         composable<SearchFollowPage>()

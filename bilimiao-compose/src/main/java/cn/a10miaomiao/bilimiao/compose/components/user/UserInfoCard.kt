@@ -1,4 +1,4 @@
-package cn.a10miaomiao.bilimiao.compose.pages.user.components
+package cn.a10miaomiao.bilimiao.compose.components.user
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

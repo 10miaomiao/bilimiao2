@@ -17,6 +17,8 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -156,12 +158,9 @@ class UserSpaceViewModel(
     }
 
     fun toFans() {
-        val name = detailData.value?.card?.name ?: return
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://user/follow?id=${vmid}&type=fans&name=${name}"),
-                defaultNavOptions,
-            )
+        pageNavigation.navigate(WebPage(
+            url = "https://space.bilibili.com/h5/follow?type=fans&mid=$vmid"
+        ))
     }
 
     fun toFollow() {

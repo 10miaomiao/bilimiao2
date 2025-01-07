@@ -1,6 +1,5 @@
-package cn.a10miaomiao.bilimiao.compose.pages.user
+package cn.a10miaomiao.bilimiao.compose.pages.mine
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,14 +43,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
-import cn.a10miaomiao.bilimiao.compose.pages.user.content.TagFollowContent
+import cn.a10miaomiao.bilimiao.compose.pages.user.TagEditDialogState
+import cn.a10miaomiao.bilimiao.compose.pages.mine.content.TagFollowContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.UserStore
