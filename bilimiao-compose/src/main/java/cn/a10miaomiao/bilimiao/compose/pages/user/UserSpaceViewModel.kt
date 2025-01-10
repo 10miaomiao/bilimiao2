@@ -45,7 +45,6 @@ class UserSpaceViewModel(
     val archiveViewModel: UserArchiveViewModel,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     val activity: AppCompatActivity by instance()
     val userStore: UserStore by instance()
@@ -253,10 +252,10 @@ class UserSpaceViewModel(
     }
 
     fun searchSelfPage(keyword: String) {
-        val name = detailData.value?.card?.name ?: return
-        val nav = fragment.findNavController()
-        val url = "bilimiao://user/${vmid}/search?name=${name}&text=${keyword}"
-        nav.navigate(Uri.parse(url))
+        pageNavigation.navigate(UserSpaceSearchPage(
+            id = vmid,
+            keyword = keyword,
+        ))
     }
 
 }

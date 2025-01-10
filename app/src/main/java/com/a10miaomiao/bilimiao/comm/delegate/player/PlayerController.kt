@@ -16,6 +16,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuSettingPage
@@ -30,10 +31,6 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesParam
-import com.a10miaomiao.bilimiao.page.video.VideoPagesFragment
-import com.a10miaomiao.bilimiao.page.video.VideoPagesParam
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
@@ -491,46 +488,16 @@ class PlayerController(
         val playerSource = delegate.playerSource
         val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
         if (playerSource is VideoPlayerSource) {
-            val pages = playerSource.pages.map {
-                VideoPagesParam.Page(cid = it.cid, part = it.title)
-            }
-            val args = VideoPagesFragment.createArguments(
-                VideoPagesParam(
-                    aid = playerSource.aid,
-                    pic = playerSource.coverUrl,
-                    title = playerSource.title,
-                    ownerId = playerSource.ownerId,
-                    ownerName = playerSource.ownerName,
-                    pages = pages,
-                )
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.VideoPages,
+                playerSource.aid
             )
-            nav.navigate(VideoPagesFragment.actionId, args)
         }
         if (playerSource is BangumiPlayerSource) {
-            val episodes = playerSource.episodes.map {
-                BangumiPagesParam.Episode(
-                    aid = it.aid,
-                    cid = it.cid,
-                    cover = it.cover,
-                    ep_id = it.epid,
-                    index = it.index,
-                    index_title = it.index_title,
-                    badge = it.badge,
-                    badge_info = BangumiPagesParam.EpisodeBadgeInfo(
-                        bg_color = it.badge_info.bg_color,
-                        bg_color_night = it.badge_info.bg_color_night,
-                        text = it.badge_info.text,
-                    ),
-                )
-            }
-            val args = BangumiPagesFragment.createArguments(
-                BangumiPagesParam(
-                    sid = playerSource.sid,
-                    title = "",
-                    episodes = episodes,
-                )
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.BangumiEpisodes,
+                "sid=${playerSource.sid}&title=${playerSource.ownerName}"
             )
-            nav.navigate(BangumiPagesFragment.actionId, args)
         }
 
     }

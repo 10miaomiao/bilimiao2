@@ -279,6 +279,10 @@ private fun BangumiFollowPageContent(
             ) {
                 items(list, { it.season_id }) {
                     BangumiItemBox(
+                        modifier = Modifier.padding(
+                            horizontal = 10.dp,
+                            vertical = 5.dp
+                        ),
                         title = it.title,
                         cover = it.cover,
                         statusText = it.new_ep.index_show,

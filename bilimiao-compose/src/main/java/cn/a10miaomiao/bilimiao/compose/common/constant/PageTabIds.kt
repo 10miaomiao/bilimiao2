@@ -12,6 +12,12 @@ object PageTabIds {
     const val SearchAll = "search.all"
     val SearchByType = TabId("search.type")
 
+    const val UserIndex = "user.index"
+    const val UserDynamic = "user.dynamic"
+    const val UserArchive = "user.archive"
+    const val UserSearchArchive = "user.search-archive"
+    const val UserSearchDynamic = "user.search-dynamic"
+
     class TabId(
         private val name: String
     ) {

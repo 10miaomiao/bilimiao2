@@ -1,42 +1,37 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.net.Uri
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
-import bilibili.app.dynamic.v2.DynamicGRPC
-import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
+import bilibili.app.interfaces.v1.SearchArchiveReq
+import bilibili.app.interfaces.v1.SpaceGRPC
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
-import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
-import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicItemCard
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
+import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
+import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
+import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -45,16 +40,18 @@ import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-private class UserDynamicListContentViewModel(
+private typealias ArchiveItem = bilibili.app.archive.v1.Arc
+
+private class UserSearchArchiveContentViewModel(
     override val di: DI,
-    private val vmid: String,
+    private val mid: Long,
+    private val keyword: String,
 ) : ViewModel(), DIAware {
 
     private val pageNavigation: PageNavigation by instance()
 
     val isRefreshing = MutableStateFlow(false)
-    val list = FlowPaginationInfo<bilibili.app.dynamic.v2.DynamicItem>()
-    var listHistoryOffset = ""
+    val list = FlowPaginationInfo<ArchiveItem>()
 
     init {
         loadData(1)
@@ -62,32 +59,32 @@ private class UserDynamicListContentViewModel(
 
     private fun loadData(
         pageNum: Int = list.pageNum
-    ) = viewModelScope.launch(Dispatchers.IO) {
+    ) = viewModelScope.launch(Dispatchers.IO){
         try {
             list.loading.value = true
-            val req = bilibili.app.dynamic.v2.DynSpaceReq(
-                hostUid = vmid.toLong(),
-                historyOffset = listHistoryOffset,
-                page = pageNum.toLong(),
+            val req = SearchArchiveReq(
+                keyword = keyword,
+                mid = mid,
+                pn = pageNum.toLong(),
+                ps = list.pageSize.toLong(),
             )
             val res = BiliGRPCHttp.request {
-                DynamicGRPC.dynSpace(req)
+                SpaceGRPC.searchArchive(req)
             }.awaitCall()
-            listHistoryOffset = res.historyOffset
-            list.finished.value = !res.hasMore
-            list.pageNum = pageNum
+            val archivesList = res.archives.map {
+                it.archive
+            }.filterNotNull()
             if (pageNum == 1) {
-                list.data.value = res.list.toMutableList()
+                list.data.value = archivesList
             } else {
-                list.data.value = mutableListOf<bilibili.app.dynamic.v2.DynamicItem>()
-                    .apply {
-                        addAll(list.data.value)
-                        addAll(res.list)
-                    }
+                list.data.value = list.data.value
+                    .toMutableList()
+                    .apply { addAll(archivesList) }
             }
+            list.finished.value = archivesList.size < list.pageSize
         } catch (e: Exception) {
             e.printStackTrace()
-            list.fail.value = "无法连接到御坂网络"
+            list.fail.value = e.message ?: e.toString()
         } finally {
             list.loading.value = false
             isRefreshing.value = false
@@ -97,10 +94,8 @@ private class UserDynamicListContentViewModel(
     fun tryAgainLoadData() = loadData()
 
     fun refresh() {
-        listHistoryOffset = ""
         isRefreshing.value = true
-        list.finished.value = false
-        list.fail.value = ""
+        list.reset()
         loadData(1)
     }
 
@@ -111,28 +106,27 @@ private class UserDynamicListContentViewModel(
     }
 
     fun toDetailPage(
-        item: bilibili.app.dynamic.v2.DynamicItem
+        item: ArchiveItem
     ) {
-        val extend = item.extend ?: return
-        val toUrl = extend.cardUrl
-        try {
-            pageNavigation.navigateByUri(Uri.parse(toUrl))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        pageNavigation.navigateToVideoInfo(item.aid.toString())
     }
+
 }
 
 @Composable
-fun UserDynamicListContent(
-    vmid: String,
+fun UserSearchArchiveContent(
+    mid: Long,
+    keyword: String,
 ) {
-    val viewModel = diViewModel(key = "dynamic-$vmid") {
-        UserDynamicListContentViewModel(it, vmid)
-    }
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
+
+    val viewModel = diViewModel(
+        key = "${PageTabIds.UserSearchArchive}:$mid:$keyword"
+    ) {
+        UserSearchArchiveContentViewModel(it, mid, keyword)
+    }
 
     val listFlow = viewModel.list
     val list by listFlow.data.collectAsState()
@@ -140,11 +134,11 @@ fun UserDynamicListContent(
     val listFinished by listFlow.finished.collectAsState()
     val listFail by listFlow.fail.collectAsState()
 
-    val listState = rememberLazyListState()
     val emitter = localEmitter()
+    val listState = rememberLazyGridState()
     LaunchedEffect(Unit) {
         emitter.collectAction<EmitterAction.DoubleClickTab> {
-            if (it.tab == PageTabIds.UserDynamic) {
+            if (it.tab == PageTabIds.UserSearchArchive) {
                 if (listState.firstVisibleItemIndex == 0) {
                     viewModel.refresh()
                 } else {
@@ -153,28 +147,32 @@ fun UserDynamicListContent(
             }
         }
     }
-    LazyColumn(
+    LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
         state = listState,
-        contentPadding = windowInsets.addPaddingValues(
-            addTop = -windowInsets.topDp.dp + 10.dp,
-            addBottom = 10.dp
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        columns = GridCells.Adaptive(300.dp),
+        contentPadding = windowInsets.toPaddingValues(
+            top = 0.dp,
+        )
     ) {
         items(list) {
-            DynamicItemCard(
-                modifier = Modifier
-                    .widthIn(max = 600.dp)
-                    .fillMaxWidth(),
-                item = it,
+            VideoItemBox(
+                modifier = Modifier.padding(10.dp),
+                title = it.title,
+                pic = it.pic,
+                playNum = it.stat?.view.toString(),
+                damukuNum = it.stat?.danmaku.toString(),
+                remark = NumberUtil.converCTime(it.ctime),
+                duration = NumberUtil.converDuration(it.duration),
+                isHtml = true,
                 onClick = {
                     viewModel.toDetailPage(it)
-                },
+                }
             )
         }
-        item {
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
             ListStateBox(
                 loading = listLoading,
                 finished = listFinished,
@@ -185,4 +183,5 @@ fun UserDynamicListContent(
             }
         }
     }
+
 }

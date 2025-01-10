@@ -10,7 +10,9 @@ import androidx.compose.animation.SizeTransform
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.serialization.decodeArguments
 import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
@@ -24,6 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.auth.QrCodeLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.SMSLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
@@ -63,9 +66,14 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserLikeArchivePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserMedialistPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceSearchPage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 class BilimiaoPageRoute (
     val builder: NavGraphBuilder
@@ -79,11 +87,14 @@ class BilimiaoPageRoute (
         DownloadBangumiCreate,
         Message,
         MyFollow,
+        MyFans,
         UserSpace,
         UserSeasonDetail,
         UserFavourite,
+        VideoPages,
         BangumiFollow,
         BangumiDetail,
+        BangumiEpisodes,
         Setting,
         TimeSetting,
         DanmakuDisplaySetting,
@@ -94,6 +105,7 @@ class BilimiaoPageRoute (
         Search,
         History,
         WatchLater,
+        Web,
     }
 
     companion object {
@@ -111,6 +123,7 @@ class BilimiaoPageRoute (
                 }
                 Entry.Message -> MessagePage()
                 Entry.MyFollow -> MyFollowPage()
+                Entry.MyFans -> WebPage("https://space.bilibili.com/h5/follow?type=fans")
                 Entry.UserSpace -> {
                     UserSpacePage(param)
                 }
@@ -128,6 +141,7 @@ class BilimiaoPageRoute (
                         mid = param
                     )
                 }
+                Entry.VideoPages -> VideoPagesPage(param)
                 Entry.BangumiFollow -> BangumiFollowPage()
                 Entry.BangumiDetail -> {
                     val paramMap = UrlUtil.getQueryKeyValueMap(
@@ -137,6 +151,15 @@ class BilimiaoPageRoute (
                         id = paramMap["id"] ?: "",
                         epId = paramMap["epid"] ?: "",
                         mediaId = paramMap["mediaid"] ?: ""
+                    )
+                }
+                Entry.BangumiEpisodes -> {
+                    val paramMap = UrlUtil.getQueryKeyValueMap(
+                        Uri.parse("bilimiao://bangumi/episodes?$param")
+                    )
+                    BangumiEpisodesPage(
+                        sid = paramMap["sid"] ?: "",
+                        title = paramMap["title"] ?: "",
                     )
                 }
                 Entry.Setting -> SettingPage()
@@ -151,6 +174,7 @@ class BilimiaoPageRoute (
                 Entry.Search -> SearchResultPage(param)
                 Entry.History -> HistoryPage()
                 Entry.WatchLater -> WatchLaterPage()
+                Entry.Web -> WebPage(param)
             }
         }
     }
@@ -176,6 +200,9 @@ class BilimiaoPageRoute (
         composable<H5LoginPage>()
         composable<SMSLoginPage>()
 
+        // video
+        composable<VideoPagesPage>()
+
         // bangumi
         composable<BangumiFollowPage>()
         composable<BangumiDetailPage>(
@@ -185,6 +212,7 @@ class BilimiaoPageRoute (
                 }
             )
         )
+        composable<BangumiEpisodesPage>()
 
         // dynamic
         composable<DynamicPage>()
@@ -240,6 +268,7 @@ class BilimiaoPageRoute (
         composable<TimeRegionDetailPage>()
 
         // mine
+        composable<MyFollowPage>()
         composable<HistoryPage>()
         composable<WatchLaterPage>()
 
@@ -254,7 +283,7 @@ class BilimiaoPageRoute (
                 )
             )
         )
-        composable<MyFollowPage>()
+        composable<UserSpaceSearchPage>()
         composable<UserFollowPage>()
         composable<SearchFollowPage>()
         composable<UserBangumiPage>()
@@ -298,6 +327,7 @@ class BilimiaoPageRoute (
 
     @SuppressLint("RestrictedApi")
     inline fun <reified T: ComposePage> composable(
+        typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
         deepLinks: List<NavDeepLink> = emptyList(),
         noinline enterTransition:
         (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
@@ -317,6 +347,7 @@ class BilimiaoPageRoute (
     ) {
         val serializer = serializer<T>()
         builder.composable<T>(
+            typeMap = typeMap,
             deepLinks = deepLinks,
             enterTransition = enterTransition,
             exitTransition = exitTransition,

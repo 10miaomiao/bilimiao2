@@ -101,6 +101,7 @@ class VideoInfoViewModel(
             } else {
                 VideoInfoFragment.TYPE_AV
             }
+
             val res = BiliApiService.videoAPI
                 .info(id, type = type)
                 .awaitCall()
