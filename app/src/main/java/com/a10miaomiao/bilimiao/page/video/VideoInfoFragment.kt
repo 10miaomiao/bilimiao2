@@ -409,19 +409,10 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
     private val handleMorePageClick = View.OnClickListener {
         viewModel.info?.let { info ->
             val nav = Navigation.findNavController(requireActivity(), R.id.nav_bottom_sheet_fragment)
-            val args = VideoPagesFragment.createArguments(
-                video = VideoPagesParam(
-                    aid = info.aid,
-                    title = info.title,
-                    pic = info.pic,
-                    ownerId = info.owner.mid,
-                    ownerName = info.owner.name,
-                    pages = info.pages.map {
-                        VideoPagesParam.Page(it.cid, it.part)
-                    }
-                )
+            nav.navigateToCompose(
+                BilimiaoPageRoute.Entry.VideoPages,
+                info.aid
             )
-            nav.navigate(VideoPagesFragment.actionId, args)
         }
     }
 

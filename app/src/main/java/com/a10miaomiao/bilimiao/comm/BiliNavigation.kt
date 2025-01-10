@@ -21,7 +21,6 @@ import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
 import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.page.video.VideoInfoFragment
-import com.a10miaomiao.bilimiao.page.web.WebFragment
 import java.util.regex.Pattern
 
 object BiliNavigation {
@@ -137,10 +136,7 @@ object BiliNavigation {
             // b站网页使用内部浏览器打开
             val nav = (activity as? MainActivity)?.pointerNav?.navController
                 ?: activity.findNavController(R.id.nav_host_fragment)
-            nav.navigate(
-                WebFragment.actionId,
-                WebFragment.createArguments(uri.toString())
-            )
+            nav.navigateToCompose(BilimiaoPageRoute.Entry.Web, uri.toString())
         } else {
             // 非B站网页使用外部浏览器打开
             val typedValue = TypedValue()

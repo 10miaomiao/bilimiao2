@@ -8,13 +8,9 @@ import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 //import com.a10miaomiao.bilimiao.page.TestFragment
-import com.a10miaomiao.bilimiao.page.web.WebFragment
-import com.a10miaomiao.bilimiao.page.bangumi.BangumiPagesFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.page.setting.*
 import com.a10miaomiao.bilimiao.template.TemplateFragment
-import com.a10miaomiao.bilimiao.page.user.*
-import com.a10miaomiao.bilimiao.page.user.archive.UserSearchArchiveListFragment
 import com.a10miaomiao.bilimiao.page.video.*
 import com.a10miaomiao.bilimiao.page.video.comment.*
 import kotlin.reflect.KClass
@@ -43,24 +39,17 @@ object MainNavGraph {
     fun createGraph(navController: NavController, startDestination: Int) {
         navController.graph = navController.createGraph(0, startDestination) {
             addFragment(TemplateFragment::class, TemplateFragment.Companion, dest.template)
-            addFragment(WebFragment::class, WebFragment.Companion, dest.web)
             addFragment(ComposeFragment::class, ComposeFragmentNavigatorBuilder, dest.compose)
 //            addFragment(TestFragment::class, TestFragment.Companion)
 
             addFragment(VideoInfoFragment::class, VideoInfoFragment.Companion)
             addFragment(VideoCoinFragment::class, VideoCoinFragment.Companion)
-            addFragment(VideoPagesFragment::class, VideoPagesFragment.Companion)
             addFragment(VideoAddFavoriteFragment::class, VideoAddFavoriteFragment.Companion)
 
             addFragment(VideoCommentListFragment::class, VideoCommentListFragment.Companion)
             addFragment(VideoCommentDetailFragment::class, VideoCommentDetailFragment.Companion)
             addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
             addFragment(SendCommentFragment::class, SendCommentFragment.Companion)
-
-            addFragment(BangumiPagesFragment::class, BangumiPagesFragment.Companion)
-
-            addFragment(UserSearchArchiveListFragment::class, UserSearchArchiveListFragment.Companion)
-            addFragment(WatchLaterFragment::class, WatchLaterFragment.Companion)
 
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 

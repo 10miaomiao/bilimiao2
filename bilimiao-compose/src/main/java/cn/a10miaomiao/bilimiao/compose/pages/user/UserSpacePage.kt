@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
@@ -50,8 +51,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
+import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -275,6 +279,7 @@ private fun UserSpacePageDetailContent(
     val scrollableState = rememberScrollState()
 
     val scope = rememberCoroutineScope()
+    val emitter = localEmitter()
 
     ChainScrollableLayout(
         modifier = Modifier.fillMaxSize(),
@@ -315,6 +320,17 @@ private fun UserSpacePageDetailContent(
                 archiveViewModel = archiveViewModel,
             )
         }
+        val combinedTabClick = combinedTabDoubleClick(
+            pagerState = viewModel.pagerState,
+            onDoubleClick = {
+                scope.launch {
+                    emitter.emit(
+                        EmitterAction.DoubleClickTab(
+                            tab = viewModel.tabs[it].id
+                        ))
+                }
+            }
+        )
         Column(
             modifier = Modifier
                 .offset {
@@ -354,11 +370,7 @@ private fun UserSpacePageDetailContent(
                             )
                         },
                         selected = viewModel.currentPage == index,
-                        onClick = {
-                            scope.launch {
-                                viewModel.changeTab(index, true)
-                            }
-                        },
+                        onClick = { combinedTabClick(index) },
                     )
                 }
             }

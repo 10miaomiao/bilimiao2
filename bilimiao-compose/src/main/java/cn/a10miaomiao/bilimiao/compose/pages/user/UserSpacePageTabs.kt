@@ -1,12 +1,13 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import androidx.compose.runtime.Composable
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserArchiveListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserDynamicListContent
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSpaceIndexContent
 
 sealed class UserSpacePageTabs(
-    val id: Int,
+    val id: String,
     val name: String,
 ) {
     @Composable
@@ -15,7 +16,7 @@ sealed class UserSpacePageTabs(
     data class Index(
         val viewModel: UserSpaceViewModel,
     ) : UserSpacePageTabs(
-        id = 0,
+        id = PageTabIds.UserIndex,
         name = "主页"
     ) {
         @Composable
@@ -27,7 +28,7 @@ sealed class UserSpacePageTabs(
     data class Dynamic(
         val vmid: String,
     ) : UserSpacePageTabs(
-        id = 1,
+        id = PageTabIds.UserDynamic,
         name = "动态"
     ) {
         @Composable
@@ -39,7 +40,7 @@ sealed class UserSpacePageTabs(
     data class Archive(
         val viewModel: UserArchiveViewModel,
     ) : UserSpacePageTabs(
-        id = 2,
+        id = PageTabIds.UserArchive,
         name = "投稿"
     ) {
         @Composable

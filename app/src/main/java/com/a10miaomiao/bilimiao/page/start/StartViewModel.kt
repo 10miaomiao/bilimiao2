@@ -47,9 +47,10 @@ class StartViewModel(
         ),
         StartNavInfo(
             title = "粉丝",
-            pageUrl = "bilimiao://user/follow?id={mid}&type=fans&name={name}",
             iconRes = R.drawable.ic_nav_follower,
             isNeedAuth = true,
+            isComposePage = true,
+            composeEntry = BilimiaoPageRoute.Entry.MyFans,
         ),
         StartNavInfo(
             title = "收藏",
