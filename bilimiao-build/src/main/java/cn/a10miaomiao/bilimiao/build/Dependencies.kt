@@ -71,6 +71,7 @@ object Libraries {
     const val accompanistAdaptive = "com.google.accompanist:accompanist-adaptive:${Versions.accompanist}"
 
     // 通用库
+    const val kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.1"
     const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}"
     const val kotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
     const val kodeinDi = "org.kodein.di:kodein-di-framework-android-x:${Versions.kodein_di}"

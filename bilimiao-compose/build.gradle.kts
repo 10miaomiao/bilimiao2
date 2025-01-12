@@ -61,6 +61,7 @@ dependencies {
     implementation(Libraries.datastore)
     implementation(Libraries.browser)
 
+    implementation(Libraries.kotlinxDatetime)
     implementation(Libraries.kotlinxSerializationJson)
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.kodeinDi) // 依赖注入
