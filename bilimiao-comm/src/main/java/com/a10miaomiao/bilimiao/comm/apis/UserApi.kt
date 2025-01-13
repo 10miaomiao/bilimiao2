@@ -248,21 +248,25 @@ class UserApi {
     /**
      * 稍后再看
      */
-    fun videoHistoryToview(
-        pageNum: Int,
-        pageSize: Int,
+    fun videoToview(
+        sortField: Int, // 1全部, 10未看完
+        asc: Boolean = false,
+        startKey: String = "",
+        splitKey: String = "",
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
-            "x/v2/history/toview",
-            "pn" to pageNum.toString(),
-            "ps" to pageSize.toString(),
+            "x/v2/history/toview/v2/list",
+            "sort_field" to sortField.toString(),
+            "asc" to asc.toString(),
+            "split_key" to splitKey,
+            "start_key" to startKey,
         )
     }
 
     /**
      * 视频添加稍后再看
      */
-    fun videoHistoryToviewAdd(
+    fun videoToviewAdd(
         aid: String,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi("x/v2/history/toview/add")
@@ -275,12 +279,25 @@ class UserApi {
     /**
      * 删除稍后再看视频
      */
-    fun videoHistoryToviewDel(
-        aid: String,
+    fun videoToviewDels(
+        resources: List<String>,
     ) = MiaoHttp.request {
-        url = BiliApiService.biliApi("x/v2/history/toview/del")
+        url = BiliApiService.biliApi("x/v2/history/toview/v2/dels")
         formBody = ApiHelper.createParams(
-            "aid" to aid,
+            "resources" to resources.joinToString(","),
+        )
+        method = MiaoHttp.POST
+    }
+
+    /**
+     * 清除稍后再看视频
+     */
+    fun videoToviewClean(
+        cleanType: Int, // 1:已失效, 2:已看完
+    ) = MiaoHttp.request {
+        url = BiliApiService.biliApi("x/v2/history/toview/clear")
+        formBody = ApiHelper.createParams(
+            "clean_type" to cleanType.toString(),
         )
         method = MiaoHttp.POST
     }

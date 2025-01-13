@@ -11,6 +11,7 @@ data class ToViewItemInfo(
     val title: String,
     val pic: String,
     val videos: Int,
+    val page: PageInfo,
     val progress: Int,
     val pubdate: Long,
     val duration: Int,
@@ -21,17 +22,15 @@ data class ToViewItemInfo(
 ) {
     @Serializable
     data class OwnerInfo(
-        val name: String
+        val mid: String,
+        val name: String,
     )
-    // @Serializable
-    // data class HistoryInfo(
-    //     val oid: Long,
-    //     val epid: Int,
-    //     val bvid: String,
-    //     val page: Int,
-    //     val cid: Long,
-    //     val part: String,
-    //     val business: String,
-    //     val dt: Int
-    // )
+
+     @Serializable
+     data class PageInfo(
+         val cid: String,
+         val part: String,
+         val page: Int,
+         val duration: Int,
+     )
 }
