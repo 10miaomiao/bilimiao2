@@ -31,4 +31,10 @@ sealed class PlayListFrom : Parcelable {
         val bizId: String,
         val bizType: String,
     ): PlayListFrom()
+
+    @Parcelize
+    class Toview(
+        val sortField: Int, // 1全部, 10未看完
+        val asc: Boolean = false,
+    ): PlayListFrom()
 }

@@ -449,7 +449,7 @@ class VideoInfoViewModel(
         try {
             val curInfo = info ?: return@launch
             val res = BiliApiService.userApi
-                .videoHistoryToviewAdd(curInfo.aid)
+                .videoToviewAdd(curInfo.aid)
                 .awaitCall()
                 .gson<MessageInfo>()
             if (res.code == 0) {

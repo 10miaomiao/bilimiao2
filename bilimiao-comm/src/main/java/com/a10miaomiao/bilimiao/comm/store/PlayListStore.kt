@@ -6,7 +6,9 @@ import bilibili.app.dynamic.v2.ThreePointType
 import bilibili.app.view.v1.ViewGRPC
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.history.ToViewInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaResponseV2Info
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
@@ -18,6 +20,7 @@ import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
@@ -415,6 +418,80 @@ class PlayListStore(override val di: DI) :
                 items = items,
             )
         }
+
+    fun setToviewList(
+        sortField: Int, // 1全部, 10未看完
+        asc: Boolean = false,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _setToviewList(sortField, asc)
+        }
+    }
+    private suspend fun _setToviewList(
+        sortField: Int, // 1全部, 10未看完
+        asc: Boolean = false,
+    ) =  playListLoadingMutex.withLock {
+        clearPlayList(
+            loading = true
+        )
+        val listFrom = PlayListFrom.Toview(sortField, asc)
+        val items = mutableListOf<PlayListItemInfo>()
+        var startKey = ""
+        var loadFinish = false
+        while (!loadFinish) {
+            try {
+                val res = BiliApiService.userApi
+                    .videoToview(
+                        sortField = sortField,
+                        asc = asc,
+                        startKey = startKey,
+                    )
+                    .awaitCall()
+                    .json<ResponseData<ToViewInfo>>()
+                if (res.code == 0) {
+                    val data = res.requireData()
+                    val listData = data.list
+                    val newItems = listData.map {
+                        val page = it.page
+                        PlayListItemInfo(
+                            aid = it.aid.toString(),
+                            cid = it.cid.toString(),
+                            duration = it.duration,
+                            title = it.title,
+                            cover = it.pic,
+                            ownerId = it.owner.mid,
+                            ownerName = it.owner.name,
+                            videoPages = listOf(
+                                VideoPageInfo(
+                                    cid = page.cid,
+                                    page = page.page,
+                                    part = page.part,
+                                    duration = page.duration,
+                                )
+                            ),
+                            from = listFrom,
+                        )
+                    }.filter { item ->
+                        items.indexOfFirst { it.aid == item.aid } == -1
+                    }
+                    items.addAll(newItems)
+                    loadFinish = !data.has_more || listData.isEmpty() || data.next_key.isBlank()
+                    startKey = data.next_key
+                } else {
+                    PopTip.show(res.message)
+                    loadFinish = true
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                loadFinish = true
+            }
+        }
+        setPlayList(
+            name = "稍后再看",
+            from = listFrom,
+            items = items,
+        )
+    }
 
     fun VideoInfo.toPlayListItem(): PlayListItemInfo {
         val from = PlayListFrom.Video(
