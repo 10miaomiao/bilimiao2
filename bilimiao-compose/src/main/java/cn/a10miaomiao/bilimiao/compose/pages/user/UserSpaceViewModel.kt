@@ -4,19 +4,16 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.mutableStateOf
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
-import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
-import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
@@ -46,6 +43,7 @@ class UserSpaceViewModel(
 ) : ViewModel(), DIAware {
 
     private val pageNavigation by instance<PageNavigation>()
+    private val messageDialog by instance<MessageDialogState>()
     val activity: AppCompatActivity by instance()
     val userStore: UserStore by instance()
     val filterStore: FilterStore by instance()
@@ -170,9 +168,17 @@ class UserSpaceViewModel(
         }
     }
 
+    fun showLikeInfo() {
+        val detailInfo = detailData.value ?: return
+        messageDialog.alert(
+            title = detailInfo.card.name,
+            text = "${detailInfo.card.likes.skr_tip}：${detailInfo.card.likes.like_num}"
+        )
+    }
+
     fun toBangumiFollow() {
         if (isSelf) {
-            pageNavigation.navigate(BangumiFollowPage())
+            pageNavigation.navigate(MyBangumiPage())
         } else {
             pageNavigation.navigate(UserBangumiPage(vmid))
         }
