@@ -46,12 +46,13 @@ class BangumiAPI {
      * 追番列表
      */
     fun followList(
+        type: String = "bangumi",
         status: Int,
         pageNum: Int,
         pageSize: Int,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi(
-            "pgc/app/follow/v2/bangumi",
+            "pgc/app/follow/v2/$type",
             "status" to status.toString(),
             "pn" to pageNum.toString(),
             "ps" to pageSize.toString()
@@ -84,7 +85,7 @@ class BangumiAPI {
      * 设置状态
      */
     fun setFollowStatus(seasonId: String, status: Int) = MiaoHttp.request {
-        url = BiliApiService.biliApi("pgc/view/app/season")
+        url = BiliApiService.biliApi("pgc/app/follow/status/update")
         formBody = ApiHelper.createParams(
             "season_id" to seasonId,
             "status" to status.toString(),

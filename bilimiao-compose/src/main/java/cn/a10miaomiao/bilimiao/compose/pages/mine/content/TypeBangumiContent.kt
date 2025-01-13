@@ -1,6 +1,5 @@
-package cn.a10miaomiao.bilimiao.compose.pages.bangumi
+package cn.a10miaomiao.bilimiao.compose.pages.mine.content
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,69 +12,64 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
-import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.bangumi.BangumiItemBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.MyBangumiFollowListInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.MyBangumiInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
-
-@Serializable
-class BangumiFollowPage : ComposePage() {
-
-    @Composable
-    override fun Content() {
-        val viewModel: BangumiFollowPageViewModel = diViewModel()
-        BangumiFollowPageContent(viewModel)
-    }
-}
-
-private class BangumiFollowPageViewModel(
+class TypeBangumiContentViewModel(
     override val di: DI,
+    private val type: String,
 ) : ViewModel(), DIAware {
-
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
 
+    val typeName = if (type == "cinema") "追剧" else "追番"
     val statusList = listOf(
-        0 to "全部番剧",
+        0 to "全部$typeName",
         1 to "想看",
         2 to "在看",
         3 to "看过",
@@ -100,15 +94,16 @@ private class BangumiFollowPageViewModel(
             val status = currentStatus.value
             val res = BiliApiService.bangumiAPI
                 .followList(
+                    type = type,
                     status = status,
                     pageNum = pageNum,
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo2<MyBangumiFollowListInfo>>()
+                .json<ResponseResult<MyBangumiFollowListInfo>>()
             if (res.isSuccess) {
                 list.pageNum = pageNum
-                val result = res.result
+                val result = res.requireData()
                 val followList = result.follow_list ?: listOf()
                 list.finished.value = result.has_next != 1
                 if (pageNum == 1) {
@@ -125,7 +120,7 @@ private class BangumiFollowPageViewModel(
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            list.fail.value = "无法连接到御坂网络"
+            list.fail.value = e.message ?: e.toString()
         } finally {
             list.loading.value = false
             isRefreshing.value = false
@@ -154,9 +149,11 @@ private class BangumiFollowPageViewModel(
     }
 
     fun toDetailPage(item: MyBangumiInfo) {
-        pageNavigation.navigate(BangumiDetailPage(
+        pageNavigation.navigate(
+            BangumiDetailPage(
             id = item.season_id,
-        ))
+        )
+        )
     }
 
     fun changeFollowStatus(
@@ -170,7 +167,7 @@ private class BangumiFollowPageViewModel(
                         seasonId = item.season_id,
                     )
                     .awaitCall()
-                    .gson<MessageInfo>()
+                    .json<MessageInfo>(isLog = true)
             } else {
                 BiliApiService.bangumiAPI
                     .setFollowStatus(
@@ -178,14 +175,14 @@ private class BangumiFollowPageViewModel(
                         status = status,
                     )
                     .awaitCall()
-                    .gson<MessageInfo>()
+                    .json<MessageInfo>(isLog = true)
             }
             if (res.isSuccess) {
                 list.data.value = list.data.value.filter {
                     it.season_id != item.season_id
                 }
                 if (status == 0) {
-                    PopTip.show("已取消追番")
+                    PopTip.show("已取消$typeName")
                 } else {
                     PopTip.show("操作成功")
                 }
@@ -200,26 +197,31 @@ private class BangumiFollowPageViewModel(
     }
 }
 
-
 @Composable
-private fun BangumiFollowPageContent(
-    viewModel: BangumiFollowPageViewModel
+fun TypeBangumiContent(
+    type: String,
+    isActive: Boolean,
 ) {
-    PageConfig(
-        title = "我的追番"
-    )
+    val viewModel = diViewModel(key = type) {
+        TypeBangumiContentViewModel(it, type)
+    }
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
+    if (isActive) {
+        PageConfig(
+            title = "我的${viewModel.typeName}"
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                top = windowInsets.topDp.dp,
-                start = windowInsets.leftDp.dp,
-                end = windowInsets.rightDp.dp,
-            )
+            .padding(windowInsets.toPaddingValues(
+                top = 0.dp,
+                bottom = 0.dp
+            ))
     ) {
         val currentStatus = viewModel.currentStatus.collectAsState().value
         LazyRow(
@@ -249,10 +251,10 @@ private fun BangumiFollowPageContent(
         val isRefreshing by viewModel.isRefreshing.collectAsState()
         val moreMenu = remember(currentStatus) {
             if (currentStatus == 0) {
-                listOf(0 to "取消追番")
+                listOf(0 to "取消${viewModel.typeName}")
             } else {
                 listOf(
-                    Pair(0,"取消追番"),
+                    Pair(0,"取消$${viewModel.typeName}"),
                     Pair(1, "标记为『想看』").takeIf {
                         currentStatus != 1
                     },
@@ -266,6 +268,20 @@ private fun BangumiFollowPageContent(
             }
         }
 
+        val listState = rememberLazyGridState()
+        val emitter = localEmitter()
+        LaunchedEffect(Unit) {
+            emitter.collectAction<EmitterAction.DoubleClickTab> {
+                if (it.tab == PageTabIds.MyBangumi[type]) {
+                    if (listState.firstVisibleItemIndex == 0) {
+                        viewModel.refresh()
+                    } else {
+                        listState.animateScrollToItem(0)
+                    }
+                }
+            }
+        }
+
         SwipeToRefresh(
             modifier = Modifier
                 .fillMaxWidth()
@@ -274,6 +290,7 @@ private fun BangumiFollowPageContent(
             onRefresh = { viewModel.refresh() },
         ) {
             LazyVerticalGrid(
+                state = listState,
                 columns = GridCells.Adaptive(300.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
@@ -290,7 +307,7 @@ private fun BangumiFollowPageContent(
                         moreMenu = moreMenu,
                         coverBadge1 = {
                             val badge = it.badge_info
-                            if (badge != null) {
+                            if (badge != null && badge.text.isNotBlank()) {
                                 Text(
                                     modifier = Modifier
                                         .padding(5.dp)

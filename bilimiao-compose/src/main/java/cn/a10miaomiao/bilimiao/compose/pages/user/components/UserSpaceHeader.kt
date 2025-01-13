@@ -258,9 +258,7 @@ fun UserSpaceHeader(
                     NumBox(
                         num = NumberUtil.converString(cardData.likes.like_num),
                         title = "获赞",
-                        onClick = {
-
-                        },
+                        onClick = viewModel::showLikeInfo,
                     )
                 }
             }

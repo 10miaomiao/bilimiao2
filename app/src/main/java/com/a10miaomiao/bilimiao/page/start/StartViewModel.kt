@@ -1,16 +1,9 @@
 package com.a10miaomiao.bilimiao.page.start
 
-import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
-import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
-import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
-import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
-import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
-import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
-import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.MiaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
@@ -61,11 +54,11 @@ class StartViewModel(
             composeParam = "{mid}"
         ),
         StartNavInfo(
-            title = "追番",
+            title = "追番/剧",
             iconRes = R.drawable.ic_nav_bangumi,
             isNeedAuth = true,
             isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.BangumiFollow,
+            composeEntry = BilimiaoPageRoute.Entry.MyBangumi,
         ),
         StartNavInfo(
             title = "下载",

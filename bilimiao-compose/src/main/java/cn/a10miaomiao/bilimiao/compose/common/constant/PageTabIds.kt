@@ -18,6 +18,8 @@ object PageTabIds {
     const val UserSearchArchive = "user.search-archive"
     const val UserSearchDynamic = "user.search-dynamic"
 
+    val MyBangumi = TabId("my.bangumi")
+
     class TabId(
         private val name: String
     ) {

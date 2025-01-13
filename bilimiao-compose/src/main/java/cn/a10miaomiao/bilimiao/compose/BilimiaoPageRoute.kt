@@ -12,7 +12,6 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.serialization.decodeArguments
 import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
@@ -27,7 +26,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.auth.SMSLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
-import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
@@ -38,6 +36,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.HistoryPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.WatchLaterPage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
@@ -70,10 +69,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceSearchPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 
 class BilimiaoPageRoute (
     val builder: NavGraphBuilder
@@ -86,13 +83,13 @@ class BilimiaoPageRoute (
         PlayList,
         DownloadBangumiCreate,
         Message,
+        MyBangumi,
         MyFollow,
         MyFans,
         UserSpace,
         UserSeasonDetail,
         UserFavourite,
         VideoPages,
-        BangumiFollow,
         BangumiDetail,
         BangumiEpisodes,
         Setting,
@@ -122,6 +119,7 @@ class BilimiaoPageRoute (
                     DownloadBangumiCreatePage(param)
                 }
                 Entry.Message -> MessagePage()
+                Entry.MyBangumi -> MyBangumiPage()
                 Entry.MyFollow -> MyFollowPage()
                 Entry.MyFans -> WebPage("https://space.bilibili.com/h5/follow?type=fans")
                 Entry.UserSpace -> {
@@ -142,7 +140,6 @@ class BilimiaoPageRoute (
                     )
                 }
                 Entry.VideoPages -> VideoPagesPage(param)
-                Entry.BangumiFollow -> BangumiFollowPage()
                 Entry.BangumiDetail -> {
                     val paramMap = UrlUtil.getQueryKeyValueMap(
                         Uri.parse("bilimiao://bangumi?$param")
@@ -204,7 +201,6 @@ class BilimiaoPageRoute (
         composable<VideoPagesPage>()
 
         // bangumi
-        composable<BangumiFollowPage>()
         composable<BangumiDetailPage>(
             deepLinks = listOf(
                 navDeepLink {
@@ -268,6 +264,7 @@ class BilimiaoPageRoute (
         composable<TimeRegionDetailPage>()
 
         // mine
+        composable<MyBangumiPage>()
         composable<MyFollowPage>()
         composable<HistoryPage>()
         composable<WatchLaterPage>()
