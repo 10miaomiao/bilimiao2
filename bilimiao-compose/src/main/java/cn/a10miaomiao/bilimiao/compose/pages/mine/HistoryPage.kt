@@ -291,7 +291,7 @@ private class HistoryPageViewModel(
                 HistoryGRPC.delete(req)
             }.awaitCall()
             list.data.value = newItems
-            PopTip.show("已删除选中的${deleteItems.size}个视频")
+            PopTip.show("已删除选中的${deleteItems.size}个记录")
             clearSelectedItemMap()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -427,7 +427,7 @@ private fun HistoryPageContent(
                     childMenu = myMenu {
                         myItem {
                             key = MenuKeys.edit
-                            title = "多选管理"
+                            title = "批量管理"
                             iconFileName = "ic_baseline_edit_note_24"
                         }
                         myItem {
@@ -732,6 +732,9 @@ private fun HistoryListView(
                     Spacer(modifier = Modifier.height(if (sideTimeline) 10.dp else 30.dp))
                 } else {
                     val isChecked = enableEdit && viewModel.selectedItemMap.containsKey(item.kid)
+                    val duration = item.cardOgv?.duration ?: item.cardUgc?.duration ?: 0
+                    val progress = item.cardUgc?.progress ?: item.cardUgc?.progress ?: 0
+                    val progressRatio = if (duration > 0L) progress.toFloat() / duration.toFloat() else 0f
                     Box(
                         contentAlignment = Alignment.CenterStart
                     ) {
@@ -750,9 +753,14 @@ private fun HistoryListView(
                                 ?: item.cardUgc?.cover,
                             upperName = item.cardUgc?.name,
                             remark = NumberUtil.converCTime(item.viewAt),
-                            duration = NumberUtil.converDuration(
-                                item.cardOgv?.duration ?: item.cardUgc?.duration ?: 0
-                            ),
+                            duration = if (progressRatio >= 0.95f) {
+                                "已看完"
+                            } else if (progressRatio > 0f) {
+                                "${NumberUtil.converDuration(progress)}/${NumberUtil.converDuration(duration)}"
+                            } else {
+                                NumberUtil.converDuration(duration)
+                            },
+                            progress = progressRatio,
                             isHtml = true,
                             onClick = {
                                 if (!enableEdit) {
