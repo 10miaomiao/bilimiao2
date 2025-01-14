@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -107,17 +108,21 @@ private class DynamicPageViewModel(
         DynamicPageTab.Video,
     )
 
+    fun toHomePage() {
+        val nav = pageNavigation.hostController
+        nav.navigate(HomePage, navOptions {
+            popUpTo(nav.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        })
+    }
+
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.home -> {
-                val nav = pageNavigation.hostController
-                nav.navigate(HomePage, navOptions {
-                    popUpTo(nav.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                })
+                toHomePage()
             }
         }
     }
@@ -150,6 +155,9 @@ private fun DynamicPageContent(
     PageListener(
         configId = pageConfigId,
         onMenuItemClick = viewModel::menuItemClick,
+    )
+    BackHandler(
+        onBack = viewModel::toHomePage
     )
 
     val scope = rememberCoroutineScope()

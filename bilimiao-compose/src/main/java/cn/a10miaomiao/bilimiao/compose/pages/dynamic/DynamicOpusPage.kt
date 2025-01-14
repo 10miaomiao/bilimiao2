@@ -30,9 +30,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import bilibili.app.archive.middleware.v1.PlayerArgs
-import bilibili.app.dynamic.v2.DynDetailReq
-import bilibili.app.dynamic.v2.DynamicGRPC
-import bilibili.app.dynamic.v2.DynamicItem
 import bilibili.app.dynamic.v2.Module.ModuleItem
 import bilibili.app.dynamic.v2.OpusDetailReq
 import bilibili.app.dynamic.v2.OpusGRPC
@@ -55,6 +52,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import com.kongzue.dialogx.dialogs.PopTip
@@ -69,21 +67,21 @@ import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
-data class DynamicDetailPage(
+data class DynamicOpusPage(
     private val id: String,
 ) : ComposePage() {
 
     @Composable
     override fun Content() {
         val viewModel = diViewModel(key = "dynamic$id") {
-            DynamicDetailPageViewModel(it, id)
+            DynamicOpusPageViewModel(it, id)
         }
-        DynamicDetailPageContent(viewModel)
+        DynamicOpusPageContent(viewModel)
     }
 
 }
 
-private class DynamicDetailPageViewModel(
+private class DynamicOpusPageViewModel(
     override val di: DI,
     val dynId: String,
 ) : ViewModel(), DIAware {
@@ -98,8 +96,8 @@ private class DynamicDetailPageViewModel(
     private val _fail = MutableStateFlow<Any?>(null)
     val fail: StateFlow<Any?> get() = _fail
 
-    private val _detailData = MutableStateFlow<DynamicItem?>(null)
-    val detailData: StateFlow<DynamicItem?> get() = _detailData
+    private val _detailData = MutableStateFlow<OpusItem?>(null)
+    val detailData: StateFlow<OpusItem?> get() = _detailData
     init {
         if (dynId.isNotBlank()) {
             loadData()
@@ -110,9 +108,8 @@ private class DynamicDetailPageViewModel(
         try {
             _loading.value = true
             _fail.value = null
-            val req = DynDetailReq(
-                uid = userStore.state.info?.mid ?: 0L,
-                dynamicId = dynId,
+            val req = OpusDetailReq(
+                oid = dynId.toLong(),
                 shareId = "dt.opus-detail.0.0.pv",
                 shareMode = 3,
                 localTime = 8,
@@ -122,9 +119,13 @@ private class DynamicDetailPageViewModel(
                 )
             )
             val res = BiliGRPCHttp.request {
-                DynamicGRPC.dynDetail(req)
+                OpusGRPC.opusDetail(req)
             }.awaitCall()
-            _detailData.value = res.item
+            _detailData.value = res.opusItem
+            res.opusItem?.modules?.forEach {
+                miaoLogger() debug it.moduleItem!!::class.simpleName
+                miaoLogger() debug it.moduleItem
+            }
         } catch (e: Exception) {
             _fail.value = e
             PopTip.show("网络错误")
@@ -153,8 +154,8 @@ private class DynamicDetailPageViewModel(
 
 
 @Composable
-private fun DynamicDetailPageContent(
-    viewModel: DynamicDetailPageViewModel
+private fun DynamicOpusPageContent(
+    viewModel: DynamicOpusPageViewModel
 ) {
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
@@ -218,20 +219,15 @@ private fun DynamicDetailPageLoadingContent(
 
 @Composable
 private fun DynamicDetailPageDetailContent(
-    viewModel: DynamicDetailPageViewModel,
+    viewModel: DynamicOpusPageViewModel,
     windowInsets: Insets,
-    detailData: DynamicItem,
+    detailData: OpusItem,
 ) {
-    val oid = detailData.extend!!.dynIdStr
+    val oid = detailData.oid.toString()
     val replyViewModel = diViewModel(
         key = "dynamic.reply.${oid}"
     ) {
-        MainReplyViewModel(
-            it, oid,
-            type = 17,
-            extra = "{\"spmid\":\"dt.dt-detail.0.0\",\"from_spmid\":\"\"}",
-            filterTagName = "全部"
-        )
+        MainReplyViewModel(it, oid, type = 11)
     }
     val replyList by replyViewModel.list.data.collectAsState()
     val replyListLoading by replyViewModel.list.loading.collectAsState()
@@ -246,6 +242,24 @@ private fun DynamicDetailPageDetailContent(
             "${it}\n的\n动态详情"
         } ?: "动态详情"
     )
+    val hasTopBigImages = remember(detailData) {
+        detailData.modules.slice(0..2).indexOfFirst {
+            val moduleItem = it.moduleItem
+            if (moduleItem is ModuleItem.ModuleParagraph) {
+                val content = moduleItem.value.paragraph?.content
+                return@indexOfFirst content is Paragraph.Content.Pic &&
+                        content.value.style.value == PicParagraph.PicParagraphStyle.BIG_SCROLL.value
+            }
+            return@indexOfFirst false
+        } != -1
+    }
+    val topModule = remember(detailData) {
+        detailData.modules.firstOrNull()?.let {
+            val moduleItem = it.moduleItem
+            if (moduleItem is ModuleItem.ModuleTop) moduleItem.value
+            else null
+        }
+    }
     val buttomModule = remember(detailData) {
         detailData.modules.lastOrNull()?.let {
             val moduleItem = it.moduleItem
@@ -258,16 +272,32 @@ private fun DynamicDetailPageDetailContent(
             .background(
                 color = MaterialTheme.colorScheme.surface,
             ),
-        contentPadding = windowInsets.toPaddingValues()
+        contentPadding = windowInsets.toPaddingValues(
+            top = 0.dp,
+        )
     ) {
         item {
             Column(
                 modifier = Modifier
+                    .run {
+                        if (hasTopBigImages) this
+                        else padding(top = windowInsets.topDp.dp)
+                    }
                     .padding(bottom = 5.dp),
             ) {
                 for(module in detailData.modules) {
                     DynamicModuleBox(module = module)
                 }
+//                topModule?.author?.let {
+//                    Text(
+//                        it.ptimeLocationText,
+//                        style = MaterialTheme.typography.labelMedium,
+//                        color = MaterialTheme.colorScheme.outline,
+//                        modifier = Modifier
+//                            .padding(top = 10.dp)
+//                            .padding(horizontal = 10.dp)
+//                    )
+//                }
             }
         }
         item {
@@ -281,7 +311,7 @@ private fun DynamicDetailPageDetailContent(
                         end = 10.dp,
                     ),
                 text = if (moduleStat == null) "全部评论"
-                else "全部评论(${moduleStat.reply})",
+                    else "全部评论(${moduleStat.reply})",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

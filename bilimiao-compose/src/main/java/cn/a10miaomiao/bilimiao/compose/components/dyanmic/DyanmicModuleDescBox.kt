@@ -10,15 +10,22 @@ import bilibili.app.dynamic.v2.DescType
 import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedTextNode
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 @Composable
 fun bilibili.app.dynamic.v2.ModuleDesc.toAnnotatedTextNode(): List<AnnotatedTextNode> {
     return desc.map {
-        // 9: emoji
-        if (it.type.value == DescType.EMOJI.value) {
-            AnnotatedTextNode.Emote(it.text, it.uri)
-        } else {
-            AnnotatedTextNode.Text(it.text)
+        when(it.type.value) {
+            DescType.EMOJI.value -> {
+                AnnotatedTextNode.Emote(it.text, it.uri)
+            }
+            DescType.WEB.value -> {
+                AnnotatedTextNode.Link(it.text, it.uri)
+            }
+            DescType.USER.value -> {
+                AnnotatedTextNode.Link(it.text, it.uri)
+            }
+            else -> AnnotatedTextNode.Text(it.text)
         }
     }
 }

@@ -5,6 +5,7 @@ data class DynamicVideoInfo(
     val name: String,
     val face: String,
     val labelText: String,
+    val locationText: String,
     val isLike: Boolean,
     val like: Long,
     val reply: Long,

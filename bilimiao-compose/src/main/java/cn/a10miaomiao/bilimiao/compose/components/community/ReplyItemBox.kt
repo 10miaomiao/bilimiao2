@@ -71,8 +71,10 @@ class ReplyItemBoxContentInfo(
         var end = 0
         while (end < message.length) {
             if (message[end] == '[') {
+                val maxLen = message.length - end
                 val e = emote.find {
-                    message.substring(end, end + it.text.length) == it.text
+                    val len = it.text.length
+                    len <= maxLen && message.substring(end, end + len) == it.text
                 }
                 if (e != null) {
                     if (start < end) {
@@ -184,13 +186,13 @@ fun ReplyItemBox(
             loading = placeholder(R.drawable.bili_akari_img),
             contentDescription = null,
             modifier = Modifier
-                .padding(top = 4.dp)
+                .padding(top = 2.dp)
                 .size(40.dp)
                 .clip(CircleShape)
         )
         Column(
             modifier = Modifier
-                .padding(start = 10.dp)
+                .padding(start = 5.dp)
                 .weight(1f)
         ) {
             Row(
@@ -271,7 +273,7 @@ fun ReplyItemBox(
             Row(
                 modifier = Modifier.padding(vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(30.dp)
+                horizontalArrangement = Arrangement.spacedBy(40.dp)
             ) {
                 ScaleButton(
                     onPress = onLikeClick
@@ -285,7 +287,7 @@ fun ReplyItemBox(
                                 contentDescription = "like",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(end = 4.dp)
-                                    .size(12.dp)
+                                    .size(14.dp)
                             )
                         } else {
                             Icon(
@@ -293,12 +295,12 @@ fun ReplyItemBox(
                                 contentDescription = "like",
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(end = 4.dp)
-                                    .size(12.dp)
+                                    .size(14.dp)
                             )
                         }
                         Text(
                             text = like.toString(),
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
@@ -315,11 +317,11 @@ fun ReplyItemBox(
                             contentDescription = "reply",
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(end = 4.dp)
-                                .size(12.dp)
+                                .size(14.dp)
                         )
                         Text(
                             text = count.toString(),
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                     }

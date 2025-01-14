@@ -106,6 +106,7 @@ class DynamicVideoListContentViewModel(
                         name = author.name,
                         face = author.face,
                         labelText = userModule.ptimeLabelText,
+                        locationText = userModule.ptimeLocationText,
                         dynamicType = dynamicModule.type.value,
                         share = statModule.repost,
                         like = statModule.like,
@@ -248,6 +249,7 @@ fun DynamicVideoListContent() {
                         name = it.name,
                         face = it.face,
                         labelText = it.labelText,
+                        locationText = it.locationText,
                         onClick = {
                             viewModel.toUserSpace(it.mid)
                         }

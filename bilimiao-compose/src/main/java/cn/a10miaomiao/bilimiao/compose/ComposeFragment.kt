@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
@@ -36,6 +38,7 @@ import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialog
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
@@ -123,6 +126,13 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     )
     private val pageConfigState = PageConfigState()
     private val emitter = SharedFlowEmitter()
+    private val uriHandler = object : UriHandler {
+        override fun openUri(uri: String) {
+            if (!BilibiliNavigation.navigationTo(pageNavigation, uri)) {
+                BilibiliNavigation.navigationToWeb(pageNavigation, uri)
+            }
+        }
+    }
 
     private var _pageConfig = PageConfigState.Cofing(-1)
     override val pageConfig = myPageConfig {
@@ -169,6 +179,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                     LocalOnBackPressedDispatcherOwner provides this@ComposeFragment,
                     LocalPageNavigation provides pageNavigation,
                     LocalEmitter provides emitter,
+                    LocalUriHandler provides uriHandler
                 ) {
                     withDI(di = di) {
                         val windowStore: WindowStore by rememberInstance()
