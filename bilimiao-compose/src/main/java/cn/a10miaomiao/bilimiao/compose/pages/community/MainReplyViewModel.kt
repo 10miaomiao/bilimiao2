@@ -28,6 +28,8 @@ class MainReplyViewModel(
     override val di: DI,
     val oid: String,
     val type: Int,
+    val extra: String = "",
+    val filterTagName: String = "",
 ) : ViewModel(), DIAware {
 
     private val context: Context by instance()
@@ -52,6 +54,8 @@ class MainReplyViewModel(
                 oid = oid.toLong(),
                 type = type.toLong(),
                 rpid = 0,
+                extra = extra,
+                filterTagName = filterTagName,
                 cursor = CursorReq(
                     mode = bilibili.main.community.reply.v1.Mode.fromValue(sortOrder),
                     next = _cursor?.next ?: 0,

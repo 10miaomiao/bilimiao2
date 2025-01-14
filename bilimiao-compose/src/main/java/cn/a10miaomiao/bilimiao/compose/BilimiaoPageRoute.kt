@@ -30,6 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicOpusPage
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
@@ -188,7 +189,13 @@ class BilimiaoPageRoute (
 //        }
         
         // search
-        composable<SearchResultPage>()
+        composable<SearchResultPage>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "bilibili://search/?keyword={keyword}"
+                }
+            )
+        )
 
         // auth
         composable<LoginPage>()
@@ -215,6 +222,13 @@ class BilimiaoPageRoute (
         composable<DynamicDetailPage>(
             deepLinks = listOf(
                 navDeepLink<DynamicDetailPage>(
+                    basePath = "bilibili://following/detail"
+                )
+            )
+        )
+        composable<DynamicOpusPage>(
+            deepLinks = listOf(
+                navDeepLink<DynamicOpusPage>(
                     basePath = "bilibili://opus/detail"
                 )
             )

@@ -11,6 +11,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
+import com.kongzue.dialogx.dialogs.PopTip
 import java.util.regex.Pattern
 
 object BilibiliNavigation {
@@ -95,6 +96,10 @@ object BilibiliNavigation {
                 "http://$url"
             }
         )
+        if (uri.scheme != "http" && uri.scheme != "https") {
+            PopTip.show("不支持的链接：${url}")
+            return
+        }
         val host = uri.host ?: ""
         if ("bilibili.com" in host
             || "bilibili.tv" in host
