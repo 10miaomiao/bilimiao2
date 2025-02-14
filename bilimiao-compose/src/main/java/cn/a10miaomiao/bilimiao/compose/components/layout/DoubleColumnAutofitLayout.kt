@@ -1,10 +1,15 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -60,7 +65,9 @@ fun DoubleColumnAutofitLayout(
         } else {
             val density = LocalDensity.current
             val leftMaxHeightPx = remember(density) {
-                density.run { leftMaxHeight.roundToPx().toFloat() }
+                density.run {
+                    leftMaxHeight.roundToPx().toFloat() - chainScrollableLayoutState.minScrollPosition.roundToPx()
+                }
             }
             val scrollableState = rememberScrollState()
             ChainScrollableLayout(
@@ -68,16 +75,15 @@ fun DoubleColumnAutofitLayout(
                 state = chainScrollableLayoutState,
             ) { state ->
                 val alpha = (leftMaxHeightPx + state.getOffsetYValue()) / leftMaxHeightPx
+                val offsetY by animateIntAsState(
+                    targetValue = state.getOffsetYValue().roundToInt(), label = "",
+                )
                 Box(
                     modifier = Modifier
+                        .animateContentSize()
                         .height(leftMaxHeight)
                         .offset {
-                            IntOffset(
-                                0,
-                                state
-                                    .getOffsetYValue()
-                                    .roundToInt()
-                            )
+                            IntOffset(0, offsetY)
                         }
                         .alpha(alpha)
                         .nestedScroll(state.nestedScroll)
@@ -97,7 +103,7 @@ fun DoubleColumnAutofitLayout(
                         .offset {
                             IntOffset(
                                 0,
-                                (state.maxPx + state.getOffsetYValue()).roundToInt()
+                                state.maxPx.roundToInt() + offsetY
                             )
                         }
                 ) {

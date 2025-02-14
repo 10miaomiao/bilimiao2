@@ -30,7 +30,6 @@ fun BiliFailBox(
             is String -> e
             is UnknownHostException -> "无法连接到御坂网络"
             is JsonSyntaxException -> "数据解析失败: $e"
-            is Throwable -> e.message ?: e.toString()
             is Exception -> e.message ?: e.toString()
             else -> e.toString()
         }

@@ -21,6 +21,7 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -50,7 +51,7 @@ private class TimeRegionDetailListContentViewModel(
     private val rid: Int,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     private val timeSettingStore: TimeSettingStore by instance()
     private val filterStore: FilterStore by instance()
@@ -157,11 +158,7 @@ private class TimeRegionDetailListContentViewModel(
     fun toVideoDetail(
         item: RegionVideoInfo
     ) {
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + item.id),
-                defaultNavOptions,
-            )
+        pageNavigation.navigateToVideoInfo(item.id)
     }
 }
 

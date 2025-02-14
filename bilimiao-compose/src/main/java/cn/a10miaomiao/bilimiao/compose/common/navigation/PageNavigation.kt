@@ -18,11 +18,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 class PageNavigation(
-    private val fragment: Fragment,
     private val navHostController: () -> NavHostController,
+    private val launchUrl: (uri: Uri) -> Unit,
 ) {
 
     val hostController get() = navHostController()
@@ -30,9 +31,6 @@ class PageNavigation(
     fun navigateByUri(deepLink: Uri): Boolean {
         return runCatching {
             hostController.navigate(deepLink)
-        }.isSuccess || runCatching {
-            val nav = fragment.findNavController()
-            nav.navigate(deepLink, defaultNavOptions)
         }.isSuccess.also {
             if (!it) miaoLogger() debug "[NotFoundPage]:deepLink=${deepLink}"
         }
@@ -66,11 +64,7 @@ class PageNavigation(
     }
 
     fun navigateToVideoInfo(id: String) {
-        val nav = fragment.findNavController()
-        nav.navigate(
-            Uri.parse("bilimiao://video/${id}"),
-            defaultNavOptions,
-        )
+        hostController.navigate(VideoDetailPage(id))
     }
 
     fun launchWebBrowser(url: String) {
@@ -78,19 +72,7 @@ class PageNavigation(
     }
 
     fun launchWebBrowser(uri: Uri) {
-        // 使用外部浏览器打开
-        val activity = fragment.requireActivity()
-        val typedValue = TypedValue()
-        val attrId = com.google.android.material.R.attr.colorSurfaceVariant
-        activity.theme.resolveAttribute(attrId, typedValue, true)
-        val intent = CustomTabsIntent.Builder()
-            .setDefaultColorSchemeParams(
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(ContextCompat.getColor(activity, typedValue.resourceId))
-                    .build()
-            )
-            .build()
-        intent.launchUrl(activity, uri)
+        launchUrl(uri)
     }
 
 }
