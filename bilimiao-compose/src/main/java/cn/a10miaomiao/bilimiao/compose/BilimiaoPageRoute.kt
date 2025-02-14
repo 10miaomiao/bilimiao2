@@ -67,6 +67,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserMedialistPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceSearchPage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
@@ -205,6 +206,7 @@ class BilimiaoPageRoute (
         composable<SMSLoginPage>()
 
         // video
+        composable<VideoDetailPage>()
         composable<VideoPagesPage>()
 
         // bangumi

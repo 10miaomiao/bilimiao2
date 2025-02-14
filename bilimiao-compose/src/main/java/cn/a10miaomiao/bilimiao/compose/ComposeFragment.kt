@@ -1,13 +1,18 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -21,6 +26,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -30,6 +36,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
 import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
@@ -122,7 +129,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
     }
 
     private val pageNavigation = PageNavigation(
-        this,  { composeNav }
+        navHostController = { composeNav },
+        launchUrl = ::launchWebBrowser,
     )
     private val pageConfigState = PageConfigState()
     private val emitter = SharedFlowEmitter()
@@ -162,9 +170,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val arguments = requireArguments()
-        val entry = arguments.getInt(KEY_ENTRY, 0)
-        val param = arguments.getString(KEY_PARAM, "")
+        val entry = arguments?.getInt(KEY_ENTRY, 0) ?: 0
+        val param = arguments?.getString(KEY_PARAM, "") ?: ""
         val startRoute = BilimiaoPageRoute.getEntryRoute(
             BilimiaoPageRoute.Entry.entries[entry],
             param
@@ -228,6 +235,30 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                 e.printStackTrace()
             }
         }
+    }
+
+    fun launchWebBrowser(uri: Uri) {
+        // 使用外部浏览器打开
+        val activity = requireActivity()
+        val typedValue = TypedValue()
+        val attrId = com.google.android.material.R.attr.colorSurfaceVariant
+        activity.theme.resolveAttribute(attrId, typedValue, true)
+        val intent = CustomTabsIntent.Builder()
+            .setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(ContextCompat.getColor(activity, typedValue.resourceId))
+                    .build()
+            )
+            .build()
+        intent.launchUrl(activity, uri)
+    }
+
+    fun navigateByUri(deepLink: Uri) {
+        pageNavigation.navigateByUri(deepLink)
+    }
+
+    fun navigate(page: ComposePage) {
+        pageNavigation.navigate(page)
     }
 
 }

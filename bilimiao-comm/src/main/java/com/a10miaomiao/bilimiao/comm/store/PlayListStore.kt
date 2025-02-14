@@ -516,5 +516,32 @@ class PlayListStore(override val di: DI) :
             }
         )
     }
+    fun bilibili.app.archive.v1.Arc.toPlayListItem(
+        viewPages: List<bilibili.app.view.v1.ViewPage>,
+    ): PlayListItemInfo {
+        val from = PlayListFrom.Video(
+            aid = aid.toString(),
+        )
+        return PlayListItemInfo(
+            aid = aid.toString(),
+            cid = firstCid.toString(),
+            title = title,
+            cover = pic,
+            duration = duration.toInt(),
+            ownerId = author!!.mid.toString(),
+            ownerName = author.name,
+            from = from,
+            videoPages = viewPages.mapNotNull {
+                it.page
+            }.map {
+                PlayListItemInfo.VideoPageInfo(
+                    cid = it.cid.toString(),
+                    page = it.page,
+                    part = it.part,
+                    duration = it.duration.toInt(),
+                )
+            }
+        )
+    }
 }
 
