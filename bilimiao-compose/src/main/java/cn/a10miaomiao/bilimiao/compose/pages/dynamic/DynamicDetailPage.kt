@@ -14,14 +14,22 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ModalDrawer
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -47,9 +55,11 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.community.ReplyItemBox
 import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicModuleBox
+import cn.a10miaomiao.bilimiao.compose.components.layout.RightNavigationDrawer
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliFailBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
+import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyListPageContent
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
@@ -233,19 +243,7 @@ private fun DynamicDetailPageDetailContent(
             filterTagName = "全部"
         )
     }
-    val replyList by replyViewModel.list.data.collectAsState()
-    val replyListLoading by replyViewModel.list.loading.collectAsState()
-    val replyListFinished by replyViewModel.list.finished.collectAsState()
-    val replyListFail by replyViewModel.list.fail.collectAsState()
-    val upMid = replyViewModel.upMid
-//    val replyRefreshing by replyViewModel.isRefreshing.collectAsState()
 
-    val origName = detailData.extend?.origName
-    PageConfig(
-        title =  origName?.let {
-            "${it}\n的\n动态详情"
-        } ?: "动态详情"
-    )
     val buttomModule = remember(detailData) {
         detailData.modules.lastOrNull()?.let {
             val moduleItem = it.moduleItem
@@ -253,64 +251,46 @@ private fun DynamicDetailPageDetailContent(
             else null
         }
     }
-    LazyColumn(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-            ),
-        contentPadding = windowInsets.toPaddingValues()
-    ) {
-        item {
-            Column(
-                modifier = Modifier
-                    .padding(bottom = 5.dp),
-            ) {
-                for(module in detailData.modules) {
-                    DynamicModuleBox(module = module)
+
+    val origName = detailData.extend?.origName
+    PageConfig(
+        title =  origName?.let {
+            "${it}\n的\n动态详情"
+        } ?: "动态详情"
+    )
+
+    MainReplyListPageContent(
+        viewModel = replyViewModel,
+        headerContent = {
+            item {
+                Column(
+                    modifier = Modifier
+                        .padding(bottom = 5.dp),
+                ) {
+                    for(module in detailData.modules) {
+                        DynamicModuleBox(module = module)
+                    }
                 }
             }
-        }
-        item {
-            val moduleStat = buttomModule?.moduleStat
-            Text(
-                modifier = Modifier
-                    .padding(
-                        top = 10.dp,
-                        bottom = 5.dp,
-                        start = 10.dp,
-                        end = 10.dp,
-                    ),
-                text = if (moduleStat == null) "全部评论"
-                else "全部评论(${moduleStat.reply})",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        item {
-            HorizontalDivider()
-        }
-        items(
-            replyList.size,
-            { replyList[it].id }
-        ) {
-            val replyItem = replyList[it]
-            ReplyItemBox(
-                item = replyItem,
-                upMid = upMid,
-                onLikeClick = {
-                    replyViewModel.switchLike(it)
-                }
-            )
-        }
-        item() {
-            ListStateBox(
-                loading = replyListLoading,
-                finished = replyListFinished,
-                fail = replyListFail,
-                listData = replyList,
-            ) {
-                replyViewModel.loadMode()
+            item {
+                val moduleStat = buttomModule?.moduleStat
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            top = 10.dp,
+                            bottom = 5.dp,
+                            start = 10.dp,
+                            end = 10.dp,
+                        ),
+                    text = if (moduleStat == null) "全部评论"
+                    else "全部评论(${moduleStat.reply})",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            item {
+                HorizontalDivider()
             }
         }
-    }
+    )
 }

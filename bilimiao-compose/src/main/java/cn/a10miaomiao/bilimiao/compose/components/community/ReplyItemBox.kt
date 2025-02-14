@@ -2,6 +2,8 @@ package cn.a10miaomiao.bilimiao.compose.components.community
 
 import android.os.Parcelable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Reply
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Share
 import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedTextNode
+import cn.a10miaomiao.bilimiao.compose.common.foundation.ScaleIndication
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 import cn.a10miaomiao.bilimiao.compose.components.image.ImagesGrid
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
@@ -42,6 +45,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import kotlinx.android.parcel.Parcelize
+import kotlin.math.max
 import kotlin.math.min
 
 @Stable
@@ -106,7 +110,9 @@ fun ReplyItemBox(
     modifier: Modifier = Modifier,
     item: bilibili.main.community.reply.v1.ReplyInfo,
     upMid: Long,
+    onAvatarClick: () -> Unit = {},
     onLikeClick: () -> Unit = {},
+    onClick: () -> Unit = {},
 ) {
     val content = remember(item.content) {
         item.content?.let {
@@ -153,7 +159,9 @@ fun ReplyItemBox(
         cardLabels = item.replyControl?.cardLabels?.map { it.textContent } ?: emptyList(),
         upMid = upMid,
         isLike = item.replyControl?.action == 1L,
+        onAvatarClick = onAvatarClick,
         onLikeClick = onLikeClick,
+        onClick = onClick,
     )
 }
 
@@ -176,10 +184,15 @@ fun ReplyItemBox(
     cardLabels: List<String>,
     upMid: Long,
     isLike: Boolean = false,
+    onAvatarClick: () -> Unit = {},
     onLikeClick: () -> Unit = {},
+    onClick: () -> Unit = {},
 ) {
     Row(
-        modifier.padding(10.dp)
+        Modifier
+            .clickable(onClick = onClick)
+            .padding(10.dp)
+            .then(modifier)
     ) {
         GlideImage(
             model = UrlUtil.autoHttps(avatar) + "@200w_200h",
@@ -189,6 +202,7 @@ fun ReplyItemBox(
                 .padding(top = 2.dp)
                 .size(40.dp)
                 .clip(CircleShape)
+                .clickable(onClick = onAvatarClick)
         )
         Column(
             modifier = Modifier
@@ -196,7 +210,8 @@ fun ReplyItemBox(
                 .weight(1f)
         ) {
             Row(
-                modifier = Modifier.padding(bottom = 2.dp),
+                modifier = Modifier.padding(bottom = 2.dp)
+                    .clickable(onClick = onAvatarClick),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -275,56 +290,60 @@ fun ReplyItemBox(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(40.dp)
             ) {
-                ScaleButton(
-                    onPress = onLikeClick
+                Row(
+                    modifier = Modifier.clickable(
+                        onClick = onLikeClick,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ScaleIndication,
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (isLike) {
-                            Icon(
-                                BilimiaoIcons.Common.Likefill,
-                                contentDescription = "like",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(end = 4.dp)
-                                    .size(14.dp)
-                            )
-                        } else {
-                            Icon(
-                                BilimiaoIcons.Common.Like,
-                                contentDescription = "like",
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(end = 4.dp)
-                                    .size(14.dp)
-                            )
-                        }
-                        Text(
-                            text = like.toString(),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
-                }
-
-                ScaleButton(
-//                    onClick = { /*TODO*/ },
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    var likeNum = like
+                    if (isLike) {
                         Icon(
-                            BilimiaoIcons.Common.Reply,
-                            contentDescription = "reply",
+                            BilimiaoIcons.Common.Likefill,
+                            contentDescription = "like",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(end = 4.dp)
+                                .size(14.dp)
+                        )
+                        likeNum = max(1L, likeNum)
+                    } else {
+                        Icon(
+                            BilimiaoIcons.Common.Like,
+                            contentDescription = "like",
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(end = 4.dp)
                                 .size(14.dp)
                         )
-                        Text(
-                            text = count.toString(),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
+                        likeNum = max(0L, likeNum) // 防止出现负数
                     }
+                    Text(
+                        text = NumberUtil.converString(likeNum),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                Row(
+                    modifier = Modifier.clickable(
+                        onClick = { },
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ScaleIndication,
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        BilimiaoIcons.Common.Reply,
+                        contentDescription = "reply",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(end = 4.dp)
+                            .size(14.dp)
+                    )
+                    Text(
+                        NumberUtil.converString(count),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             }
         }
