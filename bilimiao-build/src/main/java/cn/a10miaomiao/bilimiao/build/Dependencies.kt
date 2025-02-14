@@ -15,7 +15,7 @@ object Versions {
     const val composeBom = "2024.10.00"
     const val datastore = "1.1.1"
     const val media = "1.6.0"
-    const val media3 = "1.4.1"
+    const val media3 = "1.5.0"
 
     const val serialization = "1.7.3"
     const val accompanist = "0.35.0-alpha"

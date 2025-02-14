@@ -11,12 +11,12 @@ plugins {
 
 android {
     namespace = "com.a10miaomiao.bilimiao"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 109
         versionName = "2.4.1 beta"
 
@@ -166,7 +166,7 @@ dependencies {
     // 闭源库：百度统计、极验验证
     "fullImplementation"(Libraries.baiduMobstat)
     "fullImplementation"(Libraries.sensebot)
-    // av1解码器：https://github.com/google/ExoPlayer/tree/release-v2/extensions/av1
+    // av1解码器：https://github.com/androidx/media/tree/release/libraries/decoder_av1
     "fullImplementation"(files("libs/lib-decoder-av1-release.aar"))
 
     testImplementation(Libraries.junit)
