@@ -106,7 +106,7 @@ class AppCrashHandler private constructor(
         val pm = context.packageManager
         val pi = pm.getPackageInfo(context.packageName, PackageManager.GET_ACTIVITIES)
         if (pi != null) {
-            info["应用版本"] = pi.versionName
+            info["应用版本"] = pi.versionName ?: "unknown"
             info["应用版本号"] = "${PackageInfoCompat.getLongVersionCode(pi)}"
         }
     }
