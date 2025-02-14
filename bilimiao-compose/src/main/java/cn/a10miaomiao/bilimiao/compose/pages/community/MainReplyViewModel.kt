@@ -10,6 +10,8 @@ import bilibili.main.community.reply.v1.MainListReq
 import bilibili.main.community.reply.v1.ReplyGRPC
 import bilibili.main.community.reply.v1.ReplyInfo
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -18,6 +20,8 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
@@ -32,16 +36,19 @@ class MainReplyViewModel(
     val filterTagName: String = "",
 ) : ViewModel(), DIAware {
 
-    private val context: Context by instance()
-    private val fragment: Fragment by instance()
+    private val pageNavigation: PageNavigation by instance()
     private val userStore: UserStore by instance()
 
     var sortOrder = 3
 
-    var triggered = false
-    var list = FlowPaginationInfo<ReplyInfo>()
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> get() = _isRefreshing
+    val list = FlowPaginationInfo<ReplyInfo>()
     var upMid = -1L
     private var _cursor: CursorReply? = null
+
+    private val _currentReply = MutableStateFlow<ReplyInfo?>(null)
+    val currentReply: StateFlow<ReplyInfo?> get() = _currentReply
 
     init {
         loadData()
@@ -90,21 +97,32 @@ class MainReplyViewModel(
             list.fail.value = e.message ?: e.toString()
         } finally {
             list.loading.value = false
-            triggered = false
+            _isRefreshing.value = false
         }
     }
 
-    fun loadMode() {
+    fun loadMore() {
         if (!this.list.finished.value && !this.list.loading.value) {
             loadData()
         }
     }
 
-    fun refreshList() {
+    fun refreshList(
+        refreshing: Boolean = true,
+    ) {
         list.reset()
         _cursor = null
-        triggered = true
+        _isRefreshing.value = refreshing
         loadData()
+    }
+
+    fun switchLike(reply: ReplyInfo) {
+        val index = list.data.value.indexOfFirst {
+            it.id == reply.id
+        }
+        if (index != -1) {
+            switchLike(index)
+        }
     }
 
     fun switchLike(index: Int) = viewModelScope.launch(Dispatchers.IO) {
@@ -127,6 +145,9 @@ class MainReplyViewModel(
                 val newList = list.data.value.toMutableList()
                 newList[index] = newItem
                 list.data.value = newList
+                if (currentReply.value?.id == newItem.id) {
+                    _currentReply.value = newItem
+                }
             } else {
                 PopTip.show(res.message)
             }
@@ -136,6 +157,21 @@ class MainReplyViewModel(
         }
     }
 
+    fun setCurrentReply(reply: ReplyInfo) {
+        _currentReply.value = reply
+    }
+
+    fun clearCurrentReply() {
+        _currentReply.value = null
+    }
+
     fun isLogin() = userStore.isLogin()
+
+
+    fun toUserPage(mid: String) {
+        pageNavigation.navigate(UserSpacePage(
+            id = mid,
+        ))
+    }
 
 }

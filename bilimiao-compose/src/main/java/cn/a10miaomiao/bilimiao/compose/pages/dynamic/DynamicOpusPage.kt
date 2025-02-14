@@ -47,6 +47,7 @@ import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicModuleBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliFailBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
+import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyListPageContent
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyViewModel
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
@@ -267,27 +268,21 @@ private fun DynamicDetailPageDetailContent(
             else null
         }
     }
-    LazyColumn(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-            ),
-        contentPadding = windowInsets.toPaddingValues(
-            top = 0.dp,
-        )
-    ) {
-        item {
-            Column(
-                modifier = Modifier
-                    .run {
-                        if (hasTopBigImages) this
-                        else padding(top = windowInsets.topDp.dp)
+    MainReplyListPageContent(
+        viewModel = replyViewModel,
+        headerContent = {
+            item {
+                Column(
+                    modifier = Modifier
+                        .run {
+                            if (hasTopBigImages) this
+                            else padding(top = windowInsets.topDp.dp)
+                        }
+                        .padding(bottom = 5.dp),
+                ) {
+                    for(module in detailData.modules) {
+                        DynamicModuleBox(module = module)
                     }
-                    .padding(bottom = 5.dp),
-            ) {
-                for(module in detailData.modules) {
-                    DynamicModuleBox(module = module)
-                }
 //                topModule?.author?.let {
 //                    Text(
 //                        it.ptimeLocationText,
@@ -298,49 +293,27 @@ private fun DynamicDetailPageDetailContent(
 //                            .padding(horizontal = 10.dp)
 //                    )
 //                }
-            }
-        }
-        item {
-            val moduleStat = buttomModule?.moduleStat
-            Text(
-                modifier = Modifier
-                    .padding(
-                        top = 10.dp,
-                        bottom = 5.dp,
-                        start = 10.dp,
-                        end = 10.dp,
-                    ),
-                text = if (moduleStat == null) "全部评论"
-                    else "全部评论(${moduleStat.reply})",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        item {
-            HorizontalDivider()
-        }
-        items(
-            replyList.size,
-            { replyList[it].id }
-        ) {
-            val replyItem = replyList[it]
-            ReplyItemBox(
-                item = replyItem,
-                upMid = upMid,
-                onLikeClick = {
-                    replyViewModel.switchLike(it)
                 }
-            )
-        }
-        item() {
-            ListStateBox(
-                loading = replyListLoading,
-                finished = replyListFinished,
-                fail = replyListFail,
-                listData = replyList,
-            ) {
-                replyViewModel.loadMode()
+            }
+            item {
+                val moduleStat = buttomModule?.moduleStat
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            top = 10.dp,
+                            bottom = 5.dp,
+                            start = 10.dp,
+                            end = 10.dp,
+                        ),
+                    text = if (moduleStat == null) "全部评论"
+                    else "全部评论(${moduleStat.reply})",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            item {
+                HorizontalDivider()
             }
         }
-    }
+    )
 }
