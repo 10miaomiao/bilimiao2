@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.page.start
 
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
@@ -35,62 +36,52 @@ class StartViewModel(
             title = "关注",
             iconRes = R.drawable.ic_nav_following,
             isNeedAuth = true,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.MyFollow,
+            pageUrl = "bilimiao://mine/follow",
         ),
         StartNavInfo(
             title = "粉丝",
             iconRes = R.drawable.ic_nav_follower,
             isNeedAuth = true,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.MyFans,
+            pageUrl = "bilimiao://web/${Uri.encode("https://space.bilibili.com/h5/follow?type=fans")}",
         ),
         StartNavInfo(
             title = "收藏",
             iconRes = R.drawable.ic_nav_fav,
             isNeedAuth = true,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.UserFavourite,
-            composeParam = "{mid}"
+            pageUrl = "bilimiao://user/favourite/{mid}",
         ),
         StartNavInfo(
             title = "追番/剧",
             iconRes = R.drawable.ic_nav_bangumi,
             isNeedAuth = true,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.MyBangumi,
+            pageUrl = "bilimiao://mine/bangumi",
         ),
         StartNavInfo(
             title = "下载",
             iconRes = R.drawable.ic_nav_download,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.DownloadList,
+            pageUrl = "bilimiao://download",
         ),
         StartNavInfo(
             title = "历史",
             iconRes = R.drawable.ic_nav_history,
             isNeedAuth = false,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.History,
+            pageUrl = "bilimiao://mine/history",
         ),
         StartNavInfo(
             title = "稍后看",
             iconRes = R.drawable.ic_nav_watchlater,
             isNeedAuth = true,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.WatchLater,
+            pageUrl = "bilimiao://mine/watchlater",
         ),
         StartNavInfo(
             title = "设置",
             iconRes = R.drawable.ic_nav_setting,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.Setting,
+            pageUrl = "bilimiao://setting",
         ),
         StartNavInfo(
             title = "歌词",
             iconRes = R.drawable.ic_nav_lyric,
-            isComposePage = true,
-            composeEntry = BilimiaoPageRoute.Entry.Lyric,
+            pageUrl = "bilimiao://lyric",
         ),
     )
 
@@ -114,9 +105,6 @@ class StartViewModel(
         val iconRes: Int? = null,
         val iconUrl: String? = null,
         val isNeedAuth: Boolean = false,
-        val isComposePage: Boolean = false,
-        val composeEntry: BilimiaoPageRoute.Entry? = null,
-        val composeParam: String? = null,
     )
 
 }

@@ -29,6 +29,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import cn.a10miaomiao.miao.binding.android.view._bottomPadding
 import cn.a10miaomiao.miao.binding.android.view._leftPadding
 import cn.a10miaomiao.miao.binding.android.view._rightPadding
@@ -257,11 +258,11 @@ class StartFragment : Fragment(), DIAware, MyPage {
             } else {
                 viewLifecycleOwner.lifecycleScope.launch {
                     withStarted {
-                        val nav = (activity as? MainActivity)?.pointerNav?.navController
-                            ?: activity.findNavController(R.id.nav_host_fragment)
-                        if (!BiliNavigation.navigationTo(nav, text)) {
-                            BiliNavigation.navigationToWeb(activity, text)
-                        }
+//                        val nav = (activity as? MainActivity)?.pointerNav?.navController
+//                            ?: activity.findNavController(R.id.nav_host_fragment)
+//                        if (!BiliNavigation.navigationTo(nav, text)) {
+//                            BiliNavigation.navigationToWeb(activity, text)
+//                        }
                     }
                 }
             }
@@ -273,17 +274,17 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handlePlayerCardDetailClick = View.OnClickListener {
         val playerState = viewModel.playerStore.state
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav
         if (playerState.sid.isNotBlank()) {
-            nav.navigateToCompose(
-                BilimiaoPageRoute.Entry.BangumiDetail,
-                "id=${playerState.sid}&epid=${playerState.epid}"
-            )
+            nav?.navigate(BangumiDetailPage(
+                id = playerState.sid,
+                epId = playerState.epid
+            ))
             scaffoldView.closeDrawer()
         } else if (playerState.aid.isNotBlank()) {
-            val args = VideoInfoFragment.createArguments(playerState.aid)
-            nav.navigate(VideoInfoFragment.actionId, args)
+            nav?.navigate(VideoDetailPage(
+                id = playerState.aid,
+            ))
             scaffoldView.closeDrawer()
         }
     }
@@ -294,17 +295,13 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private val handleUserClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav
         val userStore = viewModel.userStore
         if (userStore.isLogin()) {
             val mid = userStore.state.info?.mid ?: return@OnClickListener
-            nav.navigateToCompose(
-                BilimiaoPageRoute.Entry.UserSpace,
-                param = mid.toString(),
-            )
+            nav?.navigate(UserSpacePage(mid.toString()))
         } else {
-            nav.navigateToCompose(BilimiaoPageRoute.Entry.Login)
+            nav?.navigate(LoginPage())
         }
         scaffoldView.closeDrawer()
     }
@@ -312,18 +309,15 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val handlePlayListClick = View.OnClickListener {
         val activity = requireActivity()
         val scaffoldView = activity.getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
-//        val nav = requireActivity().findNavController(R.id.nav_bottom_sheet_fragment)
-        nav.navigateToCompose(BilimiaoPageRoute.Entry.PlayList)
+        val nav = (activity as? MainActivity)?.pointerNav
+        nav?.navigate(PlayListPage())
         scaffoldView.closeDrawer()
     }
 
     private val handleMessageClick = View.OnClickListener {
         val scaffoldView = requireActivity().getScaffoldView()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
-        nav.navigateToCompose(BilimiaoPageRoute.Entry.Message)
+        val nav = (activity as? MainActivity)?.pointerNav
+        nav?.navigate(MessagePage())
         scaffoldView.closeDrawer()
     }
 
@@ -358,17 +352,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
 
     private val handleNavItemClick = OnItemClickListener { adapter, view, position ->
         val item = viewModel.navList[position]
-        val navOptions = NavOptions.Builder()
-            .setEnterAnim(R.anim.miao_fragment_open_enter)
-            .setExitAnim(R.anim.miao_fragment_open_exit)
-            .setPopEnterAnim(R.anim.miao_fragment_close_enter)
-            .setPopExitAnim(R.anim.miao_fragment_close_exit)
-            .build()
-        val nav = (activity as? MainActivity)?.pointerNav?.navController
-            ?: requireActivity().findNavController(R.id.nav_host_fragment)
+        val nav = (activity as? MainActivity)?.pointerNav
         val scaffoldView = requireActivity().getScaffoldView()
         var pageUrl = item.pageUrl
-        var param = item.composeParam ?: ""
         if (item.isNeedAuth) {
             val userInfo = viewModel.userStore.state.info
             if (userInfo == null) {
@@ -378,17 +364,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
             pageUrl = item.pageUrl
                 ?.replace("{mid}", userInfo.mid.toString())
                 ?.replace("{name}", userInfo.name)
-            param = param.replace("{mid}", userInfo.mid.toString())
-                .replace("{name}", userInfo.name)
         }
-        if (item.isComposePage) {
-            val entry = item.composeEntry ?: return@OnItemClickListener
-            nav.navigateToCompose(entry, param)
-            scaffoldView.closeDrawer()
-        } else {
-            nav.navigate(Uri.parse(pageUrl), navOptions)
-            scaffoldView.closeDrawer()
-        }
+        nav?.navigateByUri(Uri.parse(pageUrl))
+        scaffoldView.closeDrawer()
     }
 
     private val handleCheckedChange = CompoundButton.OnCheckedChangeListener { compoundButton, b ->

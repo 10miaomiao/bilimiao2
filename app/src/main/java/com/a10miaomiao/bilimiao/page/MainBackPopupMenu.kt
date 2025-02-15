@@ -35,8 +35,7 @@ class MainBackPopupMenu(
         when (item?.itemId) {
             0 -> {
                 if(activity is MainActivity) {
-                    val nav = activity.currentNav.navController
-                    return nav.popBackStack(MainNavGraph.dest.main, false)
+                    activity.currentNav.goBackHome()
                 }
             }
             1 -> {

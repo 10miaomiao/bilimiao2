@@ -258,15 +258,15 @@ class VideoInfoFragment : Fragment(), DIAware, MyPage {
             1 -> {
                 // 评论
                 if (info != null) {
-                    val nav = (activity as? MainActivity)?.pointerNav?.navController
-                        ?: requireActivity().findNavController(R.id.nav_host_fragment)
-                    val args = VideoCommentListFragment.createArguments(
-                        info.aid,
-                        info.title,
-                        info.pic,
-                        info.owner.name,
-                    )
-                    nav.navigate(VideoCommentListFragment.actionId, args)
+//                    val nav = (activity as? MainActivity)?.pointerNav?.navController
+//                        ?: requireActivity().findNavController(R.id.nav_host_fragment)
+//                    val args = VideoCommentListFragment.createArguments(
+//                        info.aid,
+//                        info.title,
+//                        info.pic,
+//                        info.owner.name,
+//                    )
+//                    nav.navigate(VideoCommentListFragment.actionId, args)
                 }
             }
             2 -> {

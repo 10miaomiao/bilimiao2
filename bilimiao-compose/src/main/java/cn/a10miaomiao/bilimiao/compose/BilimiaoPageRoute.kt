@@ -246,7 +246,13 @@ class BilimiaoPageRoute (
         )
 
         // download
-        composable<DownloadListPage>()
+        composable<DownloadListPage>(
+            deepLinks = listOf(
+                navDeepLink<DownloadListPage>(
+                    basePath = "bilimiao://download"
+                )
+            )
+        )
         composable<DownloadDetailPage>()
         composable<DownloadBangumiCreatePage>()
 
@@ -263,7 +269,13 @@ class BilimiaoPageRoute (
         composable<PlayListPage>()
 
         // setting
-        composable<SettingPage>()
+        composable<SettingPage>(
+            deepLinks = listOf(
+                navDeepLink<SettingPage>(
+                    basePath = "bilimiao://setting"
+                )
+            )
+        )
         composable<HomeSettingPage>()
         composable<VideoSettingPage>()
         composable<DanmakuSettingPage>()
@@ -280,10 +292,34 @@ class BilimiaoPageRoute (
         composable<TimeRegionDetailPage>()
 
         // mine
-        composable<MyBangumiPage>()
-        composable<MyFollowPage>()
-        composable<HistoryPage>()
-        composable<WatchLaterPage>()
+        composable<MyBangumiPage>(
+            deepLinks = listOf(
+                navDeepLink<MyBangumiPage>(
+                    basePath = "bilimiao://mine/bangumi"
+                )
+            )
+        )
+        composable<MyFollowPage>(
+            deepLinks = listOf(
+                navDeepLink<MyFollowPage>(
+                    basePath = "bilimiao://mine/follow"
+                )
+            )
+        )
+        composable<HistoryPage>(
+            deepLinks = listOf(
+                navDeepLink<HistoryPage>(
+                    basePath = "bilimiao://mine/history"
+                )
+            )
+        )
+        composable<WatchLaterPage>(
+            deepLinks = listOf(
+                navDeepLink<WatchLaterPage>(
+                    basePath = "bilimiao://mine/watchlater"
+                )
+            )
+        )
 
         // user
         composable<UserSpacePage>(
@@ -302,16 +338,34 @@ class BilimiaoPageRoute (
         composable<UserBangumiPage>()
         composable<SearchFollowPage>()
         composable<UserLikeArchivePage>()
-        composable<UserFavouritePage>()
+        composable<UserFavouritePage>(
+            deepLinks = listOf(
+                navDeepLink<UserFavouritePage>(
+                    basePath = "bilibili://user/favourite"
+                )
+            )
+        )
         composable<UserFavouriteDetailPage>()
         composable<UserSeasonDetailPage>()
         composable<UserMedialistPage>()
 
         //lyric
-        composable<LyricPage>()
+        composable<LyricPage>(
+            deepLinks = listOf(
+                navDeepLink<LyricPage>(
+                    basePath = "bilimiao://lyric"
+                )
+            )
+        )
 
         // web
-        composable<WebPage>()
+        composable<WebPage>(
+            deepLinks = listOf(
+                navDeepLink<WebPage>(
+                    basePath = "bilimiao://web"
+                )
+            )
+        )
     }
 
     fun defaultEnterTransition(

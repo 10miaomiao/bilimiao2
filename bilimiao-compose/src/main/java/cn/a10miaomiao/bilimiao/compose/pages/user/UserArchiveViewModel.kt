@@ -160,11 +160,7 @@ class UserArchiveViewModel(
     }
 
     fun toVideoDetail(item: ArchiveInfo) {
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + item.param),
-                defaultNavOptions,
-            )
+        pageNavigation.navigateToVideoInfo(item.param)
     }
 
 }

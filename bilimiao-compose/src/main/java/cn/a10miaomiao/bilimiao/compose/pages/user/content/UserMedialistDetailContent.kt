@@ -82,7 +82,6 @@ private class UserMedialistDetailViewMode(
 ) : ViewModel(), DIAware {
 
     val userStore: UserStore by instance()
-    private val fragment: Fragment by instance()
     private val pageNavigation: PageNavigation by instance()
     private val playerDelegate: BasePlayerDelegate by instance()
     private val playerStore by instance<PlayerStore>()
@@ -184,11 +183,7 @@ private class UserMedialistDetailViewMode(
                 )
             }
         } else {
-            fragment.findNavController()
-                .navigate(
-                    Uri.parse("bilimiao://video/" + item.id),
-                    defaultNavOptions,
-                )
+            pageNavigation.navigateToVideoInfo(item.id)
         }
     }
 

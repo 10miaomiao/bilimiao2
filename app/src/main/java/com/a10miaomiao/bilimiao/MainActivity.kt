@@ -71,9 +71,7 @@ import splitties.views.backgroundColor
 
 class MainActivity
     : AppCompatActivity(),
-    DIAware,
-    NavController.OnDestinationChangedListener,
-    FragmentOnAttachListener {
+    DIAware {
 
     lateinit var ui: MainUi
 
@@ -96,19 +94,17 @@ class MainActivity
     private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
 
     private lateinit var leftFragment: StartFragment
-    private lateinit var navHostFragment: NavHostFragment
-    private lateinit var navController: NavController
+    private lateinit var navHostFragment: ComposeFragment
 
-    private var subNavHostFragment: NavHostFragment? = null
-    private var subNavController: NavController? = null
+    private var subNavHostFragment: ComposeFragment? = null
 
-    val currentNav: NavHostFragment
+    val currentNav: ComposeFragment
         get() = if (ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
-    val anotherNav: NavHostFragment
+    val anotherNav: ComposeFragment
         get() = if (!ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
 
     // 指示器，指示新页面该出现的地方
-    val pointerNav: NavHostFragment get() {
+    val pointerNav: ComposeFragment get() {
         return if (ui.root.subContentShown) {
             if (ui.root.pointerExchanged == ui.root.contentExchanged) {
                 navHostFragment
@@ -197,21 +193,13 @@ class MainActivity
 
     private fun initNavController() {
         navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-        MainNavGraph.createGraph(navController, MainNavGraph.dest.compose)
-        navController.addOnDestinationChangedListener(this)
-        navHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
-
+            .findFragmentById(R.id.nav_host_fragment) as ComposeFragment
+        navHostFragment.pageConfig.setConfig = this::notifyConfigChanged
         if (findViewById<View?>(R.id.nav_host_fragment_sub) != null) {
             val _subNavHostFragment = supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment_sub) as NavHostFragment
-            val _subNavController = _subNavHostFragment.navController
-            MainNavGraph.createGraph(_subNavController, MainNavGraph.dest.main)
-            _subNavController.addOnDestinationChangedListener(this)
-            _subNavHostFragment.childFragmentManager.addFragmentOnAttachListener(this)
+                .findFragmentById(R.id.nav_host_fragment_sub) as ComposeFragment
+            _subNavHostFragment.pageConfig.setConfig = this::notifyConfigChanged
             subNavHostFragment = _subNavHostFragment
-            subNavController = _subNavController
         }
 
         (supportFragmentManager.findFragmentByTag(getString(R.string.tag_left_fragment)) as? StartFragment)?.let {
@@ -224,7 +212,9 @@ class MainActivity
 //            }
         }
 
-        navController.handleDeepLink(intent)
+        intent.data?.let {
+            navHostFragment.navigateByUri(it)
+        }
     }
 
     private fun initAppBar() {
@@ -235,7 +225,7 @@ class MainActivity
             if (it.prop.action == MenuActions.search) {
                 openSearch(it)
             } else {
-                val fragment = currentNav.childFragmentManager.primaryNavigationFragment
+                val fragment = currentNav
                 if (fragment is MyPage) {
                     val childMenu = it.prop.childMenu
                     if (childMenu != null) {
@@ -300,45 +290,8 @@ class MainActivity
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent.data?.let { uri ->
-            val navOptions = NavOptions.Builder()
-                .setEnterAnim(R.anim.miao_fragment_open_enter)
-                .setExitAnim(R.anim.miao_fragment_open_exit)
-                .setPopEnterAnim(R.anim.miao_fragment_close_enter)
-                .setPopExitAnim(R.anim.miao_fragment_close_exit)
-                .build()
-            try {
-                pointerNav.navController.navigate(uri, navOptions)
-                true
-            } catch (e: IllegalArgumentException) {
-            }
-        }
-    }
-
-
-    override fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
-        if (fragment is MyPage) {
-            val config = fragment.pageConfig
-            config.setConfig = this::notifyConfigChanged
-        }
-    }
-
-    override fun onDestinationChanged(
-        controller: NavController,
-        destination: NavDestination,
-        arguments: Bundle?
-    ) {
-//        ui.mAppBar.canBack = destination.id != MainNavGraph.dest.main
-        ui.mAppBar.clearProp()
-
-        //将焦点给新页面
-        if (controller == anotherNav.navController) {
-            if (ui.root.focusOnMain) {
-                ui.root.subContent?.requestFocus()
-            } else {
-                ui.root.content?.requestFocus()
-            }
-            ui.root.updateLayout(false)
+        intent.data?.let {
+            navHostFragment.navigateByUri(it)
         }
     }
 
@@ -362,11 +315,7 @@ class MainActivity
         notifyConfigChanged()
     }
     fun notifyConfigChanged(){
-        currentNav.childFragmentManager.fragments.lastOrNull().let {
-            if(it is MyPage){
-                setMyPageConfig(it.pageConfig.configInfo)
-            }
-        }
+        setMyPageConfig(currentNav.pageConfig.configInfo)
     }
 
 
@@ -386,7 +335,8 @@ class MainActivity
     }
 
     private fun goBackHome(): Boolean {
-        return currentNav.navController.popBackStack(MainNavGraph.dest.main, false)
+        currentNav.goBackHome()
+        return true
     }
 
     private val onBackClick = View.OnClickListener {
@@ -460,10 +410,7 @@ class MainActivity
     }
 
     fun searchSelfPage(keyword: String) {
-        val fragment = currentNav.childFragmentManager.primaryNavigationFragment
-        if (fragment is MyPage) {
-            fragment.onSearchSelfPage(this, keyword)
-        }
+        currentNav.onSearchSelfPage(this, keyword)
     }
 
     fun setWindowInsetsAndroidL() {
@@ -569,10 +516,6 @@ class MainActivity
         basePlayerDelegate.onDestroy()
         bottomSheetDelegate.onDestroy()
         store.onDestroy()
-        navController.removeOnDestinationChangedListener(this)
-        navHostFragment.childFragmentManager.removeFragmentOnAttachListener(this)
-        subNavController?.removeOnDestinationChangedListener(this)
-        subNavHostFragment?.childFragmentManager?.removeFragmentOnAttachListener(this)
         super.onDestroy()
     }
 
@@ -592,33 +535,33 @@ class MainActivity
             SearchActivity.REQUEST_CODE -> {
                 val arguments = data?.extras ?: Bundle()
                 if (arguments.containsKey(SearchActivity.KEY_URL)) {
-                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
-                    val isComposePage = arguments.getBoolean(SearchActivity.KEY_IS_COMPOSE_PAGE, false)
-                    if (isComposePage) {
-                        val composeEntry = arguments.getInt(SearchActivity.KEY_COMPOSE_ENTRY, 0)
-                        val composeParam = arguments.getString(SearchActivity.KEY_COMPOSE_PARAM, "")
-                        pointerNav.navController.navigateToCompose(
-                            BilimiaoPageRoute.Entry.entries[composeEntry],
-                            composeParam
-                        )
-                    } else {
-                        val navOptions = NavOptions.Builder()
-                            .setEnterAnim(R.anim.miao_fragment_open_enter)
-                            .setExitAnim(R.anim.miao_fragment_open_exit)
-                            .setPopEnterAnim(R.anim.miao_fragment_close_enter)
-                            .setPopExitAnim(R.anim.miao_fragment_close_exit)
-                            .build()
-                        pointerNav.navController.navigate(Uri.parse(pageUrl), navOptions)
-                    }
-                    return
+//                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
+//                    val isComposePage = arguments.getBoolean(SearchActivity.KEY_IS_COMPOSE_PAGE, false)
+//                    if (isComposePage) {
+//                        val composeEntry = arguments.getInt(SearchActivity.KEY_COMPOSE_ENTRY, 0)
+//                        val composeParam = arguments.getString(SearchActivity.KEY_COMPOSE_PARAM, "")
+//                        pointerNav.navController.navigateToCompose(
+//                            BilimiaoPageRoute.Entry.entries[composeEntry],
+//                            composeParam
+//                        )
+//                    } else {
+//                        val navOptions = NavOptions.Builder()
+//                            .setEnterAnim(R.anim.miao_fragment_open_enter)
+//                            .setExitAnim(R.anim.miao_fragment_open_exit)
+//                            .setPopEnterAnim(R.anim.miao_fragment_close_enter)
+//                            .setPopExitAnim(R.anim.miao_fragment_close_exit)
+//                            .build()
+//                        pointerNav.navController.navigate(Uri.parse(pageUrl), navOptions)
+//                    }
+//                    return
                 }
                 val mode = arguments.getInt(SearchActivity.KEY_MODE)
                 val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
                 if (mode == 0) {
-                    pointerNav.navController.navigateToCompose(
-                        BilimiaoPageRoute.Entry.Search,
-                        param = keyword,
-                    )
+//                    pointerNav.navController.navigateToCompose(
+//                        BilimiaoPageRoute.Entry.Search,
+//                        param = keyword,
+//                    )
                 } else {
                     searchSelfPage(keyword)
                 }
@@ -714,13 +657,7 @@ class MainActivity
 
     private fun onHostNavBack(): Boolean {
 //        if (ui.mAppBar.canBack) {
-            val currentDestinationId = currentNav.navController.currentDestination?.id
-            if (currentDestinationId == MainNavGraph.dest.compose) {
-                (currentNav.childFragmentManager.fragments.last()
-                        as? ComposeFragment)?.onBackPressed()
-                return true
-            }
-            currentNav.navController.popBackStack()
+            currentNav.onBackPressed()
             return true
 //        } else {
 //            return false
@@ -755,13 +692,14 @@ class MainActivity
     }
 
     fun getPrimaryNavigationFragment(nav: NavController): Fragment? {
-        return if (nav === navController) {
-            navHostFragment.childFragmentManager.primaryNavigationFragment
-        } else if (nav === subNavController) {
-            subNavHostFragment?.childFragmentManager?.primaryNavigationFragment
-        } else {
-            null
-        }
+        return null
+//        return if (nav === navController) {
+//            navHostFragment.childFragmentManager.primaryNavigationFragment
+//        } else if (nav === subNavController) {
+//            subNavHostFragment?.childFragmentManager?.primaryNavigationFragment
+//        } else {
+//            null
+//        }
     }
 
 }
