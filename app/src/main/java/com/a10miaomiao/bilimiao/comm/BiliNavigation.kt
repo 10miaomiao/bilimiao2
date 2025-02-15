@@ -134,9 +134,9 @@ object BiliNavigation {
             || "b23.tv" in host
             || "b23.snm0516.aisee.tv" in host) {
             // b站网页使用内部浏览器打开
-            val nav = (activity as? MainActivity)?.pointerNav?.navController
-                ?: activity.findNavController(R.id.nav_host_fragment)
-            nav.navigateToCompose(BilimiaoPageRoute.Entry.Web, uri.toString())
+//            val nav = (activity as? MainActivity)?.pointerNav?.navController
+//                ?: activity.findNavController(R.id.nav_host_fragment)
+//            nav.navigateToCompose(BilimiaoPageRoute.Entry.Web, uri.toString())
         } else {
             // 非B站网页使用外部浏览器打开
             val typedValue = TypedValue()

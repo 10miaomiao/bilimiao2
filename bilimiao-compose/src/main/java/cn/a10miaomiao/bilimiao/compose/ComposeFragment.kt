@@ -30,12 +30,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
 import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
@@ -51,6 +53,7 @@ import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialog
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
@@ -259,6 +262,10 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
 
     fun navigate(page: ComposePage) {
         pageNavigation.navigate(page)
+    }
+
+    fun goBackHome() {
+        composeNav.popBackStack(HomePage, false)
     }
 
 }

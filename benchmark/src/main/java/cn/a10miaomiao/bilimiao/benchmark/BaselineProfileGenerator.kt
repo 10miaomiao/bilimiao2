@@ -22,8 +22,8 @@ class BaselineProfileGenerator {
     val rule = BaselineProfileRule()
 
     fun MacrobenchmarkScope.clickOnText(text: String) {
-        device.findObject(By.text(text))
-            .click()
+//        device.findObject(By.text(text))
+//            .click()
     }
 
     @Test
@@ -31,10 +31,10 @@ class BaselineProfileGenerator {
         rule.collectBaselineProfile(
             packageName = "com.a10miaomiao.bilimiao",
         ) {
-            pressHome()
+//            pressHome()
             startActivityAndWait()
-            clickOnText("菜单")
-            clickOnText("设置")
+//            clickOnText("菜单")
+//            clickOnText("设置")
         }
     }
 }

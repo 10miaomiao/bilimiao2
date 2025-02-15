@@ -29,6 +29,7 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
@@ -49,9 +50,7 @@ private class RankListContentViewModel(
     val regionId: Int,
 ) : ViewModel(), DIAware {
 
-    private val activity by instance<Activity>()
-    private val fragment by instance<Fragment>()
-    private val userStore by instance<UserStore>()
+    private val pageNavigation by instance<PageNavigation>()
 
     val count = MutableStateFlow(1)
     val isRefreshing = MutableStateFlow(false)
@@ -128,11 +127,7 @@ private class RankListContentViewModel(
     }
 
     fun toVideoDetail(item: bilibili.app.show.v1.Item) {
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + item.param),
-                defaultNavOptions,
-            )
+        pageNavigation.navigateToVideoInfo(item.param)
     }
 }
 

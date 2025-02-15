@@ -81,7 +81,6 @@ private class HomePopularContentViewModel(
 ) : ViewModel(), DIAware {
 
     private val context: Context by instance()
-    private val fragment: Fragment by instance()
     private val pageNavigation: PageNavigation by instance()
     private val filterStore: FilterStore by instance()
 

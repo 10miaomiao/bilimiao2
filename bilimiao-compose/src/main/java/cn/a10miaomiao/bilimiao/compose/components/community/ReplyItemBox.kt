@@ -38,7 +38,6 @@ import cn.a10miaomiao.bilimiao.compose.common.foundation.ScaleIndication
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 import cn.a10miaomiao.bilimiao.compose.components.image.ImagesGrid
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
-import cn.a10miaomiao.bilimiao.compose.components.scale.ScaleButton
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi

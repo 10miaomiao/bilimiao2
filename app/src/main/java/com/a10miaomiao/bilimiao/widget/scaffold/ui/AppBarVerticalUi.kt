@@ -222,6 +222,7 @@ class AppBarVerticalUi(
     ) = MenuItemView(context).apply {
         orientation = LinearLayout.VERTICAL
         minimumWidth = dip(60)
+        setBackgroundResource(config.selectableItemBackgroundBorderless)
         setOnClickListener(menuItemClick)
         if (data.key == MenuKeys.back) {
             setOnLongClickListener(menuItemLongClick)

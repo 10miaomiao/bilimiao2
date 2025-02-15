@@ -82,7 +82,6 @@ private class UserSeasonDetailViewModel(
     private val sid: String,
 ) : ViewModel(), DIAware {
 
-    val fragment: Fragment by instance()
     private val pageNavigation: PageNavigation by instance()
     val userStore: UserStore by instance()
     private val playerDelegate: BasePlayerDelegate by instance()
@@ -191,11 +190,7 @@ private class UserSeasonDetailViewModel(
                 )
             }
         } else {
-            fragment.findNavController()
-                .navigate(
-                    Uri.parse("bilimiao://video/" + item.aid),
-                    defaultNavOptions,
-                )
+            pageNavigation.navigateToVideoInfo(item.aid.toString())
         }
     }
 
