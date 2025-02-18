@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.store
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import bilibili.app.dynamic.v2.ThreePointType
 import bilibili.app.view.v1.ViewGRPC
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
@@ -19,6 +20,9 @@ import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -57,76 +61,32 @@ class PlayerStore(override val di: DI) :
 
     private val playListStore: PlayListStore by di.instance()
 
+    val listPositionFlow =
+        stateFlow.combine(playListStore.stateFlow) { playerState, playListState ->
+            getPlayListCurrentPosition(playerState, playListState)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = getPlayListCurrentPosition(
+                state,
+                playListStore.state
+            )
+        )
+
+    private fun getPlayListCurrentPosition(
+        playerState: State,
+        playListState: PlayListStore.State
+    ): Int {
+        return if (playerState.aid.isBlank()) {
+            -1
+        } else {
+            playListState.indexOfAid(state.aid)
+        }
+    }
+
     fun getPlayListCurrentPosition(): Int {
-        if (state.aid.isBlank()) {
-            return -1
-        }
-        return playListStore.state
-            .indexOfAid(state.aid)
+        return listPositionFlow.value
     }
-
-    fun addNextVideo(video: VideoInfo) {
-        val from = PlayListFrom.Video(
-            aid = state.aid,
-        )
-        val current = getPlayListCurrentPosition()
-        if (current == -1) {
-            playListStore.setPlayList(
-                name = state.title,
-                items = listOf(
-
-                ),
-                from = from
-            )
-        } else {
-            playListStore.addItem(
-                PlayListItemInfo(
-                    aid = video.aid,
-                    cid = video.pages[0].cid,
-                    title = video.title,
-                    cover = video.pic,
-                    duration = video.duration,
-                    ownerId = video.owner.mid,
-                    ownerName = video.owner.name,
-                    from = from,
-                ),
-                current + 1,
-            )
-        }
-
-    }
-
-    fun addLastVideo(video: VideoInfo) {
-        val from = PlayListFrom.Video(
-            aid = state.aid,
-        )
-        val current = getPlayListCurrentPosition()
-        if (current == -1) {
-            playListStore.setPlayList(
-                name = state.title,
-                items = listOf(
-
-                ),
-                from = from
-            )
-        } else {
-            playListStore.addItem(
-                PlayListItemInfo(
-                    aid = video.aid,
-                    cid = video.pages[0].cid,
-                    title = video.title,
-                    cover = video.pic,
-                    duration = video.duration,
-                    ownerId = video.owner.mid,
-                    ownerName = video.owner.name,
-                    from = from,
-                ),
-                playListStore.state.items.size,
-            )
-        }
-
-    }
-
 
     fun setPlayerSource(source: BasePlayerSource) {
         val ids = source.getSourceIds()

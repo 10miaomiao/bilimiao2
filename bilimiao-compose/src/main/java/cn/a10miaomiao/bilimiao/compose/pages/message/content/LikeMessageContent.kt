@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.message.content
 
+import ReplyDetailListPage
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -18,11 +19,13 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageResponseInfo
@@ -44,7 +47,6 @@ private class LikeMessageContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val messageStore by instance<MessageStore>()
 
@@ -118,14 +120,16 @@ private class LikeMessageContentModel(
         val type = item.item.type
         if (type == "reply") {
             // 评论
+            var enterUrl = ""
             val id = item.item.item_id
-            var toPageUrl = "bilimiao://video/comment/${id}/detail"
             if (item.item.uri.startsWith("https://www.bilibili.com/video/")) {
                 val bvID = item.item.uri.substring(31, item.item.uri.length)
-                toPageUrl += "?enterUrl=${Uri.encode("bilimiao://video/${bvID}")}"
+                enterUrl = Uri.encode("bilimiao://video/${bvID}")
             }
-            val uri = Uri.parse(toPageUrl)
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            pageNavigation.navigate(ReplyDetailListPage(
+                id = id.toString(),
+                enterUrl = enterUrl,
+            ))
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
@@ -133,10 +137,11 @@ private class LikeMessageContentModel(
         } else if (type == "video") {
             // 视频
             val aid = item.item.item_id
-            val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            pageNavigation.navigate(VideoDetailPage(
+                id = aid.toString(),
+            ))
         } else {
-            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
+            BilibiliNavigation.navigationTo(pageNavigation, item.item.uri)
         }
     }
 }

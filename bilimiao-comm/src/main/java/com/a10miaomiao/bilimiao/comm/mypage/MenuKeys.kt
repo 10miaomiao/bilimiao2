@@ -26,6 +26,7 @@ object MenuKeys {
     val complete = id_counter++
     val send = id_counter++
     val save = id_counter++
+    val favourite = id_counter++
 
     val more = id_counter++
     val follow = id_counter++

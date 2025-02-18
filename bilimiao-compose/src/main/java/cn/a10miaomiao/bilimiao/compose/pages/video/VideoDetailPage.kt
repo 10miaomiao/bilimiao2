@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -169,9 +172,7 @@ private fun VideoDetailPageContent(
         )
     }
 
-    PageConfig(
-        title = "AV${arcData.aid}\n/\n${detailData.bvid}"
-    )
+    val videoPages = detailData.pages
 
     val isShowCover = playerState.aid != arcData.aid.toString()
     val headerCoverHeight = 200.dp
@@ -215,15 +216,24 @@ private fun VideoDetailPageContent(
                     Spacer(
                         Modifier.height(windowInsets.topDp.dp)
                     )
+                    val videoHistory = detailData.history
                     AnimatedVisibility(isShowCover) {
                         VideoCoverBox(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(headerCoverHeight),
+                                .height(headerCoverHeight)
+                                .padding(8.dp),
                             aid = arcData.aid,
                             title = arcData.title,
                             pic = arcData.pic,
                             duration = arcData.duration,
+                            progress = videoHistory?.progress ?: 0L,
+                            progressTitle = videoHistory?.cid?.let { cid ->
+                                videoPages
+                                    .mapNotNull { it.page }
+                                    .find { it.cid == cid }
+                                    ?.part
+                            } ?: "",
                             onClick = viewModel::playVideo
                         )
                     }
@@ -233,7 +243,9 @@ private fun VideoDetailPageContent(
                     viewModel = viewModel,
                     innerPadding = innerPadding,
                     showCover = isShowCover,
+                    detailData = detailData,
                     arcData = arcData,
+                    isActive = true,
                 )
             }
         }
@@ -272,8 +284,8 @@ private fun VideoDetailPageContent(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
             ) {
                 TabRow(
                     modifier = Modifier
@@ -283,7 +295,9 @@ private fun VideoDetailPageContent(
                             start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
                             end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
                         )
-                        .background(MaterialTheme.colorScheme.surface),
+                        .background(MaterialTheme.colorScheme.surface)
+                        .nestedScroll(chainScrollableLayoutState.nestedScroll)
+                        .scrollable(rememberScrollState(), Orientation.Vertical),
                     selectedTabIndex = pagerState.currentPage,
                     indicator = { positions ->
                         TabRowDefaults.PrimaryIndicator(
@@ -315,7 +329,7 @@ private fun VideoDetailPageContent(
                 }
                 HorizontalPager(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .weight(1f),
                     state = pagerState,
                     key = { index -> tabs[index].first },
@@ -331,7 +345,9 @@ private fun VideoDetailPageContent(
                                     end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
                                 ),
                                 showCover = false,
+                                detailData = detailData,
                                 arcData = arcData,
+                                isActive = index == pagerState.currentPage,
                             )
                         }
 
@@ -346,6 +362,10 @@ private fun VideoDetailPageContent(
                                 ),
                                 sharedTransitionScope = sharedTransitionScope,
                                 animatedVisibilityScope = animatedVisibilityScope,
+                                detailData = detailData,
+                                arcData = arcData,
+                                isActive = index == pagerState.currentPage,
+                                usePageConfig = orientation == Orientation.Vertical,
                             )
                         }
                     }

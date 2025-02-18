@@ -32,6 +32,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
 import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
@@ -535,33 +536,16 @@ class MainActivity
             SearchActivity.REQUEST_CODE -> {
                 val arguments = data?.extras ?: Bundle()
                 if (arguments.containsKey(SearchActivity.KEY_URL)) {
-//                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
-//                    val isComposePage = arguments.getBoolean(SearchActivity.KEY_IS_COMPOSE_PAGE, false)
-//                    if (isComposePage) {
-//                        val composeEntry = arguments.getInt(SearchActivity.KEY_COMPOSE_ENTRY, 0)
-//                        val composeParam = arguments.getString(SearchActivity.KEY_COMPOSE_PARAM, "")
-//                        pointerNav.navController.navigateToCompose(
-//                            BilimiaoPageRoute.Entry.entries[composeEntry],
-//                            composeParam
-//                        )
-//                    } else {
-//                        val navOptions = NavOptions.Builder()
-//                            .setEnterAnim(R.anim.miao_fragment_open_enter)
-//                            .setExitAnim(R.anim.miao_fragment_open_exit)
-//                            .setPopEnterAnim(R.anim.miao_fragment_close_enter)
-//                            .setPopExitAnim(R.anim.miao_fragment_close_exit)
-//                            .build()
-//                        pointerNav.navController.navigate(Uri.parse(pageUrl), navOptions)
-//                    }
-//                    return
+                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
+                    pointerNav.navigateByUri(Uri.parse(pageUrl))
+                    return
                 }
                 val mode = arguments.getInt(SearchActivity.KEY_MODE)
                 val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
                 if (mode == 0) {
-//                    pointerNav.navController.navigateToCompose(
-//                        BilimiaoPageRoute.Entry.Search,
-//                        param = keyword,
-//                    )
+                    pointerNav.navigate(SearchResultPage(
+                        keyword = keyword
+                    ))
                 } else {
                     searchSelfPage(keyword)
                 }

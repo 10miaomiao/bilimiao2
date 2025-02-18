@@ -278,9 +278,7 @@ class SearchActivity : AppCompatActivity() {
                     }
                     SearchViewModel.SuggestType.SS -> {
                         val intent = Intent()
-                        intent.putExtra(KEY_COMPOSE_ENTRY, BilimiaoPageRoute.Entry.BangumiDetail.ordinal)
-                        intent.putExtra(KEY_COMPOSE_PARAM, "id=${item.value}")
-                        intent.putExtra(KEY_IS_COMPOSE_PAGE, true)
+                        intent.putExtra(KEY_URL, "bilimiao://bangumi/${item.value}")
                         setResult(REQUEST_CODE, intent)
                         finishAfterTransition()
                     }

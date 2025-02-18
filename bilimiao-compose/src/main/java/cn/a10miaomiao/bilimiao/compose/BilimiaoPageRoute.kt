@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose
 
+import ReplyDetailListPage
 import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
@@ -26,6 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.auth.SMSLoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
+import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyListPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
@@ -206,12 +208,24 @@ class BilimiaoPageRoute (
         composable<SMSLoginPage>()
 
         // video
-        composable<VideoDetailPage>()
+        composable<VideoDetailPage>(
+            deepLinks = listOf(
+                navDeepLink<VideoDetailPage>(
+                    basePath = "bilimiao://video"
+                ),
+                navDeepLink<VideoDetailPage>(
+                    basePath = "bilibili://video"
+                )
+            )
+        )
         composable<VideoPagesPage>()
 
         // bangumi
         composable<BangumiDetailPage>(
             deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "bilimiao://bangumi/{id}"
+                },
                 navDeepLink {
                     uriPattern = "https://www.bilibili.com/bangumi/play/ss{id}/"
                 }
@@ -341,13 +355,25 @@ class BilimiaoPageRoute (
         composable<UserFavouritePage>(
             deepLinks = listOf(
                 navDeepLink<UserFavouritePage>(
-                    basePath = "bilibili://user/favourite"
+                    basePath = "bilimiao://user/favourite"
                 )
             )
         )
         composable<UserFavouriteDetailPage>()
         composable<UserSeasonDetailPage>()
         composable<UserMedialistPage>()
+
+        //community
+        composable<MainReplyListPage>(
+
+        )
+        composable<ReplyDetailListPage>(
+            deepLinks = listOf(
+                navDeepLink<ReplyDetailListPage>(
+                    basePath = "bilimiao://reply"
+                )
+            )
+        )
 
         //lyric
         composable<LyricPage>(

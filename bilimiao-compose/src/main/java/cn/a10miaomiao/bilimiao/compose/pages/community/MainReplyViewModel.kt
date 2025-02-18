@@ -16,7 +16,7 @@ import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -86,7 +86,9 @@ class MainReplyViewModel(
             res.subjectControl?.let {
                 upMid = it.upMid
             }
-            listData.addAll(res.replies)
+            listData.addAll(res.replies.filter { i1 ->
+                listData.indexOfFirst { i2 -> i1.id == i2.id } == -1
+            })
             list.data.value = listData
             _cursor = res.cursor
             if (res.cursor?.isEnd == true) {
@@ -133,7 +135,7 @@ class MainReplyViewModel(
             val res = BiliApiService.commentApi
                 .action(1, item.oid.toString(), item.id.toString(), newAction)
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 val likeNum = if (isLike) item.like - 1 else item.like + 1
                 val newItem = item.copy(
