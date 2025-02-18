@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.message.content
 
 
+import ReplyDetailListPage
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -45,7 +47,6 @@ private class AtMessageContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val messageStore by instance<MessageStore>()
 
@@ -119,19 +120,24 @@ private class AtMessageContentModel(
         if (item.item.type == "reply") {
             val sourceId = item.item.source_id
             val targetId = item.item.target_id
-            var toPageUrl = if (targetId == 0L) {
-                "bilimiao://video/comment/${sourceId}/detail"
-            } else {
-                "bilimiao://video/comment/${targetId}/detail/${sourceId}"
-            }
+            var enterUrl = ""
             if (item.item.business_id == 1) {
-                val enterUrl = "bilimiao://video/${item.item.subject_id}"
-                toPageUrl += "?enterUrl=${Uri.encode(enterUrl)}"
+                val videoPageUrl = "bilimiao://video/${item.item.subject_id}"
+                enterUrl = Uri.encode(videoPageUrl)
             }
-            val uri = Uri.parse(toPageUrl)
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+           if (targetId == 0L) {
+               pageNavigation.navigate(ReplyDetailListPage(
+                   id = sourceId.toString(),
+                   enterUrl = enterUrl,
+               ))
+            } else {
+               pageNavigation.navigate(ReplyDetailListPage(
+                   id = targetId.toString(),
+                   enterUrl = enterUrl,
+               ))
+            }
         } else {
-            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
+            BilibiliNavigation.navigationTo(pageNavigation, item.item.uri)
         }
     }
 
@@ -140,15 +146,15 @@ private class AtMessageContentModel(
         if (item.item.business_id == 1) {
             val targetId = item.item.target_id
             val aid = item.item.subject_id
-            var toPageUrl = if (targetId == 0L) {
-                "bilimiao://video/$aid"
+            if (targetId == 0L) {
+                pageNavigation.navigateToVideoInfo(aid.toString())
             } else {
-                "bilimiao://video/comment/${targetId}/detail"
+                pageNavigation.navigate(ReplyDetailListPage(
+                    id = targetId.toString(),
+                ))
             }
-            val uri = Uri.parse(toPageUrl)
-            fragment.findNavController().navigate(uri, defaultNavOptions)
         } else {
-            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
+            BilibiliNavigation.navigationTo(pageNavigation, item.item.uri)
         }
     }
 

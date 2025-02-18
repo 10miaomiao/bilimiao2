@@ -111,7 +111,9 @@ private class ReplyDetailContentViewModel(
                 upMid = it.upMid
             }
             res.root?.let {
-                listData.addAll(it.replies)
+                listData.addAll(it.replies.filter { i1 ->
+                    listData.indexOfFirst { i2 -> i1.id == i2.id } == -1
+                })
             }
             list.data.value = listData
             _cursor = res.cursor
@@ -275,7 +277,7 @@ fun ReplyDetailContent(
                     }
                 } else {
                     Modifier
-                },
+                }.fillMaxWidth(),
                 item = reply,
                 upMid = upMid,
                 onAvatarClick = {
@@ -311,6 +313,7 @@ fun ReplyDetailContent(
         ) {
             val replyItem = list[it]
             ReplyItemBox(
+                modifier = Modifier.fillMaxWidth(),
                 item = replyItem,
                 upMid = upMid,
                 onAvatarClick = {

@@ -1,22 +1,40 @@
 package cn.a10miaomiao.bilimiao.compose.pages.video
 
+import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bilibili.app.view.v1.ViewGRPC
 import bilibili.app.view.v1.ViewPage
 import bilibili.app.view.v1.ViewReply
 import bilibili.app.view.v1.ViewReq
+import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
+import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -26,6 +44,7 @@ class VideoDetailViewModel(
     val id: String,
 ) : ViewModel(), DIAware {
 
+    private val activity by instance<Activity>()
     private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
@@ -153,5 +172,124 @@ class VideoDetailViewModel(
                     }
             }
         )
+    }
+
+    /**
+     * 添加至稍后再看
+     */
+    fun addVideoHistoryToview() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val arcData = detailData.value?.arc ?: return@launch
+            val res = BiliApiService.userApi
+                .videoToviewAdd(arcData.aid.toString())
+                .awaitCall()
+                .json<MessageInfo>()
+            if (res.code == 0) {
+                PopTip.show("已添加至稍后再看")
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.toString())
+        }
+    }
+
+    fun toUserPage(mid: String) {
+        pageNavigation.navigate(UserSpacePage(
+            id = mid,
+        ))
+    }
+
+    fun toVideoPage(aid: String) {
+        pageNavigation.navigate(VideoDetailPage(
+            id = aid,
+        ))
+    }
+
+    fun copyPlainText(label: String, text: String) {
+        val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText(label, text)
+        clipboard.setPrimaryClip(clip)
+    }
+
+    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+        val videoDetail = detailData.value ?: return
+        val videoArc = videoDetail.arc ?: return
+        val viewPages = videoDetail.pages
+        when (item.key) {
+            MenuKeys.download -> {
+
+            }
+            MenuKeys.favourite -> {
+
+            }
+            1 -> {
+                // 分享
+                val url = "http://www.bilibili.com/video/${videoDetail.bvid}"
+                val shareIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, "bilibili视频分享")
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        "${videoArc.title} $url"
+                    )
+                }
+                activity.startActivity(Intent.createChooser(shareIntent, "分享"))
+            }
+            2 -> {
+                // 浏览器打开
+                val url = "http://www.bilibili.com/video/${videoDetail.bvid}"
+                pageNavigation.launchWebBrowser(url)
+            }
+            3 -> {
+                // 复制链接
+                val text = "http://www.bilibili.com/video/${videoDetail.bvid}"
+                copyPlainText("URL", text)
+                PopTip.show("已复制：$text")
+            }
+            4 -> {
+                // 复制AV号
+                val text = "av${videoArc.aid}"
+                copyPlainText("URL", text)
+                PopTip.show("已复制：$text")
+            }
+            5 -> {
+                // 复制BV号
+                val text = videoDetail.bvid
+                copyPlainText("URL", text)
+                PopTip.show("已复制：$text")
+            }
+            11 -> {
+                // 添加至下一个播放
+                val current = playerStore.getPlayListCurrentPosition()
+                if (current != -1) {
+                    playListStore.run {
+                        addItem(
+                            videoArc.toPlayListItem(viewPages),
+                            current + 1
+                        )
+                    }
+                    PopTip.show("已添加至下一个播放")
+                } else {
+                    PopTip.show("添加失败，找不到正在播放的视频")
+                }
+            }
+            12 -> {
+                // 添加至最后一个播放
+                playListStore.run {
+                    addItem(
+                        videoArc.toPlayListItem(viewPages),
+                        state.items.size,
+                    )
+                }
+                PopTip.show("已添加至最后一个播放")
+            }
+            14 -> {
+                // 添加至稍后再看
+                addVideoHistoryToview()
+            }
+        }
     }
 }

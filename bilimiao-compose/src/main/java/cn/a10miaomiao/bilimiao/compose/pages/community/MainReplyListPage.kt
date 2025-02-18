@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -19,7 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.community.ReplyItemBox
 import cn.a10miaomiao.bilimiao.compose.components.dyanmic.DynamicModuleBox
@@ -29,10 +33,29 @@ import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyDetailContent
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.kodein.di.compose.rememberInstance
 
-class MainReplyListPage {
+@Serializable
+class MainReplyListPage(
 
+    val enterUrl: String = "",
+) : ComposePage() {
+
+    @Composable
+    override fun Content() {
+        val viewModel: MainReplyViewModel = diViewModel()
+        PageConfig(
+            title = "",
+            menu = null,
+        )
+        MainReplyListPageContent(
+            headerContent = {
+
+            },
+            viewModel = viewModel,
+        )
+    }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -101,7 +124,7 @@ fun MainReplyListPageContent(
                         }
                     } else {
                         Modifier
-                    },
+                    }.fillMaxWidth(),
                     item = replyItem,
                     upMid = upMid,
                     onLikeClick = {

@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.message.content
 
 
+import ReplyDetailListPage
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -19,11 +20,13 @@ import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
@@ -46,7 +49,6 @@ private class ReplyMessageContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val messageStore by instance<MessageStore>()
 
@@ -117,41 +119,47 @@ private class ReplyMessageContentModel(
 
     fun toDetailPage(item: ReplyMessageInfo, isDetail: Boolean) {
         val type = item.item.type
-                val enterPage =
         if (type == "reply") {
             // 评论
             val rootId = item.item.root_id
             val sourceId = item.item.source_id
-            var toPageUrl = if (isDetail) {
-                "bilimiao://video/comment/${rootId}/detail?"
-            } else {
-                "bilimiao://video/comment/${rootId}/detail/${sourceId}"
-            }
+            var enterUrl = ""
             if (item.item.business_id == 1) {
                 val videoPageUrl = "bilimiao://video/${item.item.subject_id}"
-                toPageUrl += "?enterUrl=${Uri.encode(videoPageUrl)}"
+                enterUrl= Uri.encode(videoPageUrl)
             }
-            fragment.findNavController().navigate(Uri.parse(toPageUrl), defaultNavOptions)
-//        } else if (type == "album") {
+            if (isDetail) {
+                pageNavigation.navigate(ReplyDetailListPage(
+                    id = rootId.toString(),
+                    enterUrl = enterUrl,
+                ))
+            } else {
+                pageNavigation.navigate(ReplyDetailListPage(
+                    id = sourceId.toString(),
+                    enterUrl = enterUrl,
+                ))
+            }
+        } else if (type == "album") {
 //            // 动态
         } else if (type == "danmu") {
             // 弹幕
             val aid = item.item.subject_id
-            val uri = Uri.parse("bilimiao://video/$aid")
-            fragment.findNavController().navigate(uri, defaultNavOptions)
+            pageNavigation.navigateToVideoInfo(aid.toString())
         } else if (type == "video") {
             // 视频
             val aid = item.item.subject_id
             val sourceId = item.item.source_id
-            val videoPageUrl = "bilimiao://video/$aid"
-            val uri = if (isDetail) {
-                Uri.parse(videoPageUrl)
+            if (isDetail) {
+                pageNavigation.navigateToVideoInfo(aid.toString())
             } else {
-                Uri.parse("bilimiao://video/comment/${sourceId}/detail?enterPageUrl=${Uri.encode(videoPageUrl)}")
+                val videoPageUrl = "bilimiao://video/$aid"
+                pageNavigation.navigate(ReplyDetailListPage(
+                    id = sourceId.toString(),
+                    enterUrl = Uri.encode(videoPageUrl),
+                ))
             }
-            fragment.findNavController().navigate(uri, defaultNavOptions)
         } else {
-            BiliUrlMatcher.toUrlLink(fragment.requireContext(), item.item.uri)
+            BilibiliNavigation.navigationTo(pageNavigation, item.item.uri)
         }
     }
 }

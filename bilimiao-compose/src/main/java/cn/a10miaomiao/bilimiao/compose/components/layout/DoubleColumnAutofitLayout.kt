@@ -110,7 +110,7 @@ fun DoubleColumnAutofitLayout(
                     content(
                         Orientation.Vertical,
                         PaddingValues.Absolute(
-                            bottom = innerPadding.calculateBottomPadding(),
+                            bottom = innerPadding.calculateBottomPadding() + chainScrollableLayoutState.minScrollPosition,
                             left = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
                             right = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
 //                            top = density.run { (state.maxPx + state.getOffsetYValue()).toDp() }
