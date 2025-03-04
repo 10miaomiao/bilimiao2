@@ -1,5 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
@@ -8,8 +13,10 @@ import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.CommonGroup
+import kotlin.Unit
 
 public val CommonGroup.Playnum: ImageVector
     get() {
@@ -58,3 +65,11 @@ public val CommonGroup.Playnum: ImageVector
     }
 
 private var _playnum: ImageVector? = null
+
+@Preview
+@Composable
+private fun Preview(): Unit {
+    Box(modifier = Modifier.padding(12.dp)) {
+        Image(imageVector = CommonGroup.Playnum, contentDescription = "")
+    }
+}

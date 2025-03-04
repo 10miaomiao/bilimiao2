@@ -76,6 +76,7 @@ dependencies {
     implementation(Libraries.composeMaterialIconsExtended)
     implementation(Libraries.composeMaterial3)
     implementation(Libraries.composeMaterial3WindowSizeClass)
+    implementation(Libraries.composeMaterial3Adaptive)
     implementation(Libraries.composeUiToolingPreview)
     implementation(Libraries.activityCompose)
     implementation(Libraries.navigationCompose)

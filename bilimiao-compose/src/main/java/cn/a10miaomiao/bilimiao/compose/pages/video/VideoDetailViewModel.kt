@@ -9,7 +9,6 @@ import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bilibili.app.view.v1.ViewGRPC
-import bilibili.app.view.v1.ViewPage
 import bilibili.app.view.v1.ViewReply
 import bilibili.app.view.v1.ViewReq
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
@@ -24,11 +23,11 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -95,14 +94,14 @@ class VideoDetailViewModel(
         val detail = detailData.value ?: return
         val pages = detail.pages
         if (pages.isNotEmpty()) {
-            playVideo(pages[0])
+            val page = pages[0].page ?: return
+            playVideo(page)
         }
     }
-    fun playVideo(viewPage: ViewPage) {
+    fun playVideo(page: bilibili.app.archive.v1.Page) {
         val detail = detailData.value ?: return
         val arc = detail.arc ?: return
         val author = arc.author ?: return
-        val page = viewPage.page ?: return
         val viewPages = detail.pages
         val ugcSeason = detail.ugcSeason
         val title = if (viewPages.size > 1) {

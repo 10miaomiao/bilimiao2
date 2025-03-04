@@ -62,6 +62,7 @@ object Libraries {
     const val composeMaterial = "androidx.compose.material:material"
     const val composeMaterial3 = "androidx.compose.material3:material3"
     const val composeMaterial3WindowSizeClass = "androidx.compose.material3:material3-window-size-class"
+    const val composeMaterial3Adaptive = "androidx.compose.material3.adaptive:adaptive-android"
     const val activityCompose = "androidx.activity:activity-compose:1.9.0"
     const val navigationCompose = "androidx.navigation:navigation-compose:${Versions.navigation}"
     const val composeMaterialIconsExtended = "androidx.compose.material:material-icons-extended"

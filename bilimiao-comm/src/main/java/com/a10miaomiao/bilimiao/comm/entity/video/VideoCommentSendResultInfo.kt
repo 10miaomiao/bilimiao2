@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.video
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class VideoCommentSendResultInfo(
     val need_captcha: Boolean,
     val url: String,

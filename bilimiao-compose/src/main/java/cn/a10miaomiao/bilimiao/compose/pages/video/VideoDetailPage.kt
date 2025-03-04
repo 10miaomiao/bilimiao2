@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -53,6 +54,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bilibili.app.archive.v1.Arc
@@ -78,6 +80,7 @@ import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoverBox
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoReplyTitleBar
 import cn.a10miaomiao.bilimiao.compose.pages.video.content.VideoDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.video.content.VideoReplyContent
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -137,7 +140,7 @@ class VideoDetailPage(
                     innerPadding = windowInsets.toPaddingValues()
                 )
             } else {
-                val arcData = detailData.arc
+                val arcData = detailData.arc ?: detailData.activitySeason?.arc
                 if (arcData != null) {
                     VideoDetailPageContent(
                         viewModel = viewModel,
@@ -145,6 +148,8 @@ class VideoDetailPage(
                         detailData = detailData,
                         arcData = arcData,
                     )
+                } else {
+                    Text("arc为空")
                 }
             }
         }
@@ -276,9 +281,9 @@ private fun VideoDetailPageContent(
                     onCloseClick = {
                         mainReplyViewModel.clearCurrentReply()
                     },
-                    onLikeRootClick = {
-                        mainReplyViewModel.switchLike(data)
-                    }
+                    onLikeReply = mainReplyViewModel::likeReply,
+                    onDeletedReply = mainReplyViewModel::removeReplyItem,
+                    usePageConfig = orientation == Orientation.Vertical
                 )
             }
         ) {
@@ -287,45 +292,76 @@ private fun VideoDetailPageContent(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
             ) {
-                TabRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = innerPadding.calculateTopPadding(),
-                            start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
-                            end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
-                        )
-                        .background(MaterialTheme.colorScheme.surface)
-                        .nestedScroll(chainScrollableLayoutState.nestedScroll)
-                        .scrollable(rememberScrollState(), Orientation.Vertical),
-                    selectedTabIndex = pagerState.currentPage,
-                    indicator = { positions ->
-                        TabRowDefaults.PrimaryIndicator(
-                            Modifier.pagerTabIndicatorOffset(pagerState, positions),
-                        )
-                    },
-                ) {
-                    tabs.forEachIndexed { index, tab ->
-                        val selected = tabs[pagerState.currentPage].first == tab.first
-                        Tab(
-                            text = {
-                                Text(
-                                    tab.second,
-                                    color = if (selected) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onBackground
+                val replyCount = arcData.stat?.reply
+                if (tabs.size > 1) {
+                    TabRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                            )
+                            .background(MaterialTheme.colorScheme.surface)
+                            .nestedScroll(chainScrollableLayoutState.nestedScroll)
+                            .scrollable(rememberScrollState(), Orientation.Vertical),
+                        selectedTabIndex = pagerState.currentPage,
+                        indicator = { positions ->
+                            TabRowDefaults.PrimaryIndicator(
+                                Modifier.pagerTabIndicatorOffset(pagerState, positions),
+                            )
+                        },
+                    ) {
+                        tabs.forEachIndexed { index, tab ->
+                            val selected = tabs[pagerState.currentPage].first == tab.first
+                            Tab(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.Bottom,
+                                    ) {
+                                        Text(
+                                            tab.second,
+                                            color = if (selected) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                MaterialTheme.colorScheme.onBackground
+                                            }
+                                        )
+                                        if (tab.first == "reply" && replyCount != null) {
+                                            Text(
+                                                text = "($replyCount)",
+                                                fontSize = 10.sp,
+                                                color = if (selected) {
+                                                    MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    MaterialTheme.colorScheme.onBackground
+                                                }
+                                            )
+                                        }
                                     }
-                                )
-                            },
-                            selected = selected,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.scrollToPage(index)
-                                }
-                            },
-                        )
+                                },
+                                selected = selected,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.scrollToPage(index)
+                                    }
+                                },
+                            )
+                        }
                     }
+                } else {
+                    VideoReplyTitleBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                            )
+                            .background(MaterialTheme.colorScheme.surface),
+                        viewModel = mainReplyViewModel,
+                        count = replyCount ?: -1,
+                    )
                 }
                 HorizontalPager(
                     modifier = Modifier

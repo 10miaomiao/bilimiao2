@@ -110,7 +110,7 @@ fun ImagesGrid(
             ) {
                 for (index in 0 until count) {
                     ImagesGridItem(
-                        modifier = Modifier.size((width / 2 - 2).dp),
+                        modifier = Modifier.size((width / 2 - 4).dp),
                         index = index,
                         imageModels = imageModels,
                         previewerController = previewerController,

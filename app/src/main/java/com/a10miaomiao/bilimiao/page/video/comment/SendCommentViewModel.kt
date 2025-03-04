@@ -91,6 +91,7 @@ class SendCommentViewModel(
                     } else {
                         message
                     },
+                    type = params.type,
                     oid = params.oid,
                     root = params.root,
                     parent = params.parent,

@@ -3,9 +3,11 @@ package com.a10miaomiao.bilimiao.comm.entity.video
 import android.os.Parcelable
 import com.a10miaomiao.bilimiao.comm.entity.user.MemberInfo
 import kotlinx.android.parcel.Parcelize
+import kotlinx.serialization.Serializable
 
 
 @Parcelize
+@Serializable
 data class VideoCommentReplyInfo(
     val action: Int,
     val assist: Int,
@@ -16,7 +18,6 @@ data class VideoCommentReplyInfo(
     val dialog: Long,
     val dialog_str: String,
     val fansgrade: Int,
-    val floor: Int,
     val like: Long,
     val member: MemberInfo,
     val mid: Long,
@@ -24,7 +25,7 @@ data class VideoCommentReplyInfo(
     val parent: Long,
     val parent_str: String,
     val rcount: Long,
-    val replies: List<VideoCommentReplyInfo>,
+    val replies: List<VideoCommentReplyInfo>? = null,
     val root: Long,
     val root_str: String,
     val rpid: Long,
@@ -35,14 +36,16 @@ data class VideoCommentReplyInfo(
 ): Parcelable {
 
     @Parcelize
+    @Serializable
     data class Content(
 //        val device: String,
         val message: String,
-        val plat: Int,
-        val emote: Map<String, Emote>?,
+        val plat: Int = 0,
+        val emote: Map<String, Emote>? = null,
     ) : Parcelable
 
     @Parcelize
+    @Serializable
     data class Emote(
         val id: Long,
         val text: String,
@@ -50,9 +53,10 @@ data class VideoCommentReplyInfo(
     ) : Parcelable
 
     @Parcelize
+    @Serializable
     data class ReplyControl(
-        val time_desc: String,
-        val location: String?,
+        val time_desc: String? = null,
+        val location: String? = null,
     ): Parcelable
 
 }

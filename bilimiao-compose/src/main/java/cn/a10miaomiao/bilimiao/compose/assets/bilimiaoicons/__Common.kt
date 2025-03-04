@@ -2,7 +2,12 @@ package cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bilicoin
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bilifavourite
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bililike
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bilishare
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Danmukunum
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Delete
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Like
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Likefill
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menufold
@@ -25,7 +30,7 @@ public val CommonGroup.AllIcons: ____KtList<ImageVector>
     if (__AllIcons != null) {
       return __AllIcons!!
     }
-    __AllIcons= listOf(Danmukunum, Like, Likefill, Menufold, Menuunfold, Playnum, Reply, Share,
-        Upper)
+    __AllIcons= listOf(Bilicoin, Bilifavourite, Bililike, Bilishare, Danmukunum, Delete, Like,
+        Likefill, Menufold, Menuunfold, Playnum, Reply, Share, Upper)
     return __AllIcons!!
   }

@@ -50,6 +50,7 @@ import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoverBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoPagesBox
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoStatBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoUpperBox
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
@@ -188,6 +189,7 @@ fun VideoDetailContent(
                 }
                 Row(
                     modifier = Modifier.padding(
+                        vertical = 5.dp,
                         horizontal = 10.dp,
                     ),
                 ) {
@@ -216,21 +218,18 @@ fun VideoDetailContent(
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.bodySmall,
                     )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = NumberUtil.converCTime(arcData.pubdate),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+
                 }
-                HorizontalDivider(
-                    modifier = Modifier.padding(
-                        horizontal = 10.dp,
-                        vertical = 5.dp,
-                    ),
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline,
-                )
                 if (videoPages.size > 1) {
                     VideoPagesBox(
                         pages = videoPages,
-                        onPageClick = {
-
-                        }
+                        onPageClick = viewModel::playVideo
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(
@@ -276,6 +275,15 @@ fun VideoDetailContent(
                                 .padding(vertical = 4.dp, horizontal = 8.dp)
                         )
                     }
+                }
+
+                val videoStat = arcData.stat
+                val reqUser = detailData.reqUser ?: bilibili.app.view.v1.ReqUser()
+                if (videoStat != null) {
+                    VideoStatBox(
+                        stat = videoStat,
+                        reqUser = reqUser,
+                    )
                 }
             }
         }
