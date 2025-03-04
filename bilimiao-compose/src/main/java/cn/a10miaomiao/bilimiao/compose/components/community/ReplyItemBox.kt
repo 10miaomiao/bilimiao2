@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Delete
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Like
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Likefill
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Reply
@@ -59,10 +60,17 @@ class ReplyItemBoxPictureInfo(
 class ReplyItemBoxContentInfo(
     val message: String,
     val emote: List<EmoteInfo>,
+    val url: List<UrlInfo>,
 ) {
     @Stable
     class EmoteInfo(
         val id: Long,
+        val text: String,
+        val url: String
+    )
+
+    @Stable
+    class UrlInfo(
         val text: String,
         val url: String
     )
@@ -108,9 +116,12 @@ class ReplyItemBoxContentInfo(
 fun ReplyItemBox(
     modifier: Modifier = Modifier,
     item: bilibili.main.community.reply.v1.ReplyInfo,
-    upMid: Long,
+    isUpper: Boolean = false,
+    showDelete: Boolean = false,
     onAvatarClick: () -> Unit = {},
     onLikeClick: () -> Unit = {},
+    onReplyClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
     onClick: () -> Unit = {},
 ) {
     val content = remember(item.content) {
@@ -122,6 +133,11 @@ fun ReplyItemBox(
                         emote.id, emote.text, emote.url
                     )
                 },
+                url = it.url.values.filterNotNull().map { url ->
+                    ReplyItemBoxContentInfo.UrlInfo(
+                        url.title, url.pcUrl
+                    )
+                }
             )
         }
     }
@@ -156,10 +172,13 @@ fun ReplyItemBox(
         like = item.like,
         count = item.count,
         cardLabels = item.replyControl?.cardLabels?.map { it.textContent } ?: emptyList(),
-        upMid = upMid,
+        isUpper = isUpper,
+        showDelete = showDelete,
         isLike = item.replyControl?.action == 1L,
         onAvatarClick = onAvatarClick,
         onLikeClick = onLikeClick,
+        onReplyClick = onReplyClick,
+        onDeleteClick = onDeleteClick,
         onClick = onClick,
     )
 }
@@ -181,10 +200,13 @@ fun ReplyItemBox(
     like: Long,
     count: Long,
     cardLabels: List<String>,
-    upMid: Long,
+    isUpper: Boolean = false,
+    showDelete: Boolean = false,
     isLike: Boolean = false,
     onAvatarClick: () -> Unit = {},
     onLikeClick: () -> Unit = {},
+    onReplyClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
     onClick: () -> Unit = {},
 ) {
     Row(
@@ -221,7 +243,7 @@ fun ReplyItemBox(
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                if (upMid == mid) {
+                if (showDelete) {
                     Text(
                         text = "UP主",
                         maxLines = 1,
@@ -325,7 +347,7 @@ fun ReplyItemBox(
                 }
                 Row(
                     modifier = Modifier.clickable(
-                        onClick = { },
+                        onClick = onReplyClick,
                         interactionSource = remember { MutableInteractionSource() },
                         indication = ScaleIndication,
                     ),
@@ -343,6 +365,23 @@ fun ReplyItemBox(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
+                }
+                if (showDelete) {
+                    Box(
+                        modifier = Modifier.clickable(
+                            onClick = onDeleteClick,
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ScaleIndication,
+                        ),
+                    ) {
+                        Icon(
+                            BilimiaoIcons.Common.Delete,
+                            contentDescription = "reply",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(end = 4.dp)
+                                .size(14.dp)
+                        )
+                    }
                 }
             }
         }

@@ -87,6 +87,7 @@ class CommentApi() {
 
     fun add(
         message: String,
+        type: Int,
         oid: String,
         root: String? = null,
         parent: String? = null,
@@ -94,7 +95,7 @@ class CommentApi() {
         url = BiliApiService.biliApi("x/v2/reply/add")
         method = MiaoHttp.POST
         val params = mutableMapOf<String, String?>(
-            "type" to "1",
+            "type" to type.toString(),
             "oid" to oid,
             "message" to message,
             "plat" to "2",
@@ -108,13 +109,14 @@ class CommentApi() {
     }
 
     fun del(
+        type: Int,
         oid: String,
         rpid: String,
     ) = MiaoHttp.request {
         url = BiliApiService.biliApi("x/v2/reply/del")
         method = MiaoHttp.POST
         val params = mutableMapOf<String, String?>(
-            "type" to "1",
+            "type" to type.toString(),
             "oid" to oid,
             "rpid" to rpid,
         )

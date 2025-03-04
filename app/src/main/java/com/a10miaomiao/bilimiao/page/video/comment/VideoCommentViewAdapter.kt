@@ -75,7 +75,7 @@ object VideoCommentViewAdapter {
             avatar = reply.member.avatar,
             time = NumberUtil.converCTime(reply.ctime),
             location = reply.reply_control.location ?: "",
-            floor = reply.floor,
+            floor = 0,
             content = VideoCommentViewContent(
                 message = reply.content.message,
                 emote = reply.content.emote?.values?.map {

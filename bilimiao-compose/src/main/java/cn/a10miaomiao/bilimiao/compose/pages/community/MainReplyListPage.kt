@@ -31,6 +31,7 @@ import cn.a10miaomiao.bilimiao.compose.components.layout.DataDrivenNavigator
 import cn.a10miaomiao.bilimiao.compose.components.layout.RightNavigationDrawer
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyDetailContent
+import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyListContent
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -68,13 +69,6 @@ fun MainReplyListPageContent(
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
 
-    val list by viewModel.list.data.collectAsState()
-    val listLoading by viewModel.list.loading.collectAsState()
-    val listFinished by viewModel.list.finished.collectAsState()
-    val listFail by viewModel.list.fail.collectAsState()
-    val upMid = viewModel.upMid
-
-    val scope = rememberCoroutineScope()
     val currentReply by viewModel.currentReply.collectAsState()
 
     BackHandler(
@@ -95,56 +89,18 @@ fun MainReplyListPageContent(
                 onCloseClick = {
                     viewModel.clearCurrentReply()
                 },
-                onLikeRootClick = {
-                    viewModel.switchLike(data)
-                }
+                onLikeReply = viewModel::likeReply,
+                onDeletedReply = viewModel::removeReplyItem,
+                usePageConfig = true,
             )
         },
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                ),
-            contentPadding = windowInsets.toPaddingValues()
-        ) {
-            headerContent()
-            items(
-                list.size,
-                { list[it].id }
-            ) {
-                val replyItem = list[it]
-                ReplyItemBox(
-                    modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                        with(sharedTransitionScope) {
-                            Modifier.sharedElement(
-                                rememberSharedContentState("reply-${replyItem.id}"),
-                                animatedVisibilityScope,
-                            )
-                        }
-                    } else {
-                        Modifier
-                    }.fillMaxWidth(),
-                    item = replyItem,
-                    upMid = upMid,
-                    onLikeClick = {
-                        viewModel.switchLike(it)
-                    },
-                    onClick = {
-                        viewModel.setCurrentReply(replyItem)
-                    }
-                )
-            }
-            item() {
-                ListStateBox(
-                    loading = listLoading,
-                    finished = listFinished,
-                    fail = listFail,
-                    listData = list,
-                ) {
-                    viewModel.loadMore()
-                }
-            }
-        }
+        ReplyListContent(
+            headerContent = headerContent,
+            viewModel = viewModel,
+            innerPadding = windowInsets.toPaddingValues(),
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
+        )
     }
 }

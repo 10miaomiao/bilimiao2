@@ -186,9 +186,12 @@ private fun ReplyDetailListPageContent(
                 onCloseClick = {
                     viewModel.popBackStack()
                 },
-                onLikeRootClick = {
+                onLikeReply = {
                     viewModel.likeReply()
                 },
+                onDeletedReply = {
+                    viewModel.popBackStack()
+                }
             )
         }
     }

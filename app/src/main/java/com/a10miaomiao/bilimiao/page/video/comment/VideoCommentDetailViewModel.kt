@@ -273,6 +273,7 @@ class VideoCommentDetailViewModel(
             }
             val res = BiliApiService.commentApi
                 .del(
+                    type = 1,
                     reply.oid.toString(),
                     reply.id.toString()
                 )
@@ -312,6 +313,7 @@ class VideoCommentDetailViewModel(
             }
             val res = BiliApiService.commentApi
                 .del(
+                    type = 1,
                     reply.oid.toString(),
                     reply.id.toString()
                 )

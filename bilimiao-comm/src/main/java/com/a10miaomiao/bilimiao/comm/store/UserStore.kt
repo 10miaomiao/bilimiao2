@@ -29,6 +29,8 @@ class UserStore(override val di: DI) :
     ) {
         fun isSelf(mid: String) = info?.mid == mid.toLong()
 
+        fun isSelf(mid: Long) = info?.mid == mid
+
         fun isLogin() = info != null
 
         fun isVip() = (info?.vip_type ?: 0) > 0
