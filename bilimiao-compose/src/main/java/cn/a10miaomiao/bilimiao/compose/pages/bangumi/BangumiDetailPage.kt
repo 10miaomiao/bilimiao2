@@ -34,11 +34,13 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.layout.DoubleColumnAutofitLayout
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememberChainScrollableLayoutState
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.components.BangumiEpisodeItem
+import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyListPage
 import com.a10miaomiao.bilimiao.comm.delegate.player.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -97,6 +99,7 @@ private class BangumiDetailPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     var seasonId = ""
@@ -255,13 +258,10 @@ private class BangumiDetailPageViewModel(
     }
 
     fun toCommentListPage(item: EpisodeInfo) {
-        val id = item.aid
-        val title =
-            Uri.encode(item.title + if (item.long_title.isBlank()) "" else "_" + item.long_title)
-        val cover = Uri.encode(item.cover)
-        val name = Uri.encode(detailInfo.value?.season_title ?: "")
-        val uri = Uri.parse("bilimiao://video/$id/comment?title=$title&cover=$cover&name=$name")
-        fragment.findNavController().navigate(uri, defaultNavOptions)
+        pageNavigation.navigate(MainReplyListPage(
+            oid = item.aid,
+            type = 1,
+        ))
     }
 
     fun shareEpisode(item: EpisodeInfo) {

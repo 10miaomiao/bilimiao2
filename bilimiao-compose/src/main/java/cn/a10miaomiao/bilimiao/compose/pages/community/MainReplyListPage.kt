@@ -39,22 +39,24 @@ import org.kodein.di.compose.rememberInstance
 
 @Serializable
 class MainReplyListPage(
-
+    val oid: String,
+    val type: Int,
     val enterUrl: String = "",
 ) : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: MainReplyViewModel = diViewModel()
-        PageConfig(
-            title = "",
-            menu = null,
-        )
+        val viewModel: MainReplyViewModel = diViewModel(
+            key = oid,
+        ) {
+            MainReplyViewModel(it, oid, type)
+        }
         MainReplyListPageContent(
             headerContent = {
 
             },
             viewModel = viewModel,
+            pageTitle = "评论列表",
         )
     }
 }
@@ -63,6 +65,7 @@ class MainReplyListPage(
 @Composable
 fun MainReplyListPageContent(
     headerContent: LazyListScope.() -> Unit,
+    pageTitle: String,
     viewModel: MainReplyViewModel,
 ) {
     val windowStore: WindowStore by rememberInstance()
@@ -100,6 +103,8 @@ fun MainReplyListPageContent(
             viewModel = viewModel,
             innerPadding = windowInsets.toPaddingValues(),
             sharedTransitionScope = sharedTransitionScope,
+            usePageConfig = true,
+            pageTitle = pageTitle,
             animatedVisibilityScope = animatedVisibilityScope,
         )
     }
