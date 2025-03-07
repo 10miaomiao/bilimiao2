@@ -11,7 +11,6 @@ import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.video.*
-import com.a10miaomiao.bilimiao.page.video.comment.*
 import kotlin.reflect.KClass
 
 
@@ -44,11 +43,6 @@ object MainNavGraph {
             addFragment(VideoInfoFragment::class, VideoInfoFragment.Companion)
             addFragment(VideoCoinFragment::class, VideoCoinFragment.Companion)
             addFragment(VideoAddFavoriteFragment::class, VideoAddFavoriteFragment.Companion)
-
-            addFragment(VideoCommentListFragment::class, VideoCommentListFragment.Companion)
-            addFragment(VideoCommentDetailFragment::class, VideoCommentDetailFragment.Companion)
-            addFragment(ReplyDetailFragment::class, ReplyDetailFragment.Companion)
-            addFragment(SendCommentFragment::class, SendCommentFragment.Companion)
 
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 

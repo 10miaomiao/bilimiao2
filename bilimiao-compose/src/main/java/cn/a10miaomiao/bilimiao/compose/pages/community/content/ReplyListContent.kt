@@ -17,12 +17,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.community.ReplyItemBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.community.components.ReplyEditDialog
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import org.kodein.di.compose.rememberInstance
 
@@ -33,6 +38,8 @@ fun ReplyListContent(
     innerPadding: PaddingValues,
     listState: LazyListState = rememberLazyListState(),
     headerContent: LazyListScope.() -> Unit = {},
+    usePageConfig: Boolean = false,
+    pageTitle: String,
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
@@ -44,6 +51,43 @@ fun ReplyListContent(
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val upMid = viewModel.upMid
+    val sortOrder by viewModel.sortOrder.collectAsState()
+
+    if (usePageConfig) {
+        val configId = PageConfig(
+            title = pageTitle,
+            menu = rememberMyMenu(sortOrder) {
+                myItem {
+                    key = MenuKeys.send
+                    iconFileName = "ic_baseline_send_24"
+                    title = "发布评论"
+                }
+                val sortOrderList = viewModel.sortOrderList
+                myItem {
+                    key = MenuKeys.sort
+                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    title = sortOrderList
+                        .find { it.first == sortOrder }
+                        ?.second ?: "排序"
+                    childMenu = myMenu {
+                        checkable = true
+                        checkedKey = sortOrder
+                        sortOrderList.forEach {
+                            myItem {
+                                key = it.first
+                                title = it.second
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        PageListener(
+            configId = configId,
+            onMenuItemClick = viewModel::menuItemClick,
+        )
+    }
+
 
     SwipeToRefresh(
         refreshing = isRefreshing,

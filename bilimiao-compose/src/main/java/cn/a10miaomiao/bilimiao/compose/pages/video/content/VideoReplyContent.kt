@@ -42,52 +42,13 @@ fun VideoReplyContent(
     isActive: Boolean = false,
     usePageConfig: Boolean = false,
 ) {
-    val list by viewModel.list.data.collectAsState()
-    val listLoading by viewModel.list.loading.collectAsState()
-    val listFinished by viewModel.list.finished.collectAsState()
-    val listFail by viewModel.list.fail.collectAsState()
-    val sortOrder by viewModel.sortOrder.collectAsState()
-    val upMid = viewModel.upMid
-
-    if (usePageConfig && isActive) {
-        val configId = PageConfig(
-            title = "AV${arcData.aid}\n/\n${detailData.bvid}",
-            menu = rememberMyMenu(sortOrder) {
-                myItem {
-                    key = MenuKeys.send
-                    iconFileName = "ic_baseline_send_24"
-                    title = "发布评论"
-                }
-                val sortOrderList = viewModel.sortOrderList
-                myItem {
-                    key = MenuKeys.sort
-                    iconFileName = "ic_baseline_filter_list_grey_24"
-                    title = sortOrderList
-                        .find { it.first == sortOrder }
-                        ?.second ?: "排序"
-                    childMenu = myMenu {
-                        checkable = true
-                        checkedKey = sortOrder
-                        sortOrderList.forEach {
-                            myItem {
-                                key = it.first
-                                title = it.second
-                            }
-                        }
-                    }
-                }
-            }
-        )
-        PageListener(
-            configId = configId,
-            onMenuItemClick = viewModel::menuItemClick,
-        )
-    }
 
     ReplyListContent(
         viewModel = viewModel,
         innerPadding = innerPadding,
         listState = listState,
+        usePageConfig = usePageConfig && isActive,
+        pageTitle = "AV${arcData.aid}\n/\n${detailData.bvid}",
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
     )
