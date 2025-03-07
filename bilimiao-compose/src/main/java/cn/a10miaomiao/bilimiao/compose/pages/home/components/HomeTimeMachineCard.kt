@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -39,18 +40,14 @@ internal fun HomeTimeMachineCard(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Column(
+    MiaoCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp)
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .clickable(onClick = onClick)
             .padding(5.dp),
+        onClick = onClick,
     ) {
         Row(
+            modifier = Modifier.padding(5.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (iconModel != null) {
@@ -68,7 +65,13 @@ internal fun HomeTimeMachineCard(
                 style = MaterialTheme.typography.titleSmall,
             )
         }
-        content()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp, start = 5.dp, end = 5.dp),
+        ) {
+            content()
+        }
     }
 }
 
@@ -97,35 +100,37 @@ internal fun HomeTimeMachineTimeCard(
         cardName = "当前时间线",
         onClick = onClick
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            AssistChip(
-                onClick = onClick,
-                leadingIcon = {
-                    Image(
-                        painter = painterResource(id = seasonIcon),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                label = {
-                    Text(
-                        text = timeText,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
+        Column {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                AssistChip(
+                    onClick = onClick,
+                    leadingIcon = {
+                        Image(
+                            painter = painterResource(id = seasonIcon),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = timeText,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                )
+            }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = emoticons,
+                textAlign = TextAlign.End,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
             )
         }
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = emoticons,
-            textAlign = TextAlign.End,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-        )
     }
 }
 

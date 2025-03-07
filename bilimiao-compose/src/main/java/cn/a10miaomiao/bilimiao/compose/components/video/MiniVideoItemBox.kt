@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +40,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Danmukunum
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Playnum
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Upper
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -57,13 +61,9 @@ fun MiniVideoItemBox(
     isHtml: Boolean = false,
     onClick: () -> Unit,
 ) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(5.dp))
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-            )
-            .clickable(onClick = onClick),
+    MiaoCard(
+        modifier = modifier,
+        onClick = onClick,
     ) {
         Box(
             modifier = Modifier
@@ -179,4 +179,5 @@ fun MiniVideoItemBox(
             )
         }
     }
+
 }

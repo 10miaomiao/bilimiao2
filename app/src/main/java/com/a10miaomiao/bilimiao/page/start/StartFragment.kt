@@ -36,6 +36,7 @@ import cn.a10miaomiao.miao.binding.android.view._rightPadding
 import cn.a10miaomiao.miao.binding.android.view._show
 import cn.a10miaomiao.miao.binding.android.view._topPadding
 import cn.a10miaomiao.miao.binding.android.widget._text
+import cn.a10miaomiao.miao.binding.android.widget._textColor
 import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.R
@@ -159,6 +160,12 @@ class StartFragment : Fragment(), DIAware, MyPage {
     private val windowStore by instance<WindowStore>()
     private val scaffoldApp by lazy { requireActivity().getScaffoldView() }
 
+    private var themeColor: Int = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        themeColor = themeDelegate.themeColor.toInt()
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -180,13 +187,17 @@ class StartFragment : Fragment(), DIAware, MyPage {
         mSelfRadioButton.setOnCheckedChangeListener(handleCheckedChange)
 
         themeDelegate.observeTheme(this, Observer {
+            ui.setState {
+                themeColor = it.toInt()
+            }
+            val themeColor = it.toInt()
             // 切换主题时，颜色随之改变
             val colorStateList = ColorStateList(
                 arrayOf(
                     intArrayOf(-android.R.attr.state_checked),
                     intArrayOf(android.R.attr.state_checked)
                 ),
-                intArrayOf(config.foregroundAlpha45Color, config.themeColor)
+                intArrayOf(config.foregroundAlpha45Color, themeColor)
             )
             mAllRadioButton.buttonTintList = colorStateList
             mSelfRadioButton.buttonTintList = colorStateList
@@ -451,8 +462,10 @@ class StartFragment : Fragment(), DIAware, MyPage {
                             text = "关闭播放"
                             cornerRadius = dip(10)
                             backgroundColor = config.blockBackgroundColor
-                            textColorResource = config.themeColorResource
-                            strokeColor = ColorStateList.valueOf(config.themeColor)
+                            miaoEffect(themeColor) {
+                                setTextColor(themeColor)
+                                strokeColor = ColorStateList.valueOf(themeColor)
+                            }
                             strokeWidth = dip(1.5f).toInt()
                             setOnClickListener(handlePlayerCardCloseClick)
                             textSize = 14f
@@ -467,6 +480,9 @@ class StartFragment : Fragment(), DIAware, MyPage {
                             setOnClickListener(handlePlayerCardDetailClick)
                             textSize = 14f
                             padding = 0
+                            miaoEffect(themeColor) {
+                                backgroundColor = themeColor
+                            }
                         }..lParams(dip(100), dip(40))
                     }
                 }..lParams(height = wrapContent) {

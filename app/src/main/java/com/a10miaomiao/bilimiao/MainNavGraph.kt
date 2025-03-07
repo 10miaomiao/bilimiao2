@@ -9,7 +9,6 @@ import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
 //import com.a10miaomiao.bilimiao.page.TestFragment
 import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
-import com.a10miaomiao.bilimiao.page.setting.*
 import com.a10miaomiao.bilimiao.template.TemplateFragment
 import com.a10miaomiao.bilimiao.page.video.*
 import com.a10miaomiao.bilimiao.page.video.comment.*
@@ -53,7 +52,6 @@ object MainNavGraph {
 
             addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
 
-            addFragment(ThemeSettingFragment::class, ThemeSettingFragment.Companion)
         }
     }
 

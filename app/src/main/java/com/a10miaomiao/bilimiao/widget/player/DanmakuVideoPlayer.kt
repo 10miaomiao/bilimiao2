@@ -8,6 +8,12 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.ClipDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.Shape
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -1177,12 +1183,12 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         context: Context,
         themeColor: Int,
     ) {
-        val draw = context.getDrawable(R.drawable.layer_progress)
+        val draw = PlayerViewDrawable.progressBarDrawable(context, themeColor)
         val bounds = mProgressBar.progressDrawable.bounds
         mProgressBar.progressDrawable = draw
         mProgressBar.progressDrawable.bounds = bounds
         mProgressBar.thumb.setColorFilter(themeColor, PorterDuff.Mode.SRC_ATOP)
-        mBottomProgressBar.progressDrawable = context.getDrawable(R.drawable.shape_bottom_progress)
+        mBottomProgressBar.progressDrawable = PlayerViewDrawable.bottomProgressBarDrawable(context, themeColor)
 
         setDialogProgressBar(context)
         setDialogVolumeProgressBar(context)

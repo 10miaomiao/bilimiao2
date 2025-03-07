@@ -130,11 +130,7 @@ private class SettingPageViewModel(
     }
 
     fun toThemePage() {
-        val nav = fragment.findNavController()
-        nav.navigate(
-            Uri.parse("bilimiao://setting/theme"),
-            defaultNavOptions
-        )
+        pageNavigation.navigate(ThemeSettingPage())
     }
 
     fun toDipSettingPage() {

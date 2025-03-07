@@ -13,7 +13,9 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -57,6 +59,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
+import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
@@ -67,6 +70,7 @@ import org.kodein.di.android.x.closestDI
 import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.compose.withDI
+import org.kodein.di.instance
 
 class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwner {
 
@@ -145,6 +149,9 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         }
     }
 
+    private val appStore by instance<AppStore>()
+    private val windowStore by instance<WindowStore>()
+
     private var _pageConfig = PageConfigState.Cofing(-1)
     override val pageConfig = myPageConfig {
         val config = _pageConfig
@@ -192,10 +199,12 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                     LocalUriHandler provides uriHandler
                 ) {
                     withDI(di = di) {
-                        val windowStore: WindowStore by rememberInstance()
+                        val appState = appStore.stateFlow.collectAsState().value
                         val windowState = windowStore.stateFlow.collectAsState().value
                         val windowInsets = windowState.getContentInsets(localContainerView())
-                        BilimiaoTheme {
+                        BilimiaoTheme(
+                            appState = appState,
+                        ) {
                             ImagePreviewerProvider(
                                 contentPadding = windowInsets.addPaddingValues(
                                     addBottom = windowStore.bottomAppBarHeightDp.dp
@@ -281,7 +290,8 @@ fun MyNavHost(
 //        else HomePage()
 //    }
     Box(
-        modifier = Modifier.nestedScroll(connection),
+        modifier = Modifier.nestedScroll(connection)
+            .background(MaterialTheme.colorScheme.background),
     ) {
         NavHost(
             navController = navController,

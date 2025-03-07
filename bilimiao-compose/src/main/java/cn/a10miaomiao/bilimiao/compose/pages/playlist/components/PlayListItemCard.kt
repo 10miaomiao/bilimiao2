@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Upper
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -41,14 +42,12 @@ internal fun PlayListItemCard(
     onClick: () -> Unit,
     action: @Composable () -> Unit,
 ) {
-    Surface(
+    MiaoCard(
         modifier = modifier,
-        shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.background
+        onClick = onClick,
     ) {
         Row(
             modifier = Modifier
-                .clickable(onClick = onClick)
                 .padding(5.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,

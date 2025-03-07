@@ -85,6 +85,7 @@ dependencies {
     implementation(Libraries.accompanistAdaptive)
     implementation("me.zhanghai.compose.preference:library:1.1.1")
     implementation("sh.calvin.reorderable:reorderable:2.3.1")
+    implementation(Libraries.materialKolor)
 
     implementation(Libraries.gson)
     implementation(Libraries.okhttp3)

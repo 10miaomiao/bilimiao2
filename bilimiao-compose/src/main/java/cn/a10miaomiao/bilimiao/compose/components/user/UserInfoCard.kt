@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -35,14 +36,12 @@ internal fun UserInfoCard(
     onClick: () -> Unit,
     actionContent: @Composable RowScope.() -> Unit,
 ) {
-    Surface(
+    MiaoCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.background
+        onClick = onClick,
     ) {
         Row(
             modifier = Modifier
-                .clickable { onClick() }
                 .padding(5.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,

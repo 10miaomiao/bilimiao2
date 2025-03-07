@@ -175,7 +175,7 @@ class PlayerDelegate2(
 
         // 主题监听
         themeDelegate.observeTheme(activity, Observer {
-            val themeColor = activity.config.themeColor
+            val themeColor = it.toInt()
             views.videoPlayer.updateThemeColor(activity, themeColor)
         })
 

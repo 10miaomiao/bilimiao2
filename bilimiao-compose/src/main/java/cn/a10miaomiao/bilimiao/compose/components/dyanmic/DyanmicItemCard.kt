@@ -10,20 +10,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
+
 @Composable
 fun DynamicItemCard(
     modifier: Modifier = Modifier,
     item: bilibili.app.dynamic.v2.DynamicItem,
     onClick: () -> Unit,
 ) {
-    Column(
+    MiaoCard(
         modifier = modifier
-            .padding(horizontal = 10.dp)
-            .clip(RoundedCornerShape(5.dp))
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-            )
-            .clickable(onClick = onClick),
+            .padding(horizontal = 10.dp),
+        onClick = onClick,
     ) {
         for(module in item.modules) {
             DynamicModuleBox(module = module)

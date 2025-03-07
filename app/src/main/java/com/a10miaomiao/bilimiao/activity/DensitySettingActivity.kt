@@ -159,6 +159,7 @@ class DensitySettingActivity : AppCompatActivity() {
 
             addView(view<MaterialButton> {
                 text = "确认修改"
+                backgroundColor = activity.themeDelegate.themeColor.toInt()
                 textColorResource = R.color.white
 
                 setOnClickListener {

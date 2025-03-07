@@ -13,6 +13,12 @@ class MenuCheckableItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : MenuItemView(context, attrs) {
 
+    var themeColor = 0
+        set(value) = run {
+            field = value
+            updateChecked()
+        }
+
     var checked: Boolean = false
         set(value) {
             field = value
@@ -22,8 +28,8 @@ class MenuCheckableItemView @JvmOverloads constructor(
     private fun updateChecked() {
         if (checked) {
             setBackgroundResource(R.drawable.shape_menu_item_checked)
-            ui.title.setTextColor(config.themeColor)
-            ui.icon.imageTintList = ColorStateList.valueOf(config.themeColor)
+            ui.title.setTextColor(themeColor)
+            ui.icon.imageTintList = ColorStateList.valueOf(themeColor)
         } else {
             setBackgroundResource(config.selectableItemBackgroundBorderless)
             ui.title.setTextColor(config.foregroundAlpha45Color)

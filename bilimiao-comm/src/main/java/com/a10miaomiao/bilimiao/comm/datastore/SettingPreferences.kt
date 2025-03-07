@@ -81,6 +81,16 @@ object SettingPreferences {
     val HomeRecommendListStyle = intPreferencesKey("home_recommend_list_style")
 
     /**
+     * Theme
+     */
+    // 主题颜色
+    val ThemeColor = longPreferencesKey("theme_color")
+    // 深色模式
+    val ThemeDarkMode = intPreferencesKey("theme_dark_mode")
+    //
+    val ThemeAppBarType = intPreferencesKey("theme_app_bar_type")
+
+    /**
      * Player
      */
     // 解码器

@@ -59,6 +59,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.ThemeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
@@ -291,6 +292,7 @@ class BilimiaoPageRoute (
             )
         )
         composable<HomeSettingPage>()
+        composable<ThemeSettingPage>()
         composable<VideoSettingPage>()
         composable<DanmakuSettingPage>()
         composable<DanmakuDisplaySettingPage>()

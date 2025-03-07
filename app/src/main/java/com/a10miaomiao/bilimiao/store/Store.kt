@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.diViewModel
+import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
@@ -20,6 +21,7 @@ class Store (
         override val di: DI,
 ): DIAware {
 
+        val appStore: AppStore by activity.diViewModel(di)
         val windowStore: WindowStore by activity.diViewModel(di)
         val playListStore: PlayListStore by activity.diViewModel(di)
         val playerStore: PlayerStore by activity.diViewModel(di)
@@ -30,6 +32,7 @@ class Store (
         val regionStore: RegionStore by activity.diViewModel(di)
 
         fun loadStoreModules(diBuilder: DI.Builder) = diBuilder.run{
+                bindSingleton { appStore }
                 bindSingleton { windowStore }
                 bindSingleton { playListStore }
                 bindSingleton { playerStore }
@@ -42,6 +45,7 @@ class Store (
 
         fun onCreate(savedInstanceState: Bundle?) {
                 windowStore.state.bottomSheetFragmentID = R.id.nav_bottom_sheet_fragment
+                appStore.init(activity)
                 windowStore.init(activity)
                 playerStore.init(activity)
                 userStore.init(activity)
