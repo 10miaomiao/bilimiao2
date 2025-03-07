@@ -30,6 +30,7 @@ import splitties.views.topPadding
 
 class AppBarVerticalUi(
     override val ctx: Context,
+    val appBarView: AppBarView,
     val menuItemClick: View.OnClickListener,
     val menuItemLongClick: View.OnLongClickListener,
 //    val backClick: View.OnClickListener,
@@ -79,7 +80,7 @@ class AppBarVerticalUi(
     }
 
     private val lineView = textView {
-        backgroundColor = ctx.config.colorSurfaceVariant
+//        backgroundColor = ctx.config.colorSurfaceVariant
     }
 
     @OptIn(InternalSplittiesApi::class)
@@ -240,11 +241,18 @@ class AppBarVerticalUi(
         if (data.key == MenuKeys.back) {
             setOnLongClickListener(menuItemLongClick)
         }
+        themeColor = appBarView.themeColor
         prop = data
     }
 
-    override fun updateTheme() {
-        lineView.backgroundColor = ctx.config.colorSurfaceVariant
+    override fun updateTheme(color: Int, bgColor: Int) {
+        lineView.backgroundColor = bgColor
+        for (i in 0 until mNavigationMenuLayout.childCount) {
+            val view = mNavigationMenuLayout.getChildAt(i)
+            if (view is MenuCheckableItemView) {
+                view.themeColor = color
+            }
+        }
     }
 
     private val translateMenuItemAniShow = AnimationSet(false).apply {

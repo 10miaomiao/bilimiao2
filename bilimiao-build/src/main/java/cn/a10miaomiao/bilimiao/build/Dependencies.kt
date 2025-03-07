@@ -84,6 +84,7 @@ object Libraries {
     const val pbandkRuntime = "pro.streem.pbandk:pbandk-runtime:${Versions.pbandk}"
     const val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
     const val glideCompiler = "com.github.bumptech.glide:compiler:${Versions.glide}"
+    const val materialKolor = "com.materialkolor:material-kolor:2.0.2"
 
     // 通用控件
     const val recyclerview = "androidx.recyclerview:recyclerview:1.2.0"

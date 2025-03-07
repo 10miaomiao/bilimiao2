@@ -90,7 +90,7 @@ class SearchActivity : AppCompatActivity() {
         val keyword = arguments.getString(KEY_KEYWORD, "")
         val mode = arguments.getInt(KEY_MODE)
         val selfSearchName = arguments.getString(KEY_NAME)
-        SearchActivityUi(this, keyword, mode, selfSearchName)
+        SearchActivityUi(this, themeDelegate, keyword, mode, selfSearchName)
     }
 
     private val viewModel by viewModels<SearchViewModel> {

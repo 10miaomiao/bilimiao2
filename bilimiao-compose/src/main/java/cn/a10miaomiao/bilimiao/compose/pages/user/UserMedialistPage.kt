@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,6 +57,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.components.layout.AutoTwoPaneLayout
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.TitleBar
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserMedialistDetailContent
 import com.a10miaomiao.bilimiao.comm.entity.ItemAndCountInfo
@@ -339,62 +341,55 @@ private fun UserMedialistListContent(
                         if (selectedMedia == null) it == 0
                         else selectedMedia.id == item.param && selectedMedia.type == item.type
                     } else { false }
-                    Box(
+                    MiaoCard(
                         modifier = Modifier.padding(5.dp),
+                        onClick = {
+                            viewModel.openMediaDetail(item)
+                        },
+                        enabled = !isSelected,
                     ) {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (isSelected) {
-                                Color.Transparent
-                            } else {
-                                MaterialTheme.colorScheme.background
-                            }
+                        Row(
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        viewModel.openMediaDetail(item)
+                                    },
+                                    enabled = !isSelected,
+                                )
+                                .padding(10.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Column() {
-                                Row(
-                                    modifier = Modifier
-                                        .clickable(
-                                            onClick = {
-                                                viewModel.openMediaDetail(item)
-                                            },
-                                            enabled = !isSelected,
-                                        )
-                                        .padding(10.dp)
-                                        .fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    GlideImage(
-                                        model = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(width = 120.dp, height = 80.dp)
-                                            .clip(RoundedCornerShape(5.dp)),
-                                        loading = placeholder(R.drawable.bili_default_placeholder_img_tv),
-                                        failure = placeholder(R.drawable.bili_fail_placeholder_img_tv),
-                                    )
+                            GlideImage(
+                                model = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(width = 120.dp, height = 80.dp)
+                                    .clip(RoundedCornerShape(5.dp)),
+                                loading = placeholder(R.drawable.bili_default_placeholder_img_tv),
+                                failure = placeholder(R.drawable.bili_fail_placeholder_img_tv),
+                            )
 
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(80.dp)
-                                            .padding(horizontal = 10.dp),
-                                    ) {
-                                        Text(
-                                            text = item.title,
-                                            maxLines = 2,
-                                            modifier = Modifier.weight(1f),
-                                            overflow = TextOverflow.Ellipsis,
-                                            color = MaterialTheme.colorScheme.onBackground,
-                                        )
-                                        Text(
-                                            text = "${item.count}个视频",
-                                            maxLines = 1,
-                                            color = MaterialTheme.colorScheme.outline,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    }
-                                }
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(80.dp)
+                                    .padding(horizontal = 10.dp),
+                            ) {
+                                Text(
+                                    text = item.title,
+                                    maxLines = 2,
+                                    modifier = Modifier.weight(1f),
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    text = "${item.count}个视频",
+                                    maxLines = 1,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
                             }
                         }
                     }

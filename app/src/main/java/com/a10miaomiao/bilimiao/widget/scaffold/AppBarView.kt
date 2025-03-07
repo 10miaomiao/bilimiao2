@@ -6,13 +6,16 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
+import bilibili.app.mine.v1.Color
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarHorizontalUi
 import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarUi
 import com.a10miaomiao.bilimiao.widget.scaffold.ui.AppBarVerticalUi
+import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -105,6 +108,8 @@ class AppBarView @JvmOverloads constructor(
 
     private var mUi = createUi()
 
+    var themeColor = 0
+
     init {
         updateProp()
         setView(mUi.root)
@@ -114,6 +119,7 @@ class AppBarView @JvmOverloads constructor(
         return if (orientation == ScaffoldView.HORIZONTAL) {
             AppBarHorizontalUi(
                 context,
+                this,
                 menuItemClick = menuItemClick,
                 menuItemLongClick = menuItemLongClick,
                 navigationClick = navigationClick,
@@ -127,6 +133,7 @@ class AppBarView @JvmOverloads constructor(
         } else {
             AppBarVerticalUi(
                 context,
+                this,
                 menuItemClick = menuItemClick,
                 menuItemLongClick = menuItemLongClick,
             )
@@ -143,8 +150,10 @@ class AppBarView @JvmOverloads constructor(
         })
     }
 
-    fun updateTheme() {
-        mUi.updateTheme()
+    fun updateTheme(color: Int, bgColor: Int) {
+        themeColor = color
+        mUi.updateTheme(color, bgColor)
+        backgroundColor = bgColor
     }
 
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {

@@ -22,6 +22,7 @@ import splitties.views.dsl.core.*
 
 class AppBarHorizontalUi(
     override val ctx: Context,
+    val appBarView: AppBarView,
     val menuItemClick: View.OnClickListener,
     val menuItemLongClick: View.OnLongClickListener,
     val navigationClick: View.OnClickListener,
@@ -134,16 +135,11 @@ class AppBarHorizontalUi(
         })
     }
 
-    val mSelectBgView = frameLayout {
-        backgroundColor = config.themeColor
-    }
-
     private val lineView = textView {
-        backgroundColor = ctx.config.colorSurfaceVariant
+//        backgroundColor = ctx.config.colorSurfaceVariant
     }
 
     override val root = frameLayout {
-        addView(mSelectBgView, lParams(dip(30), dip(30)))
         addView(mNavigationLayout.wrapInScrollView {
             scrollBarSize = 0
         }, lParams {
@@ -255,21 +251,6 @@ class AppBarHorizontalUi(
                 }
             }
 
-            if (prop.isNavigationMenu) {
-                val selectIndex = menus?.indexOfFirst {
-                    it.key == prop.navigationKey
-                } ?: -1
-                if (selectIndex == -1) {
-                    mSelectBgView.visibility = View.GONE
-                } else {
-                    val itemView = mNavigationMemuLayout.getChildAt(selectIndex)
-//                    mSelectBgView.translationX = itemView.left.toFloat()
-//                    mSelectBgView.translationY = itemView.top.toFloat()
-                    mSelectBgView.visibility = View.VISIBLE
-                }
-            } else {
-                mSelectBgView.visibility = View.GONE
-            }
         }
     }
 
@@ -308,12 +289,19 @@ class AppBarHorizontalUi(
         if (data.key == MenuKeys.back) {
             setOnLongClickListener(menuItemLongClick)
         }
+        themeColor = appBarView.themeColor
         prop = data
     }
 
 
-    override fun updateTheme() {
-        lineView.backgroundColor = ctx.config.colorSurfaceVariant
+    override fun updateTheme(color: Int, bgColor: Int) {
+        lineView.backgroundColor = bgColor
+        for (i in 0 until mNavigationMemuLayout.childCount) {
+            val view = mNavigationMemuLayout.getChildAt(i)
+            if (view is MenuCheckableItemView) {
+                view.themeColor = color
+            }
+        }
     }
 
     private fun View.getInAnim(): Animator {

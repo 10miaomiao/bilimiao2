@@ -130,6 +130,7 @@ dependencies {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
     implementation(Libraries.zxingLite)
+    implementation(Libraries.materialKolor)
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
 //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")

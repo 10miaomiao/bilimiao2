@@ -19,11 +19,14 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentOnAttachListener
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.navigation.NavController
@@ -63,7 +66,15 @@ import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.common.util.concurrent.MoreExecutors
+import com.materialkolor.dynamiccolor.MaterialDynamicColors
+import com.materialkolor.hct.Hct
+import com.materialkolor.ktx.DynamicScheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -74,7 +85,8 @@ class MainActivity
     : AppCompatActivity(),
     DIAware {
 
-    lateinit var ui: MainUi
+    private var mainUi: MainUi? = null
+    private val ui get() = mainUi!!
 
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
@@ -124,11 +136,60 @@ class MainActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         themeDelegate.onCreate(savedInstanceState)
-        ui = MainUi(this)
+
+        // 统计服务
+        BilimiaoStatService.setAuthorizedState(this, false)
+        BilimiaoStatService.start(this)
+
+        // 安卓13开始手动申请通知权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                //2、申请权限: 参数二：权限的数组；参数三：请求码
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1
+                )
+            }
+        }
+
+        store.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            store.appStore.stateFlow.mapNotNull {
+                it.theme
+            }.flowOn(Dispatchers.Main).collect {
+                if (mainUi == null) {
+                    initRootView(savedInstanceState)
+                }
+                val color = it.color.toInt()
+                var bgColor = if (it.appBarType == 0) {
+                    val hct = Hct.fromInt(color)
+                    val isDark = when(it.darkMode) {
+                        0 -> themeDelegate.isSystemInDark()
+                        1 -> false
+                        else -> true
+                    }
+                    val tone = if (isDark) 20.0 else 90.0
+                    Hct.from(hct.hue, 10.0, tone).toInt()
+                } else {
+                    config.blockBackgroundColor
+                }
+                bgColor = (bgColor and 0x00FFFFFF) or (0xF8000000).toInt()
+                ui.mAppBar.updateTheme(color, bgColor)
+            }
+        }
+    }
+
+    private fun initRootView(savedInstanceState: Bundle?) {
+        mainUi = MainUi(this)
         setContentView(ui.root)
         basePlayerDelegate.onCreate(savedInstanceState)
         bottomSheetDelegate.onCreate(savedInstanceState)
-        store.onCreate(savedInstanceState)
         ui.root.showPlayer = basePlayerDelegate.isPlaying()
         ui.root.playerDelegate = basePlayerDelegate as PlayerDelegate2
         ui.root.onDrawerStateChanged = ::onDrawerStateChanged
@@ -152,43 +213,6 @@ class MainActivity
         initNavController()
         initAppBar()
         initSettingPreferences()
-
-//        ui.mContainerView.addDrawerListener(onDrawer)
-//        lifecycleScope.launch(Dispatchers.IO){
-//            val loginInfo = Bilimiao.commApp.loginInfo!!
-//            val refreshToken = loginInfo.token_info.refresh_token
-//            val cookieInfo = loginInfo.cookie_info!!
-//            DebugMiao.log(Bilimiao.commApp.loginInfo)
-//            val res = BiliApiService.authApi.refreshToken(refreshToken, cookieInfo).awaitCall()
-//            DebugMiao.log("oauth2")
-//            DebugMiao.log("oauth2", res.body?.string())
-//        }
-
-        // 统计服务
-        BilimiaoStatService.setAuthorizedState(this, false)
-        BilimiaoStatService.start(this)
-
-        // 安卓13开始手动申请通知权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                //2、申请权限: 参数二：权限的数组；参数三：请求码
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    1
-                )
-            }
-        }
-
-        themeDelegate.observeTheme(this, Observer {
-            ui.mAppBar.backgroundColor = themeDelegate.getAppBarBgColor()
-            ui.mAppBar.updateTheme()
-        })
-
         initViewFocusable()
     }
 
@@ -287,7 +311,6 @@ class MainActivity
             }
         }
     }
-
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)

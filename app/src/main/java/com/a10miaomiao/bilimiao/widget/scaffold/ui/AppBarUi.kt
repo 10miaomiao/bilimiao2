@@ -6,5 +6,5 @@ import splitties.views.dsl.core.Ui
 interface AppBarUi : Ui {
     fun setProp(prop: AppBarView.PropInfo?)
 
-    fun updateTheme()
+    fun updateTheme(color: Int, bgColor: Int)
 }
