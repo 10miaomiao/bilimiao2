@@ -184,8 +184,8 @@ fun VideoDetailContent(
                 }
                 VideoUpperBox(
                     author = arcData.author,
-                    ownerExt = detailData.ownerExt,
-                    staffList = detailData.staff,
+                    ownerExt =  detailData.activitySeason?.ownerExt ?: detailData.ownerExt,
+                    staffList =  detailData.activitySeason?.staff ?: detailData.staff,
                     onUserClick = viewModel::toUserPage
                 )
                 SelectionContainer {
