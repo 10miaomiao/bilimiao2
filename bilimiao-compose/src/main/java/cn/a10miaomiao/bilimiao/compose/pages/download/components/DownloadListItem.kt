@@ -37,7 +37,7 @@ fun DownloadListItem(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.surfaceVariant
         ) {
             Column() {
                 Row(
