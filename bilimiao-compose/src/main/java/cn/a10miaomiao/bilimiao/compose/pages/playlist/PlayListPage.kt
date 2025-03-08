@@ -47,6 +47,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.components.PlayListItemCard
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -81,17 +82,12 @@ private class PlayListPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     private val playerDelegate by instance<BasePlayerDelegate>()
 
     fun toVideoInfoPage(item: PlayListItemInfo) {
-        val nav = fragment.findNavController()
-        val id = item.aid
-        nav.navigate(
-            "bilimiao://video/$id".toUri(),
-            defaultNavOptions
-        )
+        pageNavigation.navigateToVideoInfo(item.aid)
     }
 
     fun playVideo(item: PlayListItemInfo) {
