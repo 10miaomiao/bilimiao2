@@ -26,6 +26,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -73,7 +74,7 @@ private class UserLikeArchivePageViewModel(
     val vmid: String,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<ArchiveInfo>()
@@ -138,11 +139,7 @@ private class UserLikeArchivePageViewModel(
     }
 
     fun toVideoDetail(item: ArchiveInfo) {
-        fragment.findNavController()
-            .navigate(
-                Uri.parse("bilimiao://video/" + item.param),
-                defaultNavOptions,
-            )
+        pageNavigation.navigateToVideoInfo(item.param)
     }
 }
 
