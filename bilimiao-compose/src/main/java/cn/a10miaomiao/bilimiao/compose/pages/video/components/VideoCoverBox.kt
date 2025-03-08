@@ -124,7 +124,7 @@ fun VideoCoverBox(
             }
         }
         Image(
-            painter = painterResource(R.drawable.ic_bili_play),
+            painter = painterResource(R.drawable.ic_bili_tv_play),
             contentDescription = "立即播放",
             modifier = Modifier
                 .align(Alignment.Center)

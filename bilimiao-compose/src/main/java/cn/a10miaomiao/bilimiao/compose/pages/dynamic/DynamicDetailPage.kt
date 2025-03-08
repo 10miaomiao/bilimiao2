@@ -253,14 +253,12 @@ private fun DynamicDetailPageDetailContent(
     }
 
     val origName = detailData.extend?.origName
-    PageConfig(
-        title =  origName?.let {
-            "${it}\n的\n动态详情"
-        } ?: "动态详情"
-    )
 
     MainReplyListPageContent(
         viewModel = replyViewModel,
+        pageTitle = origName?.let {
+            "${it}\n的\n动态详情"
+        } ?: "动态详情",
         headerContent = {
             item {
                 Column(

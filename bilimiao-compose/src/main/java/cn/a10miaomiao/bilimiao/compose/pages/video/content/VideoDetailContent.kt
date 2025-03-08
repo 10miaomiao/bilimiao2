@@ -51,6 +51,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoverBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoPagesBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoStatBox
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoUgcSeasonBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoUpperBox
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
@@ -71,15 +72,17 @@ fun VideoDetailContent(
     val playerStore by rememberInstance<PlayerStore>()
     val listPosition by playerStore.listPositionFlow.collectAsState()
     val videoStat = arcData.stat
-    val videoPages = remember(detailData.pages) {
-        detailData.pages.mapNotNull { it.page }
+    val pages = viewModel.run { detailData.getPages() }
+    val videoPages = remember(pages) {
+        pages.mapNotNull { it.page }
     }
     val videoHistory = detailData.history
-
+    val videoReqUser = detailData.activitySeason?.reqUser
+        ?: detailData.reqUser ?: bilibili.app.view.v1.ReqUser()
     if (isActive) {
         val pageConfig = PageConfig(
-            title = "AV${arcData.aid}\n/\n${detailData.bvid}",
-            menu = rememberMyMenu(listPosition) {
+            title = "AV${arcData.aid}\n/\n${viewModel.getBvid()}",
+            menu = rememberMyMenu(listPosition, videoReqUser.favorite, videoStat?.share) {
                 myItem {
                     key = MenuKeys.more
                     iconFileName = "ic_more_vert_grey_24dp"
@@ -87,7 +90,8 @@ fun VideoDetailContent(
                     childMenu = myMenu {
                         myItem {
                             key = 1
-                            title = "分享"
+                            val shareCount = videoStat?.share
+                            title = if (shareCount != null) "分享($shareCount)" else "分享"
                         }
                         myItem {
                             key = 2
@@ -114,8 +118,13 @@ fun VideoDetailContent(
                 }
                 myItem {
                     key = MenuKeys.favourite
-                    iconFileName = "ic_baseline_star_24"
-                    title = "收藏"
+                    if (videoReqUser.favorite == 1) {
+                        iconFileName = "ic_baseline_star_24"
+                        title = "已收藏"
+                    } else {
+                        iconFileName = "ic_baseline_star_outline_24"
+                        title = "收藏"
+                    }
                 }
                 myItem {
                     key = MenuKeys.add
@@ -270,19 +279,32 @@ fun VideoDetailContent(
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .clickable {
-
+                                    viewModel.toSearchPage(tag.name)
                                 }
                                 .padding(vertical = 4.dp, horizontal = 8.dp)
                         )
                     }
                 }
 
-                val videoStat = arcData.stat
-                val reqUser = detailData.reqUser ?: bilibili.app.view.v1.ReqUser()
                 if (videoStat != null) {
                     VideoStatBox(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp),
+                        viewModel = viewModel,
+                        arc = arcData,
                         stat = videoStat,
-                        reqUser = reqUser,
+                        reqUser = videoReqUser,
+                    )
+                }
+                val ugcSeason = detailData.ugcSeason
+                    ?: detailData.activitySeason?.ugcSeason
+                if (ugcSeason != null) {
+                    VideoUgcSeasonBox(
+                        modifier = Modifier
+                            .padding(10.dp),
+                        viewModel = viewModel,
+                        arc = arcData,
+                        ugcSeason = ugcSeason,
                     )
                 }
             }

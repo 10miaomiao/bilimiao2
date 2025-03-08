@@ -79,7 +79,10 @@ import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyDetailContent
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoAddFavoriteDialog
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoinDialog
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoverBox
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoDownloadDialog
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoReplyTitleBar
 import cn.a10miaomiao.bilimiao.compose.pages.video.content.VideoDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.video.content.VideoReplyContent
@@ -409,6 +412,10 @@ private fun VideoDetailPageContent(
             }
         }
     }
+
+    VideoCoinDialog(state = viewModel.coinDialogState)
+    VideoAddFavoriteDialog(viewModel.addFavoriteDialogState)
+    VideoDownloadDialog(state = viewModel.downloadDialogState)
 }
 
 @Composable
