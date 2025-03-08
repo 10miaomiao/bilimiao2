@@ -6,15 +6,24 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bilibili.app.archive.v1.Page
 import bilibili.app.view.v1.ViewGRPC
 import bilibili.app.view.v1.ViewReply
 import bilibili.app.view.v1.ViewReq
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoAddFavoriteDialogState
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoinDialogState
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoDownloadDialogState
+import cn.a10miaomiao.bilimiao.download.DownloadService
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -23,10 +32,12 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +61,7 @@ class VideoDetailViewModel(
     private val filterStore: FilterStore by instance()
     private val playerStore: PlayerStore by instance()
     private val playListStore: PlayListStore by instance()
+    private val userStore: UserStore by instance()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> get() = _isRefreshing
@@ -59,6 +71,22 @@ class VideoDetailViewModel(
     val fail: StateFlow<Any?> get() = _fail
     private val _detailData = MutableStateFlow<ViewReply?>(null)
     val detailData: StateFlow<ViewReply?> get() = _detailData
+
+    // 自动连播合集
+    private val _isAutoPlaySeason = mutableStateOf(true)
+    val isAutoPlaySeason get() = _isAutoPlaySeason.value
+
+    val coinDialogState = VideoCoinDialogState(
+        scope = viewModelScope,
+        onChanged = ::updateCoinState,
+    )
+    val addFavoriteDialogState = VideoAddFavoriteDialogState(
+        scope = viewModelScope,
+        onChanged = ::updateFavoriteState,
+    )
+    val downloadDialogState = VideoDownloadDialogState(
+        scope = viewModelScope,
+    )
 
     init {
         loadData()
@@ -92,25 +120,25 @@ class VideoDetailViewModel(
 
     fun playVideo() {
         val detail = detailData.value ?: return
-        val pages = detail.pages
+        val pages = detail.getPages()
         if (pages.isNotEmpty()) {
             val page = pages[0].page ?: return
             playVideo(page)
         }
     }
-    fun playVideo(page: bilibili.app.archive.v1.Page) {
+    fun playVideo(page: Page) {
         val detail = detailData.value ?: return
-        val arc = detail.arc ?: return
+        val arc = detail.getArcData() ?: return
         val author = arc.author ?: return
         val viewPages = detail.pages
-        val ugcSeason = detail.ugcSeason
+        val ugcSeason = detail.getUgcSeasonData()
         val title = if (viewPages.size > 1) {
             page.part
         } else {
             arc.title
         }
         val cid = page.cid
-        val isAutoPlaySeason = false
+        val isAutoPlaySeason = this.isAutoPlaySeason
         if (isAutoPlaySeason && ugcSeason != null) {
             // 将合集加入播放列表
             val playListFromId = (playListStore.state.from as? PlayListFrom.Season)?.seasonId
@@ -177,6 +205,10 @@ class VideoDetailViewModel(
      * 添加至稍后再看
      */
     fun addVideoHistoryToview() = viewModelScope.launch(Dispatchers.IO) {
+        if (!userStore.isLogin()) {
+            PopTip.show("请先登录")
+            return@launch
+        }
         try {
             val arcData = detailData.value?.arc ?: return@launch
             val res = BiliApiService.userApi
@@ -194,6 +226,162 @@ class VideoDetailViewModel(
         }
     }
 
+    fun ViewReply.getArcData(): bilibili.app.archive.v1.Arc? {
+        return arc ?: activitySeason?.arc
+    }
+
+    fun ViewReply.getReqUserData(): bilibili.app.view.v1.ReqUser? {
+        return activitySeason?.reqUser ?: reqUser
+    }
+
+    fun ViewReply.getUgcSeasonData(): bilibili.app.view.v1.UgcSeason? {
+        return ugcSeason ?: activitySeason?.ugcSeason
+    }
+
+    fun ViewReply.getPages(): List<bilibili.app.view.v1.ViewPage> {
+        return activitySeason?.pages ?: pages
+    }
+
+    fun ViewReply.getBvid(): String {
+        return activitySeason?.bvid ?: bvid
+    }
+
+    fun getBvid(): String {
+        return detailData.value?.getBvid() ?: ""
+    }
+
+    private fun updateArcAndReqUser(
+        arc: bilibili.app.archive.v1.Arc?,
+        reqUser: bilibili.app.view.v1.ReqUser?,
+    ) {
+        val videoDetail = detailData.value ?: return
+        val activitySeason = videoDetail.activitySeason
+        if (activitySeason != null) {
+            _detailData.value = videoDetail.copy(
+                activitySeason = activitySeason.copy(
+                    arc = arc,
+                    reqUser = reqUser,
+                ),
+            )
+        } else {
+            _detailData.value = videoDetail.copy(
+                arc = arc,
+                reqUser = reqUser,
+            )
+        }
+    }
+
+    private fun updateCoinState(state: Int) {
+        val videoDetail = detailData.value ?: return
+        var videoArc = videoDetail.getArcData()
+        var reqUser = videoDetail.getReqUserData()
+        val stat = videoArc?.stat
+        videoArc = videoArc?.copy(
+            stat = stat?.copy(
+                coin = stat.coin + state,
+            )
+        )
+        reqUser = reqUser?.copy(
+            coin = state,
+        )
+        updateArcAndReqUser(videoArc, reqUser)
+    }
+
+    private fun updateFavoriteState(state: Int) {
+        val videoDetail = detailData.value ?: return
+        var videoArc = videoDetail.getArcData()
+        var reqUser = videoDetail.getReqUserData()
+        val stat = videoArc?.stat
+        if (state == 0) {
+            videoArc = videoArc?.copy(
+                stat = stat?.copy(
+                    fav = stat.fav - 1,
+                )
+            )
+            reqUser = reqUser?.copy(
+                favorite = state,
+            )
+        } else if (state == 1) {
+            videoArc = videoArc?.copy(
+                stat = stat?.copy(
+                    fav = stat.fav + 1,
+                )
+            )
+            reqUser = reqUser?.copy(
+                favorite = state,
+            )
+        }
+        updateArcAndReqUser(videoArc, reqUser)
+    }
+
+    private fun updateLikeState(state: Int) {
+        val videoDetail = detailData.value ?: return
+        var videoArc = videoDetail.arc ?: videoDetail.activitySeason?.arc
+        var reqUser = videoDetail.getReqUserData()
+        val stat = videoArc?.stat
+        if (state == 0) {
+            videoArc = videoArc?.copy(
+                stat = stat?.copy(
+                    like = stat.like - 1,
+                )
+            )
+            reqUser = reqUser?.copy(
+                like = state,
+            )
+        } else if (state == 1) {
+            videoArc = videoArc?.copy(
+                stat = stat?.copy(
+                    like = stat.like + 1,
+                )
+            )
+            reqUser = reqUser?.copy(
+                like = state,
+            )
+        }
+        updateArcAndReqUser(videoArc, reqUser)
+    }
+
+    /**
+     * 点赞/取消点赞
+     */
+    fun requestLike(
+        arc: bilibili.app.archive.v1.Arc,
+        reqUser: bilibili.app.view.v1.ReqUser?,
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        if (!userStore.isLogin()) {
+            PopTip.show("请先登录")
+            return@launch
+        }
+        try {
+            val res = BiliApiService.videoAPI
+                .like(
+                    aid = arc.aid.toString(),
+                    dislike = reqUser?.dislike ?: 0,
+                    like = reqUser?.like ?: 0,
+                )
+                .awaitCall()
+                .json<MessageInfo>()
+            if (res.isSuccess) {
+                val state = if (reqUser?.like == 1) 0 else 1
+                if (state == 1) {
+                    PopTip.show("点赞成功")
+                } else {
+                    PopTip.show("已取消点赞")
+                }
+                updateLikeState(state)
+            } else {
+                PopTip.show(res.message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            PopTip.show(e.message ?: e.toString())
+        }
+    }
+
+    fun updateIsAutoPlaySeason(isChecked: Boolean) {
+        _isAutoPlaySeason.value = isChecked
+    }
+
     fun toUserPage(mid: String) {
         pageNavigation.navigate(UserSpacePage(
             id = mid,
@@ -206,6 +394,49 @@ class VideoDetailViewModel(
         ))
     }
 
+    fun toSearchPage(keyword: String) {
+        pageNavigation.navigate(SearchResultPage(
+            keyword = keyword,
+        ))
+    }
+
+    fun toUgcSeasonPage(seasonId: String, seasonTitle: String) {
+        pageNavigation.navigate(UserSeasonDetailPage(
+            id = seasonId,
+            title = seasonTitle,
+        ))
+    }
+
+    fun openCoinDialog(aid: String, copyright: Int) {
+        if (!userStore.isLogin()) {
+            PopTip.show("请先登录")
+            return
+        }
+        coinDialogState.show(aid, copyright)
+    }
+
+    fun openAddFavoriteDialog(aid: String) {
+        if (!userStore.isLogin()) {
+            PopTip.show("请先登录")
+            return
+        }
+        addFavoriteDialogState.show(aid)
+    }
+
+    fun openShare(id: String, title: String) {
+        val url = "http://www.bilibili.com/video/$id"
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "bilibili视频分享")
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "$title $url"
+            )
+        }
+        activity.startActivity(Intent.createChooser(shareIntent, "分享"))
+    }
+
     fun copyPlainText(label: String, text: String) {
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText(label, text)
@@ -214,37 +445,35 @@ class VideoDetailViewModel(
 
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         val videoDetail = detailData.value ?: return
-        val videoArc = videoDetail.arc ?: return
-        val viewPages = videoDetail.pages
+        val videoArc = videoDetail.getArcData() ?: return
+        val viewPages = videoDetail.getPages()
         when (item.key) {
             MenuKeys.download -> {
-
+                viewModelScope.launch {
+                    val downloadService = DownloadService.getService(activity)
+                    downloadDialogState.show(
+                        downloadService,
+                        videoDetail.getBvid(),
+                        videoArc,
+                        viewPages.mapNotNull { it.page },
+                    )
+                }
             }
             MenuKeys.favourite -> {
-
+                openAddFavoriteDialog(videoArc.aid.toString())
             }
             1 -> {
                 // 分享
-                val url = "http://www.bilibili.com/video/${videoDetail.bvid}"
-                val shareIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, "bilibili视频分享")
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        "${videoArc.title} $url"
-                    )
-                }
-                activity.startActivity(Intent.createChooser(shareIntent, "分享"))
+                openShare(videoDetail.getBvid(), videoArc.title)
             }
             2 -> {
                 // 浏览器打开
-                val url = "http://www.bilibili.com/video/${videoDetail.bvid}"
+                val url = "http://www.bilibili.com/video/${videoDetail.getBvid()}"
                 pageNavigation.launchWebBrowser(url)
             }
             3 -> {
                 // 复制链接
-                val text = "http://www.bilibili.com/video/${videoDetail.bvid}"
+                val text = "http://www.bilibili.com/video/${videoDetail.getBvid()}"
                 copyPlainText("URL", text)
                 PopTip.show("已复制：$text")
             }
@@ -256,7 +485,7 @@ class VideoDetailViewModel(
             }
             5 -> {
                 // 复制BV号
-                val text = videoDetail.bvid
+                val text = videoDetail.getBvid()
                 copyPlainText("URL", text)
                 PopTip.show("已复制：$text")
             }

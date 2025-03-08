@@ -118,7 +118,7 @@ private class UserSeasonDetailViewModel(
             }
             list.finished.value = true
             list.pageNum = pageNum
-            if (favState.value == -1) {
+            if (favState.value == -1 && userStore.isLogin()) {
                 // 获取订阅状态
                 val firstEp = sections.value.firstOrNull()
                     ?.episodes

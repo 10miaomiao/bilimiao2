@@ -1,9 +1,16 @@
 package cn.a10miaomiao.bilimiao.compose.pages.video.components
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,20 +27,28 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bilicoin
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bilifavourite
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bililike
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Bilishare
+import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailViewModel
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun VideoStatBox(
+    modifier: Modifier = Modifier,
+    viewModel: VideoDetailViewModel,
+    arc: bilibili.app.archive.v1.Arc,
     stat: bilibili.app.archive.v1.Stat,
     reqUser: bilibili.app.view.v1.ReqUser,
 ) {
+    val scrollState = rememberScrollState()
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .horizontalScroll(scrollState)
+            .then(modifier),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         VideoStatButton(
-            modifier = Modifier.weight(1f),
             icon = BilimiaoIcons.Common.Bililike,
             text = NumberUtil.converString(stat.like),
             description = "点赞",
@@ -43,11 +58,10 @@ fun VideoStatBox(
                 MaterialTheme.colorScheme.primary
             },
             onClick = {
-
+                viewModel.requestLike(arc, reqUser)
             },
         )
         VideoStatButton(
-            modifier = Modifier.weight(1f),
             icon = BilimiaoIcons.Common.Bilicoin,
             text = NumberUtil.converString(stat.coin),
             description = "投币",
@@ -57,11 +71,13 @@ fun VideoStatBox(
                 MaterialTheme.colorScheme.primary
             },
             onClick = {
-
+                viewModel.openCoinDialog(
+                    arc.aid.toString(),
+                    arc.copyright,
+                )
             },
         )
         VideoStatButton(
-            modifier = Modifier.weight(1f),
             icon = BilimiaoIcons.Common.Bilifavourite,
             text = NumberUtil.converString(stat.fav),
             description = "收藏",
@@ -71,17 +87,16 @@ fun VideoStatBox(
                 MaterialTheme.colorScheme.primary
             },
             onClick = {
-
+                viewModel.openAddFavoriteDialog(arc.aid.toString())
             },
         )
         VideoStatButton(
-            modifier = Modifier.weight(1f),
             icon = BilimiaoIcons.Common.Bilishare,
             text = NumberUtil.converString(stat.share),
             description = "分享",
             color = MaterialTheme.colorScheme.outline,
             onClick = {
-
+                viewModel.openShare("av${arc.aid}", arc.title)
             },
         )
     }
@@ -96,24 +111,37 @@ fun VideoStatButton(
     color: Color,
     onClick: () -> Unit,
 ) {
-    TextButton(
-        modifier = modifier,
+    ElevatedAssistChip(
         onClick = onClick,
-    ) {
-        Row(
-            verticalAlignment = Alignment.Bottom,
-        ) {
+        leadingIcon = {
             Icon(
                 imageVector = icon,
                 contentDescription = description,
                 modifier = Modifier.size(24.dp),
                 tint = color,
             )
+        },
+        label = {
             Text(
                 text = text,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(start = 4.dp),
             )
         }
-    }
+    )
+//    TextButton(
+//        modifier = modifier,
+//        onClick = onClick,
+//    ) {
+//        Row(
+//            verticalAlignment = Alignment.Bottom,
+//        ) {
+//
+//            Text(
+//                text = text,
+//                color = MaterialTheme.colorScheme.outline,
+//                modifier = Modifier.padding(start = 4.dp),
+//            )
+//        }
+//    }
 }

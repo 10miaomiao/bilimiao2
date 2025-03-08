@@ -270,6 +270,9 @@ private fun DynamicDetailPageDetailContent(
     }
     MainReplyListPageContent(
         viewModel = replyViewModel,
+        pageTitle = origName?.let {
+            "${it}\n的\n动态详情"
+        } ?: "动态详情",
         headerContent = {
             item {
                 Column(

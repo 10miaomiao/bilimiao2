@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -37,6 +38,7 @@ fun VideoUpperBox(
                         .clickable {
                             onUserClick(staff.mid.toString())
                         }
+                        .width(100.dp)
                         .padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -50,6 +52,7 @@ fun VideoUpperBox(
                         text = staff.name,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
                     )
                     Text(
                         text = staff.title,

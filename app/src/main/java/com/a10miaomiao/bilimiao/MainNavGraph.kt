@@ -7,10 +7,7 @@ import androidx.navigation.fragment.FragmentNavigatorDestinationBuilder
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import com.a10miaomiao.bilimiao.comm.navigation.ComposeFragmentNavigatorBuilder
 import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
-//import com.a10miaomiao.bilimiao.page.TestFragment
-import com.a10miaomiao.bilimiao.page.download.DownloadVideoCreateFragment
 import com.a10miaomiao.bilimiao.template.TemplateFragment
-import com.a10miaomiao.bilimiao.page.video.*
 import kotlin.reflect.KClass
 
 
@@ -38,14 +35,6 @@ object MainNavGraph {
         navController.graph = navController.createGraph(0, startDestination) {
             addFragment(TemplateFragment::class, TemplateFragment.Companion, dest.template)
             addFragment(ComposeFragment::class, ComposeFragmentNavigatorBuilder, dest.compose)
-//            addFragment(TestFragment::class, TestFragment.Companion)
-
-            addFragment(VideoInfoFragment::class, VideoInfoFragment.Companion)
-            addFragment(VideoCoinFragment::class, VideoCoinFragment.Companion)
-            addFragment(VideoAddFavoriteFragment::class, VideoAddFavoriteFragment.Companion)
-
-            addFragment(DownloadVideoCreateFragment::class, DownloadVideoCreateFragment.Companion)
-
         }
     }
 

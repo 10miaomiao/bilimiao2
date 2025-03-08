@@ -12,7 +12,6 @@ import splitties.dimensions.dip
 import splitties.views.dsl.core.matchParent
 
 class ViewConfig(val context: Context) {
-    val containerWidth = context.dip(900)
     val pagePadding = context.dip(10)
     val bottomSheetTitleHeight = context.dip(30)
 
@@ -20,17 +19,8 @@ class ViewConfig(val context: Context) {
     val largePadding = context.dip(20)
 
     val dividerSize = context.dip(8)
-    val regionIconSize = context.dip(24)
-
-    val blackAlpha45 = getColor(R.color.black_alpha_45)
-    val black80 = getColor(R.color.black_80)
-
-    val white80 = 0xAAFFFFFF.toInt()
 
     val themeName = context.resources.getString(context.attr(R.attr.themeName))
-
-    val colorSurfaceResource = context.attr(com.google.android.material.R.attr.colorSurface)
-    val colorSurface = getColor(colorSurfaceResource)
 
 
     val themeColorResource = context.attr(android.R.attr.colorPrimary)
