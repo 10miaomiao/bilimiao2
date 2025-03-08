@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -243,7 +244,7 @@ fun ReplyItemBox(
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                if (showDelete) {
+                if (isUpper) {
                     Text(
                         text = "UP主",
                         maxLines = 1,
@@ -291,13 +292,15 @@ fun ReplyItemBox(
                 }
             }
             if (content != null) {
-                val nodes = content.toAnnotatedTextNode()
-                val emoteMap = inlineAnnotatedContent(nodes)
-                Text(
-                    annotatedText(nodes),
-                    inlineContent = emoteMap,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                SelectionContainer {
+                    val nodes = content.toAnnotatedTextNode()
+                    val emoteMap = inlineAnnotatedContent(nodes)
+                    Text(
+                        annotatedText(nodes),
+                        inlineContent = emoteMap,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
             if (picturesList.isNotEmpty()) {
                 Box(modifier = Modifier.padding(
