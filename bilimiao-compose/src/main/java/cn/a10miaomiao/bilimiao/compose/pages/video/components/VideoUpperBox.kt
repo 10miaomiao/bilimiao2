@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
@@ -39,7 +40,10 @@ fun VideoUpperBox(
                             onUserClick(staff.mid.toString())
                         }
                         .width(100.dp)
-                        .padding(10.dp),
+                        .padding(
+                            vertical = 10.dp,
+                            horizontal = 5.dp,
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     GlideImage(
@@ -53,6 +57,7 @@ fun VideoUpperBox(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = staff.title,
