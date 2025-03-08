@@ -114,8 +114,6 @@ private class UserMedialistPageViewModel(
     val defaultMedia: OpenedMediaInfo?,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
-
     val isRefreshing = MutableStateFlow(false)
     val list = FlowPaginationInfo<SeriesInfo>()
 
