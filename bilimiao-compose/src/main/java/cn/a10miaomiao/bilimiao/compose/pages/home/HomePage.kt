@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
@@ -73,6 +75,8 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
+import com.a10miaomiao.bilimiao.comm.store.AppStore
+import com.a10miaomiao.bilimiao.comm.store.AppStore.HomeSettingState
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
@@ -84,6 +88,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -155,6 +160,7 @@ private class HomePageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
+    private val appStore by instance<AppStore>()
     private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
 
@@ -162,17 +168,36 @@ private class HomePageViewModel(
 
     private var lastBackPressedTime = 0L
 
-    val tabs = listOf<HomePageTab>(
-        HomePageTab.TimeMachine,
-        HomePageTab.Recommend,
-        HomePageTab.Popular,
-    )
+    private val _tabs = mutableStateOf(listOf<HomePageTab>())
+    val tabs get() = _tabs.value
     val pageState = HomePageState(pageNavigation)
     val context: Context by instance()
 
     init {
         loadAdData()
+        viewModelScope.launch {
+            updateTabs(appStore.state.home)
+            appStore.stateFlow.map {
+                it.home
+            }.collect {
+                updateTabs(it)
+            }
+        }
     }
+
+    private fun updateTabs(setting: HomeSettingState) {
+        val tabs = mutableListOf<HomePageTab>(
+            HomePageTab.TimeMachine,
+        )
+        if (setting.showRecommend) {
+            tabs.add(HomePageTab.Recommend)
+        }
+        if (setting.showPopular) {
+            tabs.add(HomePageTab.Popular)
+        }
+        _tabs.value = tabs
+    }
+
     private suspend fun getMiaoInitData(version: String): MiaoAdInfo {
         val sp = context.getSharedPreferences(BilimiaoCommApp.APP_NAME, Context.MODE_PRIVATE)
         val calendar = GregorianCalendar()
