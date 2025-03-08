@@ -789,7 +789,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     override fun release() {
         releaseDanmaku()
-        gsyVideoManager.player.stop()
+        gsyVideoManager?.player?.stop()
         super.release()
     }
 
