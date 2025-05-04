@@ -645,6 +645,10 @@ class PlayerDelegate2(
         return views.videoPlayer.currentState == GSYVideoPlayer.CURRENT_STATE_PAUSE
     }
 
+    override fun isOpened(): Boolean {
+        return scaffoldApp.showPlayer
+    }
+
     override fun setWindowInsets(
         left: Int,
         top: Int,

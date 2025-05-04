@@ -11,6 +11,7 @@ interface BasePlayerDelegate: BaseDelegate {
     fun openPlayer(source: BasePlayerSource)
     fun closePlayer()
     fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?)
+    fun isOpened(): Boolean
     fun isPlaying(): Boolean
     fun isPause(): Boolean
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int, displayCutout: DisplayCutout?)

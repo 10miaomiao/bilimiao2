@@ -122,6 +122,9 @@ class VideoDetailPage(
 
         val detailData = viewModel.detailData.collectAsState().value
 
+        BackHandler(
+            onBack = viewModel::onBackPressed
+        )
         AnimatedContent(
             modifier = Modifier.fillMaxSize(),
             targetState = detailData == null,
