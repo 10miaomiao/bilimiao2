@@ -122,7 +122,8 @@ private class ReplyDetailContentViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> get() = _isRefreshing
     val list = FlowPaginationInfo<ReplyInfo>()
-    var upMid = -1L
+    private val _upMid = MutableStateFlow(-1L)
+    val upMid: StateFlow<Long> get() = _upMid
     private var _cursor: CursorReply? = null
 
     init {
@@ -152,7 +153,7 @@ private class ReplyDetailContentViewModel(
             }.awaitCall()
             val listData = list.data.value.toMutableList()
             res.subjectControl?.let {
-                upMid = it.upMid
+                _upMid.value = it.upMid
             }
             res.root?.let {
                 listData.addAll(it.replies.filter { i1 ->
@@ -302,7 +303,7 @@ private class ReplyDetailContentViewModel(
 
     fun openReplyDialog(reply: ReplyInfo) {
         val params = ReplyEditParams(
-            type = 3,
+            type = currentReply.type.toInt(),
             oid = reply.oid.toString(),
             root = currentReply.id.toString(),
             parent = reply.id.toString(),
@@ -367,7 +368,7 @@ fun ReplyDetailContent(
     val listFinished by viewModel.list.finished.collectAsState()
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val upMid = viewModel.upMid
+    val upMid by viewModel.upMid.collectAsState()
 
     if (usePageConfig) {
         val memberName = reply.member?.name

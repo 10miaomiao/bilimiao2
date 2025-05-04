@@ -50,7 +50,7 @@ fun ReplyListContent(
     val listFinished by viewModel.list.finished.collectAsState()
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-    val upMid = viewModel.upMid
+    val upMid by viewModel.upMid.collectAsState()
     val sortOrder by viewModel.sortOrder.collectAsState()
 
     if (usePageConfig) {

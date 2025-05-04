@@ -67,7 +67,8 @@ class MainReplyViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> get() = _isRefreshing
     val list = FlowPaginationInfo<ReplyInfo>()
-    var upMid = -1L
+    private val _upMid = MutableStateFlow(-1L)
+    val upMid: StateFlow<Long> get() = _upMid
     private var _cursor: CursorReply? = null
 
     private val _currentReply = MutableStateFlow<ReplyInfo?>(null)
@@ -124,7 +125,7 @@ class MainReplyViewModel(
                 }
             }
             res.subjectControl?.let {
-                upMid = it.upMid
+                _upMid.value = it.upMid
             }
             val replies = res.replies.filter { i1 ->
                 listData.indexOfFirst { i2 -> i1.id == i2.id } == -1
