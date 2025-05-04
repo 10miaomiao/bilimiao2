@@ -23,6 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,39 +81,72 @@ class ReplyItemBoxContentInfo(
 
     @Composable
     fun toAnnotatedTextNode(): List<AnnotatedTextNode> {
+        val regex = Regex(
+            """(?i)""" +  // 忽略大小写
+                    """(\b(https?://|www\.)[\w-]+(\.[\w-]+)+([/\S]*)*\b)|""" +  // URL（优先匹配）
+                    """(\b(av\d{1,15})\b)|""" +     // B站av号（1-15位数字）
+                    """(\b(BV[\dA-Za-z]{10})\b)|""" + // B站BV号（固定10位）
+                    """(\b(ac\d{1,10})\b)|""" +     // A站ac号（1-10位数字）
+                    """(\b(sm\d{1,10})\b)|""" +     // Niconico sm号（1-10位数字）
+                    """(\b(cv\d{1,8})\b)|""" +         // B站专栏cv号（1-8位数字）
+                    """(\[[^\[\]\s]{1,30}])""" // 匹配emote表情
+        )
         val nodes = mutableListOf<AnnotatedTextNode>()
-        var start = 0
-        var end = 0
-        while (end < message.length) {
-            if (message[end] == '[') {
-                val maxLen = message.length - end
-                val e = emote.find {
-                    val len = it.text.length
-                    len <= maxLen && message.substring(end, end + len) == it.text
-                }
+        var lastEnd = 0
+        regex.findAll(message).forEach {
+            // 添加前面的普通文本
+            val rangeFirst = it.range.first
+            val rangeLast = it.range.last + 1
+            if (rangeFirst != lastEnd) {
+                val nodeText = message.substring(lastEnd, rangeFirst)
+                nodes.add(AnnotatedTextNode.Text(nodeText))
+            }
+            val nodeText = message.substring(rangeFirst, rangeLast)
+            if (nodeText.startsWith('[')) {
+                val e = emote.find { it.text == nodeText }
                 if (e != null) {
-                    if (start < end) {
-                        val nodeText = message.substring(start, end)
-                        nodes.add(AnnotatedTextNode.Text(nodeText))
-                    }
                     nodes.add(AnnotatedTextNode.Emote(
-                        text = e.text,
+                        text = nodeText,
                         url = UrlUtil.autoHttps(e.url)
                     ))
-                    end += e.text.length
-                    start = end
-                    continue
+                } else {
+                    nodes.add(AnnotatedTextNode.Text(nodeText))
                 }
+            } else {
+                nodes.add(AnnotatedTextNode.Link(
+                    text = nodeText,
+                    url = getLinkUrl(nodeText)
+                ))
             }
-            end++
+            lastEnd = rangeLast
         }
-        if (start < end) {
-            val nodeText = message.substring(start, end)
+        if (lastEnd < message.length) {
+            val nodeText = message.substring(lastEnd, message.length)
             nodes.add(AnnotatedTextNode.Text(nodeText))
         }
         return nodes
     }
 
+
+    @Composable
+    private fun getLinkUrl(text: String): String {
+        val url = if (text.startsWith("http")) {
+            text
+        } else if (text.startsWith("av") || text.startsWith("AV")){
+            "bilimiao://video/${text.substring(2, text.length)}"
+        } else if (text.startsWith("BV")){
+            "bilimiao://video/$this"
+        } else if (text.startsWith("sm") || text.startsWith("SM")){
+            "https://www.nicovideo.jp/watch/$this"
+        } else if (text.startsWith("ac") || text.startsWith("AC")){
+            "https://www.acfun.cn/v/${this}"
+        } else if (text.startsWith("cv") || text.startsWith("CV")){
+            "https://www.bilibili.com/read/${this}"
+        } else {
+            "http://$this"
+        }
+        return url
+    }
 }
 
 @Composable
