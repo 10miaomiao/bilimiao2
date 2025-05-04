@@ -16,6 +16,7 @@ import bilibili.app.view.v1.ViewReq
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSeasonDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
@@ -24,6 +25,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoAddFavoriteDi
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoinDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoDownloadDialogState
 import cn.a10miaomiao.bilimiao.download.DownloadService
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -51,7 +54,7 @@ import org.kodein.di.instance
 
 class VideoDetailViewModel(
     override val di: DI,
-    val id: String,
+    id: String,
 ) : ViewModel(), DIAware {
 
     private val activity by instance<Activity>()
@@ -76,6 +79,9 @@ class VideoDetailViewModel(
     private val _isAutoPlaySeason = mutableStateOf(true)
     val isAutoPlaySeason get() = _isAutoPlaySeason.value
 
+    // 此ViewModel启动播放的视频Aid
+    private var videoAidToPlay = ""
+
     val coinDialogState = VideoCoinDialogState(
         scope = viewModelScope,
         onChanged = ::updateCoinState,
@@ -88,7 +94,31 @@ class VideoDetailViewModel(
         scope = viewModelScope,
     )
 
+    private var _id = id
+
     init {
+        loadData()
+    }
+
+    fun onBackPressed() {
+        viewModelScope.launch(Dispatchers.Main) {
+            if (basePlayerDelegate.isOpened()
+                && basePlayerDelegate.getSourceIds().aid == videoAidToPlay) {
+                val openMode = SettingPreferences.mapData(activity) {
+                    it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
+                }
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_CLOSE != 0) {
+                    basePlayerDelegate.closePlayer()
+                }
+            }
+            runCatching {
+                pageNavigation.popBackStack()
+            }
+        }
+    }
+
+    fun changeVideo(id: String) {
+        _id = id
         loadData()
     }
 
@@ -96,19 +126,20 @@ class VideoDetailViewModel(
         try {
             _loading.value = true
             _fail.value = null
-            val req = if (id.startsWith("BV")) {
+            val req = if (_id.startsWith("BV")) {
                 ViewReq(
-                    bvid = id,
+                    bvid = _id,
                 )
             } else {
                 ViewReq(
-                    aid = id.toLong(),
+                    aid = _id.toLong(),
                 )
             }
             val res = BiliGRPCHttp.request {
                 ViewGRPC.view(req)
             }.awaitCall()
             _detailData.value = res
+            autoStartPlay()
         } catch (e: Exception) {
             e.printStackTrace()
             _fail.value = e
@@ -117,6 +148,42 @@ class VideoDetailViewModel(
             _loading.value = false
         }
     }
+
+    private fun autoStartPlay() = viewModelScope.launch(Dispatchers.Main) {
+        val arcData = detailData.value?.getArcData() ?: return@launch
+        if (basePlayerDelegate.getSourceIds().aid == arcData.aid.toString()) {
+            // 同个视频不替换播放
+            return@launch
+        }
+        val openMode = SettingPreferences.mapData(activity) {
+            it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
+        }
+        if (basePlayerDelegate.isOpened()) {
+            if (basePlayerDelegate.isPlaying()) {
+                // 自动替换正在播放的视频
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE != 0) {
+                    playVideo()
+                }
+            } else if (basePlayerDelegate.isPause()) {
+                // 自动替换暂停的视频
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE_PAUSE != 0) {
+                    playVideo()
+                }
+            } else {
+                // 自动替换完成的视频
+                if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_REPLACE_COMPLETE != 0) {
+                    playVideo()
+                }
+            }
+        } else {
+            // 自动播放新视频
+            if (openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_PLAY != 0) {
+                playVideo()
+            }
+        }
+    }
+
+
 
     fun playVideo() {
         val detail = detailData.value ?: return
@@ -130,6 +197,7 @@ class VideoDetailViewModel(
         val detail = detailData.value ?: return
         val arc = detail.getArcData() ?: return
         val author = arc.author ?: return
+        videoAidToPlay = arc.aid.toString()
         val viewPages = detail.pages
         val ugcSeason = detail.getUgcSeasonData()
         val title = if (viewPages.size > 1) {
@@ -398,6 +466,10 @@ class VideoDetailViewModel(
         pageNavigation.navigate(SearchResultPage(
             keyword = keyword,
         ))
+    }
+
+    fun toPlayListPage() {
+        pageNavigation.navigate(PlayListPage())
     }
 
     fun toUgcSeasonPage(seasonId: String, seasonTitle: String) {
