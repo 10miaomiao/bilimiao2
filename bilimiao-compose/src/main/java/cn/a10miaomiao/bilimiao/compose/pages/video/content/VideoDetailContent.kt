@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.video.content
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,10 +33,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.substring
 import androidx.compose.ui.unit.dp
 import bilibili.app.archive.v1.Arc
 import bilibili.app.view.v1.ViewReply
@@ -43,18 +52,22 @@ import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Danmukunum
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Playnum
+import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoverBox
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoInfoBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoPagesBox
+import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoPlayListBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoStatBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoUgcSeasonBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoUpperBox
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import org.kodein.di.compose.rememberInstance
@@ -70,7 +83,12 @@ fun VideoDetailContent(
     isActive: Boolean,
 ) {
     val playerStore by rememberInstance<PlayerStore>()
+    val playListStore by rememberInstance<PlayListStore>()
+    val playListState by playListStore.stateFlow.collectAsState()
     val listPosition by playerStore.listPositionFlow.collectAsState()
+    var isExpandPlayList by remember {
+        mutableStateOf(false)
+    }
     val videoStat = arcData.stat
     val pages = viewModel.run { detailData.getPages() }
     val videoPages = remember(pages) {
@@ -188,85 +206,19 @@ fun VideoDetailContent(
                     staffList =  detailData.activitySeason?.staff ?: detailData.staff,
                     onUserClick = viewModel::toUserPage
                 )
-                SelectionContainer {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 10.dp),
-                        text = arcData.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-                Row(
-                    modifier = Modifier.padding(
-                        vertical = 5.dp,
-                        horizontal = 10.dp,
-                    ),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        imageVector = BilimiaoIcons.Common.Playnum,
-                        contentDescription = "播放量"
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 2.dp),
-                        text = NumberUtil.converString(videoStat?.view ?: 0),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Icon(
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        imageVector = BilimiaoIcons.Common.Danmukunum,
-                        contentDescription = "弹幕数"
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 2.dp),
-                        text =  NumberUtil.converString(videoStat?.danmaku ?: 0),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = NumberUtil.converCTime(arcData.pubdate),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-
-                }
-                if (videoPages.size > 1) {
-                    VideoPagesBox(
-                        pages = videoPages,
-                        onPageClick = viewModel::playVideo
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(
-                            horizontal = 10.dp,
-                            vertical = 5.dp,
-                        ),
-                        thickness = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                }
-                if (arcData.desc.isNotBlank()) {
-                    SelectionContainer {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 10.dp),
-                            text = arcData.desc,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline,
-                        )
-                    }
-                }
-
+                VideoInfoBox(
+                    viewModel = viewModel,
+                    arc = arcData,
+                    stat = videoStat,
+                    pages = videoPages,
+                )
+                Spacer(
+                    modifier = Modifier.height(5.dp)
+                )
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            vertical = 5.dp,
-                            horizontal = 10.dp,
-                        ),
+                        .padding(horizontal = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(5.dp),
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
@@ -285,7 +237,9 @@ fun VideoDetailContent(
                         )
                     }
                 }
-
+                Spacer(
+                    modifier = Modifier.height(5.dp)
+                )
                 if (videoStat != null) {
                     VideoStatBox(
                         modifier = Modifier
@@ -296,15 +250,42 @@ fun VideoDetailContent(
                         reqUser = videoReqUser,
                     )
                 }
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
                 val ugcSeason = detailData.ugcSeason
                     ?: detailData.activitySeason?.ugcSeason
-                if (ugcSeason != null) {
-                    VideoUgcSeasonBox(
+                if (!playListState.isEmpty()) {
+                    VideoPlayListBox(
                         modifier = Modifier
-                            .padding(10.dp),
+                            .padding(horizontal = 10.dp),
                         viewModel = viewModel,
                         arc = arcData,
                         ugcSeason = ugcSeason,
+                        playListState = playListState,
+                        isExpand = isExpandPlayList,
+                        onChangeExpand = {
+                            isExpandPlayList = it
+                        }
+                    )
+                    Spacer(
+                        modifier = Modifier.height(10.dp)
+                    )
+                }
+                if (ugcSeason != null) {
+                    VideoUgcSeasonBox(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp),
+                        viewModel = viewModel,
+                        arc = arcData,
+                        ugcSeason = ugcSeason,
+                        isExpand = !isExpandPlayList,
+                        onChangeExpand = {
+                            isExpandPlayList = !it
+                        }
+                    )
+                    Spacer(
+                        modifier = Modifier.height(10.dp)
                     )
                 }
             }
