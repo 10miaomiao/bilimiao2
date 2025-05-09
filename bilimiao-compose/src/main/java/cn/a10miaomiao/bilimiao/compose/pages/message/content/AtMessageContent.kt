@@ -34,6 +34,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -119,23 +120,15 @@ private class AtMessageContentModel(
         // 评论
         if (item.item.type == "reply") {
             val sourceId = item.item.source_id
-            val targetId = item.item.target_id
             var enterUrl = ""
             if (item.item.business_id == 1) {
                 val videoPageUrl = "bilimiao://video/${item.item.subject_id}"
-                enterUrl = Uri.encode(videoPageUrl)
+                enterUrl = videoPageUrl
             }
-           if (targetId == 0L) {
-               pageNavigation.navigate(ReplyDetailListPage(
-                   id = sourceId.toString(),
-                   enterUrl = enterUrl,
-               ))
-            } else {
-               pageNavigation.navigate(ReplyDetailListPage(
-                   id = targetId.toString(),
-                   enterUrl = enterUrl,
-               ))
-            }
+            pageNavigation.navigate(ReplyDetailListPage(
+                id = sourceId.toString(),
+                enterUrl = enterUrl,
+            ))
         } else {
             BilibiliNavigation.navigationTo(pageNavigation, item.item.uri)
         }
@@ -144,13 +137,15 @@ private class AtMessageContentModel(
     fun toDetailPage(item: AtMessageInfo) {
         val type = item.item.type
         if (item.item.business_id == 1) {
-            val targetId = item.item.target_id
             val aid = item.item.subject_id
+            val targetId = item.item.target_id
+            val videoPageUrl = "bilimiao://video/$aid}"
             if (targetId == 0L) {
                 pageNavigation.navigateToVideoInfo(aid.toString())
             } else {
                 pageNavigation.navigate(ReplyDetailListPage(
                     id = targetId.toString(),
+                    enterUrl = videoPageUrl,
                 ))
             }
         } else {

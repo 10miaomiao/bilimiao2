@@ -126,7 +126,7 @@ private class ReplyMessageContentModel(
             var enterUrl = ""
             if (item.item.business_id == 1) {
                 val videoPageUrl = "bilimiao://video/${item.item.subject_id}"
-                enterUrl= Uri.encode(videoPageUrl)
+                enterUrl= videoPageUrl
             }
             if (isDetail) {
                 pageNavigation.navigate(ReplyDetailListPage(
@@ -155,7 +155,7 @@ private class ReplyMessageContentModel(
                 val videoPageUrl = "bilimiao://video/$aid"
                 pageNavigation.navigate(ReplyDetailListPage(
                     id = sourceId.toString(),
-                    enterUrl = Uri.encode(videoPageUrl),
+                    enterUrl = videoPageUrl,
                 ))
             }
         } else {

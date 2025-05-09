@@ -1,4 +1,5 @@
 
+import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -22,16 +23,21 @@ import bilibili.main.community.reply.v1.ReplyInfoReq
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
+import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliFailBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
 import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyDetailContent
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
+import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -58,7 +64,7 @@ class ReplyDetailListPage(
         ) {
             ReplyDetailListPageViewModel(it, id.toLong())
         }
-        ReplyDetailListPageContent(viewModel)
+        ReplyDetailListPageContent(viewModel, enterUrl)
     }
 }
 
@@ -92,6 +98,7 @@ private class ReplyDetailListPageViewModel(
                 ReplyGRPC.replyInfo(req)
             }.awaitCall()
             _detailData.value = res.reply
+            miaoLogger() debug res.reply
         } catch (e: Exception) {
             e.printStackTrace()
             _fail.value = e
@@ -138,11 +145,10 @@ private class ReplyDetailListPageViewModel(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ReplyDetailListPageContent(
-    viewModel: ReplyDetailListPageViewModel
+    viewModel: ReplyDetailListPageViewModel,
+    enterUrl: String = "",
 ) {
-    PageConfig(
-        title = "评论回复详情"
-    )
+    val pageNavigation: PageNavigation by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
     val windowState = windowStore.stateFlow.collectAsState().value
     val windowInsets = windowState.getContentInsets(localContainerView())
@@ -150,6 +156,45 @@ private fun ReplyDetailListPageContent(
     val detailData = viewModel.detailData.collectAsState().value
     val loading = viewModel.loading.collectAsState().value
     val fail = viewModel.fail.collectAsState().value
+
+    val parentId = detailData?.parent ?: 0L
+
+    val configId = PageConfig(
+        title = "评论回复详情",
+        menu = rememberMyMenu(enterUrl, detailData?.parent) {
+            if (enterUrl.isNotEmpty()) {
+                myItem {
+                    key = MenuKeys.url
+                    iconFileName = "ic_link_black_24dp"
+                    title = "评论来源"
+                }
+            }
+            if (parentId != 0L) {
+                myItem {
+                    key = MenuKeys.parent
+                    iconFileName = "ic_link_black_24dp"
+                    title = "上级评论"
+                }
+            }
+        }
+    )
+    PageListener(
+        configId = configId,
+        onMenuItemClick = { _, menuItem ->
+            when (menuItem.key) {
+                MenuKeys.parent -> {
+                    pageNavigation.navigate(ReplyDetailListPage(
+                        id = parentId.toString(),
+                        enterUrl = enterUrl
+                    ))
+                }
+                MenuKeys.url -> {
+                    pageNavigation.navigateByUri(Uri.parse(enterUrl))
+                }
+            }
+
+        }
+    )
 
     AnimatedContent(
         modifier = Modifier.fillMaxSize(),
