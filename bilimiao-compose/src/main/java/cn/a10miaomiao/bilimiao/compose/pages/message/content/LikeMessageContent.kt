@@ -34,6 +34,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -124,7 +125,7 @@ private class LikeMessageContentModel(
             val id = item.item.item_id
             if (item.item.uri.startsWith("https://www.bilibili.com/video/")) {
                 val bvID = item.item.uri.substring(31, item.item.uri.length)
-                enterUrl = Uri.encode("bilimiao://video/${bvID}")
+                enterUrl = "bilimiao://video/${bvID}"
             }
             pageNavigation.navigate(ReplyDetailListPage(
                 id = id.toString(),

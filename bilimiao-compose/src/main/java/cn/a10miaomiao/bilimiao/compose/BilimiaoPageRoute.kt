@@ -341,6 +341,9 @@ class BilimiaoPageRoute (
         composable<UserSpacePage>(
             deepLinks = listOf(
                 navDeepLink<UserSpacePage>(
+                    basePath = "bilimiao://user"
+                ),
+                navDeepLink<UserSpacePage>(
                     basePath = "bilibili://author"
                 ),
                 navDeepLink<UserSpacePage>(
@@ -371,9 +374,9 @@ class BilimiaoPageRoute (
         )
         composable<ReplyDetailListPage>(
             deepLinks = listOf(
-                navDeepLink<ReplyDetailListPage>(
-                    basePath = "bilimiao://reply"
-                )
+                navDeepLink {
+                    uriPattern = "bilimiao://comment/{id}?enterUrl={enterUrl}"
+                }
             )
         )
 
