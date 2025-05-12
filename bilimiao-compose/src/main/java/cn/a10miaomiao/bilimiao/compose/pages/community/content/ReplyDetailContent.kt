@@ -83,6 +83,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
 import com.kongzue.dialogx.dialogs.TipDialog
 import com.kongzue.dialogx.dialogs.WaitDialog
@@ -313,13 +314,16 @@ private class ReplyDetailContentViewModel(
     }
 
     fun openReplyDialog() {
+        val rid = currentReply.id
+        val root = currentReply.root
         val params = ReplyEditParams(
             type = currentReply.type.toInt(),
             oid = currentReply.oid.toString(),
-            root = currentReply.id.toString(),
-            parent = currentReply.id.toString(),
+            root = if (root == 0L) rid.toString() else root.toString(),
+            parent = rid.toString(),
             name = currentReply.member?.name ?: "",
         )
+        miaoLogger() debug params
         editDialogState.show(params)
     }
 

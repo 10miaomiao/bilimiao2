@@ -98,7 +98,6 @@ private class ReplyDetailListPageViewModel(
                 ReplyGRPC.replyInfo(req)
             }.awaitCall()
             _detailData.value = res.reply
-            miaoLogger() debug res.reply
         } catch (e: Exception) {
             e.printStackTrace()
             _fail.value = e
