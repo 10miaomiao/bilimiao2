@@ -100,10 +100,9 @@ class CommentApi() {
             "message" to message,
             "plat" to "2",
         )
-        // 二级评论以上使用
+        // 二级评论根评论
         root?.let { params.put("root", root) }
-        // 二级评论同根评论id
-        // 大于二级评论为要回复的评论id
+        // 二级评论父级评论
         parent?.let { params.put("parent", parent) }
         formBody = ApiHelper.createParams(params)
     }

@@ -103,6 +103,7 @@ import com.kongzue.dialogx.dialogs.WaitDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 @Stable
@@ -177,7 +178,8 @@ class ReplyEditDialogState(
             }
             val res = BiliApiService.commentApi
                 .add(
-                    message = if (params.type == 3) {
+                    message = if (params.parent != null
+                        && params.parent != params.root) {
                         "回复 @${params.name} :$message"
                     } else {
                         message
@@ -192,10 +194,11 @@ class ReplyEditDialogState(
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
                     val result = res.requireData()
-                    onAddReply(result.reply)
                     _visible.value = false
-//                    snackbar.showSnackbar(result.success_toast)
                     PopTip.show(result.success_toast)
+                    _input.value = TextFieldValue("")
+                    delay(1000L)
+                    onAddReply(result.reply)
                 } else {
                     snackbar.showSnackbar(res.message)
                 }
