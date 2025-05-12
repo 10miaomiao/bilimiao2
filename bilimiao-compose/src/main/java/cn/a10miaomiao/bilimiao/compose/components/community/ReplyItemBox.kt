@@ -43,8 +43,10 @@ import cn.a10miaomiao.bilimiao.compose.common.foundation.ScaleIndication
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 import cn.a10miaomiao.bilimiao.compose.components.image.ImagesGrid
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
+import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -65,6 +67,7 @@ class ReplyItemBoxContentInfo(
     val message: String,
     val emote: List<EmoteInfo>,
     val url: List<UrlInfo>,
+    val atNameToMid: Map<String, Long> = emptyMap(),
 ) {
     @Stable
     class EmoteInfo(
@@ -89,7 +92,8 @@ class ReplyItemBoxContentInfo(
                     """(\b(ac\d{1,10})\b)|""" +     // A站ac号（1-10位数字）
                     """(\b(sm\d{1,10})\b)|""" +     // Niconico sm号（1-10位数字）
                     """(\b(cv\d{1,8})\b)|""" +         // B站专栏cv号（1-8位数字）
-                    """(\[[^\[\]\s]{1,30}])""" // 匹配emote表情
+                    """(\[[^\[\]\s]{1,30}])|""" + // 匹配emote表情
+                    """@(?:${atNameToMid.keys.joinToString("|") { Regex.escape(it) }})""" // 匹配@用户名
         )
         val nodes = mutableListOf<AnnotatedTextNode>()
         var lastEnd = 0
@@ -108,6 +112,16 @@ class ReplyItemBoxContentInfo(
                     nodes.add(AnnotatedTextNode.Emote(
                         text = nodeText,
                         url = UrlUtil.autoHttps(e.url)
+                    ))
+                } else {
+                    nodes.add(AnnotatedTextNode.Text(nodeText))
+                }
+            } else if (nodeText.startsWith('@')) {
+                val name = nodeText.substring(1, nodeText.length)
+                if (atNameToMid.containsKey(name)) {
+                    nodes.add(AnnotatedTextNode.Link(
+                        text = nodeText,
+                        url = "bilimiao://user/${atNameToMid[name]}"
                     ))
                 } else {
                     nodes.add(AnnotatedTextNode.Text(nodeText))
@@ -174,7 +188,8 @@ fun ReplyItemBox(
                     ReplyItemBoxContentInfo.UrlInfo(
                         url.title, url.pcUrl
                     )
-                }
+                },
+                atNameToMid = it.atNameToMid
             )
         }
     }
