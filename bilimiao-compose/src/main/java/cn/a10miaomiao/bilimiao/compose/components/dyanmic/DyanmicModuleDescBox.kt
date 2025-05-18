@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.components.dyanmic
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -40,5 +41,7 @@ fun DyanmicModuleDescBox(
         inlineContent = inlineAnnotatedContent(nodes),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp))
+            .padding(horizontal = 10.dp),
+        color = MaterialTheme.colorScheme.onSurface,
+    )
 }
