@@ -470,6 +470,7 @@ private fun WatchLaterPageContent(
             Text(
                 text = "自动连播",
                 style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Switch(
                 modifier = Modifier.scale(0.75f),
