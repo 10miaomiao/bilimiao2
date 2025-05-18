@@ -149,15 +149,15 @@ class ReplyItemBoxContentInfo(
         } else if (text.startsWith("av") || text.startsWith("AV")){
             "bilimiao://video/${text.substring(2, text.length)}"
         } else if (text.startsWith("BV")){
-            "bilimiao://video/$this"
+            "bilimiao://video/$text"
         } else if (text.startsWith("sm") || text.startsWith("SM")){
-            "https://www.nicovideo.jp/watch/$this"
+            "https://www.nicovideo.jp/watch/$text"
         } else if (text.startsWith("ac") || text.startsWith("AC")){
-            "https://www.acfun.cn/v/${this}"
+            "https://www.acfun.cn/v/${text}"
         } else if (text.startsWith("cv") || text.startsWith("CV")){
-            "https://www.bilibili.com/read/${this}"
+            "https://www.bilibili.com/read/${text}"
         } else {
-            "http://$this"
+            "http://$text"
         }
         return url
     }

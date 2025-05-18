@@ -133,6 +133,9 @@ fun ReplyListContent(
                     onDeleteClick = {
                         viewModel.deleteReply(replyItem)
                     },
+                    onReplyClick = {
+                        viewModel.setCurrentReply(replyItem)
+                    },
                     onClick = {
                         viewModel.setCurrentReply(replyItem)
                     }
