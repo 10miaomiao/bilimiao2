@@ -36,6 +36,7 @@ import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.entity.ItemAndCountInfo
 import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
@@ -44,7 +45,7 @@ import com.a10miaomiao.bilimiao.comm.entity.media.MediaListV2Info
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaResponseV2Info
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -102,9 +103,9 @@ private class UserBangumiPageViewModel(
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo<ItemAndCountInfo<SpaceInfo.SeasonItem>>>()
+                .json<ResponseData<ItemAndCountInfo<SpaceInfo.SeasonItem>>>()
             if (res.code == 0) {
-                val items = res.data.item
+                val items = res.requireData().item
                 if (pageNum == 1) {
                     list.data.value = items
                 } else {
@@ -113,7 +114,7 @@ private class UserBangumiPageViewModel(
                         *items.toTypedArray(),
                     )
                 }
-                list.finished.value = list.data.value.size >= res.data.count
+                list.finished.value = list.data.value.size >= res.requireData().count
             } else {
                 PopTip.show(res.message)
                 throw Exception(res.message)

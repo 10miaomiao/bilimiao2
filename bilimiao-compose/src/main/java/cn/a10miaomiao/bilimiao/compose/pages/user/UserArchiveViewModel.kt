@@ -8,6 +8,7 @@ import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
@@ -15,7 +16,7 @@ import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesListInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,9 +77,9 @@ class UserArchiveViewModel(
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo<ArchiveCursorInfo>>()
+                .json<ResponseData<ArchiveCursorInfo>>()
             if (res.code == 0) {
-                val items: List<ArchiveInfo> = res.data.item ?: emptyList()
+                val items: List<ArchiveInfo> = res.requireData().item ?: emptyList()
                 if (aid.isBlank()) {
                     list.data.value = items.toMutableList()
                 } else {
@@ -91,7 +92,7 @@ class UserArchiveViewModel(
 //                if (region.value == 0) {
 //                    total = res.data.count
 //                }
-                list.finished.value = !res.data.has_next
+                list.finished.value = !res.requireData().has_next
             } else {
                 PopTip.show(res.message)
                 throw Exception(res.message)
@@ -132,9 +133,9 @@ class UserArchiveViewModel(
                 vmid,
                 pageNum = 1,
                 pageSize = 5,
-            ).awaitCall().gson<ResultInfo<SeriesListInfo>>()
+            ).awaitCall().json<ResponseData<SeriesListInfo>>()
             if (res.code == 0) {
-                val result = res.data
+                val result = res.requireData()
                 _seriesList.value = result.items
                 _seriesTotal.value = result.page.total
             } else {

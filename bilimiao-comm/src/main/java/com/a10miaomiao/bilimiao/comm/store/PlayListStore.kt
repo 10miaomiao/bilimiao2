@@ -19,7 +19,6 @@ import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
@@ -251,9 +250,9 @@ class PlayListStore(override val di: DI) :
                         keyword = "",
                         pageNum = pageNum,
                         pageSize = 20,
-                    ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
+                    ).awaitCall().json<ResponseData<MediaDetailInfo>>()
                     if (res.code == 0) {
-                        val result = res.data.medias
+                        val result = res.requireData().medias
                         val newItems = result?.filter {
                             it.ugc != null
                         }?.map {
@@ -375,9 +374,9 @@ class PlayListStore(override val di: DI) :
                             oid = lastOid,
                         )
                         .awaitCall()
-                        .gson<ResultInfo<MediaResponseV2Info>>()
+                        .json<ResponseData<MediaResponseV2Info>>()
                     if (res.code == 0) {
-                        val mediaList = res.data.media_list ?: break
+                        val mediaList = res.requireData().media_list ?: break
                         lastOid = mediaList.lastOrNull()?.id ?: ""
                         val newItems = mediaList.map {
                             PlayListItemInfo(
@@ -402,7 +401,7 @@ class PlayListStore(override val di: DI) :
                             items.indexOfFirst { it.aid == item.aid } == -1
                         }
                         items.addAll(newItems)
-                        loadFinish = !res.data.has_more
+                        loadFinish = !res.requireData().has_more
                     } else {
                         PopTip.show(res.message)
                         loadFinish = true
@@ -461,18 +460,23 @@ class PlayListStore(override val di: DI) :
                             cover = it.pic,
                             ownerId = it.owner.mid,
                             ownerName = it.owner.name,
-                            videoPages = listOf(
-                                VideoPageInfo(
-                                    cid = page.cid,
-                                    page = page.page,
-                                    part = page.part,
-                                    duration = page.duration,
+                            videoPages = if (page == null) {
+                                emptyList()
+                            } else {
+                                listOf(
+                                    VideoPageInfo(
+                                        cid = page.cid,
+                                        page = page.page,
+                                        part = page.part,
+                                        duration = page.duration,
+                                    )
                                 )
-                            ),
+                            },
                             from = listFrom,
                         )
                     }.filter { item ->
-                        items.indexOfFirst { it.aid == item.aid } == -1
+                        item.videoPages.isNotEmpty()
+                                && items.indexOfFirst { it.aid == item.aid } == -1
                     }
                     items.addAll(newItems)
                     loadFinish = !data.has_more || listData.isEmpty() || data.next_key.isBlank()

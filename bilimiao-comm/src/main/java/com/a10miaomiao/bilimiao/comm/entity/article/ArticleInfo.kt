@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.article
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ArticleInfo(
     val attention: Boolean,
     val author_name: String,

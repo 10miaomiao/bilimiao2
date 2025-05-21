@@ -105,7 +105,6 @@ dependencies {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
 
-    implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
     implementation(Libraries.pbandkRuntime)
 

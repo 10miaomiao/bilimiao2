@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.proxy
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ProxyServerInfo (
     val name: String, // 服务器名字
     val host: String, // 服务器host
@@ -8,11 +11,13 @@ data class ProxyServerInfo (
     val queryArgs: List<HttpQueryArg>? = null, // 自定义请求参数
     val headers: List<HttpHeader>? = null, // 自定义请求头
 ) {
+    @Serializable
     data class HttpQueryArg(
         val enable: Boolean,
         val key: String,
         val value: String,
     )
+    @Serializable
     data class HttpHeader(
         val enable: Boolean,
         val name: String,

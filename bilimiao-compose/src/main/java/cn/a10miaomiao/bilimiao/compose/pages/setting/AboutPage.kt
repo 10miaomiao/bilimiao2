@@ -46,7 +46,7 @@ import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememb
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -141,7 +141,7 @@ private class AboutPageViewModel(
         try {
             val data = MiaoHttp.request {
                 url = "https://api.github.com/repos/10miaomiao/bilimiao2/contributors"
-            }.awaitCall().gson<List<GithubContributorInfo>>()
+            }.awaitCall().json<List<GithubContributorInfo>>()
             contributorsList.value = data.map {
                 ContributorInfo(
                     email = it.html_url,
@@ -159,7 +159,7 @@ private class AboutPageViewModel(
     suspend fun getGiteeContributors() {
         val data = MiaoHttp.request {
             url = "https://gitee.com/api/v5/repos/10miaomiao/bilimiao2/contributors"
-        }.awaitCall().gson<List<ContributorInfo>>()
+        }.awaitCall().json<List<ContributorInfo>>()
         val list = mutableListOf<ContributorInfo>()
         // 合并email或name相同的贡献者
         data.forEach {
@@ -195,7 +195,7 @@ private class AboutPageViewModel(
         try {
             versionState.value = AppVersionState.Checking
             val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$versionCode"
-            val res = MiaoHttp.request(url).call().gson<MiaoAdInfo>()
+            val res = MiaoHttp.request(url).call().json<MiaoAdInfo>()
             if (res.code == 0) {
                 val versionInfo = res.data.version
                 versionState.value = if (versionInfo.versionCode > versionCode) {

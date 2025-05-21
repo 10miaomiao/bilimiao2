@@ -8,7 +8,11 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bilibili.app.view.v1.ViewGRPC
+import bilibili.app.view.v1.ViewReq
 import com.a10miaomiao.bilimiao.comm.apis.*
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
+import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.article.ArticleInfo
@@ -16,8 +20,9 @@ import com.a10miaomiao.bilimiao.comm.entity.audio.AudioInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonEpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.live.RoomInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.Glide
@@ -142,32 +147,38 @@ class CoverViewModel(
 
     // 普通视频
     private suspend fun loadAvData() {
-        val res = VideoAPI().info(id).call().gson<ResultInfo<VideoInfo>>()
-        if (res.code == 0) {
-            val data = res.data
+        val req = ViewReq(aid = id.toLong())
+        val res = BiliGRPCHttp.request {
+            ViewGRPC.view(req)
+        }.awaitCall()
+        val arc = res.arc ?: res.activitySeason?.arc
+        if (arc != null) {
             withContext(Dispatchers.Main) {
-                title.value = data.title
-                loadCover(data.pic)
+                title.value = arc.title
+                loadCover(arc.pic)
             }
         } else {
             withContext(Dispatchers.Main) {
-                toast(res.message)
+                toast("arc为空")
             }
         }
     }
 
     // 普通视频 BV
     private suspend fun loadBVData() {
-        val res = VideoAPI().info(id, type = "BV").call().gson<ResultInfo<VideoInfo>>()
-        if (res.code == 0) {
-            val data = res.data
+        val req = ViewReq(bvid = id)
+        val res = BiliGRPCHttp.request {
+            ViewGRPC.view(req)
+        }.awaitCall()
+        val arc = res.arc ?: res.activitySeason?.arc
+        if (arc != null) {
             withContext(Dispatchers.Main) {
-                title.value = data.title
-                loadCover(data.pic)
+                title.value = arc.title
+                loadCover(arc.pic)
             }
         } else {
             withContext(Dispatchers.Main) {
-                toast(res.message)
+                toast("arc为空")
             }
         }
     }
@@ -179,9 +190,9 @@ class CoverViewModel(
 
     // 番剧剧集
     private suspend fun loadEpData() {
-        val res = BangumiAPI().episodeInfo(id).call().gson<ResultInfo2<SeasonEpisodeInfo>>()
+        val res = BangumiAPI().episodeInfo(id).call().json<ResponseResult<SeasonEpisodeInfo>>()
         if (res.code == 0) {
-            val data = res.result
+            val data = res.requireData()
             val ep = data.episodes.find { it.id == id }
             withContext(Dispatchers.Main) {
                 if (ep == null) {
@@ -192,7 +203,6 @@ class CoverViewModel(
                     loadCover(ep.cover)
                 }
             }
-
         } else {
             withContext(Dispatchers.Main) {
                 toast(res.message)
@@ -202,9 +212,9 @@ class CoverViewModel(
 
     // 直播间
     private suspend fun loadRoomData() {
-        val res = LiveApi().info(id).call().gson<ResultInfo<RoomInfo>>()
-        if (res.code == 0) {
-            val data = res.data
+        val res = LiveApi().info(id).call().json<ResponseData<RoomInfo>>()
+        if (res.isSuccess) {
+            val data = res.requireData()
             withContext(Dispatchers.Main) {
                 title.value = data.title
                 loadCover(data.user_cover)
@@ -218,9 +228,9 @@ class CoverViewModel(
 
     // 专栏
     private suspend fun loadCvData() {
-        val res = ArticleAPI().info(id).call().gson<ResultInfo<ArticleInfo>>()
-        if (res.code == 0) {
-            val data = res.data
+        val res = ArticleAPI().info(id).call().json<ResponseData<ArticleInfo>>()
+        if (res.isSuccess) {
+            val data = res.requireData()
             withContext(Dispatchers.Main) {
                 title.value = data.title
                 loadCover(data.banner_url)
@@ -234,9 +244,9 @@ class CoverViewModel(
 
     // 音频
     private suspend fun loadAuData() {
-        val res = AudioAPI().info(id).call().gson<ResultInfo<AudioInfo>>()
-        if (res.code == 0) {
-            val data = res.data
+        val res = AudioAPI().info(id).call().json<ResponseData<AudioInfo>>()
+        if (res.isSuccess) {
+            val data = res.requireData()
             withContext(Dispatchers.Main) {
                 title.value = data.title
                 loadCover(data.cover_url)

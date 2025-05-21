@@ -147,8 +147,6 @@ dependencies {
     implementation(Libraries.media3ExoPlayerDash)
     implementation(Libraries.gsyVideoPlayer)
 
-
-    implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
     implementation(Libraries.pbandkRuntime)
     implementation(Libraries.glide)

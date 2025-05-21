@@ -50,16 +50,13 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserTagSetDialogState
 import cn.a10miaomiao.bilimiao.compose.components.user.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.string
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.JsonSyntaxException
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -140,7 +137,7 @@ private class TagFollowContentModel(
                     order = orderType
                 )
                 .awaitCall()
-                .gson<ResultInfo<List<FollowingItemInfo>?>>()
+                .json<ResponseData<List<FollowingItemInfo>?>>()
             if (res.isSuccess) {
                 list.pageNum = pageNum
                 val listData = getInterrelations(
@@ -182,37 +179,25 @@ private class TagFollowContentModel(
         list: List<FollowingItemInfo>,
         defaultInterrelation: InterrelationInfo,
     ): List<FollowingItemInfo> {
-        var interrelationMap = JsonObject()
-        val resText = BiliApiService.userRelationApi
-            .interrelations(list.map { it.mid })
-            .awaitCall()
-            .string()
+        var interrelationMap = mapOf<String, InterrelationInfo>()
         try {
-            val res = resText.gson<ResultInfo<JsonObject>>()
+            val res = BiliApiService.userRelationApi
+                .interrelations(list.map { it.mid })
+                .awaitCall()
+                .json<ResponseData<Map<String, InterrelationInfo>>>()
             if (res.isSuccess) {
-                interrelationMap = res.data
+                interrelationMap = res.requireData()
             } else {
                 // TODO: message
             }
-        } catch (e: JsonSyntaxException) {
+        } catch (e: Exception) {
             e.printStackTrace()
-            val res = resText.gson<MessageInfo>()
-            if (res.isSuccess) {
-                interrelationMap = JsonObject()
-            } else {
-                // TODO: message
-            }
         }
         return list.map {
-            var interrelation = defaultInterrelation
-            if (interrelationMap.has(it.mid)) {
-                val interrelationJObj = interrelationMap[it.mid]
-                if (interrelationJObj.isJsonObject) {
-                    interrelation = Gson().fromJson(
-                        interrelationJObj,
-                        InterrelationInfo::class.java
-                    )
-                }
+            val interrelation = if (interrelationMap.containsKey(it.mid)) {
+                interrelationMap[it.mid]!!
+            } else {
+                defaultInterrelation
             }
             it.copy(
                 attribute = interrelation.attribute,
@@ -259,7 +244,7 @@ private class TagFollowContentModel(
             }
             val res = BiliApiService.userRelationApi
                 .modify(item.mid, mode)
-                .awaitCall().gson<MessageInfo>()
+                .awaitCall().json<MessageInfo>()
             if (res.code == 0) {
                 list.data.value = list.data.value.map {
                     if (item.mid == it.mid) {

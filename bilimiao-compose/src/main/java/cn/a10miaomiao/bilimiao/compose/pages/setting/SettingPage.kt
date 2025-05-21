@@ -37,11 +37,11 @@ import cn.a10miaomiao.bilimiao.compose.components.preference.glidePreference
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -96,10 +96,7 @@ private class SettingPageViewModel(
                 str = br.readLine()
             }
             val jsonStr = stringBuilder.toString()
-            moreSettingList.value = Gson().fromJson(
-                jsonStr,
-                object : TypeToken<List<MiaoSettingInfo>>() {}.type,
-            )
+            moreSettingList.value = MiaoJson.fromJson<List<MiaoSettingInfo>>(jsonStr)
         } catch (e: IOException) {
             e.printStackTrace()
         }

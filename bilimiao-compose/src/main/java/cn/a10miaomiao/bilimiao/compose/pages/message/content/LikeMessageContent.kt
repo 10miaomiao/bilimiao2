@@ -31,7 +31,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.LikeMessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
@@ -68,7 +68,7 @@ private class LikeMessageContentModel(
             val res = BiliApiService.messageApi
                 .like(id, time)
                 .awaitCall()
-                .gson<ResultInfo<LikeMessageResponseInfo>>()
+                .json<ResultInfo<LikeMessageResponseInfo>>()
             if (res.isSuccess) {
                 messageStore.clearLikeUnread()
                 val total = res.data.total
@@ -86,7 +86,8 @@ private class LikeMessageContentModel(
                 list.fail.value = res.message
             }
         } catch (e: Exception) {
-            list.fail.value = "无法连接到御坂网络"
+            e.printStackTrace()
+            list.fail.value = e.message ?: e.toString()
         } finally {
             list.loading.value = false
             isRefreshing.value = false

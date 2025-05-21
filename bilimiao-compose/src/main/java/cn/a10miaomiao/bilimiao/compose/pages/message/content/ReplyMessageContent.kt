@@ -32,7 +32,7 @@ import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.ReplyMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
@@ -69,7 +69,7 @@ private class ReplyMessageContentModel(
             val res = BiliApiService.messageApi
                 .reply(id, time)
                 .awaitCall()
-                .gson<ResultInfo<MessageResponseInfo<ReplyMessageInfo>>>()
+                .json<ResultInfo<MessageResponseInfo<ReplyMessageInfo>>>()
             if (res.isSuccess) {
                 messageStore.clearReplyUnread()
                 _cursor = res.data.cursor
@@ -86,7 +86,8 @@ private class ReplyMessageContentModel(
                 list.fail.value = res.message
             }
         } catch (e: Exception) {
-            list.fail.value = "无法连接到御坂网络"
+            e.printStackTrace()
+            list.fail.value = e.message ?: e.toString()
         } finally {
             list.loading.value = false
             isRefreshing.value = false

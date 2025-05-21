@@ -33,6 +33,7 @@ import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import com.a10miaomiao.bilimiao.comm.entity.ItemAndCountInfo
 import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveInfo
@@ -40,7 +41,7 @@ import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListV2Info
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaResponseV2Info
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -96,18 +97,18 @@ private class UserLikeArchivePageViewModel(
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo<ItemAndCountInfo<ArchiveInfo>>>()
-            if (res.code == 0) {
-                val items: List<ArchiveInfo> = res.data.item
+                .json<ResponseData<ItemAndCountInfo<ArchiveInfo>>>()
+            if (res.isSuccess) {
+                val items: List<ArchiveInfo> = res.requireData().item
                 if (pageNum == 1) {
                     list.data.value = items.toMutableList()
                 } else {
-                    list.data.value = mutableListOf<ArchiveInfo>().apply {
-                        addAll(list.data.value)
+                    list.data.value = list.data.value.toMutableList().apply {
                         addAll(items)
                     }
                 }
-                list.finished.value = list.data.value.size >= res.data.count
+                list.pageNum = pageNum
+                list.finished.value = list.data.value.size >= res.requireData().count
             } else {
                 PopTip.show(res.message)
                 throw Exception(res.message)

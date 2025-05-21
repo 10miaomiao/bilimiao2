@@ -43,6 +43,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.components.BangumiEpisodeIt
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyListPage
 import com.a10miaomiao.bilimiao.comm.delegate.player.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
+import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.*
@@ -52,7 +54,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
@@ -60,13 +62,15 @@ import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.google.gson.JsonObject
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
@@ -141,9 +145,9 @@ private class BangumiDetailPageViewModel(
             val res = BiliApiService.bangumiAPI.seasonInfoV2(
                 seasonId, epId
             ).awaitCall()
-                .gson<ResultInfo<SeasonV2Info>>()
+                .json<ResponseData<SeasonV2Info>>()
             if (res.code == 0) {
-                val result = res.data
+                val result = res.requireData()
                 detailInfo.value = result
                 val seasonModule = result.modules.find {
                     it.style == "season"
@@ -182,9 +186,9 @@ private class BangumiDetailPageViewModel(
 
             val res = BiliApiService.bangumiAPI.seasonSection(id)
                 .awaitCall()
-                .gson<ResultInfo2<SeasonSectionInfo>>()
+                .json<ResponseResult<SeasonSectionInfo>>()
             if (res.code == 0) {
-                val result = res.result
+                val result = res.requireData()
                 val list = mutableListOf<SeasonSectionInfo.SectionInfo>()
                 result.main_section?.let(list::add)
                 result.section?.let(list::addAll)
@@ -220,7 +224,7 @@ private class BangumiDetailPageViewModel(
                 BiliApiService.bangumiAPI.cancelFollow(detail.season_id)
             } else {
                 BiliApiService.bangumiAPI.followSeason(detail.season_id)
-            }).awaitCall().gson<ResultInfo2<ToastInfo>>()
+            }).awaitCall().json<ResponseResult<ToastInfo>>()
             if (res.isSuccess) {
                 isFollow.value = mode == 1
                 withContext(Dispatchers.Main) {
@@ -453,17 +457,20 @@ private fun BangumiDetailPageContent(
         if (mediaId.isNotBlank() && seasonId.value.isBlank()) {
             try {
                 val res = withContext(Dispatchers.IO) {
-                    MiaoHttp.request {
-                        url = "https://api.bilibili.com/pgc/review/user?media_id=${mediaId}"
-                    }.awaitCall().gson<ResultInfo2<JsonObject>>()
+                    MiaoHttp
+                        .request {
+                            url = "https://api.bilibili.com/pgc/review/user?media_id=${mediaId}"
+                        }
+                        .awaitCall()
+                        .json<ResponseResult<Map<String, JsonElement>>>()
                 }
                 if (res.isSuccess) {
-                    if (res.result.has("media")
-                        && res.result["media"].isJsonObject
-                    ) {
-                        val media = res.result["media"].asJsonObject
-                        if (media.has("season_id")) {
-                            seasonId.value = media["season_id"].asString
+                    val resultData = res.requireData()
+                    if (resultData.containsKey("media")) {
+                        val media = resultData["media"]!!
+                        val jsonObject = media.jsonObject
+                        if (jsonObject.containsKey("season_id")) {
+                            seasonId.value = jsonObject["season_id"]!!.jsonPrimitive.content
                         }
                     }
                 } else {

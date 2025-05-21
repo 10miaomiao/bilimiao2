@@ -26,12 +26,13 @@ import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.message.components.MessageItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.AtMessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageCursorInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.MessageResponseInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
@@ -68,24 +69,25 @@ private class AtMessageContentModel(
             val res = BiliApiService.messageApi
                 .at(id, time)
                 .awaitCall()
-                .gson<ResultInfo<MessageResponseInfo<AtMessageInfo>>>()
+                .json<ResponseData<MessageResponseInfo<AtMessageInfo>>>()
             if (res.isSuccess) {
                 messageStore.clearAtUnread()
-                _cursor = res.data.cursor
+                _cursor = res.requireData().cursor
                 if (id == 0L) {
-                    list.data.value = res.data.items
+                    list.data.value = res.requireData().items
                 } else {
                     list.data.value = mutableListOf<AtMessageInfo>().apply {
                         addAll(list.data.value)
-                        addAll(res.data.items)
+                        addAll(res.requireData().items)
                     }
                 }
-                list.finished.value = res.data.items.isEmpty()
+                list.finished.value = res.requireData().items.isEmpty()
             } else {
                 list.fail.value = res.message
             }
         } catch (e: Exception) {
-            list.fail.value = "无法连接到御坂网络"
+            e.printStackTrace()
+            list.fail.value = e.message ?: e.toString()
         } finally {
             list.loading.value = false
             isRefreshing.value = false

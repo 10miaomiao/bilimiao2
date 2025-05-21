@@ -29,10 +29,11 @@ import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.user.UserInfoCard
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -113,20 +114,21 @@ private class UserFollowPageViewModel(
                     order = orderType.value
                 )
                 .awaitCall()
-                .gson<ResultInfo<FollowingsInfo>>()
+                .json<ResponseData<FollowingsInfo>>()
             if (res.isSuccess) {
                 list.pageNum = pageNum
-                list.finished.value = res.data == null || res.data.list.isEmpty()
+                val result = res.requireData()
+                list.finished.value = res.data == null || result.list.isEmpty()
                 if (res.data != null) {
                     if (pageNum == 1) {
-                        list.data.value = res.data.list
+                        list.data.value = result.list
                     } else {
                         list.data.value = mutableListOf<FollowingItemInfo>().apply {
                             addAll(list.data.value)
-                            addAll(res.data.list)
+                            addAll(result.list)
                         }
                     }
-                    list.finished.value = res.data.list.size < list.pageSize
+                    list.finished.value = result.list.size < list.pageSize
                 }
             } else {
                 list.fail.value = res.message
@@ -175,7 +177,7 @@ private class UserFollowPageViewModel(
             }
             val res = BiliApiService.userRelationApi
                 .modify(item.mid, mode)
-                .awaitCall().gson<MessageInfo>()
+                .awaitCall().json<MessageInfo>()
             if (res.code == 0) {
                 list.data.value = list.data.value.map {
                     if (item.mid == it.mid) {

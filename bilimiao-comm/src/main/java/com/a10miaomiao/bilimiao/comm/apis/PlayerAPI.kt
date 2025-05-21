@@ -2,13 +2,15 @@ package com.a10miaomiao.bilimiao.comm.apis
 
 import android.os.SystemClock
 import android.widget.Toast
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
+import kotlinx.serialization.Serializable
 
 class PlayerAPI {
 
@@ -70,9 +72,9 @@ class PlayerAPI {
         val res = MiaoHttp.request {
             url = BiliApiService.biliApi("x/player/playurl", *params.toList().toTypedArray())
             headers.putAll(getVideoHeaders(avid))
-        }.awaitCall().gson<ResultInfo<PlayurlData>>()
-        if (res.code == 0) {
-            return res.data
+        }.awaitCall().json<ResponseData<PlayurlData>>()
+        if (res.isSuccess) {
+            return res.requireData()
         } else {
             throw Exception(res.message)
         }
@@ -110,7 +112,7 @@ class PlayerAPI {
                 "pgc/player/api/playurl",
                 *params.toList().toTypedArray()
             )
-        }.awaitCall().gson<PlayurlData>()
+        }.awaitCall().json<PlayurlData>()
         if (res.code == 0) {
             return res
         } else if (res.code == -10403) {
@@ -170,7 +172,7 @@ class PlayerAPI {
                 "https://${proxyServer.host}/pgc/player/api/playurl",
                 *params.toList().toTypedArray()
             )
-        }.awaitCall().gson<PlayurlData>()
+        }.awaitCall().json<PlayurlData>()
         if (res.code == 0) {
             return res
         } else if (res.code == -10403) {
@@ -212,6 +214,7 @@ class PlayerAPI {
         method = MiaoHttp.POST
     }
 
+    @Serializable
     data class PlayurlData(
         val accept_description: List<String>,
         val accept_format: String,
@@ -226,14 +229,15 @@ class PlayerAPI {
         // 时长，毫秒
         val timelength: Int,
         val video_codecid: Int,
-        val durl: List<Durl>?,
-        val dash: Dash?,
-        val code: Int,
+        val durl: List<Durl>? = null,
+        val dash: Dash? = null,
+        val code: Int = 0,
         val support_formats: List<SupportFormats>,
-        val last_play_time: Long?,
-        val last_play_cid: String?,
+        val last_play_time: Long? = null,
+        val last_play_cid: String? = null,
     )
 
+    @Serializable
     data class Durl(
         val ahead: String,
         val length: Long,
@@ -243,6 +247,7 @@ class PlayerAPI {
         val vhead: String
     )
 
+    @Serializable
     data class SupportFormats(
         val quality: Int,
         val format: String,
@@ -251,6 +256,7 @@ class PlayerAPI {
         val superscript: String
     )
 
+    @Serializable
     data class Dash(
         // 时长，秒
         val duration: Long,
@@ -259,6 +265,7 @@ class PlayerAPI {
         val audio: List<DashItem>?,
     )
 
+    @Serializable
     data class DashItem(
         val id: Int,
         val bandwidth: Int,
@@ -273,6 +280,7 @@ class PlayerAPI {
         val segment_base: SegmentBase,
     )
 
+    @Serializable
     data class SegmentBase(
         val initialization: String,
         val index_range: String,

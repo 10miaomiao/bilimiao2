@@ -155,7 +155,7 @@ internal fun HomeTimeMachineRegionCard(
             modifier = Modifier,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            region.children.forEachIndexed { index, child ->
+            region.children?.forEachIndexed { index, child ->
                 AssistChip(
                     onClick = { onClick(region, index) },
                     label = {

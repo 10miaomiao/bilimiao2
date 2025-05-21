@@ -46,12 +46,13 @@ import cn.a10miaomiao.bilimiao.compose.pages.lyric.lib.KrcText
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricOffsetPopupMenu
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.poup_menu.LyricSourcePopupMenu
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.google.gson.Gson
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -166,10 +167,7 @@ internal class LyricPageViewModel(
         try {
             val res = MiaoHttp.request {
                 url ="https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s=$videoTitle&type=1&offset=0&total=true&limit=12"
-            }.awaitCall().let{
-                val jsonStr = it.body!!.string()
-                Gson().fromJson(jsonStr,NeteaseSearchResultInfo::class.java)
-            }
+            }.awaitCall().json<NeteaseSearchResultInfo>()
             if (res.code==200) {
                 val addList= mutableListOf<LyricSource>()
                 res.result.songs.forEach {
@@ -195,7 +193,7 @@ internal class LyricPageViewModel(
                 url ="https://mobileservice.kugou.com/api/v3/lyric/search?version=9108&highlight=1&keyword=$videoTitle&plat=0&pagesize=12&area_code=1&page=1&with_res_tag=1"
             }.awaitCall().let{
                 val jsonStr = it.body!!.string().replace("<!--.*?-->".toRegex(),"")
-                Gson().fromJson(jsonStr,KugouSearchResultInfo::class.java)
+                MiaoJson.fromJson<KugouSearchResultInfo>(jsonStr)
             }
             if (res.errcode == 0) {
                 val addList= mutableListOf<LyricSource>()
@@ -276,18 +274,12 @@ internal class LyricPageViewModel(
                     KUGOU -> {
                         val res1 = MiaoHttp.request {
                             url ="https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&keyword=&duration=&hash=${src.code}&album_audio_id="
-                        }.awaitCall().let{
-                            val jsonStr=it.body!!.string()
-                            Gson().fromJson(jsonStr,KugouAccessKeyItem::class.java)
-                        }
+                        }.awaitCall().json<KugouAccessKeyItem>()
                         if(res1.errcode==200){
                             val res2 = MiaoHttp.request {
                                 val can = res1.candidates[0]
                                 url ="https://lyrics.kugou.com/download?ver=1&client=pc&id=${can.id}&accesskey=${can.accesskey}&fmt=krc&charset=utf8"
-                            }.awaitCall().let{
-                                val jsonStr=it.body!!.string()
-                                Gson().fromJson(jsonStr,KugouLyricItem::class.java)
-                            }
+                            }.awaitCall().json<KugouLyricItem>()
                             if(res2.error_code==0){
                                 val decoded = res2.content.decodeKrc()
                                 var language:KugouLyricLanguage? = null
@@ -306,7 +298,7 @@ internal class LyricPageViewModel(
                                         } else if(left=="language"){
                                             val k = right.decodeKrcLanguage()
                                             try {
-                                                language = Gson().fromJson(k,KugouLyricLanguage::class.java)
+                                                language = MiaoJson.fromJson<KugouLyricLanguage>(k)
                                             } catch (e: Exception) {
                                                 e.printStackTrace()
                                             }
@@ -349,10 +341,7 @@ internal class LyricPageViewModel(
                     NETEASE -> {
                         val res = MiaoHttp.request {
                             url ="https://music.163.com/api/song/media?id=${src.code}"
-                        }.awaitCall().let{
-                            val jsonStr=it.body!!.string()
-                            Gson().fromJson(jsonStr,NeteaseLyricItem::class.java)
-                        }
+                        }.awaitCall().json<NeteaseLyricItem>()
                         if (res.code==200) {
                             res.lyric.split('\n').forEach {
                                 val left=it.substringBefore(':').substringAfter('[')

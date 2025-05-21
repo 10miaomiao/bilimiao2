@@ -8,12 +8,13 @@ import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadMediaFileInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
-import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.encodeToString
 import java.io.*
 import kotlin.coroutines.CoroutineContext
 
@@ -124,7 +125,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             .filter { it.exists() }
             .map {
                 val entryJson = it.readText()
-                val entry = Gson().fromJson(entryJson, BiliDownloadEntryInfo::class.java)
+                val entry = MiaoJson.fromJson<BiliDownloadEntryInfo>(entryJson)
                 BiliDownloadEntryAndPathInfo(
                     entry = entry,
                     entryDirPath = it.parent,
@@ -149,7 +150,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         val entryDir = getDownloadFileDir(biliEntry)
         // 保存视频信息
         val entryJsonFile = File(entryDir, "entry.json")
-        val entryJsonStr = Gson().toJson(biliEntry)
+        val entryJsonStr = MiaoJson.toJson(biliEntry)
         entryJsonFile.writeText(entryJsonStr)
         val biliDownInfo = BiliDownloadEntryAndPathInfo(
             entry = biliEntry,
@@ -256,7 +257,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             val mediaFileInfo = BiliPalyUrlHelper.playUrl(entry)
             val httpHeader = BiliPalyUrlHelper.httpHeader(entry)
             val mediaJsonFile = File(videoDir, "index.json")
-            val mediaJsonStr = Gson().toJson(mediaFileInfo)
+            val mediaJsonStr = MiaoJson.toJson(mediaFileInfo)
             mediaJsonFile.writeText(mediaJsonStr)
 
             if (currentDownloadInfo.taskId != currentTaskId) {
@@ -441,7 +442,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             (curMediaFileInfo as BiliDownloadMediaFileInfo.Type2)?.let {
                 if (it.video[0].size == 0L && info.size != 0L) {
                     it.video[0].size = info.size
-                    val mediaJsonStr = Gson().toJson(it)
+                    val mediaJsonStr = MiaoJson.toJson(it)
                     curMediaFile?.writeText(mediaJsonStr)
                 }
             }
@@ -510,7 +511,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
     ) {
         // 保存视频信息
         val entryJsonFile = File(entryDirPath, "entry.json")
-        val entryJsonStr = Gson().toJson(entry)
+        val entryJsonStr = MiaoJson.toJson(entry)
         entryJsonFile.writeText(entryJsonStr)
     }
 

@@ -61,13 +61,14 @@ import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.TitleBar
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserMedialistDetailContent
 import com.a10miaomiao.bilimiao.comm.entity.ItemAndCountInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesInfo
 import com.a10miaomiao.bilimiao.comm.entity.archive.SeriesListInfo
 import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListV2Info
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.store.WindowStore.Insets
@@ -141,9 +142,9 @@ private class UserMedialistPageViewModel(
                 mid = mid,
                 pageNum = pageNum,
                 pageSize = list.pageSize
-            ).awaitCall().gson<ResultInfo<SeriesListInfo>>()
+            ).awaitCall().json<ResponseData<SeriesListInfo>>()
             if (res.isSuccess) {
-                val result = res.data
+                val result = res.requireData()
                 if (pageNum == 1) {
                     list.data.value = result.items.toMutableList()
                 } else {

@@ -50,12 +50,13 @@ import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.RecommendCardInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -111,13 +112,13 @@ private class HomeRecommendContentViewModel(
             list.loading.value = true
             val res = BiliApiService.homeApi.recommendList(
                 idx = idx,
-            ).awaitCall().gson<ResultInfo<HomeRecommendInfo>>()
+            ).awaitCall().json<ResponseData<HomeRecommendInfo>>()
             if (res.isSuccess) {
-                val itemsList = res.data.items
+                val itemsList = res.requireData().items
                 val filterList = itemsList.filter {
                     (it.goto?.isNotEmpty() ?: false)
                             && filterStore.filterWord(it.title)
-                            && filterStore.filterUpper(it.args.up_id ?: "-1")
+                            && filterStore.filterUpper(it.args?.up_id ?: "-1")
                             && filterStore.filterTag(it.param, it.card_goto)
                 }
                 if (idx == 0L) {
@@ -223,7 +224,7 @@ internal fun HomeRecommendContent() {
                         ),
                         title = it.title,
                         pic = it.cover,
-                        upperName = it.args.up_name,
+                        upperName = it.args?.up_name,
                         playNum = it.cover_left_text_1,
                         damukuNum = it.cover_left_text_2,
                         duration = it.cover_right_text,
@@ -236,7 +237,7 @@ internal fun HomeRecommendContent() {
                         modifier = Modifier.padding(5.dp),
                         title = it.title,
                         pic = it.cover,
-                        upperName = it.args.up_name,
+                        upperName = it.args?.up_name,
                         playNum = it.cover_left_text_1,
                         damukuNum = it.cover_left_text_2,
                         duration = it.cover_right_text,

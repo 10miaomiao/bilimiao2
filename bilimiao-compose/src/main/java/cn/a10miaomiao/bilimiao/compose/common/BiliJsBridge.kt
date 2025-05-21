@@ -7,11 +7,15 @@ import androidx.fragment.app.Fragment
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.reflect.TypeToken
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.decodeToSequence
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class BiliJsBridge(
     val fragment: Fragment,
@@ -63,7 +67,7 @@ class BiliJsBridge(
     @JavascriptInterface
     fun postMessage(eventString: String) {
         miaoLogger().d("postMessage" to eventString)
-        val event = Gson().fromJson<MessageEventInfo>(eventString, MessageEventInfoType.type)
+        val event = MiaoJson.fromJson<MessageEventInfo>(eventString)
         var result = ""
         when (event.method) {
             "ui.setStatusBarMode" -> {
@@ -92,10 +96,10 @@ class BiliJsBridge(
                 }
             }
             "share.showShareMpcWindow" -> {
-                val defaultData = event.data["default"].asJsonObject
-                val title = defaultData["title"].asString
-                val text = defaultData["text"].asString
-                val url = defaultData["url"].asString
+                val defaultData = event.data.jsonObject["default"]?.jsonObject ?: return
+                val title = defaultData["title"]?.jsonPrimitive?.content ?: ""
+                val text = defaultData["text"]?.jsonPrimitive?.content ?: ""
+                val url = defaultData["url"]?.jsonPrimitive?.content ?: ""
                 activity.runOnUiThread {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.putExtra(Intent.EXTRA_TEXT, "$title $url $text");
@@ -104,7 +108,7 @@ class BiliJsBridge(
                 }
             }
             "ability.openScheme" -> {
-                val url = event.data["url"].asString ?: return
+                val url = event.data.jsonObject["url"]?.jsonPrimitive?.content ?: "" ?: return
                 activity.runOnUiThread {
                     val re = BilibiliNavigation.navigationTo(
                         pageNavigation,
@@ -126,8 +130,10 @@ class BiliJsBridge(
                 val loginInfo = BilimiaoCommApp.commApp.loginInfo
                 if (loginInfo != null) {
                     // TODO: 刷新登录cookie
-                    val onLoginCallbackId = event.data["onLoginCallbackId"].asString
-                    biliCallbackReceived(onLoginCallbackId, "{ state: 1 }")
+                    val onLoginCallbackId = event.data.jsonObject["onLoginCallbackId"]?.jsonPrimitive?.content
+                    if (onLoginCallbackId != null) {
+                        biliCallbackReceived(onLoginCallbackId, "{ state: 1 }")
+                    }
                 }
             }
         }
@@ -139,7 +145,7 @@ class BiliJsBridge(
     fun MessageEventInfo.callback(
         result: String
     ) {
-        val callbackId = data["callbackId"].asString
+        val callbackId = data.jsonObject["callbackId"]?.jsonPrimitive?.content
         callbackId?.let {
             biliCallbackReceived(it, result)
         }
@@ -158,9 +164,9 @@ class BiliJsBridge(
         }
     }
 
+    @Serializable
     data class MessageEventInfo(
         val method: String,
-        val data: JsonObject
+        val data: JsonElement
     )
-    object MessageEventInfoType : TypeToken<MessageEventInfo>()
 }

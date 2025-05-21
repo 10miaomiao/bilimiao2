@@ -40,7 +40,7 @@ import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -154,7 +154,7 @@ internal class SendDanmakuViewModel(
                     fontsize = textSize.toInt(),
                     color = color,
                     progress = currentPosition,
-                ).awaitCall().gson<MessageInfo>()
+                ).awaitCall().json<MessageInfo>()
                 withContext(Dispatchers.Main) {
                     if (res.isSuccess) {
                         PopTip.show("发送成功")

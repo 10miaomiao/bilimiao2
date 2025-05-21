@@ -13,7 +13,7 @@ data class MediaListInfo(
     var fav_state: Int,
     var fid: Long,
     var id: String,
-    var like_state: Int,
+    var like_state: Int = 0,
     var media_count: Int,
     var mid: Long,
     var mtime: Long,

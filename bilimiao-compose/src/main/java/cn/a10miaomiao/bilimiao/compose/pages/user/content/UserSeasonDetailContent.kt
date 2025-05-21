@@ -55,14 +55,14 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.components.TitleBar
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.archive.ArchiveRelationInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -145,8 +145,8 @@ private class UserSeasonDetailViewModel(
         try {
             val res = BiliApiService.archiveApi.relation(
                 aid = aid
-            ).awaitCall().gson<ResultInfo<ArchiveRelationInfo>>()
-            favState.value = if (res.data.season_fav) 1 else 0
+            ).awaitCall().json<ResponseData<ArchiveRelationInfo>>()
+            favState.value = if (res.requireData().season_fav) 1 else 0
         } catch (e: Exception) {
             PopTip.show("获取订阅状态失败")
             e.printStackTrace()
@@ -223,7 +223,7 @@ private class UserSeasonDetailViewModel(
                     seasonId = sid,
                 )
                 .awaitCall()
-                .gson<MessageInfo>(isLog = true)
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("订阅成功")
                 favState.value = 1
@@ -243,7 +243,7 @@ private class UserSeasonDetailViewModel(
                     seasonId = sid,
                 )
                 .awaitCall()
-                .gson<MessageInfo>(isLog = true)
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("已取消订阅")
                 favState.value = 0

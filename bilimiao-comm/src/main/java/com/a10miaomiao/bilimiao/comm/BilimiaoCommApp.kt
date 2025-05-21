@@ -4,12 +4,14 @@ import android.app.Application
 import android.content.Context
 import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.entity.auth.LoginInfo
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.AESUtil
 import com.a10miaomiao.bilimiao.comm.utils.MiaoEncryptDecrypt
-import com.google.gson.Gson
 import com.kongzue.dialogx.DialogX
 import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
+import kotlinx.serialization.encodeToString
 import java.io.File
 
 class BilimiaoCommApp(
@@ -54,7 +56,8 @@ class BilimiaoCommApp(
     fun saveAuthInfo(loginInfo: LoginInfo) {
         this.loginInfo = loginInfo
         val miaoED = getMiaoEncryptDecrypt()
-        val jsonByteArray = Gson().toJson(loginInfo).toByteArray()
+        val jsonStr = MiaoJson.toJson(loginInfo)
+        val jsonByteArray = jsonStr.toByteArray()
         val secretKey = AESUtil.getKey(key, app)
         val cipher = AESUtil.encrypt(miaoED.encrypt(jsonByteArray), secretKey)
         val file = File(authFilePath)
@@ -70,7 +73,7 @@ class BilimiaoCommApp(
             val cipher = file.readBytes()
             val jsonByteArray = miaoED.decrypt(AESUtil.decrypt(cipher, secretKey))
             val jsonStr = String(jsonByteArray)
-            val loginInfo = Gson().fromJson(jsonStr, LoginInfo::class.java)
+            val loginInfo = MiaoJson.fromJson<LoginInfo>(jsonStr)
             this.loginInfo = loginInfo
             return loginInfo
         } catch (e: Exception) {

@@ -29,9 +29,9 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.input.SearchBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.user.UserInfoCard
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
@@ -91,19 +91,19 @@ private class SearchFollowPageViewModel(
                     pageSize = list.pageSize,
                 )
                 .awaitCall()
-                .gson<ResultInfo<FollowingsInfo>>()
+                .json<ResponseData<FollowingsInfo>>()
             if (res.isSuccess) {
                 list.pageNum = pageNum
-                list.finished.value = res.data.list.isEmpty()
+                list.finished.value = res.requireData().list.isEmpty()
                 if (pageNum == 1) {
-                    list.data.value = res.data.list
+                    list.data.value = res.requireData().list
                 } else {
                     list.data.value = mutableListOf<FollowingItemInfo>().apply {
                         addAll(list.data.value)
-                        addAll(res.data.list)
+                        addAll(res.requireData().list)
                     }
                 }
-                list.finished.value = res.data.list.size < list.pageSize
+                list.finished.value = res.requireData().list.size < list.pageSize
             } else {
                 list.fail.value = res.message
             }
