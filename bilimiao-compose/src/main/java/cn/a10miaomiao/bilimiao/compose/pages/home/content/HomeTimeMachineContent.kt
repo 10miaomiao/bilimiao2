@@ -107,11 +107,12 @@ private class HomeTimeMachineContentViewModel(
         region: RegionInfo,
         initialIndex: Int,
     ) {
+        val children = region.children ?: emptyList()
         pageNavigation.navigate(TimeRegionDetailPage(
             tid = region.tid,
             name = region.name,
-            childIds = region.children.map { it.tid },
-            childNames = region.children.map { it.name },
+            childIds = children.map { it.tid },
+            childNames = children.map { it.name },
             initialIndex = initialIndex,
         ))
     }

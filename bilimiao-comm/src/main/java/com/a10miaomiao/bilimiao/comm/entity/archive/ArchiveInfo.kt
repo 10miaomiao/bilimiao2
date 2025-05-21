@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.entity.archive
 
+import kotlinx.serialization.Serializable
+
 /**
 "title": "红警最弱的夹缝中重拳出击!锤死老大和老二!",
 "subtitle": "",
@@ -48,15 +50,16 @@ package com.a10miaomiao.bilimiao.comm.entity.archive
 "view_content": "2.3万",
 "icon_type": 0
  */
+@Serializable
 class ArchiveInfo(
     val author: String,
-    val bvid: String,
+    val bvid: String = "",
     val cover: String,
     val ctime: Long,
 //    val cursor_attr: CursorAttr,
     val danmaku: String,
     val duration: Long,
-    val first_cid: String,
+    val first_cid: String = "",
     val goto: String,
     val icon_type: Int,
     val is_cooperation: Boolean,

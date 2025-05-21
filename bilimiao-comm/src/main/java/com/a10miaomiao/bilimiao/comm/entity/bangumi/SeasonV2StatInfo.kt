@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.bangumi
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SeasonV2StatInfo(
     val coins: String,
     val danmakus: String,

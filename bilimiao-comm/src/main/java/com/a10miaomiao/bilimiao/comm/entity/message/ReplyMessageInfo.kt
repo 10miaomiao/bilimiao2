@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.message
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ReplyMessageInfo (
     val id: Long,
     /**
@@ -27,7 +30,7 @@ data class ReplyMessageInfo (
      */
     val reply_time: Long
 ) {
-
+    @Serializable
     data class ItemInfo(
         val subject_id: Long,
         val root_id: Long,

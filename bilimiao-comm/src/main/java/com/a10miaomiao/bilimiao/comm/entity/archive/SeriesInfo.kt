@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.archive
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SeriesInfo(
     val type: String,
     val title: String,

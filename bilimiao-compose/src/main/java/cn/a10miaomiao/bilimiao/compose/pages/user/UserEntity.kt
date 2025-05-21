@@ -1,9 +1,12 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 internal data class FollowingItemInfo(
     val mid: String,
     val attribute: Int, // 关注属性: 0：未关注, 2：已关注, 6：已互粉
-    val mtime: Long,
+    val mtime: Long = 0L,
     val special: Int, // 特别关注标志: 0：否, 1：是
     val uname: String,
     val face: String,
@@ -24,6 +27,7 @@ internal data class FollowingsInfo(
 /**
  * 分组信息
  */
+@Serializable
 internal data class TagInfo(
     val tagid: Int,
     val name: String,
@@ -31,6 +35,7 @@ internal data class TagInfo(
     val tip: String,
 )
 
+@Serializable
 internal data class InterrelationInfo(
     val attribute: Int = 0, // 关注属性: 0：未关注, 2：已关注, 6：已互粉
     val is_followed: Boolean = false,

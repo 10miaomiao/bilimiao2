@@ -11,7 +11,7 @@ data class ToViewItemInfo(
     val title: String,
     val pic: String,
     val videos: Int,
-    val page: PageInfo,
+    val page: PageInfo? = null,
     val progress: Int,
     val pubdate: Long,
     val duration: Int,

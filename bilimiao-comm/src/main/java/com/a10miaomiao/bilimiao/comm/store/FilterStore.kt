@@ -5,11 +5,12 @@ import androidx.lifecycle.ViewModel
 import com.a10miaomiao.bilimiao.comm.db.FilterTagDB
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.db.FilterWordDB
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -167,8 +168,8 @@ class FilterStore(override val di: DI) :
         }
         return BiliApiService.videoAPI.info(id, typeUpperCase)
             .awaitCall()
-            .gson<ResultInfo<VideoInfo>>().data.tag
-            .let { filterTag(it) }
+            .json<ResponseData<VideoInfo>>()
+            .let { filterTag(it.requireData().tag) }
     }
 
     fun addTag(name: String) {

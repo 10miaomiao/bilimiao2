@@ -9,12 +9,13 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.coroutineScope
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.geetest.sdk.GT3ConfigBean
 import com.geetest.sdk.GT3ErrorBean
 import com.geetest.sdk.GT3GeetestUtils
 import com.geetest.sdk.GT3Listener
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -54,7 +55,7 @@ class BiliGeetestUtilImpl(
         override fun onDialogResult(result: String) {
             lifecycle.coroutineScope.launch(Dispatchers.Main) {
                 try {
-                    val resultBean = Gson().fromJson(result, BiliGeetestUtil.GT3ResultBean::class.java)
+                    val resultBean = MiaoJson.fromJson<BiliGeetestUtil.GT3ResultBean>(result)
                     gtCallBack?.onGTDialogResult(resultBean)
                     gt3GeetestUtils.showSuccessDialog()
                 } catch (e: Exception) {

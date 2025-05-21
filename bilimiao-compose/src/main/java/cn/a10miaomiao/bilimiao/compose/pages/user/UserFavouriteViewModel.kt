@@ -7,11 +7,12 @@ import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditDialogState
 import com.a10miaomiao.bilimiao.comm.entity.ListAndCountInfo
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaFoldersInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -75,12 +76,12 @@ internal class UserFavouriteViewModel(
                     mid,
                     pageNum = pageNum,
                     pageSize = list.pageSize
-                ).awaitCall().gson<ResultInfo<ListAndCountInfo<MediaListInfo>>>()
+                ).awaitCall().json<ResponseData<ListAndCountInfo<MediaListInfo>>>()
                 if (!res.isSuccess) {
                     list.fail.value = res.message
                     return@launch
                 }
-                val result = res.data
+                val result = res.requireData()
                 hasMore = result.has_more
                 result.list
             } else {
@@ -88,12 +89,12 @@ internal class UserFavouriteViewModel(
                     mid,
                     pageNum = pageNum,
                     pageSize = list.pageSize
-                ).awaitCall().gson<ResultInfo<MediaFoldersInfo>>()
+                ).awaitCall().json<ResponseData<MediaFoldersInfo>>()
                 if (!res.isSuccess) {
                     list.fail.value = res.message
                     return@launch
                 }
-                val result = res.data
+                val result = res.requireData()
                 hasMore = result.has_more
                 result.folders.map {
                     it.folder_detail
@@ -207,7 +208,7 @@ internal class UserFavouriteViewModel(
                 privacy = privacy,
             )
             .awaitCall()
-            .gson<MessageInfo>()
+            .json<MessageInfo>()
         if (!res.isSuccess) {
             throw Exception(res.message)
         }

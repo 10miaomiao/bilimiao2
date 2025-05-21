@@ -1,7 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.entity.bangumi
 
 import com.a10miaomiao.bilimiao.comm.entity.comm.bili.BadgeInfo
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class SeasonV2Info(
     val actor: SeasonV2ActorInfo,
     val alias: String,

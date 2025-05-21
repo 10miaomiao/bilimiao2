@@ -1,7 +1,10 @@
 package cn.a10miaomiao.bilimiao.download.entry
 
+import kotlinx.serialization.Serializable
+
 sealed class BiliDownloadMediaFileInfo {
 
+    @Serializable
     data class Type1(
         val available_period_milli: Int,
         val description: String,
@@ -25,11 +28,13 @@ sealed class BiliDownloadMediaFileInfo {
         val video_project: Boolean
     ): BiliDownloadMediaFileInfo()
 
+    @Serializable
     data class Type1PlayerCodecConfig(
         val player: String,
         val use_ijk_media_codec: Boolean
     )
 
+    @Serializable
     data class Type1Segment(
         val backup_urls: List<String>,
         val bytes: Long,
@@ -40,13 +45,14 @@ sealed class BiliDownloadMediaFileInfo {
         val url: String
     )
 
-
+    @Serializable
     data class Type2(
         val duration: Long,
         val video: List<Type2File>,
         val audio: List<Type2File>?
     ): BiliDownloadMediaFileInfo()
 
+    @Serializable
     data class Type2File(
         val id: Int,
         val base_url: String,
@@ -62,6 +68,7 @@ sealed class BiliDownloadMediaFileInfo {
         val dash_drm_type: Int,
     )
 
+    @Serializable
     data class None(
         val message: String,
     ): BiliDownloadMediaFileInfo()

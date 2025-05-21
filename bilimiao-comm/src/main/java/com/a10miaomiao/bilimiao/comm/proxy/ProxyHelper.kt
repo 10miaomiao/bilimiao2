@@ -3,8 +3,9 @@ package com.a10miaomiao.bilimiao.comm.proxy
 import android.content.Context
 import android.content.Intent
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import kotlinx.serialization.encodeToString
 import java.io.File
 
 object ProxyHelper {
@@ -30,7 +31,7 @@ object ProxyHelper {
         } else if (server != null) {
             list.add(server)
         }
-        val jsonStr = Gson().toJson(list)
+        val jsonStr = MiaoJson.toJson(list)
         val file = File(context.filesDir.path + jsonFileName)
         file.writeText(jsonStr)
         // 通知更新
@@ -50,10 +51,7 @@ object ProxyHelper {
         }
         val jsonStr = file.readText()
         return try {
-            val list = Gson().fromJson<List<ProxyServerInfo>>(
-                jsonStr,
-                object : TypeToken<List<ProxyServerInfo>>() {}.type,
-            )
+            val list = MiaoJson.fromJson<List<ProxyServerInfo>>(jsonStr)
             list.toMutableList()
         } catch (e: Exception) {
             e.printStackTrace()

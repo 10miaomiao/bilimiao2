@@ -1,5 +1,8 @@
 package cn.a10miaomiao.bilimiao.download.entry
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class BiliDownloadEntryInfo(
     val media_type: Int,
     val has_dash_audio: Boolean,
@@ -47,6 +50,7 @@ data class BiliDownloadEntryInfo(
         }
 
     // 视频分P信息
+    @Serializable
     data class PageInfo(
         val cid: Long,
         val page: Int,
@@ -62,12 +66,14 @@ data class BiliDownloadEntryInfo(
         val download_subtitle: String
     )
     // 番剧源信息
+    @Serializable
     data class SourceInfo(
         val av_id: Long,
         val cid: Long,
         val website: String,
     )
     // 番剧剧集信息
+    @Serializable
     data class EpInfo(
         val av_id: Long,
         val page: Int,

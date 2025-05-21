@@ -1,5 +1,5 @@
 <p align="center">
-<img width="100px" src="https://oss.10miaomiao.cn/images/bilimiao.png"/>
+<img width="100px" src="https://10miaomiao.cn/icons/bilimiao_new.png"/>
 </p>
 
 <div align="center">

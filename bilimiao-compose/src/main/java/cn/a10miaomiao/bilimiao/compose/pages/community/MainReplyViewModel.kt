@@ -25,7 +25,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -236,7 +235,7 @@ class MainReplyViewModel(
                     rpid = reply.id.toString(),
                 )
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 withContext(Dispatchers.Main) {
                     PopTip.show("删除成功")

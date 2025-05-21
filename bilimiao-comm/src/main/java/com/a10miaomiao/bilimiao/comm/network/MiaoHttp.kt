@@ -2,10 +2,8 @@ package com.a10miaomiao.bilimiao.comm.network
 
 import android.webkit.CookieManager
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
@@ -104,56 +102,12 @@ class MiaoHttp(var url: String? = null) {
 
     companion object {
 
-        private val gson = Gson()
-
-        val kotlinJson = Json {
-            ignoreUnknownKeys = true // 忽略未知 Key
-            explicitNulls = true // 空值填充
-            isLenient = true // 宽松校验
-        }
-
-        fun <T> fromJson(json: String, typeOfT: Type): T {
-            try {
-                return gson.fromJson(json, typeOfT)
-            } catch (e: IllegalStateException) {
-                miaoLogger().i("GSON解析出错", json)
-                throw e
-            }
-        }
-
-        inline fun <reified T> fromJson(json: String): T {
-            try {
-                return kotlinJson.decodeFromString<T>(json)
-            } catch (e: IllegalStateException) {
-                miaoLogger().i("JSON解析出错", json)
-                throw e
-            }
-        }
-
         fun request(url: String? = null, init: (MiaoHttp.() -> Unit)? = null) = MiaoHttp(url).apply {
             init?.invoke(this)
         }
 
-        inline fun <reified T> gsonConverterFactory(): (response: Response) -> T = { response ->
-            val jsonStr = response.string()
-            fromJson(jsonStr, object : TypeToken<T>() {}.type)
-        }
-
         fun Response.string(): String {
             return this.body!!.string()
-        }
-
-        inline fun <reified T> String.gson(isLog: Boolean = false): T {
-            val jsonStr = this
-            if (isLog) {
-                miaoLogger() debug jsonStr
-            }
-            val type = object : TypeToken<T>() {}.type
-            return fromJson(jsonStr, type)
-        }
-
-        inline fun <reified T> Response.gson(isLog: Boolean = false): T {
-            return this.string().gson<T>(isLog)
         }
 
         inline fun <reified T> Response.json(isLog: Boolean = false): T {
@@ -161,7 +115,7 @@ class MiaoHttp(var url: String? = null) {
             if (isLog) {
                 miaoLogger() debug jsonStr
             }
-            return fromJson(jsonStr)
+            return MiaoJson.fromJson(jsonStr)
         }
 
         const val GET = "GET"

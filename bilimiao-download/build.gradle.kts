@@ -41,7 +41,7 @@ dependencies {
     implementation(Libraries.appcompat)
     implementation(Libraries.material)
 
-    implementation(Libraries.gson)
+    implementation(Libraries.kotlinxSerializationJson)
     implementation(Libraries.okhttp3)
 
     implementation(project(":bilimiao-comm"))

@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.bangumi
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SeasonEpisodeInfo(
     val cover: String,
     val episodes: List<EpisodeInfo>,
@@ -17,7 +20,7 @@ data class SeasonEpisodeInfo(
     val season_id: Int,
     val season_title: String,
     val seasons: List<SeasonInfo>,
-    val section: List<Any>,
+//    val section: List<Any>,
 //    val series: Series,
     val share_url: String,
     val square_cover: String,

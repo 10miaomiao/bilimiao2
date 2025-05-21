@@ -26,7 +26,6 @@ object Versions {
 
     //
     const val okhttp = "4.10.0"
-    const val gson = "2.10.1"
     const val glide = "4.13.2"
     const val pbandk = "0.14.4-SNAPSHOT"
 
@@ -77,7 +76,6 @@ object Libraries {
     const val kotlinxCoroutinesAndroid = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
     const val kodeinDi = "org.kodein.di:kodein-di-framework-android-x:${Versions.kodein_di}"
     const val kodeinDiCompose = "org.kodein.di:kodein-di-framework-compose:${Versions.kodein_di}"
-    const val gson = "com.google.code.gson:gson:${Versions.gson}"
     const val okhttp3 = "com.squareup.okhttp3:okhttp:${Versions.okhttp}"
 //    const val grpcProtobuf = "io.grpc:grpc-protobuf-lite:1.33.0"
 //    const val grpcStub = "io.grpc:grpc-stub:1.33.0"

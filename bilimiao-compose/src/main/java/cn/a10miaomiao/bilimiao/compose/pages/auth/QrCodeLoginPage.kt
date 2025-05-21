@@ -42,7 +42,7 @@ import com.a10miaomiao.bilimiao.comm.entity.auth.QRLoginInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.king.zxing.util.CodeUtils
@@ -91,7 +91,7 @@ private class QrCodeLoginPageViewModel(
             val res = BiliApiService.authApi
                 .qrCode(loginSessionId)
                 .awaitCall()
-                .gson<ResponseData<QRLoginInfo>>()
+                .json<ResponseData<QRLoginInfo>>()
             if (res.isSuccess) {
                 val resData = res.requireData()
                 renderQrcode(resData.url)
@@ -127,7 +127,7 @@ private class QrCodeLoginPageViewModel(
             val res = BiliApiService.authApi
                 .checkQrCode(authCode)
                 .awaitCall()
-                .gson<ResponseData<LoginInfo.QrLoginInfo>>()
+                .json<ResponseData<LoginInfo.QrLoginInfo>>()
             when(res.code) {
                 86039 -> {
                     // 未确认
@@ -171,7 +171,7 @@ private class QrCodeLoginPageViewModel(
             BiliApiService.authApi
                 .account()
                 .awaitCall()
-                .gson<ResponseData<UserInfo>>()
+                .json<ResponseData<UserInfo>>()
         }
         if (res.isSuccess) {
             withContext(Dispatchers.Main) {

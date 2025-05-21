@@ -18,12 +18,13 @@ import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.SpaceInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
@@ -92,10 +93,15 @@ class UserSpaceViewModel(
         try {
             _loading.value = true
             _fail.value = null
-            val res = UserApi().space(vmid).awaitCall().gson<ResultInfo<SpaceInfo>>()
+            val res = BiliApiService
+                .userApi
+                .space(vmid)
+                .awaitCall()
+                .json<ResponseData<SpaceInfo>>()
             if (res.code == 0) {
-                _detailData.value = res.data
-                _isFollow.value = res.data.card.relation.is_follow == 1
+                val result = res.requireData()
+                _detailData.value = result
+                _isFollow.value = result.card.relation.is_follow == 1
             } else {
                 _fail.value = res.message
                 PopTip.show(res.message)
@@ -137,7 +143,7 @@ class UserSpaceViewModel(
             val mode = if (isFollow.value) { 2 } else { 1 }
             val res = BiliApiService.userRelationApi
                 .modify(vmid, mode)
-                .awaitCall().gson<MessageInfo>()
+                .awaitCall().json<MessageInfo>()
             if (res.code == 0) {
                 _isFollow.value = mode == 1
                 PopTip.show(if (mode == 1) {

@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.live
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RoomInfo(
     val uid: String,
     val room_id: String,

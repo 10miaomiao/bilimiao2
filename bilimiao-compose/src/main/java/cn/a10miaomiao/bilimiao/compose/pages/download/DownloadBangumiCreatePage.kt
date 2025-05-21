@@ -26,13 +26,14 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonSectionInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonV2Info
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -94,7 +95,7 @@ internal class DownloadBangumiCreatePageViewModel(
             list.loading.value = true
             val res = BiliApiService.bangumiAPI.seasonSection(id)
                 .awaitCall()
-                .gson<ResultInfo2<SeasonSectionInfo>>()
+                .json<ResultInfo2<SeasonSectionInfo>>()
             if (res.code == 0) {
                 val result = res.result.main_section?.episodes ?: emptyList()
                 list.data.value = result
@@ -148,7 +149,7 @@ internal class DownloadBangumiCreatePageViewModel(
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val res = BiliApiService.bangumiAPI.seasonInfoV2(id, "").awaitCall()
-                .gson<ResultInfo<SeasonV2Info>>()
+                .json<ResponseData<SeasonV2Info>>()
             if (res.code == 0) {
                 _seasonDetail = res.data
             } else {

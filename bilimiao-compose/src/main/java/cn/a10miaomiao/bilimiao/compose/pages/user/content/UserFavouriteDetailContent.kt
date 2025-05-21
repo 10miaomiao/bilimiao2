@@ -58,6 +58,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.components.TitleBar
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaDetailInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediaListInfo
@@ -67,7 +68,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -114,9 +115,9 @@ private class UserFavouriteDetailViewModel(
                 keyword = keyword,
                 pageNum = pageNum,
                 pageSize = list.pageSize
-            ).awaitCall().gson<ResultInfo<MediaDetailInfo>>()
+            ).awaitCall().json<ResponseData<MediaDetailInfo>>()
             if (res.code == 0) {
-                val result = res.data
+                val result = res.requireData()
                 val mediaList = result.medias ?: listOf()
                 mediaInfo.value = result.info
                 if (pageNum == 1) {
@@ -220,7 +221,7 @@ private class UserFavouriteDetailViewModel(
                 privacy = privacy,
             )
             .awaitCall()
-            .gson<MessageInfo>()
+            .json<MessageInfo>()
         if (!res.isSuccess) {
             throw Exception(res.message)
         }
@@ -232,7 +233,7 @@ private class UserFavouriteDetailViewModel(
                 mediaIds = mediaId,
             )
             .awaitCall()
-            .gson<MessageInfo>(isLog = true)
+            .json<MessageInfo>(isLog = true)
         if (!res.isSuccess) {
             throw Exception(res.message)
         }
@@ -245,7 +246,7 @@ private class UserFavouriteDetailViewModel(
                     mediaId = mediaId,
                 )
                 .awaitCall()
-                .gson<MessageInfo>(isLog = true)
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("订阅成功")
                 refresh()
@@ -265,7 +266,7 @@ private class UserFavouriteDetailViewModel(
                     mediaId = mediaId,
                 )
                 .awaitCall()
-                .gson<MessageInfo>(isLog = true)
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("已取消订阅")
                 refresh()

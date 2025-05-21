@@ -47,7 +47,7 @@ import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.network
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.player.BilimiaoPlayerManager
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
@@ -544,7 +544,7 @@ class PlayerDelegate2(
             try {
                 val res = MiaoHttp.request {
                     url = UrlUtil.autoHttps(subtitleUrl)
-                }.awaitCall().gson<SubtitleJsonInfo>()
+                }.awaitCall().json<SubtitleJsonInfo>()
                 views.videoPlayer.subtitleBody = res.body.map {
                     DanmakuVideoPlayer.SubtitleItemInfo(
                         from = (it.from * 1000).toLong(),

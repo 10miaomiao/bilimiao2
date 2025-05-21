@@ -87,7 +87,6 @@ dependencies {
     implementation("sh.calvin.reorderable:reorderable:2.3.1")
     implementation(Libraries.materialKolor)
 
-    implementation(Libraries.gson)
     implementation(Libraries.okhttp3)
     implementation(Libraries.pbandkRuntime)
     implementation(Libraries.glide)

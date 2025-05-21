@@ -13,9 +13,9 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.TagEditDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.user.TagInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserTagSetDialogState
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
@@ -61,10 +61,10 @@ internal class MyFollowViewModel(
             val res = BiliApiService.userRelationApi
                 .tags()
                 .awaitCall()
-                .gson<ResultInfo<List<TagInfo>>>()
+                .json<ResponseData<List<TagInfo>>>()
             if (res.isSuccess) {
                 tagList.pageNum = pageNum
-                tagList.data.value = res.data
+                tagList.data.value = res.requireData()
             } else {
                 tagList.fail.value = res.message
             }
@@ -83,7 +83,7 @@ internal class MyFollowViewModel(
             val res = BiliApiService.userRelationApi
                 .tagCreate(name)
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("创建成功")
                 clearTagEditDialogState()
@@ -107,7 +107,7 @@ internal class MyFollowViewModel(
             val res = BiliApiService.userRelationApi
                 .tagUpdate(tagId, tagName)
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("修改成功")
                 clearTagEditDialogState()
@@ -128,7 +128,7 @@ internal class MyFollowViewModel(
             val res = BiliApiService.userRelationApi
                 .tagDelete(tagId)
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("删除成功")
                 loadData()
@@ -151,7 +151,7 @@ internal class MyFollowViewModel(
                     tagIds = tagIds,
                 )
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 PopTip.show("操作成功")
                 // 刷新分组数量

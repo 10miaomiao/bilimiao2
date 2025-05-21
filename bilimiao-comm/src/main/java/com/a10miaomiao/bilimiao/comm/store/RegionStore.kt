@@ -6,18 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.io.BufferedReader
@@ -58,11 +60,8 @@ class RegionStore(override val di: DI) :
         // 加载分区列表
         try {
             val jsonStr = readRegionJson(context, isBestRegion)!!
-            val result = Gson().fromJson<ResultInfo<List<RegionInfo>>>(
-                jsonStr,
-                object : TypeToken<ResultInfo<List<RegionInfo>>>() {}.type
-            )
-            val data = result.data
+            val result = MiaoJson.fromJson<ResponseData<List<RegionInfo>>>(jsonStr)
+            val data = result.requireData()
             data.forEachIndexed(::regionIcon)
             setState {
                 regions = data.toMutableList()
@@ -81,9 +80,9 @@ class RegionStore(override val di: DI) :
             val res = BiliApiService.regionAPI
                 .regions()
                 .awaitCall()
-                .gson<ResultInfo<List<RegionInfo>>>()
+                .json<ResponseData<List<RegionInfo>>>()
             if (res.isSuccess) {
-                val regionList = res.data.filter { it.children != null && it.children.isNotEmpty() }
+                val regionList = res.requireData().filter { it.children?.isNotEmpty() == true }
                 setState {
                     regions = regionList.toMutableList()
                 }
@@ -91,7 +90,7 @@ class RegionStore(override val di: DI) :
                 // 保存到本地
                 writeRegionJson(
                     context,
-                    ResultInfo(
+                    ResponseData(
                         code = 0,
                         data = regionList,
                         message = "",
@@ -135,9 +134,9 @@ class RegionStore(override val di: DI) :
         }
     }
 
-    private fun writeRegionJson(context: Context, region: ResultInfo<List<RegionInfo>>) {
+    private fun writeRegionJson(context: Context, region: ResponseData<List<RegionInfo>>) {
         try {
-            val jsonStr = Gson().toJson(region)
+            val jsonStr = MiaoJson.toJson(region)
             val outputStream = context.openFileOutput("region.json", Context.MODE_PRIVATE);
             outputStream.write(jsonStr.toByteArray());
             outputStream.close();

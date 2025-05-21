@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
-import com.google.gson.JsonSyntaxException
 import java.net.UnknownHostException
 
 @Composable
@@ -29,7 +28,7 @@ fun BiliFailBox(
         when (e) {
             is String -> e
             is UnknownHostException -> "无法连接到御坂网络"
-            is JsonSyntaxException -> "数据解析失败: $e"
+//            is JsonSyntaxException -> "数据解析失败: $e"
             is Exception -> e.message ?: e.toString()
             else -> e.toString()
         }

@@ -1,6 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.entity.region
 
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class RegionVideoInfo(
     val author: String,
     val bvid: String,

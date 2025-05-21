@@ -30,7 +30,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionVideoInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionVideosRankInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
@@ -88,7 +88,7 @@ private class TimeRegionDetailListContentViewModel(
                     timeTo = timeTo.getValue(),
                 )
                 .awaitCall()
-                .gson<ResultInfo<RegionVideosRankInfo>>()
+                .json<ResultInfo<RegionVideosRankInfo>>()
             if (res.code == 0) {
                 val result = res.data.result
                 if (result == null) {

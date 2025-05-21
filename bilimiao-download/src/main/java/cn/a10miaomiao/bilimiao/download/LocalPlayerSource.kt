@@ -9,7 +9,8 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
-import com.google.gson.Gson
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.danmaku.parser.BiliDanmukuParser
@@ -55,7 +56,7 @@ class LocalPlayerSource(
         }
         val videoIndexJson = videoIndexJsonFile.readText()
         if (entry.media_type == 1) {
-            val mediaInfo = Gson().fromJson(videoIndexJson, BiliDownloadMediaFileInfo.Type1::class.java)
+            val mediaInfo = MiaoJson.fromJson<BiliDownloadMediaFileInfo.Type1>(videoIndexJson)
             val videoFile = File(
                 videoDir, "0" + "." + mediaInfo.format
             )
@@ -71,7 +72,7 @@ class LocalPlayerSource(
                 return emptyPlayerSourceInfo
             }
         } else {
-            val mediaInfo = Gson().fromJson(videoIndexJson, BiliDownloadMediaFileInfo.Type2::class.java)
+            val mediaInfo = MiaoJson.fromJson<BiliDownloadMediaFileInfo.Type2>(videoIndexJson)
             val videoFile = File(videoDir, "video.m4s")
             val audioFile = File(videoDir, "audio.m4s")
             val url = Uri.fromFile(videoFile).toString()
@@ -124,7 +125,7 @@ class LocalPlayerSource(
 
     private fun getEntryFileInfo(): BiliDownloadEntryInfo {
         val entryJsonFile = File(entryDirPath, "entry.json")
-        return Gson().fromJson(entryJsonFile.readText(), BiliDownloadEntryInfo::class.java)
+        return MiaoJson.fromJson(entryJsonFile.readText())
     }
 
     private fun getBiliDanmukuStream(): InputStream? {

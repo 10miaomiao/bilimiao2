@@ -35,7 +35,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
@@ -278,7 +277,7 @@ class VideoDetailViewModel(
             return@launch
         }
         try {
-            val arcData = detailData.value?.arc ?: return@launch
+            val arcData = detailData.value?.getArcData() ?: return@launch
             val res = BiliApiService.userApi
                 .videoToviewAdd(arcData.aid.toString())
                 .awaitCall()
@@ -586,7 +585,7 @@ class VideoDetailViewModel(
                 }
                 PopTip.show("已添加至最后一个播放")
             }
-            14 -> {
+            13 -> {
                 // 添加至稍后再看
                 addVideoHistoryToview()
             }

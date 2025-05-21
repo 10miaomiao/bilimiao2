@@ -7,16 +7,17 @@ import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.google.gson.Gson
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.io.File
@@ -70,7 +71,7 @@ class UserStore(override val di: DI) :
     private fun seveUserInfo(userInfo: UserInfo?) {
         val file = File(activity.filesDir.path + "/user.data")
         if (userInfo != null) {
-            val jsonStr = Gson().toJson(userInfo)
+            val jsonStr = MiaoJson.toJson(userInfo)
             file.writeText(jsonStr)
         } else {
             file.delete()
@@ -82,7 +83,7 @@ class UserStore(override val di: DI) :
             val file = File(activity.filesDir.path + "/user.data")
             if (file.exists()) {
                 val jsonStr = file.readText()
-                val localInfo = Gson().fromJson(jsonStr, UserInfo::class.java)
+                val localInfo = MiaoJson.fromJson<UserInfo>(jsonStr)
                 setState {
                     info = localInfo
                 }

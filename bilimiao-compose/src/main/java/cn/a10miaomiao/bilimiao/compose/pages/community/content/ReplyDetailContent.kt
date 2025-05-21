@@ -81,7 +81,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.gson
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
@@ -198,7 +198,7 @@ private class ReplyDetailContentViewModel(
             val res = BiliApiService.commentApi
                 .action(1, item.oid.toString(), item.id.toString(), newAction)
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 val likeNum = if (isLike) item.like - 1 else item.like + 1
                 val newItem = item.copy(
@@ -254,7 +254,7 @@ private class ReplyDetailContentViewModel(
                     rpid = reply.id.toString(),
                 )
                 .awaitCall()
-                .gson<MessageInfo>()
+                .json<MessageInfo>()
             if (res.isSuccess) {
                 withContext(Dispatchers.Main) {
                     PopTip.show("删除成功")
