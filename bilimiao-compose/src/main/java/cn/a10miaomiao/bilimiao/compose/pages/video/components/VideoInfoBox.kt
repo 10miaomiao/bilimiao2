@@ -160,7 +160,8 @@ fun VideoInfoBox(
         if (pages.size > 1) {
             VideoPagesBox(
                 pages = pages,
-                onPageClick = viewModel::playVideo
+                onPageClick = viewModel::playVideo,
+                onMoreClick = viewModel::openVideoPages,
             )
             HorizontalDivider(
                 modifier = Modifier.padding(
