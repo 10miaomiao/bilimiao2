@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bilibili.app.archive.v1.Page
 import bilibili.app.view.v1.ViewGRPC
 import bilibili.app.view.v1.ViewPage
 import bilibili.app.view.v1.ViewReq
@@ -96,7 +97,7 @@ private class VideoPagesPageViewModel(
 
     val loading = MutableStateFlow(false)
     val fail = MutableStateFlow<String?>(null)
-    val pages = MutableStateFlow(listOf<ViewPage>())
+    val pages = MutableStateFlow(listOf<Page>())
 
     var arcInfo: bilibili.app.archive.v1.Arc? = null
     val currentPlay: StateFlow<PlayerStore.State> get() = playerStore.stateFlow
@@ -116,7 +117,9 @@ private class VideoPagesPageViewModel(
                 ViewGRPC.view(req)
             }.awaitCall()
             arcInfo = result.arc
-            pages.value = result.pages
+            pages.value = result.pages.map {
+                it.page
+            }.filterNotNull()
         } catch (e: Exception) {
             e.printStackTrace()
             fail.value = e.message ?: e.toString()
@@ -125,9 +128,8 @@ private class VideoPagesPageViewModel(
         }
     }
 
-    fun startPlayVideo(item: ViewPage) {
+    fun startPlayVideo(page: Page) {
         val arc = arcInfo ?: return
-        val page = item.page ?: return
         val playerSource = VideoPlayerSource(
             aid = aid,
             id = page.cid.toString(),
@@ -139,8 +141,8 @@ private class VideoPagesPageViewModel(
         )
         playerSource.pages = pages.value.map {
             VideoPlayerSource.PageInfo(
-                cid = it.page!!.cid.toString(),
-                title = it.page!!.part,
+                cid = it.cid.toString(),
+                title = it.part,
             )
         }
         basePlayerDelegate.openPlayer(playerSource)
@@ -169,7 +171,7 @@ private fun VideoPagesPageContent(
     fun scrollToCurrentPlay() {
         if (viewModel.aid != currentPlay.aid) return
         val index = pages.indexOfFirst {
-            it.page?.cid.toString() == currentPlay.cid
+            it.cid.toString() == currentPlay.cid
         }
         if (index != -1) {
             scope.launch {
@@ -202,8 +204,8 @@ private fun VideoPagesPageContent(
             state = listState,
             contentPadding = windowInsets.toPaddingValues()
         ) {
-            items(pages) {
-                val page = it.page!!
+            items(pages.size, { pages[it].cid }) { index ->
+                val page = pages[index]
                 val isCurrentPlay = currentPlay.cid == page.cid.toString()
                 Box(Modifier.padding(vertical = 5.dp, horizontal = 10.dp)) {
                     Surface(
@@ -219,19 +221,26 @@ private fun VideoPagesPageContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable(onClick = {
-                                    viewModel.startPlayVideo(it)
+                                    viewModel.startPlayVideo(page)
                                 })
                                 .padding(10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = page.part,
+                                text = "P${index + 1} " + page.part,
                                 fontSize = 18.sp,
                                 modifier = Modifier.weight(1f)
                             )
                             if (isCurrentPlay) {
                                 Text(
-                                    text = "当前播放",
+                                    text = "正在播放",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(end = 5.dp),
+                                    color = MaterialTheme.colorScheme.outline,
+                                )
+                            } else {
+                                Text(
+                                    text = NumberUtil.converDuration(page.duration),
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(end = 5.dp),
                                     color = MaterialTheme.colorScheme.primary,

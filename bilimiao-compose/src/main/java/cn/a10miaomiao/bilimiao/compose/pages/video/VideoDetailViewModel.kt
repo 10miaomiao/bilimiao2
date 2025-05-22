@@ -449,6 +449,15 @@ class VideoDetailViewModel(
         _isAutoPlaySeason.value = isChecked
     }
 
+    fun openVideoPages() {
+        val arc = detailData.value?.getArcData() ?: return
+        BottomSheetNavigation.navigate(
+            activity,
+            entry = BilimiaoPageRoute.Entry.VideoPages,
+            param = arc.aid.toString()
+        )
+    }
+
     fun toUserPage(mid: String) {
         pageNavigation.navigate(UserSpacePage(
             id = mid,
