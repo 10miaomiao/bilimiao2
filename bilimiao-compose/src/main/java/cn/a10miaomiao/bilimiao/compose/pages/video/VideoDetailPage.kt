@@ -368,6 +368,13 @@ private fun VideoDetailPageContent(
                         count = replyCount ?: -1,
                     )
                 }
+                BackHandler(
+                    enabled = pagerState.currentPage > 0
+                ) {
+                    scope.launch {
+                        pagerState.animateScrollToPage(0)
+                    }
+                }
                 HorizontalPager(
                     modifier = Modifier
                         .fillMaxWidth()
