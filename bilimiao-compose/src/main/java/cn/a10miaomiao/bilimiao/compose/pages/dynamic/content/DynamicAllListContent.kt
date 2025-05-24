@@ -138,7 +138,7 @@ class DynamicAllListContenttViewModel(
     fun refresh() {
         list.reset()
         isRefreshing.value = true
-        loadData()
+        loadData("")
     }
 
     fun toDetailPage(item: DynamicItem) {
