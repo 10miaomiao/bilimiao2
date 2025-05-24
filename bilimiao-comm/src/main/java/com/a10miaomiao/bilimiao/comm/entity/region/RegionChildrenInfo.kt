@@ -13,5 +13,5 @@ data class RegionChildrenInfo(
     var tid: Int,
     var reid: Int,
     var name: String,
-    var type: Int
+    var type: Int = 0
 ) : Parcelable
