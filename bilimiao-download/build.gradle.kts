@@ -4,6 +4,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("bilimiao-build")
+    kotlin("plugin.serialization")
 }
 
 android {

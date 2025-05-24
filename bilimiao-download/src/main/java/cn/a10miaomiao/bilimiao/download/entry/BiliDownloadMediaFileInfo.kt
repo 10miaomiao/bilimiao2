@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.download.entry
 
 import kotlinx.serialization.Serializable
 
+@Serializable
 sealed class BiliDownloadMediaFileInfo {
 
     @Serializable
@@ -9,7 +10,7 @@ sealed class BiliDownloadMediaFileInfo {
         val available_period_milli: Int,
         val description: String,
         val format: String,
-        val from: String,
+        val from: String? = null,
         val intact: Boolean,
         val is_downloaded: Boolean,
         val is_resolved: Boolean,
@@ -22,7 +23,7 @@ sealed class BiliDownloadMediaFileInfo {
         val quality: Int,
         val segment_list: List<Type1Segment>,
         val time_length: Int,
-        val type_tag: String,
+        val type_tag: String? = null,
         val user_agent: String,
         val video_codec_id: Int,
         val video_project: Boolean
