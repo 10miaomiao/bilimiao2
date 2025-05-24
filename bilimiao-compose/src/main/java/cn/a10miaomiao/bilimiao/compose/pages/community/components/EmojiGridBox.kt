@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,8 +56,14 @@ fun EmojiGridBox(
     val packageList = remember {
         mutableStateListOf<UserEmotePackageInfo>()
     }
+    val packageListState = rememberLazyListState()
     val pagerState = rememberPagerState { packageList.size }
     val scope = rememberCoroutineScope()
+    LaunchedEffect(pagerState.currentPage) {
+        scope.launch {
+            packageListState.animateScrollToItem(pagerState.currentPage)
+        }
+    }
     LaunchedEffect(Unit) {
         try {
             loading.value = true
@@ -91,7 +98,8 @@ fun EmojiGridBox(
         } else {
             Column {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    state = packageListState,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
                     items(packageList.size) {
                         val item = packageList[it]
