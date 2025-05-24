@@ -47,6 +47,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.dynamic.content.DynamicVideoListCon
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomePopularContent
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeRecommendContent
+import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.store.WindowStore
@@ -149,6 +150,12 @@ private fun DynamicPageContent(
                 key = MenuKeys.dynamic
                 title = "动态"
                 iconFileName = "ic_baseline_icecream_24"
+            }
+            myItem {
+                key = MenuKeys.search
+                title = "搜索"
+                iconFileName = "ic_search_gray"
+                action = MenuActions.search
             }
         }
     )

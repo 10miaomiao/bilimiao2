@@ -71,6 +71,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
@@ -367,6 +368,12 @@ private fun HomePageContent(
                 key = MenuKeys.dynamic
                 title = "动态"
                 iconFileName = "ic_baseline_icecream_24"
+            }
+            myItem {
+                key = MenuKeys.search
+                title = "搜索"
+                iconFileName = "ic_search_gray"
+                action = MenuActions.search
             }
         }
     )
