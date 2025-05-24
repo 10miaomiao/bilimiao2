@@ -87,12 +87,12 @@
         </activity>
 
         <service
-            android:name="cn.a10miaomiao.bilimiao.download.DownloadService"
-            android:exported="true" />
+            android:name="cn.a10miaomiao.bilimiao.download.DownloadService"/>
         <service
             android:name=".service.PlaybackService"
             android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
+            android:foregroundServiceType="mediaPlayback"
+            android:permission="android.permission.BIND_MEDIA_BROWSER_SERVICE">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
                 <action android:name="android.media.browse.MediaBrowserService" />
