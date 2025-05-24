@@ -323,9 +323,6 @@ private fun ReplyTextField(
                 }
                 innerTextField()
             },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Send
-            ),
             keyboardActions = KeyboardActions(
                 onDone = {
                     state.freeFocus()
