@@ -229,7 +229,6 @@ internal class DownloadBangumiCreatePageViewModel(
         val source = BiliDownloadEntryInfo.SourceInfo(
             av_id = episode.aid.toLong(),
             cid = episode.cid.toLong(),
-            website = "bangumi",
         )
         val ep = BiliDownloadEntryInfo.EpInfo(
             av_id = source.av_id,

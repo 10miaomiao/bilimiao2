@@ -117,10 +117,10 @@ internal class DownloadListPageViewModel(
             val page = biliEntry.page_data
             if (page != null) {
                 id = biliEntry.avid!!
-                indexTitle = page.download_title
+                indexTitle = page.download_title ?: "unknown"
                 cid = page.cid
                 type = DownloadType.VIDEO
-                itemTitle = page.part
+                itemTitle = page.part ?: "unknown"
             }
             val ep = biliEntry.ep
             val source = biliEntry.source
