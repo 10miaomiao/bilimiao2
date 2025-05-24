@@ -244,7 +244,8 @@ private fun VideoDetailPageContent(
                                     .find { it.cid == cid }
                                     ?.part
                             } ?: "",
-                            onClick = viewModel::playVideo
+                            onClick = viewModel::playVideo,
+                            onLongClick = viewModel::openCoverActivity
                         )
                     }
                 }
