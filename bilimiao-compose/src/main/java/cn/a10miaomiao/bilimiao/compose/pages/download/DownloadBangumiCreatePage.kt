@@ -27,6 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
+import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo2
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
@@ -95,9 +96,9 @@ internal class DownloadBangumiCreatePageViewModel(
             list.loading.value = true
             val res = BiliApiService.bangumiAPI.seasonSection(id)
                 .awaitCall()
-                .json<ResultInfo2<SeasonSectionInfo>>()
-            if (res.code == 0) {
-                val result = res.result.main_section?.episodes ?: emptyList()
+                .json<ResponseResult<SeasonSectionInfo>>()
+            if (res.isSuccess) {
+                val result = res.requireData().main_section?.episodes ?: emptyList()
                 list.data.value = result
                 if (result.isNotEmpty()) {
                     loadAcceptQuality(result[0].id, result[0].cid)

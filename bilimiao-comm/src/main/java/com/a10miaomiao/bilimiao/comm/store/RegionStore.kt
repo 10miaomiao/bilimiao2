@@ -67,6 +67,7 @@ class RegionStore(override val di: DI) :
                 regions = data.toMutableList()
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             PopTip.show("读取分区列表遇到错误")
         }
         // 从网络读取最新版本的分区列表
