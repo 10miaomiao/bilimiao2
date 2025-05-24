@@ -152,7 +152,7 @@ class DynamicVideoListContentViewModel(
     fun refresh() {
         list.reset()
         isRefreshing.value = true
-        loadData()
+        loadData("")
     }
 
     private fun getDynamicContent(
