@@ -127,6 +127,10 @@ fun VideoDetailContent(
                             key = 5
                             title = "复制BV号"
                         }
+                        myItem {
+                            key = 6
+                            title = "保存封面"
+                        }
                     }
                 }
                 myItem {
@@ -197,7 +201,8 @@ fun VideoDetailContent(
                         progressTitle = videoHistory?.cid?.let { cid ->
                             videoPages.find { it.cid == cid }?.part
                         } ?: "",
-                        onClick = viewModel::playVideo
+                        onClick = viewModel::playVideo,
+                        onLongClick = viewModel::openCoverActivity
                     )
                 }
                 VideoUpperBox(
