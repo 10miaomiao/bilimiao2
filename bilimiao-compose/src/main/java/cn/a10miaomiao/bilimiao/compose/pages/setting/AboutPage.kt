@@ -264,6 +264,7 @@ private class AboutPageViewModel(
         pageNavigation.navigate(TestPage())
     }
 
+    @Serializable
     data class ContributorInfo(
         val email: String,
         val name: String,
@@ -271,6 +272,7 @@ private class AboutPageViewModel(
         val avatar_url: String?,
     )
 
+    @Serializable
     data class GithubContributorInfo(
         val login: String,
         val html_url: String,
