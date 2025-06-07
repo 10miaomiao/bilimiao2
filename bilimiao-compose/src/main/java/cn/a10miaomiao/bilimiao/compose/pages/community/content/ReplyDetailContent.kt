@@ -79,6 +79,7 @@ import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.VideoCommentReplyInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
+import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
@@ -113,7 +114,7 @@ private class ReplyDetailContentViewModel(
         onAddReply = ::addNewReply,
     )
 
-    private var _sortOrder = MutableStateFlow(3)
+    private var _sortOrder = MutableStateFlow(2)
     val sortOrder: StateFlow<Int> get() = _sortOrder
     val sortOrderList = listOf(
         2 to "按时间",
@@ -373,6 +374,8 @@ fun ReplyDetailContent(
     val listFail by viewModel.list.fail.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val upMid by viewModel.upMid.collectAsState()
+    val sortOrder by viewModel.sortOrder.collectAsState()
+    val sortOrderList = viewModel.sortOrderList
 
     if (usePageConfig) {
         val memberName = reply.member?.name
@@ -382,7 +385,7 @@ fun ReplyDetailContent(
                 "评论详情"
             else
                 "${memberName}\n的\n评论",
-            menu = rememberMyMenu {
+            menu = rememberMyMenu(sortOrder) {
                 myItem {
                     key = MenuKeys.send
                     iconFileName = "ic_baseline_send_24"
@@ -395,13 +398,23 @@ fun ReplyDetailContent(
                         title = "删除评论"
                     }
                 }
-//                if (viewModel.enterPageUrl != null) {
-//                    myItem {
-//                        key = MenuKeys.url
-//                        iconFileName = "ic_link_black_24dp"
-//                        title = "评论来源"
-//                    }
-//                }
+                myItem {
+                    key = MenuKeys.sort
+                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    title = sortOrderList
+                        .find { it.first == sortOrder }
+                        ?.second ?: "排序"
+                    childMenu = myMenu {
+                        checkable = true
+                        checkedKey = sortOrder
+                        sortOrderList.forEach {
+                            myItem {
+                                key = it.first
+                                title = it.second
+                            }
+                        }
+                    }
+                }
             }
         )
         PageListener(
@@ -451,6 +464,47 @@ fun ReplyDetailContent(
                             imageVector = Icons.AutoMirrored.Filled.Comment,
                             contentDescription = "回复评论",
                         )
+                    }
+                    val expanded = remember {
+                        mutableStateOf(false)
+                    }
+                    Box {
+                        IconButton(
+                            onClick = {
+                                expanded.value = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = "列表排序",
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = expanded.value,
+                            onDismissRequest = {
+                                expanded.value = false
+                            },
+                        ) {
+                            viewModel.sortOrderList.forEach {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(text = it.second)
+                                    },
+                                    onClick = {
+                                        viewModel.setSortOrder(it.first)
+                                        expanded.value = false
+                                    },
+                                    trailingIcon = {
+                                        if (it.first == sortOrder) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
