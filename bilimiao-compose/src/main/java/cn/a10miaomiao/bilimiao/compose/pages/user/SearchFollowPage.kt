@@ -33,6 +33,7 @@ import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,7 +59,6 @@ private class SearchFollowPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val activity by instance<Activity>()
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
 
@@ -108,7 +108,8 @@ private class SearchFollowPageViewModel(
                 list.fail.value = res.message
             }
         } catch (e: Exception) {
-            list.fail.value = "无法连接到御坂网络"
+            e.printStackTrace()
+            list.fail.value = e.message ?: e.toString()
         } finally {
             list.loading.value = false
             isRefreshing.value = false

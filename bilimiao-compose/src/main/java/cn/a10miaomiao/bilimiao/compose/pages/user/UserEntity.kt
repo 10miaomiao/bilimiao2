@@ -18,9 +18,10 @@ internal data class FollowingItemInfo(
     val isFollowing get() = attribute == 2 || attribute == 6
 }
 
+@Serializable
 internal data class FollowingsInfo(
     val list: List<FollowingItemInfo>,
-    val re_version: Int,
+    val re_version: Int = 0,
     val total: Int,
 )
 
