@@ -336,7 +336,6 @@ internal fun DownloadListPageContent(
         }
         items(
             list,
-            key = { it.cid },
         ) {
             DownloadListItem(
                 curDownload = curDownload,

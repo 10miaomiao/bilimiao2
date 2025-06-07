@@ -57,16 +57,16 @@ sealed class BiliDownloadMediaFileInfo {
     data class Type2File(
         val id: Int,
         val base_url: String,
-        val backup_url: List<String>?,
+        val backup_url: List<String>? = null,
         val bandwidth: Int,
         val codecid: Int,
         var size: Long,
         val md5: String,
         val no_rexcode: Boolean,
-        val frame_rate: String,
-        val width: Int,
-        val height: Int,
-        val dash_drm_type: Int,
+        val frame_rate: String = "",
+        val width: Int = 1,
+        val height: Int = 1,
+        val dash_drm_type: Int = 0,
     )
 
     @Serializable

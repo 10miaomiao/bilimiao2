@@ -232,7 +232,6 @@ internal fun DownloadDetailPageContent(
             }
             items(
                 downloadItems,
-                key = { it.cid },
             ) { item ->
                 DownloadDetailItem(
                     curDownload = curDownload,
