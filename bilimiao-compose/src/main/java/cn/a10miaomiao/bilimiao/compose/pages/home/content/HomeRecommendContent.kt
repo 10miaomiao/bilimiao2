@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
 import bilibili.app.card.v1.Card
 import bilibili.app.card.v1.SmallCoverV5
 import bilibili.app.show.v1.EntranceShow

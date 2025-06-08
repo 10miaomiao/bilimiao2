@@ -31,11 +31,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -72,7 +72,7 @@ internal class SendDanmakuViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
     private val playerDelegate by instance<BasePlayerDelegate>()
 
     internal val danmakuTypeList = listOf<SelectItemInfo<Int>>(
@@ -165,7 +165,7 @@ internal class SendDanmakuViewModel(
                             color,
                             currentPosition
                         )
-                        fragment.findNavController().popBackStack()
+                        pageNavigation.popBackStack()
                     } else {
                         PopTip.show(res.message)
                     }

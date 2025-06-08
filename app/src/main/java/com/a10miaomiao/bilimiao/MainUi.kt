@@ -16,8 +16,6 @@ import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
-import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetUi
-import com.a10miaomiao.bilimiao.comm.shadowLayout
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
@@ -32,7 +30,7 @@ import splitties.views.dsl.core.*
 
 
 @OptIn(InternalSplittiesApi::class)
-class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
+class MainUi(override val ctx: Context) : Ui {
 
     companion object {
         // 重启activiry时保持播放
@@ -45,17 +43,12 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         visibility = View.INVISIBLE
     }
 
-    val mContainerView = inflate<FragmentContainerView>(R.layout.container_fragment) {
+    val mContainerView = inflate<View>(R.layout.container_fragment) {
         backgroundColor = Color.TRANSPARENT
     }
 
-    val mSubContainerView = inflate<FragmentContainerView>(R.layout.container_fragment_sub) {
+    val mSubContainerView = inflate<View>(R.layout.container_fragment_sub) {
         backgroundColor = Color.TRANSPARENT
-    }
-
-    val mBottomSheetView = inflate<FragmentContainerView>(R.layout.bottom_sheet_fragment) {
-        backgroundColor = config.windowBackgroundColor
-        setOnClickListener {  }
     }
 
     val mAppBar = view<AppBarView>{
@@ -97,45 +90,6 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
         addView(areaLimitView, lParams(matchParent, matchParent))
         addView(loadingView, lParams(matchParent, matchParent))
     }
-
-    var mBottomSheetTitleView = textView {
-        gravity = Gravity.CENTER
-    }
-
-    val mBottomSheetLayout = frameLayout {
-        elevation = dip(20).toFloat()
-        setOnClickListener { }
-//        translationY = dip(-200f)
-
-        addView(limitedFrameLayout {
-            maxHeight = dip(500)
-            maxWidth = dip(600)
-
-            addView(shadowLayout {
-                backgroundColor = config.windowBackgroundColor
-                val round = dip(10)
-                setSpecialCorner(round, round, 0 ,0)
-
-                addView(mBottomSheetView, lParams {
-                    width = matchParent
-                    height = matchParent
-                })
-                addView(bottomSheetTitleView, lParams {
-                    width = matchParent
-                    height = config.bottomSheetTitleHeight
-                })
-            }, lParams {
-                width = matchParent
-                height = matchParent
-            })
-        }, lParams {
-            width = matchParent
-            height = matchParent
-            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        })
-    }
-
-    var mBottomSheetBehavior: BottomSheetBehavior<View>? = null
 
     var mMaskView = view<View> {
         setBackgroundResource(R.color.black)
@@ -198,18 +152,6 @@ class MainUi(override val ctx: Context) : Ui, BottomSheetUi {
             width = matchParent
             behavior = DrawerBehavior(ctx, null)
         })
-
-        addView(mBottomSheetLayout, lParams {
-            height = matchParent
-            width = matchParent
-            mBottomSheetBehavior = MyBottomSheetBehavior(ctx)
-            behavior = mBottomSheetBehavior
-        })
     }
-
-    override val bottomSheetView get() = mBottomSheetView
-    override val bottomSheetBehavior get() = mBottomSheetBehavior
-    override val bottomSheetTitleView get() = mBottomSheetTitleView
-    override val bottomSheetMaskView get() = mMaskView
 
 }

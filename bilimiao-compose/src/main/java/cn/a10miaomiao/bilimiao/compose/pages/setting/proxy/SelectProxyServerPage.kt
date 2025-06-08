@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting.proxy
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,7 +19,6 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
@@ -52,7 +52,7 @@ internal class SelectProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val activity by instance<Activity>()
     private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
@@ -99,8 +99,8 @@ internal class SelectProxyServerPageViewModel(
     val selectedUpos = MutableStateFlow(uposList[0])
 
     fun readServerList() {
-        serverList.value = ProxyHelper.serverList(fragment.requireContext())
-        val uposName = ProxyHelper.uposName(fragment.requireContext())
+        serverList.value = ProxyHelper.serverList(activity)
+        val uposName = ProxyHelper.uposName(activity)
         uposList.find { it.name == uposName }?.let {
             selectedUpos.value = it
         }
@@ -119,11 +119,11 @@ internal class SelectProxyServerPageViewModel(
     }
 
     fun applyServer() {
-        ProxyHelper.saveUposName(fragment.requireContext(), selectedUpos.value.name)
+        ProxyHelper.saveUposName(activity, selectedUpos.value.name)
         val uposHost = selectedUpos.value.host
         val proxyServer = serverList.value[selectedServerIndex.value]
         basePlayerDelegate.setProxy(proxyServer, uposHost)
-        fragment.findNavController().popBackStack()
+        pageNavigation.popBackStack()
     }
 
     fun toAddPage() {

@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menufold

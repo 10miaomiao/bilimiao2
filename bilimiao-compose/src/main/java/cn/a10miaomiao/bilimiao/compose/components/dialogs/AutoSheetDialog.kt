@@ -22,6 +22,7 @@ import androidx.window.core.layout.WindowWidthSizeClass
 fun AutoSheetDialog(
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit,
+    onPreDismiss: (() -> Boolean)? = null,
     content: @Composable () -> Unit
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
@@ -32,6 +33,7 @@ fun AutoSheetDialog(
     }
     AnyPopDialog(
         onDismiss = onDismiss,
+        onPreDismiss = onPreDismiss,
         content = {
             Box(
                 modifier = Modifier

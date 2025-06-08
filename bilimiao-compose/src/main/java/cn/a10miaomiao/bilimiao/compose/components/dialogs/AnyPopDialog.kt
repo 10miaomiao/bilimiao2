@@ -76,6 +76,7 @@ private const val DefaultDurationMillis: Int = 250
 private fun DialogFullScreen(
     isActiveClose: Boolean,
     onDismissRequest: () -> Unit,
+    onPreDismissRequest: (() -> Boolean)? = null,
     properties: AnyPopDialogProperties,
     content: @Composable () -> Unit
 ) {
@@ -94,7 +95,7 @@ private fun DialogFullScreen(
     }
 
     val handleBackPress = {
-        if (!isBackPress) {
+        if (!isBackPress && onPreDismissRequest?.invoke() != true) {
             isBackPress = true
             isAnimateLayout = false
         }
@@ -217,11 +218,13 @@ fun AnyPopDialog(
     isActiveClose: Boolean = false,
     properties: AnyPopDialogProperties = AnyPopDialogProperties(direction = DirectionState.BOTTOM),
     onDismiss: () -> Unit,
+    onPreDismiss: (() -> Boolean)? = null,
     content: @Composable () -> Unit
 ) {
     DialogFullScreen(
         isActiveClose = isActiveClose,
         onDismissRequest = onDismiss,
+        onPreDismissRequest = onPreDismiss,
         properties = properties,
         content = content,
     )

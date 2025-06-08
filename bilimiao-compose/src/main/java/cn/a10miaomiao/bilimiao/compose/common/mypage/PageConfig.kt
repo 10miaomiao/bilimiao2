@@ -46,6 +46,11 @@ class PageConfigState {
         configFlow.debounce(200).collect(collector)
     }
 
+    @Composable
+    fun collectConfigAsState(): State<Cofing> {
+        return configFlow.collectAsState()
+    }
+
     fun putMyPageListener(id: Int, listener: OnMyPageListener) {
         listenerMap[id] = listener
     }

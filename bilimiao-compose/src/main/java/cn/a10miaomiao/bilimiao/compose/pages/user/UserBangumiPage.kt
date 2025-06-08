@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel

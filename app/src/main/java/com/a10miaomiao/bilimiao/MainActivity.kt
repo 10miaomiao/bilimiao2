@@ -29,12 +29,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.NavHostFragment
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
@@ -45,13 +42,12 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
-import com.a10miaomiao.bilimiao.comm.delegate.sheet.BottomSheetDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPopupMenu
-import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
@@ -101,7 +97,6 @@ class MainActivity
     private val store by lazy { Store(this, di) }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
     private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate2(this, di) }
-    private val bottomSheetDelegate by lazy { BottomSheetDelegate(this, ui) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val supportHelper by lazy { SupportHelper(this) }
     private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
@@ -189,7 +184,6 @@ class MainActivity
         mainUi = MainUi(this)
         setContentView(ui.root)
         basePlayerDelegate.onCreate(savedInstanceState)
-        bottomSheetDelegate.onCreate(savedInstanceState)
         ui.root.showPlayer = basePlayerDelegate.isPlaying()
         ui.root.playerDelegate = basePlayerDelegate as PlayerDelegate2
         ui.root.onDrawerStateChanged = ::onDrawerStateChanged
@@ -437,6 +431,10 @@ class MainActivity
         currentNav.onSearchSelfPage(this, keyword)
     }
 
+    fun openBottomSheet(page: ComposePage) {
+        navHostFragment.openBottomSheet(page)
+    }
+
     fun setWindowInsetsAndroidL() {
         val rectangle = Rect()
         val displayMetrics = DisplayMetrics()
@@ -472,7 +470,7 @@ class MainActivity
             left, top, right, bottom,
         )
         windowStore.setBottomSheetContentInsets(
-            0, config.bottomSheetTitleHeight, 0, bottom
+            0, config.bottomSheetTitleHeight, 0, 0
         )
         val playerLP = ui.mPlayerLayout.layoutParams
         if (playerLP is ScaffoldView.LayoutParams) {
@@ -482,7 +480,6 @@ class MainActivity
             }
         }
         ui.mAppBar.setWindowInsets(left, top, right, bottom)
-        ui.mBottomSheetLayout.setPadding(left, top, right, 0)
         val showPlayer = ui.root.showPlayer
         val fullScreenPlayer = ui.root.fullScreenPlayer
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
@@ -538,7 +535,6 @@ class MainActivity
 
     override fun onDestroy() {
         basePlayerDelegate.onDestroy()
-        bottomSheetDelegate.onDestroy()
         store.onDestroy()
         super.onDestroy()
     }
@@ -679,9 +675,6 @@ class MainActivity
             ui.root.closeDrawer()
             return
         }
-        if (bottomSheetDelegate.onBackPressed()) {
-            return
-        }
         if (ui.root.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
@@ -696,17 +689,6 @@ class MainActivity
         ScreenDpiUtil.readCustomConfiguration(configuration)
         val newContext = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(newContext)
-    }
-
-    fun getPrimaryNavigationFragment(nav: NavController): Fragment? {
-        return null
-//        return if (nav === navController) {
-//            navHostFragment.childFragmentManager.primaryNavigationFragment
-//        } else if (nav === subNavController) {
-//            subNavHostFragment?.childFragmentManager?.primaryNavigationFragment
-//        } else {
-//            null
-//        }
     }
 
 }

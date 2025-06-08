@@ -13,14 +13,13 @@ class WindowStore(
 ) : ViewModel(), BaseStore<WindowStore.State> {
 
     data class State(
-        var bottomSheetFragmentID: Int = 0,
         var bottomAppBarHeight: Int = 0,
         var windowInsets: Insets = Insets(),
         var contentInsets: Insets = Insets(),
         var bottomSheetContentInsets: Insets = Insets(),
     ) {
         fun getContentInsets(view: View?): Insets {
-            if (view != null && view.id == bottomSheetFragmentID) {
+            if (view != null && view.tag == "bottomSheet") {
                 return bottomSheetContentInsets
             }
             return contentInsets

@@ -4,11 +4,9 @@ import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import org.kodein.di.DI
@@ -39,8 +37,7 @@ class ErrorMessageBoxController(
         }
         errorMessageRetryBtn.setOnClickListener {
             if (delegate.playerSource?.proxyServer != null) {
-                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                nav.navigateToCompose(BilimiaoPageRoute.Entry.SelectProxyServer)
+                activity.openBottomSheet(SelectProxyServerPage())
             } else {
                 hide()
                 delegate.reloadPlayer()

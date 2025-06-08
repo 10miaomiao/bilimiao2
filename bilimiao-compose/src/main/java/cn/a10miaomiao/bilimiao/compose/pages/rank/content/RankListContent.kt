@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
 import bilibili.app.show.v1.RankAllResultReq
 import bilibili.app.show.v1.RankGRPC
 import bilibili.app.show.v1.RankRegionResultReq

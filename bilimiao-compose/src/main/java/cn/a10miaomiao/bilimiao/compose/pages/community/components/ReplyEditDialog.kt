@@ -77,7 +77,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AnyPopDialog
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AnyPopDialogProperties
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
@@ -231,11 +230,6 @@ fun ReplyEditDialog(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(10.dp),
             content = {
-                BackHandler(
-                    enabled = showEmojiGrid.value,
-                ) {
-                    showEmojiGrid.value = false
-                }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -281,7 +275,15 @@ fun ReplyEditDialog(
                     }
                 }
             },
-            onDismiss = state::dismiss
+            onDismiss = state::dismiss,
+            onPreDismiss = {
+                if (showEmojiGrid.value) {
+                    showEmojiGrid.value = false
+                    true
+                } else {
+                    false
+                }
+            }
         )
     }
 }
