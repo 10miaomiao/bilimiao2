@@ -14,7 +14,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.Navigator
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
@@ -24,6 +23,7 @@ import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 class PageNavigation(
     private val navHostController: () -> NavHostController,
     private val launchUrl: (uri: Uri) -> Unit,
+    private val onClose: () -> Unit = {},
 ) {
 
     val hostController get() = navHostController()
@@ -52,7 +52,9 @@ class PageNavigation(
     }
 
     fun popBackStack() {
-        hostController.popBackStack()
+        if (!hostController.popBackStack()) {
+            onClose()
+        }
     }
 
     fun <T : ComposePage> popBackStack(
@@ -60,7 +62,9 @@ class PageNavigation(
         inclusive: Boolean,
         saveState: Boolean = false
     ) {
-        hostController.popBackStack(route, inclusive, saveState)
+        if(!hostController.popBackStack(route, inclusive, saveState)) {
+            onClose()
+        }
     }
 
     fun navigateToVideoInfo(id: String) {

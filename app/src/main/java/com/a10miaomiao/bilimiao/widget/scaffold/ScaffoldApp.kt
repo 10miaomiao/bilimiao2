@@ -6,10 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.ViewGroup
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.findNavController
-import com.a10miaomiao.bilimiao.R
 
 fun <T: View> getView(viewGroup: ViewGroup, clazz: Class<T>): T? {
     for (i in 0 until viewGroup.size) {

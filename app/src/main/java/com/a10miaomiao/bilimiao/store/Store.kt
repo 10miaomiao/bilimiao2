@@ -44,7 +44,6 @@ class Store (
         }
 
         fun onCreate(savedInstanceState: Bundle?) {
-                windowStore.state.bottomSheetFragmentID = R.id.nav_bottom_sheet_fragment
                 appStore.init(activity)
                 windowStore.init(activity)
                 playerStore.init(activity)

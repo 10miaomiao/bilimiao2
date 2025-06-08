@@ -13,7 +13,7 @@ import splitties.views.dsl.core.matchParent
 
 class ViewConfig(val context: Context) {
     val pagePadding = context.dip(10)
-    val bottomSheetTitleHeight = context.dip(30)
+    val bottomSheetTitleHeight = context.dip(48)
 
     val smallPadding = context.dip(5)
     val largePadding = context.dip(20)

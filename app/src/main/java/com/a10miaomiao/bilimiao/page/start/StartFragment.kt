@@ -21,8 +21,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withStarted
-import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
@@ -55,9 +53,6 @@ import com.a10miaomiao.bilimiao.comm.miaoBindingUi
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myPageConfig
-import com.a10miaomiao.bilimiao.comm.navigation.FragmentNavigatorBuilder
-import com.a10miaomiao.bilimiao.comm.navigation.MainNavArgs
-import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
 import com.a10miaomiao.bilimiao.comm.recycler.GridAutofitLayoutManager
 import com.a10miaomiao.bilimiao.comm.recycler._miaoAdapter
 import com.a10miaomiao.bilimiao.comm.recycler._miaoLayoutManage
@@ -121,19 +116,7 @@ import java.io.File
 
 class StartFragment : Fragment(), DIAware, MyPage {
 
-    companion object : FragmentNavigatorBuilder() {
-        override val name = "start"
-
-        fun createArguments(): Bundle {
-            return bundleOf()
-        }
-
-        fun createArguments(text: String): Bundle {
-            return bundleOf(
-                MainNavArgs.text to text
-            )
-        }
-
+    companion object {
         private val ID_searchView = View.generateViewId()
         private val ID_searchTextView = View.generateViewId()
         private val ID_radioButton_all = View.generateViewId()

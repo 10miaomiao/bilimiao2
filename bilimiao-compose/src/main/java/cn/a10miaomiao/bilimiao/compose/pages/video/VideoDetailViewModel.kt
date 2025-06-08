@@ -14,7 +14,7 @@ import bilibili.app.view.v1.ViewGRPC
 import bilibili.app.view.v1.ViewReply
 import bilibili.app.view.v1.ViewReq
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
-import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
+import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
@@ -65,6 +65,7 @@ class VideoDetailViewModel(
     private val playerStore: PlayerStore by instance()
     private val playListStore: PlayListStore by instance()
     private val userStore: UserStore by instance()
+    private val bottomSheetState: BottomSheetState by instance()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> get() = _isRefreshing
@@ -452,11 +453,7 @@ class VideoDetailViewModel(
 
     fun openVideoPages() {
         val arc = detailData.value?.getArcData() ?: return
-        BottomSheetNavigation.navigate(
-            activity,
-            entry = BilimiaoPageRoute.Entry.VideoPages,
-            param = arc.aid.toString()
-        )
+        bottomSheetState.open(VideoPagesPage(arc.aid.toString()))
     }
 
     fun openCoverActivity() {

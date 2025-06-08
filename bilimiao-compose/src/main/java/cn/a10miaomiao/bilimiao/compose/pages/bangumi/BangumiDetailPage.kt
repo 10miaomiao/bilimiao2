@@ -25,15 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
+import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
-import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.layout.DoubleColumnAutofitLayout
@@ -41,6 +40,7 @@ import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememb
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.components.BangumiEpisodeItem
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyListPage
+import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import com.a10miaomiao.bilimiao.comm.delegate.player.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
@@ -105,6 +105,7 @@ private class BangumiDetailPageViewModel(
     private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
+    private val bottomSheetState by instance<BottomSheetState>()
 
     var seasonId = ""
         set(value) {
@@ -357,12 +358,7 @@ private class BangumiDetailPageViewModel(
                 // 下载番剧
                 val info = detailInfo.value
                 if (info != null) {
-                    val activity = fragment.requireActivity()
-                    BottomSheetNavigation.navigate(
-                        activity,
-                        BilimiaoPageRoute.Entry.DownloadBangumiCreate,
-                        info.season_id
-                    )
+                    bottomSheetState.open(DownloadBangumiCreatePage(info.season_id))
                 } else {
                     PopTip.show("请等待信息加载完成")
                 }

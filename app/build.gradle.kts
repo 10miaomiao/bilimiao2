@@ -110,8 +110,6 @@ dependencies {
     implementation(Libraries.material)
     implementation(Libraries.lifecycle)
     implementation(Libraries.lifecycleViewModel)
-    implementation(Libraries.navigationFragment)
-    implementation(Libraries.navigationUi)
     implementation(Libraries.datastore)
     implementation(Libraries.media)
     implementation(Libraries.browser)

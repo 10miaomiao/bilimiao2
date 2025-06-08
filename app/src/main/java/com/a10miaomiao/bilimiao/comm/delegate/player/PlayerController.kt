@@ -13,20 +13,18 @@ import android.view.accessibility.AccessibilityEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.datastore.preferences.core.Preferences
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
-import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
-import com.a10miaomiao.bilimiao.comm.navigation.navigateToCompose
+import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -486,18 +484,14 @@ class PlayerController(
 
     fun showPagesOrEpisodes(view: View) {
         val playerSource = delegate.playerSource
-        val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
         if (playerSource is VideoPlayerSource) {
-            nav.navigateToCompose(
-                BilimiaoPageRoute.Entry.VideoPages,
-                playerSource.aid
-            )
+            activity.openBottomSheet(VideoPagesPage(playerSource.aid))
         }
         if (playerSource is BangumiPlayerSource) {
-            nav.navigateToCompose(
-                BilimiaoPageRoute.Entry.BangumiEpisodes,
-                "sid=${playerSource.sid}&title=${playerSource.ownerName}"
-            )
+            activity.openBottomSheet(BangumiEpisodesPage(
+                sid = playerSource.sid,
+                title = playerSource.ownerName,
+            ))
         }
 
     }
@@ -514,10 +508,7 @@ class PlayerController(
             views.videoPlayer.onVideoPause()
             views.videoPlayer.hideController()
         }
-        val nav = Navigation.findNavController(
-            activity, R.id.nav_bottom_sheet_fragment
-        )
-        nav.navigateToCompose(BilimiaoPageRoute.Entry.SendDanmaku)
+        activity.openBottomSheet(SendDanmakuPage())
     }
 
     fun holdUpPlayer(view: View) {
@@ -548,23 +539,17 @@ class PlayerController(
             }
 
             R.id.video_setting -> {
-                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
-                nav.navigateToCompose(BilimiaoPageRoute.Entry.VideoSetting)
+                activity.openBottomSheet(VideoSettingPage())
             }
 
             R.id.danmuku_setting -> {
-                val nav = activity.findNavController(R.id.nav_bottom_sheet_fragment)
                 val tabName = if (scaffoldApp.fullScreenPlayer){
                     SettingPreferences.DanmakuFullMode.name
                 } else {
                     SettingPreferences.DanmakuSmallMode.name
                 }
-                nav.navigateToCompose(
-                    BilimiaoPageRoute.Entry.DanmakuDisplaySetting,
-                    tabName
-                )
+                activity.openBottomSheet(DanmakuDisplaySettingPage(tabName))
             }
-
             R.id.scale_1,
             R.id.scale_2,
             R.id.scale_3,

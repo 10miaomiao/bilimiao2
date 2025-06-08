@@ -44,19 +44,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
-import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePageState
 import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineRegionCard
 import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineTimeCard
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
@@ -81,8 +82,8 @@ private class HomeTimeMachineContentViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    val fragment: Fragment by instance()
     private val pageNavigation: PageNavigation by instance()
+    private val bottomSheetState by instance<BottomSheetState>()
 
     val timeSettingStore: TimeSettingStore by instance()
     val regionStore: RegionStore by instance()
@@ -118,11 +119,7 @@ private class HomeTimeMachineContentViewModel(
     }
 
     fun openTimeSetting() {
-        BottomSheetNavigation.navigate(
-            fragment.requireActivity(),
-            entry = BilimiaoPageRoute.Entry.TimeSetting,
-            param = ""
-        )
+        bottomSheetState.open(TimeSettingPage())
     }
 
 }

@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
 import bilibili.main.community.reply.v1.CursorReply
 import bilibili.main.community.reply.v1.CursorReq
 import bilibili.main.community.reply.v1.DetailListReq

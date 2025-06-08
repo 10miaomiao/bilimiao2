@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
+import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
@@ -34,7 +35,6 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
-import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomSheetNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.time.content.TimeRegionDetailListContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
@@ -82,9 +82,8 @@ private class TimeRegionDetailPageViewModel(
     val initialIndex: Int,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val timeSettingStore: TimeSettingStore by instance()
-    private val filterStore: FilterStore by instance()
+    private val bottomSheetState by instance<BottomSheetState>()
 
     val timeText = timeSettingStore.stateFlow.stateMap {
         "${it.timeFrom.getValue("-")}\n至\n${it.timeTo.getValue("-")}"
@@ -109,11 +108,7 @@ private class TimeRegionDetailPageViewModel(
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.time -> {
-                BottomSheetNavigation.navigate(
-                    fragment.requireActivity(),
-                    BilimiaoPageRoute.Entry.TimeSetting,
-                    ""
-                )
+                bottomSheetState.open(TimeSettingPage())
             }
             in 0..4 -> {
                 timeSettingStore.setRankOrder(item.key!!)

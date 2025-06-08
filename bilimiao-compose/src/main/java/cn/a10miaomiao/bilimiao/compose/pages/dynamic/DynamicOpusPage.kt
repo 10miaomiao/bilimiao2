@@ -28,7 +28,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import bilibili.app.archive.middleware.v1.PlayerArgs
 import bilibili.app.dynamic.v2.Module.ModuleItem
 import bilibili.app.dynamic.v2.OpusDetailReq
@@ -138,17 +137,6 @@ private class DynamicOpusPageViewModel(
 
     fun menuItemClick(view: View, item: MenuItemPropInfo) {
         when (item.key) {
-            MenuKeys.home -> {
-                val nav = fragment.findNavController()
-                val mainDestinationId = 100
-                val navOptions = NavOptions.Builder()
-                    .setLaunchSingleTop(true)
-                    .setPopUpTo(nav.graph.findStartDestination().id, false, true)
-                    .setRestoreState(true)
-                    .build()
-                defaultNavOptions
-                nav.navigate(Uri.parse("bilimiao://home"), navOptions)
-            }
         }
     }
 }

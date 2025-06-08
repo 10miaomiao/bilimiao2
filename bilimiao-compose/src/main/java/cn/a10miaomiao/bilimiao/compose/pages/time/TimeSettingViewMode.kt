@@ -3,10 +3,11 @@ package cn.a10miaomiao.bilimiao.compose.pages.time
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
-import androidx.navigation.fragment.findNavController
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.time.components.getMonthDayNum
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
+import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -18,8 +19,7 @@ class TimeSettingViewMode(
 ) : ViewModel(), DIAware {
 
     private val timeSettingStore by instance<TimeSettingStore>()
-
-    private val fragment by instance<Fragment>()
+    private val pageNavigation by instance<PageNavigation>()
 
 //    private val calendar = Calendar.getInstance()
 
@@ -77,8 +77,7 @@ class TimeSettingViewMode(
                 timeFrom.set(start)
                 timeTo.set(end)
             } else if (start != null) {
-                Toast.makeText(fragment.requireActivity(), "时间间隔不能大于30天", Toast.LENGTH_LONG)
-                    .show()
+                PopTip.show("时间间隔不能大于30天")
             } else {
                 timeFrom.year = -1
             }
@@ -105,8 +104,7 @@ class TimeSettingViewMode(
             else -> currentTime.value
         })
         if (timeInfo.timeFrom.year == -1) {
-            Toast.makeText(fragment.requireActivity(), "请选择时间范围", Toast.LENGTH_SHORT)
-                .show()
+            PopTip.show("请选择时间范围")
             return
         }
         timeSettingStore.setTime(
@@ -115,7 +113,7 @@ class TimeSettingViewMode(
             timeInfo.timeTo.copy(),
         )
         timeSettingStore.save()
-        fragment.findNavController().popBackStack()
+        pageNavigation.popBackStack()
     }
 
     class TimeInfo(

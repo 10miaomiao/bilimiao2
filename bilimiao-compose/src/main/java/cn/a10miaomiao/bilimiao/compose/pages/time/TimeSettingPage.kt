@@ -11,11 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.fragment.findNavController
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
@@ -103,7 +105,8 @@ private fun TimeSettingPageContent(
             ) {
                 Text(
                     text = "确定",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    fontSize = 20.sp,
+                    lineHeight = 20.sp
                 )
             }
         }
