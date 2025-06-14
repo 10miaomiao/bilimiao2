@@ -17,7 +17,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class MiaoHttp(var url: String? = null) {
-    private val cookieManager = CookieManager.getInstance()
+    private val cookieManager by lazy {
+       try { CookieManager.getInstance() }
+       catch (e: Exception) { null }
+    }
 
     private var client = OkHttpClient()
     private val requestBuilder = Request.Builder()
@@ -38,7 +41,7 @@ class MiaoHttp(var url: String? = null) {
                 requestBuilder.addHeader("x-bili-mid", it.mid.toString())
             }
         }
-        val cookie = cookieManager.getCookie(url)
+        val cookie = getCookie(url)
         if (!cookie.isNullOrBlank()) {
             requestBuilder.addHeader("Cookie", cookie)
         }
@@ -61,6 +64,10 @@ class MiaoHttp(var url: String? = null) {
     fun call(): Response {
         val req = buildRequest()
         return client.newCall(req).execute()
+    }
+
+    private fun getCookie(url: String?): String {
+        return cookieManager?.getCookie(url) ?: ""
     }
 
     suspend fun awaitCall(): Response{
