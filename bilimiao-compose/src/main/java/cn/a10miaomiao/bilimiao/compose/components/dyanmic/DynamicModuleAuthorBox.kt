@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -26,15 +28,25 @@ import com.bumptech.glide.integration.compose.GlideImage
 @Composable
 fun DynamicModuleAuthorBox(
     author: bilibili.app.dynamic.v2.ModuleAuthor,
-    onClick: (() -> Unit)? = null,
+    isJumpToUser: Boolean = true,
 ) {
     val authorData = author.author ?: return
+    val pageNavigation = localPageNavigation()
+    fun jumpToUser() {
+        if (isJumpToUser) {
+            pageNavigation.navigate(
+                UserSpacePage(
+                    id = authorData.mid.toString(),
+                )
+            )
+        }
+    }
     DynamicModuleAuthorBox(
         name = authorData.name,
         face = authorData.face,
         labelText = author.ptimeLabelText,
         locationText = author.ptimeLocationText,
-        onClick = onClick,
+        onClick = ::jumpToUser,
     )
 }
 

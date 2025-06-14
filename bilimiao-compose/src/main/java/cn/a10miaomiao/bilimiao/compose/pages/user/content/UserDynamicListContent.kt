@@ -168,6 +168,7 @@ fun UserDynamicListContent(
                     .widthIn(max = 600.dp)
                     .fillMaxWidth(),
                 item = it,
+                isJumpToUser = false,
                 onClick = {
                     viewModel.toDetailPage(it)
                 },

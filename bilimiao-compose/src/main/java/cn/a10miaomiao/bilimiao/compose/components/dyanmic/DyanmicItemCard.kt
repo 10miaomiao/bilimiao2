@@ -16,6 +16,7 @@ import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 fun DynamicItemCard(
     modifier: Modifier = Modifier,
     item: bilibili.app.dynamic.v2.DynamicItem,
+    isJumpToUser: Boolean = true,
     onClick: () -> Unit,
 ) {
     MiaoCard(
@@ -24,7 +25,10 @@ fun DynamicItemCard(
         onClick = onClick,
     ) {
         for(module in item.modules) {
-            DynamicModuleBox(module = module)
+            DynamicModuleBox(
+                module = module,
+                isJumpToUser = isJumpToUser,
+            )
         }
     }
 }
