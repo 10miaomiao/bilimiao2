@@ -13,6 +13,7 @@ object MenuKeys {
     val history = id_counter++
     val download = id_counter++
     val search = id_counter++
+    val searchInHome = id_counter++
 
     val region = id_counter++
     val sort = id_counter++
