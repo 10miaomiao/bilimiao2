@@ -152,7 +152,7 @@ private fun DynamicPageContent(
                 iconFileName = "ic_baseline_icecream_24"
             }
             myItem {
-                key = MenuKeys.search
+                key = MenuKeys.searchInHome
                 title = "搜索"
                 iconFileName = "ic_search_gray"
                 action = MenuActions.search
