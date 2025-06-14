@@ -91,7 +91,7 @@ object Libraries {
     const val flexbox = "com.google.android.flexbox:flexbox:3.0.0"
     const val foregroundCompat = "me.zhanghai.android.foregroundcompat:library:1.0.2"
     const val drawer = "com.drakeet.drawer:drawer:1.0.3"
-    const val dialogX = "com.github.kongzue:DialogX:0.0.50.beta20"
+    const val dialogX = "com.github.kongzue:DialogX:0.0.50.beta37"
     const val dialogXMaterialYou = "com.github.kongzue.DialogX:DialogXMaterialYou:0.0.50.beta20"
     const val zxingLite = "com.github.jenly1314:zxing-lite:2.1.0"
 
