@@ -33,7 +33,11 @@ sealed class AnnotatedTextNode {
 //        val height: Int
     ) : AnnotatedTextNode()
     @Stable
-    class Link(val text: String, val url: String) : AnnotatedTextNode()
+    class Link(
+        val text: String,
+        val url: String,
+        val withLineBreak: Boolean = false, // 表示前面要加换行符
+    ) : AnnotatedTextNode()
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -72,6 +76,9 @@ fun annotatedText(
                     appendInlineContent(it.text)
                 }
                 is AnnotatedTextNode.Link -> {
+                    if (it.withLineBreak) {
+                        append("\n")
+                    }
                     withLink(
                         LinkAnnotation.Url(
                             it.url,

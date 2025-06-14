@@ -13,7 +13,28 @@ fun List<TextNode>.toAnnotatedTextNode(): List<AnnotatedTextNode> {
             }
 
             is TextNode.Text.Link -> {
-                AnnotatedTextNode.Link(node.value.showText, node.value.link)
+                var showText = node.value.showText
+                // 第一个通常是换行符(0x0a)，然后第二个是换页符(0x0c)，
+                // 这里直接去除得了，然后是显示文字部分，到(0x11)结束
+                // 后面部分应该是控制格式样式的，现在不考虑，只显示文字
+                // ฅ^•ﻌ•^ฅ
+                var showTextStart = 0
+                var showTextEnd = showText.length
+                var withLineBreak = false
+                if (showText[0].code == 0x0a) {
+                    showTextStart = 1
+                    withLineBreak = true
+                } else if (showText[0].code == 0x0c){
+                    showTextStart = 1
+                }
+                if (showText[1].code == 0x0c) {
+                    showTextStart = 2
+                }
+                if (showTextStart > 0) {
+                    showTextEnd = showText.indexOf(0x11.toChar())
+                }
+                showText = showText.substring(showTextStart, showTextEnd)
+                AnnotatedTextNode.Link(showText, node.value.link, withLineBreak)
             }
 
             is TextNode.Text.Emote -> {
