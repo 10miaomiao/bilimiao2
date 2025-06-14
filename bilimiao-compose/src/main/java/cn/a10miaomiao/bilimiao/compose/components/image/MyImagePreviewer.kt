@@ -24,6 +24,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.FragmentActivity
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -146,7 +147,10 @@ private class MyImagePreviewerController(
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MyImagePreviewer(imagePreviewerState: ImagePreviewerState) {
+fun MyImagePreviewer(
+    imagePreviewerState: ImagePreviewerState,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+) {
     val activity: FragmentActivity by rememberInstance()
     val controller = remember(imagePreviewerState) {
         MyImagePreviewerController(activity, imagePreviewerState)
@@ -181,7 +185,7 @@ fun MyImagePreviewer(imagePreviewerState: ImagePreviewerState) {
         onMenuItemClick = controller::menuItemClick,
     )
     ImagePreviewer(
-        contentPadding = imagePreviewerState.contentPadding,
+        contentPadding = contentPadding,
         state = imagePreviewerState.previewerState,
         imageLoader = { page ->
             val model = imagePreviewerState.imageModels[page]
@@ -190,6 +194,8 @@ fun MyImagePreviewer(imagePreviewerState: ImagePreviewerState) {
             GlideSubcomposition(imageUrl) {
                 if (state is RequestState.Success) {
                     painterState.value = painter
+                    // 设置原图已下载标志
+                    imagePreviewerState.onImageLoaded(page)
                 }
             }
             return@ImagePreviewer Pair(

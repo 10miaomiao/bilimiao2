@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
@@ -73,7 +74,9 @@ private fun ImagesGridItem(
             GlideImage(
                 modifier = Modifier.fillMaxSize(),
                 contentDescription = null,
-                model = model.previewUrl,
+                model = if (previewerController.isImageLoaded(model.originalUrl)) {
+                    model.originalUrl
+                } else { model.previewUrl },
                 contentScale = ContentScale.Crop,
             )
         }
@@ -94,7 +97,12 @@ fun ImagesGrid(
     )
     if (count == 1) {
         ImagesGridItem(
-            modifier = Modifier.widthIn(max = 300.dp),
+            modifier = Modifier.sizeIn(
+                minWidth = 150.dp,
+                maxWidth = 300.dp,
+                minHeight = 150.dp,
+                maxHeight = 300.dp,
+            ),
             index = 0,
             imageModels = imageModels,
             previewerController = previewerController,
