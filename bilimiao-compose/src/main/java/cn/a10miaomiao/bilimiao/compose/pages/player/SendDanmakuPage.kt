@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -22,9 +24,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -74,6 +79,8 @@ internal class SendDanmakuViewModel(
 
     private val pageNavigation by instance<PageNavigation>()
     private val playerDelegate by instance<BasePlayerDelegate>()
+
+    val focusRequester = FocusRequester()
 
     internal val danmakuTypeList = listOf<SelectItemInfo<Int>>(
         SelectItemInfo("滚动", 1),
@@ -179,6 +186,14 @@ internal class SendDanmakuViewModel(
             }
         }
     }
+
+    fun requestFocus() {
+        focusRequester.requestFocus()
+    }
+
+    fun freeFocus() {
+        focusRequester.freeFocus()
+    }
 }
 
 
@@ -202,6 +217,10 @@ internal fun SendDanmakuPageContent(
 
     val scrollState = rememberScrollState()
 
+    LaunchedEffect(Unit) {
+        viewModel.requestFocus()
+    }
+
     Column(
         modifier = Modifier
             .padding(windowInsets.toPaddingValues())
@@ -211,7 +230,8 @@ internal fun SendDanmakuPageContent(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         TextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .focusRequester(viewModel.focusRequester),
             value = danmakuText,
             onValueChange = viewModel::setDanmakuTextValue,
             label = {
@@ -249,10 +269,10 @@ internal fun SendDanmakuPageContent(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(end = 10.dp),
             )
-            FlowRow(
+            LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                viewModel.danmakuTypeList.forEach {
+                items(viewModel.danmakuTypeList) {
                     FilterChip(
                         selected = danmakuType == it.value,
                         onClick = {
@@ -274,10 +294,10 @@ internal fun SendDanmakuPageContent(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(end = 10.dp),
             )
-            FlowRow(
+            LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                viewModel.danmakuTextSizeList.forEach {
+                items(viewModel.danmakuTextSizeList) {
                     FilterChip(
                         selected = danmakuTextSize == it.value,
                         onClick = {
@@ -298,10 +318,10 @@ internal fun SendDanmakuPageContent(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(end = 10.dp),
             )
-            FlowRow(
+            LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                viewModel.danmakuColorList.forEach {
+                items(viewModel.danmakuColorList) {
                     FilterChip(
                         selected = danmakuColor == it.value,
                         onClick = {
