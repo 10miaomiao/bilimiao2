@@ -185,12 +185,14 @@ class VideoDetailViewModel(
     }
 
 
-
     fun playVideo() {
         val detail = detailData.value ?: return
         val pages = detail.getPages()
+        val history = detail.history
         if (pages.isNotEmpty()) {
-            val page = pages[0].page ?: return
+            val page = history?.let { h ->
+                pages.find { it.page?.cid == h.cid }
+            }?.page ?: pages[0].page ?: return
             playVideo(page)
         }
     }
