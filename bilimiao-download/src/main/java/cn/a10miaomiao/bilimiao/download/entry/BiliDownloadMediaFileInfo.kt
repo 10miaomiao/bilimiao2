@@ -39,7 +39,7 @@ sealed class BiliDownloadMediaFileInfo {
     data class Type1Segment(
         val backup_urls: List<String>,
         val bytes: Long,
-        val duration: Long,
+        val duration: Long = 0L,
         val md5: String,
         val meta_url: String,
         val order: Int,
@@ -48,7 +48,7 @@ sealed class BiliDownloadMediaFileInfo {
 
     @Serializable
     data class Type2(
-        val duration: Long,
+        val duration: Long = 0L,
         val video: List<Type2File>,
         val audio: List<Type2File>?
     ): BiliDownloadMediaFileInfo()

@@ -21,7 +21,7 @@ data class SeasonV2Info(
     val modules: List<SeasonV2ModuleInfo>,
     val new_ep: SeasonV2NewEpInfo,
     val new_keep_activity_material: SeasonV2NewKeepActivityMaterialInfo,
-    val origin_name: String,
+    val origin_name: String = "",
 
     val season_id: String,
     val season_title: String,
