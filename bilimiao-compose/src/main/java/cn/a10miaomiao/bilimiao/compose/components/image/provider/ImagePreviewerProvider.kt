@@ -39,20 +39,19 @@ class PreviewImageModel(
 class ImagePreviewerState(
     val previewerState: PreviewerState,
     val imageModels: List<PreviewImageModel>,
-    val contentPadding: PaddingValues
+    val onImageLoaded: (Int) -> Unit = {},
 )
 
 class ImagePreviewerController {
-    private var _previewerState = mutableStateOf<PreviewerState?>(null)
-    val previewerState: State<PreviewerState?> get() = _previewerState
-
-    private var _imageModels: List<PreviewImageModel> = listOf()
-    val imageModels get() = _imageModels
+    private val _imagePreviewerState = mutableStateOf<ImagePreviewerState?>(null)
+    val imagePreviewerState: State<ImagePreviewerState?> get() = _imagePreviewerState
 
     private var _enterIndex = mutableIntStateOf(-1)
     val enterIndex: IntState get() =  _enterIndex
     var enterAnimationSpec: AnimationSpec<Float>? = null
         private set
+
+    private val _imageLoaded = mutableStateOf(mutableSetOf<String>())
 
     fun enterTransform(
         state: PreviewerState,
@@ -60,8 +59,13 @@ class ImagePreviewerController {
         index: Int = 0,
         animationSpec: AnimationSpec<Float>? = null,
     ) {
-        _previewerState.value = state
-        _imageModels = models
+        _imagePreviewerState.value = ImagePreviewerState(
+            previewerState = state,
+            imageModels = models,
+            onImageLoaded = {
+                setImageLoaded(models[it].originalUrl)
+            }
+        )
         _enterIndex.value = index
         enterAnimationSpec = animationSpec
     }
@@ -72,9 +76,22 @@ class ImagePreviewerController {
     }
 
     internal fun clearState() {
-        _previewerState.value = null
-        _imageModels = listOf()
+        _imagePreviewerState.value = null
     }
+
+    private fun setImageLoaded(imageUrl: String) {
+        _imageLoaded.value = _imageLoaded.value
+            .toMutableSet()
+            .apply {
+                if (size > 500) clear()
+                add(imageUrl)
+            }
+    }
+
+    fun isImageLoaded(imageUrl: String): Boolean {
+        return _imageLoaded.value.contains(imageUrl)
+    }
+
 }
 
 internal val LocalImagePreviewerController = staticCompositionLocalOf<ImagePreviewerController> {
@@ -87,7 +104,7 @@ fun localImagePreviewerController() = LocalImagePreviewerController.current
 @Composable
 fun ImagePreviewerProvider(
     contentPadding: PaddingValues = PaddingValues(),
-    previewer: @Composable (ImagePreviewerState) -> Unit,
+    previewer: @Composable (ImagePreviewerState, PaddingValues) -> Unit,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -98,15 +115,10 @@ fun ImagePreviewerProvider(
         LocalImagePreviewerController provides controller,
         content = content,
     )
-    val previewerState = controller.previewerState.value
-    if (previewerState != null) {
-        previewer(
-            ImagePreviewerState(
-                previewerState = previewerState,
-                imageModels = controller.imageModels,
-                contentPadding = contentPadding,
-            )
-        )
+    val imagePreviewerState = controller.imagePreviewerState.value
+    if (imagePreviewerState != null) {
+        val previewerState = imagePreviewerState.previewerState
+        previewer(imagePreviewerState, contentPadding)
         val enterIndex = controller.enterIndex.value
         LocalDensity.current.apply {
             LaunchedEffect(enterIndex) {

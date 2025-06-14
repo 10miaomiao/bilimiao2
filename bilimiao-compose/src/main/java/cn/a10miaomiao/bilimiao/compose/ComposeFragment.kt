@@ -184,7 +184,9 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                 contentPadding = windowInsets.addPaddingValues(
                                     addBottom = windowStore.bottomAppBarHeightDp.dp
                                 ),
-                                previewer = { MyImagePreviewer(it) }
+                                previewer = { state, innerPadding ->
+                                    MyImagePreviewer(state, innerPadding)
+                                }
                             ) {
                                 Box(
                                     modifier = Modifier
