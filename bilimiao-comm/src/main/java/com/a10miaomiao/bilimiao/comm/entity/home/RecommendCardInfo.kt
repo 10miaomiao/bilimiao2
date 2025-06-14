@@ -14,7 +14,7 @@ data class RecommendCardInfo (
     val title: String = "",
     val uri: String = "",
     val idx: Long,
-    val track_id: String,
+    val track_id: String? = null,
     val talk_back: String? = null,
     val cover_left_text_1: String? = null,
     val cover_left_icon_1: Int = 0,

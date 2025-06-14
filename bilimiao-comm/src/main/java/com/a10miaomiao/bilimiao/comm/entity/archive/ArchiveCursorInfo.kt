@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class ArchiveCursorInfo(
     val order: List<OrderInfo>,
     val count: Int,
-    val item: List<ArchiveInfo>,
+    val item: List<ArchiveInfo>? = null,
     val last_watched_locator: LastWatchedLocatorInfo,
     // val episodic_button: { text: String, uri: String }
     val has_next: Boolean,
