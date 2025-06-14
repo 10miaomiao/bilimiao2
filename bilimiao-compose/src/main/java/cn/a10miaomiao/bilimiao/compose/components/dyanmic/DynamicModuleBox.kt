@@ -22,13 +22,14 @@ import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 @Composable
 fun DynamicModuleBox(
     module: bilibili.app.dynamic.v2.Module,
+    isJumpToUser: Boolean = true,
 ) {
     val moduleItem = module.moduleItem ?: return
     when(moduleItem) {
         is ModuleItem.ModuleTop -> Unit
         is ModuleItem.ModuleButtom -> Unit
         is ModuleItem.ModuleAuthor -> {
-            DynamicModuleAuthorBox(moduleItem.value)
+            DynamicModuleAuthorBox(moduleItem.value, isJumpToUser)
         }
         is ModuleItem.ModuleOpusSummary -> {
             DynamicModuleOpusSummaryBox(moduleItem.value)

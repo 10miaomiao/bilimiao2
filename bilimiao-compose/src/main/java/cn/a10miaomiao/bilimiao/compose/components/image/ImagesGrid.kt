@@ -36,6 +36,7 @@ import kotlin.math.min
 @Composable
 private fun ImagesGridItem(
     modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Fit,
     index: Int,
     imageModels: List<PreviewImageModel>,
     previewerController: ImagePreviewerController,
@@ -77,7 +78,7 @@ private fun ImagesGridItem(
                 model = if (previewerController.isImageLoaded(model.originalUrl)) {
                     model.originalUrl
                 } else { model.previewUrl },
-                contentScale = ContentScale.Crop,
+                contentScale = contentScale,
             )
         }
     }
@@ -98,9 +99,7 @@ fun ImagesGrid(
     if (count == 1) {
         ImagesGridItem(
             modifier = Modifier.sizeIn(
-                minWidth = 150.dp,
                 maxWidth = 300.dp,
-                minHeight = 150.dp,
                 maxHeight = 300.dp,
             ),
             index = 0,
@@ -123,6 +122,7 @@ fun ImagesGrid(
                         imageModels = imageModels,
                         previewerController = previewerController,
                         previewerState = previewerState,
+                        contentScale = ContentScale.Crop,
                     )
                 }
             }
@@ -142,6 +142,7 @@ fun ImagesGrid(
                         imageModels = imageModels,
                         previewerController = previewerController,
                         previewerState = previewerState,
+                        contentScale = ContentScale.Crop,
                     )
                 }
             }
