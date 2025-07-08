@@ -28,4 +28,8 @@ object BiliHeaders {
     const val TEKey = "TE";
     const val TEValue = "trailers";
     const val Buvid = "buvid"
+
+    // content-encoding
+    const val GRPCEncoding = "grpc-encoding"
+    const val GRPCEncodingGZIP = "gzip"
 }

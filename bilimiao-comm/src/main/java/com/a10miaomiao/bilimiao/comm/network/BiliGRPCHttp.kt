@@ -6,9 +6,12 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import pbandk.Message
+import pbandk.decodeFromByteArray
 import pbandk.decodeFromStream
 import pbandk.encodeToByteArray
+import java.io.File
 import java.io.IOException
+import java.util.zip.GZIPInputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -74,8 +77,14 @@ class BiliGRPCHttp<ReqT : Message, RespT : Message>(
     }
 
     private fun parseResponse(res: Response): RespT {
-        val inputStream = res.body!!.byteStream()
+        var inputStream = res.body!!.byteStream()
         inputStream.skip(5L)
+
+        // 手动解压gzip
+        if (res.header(BiliHeaders.GRPCEncoding) == BiliHeaders.GRPCEncodingGZIP) {
+            inputStream = GZIPInputStream(inputStream)
+        }
+
         return method.respMessageCompanion
             .decodeFromStream(inputStream)
     }

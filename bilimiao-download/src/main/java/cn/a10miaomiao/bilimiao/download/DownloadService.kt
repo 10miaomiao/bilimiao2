@@ -255,7 +255,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             )
             //获取播放地址并下载
             val mediaFileInfo = BiliPalyUrlHelper.playUrl(entry)
-            val httpHeader = BiliPalyUrlHelper.httpHeader(entry)
+            val httpHeader = mediaFileInfo.httpHeader()
             val mediaJsonFile = File(videoDir, "index.json")
             val mediaJsonStr = MiaoJson.toJson(mediaFileInfo)
             mediaJsonFile.writeText(mediaJsonStr)
@@ -268,6 +268,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             curMediaFileInfo = mediaFileInfo
             when(mediaFileInfo) {
                 is BiliDownloadMediaFileInfo.Type1 -> {
+                    // TODO: 多视频文件下载
                     downloadManager = DownloadManager(this, currentDownloadInfo.copy(
                         url = mediaFileInfo.segment_list[0].url,
                         header = httpHeader,

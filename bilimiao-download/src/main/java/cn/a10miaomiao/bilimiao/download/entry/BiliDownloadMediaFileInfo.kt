@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class BiliDownloadMediaFileInfo {
 
+    open fun httpHeader(): Map<String, String> = emptyMap()
+
     @Serializable
     data class Type1(
         val available_period_milli: Int,
@@ -24,10 +26,18 @@ sealed class BiliDownloadMediaFileInfo {
         val segment_list: List<Type1Segment>,
         val time_length: Int,
         val type_tag: String? = null,
-        val user_agent: String,
+        val user_agent: String? = null,
+        val referer: String? = null,
         val video_codec_id: Int,
         val video_project: Boolean
-    ): BiliDownloadMediaFileInfo()
+    ): BiliDownloadMediaFileInfo() {
+        override fun httpHeader(): Map<String, String> {
+            return mapOf(
+                "Referer" to referer.orEmpty(),
+                "User-Agent" to user_agent.orEmpty(),
+            ).filterValues { it.isNotEmpty() }
+        }
+    }
 
     @Serializable
     data class Type1PlayerCodecConfig(
@@ -50,8 +60,17 @@ sealed class BiliDownloadMediaFileInfo {
     data class Type2(
         val duration: Long = 0L,
         val video: List<Type2File>,
-        val audio: List<Type2File>?
-    ): BiliDownloadMediaFileInfo()
+        val audio: List<Type2File>?,
+        val user_agent: String? = null,
+        val referer: String? = null,
+    ): BiliDownloadMediaFileInfo() {
+        override fun httpHeader(): Map<String, String> {
+            return mapOf(
+                "Referer" to referer.orEmpty(),
+                "User-Agent" to user_agent.orEmpty(),
+            ).filterValues { it.isNotEmpty() }
+        }
+    }
 
     @Serializable
     data class Type2File(

@@ -1,5 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import bilibili.app.playurl.v1.PlayURLGRPC
+import bilibili.app.playurl.v1.PlayViewReq
+import bilibili.app.playurl.v1.Stream
 import bilibili.community.service.dm.v1.DMGRPC
 import bilibili.community.service.dm.v1.DmViewReq
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
@@ -30,18 +33,10 @@ class VideoPlayerSource(
     var pages = emptyList<PageInfo>()
 
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
-//        val req = Playurl.PlayURLReq.newBuilder()
-//            .setAid(aid.toLong())
-//            .setCid(cid.toLong())
-//            .setQn(quality.toLong())
-//            .setDownload(0)
-//            .setForceHost(2)
-//            .setFourk(false)
-//            .build()
-//        val result = PlayURLGrpc.getPlayURLMethod()
-//            .request(req)
-//            .awaitCall()
-//        return getMpdUrl(quality, result.dash)
+        getGrpcPlayerUrl(quality, fnval)?.let {
+            return it
+        }
+        // 如果grpc api获取失败则使用旧版api
         val res = BiliApiService.playerAPI
             .getVideoPalyUrl(aid, id, quality, fnval)
 
@@ -53,13 +48,20 @@ class VideoPlayerSource(
                 PlayerSourceInfo.AcceptInfo(i, res.accept_description[index])
             }
             val dash = res.dash
+            it.header = mapOf(
+                "Referer" to BiliApiService.playerAPI.DEFAULT_REFERER,
+                "User-Agent" to BiliApiService.playerAPI.DEFAULT_USER_AGENT,
+            )
             if (dash != null) {
                 it.duration = dash.duration * 1000L
-                val dashSource = DashSource(res.quality, dash)
-                val dashVideo = dashSource.getDashVideo()!!
+                val dashVideo = dash.video.firstOrNull() ?: throw Exception("未找到可播放的dash视频")
                 it.height = dashVideo.height
                 it.width = dashVideo.width
-                it.url = dashSource.getMDPUrl(dashVideo)
+                val dashSource = DashSource()
+                it.url = dashSource.getMDPUrl(
+                    dashData = dash,
+                    quality = res.quality
+                )
             } else {
                 val durl = res.durl!!
                 if (durl.size == 1) {
@@ -76,6 +78,66 @@ class VideoPlayerSource(
 
             }
         }
+    }
+
+    private suspend fun getGrpcPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo? {
+        val result = BiliGRPCHttp.request {
+            val req = PlayViewReq(
+                aid = aid.toLong(),
+                cid = id.toLong(),
+                qn = quality.toLong(),
+                download = 0,
+                fnval = fnval,
+                fnver = 0,
+                forceHost = 2,
+                fourk = true,
+            )
+            PlayURLGRPC.playView(req)
+        }.awaitCall()
+        val videoInfo = result.videoInfo ?: return null
+        val playerSource = PlayerSourceInfo()
+        val availableStreamList = videoInfo.streamList.filter {
+            it.content != null
+        }
+        if (availableStreamList.isEmpty()) {
+            return null
+        }
+        playerSource.acceptList = availableStreamList.map {
+            val acceptInfo = it.streamInfo!!
+            PlayerSourceInfo.AcceptInfo(
+                acceptInfo.quality,
+                acceptInfo.newDescription
+            )
+        }
+        val stream = availableStreamList.firstOrNull {
+            it.streamInfo?.quality == quality
+        } ?: availableStreamList.firstOrNull()
+        val streamContent = stream?.content ?: return null
+        playerSource.quality = stream.streamInfo?.quality ?: videoInfo.quality
+        playerSource.duration = videoInfo.timelength
+        when (streamContent) {
+            is Stream.Content.DashVideo -> {
+                val dash = streamContent.value
+                val dashAudio = videoInfo.dashAudio
+                val audio = dashAudio.firstOrNull {
+                    it.id == dash.audioId && it.baseUrl.isNotEmpty()
+                } ?: dashAudio.firstOrNull { it.baseUrl.isNotEmpty() }
+                playerSource.height = dash.height
+                playerSource.width = dash.width
+                playerSource.url = DashSource().getMDPUrl(
+                    videoId = videoInfo.quality,
+                    videoFormat = videoInfo.format,
+                    video = dash,
+                    audio = audio,
+                    durationMs = videoInfo.timelength,
+                )
+            }
+            is Stream.Content.SegmentVideo -> {
+                val durl = streamContent.value
+                playerSource.url = "[concatenating]\n" + durl.segment.joinToString("\n") { it.url }
+            }
+        }
+        return playerSource
     }
 
     override fun getSourceIds(): PlayerSourceIds {

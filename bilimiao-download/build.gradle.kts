@@ -44,6 +44,7 @@ dependencies {
 
     implementation(Libraries.kotlinxSerializationJson)
     implementation(Libraries.okhttp3)
+    implementation(Libraries.pbandkRuntime)
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":DanmakuFlameMaster"))

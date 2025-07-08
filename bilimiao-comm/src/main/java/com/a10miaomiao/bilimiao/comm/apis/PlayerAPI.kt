@@ -14,6 +14,9 @@ import kotlinx.serialization.Serializable
 
 class PlayerAPI {
 
+    val DEFAULT_REFERER = "https://www.bilibili.com/"
+    val DEFAULT_USER_AGENT = "Bilibili Freedoooooom/MarkII"
+
     private fun getVideoHeaders(avid: String) = mapOf(
         "Referer" to "https://www.bilibili.com/av$avid",
         "User-Agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
@@ -216,23 +219,23 @@ class PlayerAPI {
 
     @Serializable
     data class PlayurlData(
-        val accept_description: List<String>,
-        val accept_format: String,
-        val accept_quality: List<Int>,
-        val format: String,
-        val from: String,
+        val accept_description: List<String> = emptyList(),
+        val accept_format: String = "",
+        val accept_quality: List<Int> = emptyList(),
+        val format: String = "",
+        val from: String = "",
         val message: String,
-        val quality: Int,
-        val result: String,
-        val seek_param: String,
-        val seek_type: String,
+        val quality: Int = 0,
+        val result: String = "",
+        val seek_param: String = "",
+        val seek_type: String = "",
         // 时长，毫秒
-        val timelength: Int,
-        val video_codecid: Int,
+        val timelength: Int = 0,
+        val video_codecid: Int = 0,
         val durl: List<Durl>? = null,
         val dash: Dash? = null,
         val code: Int = 0,
-        val support_formats: List<SupportFormats>,
+        val support_formats: List<SupportFormats> = emptyList(),
         val last_play_time: Long? = null,
         val last_play_cid: String? = null,
     )
