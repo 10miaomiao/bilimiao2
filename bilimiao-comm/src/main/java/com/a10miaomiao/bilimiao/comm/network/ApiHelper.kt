@@ -34,7 +34,7 @@ object ApiHelper {
 
     const val REFERER = "https://www.bilibili.com/"
     const val APP_BASE = "https://app.bilibili.com/"
-    const val GRPC_BASE = "https://grpc.biliapi.net/"
+    const val GRPC_BASE = "https://app.bilibili.com/"
 
     /**
      * User-Agent: Mozilla/5.0 BiliDroid/1.45.0 (bbcallen@gmail.com) os/android model/2201123C mobi_app/android_hd build/1450000 channel/bili innerVer/1450000 osVer/12 network/2

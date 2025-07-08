@@ -29,6 +29,7 @@ import androidx.media3.datasource.TransferListener
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.dash.manifest.DashManifestParser
 import androidx.media3.exoplayer.source.ConcatenatingMediaSource
+import androidx.media3.exoplayer.source.ConcatenatingMediaSource2
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
@@ -269,6 +270,7 @@ class PlayerDelegate2(
     ): MediaSource? {
         val dataSourceArr = dataSource.split("\n")
         val mediaMetadata = getMediaMetadata(dataSource)
+        val header = playerSourceInfo?.header ?: emptyMap()
         return when (dataSourceArr[0]) {
             "[local-merging]" -> {
                 // 本地音视频分离
@@ -292,7 +294,6 @@ class PlayerDelegate2(
             "[merging]" -> {
                 // 音视频分离
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                val header = getDefaultRequestProperties()
                 dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 val videoMedia = MediaItem.Builder().apply {
@@ -314,13 +315,12 @@ class PlayerDelegate2(
             "[concatenating]" -> {
                 // 视频拼接
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                val header = getDefaultRequestProperties()
                 dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 ConcatenatingMediaSource().apply {
                     for (i in 1 until dataSourceArr.size) {
                         val mediaItem = MediaItem.Builder().apply {
-                            setUri(dataSourceArr[2])
+                            setUri(dataSourceArr[i])
                             mediaMetadata?.let(::setMediaMetadata)
                         }.build()
                         addMediaSource(
@@ -334,7 +334,6 @@ class PlayerDelegate2(
             "[dash-mpd]" -> {
                 // Create a data source factory.
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                val header = getDefaultRequestProperties()
                 dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 // Create a DASH media source pointing to a DASH manifest uri.
@@ -381,15 +380,6 @@ class PlayerDelegate2(
         allowCrossProtocolRedirects: Boolean
     ): DataSource.Factory? {
         return null
-    }
-
-    private fun getDefaultRequestProperties(): Map<String, String> {
-        val header = HashMap<String, String>()
-        if (playerSource is VideoPlayerSource) {
-            header["Referer"] = DEFAULT_REFERER
-        }
-        header["User-Agent"] = DEFAULT_USER_AGENT
-        return header
     }
 
     internal fun historyReport(currentPosition: Long) {
@@ -457,15 +447,16 @@ class PlayerDelegate2(
             val sourceInfo = withContext(Dispatchers.IO) {
                 source.getPlayerUrl(quality, fnval)
             }
+            quality = sourceInfo.quality
+            playerSourceInfo = sourceInfo
             loadingBoxController.print("成功")
             views.videoPlayer.releaseDanmaku()
             views.videoPlayer.danmakuParser = danmukuParser
-            val header = getDefaultRequestProperties()
             views.videoPlayer.setUp(
                 sourceInfo.url,
                 false,
                 null,
-                header,
+                sourceInfo.header,
                 source.title
             )
             loadingBoxController.hideLoading()
@@ -517,8 +508,6 @@ class PlayerDelegate2(
                     }
                 }
             }
-            quality = sourceInfo.quality
-            playerSourceInfo = sourceInfo
         } catch (e: DabianException) {
             errorMessageBoxController.show("少儿不宜，禁止观看", canRetry = false)
         } catch (e: AreaLimitException) {
@@ -528,6 +517,7 @@ class PlayerDelegate2(
         } catch (e: UnknownHostException) {
             errorMessageBoxController.show("无法连接到御坂网络")
         } catch (e: Exception) {
+            e.printStackTrace()
             errorMessageBoxController.show(e.message ?: e.toString())
         }
     }

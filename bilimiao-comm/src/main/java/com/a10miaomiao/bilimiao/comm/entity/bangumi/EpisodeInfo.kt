@@ -17,7 +17,7 @@ data class EpisodeInfo(
     val dimension: DimensionXInfo? = null,
     val from: String,
     val id: String,
-//    val ep_id: String = "",
+    val ep_id: String = "",
     val index: String = "",
     val index_title: String = "",
     val long_title: String = "",

@@ -5,6 +5,7 @@ class PlayerSourceInfo {
     var quality: Int = 0
     var acceptList: List<AcceptInfo> = emptyList()
     var duration: Long = 0L
+    var header: Map<String, String> = emptyMap()
 
     val description: String get() = acceptList.find { it.quality == quality }?.description ?: "未知清晰度"
 

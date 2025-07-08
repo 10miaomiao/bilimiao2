@@ -12,6 +12,7 @@ import bilibili.metadata.network.Network
 import bilibili.metadata.network.NetworkType
 import bilibili.metadata.restriction.Restriction
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import pbandk.decodeFromByteArray
 import pbandk.encodeToByteArray
 
 object BiliGRPCConfig {
@@ -50,7 +51,7 @@ object BiliGRPCConfig {
     /**
      * 移动平台.
      */
-    val platform = "android_hd";
+    val platform = "android";
 
     /**
      * 产品环境.
@@ -59,8 +60,9 @@ object BiliGRPCConfig {
 
     /**
      * 应用Id.
+     * 1为手机安卓APP，5为安卓平板APP
      */
-    var appId = 1;
+    var appId = 5;
 
     /**
      * 国家或地区.

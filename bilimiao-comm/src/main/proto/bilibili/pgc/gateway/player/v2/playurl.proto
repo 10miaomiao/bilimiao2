@@ -12,25 +12,25 @@ service PlayURL {
     rpc PlayViewComic(PlayViewReq) returns (PlayViewReply);
 }
 
-// 
+//
 message Animation {
-    // 
+    //
     map<string, string> qn_svga_animation_map = 1;
 }
 
-// 
+//
 message AudioMaterialProto {
-    // 
+    //
     string audio_id = 1;
-    // 
+    //
     string title = 2;
-    // 
+    //
     string edition = 3;
-    // 
+    //
     uint64 person_id = 4;
-    // 
+    //
     string person_name = 5;
-    // 
+    //
     string person_avatar = 6;
     //
     repeated DashItem audio = 7;
@@ -48,7 +48,7 @@ message BadgeInfo {
     string text_color = 4;
     // ? 新版本客户端已弃用此项
     GradientColor bg_gradient_color = 5;
-    // 
+    //
     string img = 6;
 }
 
@@ -92,9 +92,9 @@ message ButtonInfo {
     GradientColor bg_gradient_color = 14;
     //
     map<string, string> order_report_params = 15;
-    // 
+    //
     TaskParam task_param = 16;
-    // 
+    //
     string pc_link = 17;
 }
 
@@ -102,7 +102,7 @@ message ButtonInfo {
 message CastTips {
     //
     int32 code = 1;
-    // 
+    //
     string message = 2;
 }
 
@@ -118,7 +118,7 @@ message ClipInfo {
     ClipType clip_type = 4;
     // 跳过片头/片尾时的提示语
     string toast_text = 5;
-    // 
+    //
     MultiView multi_view = 6;
 }
 
@@ -128,7 +128,7 @@ enum ClipType {
     CLIP_TYPE_OP = 1;         // 跳过OP
     CLIP_TYPE_ED = 2;         // 跳过ED
     CLIP_TYPE_HE = 3;         //
-    CLIP_TYPE_MULTI_VIEW = 4; // 
+    CLIP_TYPE_MULTI_VIEW = 4; //
     CLIP_TYPE_AD = 5;         //
 }
 
@@ -168,9 +168,9 @@ message Coupon {
     string real_amount = 9;
     // 使用过期时间
     google.protobuf.Timestamp expire_time = 10;
-    // 
+    //
     int64 otype = 11;
-    // 
+    //
     string amount = 12;
 }
 
@@ -248,9 +248,9 @@ message DashVideo {
     string widevine_pssh = 12;
 }
 
-// 
+//
 message DataControl {
-    // 
+    //
     bool need_watch_progress = 1;
 }
 
@@ -284,7 +284,7 @@ message Dialog {
     TextInfo right_bottom_desc = 13;
     //
     repeated BottomDisplay bottom_display = 14;
-    // 
+    //
     repeated PlayList play_list = 15;
 }
 
@@ -329,105 +329,105 @@ message DolbyItem {
 // DRM技术类型
 enum DrmTechType {
     NON = 0;       //
-    FAIR_PLAY = 1; // 
+    FAIR_PLAY = 1; //
     WIDE_VINE = 2;  //
     BILI_DRM = 3; //
 }
 
 // 播放结束后的尾页Dialog
 message EndPage {
-    // 
+    //
     Dialog dialog = 1;
-    // 
+    //
     bool hide = 2;
 }
 
-// 
+//
 message EpInlineVideo {
-    // 
+    //
     int64 material_no = 1;
-    // 
+    //
     int64 aid = 2;
-    // 
+    //
     int64 cid = 3;
 }
 
 // 剧集广告信息
 message EpisodeAdvertisementInfo {
-    // 
+    //
     int64 aid = 1;
-    // 
+    //
     string title = 2;
-    // 
+    //
     string link = 3;
-    // 
+    //
     int32 follow_video_bnt_flag = 4;
-    // 
+    //
     string next_video_title = 5;
-    // 
+    //
     string next_video_link = 6;
-    // 
+    //
     int64 cid = 7;
-    // 
+    //
     int32 season_id = 8;
-    // 
+    //
     int32 follow = 9;
 }
 
 // EP信息
 message EpisodeInfo {
-    // 
+    //
     int32 ep_id = 1;
-    // 
+    //
     int64 cid = 2;
-    // 
+    //
     int64 aid = 3;
-    // 
+    //
     int64 ep_status = 4;
-    // 
+    //
     SeasonInfo season_info = 5;
-    // 
+    //
     string cover = 6;
-    // 
+    //
     string title = 7;
-    // 
+    //
     Interaction interaction = 8;
-    // 
+    //
     string long_title = 9;
 }
 
-// 
+//
 message EpPreVideo {
-    // 
+    //
     int64 aid = 1;
-    // 
+    //
     int64 cid = 2;
 }
 
-// 
+//
 message EpPublicityVideo {
-    // 
+    //
     enum Type {
         DATA_NOT_SET = 0;
         EP_PRE_VIDEO = 2;
         EP_INLINE = 3;
     }
-    // 
+    //
     Type type = 1;
-    // 
+    //
     oneof data {
-        // 
+        //
         EpPreVideo ep_pre_video = 2;
-        // 
+        //
         EpInlineVideo ep_inline_video = 3;
     }
 }
 
-// 
+//
 enum EpPublicityVideoType {
-    // 
+    //
     PRE = 0;
-    // 
+    //
     INLINE = 1;
 }
 
@@ -529,11 +529,11 @@ message Interaction {
 
 // 限制操作类型
 enum LimitActionType {
-    // 
+    //
     LAT_UNKNOWN = 0;
-    // 
+    //
     SHOW_LIMIT_DIALOG = 1;
-    // 
+    //
     SKIP_CURRENT_EP = 2;
 }
 
@@ -632,7 +632,7 @@ message PlayAbilityConf {
 
 // 云控扩展配置信息
 message PlayAbilityExtConf {
-    // 
+    //
     bool allow_close_subtitle = 1;
     //
     FreyaConfig freya_config = 2;
@@ -663,17 +663,17 @@ message PlayExtInfo {
     PlayDubbingInfo play_dubbing_info = 1;
 }
 
-// 
+//
 message PlayList {
-    // 
+    //
     int32 season_id = 1;
-    // 
+    //
     string title = 2;
-    // 
+    //
     string cover = 3;
-    // 
+    //
     string link = 4;
-    // 
+    //
     BadgeInfo badge_info = 5;
 }
 
@@ -703,21 +703,21 @@ message PlayViewBusinessInfo {
     map<string, int32> exp_map = 11;
     // DRM技术类型
     DrmTechType drm_tech_type = 12;
-    // 
+    //
     int32 limit_action_type = 13;
-    // 
+    //
     bool is_drm = 14;
-    // 
+    //
     RecordInfo record_info = 15;
-    // 
+    //
     int32 vip_status = 16;
-    // 
+    //
     bool is_live_pre = 17;
-    // 
+    //
     EpisodeInfo episode_info = 18;
-    // 
+    //
     EpisodeAdvertisementInfo episode_advertisement_info = 19;
-    // 
+    //
     UserStatus user_status = 20;
 }
 
@@ -781,9 +781,9 @@ message PlayViewReq {
     int64 material_no = 18;
     // DRM 安全等级
     int32 security_level = 19;
-    // 
+    //
     int64 season_id = 20;
-    // 
+    //
     DataControl data_control = 21;
 }
 
@@ -799,7 +799,7 @@ message PopWin {
     string bottom_text = 4;
     // 弹窗标题 新字段
     TextInfo pop_title = 5;
-    // 弹窗副标题 
+    // 弹窗副标题
     TextInfo subtitle = 6;
     // 底部描述 新字段
     ButtonInfo bottom_desc = 7;
@@ -909,9 +909,9 @@ message Scheme {
         UNKNOWN = 0;
         SHOW_TOAST = 1;
     }
-    // 
+    //
     ActionType action_type = 1;
-    // 
+    //
     string toast = 2;
 }
 
@@ -935,9 +935,9 @@ message SeasonInfo {
 
 // DRM 安全等级
 enum SecurityLevel {
-    LEVEL_UNKNOWN = 0; // 
+    LEVEL_UNKNOWN = 0; //
     LEVEL_L1 = 1; //
-    LEVEL_L2 = 2; // 
+    LEVEL_L2 = 2; //
     LEVEL_L3 = 3; //
 }
 

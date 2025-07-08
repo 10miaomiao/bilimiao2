@@ -292,6 +292,7 @@ private class BangumiDetailPageViewModel(
             ownerId = "",
             ownerName = seasonDetail.season_title
         )
+
         playerSource.episodes = episodes.map {
             BangumiPlayerSource.EpisodeInfo(
                 epid = it.id, aid = it.aid, cid = it.cid,
