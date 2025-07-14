@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.danmaku.parser.BiliDanmukuParser
@@ -40,7 +41,7 @@ class VideoPlayerSource(
         val res = BiliApiService.playerAPI
             .getVideoPalyUrl(aid, id, quality, fnval)
 
-        return PlayerSourceInfo().also {
+        return defaultPlayerSource.also {
             it.lastPlayCid = res.last_play_cid ?: ""
             it.lastPlayTime = res.last_play_time ?: 0
             it.quality = res.quality
@@ -95,10 +96,13 @@ class VideoPlayerSource(
             PlayURLGRPC.playView(req)
         }.awaitCall()
         val videoInfo = result.videoInfo ?: return null
-        val playerSource = PlayerSourceInfo()
+        val playerSource = defaultPlayerSource
         val availableStreamList = videoInfo.streamList.filter {
             it.content != null
         }
+        result.event
+//        playerSource.lastPlayCid = res?: ""
+//        playerSource.lastPlayTime = res.last_play_time ?: 0
         if (availableStreamList.isEmpty()) {
             return null
         }
@@ -124,13 +128,18 @@ class VideoPlayerSource(
                 } ?: dashAudio.firstOrNull { it.baseUrl.isNotEmpty() }
                 playerSource.height = dash.height
                 playerSource.width = dash.width
-                playerSource.url = DashSource().getMDPUrl(
-                    videoId = videoInfo.quality,
-                    videoFormat = videoInfo.format,
-                    video = dash,
-                    audio = audio,
-                    durationMs = videoInfo.timelength,
-                )
+                //  无法获取Segment Base放弃手动生成MDP XML方案
+//                playerSource.url = DashSource().getMDPUrl(
+//                    videoId = videoInfo.quality,
+//                    videoFormat = videoInfo.format,
+//                    video = dash,
+//                    audio = audio,
+//                    durationMs = videoInfo.timelength,
+//                )
+                playerSource.url = "[merging]\n" + dash.baseUrl
+                if (audio != null) {
+                    playerSource.url += "\n" + audio.baseUrl
+                }
             }
             is Stream.Content.SegmentVideo -> {
                 val durl = streamContent.value

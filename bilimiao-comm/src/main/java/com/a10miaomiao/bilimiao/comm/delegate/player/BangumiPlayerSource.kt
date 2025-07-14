@@ -56,7 +56,7 @@ class BangumiPlayerSource(
         val res = BiliApiService.playerAPI.getBangumiUrl(
             epid, id, quality, fnval
         )
-        return PlayerSourceInfo().also {
+        return defaultPlayerSource.also {
             it.lastPlayCid = res.last_play_cid ?: ""
             it.lastPlayTime = res.last_play_time ?: 0
             it.quality = res.quality
@@ -116,7 +116,7 @@ class BangumiPlayerSource(
             PlayURLGRPC.playView(req)
         }.awaitCall()
         val videoInfo = result.videoInfo ?: return null
-        val playerSource = PlayerSourceInfo()
+        val playerSource = defaultPlayerSource
         result.business?.dimension?.let {
             playerSource.height = it.height
             playerSource.width = it.width
@@ -149,13 +149,18 @@ class BangumiPlayerSource(
                 } ?: dashAudio.firstOrNull { it.baseUrl.isNotEmpty() }
                 playerSource.height = dash.height
                 playerSource.width = dash.width
-                playerSource.url = DashSource().getMDPUrl(
-                    videoId = videoInfo.quality,
-                    videoFormat = videoInfo.format,
-                    video = dash,
-                    audio = audio,
-                    durationMs = videoInfo.timelength,
-                )
+                //  无法获取Segment Base放弃手动生成MDP XML方案
+//                playerSource.url = DashSource().getMDPUrl(
+//                    videoId = videoInfo.quality,
+//                    videoFormat = videoInfo.format,
+//                    video = dash,
+//                    audio = audio,
+//                    durationMs = videoInfo.timelength,
+//                )
+                playerSource.url = "[merging]\n" + dash.baseUrl
+                if (audio != null) {
+                    playerSource.url += "\n" + audio.baseUrl
+                }
             }
             is Stream.Content.SegmentVideo -> {
                 val durl = streamContent.value

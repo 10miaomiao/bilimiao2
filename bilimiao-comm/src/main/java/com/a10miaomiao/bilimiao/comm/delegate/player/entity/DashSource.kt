@@ -98,6 +98,7 @@ class DashSource(
                 height = video.height,
                 mimeType = "video/${videoFormat}",
                 frameRate = video.frameRate,
+                minBufferTime = null,
                 segmentBase = null,
             ),
             audio = audio?.let {
@@ -112,6 +113,7 @@ class DashSource(
                     height = 0,
                     mimeType = "audio/${videoFormat}",
                     frameRate = it.frameRate,
+                    minBufferTime = null,
                     segmentBase = null,
                 )
             },
@@ -138,6 +140,7 @@ class DashSource(
                 height = video.height,
                 mimeType = "video/${videoFormat}",
                 frameRate = video.frameRate,
+                minBufferTime = null,
                 segmentBase = null,
             ),
             audio = audio?.let {
@@ -152,6 +155,7 @@ class DashSource(
                     height = 0,
                     mimeType = "audio/${videoFormat}",
                     frameRate = it.frameRate,
+                    minBufferTime = null,
                     segmentBase = null,
                 )
             },
@@ -179,6 +183,7 @@ class DashSource(
                 width = video.width,
                 height = video.height,
                 mimeType = video.mime_type,
+                minBufferTime = dashData.min_buffer_time,
                 segmentBase = SegmentBase(
                     initialization = video.segment_base.initialization,
                     indexRange = video.segment_base.index_range,
@@ -196,6 +201,7 @@ class DashSource(
                     width = 0,
                     height = 0,
                     mimeType = it.mime_type,
+                    minBufferTime = null,
                     segmentBase = SegmentBase(
                         initialization = it.segment_base.initialization,
                         indexRange = it.segment_base.index_range,
@@ -217,6 +223,7 @@ class DashSource(
         val height: Int,
         val mimeType: String,
         val frameRate: String,
+        val minBufferTime: Double?,
 //        val widevinePssh: String?,
         val segmentBase: SegmentBase?,
     )

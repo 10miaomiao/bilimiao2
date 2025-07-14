@@ -574,8 +574,8 @@ class PlayerDelegate2(
             playerSource = null
         }
         playerCoroutineScope.onCreate()
-        scaffoldApp.showPlayer = true
         playerSource = source
+        scaffoldApp.showPlayer = true
         setThumbImageView(source.coverUrl)
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         loadingBoxController.println("成功")
@@ -730,7 +730,7 @@ class PlayerDelegate2(
     }
 
     fun getVideoRatio(): Float? {
-        return playerSourceInfo?.screenProportion
+        return (playerSourceInfo ?: playerSource?.defaultPlayerSource)?.screenProportion
     }
 
     fun setHoldStatus(isHold: Boolean) {
