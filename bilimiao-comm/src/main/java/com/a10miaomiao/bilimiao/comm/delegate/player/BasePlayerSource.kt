@@ -21,6 +21,7 @@ abstract class BasePlayerSource() {
 
     open fun next(): BasePlayerSource? = null
 
+    var defaultPlayerSource = PlayerSourceInfo()
     var proxyServer: ProxyServerInfo? = null
     var uposHost: String = ""
     var isLoop: Boolean = false // 循环播放

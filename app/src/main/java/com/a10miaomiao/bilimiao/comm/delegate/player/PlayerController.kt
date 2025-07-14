@@ -59,6 +59,7 @@ class PlayerController(
     private val scaffoldApp get() = delegate.scaffoldApp
     private val views get() = delegate.views
     private val playerSourceInfo get() = delegate.playerSourceInfo
+        ?: delegate.playerSource?.defaultPlayerSource
     private val danmakuContext = DanmakuContext.create()
 
     private var onlyFull = false // 仅全屏播放
@@ -381,16 +382,19 @@ class PlayerController(
      * 播放器是否默认全屏播放
      */
     fun checkIsPlayerDefaultFull() = scope.launch {
-        val openMode = SettingPreferences.mapData(activity)  {
-            it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
+        val (openMode, fullMode) = SettingPreferences.mapData(activity)  {
+            Pair(
+                it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT,
+                it[PlayerFullMode] ?: SettingConstants.PLAYER_FULL_MODE_AUTO,
+            )
         }
         if (scaffoldApp.orientation == ScaffoldView.VERTICAL
             && openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN != 0) {
-            fullScreen(SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED, onlyFull = true)
+            fullScreen(fullMode, onlyFull = true)
         } else if (scaffoldApp.orientation == ScaffoldView.HORIZONTAL
             && openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE != 0
         ){
-            fullScreen(SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED, onlyFull = true)
+            fullScreen(fullMode, onlyFull = true)
         }
     }
 

@@ -268,6 +268,18 @@ class VideoDetailViewModel(
                             title = it.part,
                         )
                     }
+                defaultPlayerSource.run {
+                    val history = detailData.value?.history
+                    if (history != null) {
+                        lastPlayCid = history.cid.toString()
+                        lastPlayTime = history.progress * 1000L
+                    }
+                    val dimension = arc.dimension
+                    if (dimension != null) {
+                        width = dimension.width.toInt()
+                        height = dimension.height.toInt()
+                    }
+                }
             }
         )
     }

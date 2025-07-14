@@ -307,6 +307,18 @@ private class BangumiDetailPageViewModel(
                 ),
             )
         }
+        playerSource.defaultPlayerSource.run {
+            val progress = detailInfo.value?.user_status?.progress
+            if (progress != null && item.id == progress.last_ep_id ) {
+                lastPlayCid = item.cid
+                lastPlayTime = progress.last_time * 1000L
+            }
+            val dimension = item.dimension
+            if (dimension != null) {
+                width = dimension.width
+                height = dimension.height
+            }
+        }
         basePlayerDelegate.openPlayer(playerSource)
     }
 
