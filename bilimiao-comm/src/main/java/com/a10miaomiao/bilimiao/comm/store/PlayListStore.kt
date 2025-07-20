@@ -252,8 +252,8 @@ class PlayListStore(override val di: DI) :
                         pageSize = 20,
                     ).awaitCall().json<ResponseData<MediaDetailInfo>>()
                     if (res.code == 0) {
-                        val result = res.requireData().medias
-                        val newItems = result?.filter {
+                        val result = res.requireData()
+                        val newItems = result.medias?.filter {
                             it.ugc != null
                         }?.map {
                             PlayListItemInfo(
@@ -266,10 +266,10 @@ class PlayListStore(override val di: DI) :
                                 ownerName = it.upper.name,
                                 from = listFrom,
                             )
-                        }
+                        } ?: emptyList()
                         if (newItems != null) {
                             items.addAll(newItems)
-                            loadFinish = newItems.size != pageSize
+                            loadFinish = !result.has_more || newItems.isEmpty()
                         } else {
                             loadFinish = true
                         }
