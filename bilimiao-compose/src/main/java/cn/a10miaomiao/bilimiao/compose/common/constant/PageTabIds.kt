@@ -8,6 +8,7 @@ object PageTabIds {
 
     const val DynamicAll = "dynamic.all"
     const val DynamicVideo = "dynamic.video"
+    val DynamicByUpper = TabId("dynamic.upper")
 
     const val SearchAll = "search.all"
     val SearchByType = TabId("search.type")
