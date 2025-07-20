@@ -97,7 +97,6 @@ private class PlayListPageViewModel(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlayListPageContent(
     viewModel: PlayListPageViewModel
