@@ -79,6 +79,8 @@ object SettingPreferences {
     val HomePopularCarryToken = booleanPreferencesKey("home_popular_carry_token")
     // 推荐列表样式
     val HomeRecommendListStyle = intPreferencesKey("home_recommend_list_style")
+    // 首页入口视图
+    val HomeEntryView = intPreferencesKey("home_entry_view")
 
     /**
      * Theme

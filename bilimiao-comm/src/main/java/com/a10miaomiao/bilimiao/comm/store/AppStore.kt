@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -30,6 +31,7 @@ class AppStore(override val di: DI) :
     data class HomeSettingState (
         val showPopular: Boolean = true,
         val showRecommend: Boolean = true,
+        val entryView: Int = SettingConstants.HOME_ENTRY_VIEW_DEFAULT,
     )
 
     data class State (
@@ -50,6 +52,7 @@ class AppStore(override val di: DI) :
                     home = HomeSettingState(
                         showPopular = it[HomePopularShow] ?: true,
                         showRecommend = it[HomeRecommendShow] ?: true,
+                        entryView = it[HomeEntryView] ?: SettingConstants.HOME_ENTRY_VIEW_DEFAULT
                     )
                     theme = ThemeSettingState(
                         color = it[ThemeColor] ?: 0xFFFB7299,
