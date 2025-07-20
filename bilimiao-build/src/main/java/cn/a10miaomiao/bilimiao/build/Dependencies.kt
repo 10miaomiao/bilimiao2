@@ -12,7 +12,7 @@ object Versions {
     const val lifecycle = "2.8.3"
     const val navigation = "2.8.0"
 //    const val compose = "1.7.0-beta04"
-    const val composeBom = "2024.10.00"
+    const val composeBom = "2025.05.00"
     const val datastore = "1.1.1"
     const val media = "1.6.0"
     const val media3 = "1.5.0"
@@ -27,7 +27,7 @@ object Versions {
     //
     const val okhttp = "4.10.0"
     const val glide = "4.13.2"
-    const val pbandk = "0.14.4-SNAPSHOT"
+    const val pbandk = "0.16.1-SNAPSHOT"
 
     const val gsyVideoPlayer = "v10.0.0"
 }
