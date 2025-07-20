@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 data class MediaDetailInfo(
     val info: MediaListInfo,
     val medias: List<MediasInfo>? = null,
+    val has_more: Boolean = true,
 )

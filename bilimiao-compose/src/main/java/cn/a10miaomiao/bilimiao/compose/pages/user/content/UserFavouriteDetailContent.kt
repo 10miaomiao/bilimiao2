@@ -127,7 +127,7 @@ private class UserFavouriteDetailViewModel(
                         addAll(mediaList)
                     }
                 }
-                list.finished.value = mediaList.size < list.pageSize
+                list.finished.value = !result.has_more || mediaList.isEmpty()
                 list.pageNum = pageNum
             } else {
                 list.fail.value = res.message
