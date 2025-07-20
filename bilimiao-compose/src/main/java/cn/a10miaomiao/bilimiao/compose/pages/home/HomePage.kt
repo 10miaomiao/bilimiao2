@@ -67,6 +67,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomePopularContent
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeRecommendContent
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeTimeMachineContent
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
@@ -169,34 +170,42 @@ private class HomePageViewModel(
 
     private var lastBackPressedTime = 0L
 
-    private val _tabs = mutableStateOf(listOf<HomePageTab>())
+    private val _tabs = mutableStateOf(getTabs(appStore.state.home))
     val tabs get() = _tabs.value
+    var initialPage = 0
+        private set
     val pageState = HomePageState(pageNavigation)
     val context: Context by instance()
 
     init {
         loadAdData()
         viewModelScope.launch {
-            updateTabs(appStore.state.home)
             appStore.stateFlow.map {
                 it.home
             }.collect {
-                updateTabs(it)
+                _tabs.value = getTabs(it)
             }
         }
     }
 
-    private fun updateTabs(setting: HomeSettingState) {
+    private fun getTabs(setting: HomeSettingState): List<HomePageTab> {
+        val entryView = setting.entryView
         val tabs = mutableListOf<HomePageTab>(
             HomePageTab.TimeMachine,
         )
         if (setting.showRecommend) {
             tabs.add(HomePageTab.Recommend)
+            if (entryView == SettingConstants.HOME_ENTRY_VIEW_RECOMMEND) {
+                initialPage = tabs.size - 1
+            }
         }
         if (setting.showPopular) {
             tabs.add(HomePageTab.Popular)
+            if (entryView == SettingConstants.HOME_ENTRY_VIEW_POPULAR) {
+                initialPage = tabs.size - 1
+            }
         }
-        _tabs.value = tabs
+        return tabs
     }
 
     private suspend fun getMiaoInitData(version: String): MiaoAdInfo {
@@ -392,7 +401,10 @@ private fun HomePageContent(
     val windowInsets = windowState.getContentInsets(localContainerView())
 
 
-    val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
+    val pagerState = rememberPagerState(
+        pageCount = { viewModel.tabs.size },
+        initialPage = viewModel.initialPage
+    )
     val emitter = localEmitter()
     val combinedTabClick = combinedTabDoubleClick(
         pagerState = pagerState,

@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -22,10 +23,13 @@ import cn.a10miaomiao.bilimiao.compose.common.localContainerView
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.listStylePreference
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.serialization.Serializable
+import me.zhanghai.compose.preference.ListPreferenceType
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.listPreference
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
 import org.kodein.di.DI
@@ -48,6 +52,12 @@ private class HomeSettingPageViewModel(
 ) : ViewModel(), DIAware {
 
     private val fragment by instance<Fragment>()
+
+    val entryViews = mapOf(
+        SettingConstants.HOME_ENTRY_VIEW_DEFAULT to "默认",
+        SettingConstants.HOME_ENTRY_VIEW_RECOMMEND to "推荐",
+        SettingConstants.HOME_ENTRY_VIEW_POPULAR to "热门",
+    )
 
 }
 
@@ -89,6 +99,22 @@ private fun HomeSettingPageContent(
                 title = {
                     Text("首页顶部设置")
                 }
+            )
+            listPreference(
+                key = SettingPreferences.HomeEntryView.name,
+                defaultValue = SettingConstants.HOME_ENTRY_VIEW_DEFAULT,
+                type = ListPreferenceType.DROPDOWN_MENU,
+                title = {
+                    Text("首页入口")
+                },
+                summary = {
+                    Text(text = "当前: " + viewModel.entryViews[it])
+                },
+                values = viewModel.entryViews.keys.toList(),
+                valueToText = {
+                    val text = viewModel.entryViews[it]
+                    AnnotatedString(text ?: "未知")
+                },
             )
             switchPreference(
                 key = SettingPreferences.HomeRecommendShow.name,
