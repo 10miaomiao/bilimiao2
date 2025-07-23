@@ -294,7 +294,10 @@ class BilimiaoPageRoute (
             deepLinks = listOf(
                 navDeepLink<WebPage>(
                     basePath = "bilimiao://web"
-                )
+                ),
+                navDeepLink {
+                    uriPattern = "bilibili://forward?-Btarget={url}"
+                }
             )
         )
     }
