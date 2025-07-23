@@ -58,7 +58,6 @@ import com.a10miaomiao.bilimiao.comm.entity.comm.PaginationInfo
 import com.a10miaomiao.bilimiao.comm.entity.history.ToViewInfo
 import com.a10miaomiao.bilimiao.comm.entity.history.ToViewItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.media.MediasInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys

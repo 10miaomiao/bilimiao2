@@ -16,7 +16,6 @@ import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo.VideoPageInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
@@ -497,29 +496,6 @@ class PlayListStore(override val di: DI) :
         )
     }
 
-    fun VideoInfo.toPlayListItem(): PlayListItemInfo {
-        val from = PlayListFrom.Video(
-            aid = aid,
-        )
-        return PlayListItemInfo(
-            aid = aid,
-            cid = pages[0].cid,
-            title = title,
-            cover = pic,
-            duration = duration,
-            ownerId = owner.mid,
-            ownerName = owner.name,
-            from = from,
-            videoPages = pages.map {
-                PlayListItemInfo.VideoPageInfo(
-                    cid = it.cid,
-                    page = it.page,
-                    part = it.part,
-                    duration = it.duration,
-                )
-            }
-        )
-    }
     fun bilibili.app.archive.v1.Arc.toPlayListItem(
         viewPages: List<bilibili.app.view.v1.ViewPage>,
     ): PlayListItemInfo {
