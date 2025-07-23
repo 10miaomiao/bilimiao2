@@ -16,9 +16,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import bilibili.app.dynamic.v2.ModuleDynamic
+import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.image.ImagesGrid
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import kotlin.math.min
 
@@ -26,6 +28,8 @@ import kotlin.math.min
 private fun DynArchiveBox(
     dynPgc: bilibili.app.dynamic.v2.MdlDynArchive
 ) {
+    val pageNavigation = localPageNavigation()
+
     VideoItemBox(
         modifier = Modifier.padding(
             horizontal = 10.dp,
@@ -35,6 +39,11 @@ private fun DynArchiveBox(
         pic = dynPgc.cover,
         duration = dynPgc.coverLeftText1,
         remark = dynPgc.coverLeftText2 + "  " + dynPgc.coverLeftText3,
+        onClick = {
+            pageNavigation.navigate(VideoDetailPage(
+                id = dynPgc.bvid,
+            ))
+        }
     )
 }
 
