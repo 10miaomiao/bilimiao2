@@ -11,7 +11,6 @@ import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListItemInfo
 import com.a10miaomiao.bilimiao.comm.entity.video.UgcSeasonInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
@@ -156,22 +155,6 @@ class PlayerStore(override val di: DI) :
 
     fun setAutoStopDuration(duration: Int) {
         autoStopDurationFlow.value = duration
-    }
-
-    private fun VideoInfo.toPlayListItem(): PlayListItemInfo {
-        val from = PlayListFrom.Video(
-            aid = aid,
-        )
-        return PlayListItemInfo(
-            aid = aid,
-            cid = pages[0].cid,
-            title = title,
-            cover = pic,
-            duration = duration,
-            ownerId = owner.mid,
-            ownerName = owner.name,
-            from = from,
-        )
     }
 }
 
