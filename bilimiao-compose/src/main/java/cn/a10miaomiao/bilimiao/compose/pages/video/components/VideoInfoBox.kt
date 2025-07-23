@@ -107,9 +107,7 @@ fun VideoInfoBox(
         modifier = Modifier
             .fillMaxWidth()
     ){
-        SelectionContainer(
-            modifier = Modifier.weight(1f)
-        ) {
+        SelectionContainer {
             Text(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
