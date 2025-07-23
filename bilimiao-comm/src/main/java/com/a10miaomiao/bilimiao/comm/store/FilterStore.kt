@@ -2,16 +2,18 @@ package com.a10miaomiao.bilimiao.comm.store
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
+import bilibili.app.view.v1.ViewGRPC
+import bilibili.app.view.v1.ViewReq
 import com.a10miaomiao.bilimiao.comm.db.FilterTagDB
 import com.a10miaomiao.bilimiao.comm.db.FilterUpperDB
 import com.a10miaomiao.bilimiao.comm.db.FilterWordDB
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoInfo
-import com.a10miaomiao.bilimiao.comm.entity.video.VideoTagInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
@@ -143,9 +145,9 @@ class FilterStore(override val di: DI) :
         return true
     }
 
-    fun filterTag(text: List<VideoTagInfo>): Boolean {
+    fun filterTag(text: List<String>): Boolean {
         text.forEach {
-            if (state.filterTagList.contains(it.tag_name)) {
+            if (state.filterTagList.contains(it)) {
                 return false
             }
         }
@@ -157,19 +159,25 @@ class FilterStore(override val di: DI) :
      */
     suspend fun filterTag(
         id: String, // av号或bv号
-        type: String, // "AV" | "BV"
     ): Boolean {
         if (state.filterTagList.isEmpty()) {
             return true
         }
-        val typeUpperCase = type.uppercase()
-        if (typeUpperCase != "AV" && typeUpperCase != "BV") {
-            return true
+        val req = if (id.startsWith("BV")) {
+            ViewReq(
+                bvid = id,
+            )
+        } else {
+            ViewReq(
+                aid = id.toLong(),
+            )
         }
-        return BiliApiService.videoAPI.info(id, typeUpperCase)
-            .awaitCall()
-            .json<ResponseData<VideoInfo>>()
-            .let { filterTag(it.requireData().tag) }
+        val res = BiliGRPCHttp.request {
+            ViewGRPC.view(req)
+        }.awaitCall()
+        val tags = res.tag.map { it.name }
+        miaoLogger() debug tags
+        return filterTag(tags)
     }
 
     fun addTag(name: String) {
@@ -198,4 +206,5 @@ class FilterStore(override val di: DI) :
         PopTip.show("删除成功")
     }
 
+    fun filterTagListIsEmpty() = state.filterTagList.isEmpty()
 }

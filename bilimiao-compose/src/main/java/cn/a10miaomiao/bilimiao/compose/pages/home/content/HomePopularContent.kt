@@ -118,19 +118,23 @@ private class HomePopularContentViewModel(
                 (base != null // && upper != null
                         && base.cardGoto == "av"
                         && filterStore.filterWord(base.title)
-                        && filterStore.filterUpperName(it.rightDesc1)
-                        && filterStore.filterTag(base.param, base.cardGoto)
-                        )
+                        && filterStore.filterUpperName(it.rightDesc1))
             }
             val topItems = result.config?.topItems
             if (topItems != null) {
                 topEntranceList.value = topItems
             }
-            if (idx == 0L) {
-                list.data.value = filterList
+            val newList = if (idx == 0L) mutableListOf()
+                else list.data.value.toMutableList()
+            if (filterStore.filterTagListIsEmpty()) {
+                newList.addAll(filterList)
+                list.data.value = newList
             } else {
-                list.data.value = list.data.value.toMutableList().also {
-                    it.addAll(filterList)
+                filterList.forEach {
+                    if (filterStore.filterTag(it.base!!.param)) {
+                        newList.add(it)
+                        list.data.value = newList.toList()
+                    }
                 }
             }
             list.finished.value = itemsList.isEmpty()

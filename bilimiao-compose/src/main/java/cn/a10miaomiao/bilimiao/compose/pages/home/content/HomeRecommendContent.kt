@@ -117,14 +117,21 @@ private class HomeRecommendContentViewModel(
                 val filterList = itemsList.filter {
                     (it.goto?.isNotEmpty() ?: false)
                             && filterStore.filterWord(it.title)
-                            && filterStore.filterUpper(it.args?.up_id ?: "-1")
-                            && filterStore.filterTag(it.param, it.card_goto)
+                            && it.args != null
+                            && it.args!!.up_id != null
+                            && filterStore.filterUpper(it.args!!.up_id!!)
                 }
-                if (idx == 0L) {
-                    list.data.value = filterList
+                val newList = if (idx == 0L) mutableListOf()
+                else list.data.value.toMutableList()
+                if (filterStore.filterTagListIsEmpty()) {
+                    newList.addAll(filterList)
+                    list.data.value = newList
                 } else {
-                    list.data.value = list.data.value.toMutableList().also {
-                        it.addAll(filterList)
+                    filterList.forEach {
+                        if (filterStore.filterTag(it.param)) {
+                            newList.add(it)
+                            list.data.value = newList.toList()
+                        }
                     }
                 }
                 list.finished.value = itemsList.isEmpty()
