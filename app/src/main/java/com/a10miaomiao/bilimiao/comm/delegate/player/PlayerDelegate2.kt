@@ -557,6 +557,10 @@ class PlayerDelegate2(
     fun reloadPlayer() {
         lastPosition = views.videoPlayer.currentPositionWhenPlaying
         playerCoroutineScope.launch(Dispatchers.Main) {
+            playerSource?.defaultPlayerSource?.let {
+                it.lastPlayCid = ""
+                it.lastPlayTime = 0L
+            }
             loadPlayerSource()
         }
     }
