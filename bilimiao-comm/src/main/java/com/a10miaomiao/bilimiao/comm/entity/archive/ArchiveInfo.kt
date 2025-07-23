@@ -52,7 +52,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 class ArchiveInfo(
-    val author: String,
+    val author: String = "",
     val bvid: String = "",
     val cover: String,
     val ctime: Long,
