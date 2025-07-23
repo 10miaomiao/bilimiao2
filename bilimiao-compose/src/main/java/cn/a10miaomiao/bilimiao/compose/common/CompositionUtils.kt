@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import com.a10miaomiao.bilimiao.store.WindowStore
 
 @Composable
@@ -19,10 +20,10 @@ fun WindowStore.Insets.addPaddingValues(
 ): PaddingValues {
     return remember(this, addLeft, addRight, addTop, addBottom) {
         PaddingValues.Absolute(
-            left = leftDp.dp + addLeft,
-            right = rightDp.dp + addRight,
-            top = topDp.dp + addTop,
-            bottom = bottomDp.dp + addBottom,
+            left = max(leftDp.dp + addLeft, 0.dp),
+            right = max(rightDp.dp + addRight, 0.dp),
+            top = max(topDp.dp + addTop, 0.dp),
+            bottom = max(bottomDp.dp + addBottom, 0.dp),
         )
     }
 }
