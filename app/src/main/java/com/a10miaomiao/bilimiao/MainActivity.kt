@@ -32,6 +32,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
+import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 import com.a10miaomiao.bilimiao.activity.SearchActivity
@@ -60,6 +61,7 @@ import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -89,6 +91,7 @@ class MainActivity
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
         store.loadStoreModules(this)
+        bindSingleton { startViewWrapper }
         bindSingleton { basePlayerDelegate }
         bindSingleton { themeDelegate }
         bindSingleton { statusBarHelper }
@@ -97,13 +100,19 @@ class MainActivity
     }
 
     private val store by lazy { Store(this, di) }
+    private val startViewWrapper by lazy {
+        StartViewWrapper(
+            this,
+            this::startMenuNavigate,
+            this::startMenuOpenSearch
+        )
+    }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
     private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate2(this, di) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val supportHelper by lazy { SupportHelper(this) }
     private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
 
-    private lateinit var leftFragment: StartFragment
     private lateinit var navHostFragment: ComposeFragment
 
     private var subNavHostFragment: ComposeFragment? = null
@@ -183,7 +192,7 @@ class MainActivity
     }
 
     private fun initRootView(savedInstanceState: Bundle?) {
-        mainUi = MainUi(this)
+        mainUi = MainUi(this, startViewWrapper)
         setContentView(ui.root)
         basePlayerDelegate.onCreate(savedInstanceState)
         ui.root.showPlayer = basePlayerDelegate.isPlaying()
@@ -221,16 +230,6 @@ class MainActivity
                 .findFragmentById(R.id.nav_host_fragment_sub) as ComposeFragment
             _subNavHostFragment.pageConfig.setConfig = this::notifyConfigChanged
             subNavHostFragment = _subNavHostFragment
-        }
-
-        (supportFragmentManager.findFragmentByTag(getString(R.string.tag_left_fragment)) as? StartFragment)?.let {
-            leftFragment = it
-            ui.root.drawerFragment = it
-//            if (leftFragment.isVisible) {
-//                supportFragmentManager.beginTransaction()
-//                    .hide(leftFragment)
-//                    .commit()
-//            }
         }
 
         intent.data?.let {
@@ -351,7 +350,6 @@ class MainActivity
             }
             ui.root.slideUpBottomAppBar()
         }
-        leftFragment.setConfig(config.search)
     }
 
     private fun goBackHome(): Boolean {
@@ -417,6 +415,10 @@ class MainActivity
     }
 
     fun onDrawerStateChanged(state: Int) {
+        val startTop = ui.root.getDrawerTouchStartY()
+        if (startTop > 0f) {
+            startViewWrapper.setTouchStartTop(startTop)
+        }
         // 太麻烦
 //        supportFragmentManager.beginTransaction().also {
 //            if (state == AppBarBehaviorDelegate.STATE_COLLAPSED
@@ -435,6 +437,16 @@ class MainActivity
 
     fun openBottomSheet(page: ComposePage) {
         navHostFragment.openBottomSheet(page)
+    }
+
+    private fun startMenuNavigate(page: ComposePage) {
+        ui.root.closeDrawer()
+        pointerNav.navigate(page)
+    }
+
+    private fun startMenuOpenSearch() {
+        ui.root.closeDrawer()
+        openSearch()
     }
 
     fun setWindowInsetsAndroidL() {
@@ -705,9 +717,6 @@ class MainActivity
     }
 
     override fun onBackPressed() {
-        if (leftFragment.onBackPressed()) {
-            return
-        }
         if (ui.root.isDrawerOpen()) {
             ui.root.closeDrawer()
             return

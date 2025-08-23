@@ -84,4 +84,7 @@ class DrawerBehavior(context: Context, attrs: AttributeSet?) :
         return behaviorDelegate?.isDrawerOpen() ?: false
     }
 
+    fun getTouchStartY(): Float {
+        return behaviorDelegate?.getTouchStartY() ?: 0f
+    }
 }

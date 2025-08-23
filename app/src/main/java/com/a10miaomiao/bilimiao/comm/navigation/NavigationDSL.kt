@@ -11,7 +11,7 @@ fun Activity.openBottomSheet(page: ComposePage) {
     (this as? MainActivity)?.openBottomSheet(page)
 }
 
-fun Activity.openSearch(view: View) {
+fun Activity.openSearch(view: View? = null) {
     val searchConfig = (this as? MainActivity)?.pageConfig?.search
     if (searchConfig != null) {
         SearchActivity.launch(

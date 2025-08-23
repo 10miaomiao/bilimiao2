@@ -21,6 +21,7 @@ class DrawerBehaviorDelegate(
 
     //    private var initialY = 0f
     private var initialX = 0f
+    private var initialY = 0f
     private var touchOnAppBar = false
     private val minLeft = parent.dip(40)
 
@@ -104,6 +105,7 @@ class DrawerBehaviorDelegate(
                         || (parent.orientation == ScaffoldView.HORIZONTAL
                         && ev.x < (parent.appBar?.right ?: 0))
                 this.initialX = ev.x
+                this.initialY = ev.y
             } else if (
                 ev.action == MotionEvent.ACTION_MOVE
                 && initialX > 0f
@@ -200,6 +202,7 @@ class DrawerBehaviorDelegate(
     fun openDrawer() {
         drawerView.visibility = View.VISIBLE
         targetState = STATE_EXPANDED
+        parent.setMaskViewVisibility(View.VISIBLE)
         dragger.smoothSlideViewTo(drawerView, 0, 0)
         ViewCompat.postOnAnimation(parent, draggerSettle)
     }
@@ -209,6 +212,10 @@ class DrawerBehaviorDelegate(
         targetState = STATE_COLLAPSED
         dragger.smoothSlideViewTo(drawerView, -measuredWidth, 0)
         ViewCompat.postOnAnimation(parent, draggerSettle)
+    }
+
+    fun getTouchStartY(): Float {
+        return initialY
     }
 
     fun isDrawerOpen(): Boolean {

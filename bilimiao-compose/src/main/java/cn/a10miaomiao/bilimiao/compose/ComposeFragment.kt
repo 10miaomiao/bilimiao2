@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -42,6 +43,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCompositionContext
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +57,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -127,6 +131,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         }
     }
 
+    private val startViewWrapper by instance<StartViewWrapper>()
     private val appStore by instance<AppStore>()
     private val windowStore by instance<WindowStore>()
 
@@ -207,6 +212,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                 }
                             }
                             MessageDialog(messageDialogState)
+                            MyStartView(startViewWrapper = startViewWrapper)
                         }
                     }
                 }
@@ -384,5 +390,21 @@ fun MyBottomSheetTitleBar(
             )
         }
 
+    }
+}
+
+@Composable
+fun MyStartView(
+    startViewWrapper: StartViewWrapper
+) {
+    if (startViewWrapper.shouldCreateCompositionOnAttachedToWindow) {
+        val composition = rememberCompositionContext()
+        startViewWrapper.setContent(composition) {
+            StartViewContent(
+                startTopHeight = startViewWrapper.touchStart.value.dp,
+                navigateTo = startViewWrapper.navigateTo,
+                openSearch = startViewWrapper.openSearch
+            )
+        }
     }
 }

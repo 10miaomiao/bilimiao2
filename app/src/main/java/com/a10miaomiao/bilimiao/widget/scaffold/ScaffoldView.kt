@@ -150,7 +150,6 @@ class ScaffoldView @JvmOverloads constructor(
 
     var appBar: AppBarView? = null
     var appBarBehavior: AppBarBehavior? = null
-    var drawerFragment: Fragment? = null
 
     var content: View? = null
     var contentBehavior: ContentBehavior? = null
@@ -254,6 +253,10 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun changedDrawerState(state: Int) {
         onDrawerStateChanged?.invoke(state)
+    }
+
+    fun getDrawerTouchStartY(): Float {
+        return drawerBehavior?.getTouchStartY() ?: 0f
     }
 
     fun slideUpBottomAppBar() {

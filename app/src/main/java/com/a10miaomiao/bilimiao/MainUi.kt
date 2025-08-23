@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.fragment.app.FragmentContainerView
+import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
@@ -30,18 +31,22 @@ import splitties.views.dsl.core.*
 
 
 @OptIn(InternalSplittiesApi::class)
-class MainUi(override val ctx: Context) : Ui {
+class MainUi(
+    override val ctx: Context,
+    private val startViewWrapper: StartViewWrapper,
+) : Ui {
 
     companion object {
         // 重启activiry时保持播放
         private var keepPlayerView: DanmakuVideoPlayer? = null
     }
 
-    val mLeftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
-        backgroundColor = config.windowBackgroundColor
-        elevation = dip(20).toFloat()
-        visibility = View.INVISIBLE
-    }
+//    val mLeftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
+//        backgroundColor = config.windowBackgroundColor
+//        elevation = dip(20).toFloat()
+//        visibility = View.INVISIBLE
+//    }
+    val mLeftContainerView = startViewWrapper.getView()
 
     val mContainerView = inflate<View>(R.layout.container_fragment) {
         backgroundColor = Color.TRANSPARENT
@@ -93,7 +98,7 @@ class MainUi(override val ctx: Context) : Ui {
 
     var mMaskView = view<View> {
         setBackgroundResource(R.color.black)
-        elevation = dip(20).toFloat()
+        setOnClickListener {  }
         alpha = 0f
         visibility = View.GONE
     }
