@@ -43,12 +43,14 @@ import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
-class MyBangumiPage() : ComposePage() {
+class MyBangumiPage(
+    val type: String = "bangumi",
+) : ComposePage() {
 
     @Composable
     override fun Content() {
         val viewModel: SearchPageViewModel = diViewModel()
-        MyBangumiPageContent(viewModel)
+        MyBangumiPageContent(viewModel, type)
     }
 }
 
@@ -101,6 +103,7 @@ private class SearchPageViewModel(
 @Composable
 private fun MyBangumiPageContent(
     viewModel: SearchPageViewModel,
+    type: String = "bangumi",
 ) {
     PageConfig(
         title = "搜索"
@@ -110,7 +113,12 @@ private fun MyBangumiPageContent(
     val windowInsets = windowState.getContentInsets(localContainerView())
 
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
+    val pagerState = rememberPagerState(
+        initialPage = viewModel.tabs.indexOfFirst {
+            it.id == PageTabIds.MyBangumi[type]
+        }.let { if (it == -1) 0 else it },
+        pageCount = { viewModel.tabs.size },
+    )
     val emitter = localEmitter()
     val combinedTabClick = combinedTabDoubleClick(
         pagerState = pagerState,

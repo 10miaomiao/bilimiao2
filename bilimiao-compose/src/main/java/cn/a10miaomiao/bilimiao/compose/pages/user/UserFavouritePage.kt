@@ -59,6 +59,7 @@ import org.kodein.di.compose.rememberInstance
 @Serializable
 data class UserFavouritePage(
     private val mid: String,
+    val type: String = "created", // created, collected
 ) : ComposePage() {
 
     @Composable
@@ -66,13 +67,14 @@ data class UserFavouritePage(
         val viewModel: UserFavouriteViewModel = diViewModel {
             UserFavouriteViewModel(it, mid)
         }
-        UserFavouritePageContent(viewModel)
+        UserFavouritePageContent(viewModel, type)
     }
 }
 
 @Composable
 private fun UserFavouritePageContent(
     viewModel: UserFavouriteViewModel,
+    type: String = "created"
 ) {
     val userStore: UserStore by rememberInstance()
     val windowStore: WindowStore by rememberInstance()
@@ -91,7 +93,10 @@ private fun UserFavouritePageContent(
     }
 
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(
+        initialPage = if (type == "created") 0 else 1,
+        pageCount = { 2 }
+    )
     val callName = remember(viewModel.mid) {
         if (userStore.isSelf(viewModel.mid)) {
             "我"
