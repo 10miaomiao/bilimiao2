@@ -217,10 +217,12 @@ fun TypeBangumiContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(windowInsets.toPaddingValues(
-                top = 0.dp,
-                bottom = 0.dp
-            ))
+            .padding(
+                windowInsets.toPaddingValues(
+                    top = 0.dp,
+                    bottom = 0.dp
+                )
+            )
     ) {
         val currentStatus = viewModel.currentStatus.collectAsState().value
         LazyRow(

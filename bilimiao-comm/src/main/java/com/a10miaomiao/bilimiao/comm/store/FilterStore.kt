@@ -176,7 +176,6 @@ class FilterStore(override val di: DI) :
             ViewGRPC.view(req)
         }.awaitCall()
         val tags = res.tag.map { it.name }
-        miaoLogger() debug tags
         return filterTag(tags)
     }
 

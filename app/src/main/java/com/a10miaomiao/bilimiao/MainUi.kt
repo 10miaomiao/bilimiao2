@@ -79,7 +79,7 @@ class MainUi(
 
     val mPlayerLayout = frameLayout {
         backgroundColor = 0xFF000000.toInt()
-        elevation = dip(19).toFloat()
+//        elevation = dip(19).toFloat()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             outlineSpotShadowColor = config.shadowColor
         }
