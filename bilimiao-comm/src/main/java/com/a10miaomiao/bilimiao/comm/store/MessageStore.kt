@@ -26,7 +26,13 @@ class MessageStore(override val di: DI) :
 
     data class State (
         var unread: UnreadMessageInfo? = null
-    )
+    ) {
+        fun totalCount(): Int {
+            return unread?.let { unread ->
+                unread.reply + unread.at + unread.like // + unread.sys_msg
+            } ?: 0
+        }
+    }
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
@@ -81,11 +87,5 @@ class MessageStore(override val di: DI) :
                 at = 0
             )
         }
-    }
-
-    fun getUnreadCount(): Int {
-        return state.unread?.let { unread ->
-            unread.reply + unread.at + unread.like // + unread.sys_msg
-        } ?: 0
     }
 }
