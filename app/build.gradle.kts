@@ -132,7 +132,6 @@ dependencies {
     implementation(Libraries.dialogX) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
-    implementation(Libraries.zxingLite)
     implementation(Libraries.materialKolor)
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
@@ -154,6 +153,7 @@ dependencies {
     implementation(Libraries.pbandkRuntime)
     implementation(Libraries.glide)
     annotationProcessor(Libraries.glideCompiler)
+    implementation(Libraries.microgSafeParcel)
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))

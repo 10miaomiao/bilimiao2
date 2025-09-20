@@ -10,12 +10,15 @@ import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.DisplayCutout
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
+import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -52,12 +55,12 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPopupMenu
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCConfig
+import com.a10miaomiao.bilimiao.comm.scanner.BilimiaoScanner
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
-import com.a10miaomiao.bilimiao.page.start.StartFragment
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
@@ -66,6 +69,7 @@ import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.common.util.concurrent.MoreExecutors
+import com.kongzue.dialogx.dialogs.PopTip
 import com.materialkolor.dynamiccolor.MaterialDynamicColors
 import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.DynamicScheme
@@ -104,7 +108,9 @@ class MainActivity
         StartViewWrapper(
             this,
             this::startMenuNavigate,
-            this::startMenuOpenSearch
+            this::startMenuNavigateUrl,
+            this::startMenuOpenSearch,
+            this::startMenuOpenScanner,
         )
     }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
@@ -444,9 +450,27 @@ class MainActivity
         pointerNav.navigate(page)
     }
 
+    private fun startMenuNavigateUrl(url: String) {
+        ui.root.closeDrawer()
+        val uri = Uri.parse(url)
+        if (!pointerNav.navigateByUri(uri)) {
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
+        }
+    }
+
     private fun startMenuOpenSearch() {
         ui.root.closeDrawer()
         openSearch()
+    }
+
+    private fun startMenuOpenScanner(callback: (result: String) -> Unit): Boolean {
+        ui.root.closeDrawer()
+        return BilimiaoScanner.openScanner(
+            this,
+            themeDelegate.themeColor.toInt(),
+            callback,
+        )
     }
 
     fun setWindowInsetsAndroidL() {
@@ -600,7 +624,7 @@ class MainActivity
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when (resultCode) {
+        when (requestCode) {
             SearchActivity.REQUEST_CODE -> {
                 val arguments = data?.extras ?: Bundle()
                 if (arguments.containsKey(SearchActivity.KEY_URL)) {
@@ -617,6 +641,11 @@ class MainActivity
                 } else {
                     searchSelfPage(keyword)
                 }
+            }
+            BilimiaoScanner.REQUEST_CODE -> {
+                BilimiaoScanner.onActivityResult(
+                    ActivityResult(resultCode, data)
+                )
             }
         }
     }
