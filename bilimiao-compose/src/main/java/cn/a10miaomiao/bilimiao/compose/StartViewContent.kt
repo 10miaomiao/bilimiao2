@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose
 
 import android.os.Build
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +58,7 @@ import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.foundation.ScaleIndication
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartLibraryCard
+import cn.a10miaomiao.bilimiao.compose.components.start.StartPlayerCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartSearchCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartUserCard
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
@@ -133,6 +135,41 @@ fun StartViewContent(
                 )
             }
         }
+        item {
+            AnimatedVisibility(
+                visible = playerState.title.isNotEmpty(),
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .fillMaxWidth()
+            ) {
+                StartPlayerCard(
+                    aid = playerState.aid,
+                    title = playerState.title,
+                    cover = playerState.cover,
+                    onClick = {
+                        if (playerState.type === "video") {
+                            navigateTo(
+                                VideoDetailPage(
+                                    id = playerState.aid,
+                                )
+                            )
+                        } else if (playerState.type === "bangumi") {
+                            navigateTo(
+                                BangumiDetailPage(
+                                    id = playerState.sid,
+                                    epId = playerState.epid,
+                                )
+                            )
+                        }
+                    },
+                    onPlayListClick = {
+                        navigateTo(PlayListPage())
+                    },
+                    onCloseClick = playerDelegate::closePlayer,
+                )
+            }
+        }
+
         item {
             StartUserCard(
                 userInfo = userState.info,
