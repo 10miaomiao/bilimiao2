@@ -66,6 +66,7 @@ object Libraries {
     const val navigationCompose = "androidx.navigation:navigation-compose:${Versions.navigation}"
     const val composeMaterialIconsExtended = "androidx.compose.material:material-icons-extended"
     const val glideCompose = "com.github.bumptech.glide:compose:1.0.0-beta01"
+    const val qrose = "io.github.alexzhirkevich:qrose:1.0.1"  // 二维码生成
     // compose控件
     const val accompanistDrawablePainter = "com.google.accompanist:accompanist-drawablepainter:${Versions.accompanist}"
     const val accompanistAdaptive = "com.google.accompanist:accompanist-adaptive:${Versions.accompanist}"
@@ -83,6 +84,7 @@ object Libraries {
     const val glide = "com.github.bumptech.glide:glide:${Versions.glide}"
     const val glideCompiler = "com.github.bumptech.glide:compiler:${Versions.glide}"
     const val materialKolor = "com.materialkolor:material-kolor:2.0.2"
+    const val microgSafeParcel = "org.microg:safe-parcel:1.7.1"
 
     // 通用控件
     const val recyclerview = "androidx.recyclerview:recyclerview:1.2.0"
@@ -93,7 +95,6 @@ object Libraries {
     const val drawer = "com.drakeet.drawer:drawer:1.0.3"
     const val dialogX = "com.github.kongzue:DialogX:0.0.50.beta37"
     const val dialogXMaterialYou = "com.github.kongzue.DialogX:DialogXMaterialYou:0.0.50.beta20"
-    const val zxingLite = "com.github.jenly1314:zxing-lite:2.1.0"
 
     const val gsyVideoPlayer = "com.github.CarGuo.GSYVideoPlayer:gsyvideoplayer-java:${Versions.gsyVideoPlayer}"
 

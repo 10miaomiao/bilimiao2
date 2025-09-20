@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.components.start
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 fun StartSearchCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    onScannerClick: () -> Unit,
 ) {
     MiaoCard(
         modifier = modifier,
@@ -50,7 +52,10 @@ fun StartSearchCard(
             Icon(
                 modifier = Modifier
                     .padding(8.dp)
-                    .size(40.dp),
+                    .size(40.dp)
+                    .clickable(
+                        onClick = onScannerClick,
+                    ),
                 imageVector = Icons.Filled.CameraAlt,
                 tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = null

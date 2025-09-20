@@ -45,7 +45,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.store.WindowStore
-import com.king.zxing.util.CodeUtils
+import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +67,7 @@ class QrCodeLoginPage : ComposePage() {
     }
 
 }
-
+//
 private class QrCodeLoginPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
@@ -79,7 +79,7 @@ private class QrCodeLoginPageViewModel(
     private var _authCode = ""
 
     val loading = MutableStateFlow(false)
-    val qrImage = MutableStateFlow<ImageBitmap?>(null)
+    val qrCodeData = MutableStateFlow<String?>(null)
     val error = MutableStateFlow("")
     val isScaned = MutableStateFlow(false)
 
@@ -94,7 +94,7 @@ private class QrCodeLoginPageViewModel(
                 .json<ResponseData<QRLoginInfo>>()
             if (res.isSuccess) {
                 val resData = res.requireData()
-                renderQrcode(resData.url)
+                qrCodeData.value = resData.url
                 launch {
                     val authCode = resData.auth_code
                     _authCode = authCode
@@ -110,15 +110,6 @@ private class QrCodeLoginPageViewModel(
             loading.value = false
         }
     }
-
-    fun renderQrcode(
-        url: String,
-    ) {
-        qrImage.value = CodeUtils.createQRCode(
-            url, 600
-        ).asImageBitmap()
-    }
-
 
     private suspend fun checkQRCode(
         authCode: String,
@@ -201,7 +192,7 @@ private fun QrCodeLoginPageContent(
 
     val loading = viewModel.loading.collectAsState().value
     val error = viewModel.error.collectAsState().value
-    val qrImage = viewModel.qrImage.collectAsState().value
+    val qrCodeData = viewModel.qrCodeData.collectAsState().value
     val isScaned = viewModel.isScaned.collectAsState().value
 //    val isFullScreenQrcode by viewModel.isScaned.collectAsState()
 
@@ -216,10 +207,10 @@ private fun QrCodeLoginPageContent(
     if (
         isFullScreenQrcode
         && !isScaned
-        && qrImage != null
+        && qrCodeData != null
     ) {
         Image(
-            bitmap = qrImage,
+            painter = rememberQrCodePainter(qrCodeData),
             contentDescription = "",
             modifier = Modifier
                 .fillMaxSize()
@@ -254,9 +245,9 @@ private fun QrCodeLoginPageContent(
                         isFullScreenQrcode = true
                     },
             ) {
-                if (qrImage != null) {
+                if (qrCodeData != null) {
                     Image(
-                        bitmap = qrImage,
+                        painter = rememberQrCodePainter(qrCodeData),
                         contentDescription = "",
                         modifier = Modifier
                             .size(240.dp)

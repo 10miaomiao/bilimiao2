@@ -89,7 +89,7 @@ dependencies {
     implementation(Libraries.pbandkRuntime)
     implementation(Libraries.glide)
     implementation(Libraries.glideCompose)
-    implementation(Libraries.zxingLite)
+    implementation(Libraries.qrose)
 
     implementation(Libraries.dialogX) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")

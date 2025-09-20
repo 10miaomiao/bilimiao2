@@ -14,7 +14,9 @@ import kotlin.math.min
 class StartViewWrapper(
     val activity: Activity,
     val navigateTo: (ComposePage) -> Unit,
+    val navigateUrl: (String) -> Unit,
     val openSearch: () -> Unit,
+    val openScanner: (callback: (result: String) -> Unit) -> Boolean,
 ) {
 
     private val composeView = ComposeView(activity)

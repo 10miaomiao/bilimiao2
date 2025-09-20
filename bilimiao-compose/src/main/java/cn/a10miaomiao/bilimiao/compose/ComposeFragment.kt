@@ -262,8 +262,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         intent.launchUrl(activity, uri)
     }
 
-    fun navigateByUri(deepLink: Uri) {
-        pageNavigation.navigateByUri(deepLink)
+    fun navigateByUri(deepLink: Uri): Boolean {
+        return pageNavigation.navigateByUri(deepLink)
     }
 
     fun navigate(page: ComposePage) {
@@ -403,7 +403,9 @@ fun MyStartView(
             StartViewContent(
                 startTopHeight = startViewWrapper.touchStart.value.dp,
                 navigateTo = startViewWrapper.navigateTo,
-                openSearch = startViewWrapper.openSearch
+                navigateUrl = startViewWrapper.navigateUrl,
+                openSearch = startViewWrapper.openSearch,
+                openScanner = startViewWrapper.openScanner,
             )
         }
     }
