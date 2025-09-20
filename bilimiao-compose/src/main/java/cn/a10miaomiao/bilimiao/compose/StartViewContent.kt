@@ -64,6 +64,7 @@ import cn.a10miaomiao.bilimiao.compose.components.start.StartUserCard
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
+import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.HistoryPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
@@ -199,6 +200,9 @@ fun StartViewContent(
                 onUserFollowingClick = {
                     navigateTo(MyFollowPage())
                 },
+                onMessageClick = {
+                    navigateTo(MessagePage())
+                }
             )
         }
         item {

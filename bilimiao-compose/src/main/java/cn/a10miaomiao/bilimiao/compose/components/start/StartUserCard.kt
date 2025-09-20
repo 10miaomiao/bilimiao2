@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,10 +31,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
+import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
+import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import org.kodein.di.compose.rememberInstance
 
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -43,6 +49,7 @@ fun StartUserCard(
     onUserDynamicClick: () -> Unit = {},
     onUserFollowingClick: () -> Unit = {},
     onUserFollowerClick: () -> Unit = {},
+    onMessageClick: () -> Unit = {},
 ) {
     val imageHeight = 100.dp
     val userRowTop = imageHeight - 40.dp
@@ -95,6 +102,7 @@ fun StartUserCard(
                         .padding(top = userRowTop, bottom = 10.dp)
                         .padding(horizontal = 10.dp)
                         .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (userInfo == null) {
                         Image(
@@ -149,6 +157,11 @@ fun StartUserCard(
                             }
                         }
                     }
+                    StartUserMessageBox(
+                        modifier = Modifier
+                            .padding(start = 8.dp),
+                        onClick = onMessageClick,
+                    )
                 }
                 if (userInfo != null) {
                     Row(
@@ -196,6 +209,45 @@ fun StartUserCard(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StartUserMessageBox(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val messageStore by rememberInstance<MessageStore>()
+    val messageState by messageStore.stateFlow.collectAsState()
+    Box(
+        modifier = modifier,
+    ) {
+        val totalCount = messageState.totalCount()
+        Image(
+            painter = painterResource(id = R.drawable.ic_message),
+            contentDescription = "message",
+            modifier = Modifier
+                .size(40.dp)
+                .padding(end = 8.dp)
+                .clickable(
+                    onClick = onClick,
+                )
+        )
+        if (totalCount > 0) {
+            Badge(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+            ) {
+                Text(
+                    text = if (totalCount > 99) {
+                        "99+"
+                    } else {
+                        totalCount.toString()
+                    }
+                )
+            }
+
         }
     }
 }
