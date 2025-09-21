@@ -200,7 +200,11 @@ private fun DynamicAllAndVideoWrap(
             }
         } else {
             LazyRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(
+                        top = windowInsets.topDp.dp,
+                        end = windowInsets.rightDp.dp,
+                    ),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(
                     horizontal = 8.dp

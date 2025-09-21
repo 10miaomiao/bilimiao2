@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -41,6 +42,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 @Composable
 fun DynamicUpperList(
     modifier: Modifier = Modifier,
+    safePadding: PaddingValues,
     upperList: List<UpListItem>,
     selectedUpper: UpListItem? = null,
     onBackAll: () -> Unit,
@@ -55,7 +57,8 @@ fun DynamicUpperList(
 
     LazyColumn(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = safePadding,
     ) {
         item {
             val isSelected = selectedUpper == null
