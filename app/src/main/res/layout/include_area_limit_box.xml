@@ -24,17 +24,17 @@
         android:layout_marginBottom="30dp"/>
 
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/area_limit_ok_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/center"
         android:layout_toEndOf="@id/center"
         android:layout_marginTop="20dp"
-        android:textColor="?colorOnSurface"
+        android:textColor="@color/white"
         android:text="使用代理"/>
 
-    <TextView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/area_limit_close_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -43,7 +43,6 @@
         android:layout_toStartOf="@id/center"
         android:textColor="?colorAccent"
         android:text="关闭播放"
-        android:gravity="center"
-        android:background="?selectableItemBackgroundBorderless"/>
+        android:gravity="center"/>
 
 </RelativeLayout>

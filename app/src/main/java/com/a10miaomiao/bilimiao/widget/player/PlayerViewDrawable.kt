@@ -85,4 +85,73 @@ object PlayerViewDrawable {
             setId(2, android.R.id.progress) // 主要进度层
         }
     }
+
+    fun videoVolumeProgress(
+        context: Context,
+        themeColor: Int
+    ): Drawable {
+        // 背景 shape
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(Color.WHITE) // #ffffffff
+            cornerRadius = context.resources.displayMetrics.density * 2f // 2dp
+        }
+
+        // 前景 progress shape
+        val progressDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(themeColor)
+            cornerRadius = context.resources.displayMetrics.density * 2f // 2dp
+        }
+
+        // Clip 包裹 progress
+        val clipProgressDrawable = ClipDrawable(
+            progressDrawable,
+            Gravity.BOTTOM,
+            ClipDrawable.VERTICAL
+        )
+
+        // layer-list 拼装
+        return LayerDrawable(
+            arrayOf(backgroundDrawable, clipProgressDrawable)
+        ).apply {
+            setId(0, android.R.id.background)
+            setId(1, android.R.id.progress)
+        }
+    }
+
+    fun dialogProgressBar(
+        context: Context,
+        themeColor: Int
+    ): Drawable {
+        // 背景 shape
+        val backgroundDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(Color.WHITE) // #ffffffff
+            cornerRadius = context.resources.displayMetrics.density * 2f // 2dp
+        }
+
+        // 前景 progress shape
+        val progressDrawable = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(themeColor)
+            cornerRadius = context.resources.displayMetrics.density * 2f // 2dp
+        }
+
+        // Clip 包裹 progress
+        val clipProgressDrawable = ClipDrawable(
+            progressDrawable,
+            Gravity.START,
+            ClipDrawable.HORIZONTAL
+        )
+
+        // layer-list 拼装
+        return LayerDrawable(
+            arrayOf(backgroundDrawable, clipProgressDrawable)
+        ).apply {
+            setId(0, android.R.id.background)
+            setId(1, android.R.id.progress)
+        }
+    }
+
 }
