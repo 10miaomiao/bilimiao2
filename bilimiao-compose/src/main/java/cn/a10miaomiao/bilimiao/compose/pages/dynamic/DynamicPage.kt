@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
@@ -24,6 +25,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
+import cn.a10miaomiao.bilimiao.compose.common.toWindowInsets
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.components.DynamicMiniUpperList
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.components.DynamicPageScaffold
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.components.DynamicUpperList
@@ -127,6 +129,10 @@ private fun DynamicPageContent(
                     modifier = Modifier
                         .width(maxWidth)
                         .fillMaxHeight(),
+                    safePadding = PaddingValues(
+                        top = windowInsets.topDp.dp,
+                        bottom = windowInsets.bottomDp.dp
+                    ),
                     upperList = upperList,
                     selectedUpper = if (pagerState.currentPage == 1) {
                         selectedUpper
