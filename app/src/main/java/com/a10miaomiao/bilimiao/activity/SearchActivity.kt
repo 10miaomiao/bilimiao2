@@ -138,7 +138,7 @@ class SearchActivity : AppCompatActivity() {
         val intent = Intent()
         intent.putExtra(KEY_MODE, if (ui.allRadioButton.isChecked) 0 else 1)
         intent.putExtra(KEY_KEYWORD, keyword)
-        setResult(REQUEST_CODE, intent)
+        setResult(Activity.RESULT_OK, intent)
         finishAfterTransition()
     }
 
