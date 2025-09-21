@@ -37,6 +37,7 @@ class AppStore(override val di: DI) :
     data class State (
         var theme: ThemeSettingState? = null,
         var home: HomeSettingState = HomeSettingState(),
+        var isLockScreenOrientationPortrait: Boolean = false,
     )
 
     override val stateFlow = MutableStateFlow(State())
@@ -59,6 +60,7 @@ class AppStore(override val di: DI) :
                         darkMode = it[ThemeDarkMode] ?: 0,
                         appBarType = it[ThemeAppBarType] ?: 0,
                     )
+                    isLockScreenOrientationPortrait = it[IsLockScreenOrientationPortrait] ?: false
                 }
             }
         }
