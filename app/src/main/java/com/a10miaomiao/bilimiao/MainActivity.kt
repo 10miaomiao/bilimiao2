@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao
 
 import android.Manifest
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -626,6 +627,9 @@ class MainActivity
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             SearchActivity.REQUEST_CODE -> {
+                if (resultCode != Activity.RESULT_OK) {
+                    return
+                }
                 val arguments = data?.extras ?: Bundle()
                 if (arguments.containsKey(SearchActivity.KEY_URL)) {
                     val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
