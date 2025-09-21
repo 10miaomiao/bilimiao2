@@ -16,6 +16,7 @@ class Libgav1Media3ExoPlayerManager : Media3ExoPlayerManager() {
     override fun buildMediaPlayer(context: Context): ExoMediaPlayer {
         if (renderersFactory == null) {
             renderersFactory = Libgav1VideoRendererFactory(context)
+                .setEnableDecoderFallback(true)
         }
         val exoMediaPlayer = ExoMediaPlayer(context)
         exoMediaPlayer.rendererFactory = renderersFactory
