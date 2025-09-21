@@ -216,6 +216,16 @@ private fun SettingPageContent(
                     Text("你知道雪为什么是白色的吗")
                 }
             )
+            switchPreference(
+                key = SettingPreferences.IsLockScreenOrientationPortrait.name,
+                defaultValue = false,
+                title = {
+                    Text( "APP界面竖屏锁定")
+                },
+                summary = {
+                    Text("不会影响全屏播放方向")
+                }
+            )
             preference(
                 key = "theme",
                 title = {

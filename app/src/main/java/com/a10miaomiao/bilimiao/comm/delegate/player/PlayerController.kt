@@ -25,6 +25,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
+import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
@@ -53,6 +54,7 @@ class PlayerController(
 ) : DIAware, VideoPlayerCallBack, GSYVideoProgressListener {
 
     private val userStore by instance<UserStore>()
+    private val appStore by instance<AppStore>()
     private val playerStore by instance<PlayerStore>()
     private val playListStore by instance<PlayListStore>()
     private val statusBarHelper by instance<StatusBarHelper>()
@@ -162,11 +164,11 @@ class PlayerController(
             // 横向全屏(固定方向2)
             SettingConstants.PLAYER_FULL_MODE_REVERSE_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
             // 跟随系统：不指定方向
-            SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED -> getAppSettingScreenOrientation()
             // 跟随视频：竖向视频时为不指定方向，横向视频时候为横向全屏(自动旋转)
             SettingConstants.PLAYER_FULL_MODE_AUTO -> {
                 if ((playerSourceInfo?.screenProportion ?: 1f) < 1f) {
-                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    getAppSettingScreenOrientation()
                 } else {
                     ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 }
@@ -192,7 +194,7 @@ class PlayerController(
         views.videoPlayer.mode = DanmakuVideoPlayer.PlayerMode.SMALL_TOP
         updatePlayerMode(activity.resources.configuration)
         scaffoldApp.fullScreenPlayer = false
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        activity.requestedOrientation = getAppSettingScreenOrientation()
         statusBarHelper.isShowStatus = true
         statusBarHelper.isShowNavigation = true
 
@@ -202,6 +204,14 @@ class PlayerController(
                 initDanmakuContext(it)
             }
         }
+    }
+
+    private fun getAppSettingScreenOrientation(): Int {
+        // 是否锁定竖屏
+        if (appStore.state.isLockScreenOrientationPortrait) {
+            return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+        return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
     fun updatePlayerMode(config: Configuration) {

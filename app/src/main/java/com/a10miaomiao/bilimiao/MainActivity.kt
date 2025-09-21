@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Rect
@@ -194,6 +195,18 @@ class MainActivity
                 }
                 bgColor = (bgColor and 0x00FFFFFF) or (0xF8000000).toInt()
                 ui.mAppBar.updateTheme(color, bgColor)
+            }
+        }
+        lifecycleScope.launch {
+            store.appStore.stateFlow.mapNotNull {
+                it.isLockScreenOrientationPortrait
+            }.flowOn(Dispatchers.Main).collect {
+                if (!ui.root.fullScreenPlayer) {
+                    this@MainActivity.requestedOrientation = when (it) {
+                        true -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 竖屏锁定
+                        else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    }
+                }
             }
         }
     }

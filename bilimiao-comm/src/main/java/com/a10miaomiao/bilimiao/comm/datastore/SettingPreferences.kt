@@ -63,6 +63,8 @@ object SettingPreferences {
      */
     // 使用旧版分区
     val IsBestRegion = booleanPreferencesKey("is_best_region")
+    // APP界面竖屏锁定
+    val IsLockScreenOrientationPortrait = booleanPreferencesKey("is_lock_screen_orientation_portrait")
     // 自动检测更新
     val IsAutoCheckVersion = booleanPreferencesKey("is_auto_check_version")
     // 忽略更新的版本
