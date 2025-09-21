@@ -49,6 +49,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.components.FavouriteEditForm
@@ -188,7 +189,7 @@ private class UserFavouriteDetailViewModel(
         if (ugcInfo != null) {
             pageNavigation.navigateToVideoInfo(item.id)
         } else if (ogvInfo != null) {
-            pageNavigation.navigateToVideoInfo(ogvInfo.season_id)
+            pageNavigation.navigate(BangumiDetailPage(ogvInfo.season_id))
         }
     }
 
