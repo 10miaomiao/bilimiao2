@@ -5,7 +5,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
@@ -178,6 +180,9 @@ class PlayerDelegate2(
         themeDelegate.observeTheme(activity, Observer {
             val themeColor = it.toInt()
             views.videoPlayer.updateThemeColor(activity, themeColor)
+            areaLimitBoxController.updateThemeColor(themeColor)
+            errorMessageBoxController.updateThemeColor(themeColor)
+            completionBoxController.updateThemeColor(themeColor)
         })
 
         if (isPlaying()) {

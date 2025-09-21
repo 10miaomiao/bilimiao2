@@ -64,7 +64,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         SMALL_FLOAT,
         FULL,
     }
-
+    // 主题颜色
+    private var mThemeColor = Color.BLUE
     // 弹幕组件
     private val mDanmakuView: DanmakuView by lazy { findViewById(R.id.danmaku_view) }
 
@@ -296,8 +297,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         isShowDragProgressTextOnSeekBar = true
         enlargeImageRes = R.drawable.ic_player_portrait_fullscreen
         shrinkImageRes = R.drawable.ic_player_portrait_fullscreen
-        setDialogVolumeProgressBar(context)
-        setDialogProgressBar(context)
         initDanmakuContext()
         mButtomPlay.setOnClickListener {
             clickStartIcon()
@@ -939,9 +938,11 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mDialogProgressBar.progressDrawable = mDialogProgressBarDrawable
             }
             mDialogSeekTime = localView.findViewById(progressDialogCurrentDurationTextId)
+            mDialogSeekTime.setTextColor(mThemeColor)
             mDialogTotalTime = localView.findViewById(progressDialogAllDurationTextId)
             mDialogIcon = localView.findViewById(progressDialogImageId)
             mDialogOffsetText = localView.findViewById(R.id.tv_offset)
+            mDialogOffsetText!!.setTextColor(mThemeColor)
 
             mProgressDialog = Dialog(activityContext, R.style.video_style_dialog_progress)
             mProgressDialog.setContentView(localView)
@@ -1036,15 +1037,13 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
      */
     override fun onLossTransientCanDuck() {
         // 暂时失去AudioFocus，但是可以继续播放，不过要在降低音量
-        miaoLogger() debug "onLossTransientCanDuck"
     }
 
     /**
      * 暂时失去Audio Focus，并会很快再次获得
      */
     override fun onLossTransientAudio() {
-        // 暂时失去Audio Focus，并会很快再次获得。必须停止Audio的播放
-        miaoLogger() debug "onLossTransientAudio"
+        // 暂时失去Audio Focus，并会很快再次获得。必须停止A
         if (enabledAudioFocus) {
             Handler(Looper.getMainLooper()).post {
                 onVideoPause()
@@ -1056,7 +1055,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
      * 获得了Audio Focus
      */
     override fun onGankAudio() {
-        miaoLogger() debug "onGankAudio"
         if (enabledAudioFocus) {
             Handler(Looper.getMainLooper()).post {
                 if (currentState == GSYVideoView.CURRENT_STATE_PAUSE) {
@@ -1164,16 +1162,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         }
 
     }
-    private fun setDialogVolumeProgressBar(context: Context) {
-        val draw = context.getDrawable(R.drawable.shape_video_volume_progress)
-        setDialogVolumeProgressBar(draw)
-    }
-
-    private fun setDialogProgressBar(context: Context) {
-        setDialogProgressColor(context.config.themeColor, mDialogProgressNormalColor)
-        val draw = context.getDrawable(R.drawable.shape_video_dialog_progress)
-        setDialogProgressBar(draw)
-    }
 
     fun updateTextureViewShowType() {
         changeTextureViewShowType()
@@ -1183,6 +1171,10 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         context: Context,
         themeColor: Int,
     ) {
+        mThemeColor = themeColor
+        mDialogSeekTime?.setTextColor(mThemeColor)
+        mDialogOffsetText?.setTextColor(mThemeColor)
+
         val draw = PlayerViewDrawable.progressBarDrawable(context, themeColor)
         val bounds = mProgressBar.progressDrawable.bounds
         mProgressBar.progressDrawable = draw
@@ -1190,8 +1182,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mProgressBar.thumb.setColorFilter(themeColor, PorterDuff.Mode.SRC_ATOP)
         mBottomProgressBar.progressDrawable = PlayerViewDrawable.bottomProgressBarDrawable(context, themeColor)
 
-        setDialogProgressBar(context)
-        setDialogVolumeProgressBar(context)
+        setDialogVolumeProgressBar(PlayerViewDrawable.videoVolumeProgress(context, themeColor))
+        setDialogProgressBar(PlayerViewDrawable.dialogProgressBar(context, themeColor))
     }
 
     /**
