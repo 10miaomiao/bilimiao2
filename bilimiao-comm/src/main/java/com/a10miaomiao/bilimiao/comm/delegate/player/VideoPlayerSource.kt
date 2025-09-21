@@ -100,7 +100,6 @@ class VideoPlayerSource(
         val availableStreamList = videoInfo.streamList.filter {
             it.content != null
         }
-        result.event
 //        playerSource.lastPlayCid = res?: ""
 //        playerSource.lastPlayTime = res.last_play_time ?: 0
         if (availableStreamList.isEmpty()) {
@@ -136,9 +135,10 @@ class VideoPlayerSource(
 //                    audio = audio,
 //                    durationMs = videoInfo.timelength,
 //                )
-                playerSource.url = "[merging]\n" + dash.baseUrl
-                if (audio != null) {
-                    playerSource.url += "\n" + audio.baseUrl
+                playerSource.url = if (audio == null) {
+                    dash.baseUrl
+                } else {
+                    "[merging]\n${dash.baseUrl}\n${audio.baseUrl}"
                 }
             }
             is Stream.Content.SegmentVideo -> {

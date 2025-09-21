@@ -44,7 +44,11 @@ public class Media3ExoPlayerManager extends BasePlayerManager {
     }
 
     protected ExoMediaPlayer buildMediaPlayer(Context context) {
-        return new ExoMediaPlayer(context);
+        DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(context)
+                .setEnableDecoderFallback(true);
+        ExoMediaPlayer exoMediaPlayer = new ExoMediaPlayer(context);
+        exoMediaPlayer.setRendererFactory(renderersFactory);
+        return exoMediaPlayer;
     }
 
     @Override

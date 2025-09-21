@@ -157,9 +157,10 @@ class BangumiPlayerSource(
 //                    audio = audio,
 //                    durationMs = videoInfo.timelength,
 //                )
-                playerSource.url = "[merging]\n" + dash.baseUrl
-                if (audio != null) {
-                    playerSource.url += "\n" + audio.baseUrl
+                playerSource.url = if (audio == null) {
+                    dash.baseUrl
+                } else {
+                    "[merging]\n${dash.baseUrl}\n${audio.baseUrl}"
                 }
             }
             is Stream.Content.SegmentVideo -> {
