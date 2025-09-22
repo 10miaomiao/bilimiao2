@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -66,6 +68,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
@@ -98,6 +101,7 @@ private class WatchLaterPageViewModel(
     private val playListStore by instance<PlayListStore>()
     private val playerStore by instance<PlayerStore>()
     private val playerDelegate by instance<BasePlayerDelegate>()
+    private val userLibraryStore by instance<UserLibraryStore>()
 
     private var nextKey = ""
 
@@ -168,6 +172,9 @@ private class WatchLaterPageViewModel(
                 }
                 nextKey = data.next_key
                 list.finished.value = !data.has_more
+                if (nextKey.isBlank()) {
+                    updateUserLibrary()
+                }
             } else {
                 list.fail.value = res.message
                 PopTip.show(res.message)
@@ -201,6 +208,7 @@ private class WatchLaterPageViewModel(
                 list.data.value = newItems
                 PopTip.show("已移除选中的${deleteItems.size}个视频")
                 _selectedItemMap.clear()
+                updateUserLibrary()
             } else {
                 PopTip.show(res.message)
             }
@@ -252,6 +260,21 @@ private class WatchLaterPageViewModel(
         } finally {
             messageDialog.close()
         }
+    }
+
+    fun updateUserLibrary() {
+        userLibraryStore.setWatchLaterList(
+            list.data.value
+                .filter { it.aid != 0L }
+                .take(2)
+                .map {
+                    UserLibraryStore.WatchLaterInfo(
+                        aid = it.aid,
+                        title = it.title,
+                        cover = it.pic,
+                    )
+                }
+        )
     }
 
     private fun tryAgainLoadData() {
@@ -489,6 +512,25 @@ private fun WatchLaterPageContent(
             ) {
                 items(list.size) { index ->
                     val item = list[index]
+                    if (item.aid == 0L) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = 10.dp,
+                                    vertical = 5.dp
+                                ),
+                        ) {
+                            Text(
+                                text = item.title,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.outline,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                        return@items
+                    }
                     val enableEdit = enableEditMode.value
                     val isChecked = enableEdit && viewModel.selectedItemMap.containsKey(item.aid)
                     val duration = item.duration

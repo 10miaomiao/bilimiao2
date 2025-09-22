@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
@@ -74,15 +75,15 @@ fun StartLibraryCard(
                 },
             ) {
                 if (isLogin) {
+                    val favourite = userLibraryState.favourite
                     Text(
-                        text = "默认收藏夹(${userLibraryState.favourite.defaultFavCount})",
+                        text = favourite.defaultFavTitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .clickable {
-                                val favourite = userLibraryState.favourite
                                 if (favourite.defaultFavId.isNotEmpty()) {
                                     navigateTo(
                                         UserFavouriteDetailPage(
@@ -138,7 +139,7 @@ fun StartLibraryCard(
             ) {
                 if (isLogin) {
                     Text(
-                        text = "我的追番(${userLibraryState.bangumi.bangumiCount})",
+                        text = "我的追番",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
@@ -152,7 +153,7 @@ fun StartLibraryCard(
                             .padding(vertical = 4.dp, horizontal = 8.dp)
                     )
                     Text(
-                        text = "我的追剧(${userLibraryState.bangumi.cinemaCount})",
+                        text = "我的追剧",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
@@ -188,6 +189,7 @@ fun StartLibraryCard(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -235,6 +237,7 @@ fun StartLibraryCard(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(MaterialTheme.colorScheme.surfaceVariant)

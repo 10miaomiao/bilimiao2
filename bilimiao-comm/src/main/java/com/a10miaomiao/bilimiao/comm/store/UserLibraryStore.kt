@@ -30,8 +30,8 @@ class UserLibraryStore (override val di: DI) :
     data class FavouriteInfo(
         val defaultFavCount: Int = 0,
         val defaultFavId: String = "",
-        val defaultFavTitle: String = "",
-        val subscriptionCount: Int = 0,
+        val defaultFavTitle: String = "默认收藏夹",
+//        val subscriptionCount: Int = 0,
     )
 
     data class HistoryInfo(
@@ -48,16 +48,16 @@ class UserLibraryStore (override val di: DI) :
 //        val addToAt: Long = 0,
     )
 
-    data class BangumiInfo(
-        val bangumiCount: Int = 0,
-        val cinemaCount: Int = 0,
-    )
+//    data class BangumiInfo(
+//        val bangumiCount: Int = 0,
+//        val cinemaCount: Int = 0,
+//    )
 
     data class State (
         val favourite: FavouriteInfo = FavouriteInfo(),
         val history: List<HistoryInfo> = emptyList(),
         val watchLater: List<WatchLaterInfo> = emptyList(),
-        val bangumi: BangumiInfo = BangumiInfo(),
+//        val bangumi: BangumiInfo = BangumiInfo(),
     )
 
     private val userStore: UserStore by instance()
@@ -72,7 +72,7 @@ class UserLibraryStore (override val di: DI) :
             if (mid != null) {
                 loadWatchLaterData()
                 loadFavouriteData(mid)
-                loadBangumiData()
+//                loadBangumiData()
             }
         }
     }
@@ -150,117 +150,126 @@ class UserLibraryStore (override val di: DI) :
                     }
                 }
         }
-        val collectedResult = kotlin.runCatching {
-            BiliApiService.userApi
-                .favCollectedList(
-                    mid.toString(),
-                    pageNum = 1,
-                    pageSize = 1
-                )
-                .awaitCall()
-                .json<ResponseData<MediaFoldersInfo>>()
-                .let {
-                    if (it.isSuccess) {
-                        0
-                    } else {
-                        0
-                    }
-                }
-        }
+//        val collectedResult = kotlin.runCatching {
+//            BiliApiService.userApi
+//                .favCollectedList(
+//                    mid.toString(),
+//                    pageNum = 1,
+//                    pageSize = 1
+//                )
+//                .awaitCall()
+//                .json<ResponseData<MediaFoldersInfo>>()
+//                .let {
+//                    if (it.isSuccess) {
+//                        0
+//                    } else {
+//                        0
+//                    }
+//                }
+//        }
         val defaultFav = defaultFavResult.getOrNull()
         stateFlow.value = state.copy(
             favourite = FavouriteInfo(
                 defaultFavCount = defaultFav?.media_count ?: 0,
                 defaultFavId = defaultFav?.id ?: "",
                 defaultFavTitle = defaultFav?.title ?: "",
-                subscriptionCount = collectedResult.getOrElse { 0 },
+//                subscriptionCount = collectedResult.getOrElse { 0 },
             )
         )
     }
 
-    private suspend fun loadBangumiData() {
-        val cinemaResult = kotlin.runCatching {
-            BiliApiService.bangumiAPI
-                .followList(
-                    type = "cinema",
-                    status = 0,
-                    pageNum = 1,
-                    pageSize = 1,
-                )
-                .awaitCall()
-                .json<ResponseResult<MyBangumiFollowListInfo>>()
-                .let {
-                    if (it.isSuccess) {
-                        it.requireData().total
-                    } else {
-                        0
-                    }
-                }
-        }
-        val bangumiResult = kotlin.runCatching {
-            BiliApiService.bangumiAPI
-                .followList(
-                    type = "bangumi",
-                    status = 0,
-                    pageNum = 1,
-                    pageSize = 1,
-                )
-                .awaitCall()
-                .json<ResponseResult<MyBangumiFollowListInfo>>()
-                .let {
-                    if (it.isSuccess) {
-                        it.requireData().total
-                    } else {
-                        0
-                    }
-                }
-        }
-        stateFlow.value = state.copy(
-            bangumi = BangumiInfo(
-                bangumiCount = bangumiResult.getOrNull() ?: 0,
-                cinemaCount = cinemaResult.getOrNull() ?: 0,
-            )
-        )
-    }
+//    private suspend fun loadBangumiData() {
+//        val cinemaResult = kotlin.runCatching {
+//            BiliApiService.bangumiAPI
+//                .followList(
+//                    type = "cinema",
+//                    status = 0,
+//                    pageNum = 1,
+//                    pageSize = 1,
+//                )
+//                .awaitCall()
+//                .json<ResponseResult<MyBangumiFollowListInfo>>()
+//                .let {
+//                    if (it.isSuccess) {
+//                        it.requireData().total
+//                    } else {
+//                        0
+//                    }
+//                }
+//        }
+//        val bangumiResult = kotlin.runCatching {
+//            BiliApiService.bangumiAPI
+//                .followList(
+//                    type = "bangumi",
+//                    status = 0,
+//                    pageNum = 1,
+//                    pageSize = 1,
+//                )
+//                .awaitCall()
+//                .json<ResponseResult<MyBangumiFollowListInfo>>()
+//                .let {
+//                    if (it.isSuccess) {
+//                        it.requireData().total
+//                    } else {
+//                        0
+//                    }
+//                }
+//        }
+//        stateFlow.value = state.copy(
+//            bangumi = BangumiInfo(
+//                bangumiCount = bangumiResult.getOrNull() ?: 0,
+//                cinemaCount = cinemaResult.getOrNull() ?: 0,
+//            )
+//        )
+//    }
 
     fun appendHistory(history: HistoryInfo) {
         val newHistory = state.history.toMutableList()
         newHistory.add(0, history)
-        stateFlow.value = state.copy(
-            history = newHistory.take(2)
-        )
+        setHistoryList(newHistory)
     }
 
     fun appendWatchLater(watchLater: WatchLaterInfo) {
         val newWatchLater = state.watchLater.toMutableList()
+        newWatchLater.add(0, watchLater)
+        setWatchLaterList(newWatchLater)
+    }
+
+    fun setHistoryList(list: List<HistoryInfo>) {
         stateFlow.value = state.copy(
-            watchLater = newWatchLater.take(2)
+            history = list.take(2)
         )
     }
 
-    fun setFavouriteCount(
-        defaultFavCount: Int = 0,
-        subscriptionCount: Int = 0,
-    ) {
+    fun setWatchLaterList(list: List<WatchLaterInfo>) {
         stateFlow.value = state.copy(
-            favourite = FavouriteInfo(
-                defaultFavCount = defaultFavCount,
-                subscriptionCount = subscriptionCount,
-            )
+            watchLater = list.take(2)
         )
     }
 
-    fun setBangumiCount(
-        bangumiCount: Int = 0,
-        cinemaCount: Int = 0,
-    ) {
-        stateFlow.value = state.copy(
-            bangumi = BangumiInfo(
-                bangumiCount = bangumiCount,
-                cinemaCount = cinemaCount,
-            )
-        )
-    }
+//    fun setFavouriteCount(
+//        defaultFavCount: Int = 0,
+//        subscriptionCount: Int = 0,
+//    ) {
+//        stateFlow.value = state.copy(
+//            favourite = FavouriteInfo(
+//                defaultFavCount = defaultFavCount,
+//                subscriptionCount = subscriptionCount,
+//            )
+//        )
+//    }
+//
+//    fun setBangumiCount(
+//        bangumiCount: Int = 0,
+//        cinemaCount: Int = 0,
+//    ) {
+//        stateFlow.value = state.copy(
+//            bangumi = BangumiInfo(
+//                bangumiCount = bangumiCount,
+//                cinemaCount = cinemaCount,
+//            )
+//        )
+//    }
 
 
 }

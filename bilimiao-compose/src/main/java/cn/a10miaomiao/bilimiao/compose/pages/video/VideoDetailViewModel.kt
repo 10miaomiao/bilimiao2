@@ -40,6 +40,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.kongzue.dialogx.dialogs.PopTip
@@ -65,6 +66,7 @@ class VideoDetailViewModel(
     private val playerStore: PlayerStore by instance()
     private val playListStore: PlayListStore by instance()
     private val userStore: UserStore by instance()
+    private val userLibraryStore: UserLibraryStore by instance()
     private val bottomSheetState: BottomSheetState by instance()
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -300,6 +302,13 @@ class VideoDetailViewModel(
                 .json<MessageInfo>()
             if (res.code == 0) {
                 PopTip.show("已添加至稍后再看")
+                userLibraryStore.appendWatchLater(
+                    UserLibraryStore.WatchLaterInfo(
+                        aid = arcData.aid,
+                        title = arcData.title,
+                        cover = arcData.pic,
+                    )
+                )
             } else {
                 PopTip.show(res.message)
             }

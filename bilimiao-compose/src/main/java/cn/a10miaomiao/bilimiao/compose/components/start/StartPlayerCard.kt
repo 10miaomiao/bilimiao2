@@ -109,7 +109,7 @@ fun StartPlayerCard(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "关闭播放",
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
