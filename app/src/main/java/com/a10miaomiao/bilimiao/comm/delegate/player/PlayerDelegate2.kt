@@ -54,6 +54,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.player.BilimiaoPlayerManager
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
@@ -110,6 +111,7 @@ class PlayerDelegate2(
 
     private val userStore by instance<UserStore>()
     private val playerStore by instance<PlayerStore>()
+    private val userLibraryStore by instance<UserLibraryStore>()
     private val windowStore by instance<WindowStore>()
     private val themeDelegate by instance<ThemeDelegate>()
 
@@ -365,7 +367,7 @@ class PlayerDelegate2(
 
     override fun getMediaMetadata(dataSource: String): MediaMetadata? {
         return playerSource?.let {
-            val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl))
+            val artworkUri = Uri.parse(UrlUtil.autoHttps(it.coverUrl) + "@300w_300h_1c_")
             val metaData = MediaMetadata.Builder()
                 .setTitle(it.title)
                 .setArtworkUri(artworkUri)
@@ -610,6 +612,7 @@ class PlayerDelegate2(
         }
         // 播放器是否默认全屏播放
         controller.checkIsPlayerDefaultFull()
+        // 是否显示分P和剧集按钮
         if (source is VideoPlayerSource && source.pages.size > 1) {
             views.videoPlayer.setExpandButtonText("分P")
             views.videoPlayer.showExpandButton()
@@ -618,6 +621,17 @@ class PlayerDelegate2(
             views.videoPlayer.showExpandButton()
         } else {
             views.videoPlayer.hideExpandButton()
+        }
+        // 添加到用户库历史记录
+        if (source is VideoPlayerSource) {
+            userLibraryStore.appendHistory(
+                UserLibraryStore.HistoryInfo(
+                    aid = source.aid.toLong(),
+                    title = source.mainTitle,
+                    cover = source.coverUrl,
+                    viewAt = System.currentTimeMillis(),
+                )
+            )
         }
     }
 
