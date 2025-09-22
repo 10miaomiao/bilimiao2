@@ -18,7 +18,6 @@ import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.google.android.material.appbar.MaterialToolbar
-import com.king.zxing.CaptureActivity
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.kodein.di.DI
