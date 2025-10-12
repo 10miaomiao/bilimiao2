@@ -114,6 +114,9 @@ class PlayerDelegate2(
     private val userLibraryStore by instance<UserLibraryStore>()
     private val windowStore by instance<WindowStore>()
     private val themeDelegate by instance<ThemeDelegate>()
+    
+    private var themeObserver: Observer<Long>? = null
+    private var isBroadcastReceiverRegistered = false
 
     var playerSourceInfo: PlayerSourceInfo? = null
 
@@ -159,16 +162,27 @@ class PlayerDelegate2(
     override fun onCreate(savedInstanceState: Bundle?) {
         playerCoroutineScope.onCreate()
         initPlayer()
-        val intentFilter = IntentFilter().apply {
-            addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-            addAction(Intent.ACTION_MEDIA_BUTTON)
+        
+        // 只在未注册时注册广播接收器
+        if (!isBroadcastReceiverRegistered) {
+            val intentFilter = IntentFilter().apply {
+                addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+                addAction(Intent.ACTION_MEDIA_BUTTON)
+            }
+            try {
+                registerReceiver(
+                    activity,
+                    broadcastReceiver,
+                    intentFilter,
+                    ContextCompat.RECEIVER_NOT_EXPORTED
+                )
+                isBroadcastReceiverRegistered = true
+            } catch (e: IllegalArgumentException) {
+                // 接收器已注册，忽略错误
+                miaoLogger() warn "BroadcastReceiver already registered: ${e.message}"
+            }
         }
-        registerReceiver(
-            activity,
-            broadcastReceiver,
-            intentFilter,
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             picInPicHelper = PicInPicHelper(activity, views.videoPlayer)
         }
@@ -178,14 +192,17 @@ class PlayerDelegate2(
         //音频焦点冲突时是否释放
         views.videoPlayer.isReleaseWhenLossAudio = true
 
-        // 主题监听
-        themeDelegate.observeTheme(activity, Observer {
-            val themeColor = it.toInt()
-            views.videoPlayer.updateThemeColor(activity, themeColor)
-            areaLimitBoxController.updateThemeColor(themeColor)
-            errorMessageBoxController.updateThemeColor(themeColor)
-            completionBoxController.updateThemeColor(themeColor)
-        })
+        // 主题监听 - 使用 lifecycle-aware observer
+        if (themeObserver == null) {
+            themeObserver = Observer {
+                val themeColor = it.toInt()
+                views.videoPlayer.updateThemeColor(activity, themeColor)
+                areaLimitBoxController.updateThemeColor(themeColor)
+                errorMessageBoxController.updateThemeColor(themeColor)
+                completionBoxController.updateThemeColor(themeColor)
+            }
+            themeDelegate.observeTheme(activity, themeObserver!!)
+        }
 
         if (isPlaying()) {
             loadingBoxController.hideLoading()
@@ -235,7 +252,20 @@ class PlayerDelegate2(
 
     override fun onDestroy() {
         playerCoroutineScope.onDestroy()
-        activity.unregisterReceiver(broadcastReceiver)
+        
+        // 安全地注销广播接收器
+        if (isBroadcastReceiverRegistered) {
+            try {
+                activity.unregisterReceiver(broadcastReceiver)
+                isBroadcastReceiverRegistered = false
+            } catch (e: IllegalArgumentException) {
+                // 接收器未注册，忽略错误
+                miaoLogger() warn "BroadcastReceiver not registered: ${e.message}"
+            }
+        }
+        
+        // 清理主题观察者引用
+        themeObserver = null
     }
 
     override fun onBackPressed(): Boolean {

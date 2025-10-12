@@ -71,21 +71,37 @@ object BilimiaoScanner {
     fun onActivityResult(
         result: ActivityResult
     ) {
-        val data: Intent = result.data ?: return
+        val data: Intent = result.data ?: run {
+            // 清理回调以防止内存泄漏
+            resultCallback = null
+            return
+        }
         if (result.resultCode == Activity.RESULT_OK) {
             if (data.hasExtra("extra_barcode_result")) {
                 // GMS扫码器扫码结果
-                val barcodeBytes = data.getByteArrayExtra("extra_barcode_result") ?: return
+                val barcodeBytes = data.getByteArrayExtra("extra_barcode_result") ?: run {
+                    resultCallback = null
+                    return
+                }
                 val barcodeResult = SafeParcelUtil.fromByteArray(barcodeBytes, GmsBarcodeResult.CREATOR)
                 val textResult = barcodeResult.displayValue
                 resultCallback?.invoke(textResult)
                 resultCallback = null
             } else if (data.hasExtra("extra_qrcode_text_result")) {
                 // bilimiao扫码器扫码结果
-                val textResult = data.getStringExtra("extra_qrcode_text_result") ?: return
+                val textResult = data.getStringExtra("extra_qrcode_text_result") ?: run {
+                    resultCallback = null
+                    return
+                }
                 resultCallback?.invoke(textResult)
                 resultCallback = null
+            } else {
+                // 没有结果，清理回调
+                resultCallback = null
             }
+        } else {
+            // 取消或失败，清理回调
+            resultCallback = null
         }
     }
 
