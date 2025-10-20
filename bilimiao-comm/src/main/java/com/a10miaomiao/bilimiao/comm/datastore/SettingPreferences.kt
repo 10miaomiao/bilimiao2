@@ -89,6 +89,8 @@ object SettingPreferences {
      */
     // 主题颜色
     val ThemeColor = longPreferencesKey("theme_color")
+    // 主题类型
+    val ThemeType = intPreferencesKey("theme_type")
     // 深色模式
     val ThemeDarkMode = intPreferencesKey("theme_dark_mode")
     //

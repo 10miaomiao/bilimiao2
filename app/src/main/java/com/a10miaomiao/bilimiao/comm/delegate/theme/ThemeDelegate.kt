@@ -10,6 +10,7 @@ import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -35,34 +36,27 @@ class ThemeDelegate(
 ) : DIAware {
 
     companion object {
-        var defaultThemeColor = 0xFFFB7299
         fun getNightMode(context: Context): Int {
             return runBlocking {
                 SettingPreferences.mapData(context) {
-                    it[ThemeColor]?.let { c -> defaultThemeColor = c }
                     it[ThemeDarkMode] ?: 0
                 }
             }
         }
     }
 
-    private val _themeColor = MutableLiveData<Long>()
+    private val _themeColor = MutableLiveData<Int>()
     val themeColor get() = _themeColor.value ?: defaultThemeColor
+    private val defaultThemeColor get() = ContextCompat.getColor(activity, android.R.color.system_primary_light)
 
     fun onCreate(savedInstanceState: Bundle?) {
-        collectData()
     }
 
-    private fun collectData() {
-        SettingPreferences.launch(activity.lifecycleScope) {
-            activity.dataStore.data.collect {
-                it[ThemeColor]?.let { c -> defaultThemeColor = c }
-                _themeColor.value = it[ThemeColor] ?: 0xFFFB7299
-            }
-        }
+    fun setThemeColor(color: Int) {
+        _themeColor.value = color
     }
 
-    fun observeTheme(owner: LifecycleOwner, observer: Observer<Long>) = _themeColor.observe(owner, observer)
+    fun observeTheme(owner: LifecycleOwner, observer: Observer<Int>) = _themeColor.observe(owner, observer)
 
     fun isSystemInDark(): Boolean {
         val uiMode = activity.resources.configuration.uiMode

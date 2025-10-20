@@ -8,6 +8,9 @@ object SettingConstants {
     const val HOME_ENTRY_VIEW_RECOMMEND = 1 // 推荐
     const val HOME_ENTRY_VIEW_POPULAR = 2 // 热门
 
+    const val THEME_TYPE_DEFAULT = 0
+    const val THEME_TYPE_DYNAMIC_COLOR = 1
+
     const val PLAYER_DECODER_DEFAULT = "default"
     const val PLAYER_DECODER_AV1 = "AV1"
 

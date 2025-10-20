@@ -180,9 +180,9 @@ class MainActivity
                 if (mainUi == null) {
                     initRootView(savedInstanceState)
                 }
-                val color = it.color.toInt()
+                val themeColor = it.color
                 var bgColor = if (it.appBarType == 0) {
-                    val hct = Hct.fromInt(color)
+                    val hct = Hct.fromInt(themeColor)
                     val isDark = when(it.darkMode) {
                         0 -> themeDelegate.isSystemInDark()
                         1 -> false
@@ -194,7 +194,8 @@ class MainActivity
                     config.blockBackgroundColor
                 }
                 bgColor = (bgColor and 0x00FFFFFF) or (0xF8000000).toInt()
-                ui.mAppBar.updateTheme(color, bgColor)
+                ui.mAppBar.updateTheme(themeColor, bgColor)
+                themeDelegate.setThemeColor(themeColor)
             }
         }
         lifecycleScope.launch {

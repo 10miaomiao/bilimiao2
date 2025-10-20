@@ -3,6 +3,7 @@ package com.a10miaomiao.bilimiao.comm.store
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -23,7 +24,8 @@ class AppStore(override val di: DI) :
     ViewModel(), BaseStore<AppStore.State> {
 
     data class ThemeSettingState (
-        val color: Long,
+        val color: Int,
+        val type: Int = SettingConstants.THEME_TYPE_DEFAULT,
         val darkMode: Int = 0,
         val appBarType: Int = 0,
     )
@@ -49,6 +51,12 @@ class AppStore(override val di: DI) :
         super.init(context)
         SettingPreferences.launch(viewModelScope) {
             context.dataStore.data.collect {
+                val themeType = it[ThemeType] ?: SettingConstants.THEME_TYPE_DEFAULT
+                val themeColor = if (themeType == SettingConstants.THEME_TYPE_DYNAMIC_COLOR) {
+                    materialYouColor
+                } else {
+                    (it[ThemeColor] ?: 0xFFFB7299).toInt()
+                }
                 setState {
                     home = HomeSettingState(
                         showPopular = it[HomePopularShow] ?: true,
@@ -56,7 +64,8 @@ class AppStore(override val di: DI) :
                         entryView = it[HomeEntryView] ?: SettingConstants.HOME_ENTRY_VIEW_DEFAULT
                     )
                     theme = ThemeSettingState(
-                        color = it[ThemeColor] ?: 0xFFFB7299,
+                        color = themeColor,
+                        type = themeType,
                         darkMode = it[ThemeDarkMode] ?: 0,
                         appBarType = it[ThemeAppBarType] ?: 0,
                     )
@@ -65,6 +74,11 @@ class AppStore(override val di: DI) :
             }
         }
     }
+
+    val materialYouColor get() = ContextCompat.getColor(
+        context,
+        android.R.color.system_primary_light
+    )
 
     fun setDarkMode(mode: Int) {
         viewModelScope.launch {
@@ -84,10 +98,11 @@ class AppStore(override val di: DI) :
         }
     }
 
-    fun setThemeColor(color: Long) {
+    fun setThemeColor(color: Long, type: Int) {
         viewModelScope.launch {
             SettingPreferences.edit(context) {
                 it[ThemeColor] = color
+                it[ThemeType] = type
             }
         }
     }
