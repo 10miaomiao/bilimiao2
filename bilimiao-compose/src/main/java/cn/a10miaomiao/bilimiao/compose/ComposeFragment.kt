@@ -212,8 +212,8 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                 }
                             }
                             MessageDialog(messageDialogState)
-                            MyStartView(startViewWrapper = startViewWrapper)
                         }
+                        MyStartView(startViewWrapper = startViewWrapper)
                     }
                 }
             }
@@ -395,18 +395,23 @@ fun MyBottomSheetTitleBar(
 
 @Composable
 fun MyStartView(
-    startViewWrapper: StartViewWrapper
+    startViewWrapper: StartViewWrapper,
 ) {
+    val appStore by rememberInstance<AppStore>()
+
     if (startViewWrapper.shouldCreateCompositionOnAttachedToWindow) {
         val composition = rememberCompositionContext()
         startViewWrapper.setContent(composition) {
-            StartViewContent(
-                startTopHeight = startViewWrapper.touchStart.value.dp,
-                navigateTo = startViewWrapper.navigateTo,
-                navigateUrl = startViewWrapper.navigateUrl,
-                openSearch = startViewWrapper.openSearch,
-                openScanner = startViewWrapper.openScanner,
-            )
+            val appState = appStore.stateFlow.collectAsState().value
+            BilimiaoTheme(appState) {
+                StartViewContent(
+                    startTopHeight = startViewWrapper.touchStart.value.dp,
+                    navigateTo = startViewWrapper.navigateTo,
+                    navigateUrl = startViewWrapper.navigateUrl,
+                    openSearch = startViewWrapper.openSearch,
+                    openScanner = startViewWrapper.openScanner,
+                )
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ThemeColorButton
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
 import com.a10miaomiao.bilimiao.comm.store.AppStore
@@ -73,20 +74,24 @@ private class ThemeSettingPageViewModel(
         1 to "纯色",
     )
     val appBarTypeListSize get() = appBarTypeList.size
+    val materialYouColor get() = appStore.materialYouColor
 
     val colorList = listOf<Pair<Long, String>>(
         0xFFFB7299 to "少女粉",
         0xFF2196F3 to "胖次蓝",
         0xFFFDD835 to "咸蛋黄",
-        0xFFFF9800 to "咸蛋黄2",
-        0xFF673AB7 to "紫色",
+        0xFFFF9800 to "猫猫橙",
+        0xFF673AB7 to "元气紫",
         0xFF4CAF50 to "早苗绿",
-        0xFFF44336 to "姨妈红",
+        0xFFF44336 to "麻衣红",
+        0xFF39C5BB to "初音绿",
+        0xFF66CCFF to "天依蓝",
+        0x100000000 to "Material You",
     )
 
     val themeState = appStore.stateFlow.stateMap {
         it.theme ?: AppStore.ThemeSettingState(
-            color = 0xFFFB7299,
+            color = 0xFFFB7299.toInt(),
         )
     }
 
@@ -104,7 +109,11 @@ private class ThemeSettingPageViewModel(
     }
 
     fun setThemeColor(color: Long) {
-        appStore.setThemeColor(color)
+        val type = when (color) {
+            0x100000000 -> SettingConstants.THEME_TYPE_DYNAMIC_COLOR
+            else -> SettingConstants.THEME_TYPE_DEFAULT
+        }
+        appStore.setThemeColor(color, type)
     }
 }
 
@@ -224,8 +233,14 @@ private fun ThemeSettingPageContent(
                             onClick = {
                                 viewModel.setThemeColor(color.first)
                             },
-                            baseColor = Color(color.first),
-                            selected = themeState.color == color.first,
+                            baseColor = if (color.first > 0xFFFFFFFF)
+                                Color(viewModel.materialYouColor)
+                            else
+                                Color(color.first),
+                            selected = if (color.first > 0xFFFFFFFF)
+                                themeState.type == SettingConstants.THEME_TYPE_DYNAMIC_COLOR
+                            else
+                                themeState.color == color.first.toInt(),
                             colorName = color.second,
                         )
                     }
