@@ -5,8 +5,6 @@ import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import android.widget.ImageView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import cn.a10miaomiao.miao.binding.exception.BindingOnlySetException
-import cn.a10miaomiao.miao.binding.miaoEffect
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.Glide
@@ -41,29 +39,6 @@ fun ImageView.network(
         .dontAnimate()
         .into(this)
 }
-
-fun ImageView._network(
-    url: String?,
-    suffix: String = "",
-) = miaoEffect(url) {
-    if (url.isNullOrBlank()) {
-        this.imageResource = 0
-    } else {
-        Glide.with(context)
-            .loadImageUrl(url, suffix)
-            .centerCrop()
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .placeholder(R.drawable.bili_default_image_tv)
-            .dontAnimate()
-            .into(this)
-    }
-}
-
-var SwipeRefreshLayout._isRefreshing: Boolean
-    get() { throw BindingOnlySetException() }
-    set(value) = miaoEffect(value) {
-        isRefreshing = value
-    }
 
 fun Context.attr(resid: Int): Int {
     val typedValue = TypedValue()

@@ -159,8 +159,6 @@ dependencies {
     implementation(project(":bilimiao-cover"))
 //    implementation project(":bilimiao-appwidget")
     implementation(project(":bilimiao-compose"))
-    implementation(project(":miao-binding"))
-    implementation(project(":miao-binding-android"))
     // 弹幕引擎
     implementation(project(":DanmakuFlameMaster"))
 
