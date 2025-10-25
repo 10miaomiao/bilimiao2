@@ -126,7 +126,6 @@ dependencies {
     implementation(Libraries.recyclerview)
     implementation(Libraries.baseRecyclerViewAdapterHelper)
     implementation(Libraries.swiperefreshlayout)
-    implementation(Libraries.flexbox)
     implementation(Libraries.foregroundCompat)
     implementation(Libraries.drawer)
     implementation(Libraries.dialogX) {

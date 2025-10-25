@@ -56,10 +56,6 @@
             android:label="@string/density_setting"
             android:theme="@style/Theme.Bilimiao"/>
         <activity
-            android:name=".activity.SearchActivity"
-            android:label="@string/search"
-            android:theme="@style/Theme.Bilimiao"/>
-        <activity
             android:name=".activity.DensitySettingActivity"
             android:label="@string/density_setting"
             android:theme="@style/Theme.Bilimiao"/>
