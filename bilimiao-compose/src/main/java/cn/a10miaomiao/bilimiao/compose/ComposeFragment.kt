@@ -411,6 +411,14 @@ fun MyStartView(
                     openSearch = startViewWrapper.openSearch,
                     openScanner = startViewWrapper.openScanner,
                 )
+                if (startViewWrapper.showSearchDialog.value) {
+                    cn.a10miaomiao.bilimiao.compose.components.start.SearchInputDialog(
+                        initKeyword = startViewWrapper.searchInitKeyword.value,
+                        initMode = startViewWrapper.searchInitMode.value,
+                        selfSearchName = startViewWrapper.searchSelfName.value,
+                        onDismissRequest = startViewWrapper::closeSearchDialog,
+                    )
+                }
             }
         }
     }

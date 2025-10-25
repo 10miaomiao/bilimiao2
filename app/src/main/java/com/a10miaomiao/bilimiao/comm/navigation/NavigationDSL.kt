@@ -2,32 +2,27 @@ package com.a10miaomiao.bilimiao.comm.navigation
 
 import android.app.Activity
 import android.view.View
-import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import com.a10miaomiao.bilimiao.MainActivity
-import com.a10miaomiao.bilimiao.activity.SearchActivity
 
 fun Activity.openBottomSheet(page: ComposePage) {
     (this as? MainActivity)?.openBottomSheet(page)
 }
 
 fun Activity.openSearch(view: View? = null) {
-    val searchConfig = (this as? MainActivity)?.pageConfig?.search
+    val activity = this as? MainActivity ?: return
+    val searchConfig = activity.pageConfig?.search
     if (searchConfig != null) {
-        SearchActivity.launch(
-            this,
-            searchConfig.keyword,
-            1,
-            searchConfig.name,
-            view,
+        activity.openSearchDialog(
+            initKeyword = searchConfig.keyword,
+            mode = 1,
+            name = searchConfig.name,
         )
     } else {
-        SearchActivity.launch(
-            this,
-            "",
-            0,
-            null,
-            view,
+        activity.openSearchDialog(
+            initKeyword = "",
+            mode = 0,
+            name = null,
         )
     }
 }

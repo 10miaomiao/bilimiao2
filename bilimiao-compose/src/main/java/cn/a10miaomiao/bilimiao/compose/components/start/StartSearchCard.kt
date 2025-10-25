@@ -13,11 +13,14 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
-
 
 @Composable
 fun StartSearchCard(
@@ -27,7 +30,9 @@ fun StartSearchCard(
 ) {
     MiaoCard(
         modifier = modifier,
-        onClick = onClick,
+        onClick = {
+            onClick()
+        },
     ) {
         Row(
             modifier = Modifier
@@ -53,9 +58,7 @@ fun StartSearchCard(
                 modifier = Modifier
                     .padding(8.dp)
                     .size(40.dp)
-                    .clickable(
-                        onClick = onScannerClick,
-                    ),
+                    .clickable(onClick = onScannerClick),
                 imageVector = Icons.Filled.CameraAlt,
                 tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = null

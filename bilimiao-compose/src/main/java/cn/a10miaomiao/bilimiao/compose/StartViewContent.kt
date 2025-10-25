@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,21 +38,28 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
@@ -61,6 +69,7 @@ import cn.a10miaomiao.bilimiao.compose.components.start.StartLibraryCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartPlayerCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartSearchCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartUserCard
+import cn.a10miaomiao.bilimiao.compose.components.start.SearchInputDialog
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
@@ -87,6 +96,7 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.kongzue.dialogx.dialogs.PopTip
+import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
 
 @Composable
@@ -110,16 +120,23 @@ fun StartViewContent(
     var showScannerDownloadDialog by remember { mutableStateOf(false) }
     var showScannerResultTips by remember { mutableStateOf("") }
 
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = windowInsets.addPaddingValues(
+    val coroutineScope = rememberCoroutineScope()
+    var searchCardBounds by remember { mutableStateOf<Rect?>(null) }
+    var playSearchExpand by remember { mutableStateOf(false) }
+    val density = LocalDensity.current
+    val config = LocalConfiguration.current
+
+    Box(modifier = modifier) {
+        LazyColumn(
+            modifier = Modifier.matchParentSize(),
+            contentPadding = windowInsets.addPaddingValues(
             addLeft = 10.dp,
             addRight = 10.dp,
             addTop = 10.dp,
             addBottom = 10.dp,
-        ),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
+            ),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
         item {
             Box(
                 modifier = Modifier
@@ -211,7 +228,18 @@ fun StartViewContent(
         }
         item {
             StartSearchCard(
-                onClick = openSearch,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    searchCardBounds = coords.boundsInRoot()
+                },
+                onClick = {
+                    playSearchExpand = true
+                    coroutineScope.launch {
+                        kotlinx.coroutines.delay(180)
+                        openSearch()
+                        kotlinx.coroutines.delay(200)
+                        playSearchExpand = false
+                    }
+                },
                 onScannerClick = {
                     openScanner { result ->
                         if (result.startsWith("https://")
@@ -247,6 +275,40 @@ fun StartViewContent(
                 },
             )
         }
+        }
+
+        if (playSearchExpand && searchCardBounds != null) {
+            val b = searchCardBounds!!
+            val screenW = config.screenWidthDp.dp
+            val screenH = config.screenHeightDp.dp
+            val startW = with(density) { b.width.toDp() }
+            val startH = with(density) { b.height.toDp() }
+            val startX = with(density) { b.left.toDp() }
+            val startY = with(density) { b.top.toDp() }
+
+            val progress by androidx.compose.animation.core.animateFloatAsState(
+                targetValue = if (playSearchExpand) 1f else 0f,
+                animationSpec = androidx.compose.animation.core.tween(220),
+                label = "searchExpandProgress"
+            )
+
+            val curW = androidx.compose.ui.unit.lerp(startW, screenW, progress)
+            val curH = androidx.compose.ui.unit.lerp(startH, screenH, progress)
+            val curX = androidx.compose.ui.unit.lerp(startX, 0.dp, progress)
+            val curY = androidx.compose.ui.unit.lerp(startY, 0.dp, progress)
+            val corner = androidx.compose.ui.unit.lerp(10.dp, 0.dp, progress)
+
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(
+                        with(density) { curX.roundToPx() },
+                        with(density) { curY.roundToPx() }
+                    ) }
+                    .size(curW, curH)
+                    .clip(RoundedCornerShape(corner))
+                    .background(MaterialTheme.colorScheme.surface)
+            )
+        }
     }
 
     if (showScannerDownloadDialog) {
@@ -258,15 +320,13 @@ fun StartViewContent(
             },
             confirmButton = {
                 Row() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                        TextButton(
-                            onClick = {
-                                navigateUrl("https://github.com/10miaomiao/bilimiao_scanner/releases")
-                                showScannerDownloadDialog = false
-                            },
-                        ) {
-                            Text("前往GitHub下载")
-                        }
+                    TextButton(
+                        onClick = {
+                            navigateUrl("https://github.com/10miaomiao/bilimiao_scanner/releases")
+                            showScannerDownloadDialog = false
+                        },
+                    ) {
+                        Text("前往GitHub下载")
                     }
                     TextButton(
                         onClick = {

@@ -40,7 +40,6 @@ import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
-import com.a10miaomiao.bilimiao.activity.SearchActivity
 import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
 import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -476,7 +475,24 @@ class MainActivity
 
     private fun startMenuOpenSearch() {
         ui.root.closeDrawer()
-        openSearch()
+        val searchConfig = pageConfig?.search
+        if (searchConfig != null) {
+            openSearchDialog(
+                initKeyword = searchConfig.keyword,
+                mode = 1,
+                name = searchConfig.name,
+            )
+        } else {
+            openSearchDialog(
+                initKeyword = "",
+                mode = 0,
+                name = null,
+            )
+        }
+    }
+
+    fun openSearchDialog(initKeyword: String, mode: Int, name: String?) {
+        startViewWrapper.openSearchDialog(initKeyword, mode, name)
     }
 
     private fun startMenuOpenScanner(callback: (result: String) -> Unit): Boolean {
@@ -640,26 +656,6 @@ class MainActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            SearchActivity.REQUEST_CODE -> {
-                if (resultCode != Activity.RESULT_OK) {
-                    return
-                }
-                val arguments = data?.extras ?: Bundle()
-                if (arguments.containsKey(SearchActivity.KEY_URL)) {
-                    val pageUrl = arguments.getString(SearchActivity.KEY_URL)!!
-                    pointerNav.navigateByUri(Uri.parse(pageUrl))
-                    return
-                }
-                val mode = arguments.getInt(SearchActivity.KEY_MODE)
-                val keyword = arguments.getString(SearchActivity.KEY_KEYWORD, "")
-                if (mode == 0) {
-                    pointerNav.navigate(SearchResultPage(
-                        keyword = keyword
-                    ))
-                } else {
-                    searchSelfPage(keyword)
-                }
-            }
             BilimiaoScanner.REQUEST_CODE -> {
                 BilimiaoScanner.onActivityResult(
                     ActivityResult(resultCode, data)
