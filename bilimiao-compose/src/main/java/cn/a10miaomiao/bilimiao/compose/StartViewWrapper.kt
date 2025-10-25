@@ -24,6 +24,10 @@ class StartViewWrapper(
     private val density = activity.resources.displayMetrics.density
 
     val touchStart = mutableFloatStateOf(0f)
+    val showSearchDialog = mutableStateOf(false)
+    val searchInitKeyword = mutableStateOf("")
+    val searchInitMode = mutableStateOf(0)
+    val searchSelfName = mutableStateOf<String?>(null)
 
     var shouldCreateCompositionOnAttachedToWindow = true
         private set
@@ -47,6 +51,17 @@ class StartViewWrapper(
         topHeightDp = min(topHeightDp - 200, windowHeightDp - 400)
         topHeightDp = max(topHeightDp, 0f)
         touchStart.value = topHeightDp
+    }
+
+    fun openSearchDialog(keyword: String, mode: Int, selfName: String?) {
+        searchInitKeyword.value = keyword
+        searchInitMode.value = mode
+        searchSelfName.value = selfName
+        showSearchDialog.value = true
+    }
+
+    fun closeSearchDialog() {
+        showSearchDialog.value = false
     }
 
     private fun getWindowHeight(): Int {
