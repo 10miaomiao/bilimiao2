@@ -47,24 +47,18 @@ class SearchInputViewModel(
 
     private fun getInitSuggestData(
         keyword: String
-    ) = mutableListOf(
-        SuggestInfo(
-            text = "直接搜索“$keyword”",
-            type = SuggestType.SEARCH,
-            value = keyword,
-        )
-    ).apply {
+    ) = mutableListOf<SuggestInfo>().apply {
         if (isNumeric(keyword)) {
             add(
                 SuggestInfo(
-                    text = "查看视频“AV$keyword”",
+                    text = "AV$keyword",
                     type = SuggestType.AV,
                     value = keyword,
                 )
             )
             add(
                 SuggestInfo(
-                    text = "查看番剧“SS$keyword”",
+                    text = "SS$keyword",
                     type = SuggestType.SS,
                     value = keyword,
                 )

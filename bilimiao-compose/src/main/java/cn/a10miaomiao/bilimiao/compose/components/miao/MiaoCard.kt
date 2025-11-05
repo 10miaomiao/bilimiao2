@@ -29,7 +29,7 @@ fun MiaoCard(
             disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
-        elevation = CardDefaults.cardElevation(
+        elevation = CardDefaults.outlinedCardElevation(
             defaultElevation = 1.dp,
             disabledElevation = 0.dp
         ),

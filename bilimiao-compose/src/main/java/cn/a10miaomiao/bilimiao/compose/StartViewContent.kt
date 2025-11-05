@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,29 +39,65 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Divider
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.runtime.DisposableEffect
+import androidx.activity.compose.BackHandler
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.vector.PathNode
+import androidx.compose.ui.graphics.vector.PathParser as ComposePathParser
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.foundation.ScaleIndication
@@ -69,7 +106,6 @@ import cn.a10miaomiao.bilimiao.compose.components.start.StartLibraryCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartPlayerCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartSearchCard
 import cn.a10miaomiao.bilimiao.compose.components.start.StartUserCard
-import cn.a10miaomiao.bilimiao.compose.components.start.SearchInputDialog
 import cn.a10miaomiao.bilimiao.compose.pages.auth.LoginPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
@@ -80,7 +116,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.WatchLaterPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
-import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
@@ -98,7 +133,43 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import android.app.Activity
+import android.net.Uri
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.GenericShape
+import androidx.core.view.WindowCompat
+import cn.a10miaomiao.bilimiao.compose.common.foundation.add
+import cn.a10miaomiao.bilimiao.compose.components.start.SearchInputInline
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestInfo
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestType
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun StartViewContent(
     modifier: Modifier = Modifier,
@@ -107,10 +178,82 @@ fun StartViewContent(
     navigateUrl: (String) -> Unit,
     openSearch: () -> Unit,
     openScanner: (callback: (String) -> Unit) -> Boolean,
+    isSearchVisible: Boolean = false,
+    searchInitKeyword: String = "",
+    searchInitMode: Int = 0,
+    searchSelfName: String? = null,
+    searchAnimation: Boolean = true,
+    onCloseSearch: () -> Unit = {},
 ) {
-    val windowStore by rememberInstance<WindowStore>()
-    val windowState by windowStore.stateFlow.collectAsState()
-    val windowInsets = windowState.windowInsets
+    val listState = rememberLazyListState()
+
+    SharedTransitionLayout(
+        modifier = modifier
+    ) {
+        AnimatedContent(
+            isSearchVisible,
+            transitionSpec = {
+                // 从下往上进入，从上往下退出，并带有透明过渡
+                if (searchAnimation) {
+                    (
+                        slideInHorizontally(
+                            initialOffsetX = { fullWidth -> -fullWidth },
+                            animationSpec = tween(durationMillis = 200)
+                        ) + fadeIn(animationSpec = tween(durationMillis = 200))
+                        ) togetherWith (
+                        slideOutHorizontally(
+                            targetOffsetX = { fullWidth -> -fullWidth },
+                            animationSpec = tween(durationMillis = 250)
+                        ) + fadeOut(animationSpec = tween(durationMillis = 250))
+                    )
+                } else {
+                    // 无动画
+                    fadeIn(animationSpec = tween(0)) togetherWith
+                            fadeOut(animationSpec = tween(0))
+                }
+            },
+            label = "basic_transition"
+        ) { targetState ->
+            if (targetState) {
+                SearchInputInline(
+                    modifier = Modifier,
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this@AnimatedContent,
+                    initKeyword = searchInitKeyword,
+                    initMode = searchInitMode,
+                    selfSearchName = searchSelfName,
+                    onDismissRequest = onCloseSearch,
+                )
+            } else {
+                StartIndexList(
+                    modifier = modifier,
+                    listState = listState,
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this@AnimatedContent,
+                    startTopHeight = startTopHeight,
+                    openSearch = openSearch,
+                    openScanner = openScanner,
+                    navigateTo = navigateTo,
+                    navigateUrl = navigateUrl,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun StartIndexList(
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    startTopHeight: Dp = 200.dp,
+    openSearch: () -> Unit,
+    openScanner: (onResult: (String) -> Unit) -> Boolean,
+    navigateTo: (ComposePage) -> Unit,
+    navigateUrl: (String) -> Unit,
+) {
     val userStore by rememberInstance<UserStore>()
     val userState by userStore.stateFlow.collectAsState()
     val playerStore by rememberInstance<PlayerStore>()
@@ -120,23 +263,16 @@ fun StartViewContent(
     var showScannerDownloadDialog by remember { mutableStateOf(false) }
     var showScannerResultTips by remember { mutableStateOf("") }
 
-    val coroutineScope = rememberCoroutineScope()
-    var searchCardBounds by remember { mutableStateOf<Rect?>(null) }
-    var playSearchExpand by remember { mutableStateOf(false) }
-    val density = LocalDensity.current
-    val config = LocalConfiguration.current
-
-    Box(modifier = modifier) {
-        LazyColumn(
-            modifier = Modifier.matchParentSize(),
-            contentPadding = windowInsets.addPaddingValues(
-            addLeft = 10.dp,
-            addRight = 10.dp,
-            addTop = 10.dp,
-            addBottom = 10.dp,
-            ),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+    LazyColumn(
+        state = listState,
+        modifier = modifier,
+        contentPadding = WindowInsets
+            .safeContent
+            .only(WindowInsetsSides.Vertical)
+            .asPaddingValues()
+            .add(PaddingValues(10.dp)),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         item {
             Box(
                 modifier = Modifier
@@ -228,17 +364,17 @@ fun StartViewContent(
         }
         item {
             StartSearchCard(
-                modifier = Modifier.onGloballyPositioned { coords ->
-                    searchCardBounds = coords.boundsInRoot()
-                },
+                modifier = Modifier
+                    .run {
+                        with(sharedTransitionScope) {
+                            sharedElement(
+                                rememberSharedContentState(key = "search"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
+                        }
+                    },
                 onClick = {
-                    playSearchExpand = true
-                    coroutineScope.launch {
-                        kotlinx.coroutines.delay(180)
-                        openSearch()
-                        kotlinx.coroutines.delay(200)
-                        playSearchExpand = false
-                    }
+                    openSearch()
                 },
                 onScannerClick = {
                     openScanner { result ->
@@ -273,40 +409,6 @@ fun StartViewContent(
                 onSettingClick = {
                     navigateTo(SettingPage())
                 },
-            )
-        }
-        }
-
-        if (playSearchExpand && searchCardBounds != null) {
-            val b = searchCardBounds!!
-            val screenW = config.screenWidthDp.dp
-            val screenH = config.screenHeightDp.dp
-            val startW = with(density) { b.width.toDp() }
-            val startH = with(density) { b.height.toDp() }
-            val startX = with(density) { b.left.toDp() }
-            val startY = with(density) { b.top.toDp() }
-
-            val progress by androidx.compose.animation.core.animateFloatAsState(
-                targetValue = if (playSearchExpand) 1f else 0f,
-                animationSpec = androidx.compose.animation.core.tween(220),
-                label = "searchExpandProgress"
-            )
-
-            val curW = androidx.compose.ui.unit.lerp(startW, screenW, progress)
-            val curH = androidx.compose.ui.unit.lerp(startH, screenH, progress)
-            val curX = androidx.compose.ui.unit.lerp(startX, 0.dp, progress)
-            val curY = androidx.compose.ui.unit.lerp(startY, 0.dp, progress)
-            val corner = androidx.compose.ui.unit.lerp(10.dp, 0.dp, progress)
-
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(
-                        with(density) { curX.roundToPx() },
-                        with(density) { curY.roundToPx() }
-                    ) }
-                    .size(curW, curH)
-                    .clip(RoundedCornerShape(corner))
-                    .background(MaterialTheme.colorScheme.surface)
             )
         }
     }
@@ -359,9 +461,11 @@ fun StartViewContent(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        navigateTo(SearchResultPage(
-                            keyword = showScannerResultTips,
-                        ))
+                        navigateTo(
+                            SearchResultPage(
+                                keyword = showScannerResultTips,
+                            )
+                        )
                         showScannerResultTips = ""
                     },
                 ) {

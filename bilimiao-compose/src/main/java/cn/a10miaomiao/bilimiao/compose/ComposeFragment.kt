@@ -399,26 +399,41 @@ fun MyStartView(
 ) {
     val appStore by rememberInstance<AppStore>()
 
+    fun openSearch() {
+//        val searchConfig = pageConfig?.search
+//        if (searchConfig != null) {
+//            openSearchDialog(
+//                initKeyword = searchConfig.keyword,
+//                mode = 1,
+//                name = searchConfig.name,
+//            )
+//        } else {
+//            openSearchDialog(
+//                initKeyword = "",
+//                mode = 0,
+//                name = null,
+//            )
+//        }
+        startViewWrapper.openSearchDialog("", 0, null, true)
+    }
+
     if (startViewWrapper.shouldCreateCompositionOnAttachedToWindow) {
         val composition = rememberCompositionContext()
         startViewWrapper.setContent(composition) {
             val appState = appStore.stateFlow.collectAsState().value
             BilimiaoTheme(appState) {
                 StartViewContent(
-                    startTopHeight = startViewWrapper.touchStart.value.dp,
+                    startTopHeight = startViewWrapper.touchStart.dp,
                     navigateTo = startViewWrapper.navigateTo,
                     navigateUrl = startViewWrapper.navigateUrl,
-                    openSearch = startViewWrapper.openSearch,
+                    openSearch = ::openSearch,
                     openScanner = startViewWrapper.openScanner,
+                    isSearchVisible = startViewWrapper.showSearchDialog,
+                    searchInitKeyword = startViewWrapper.searchInitKeyword,
+                    searchInitMode = startViewWrapper.searchInitMode,
+                    searchSelfName = startViewWrapper.searchSelfName,
+                    onCloseSearch = startViewWrapper::closeSearchDialog,
                 )
-                if (startViewWrapper.showSearchDialog.value) {
-                    cn.a10miaomiao.bilimiao.compose.components.start.SearchInputDialog(
-                        initKeyword = startViewWrapper.searchInitKeyword.value,
-                        initMode = startViewWrapper.searchInitMode.value,
-                        selfSearchName = startViewWrapper.searchSelfName.value,
-                        onDismissRequest = startViewWrapper::closeSearchDialog,
-                    )
-                }
             }
         }
     }
