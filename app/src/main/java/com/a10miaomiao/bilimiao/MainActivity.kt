@@ -110,7 +110,7 @@ class MainActivity
             this,
             this::startMenuNavigate,
             this::startMenuNavigateUrl,
-            this::startMenuOpenSearch,
+            this::startMenuDismissRequest,
             this::startMenuOpenScanner,
         )
     }
@@ -369,6 +369,9 @@ class MainActivity
                 navigationKey = config.menu?.checkedKey ?: 0
             }
             ui.root.slideUpBottomAppBar()
+
+            config.search
+            pageConfig?.search
         }
     }
 
@@ -439,6 +442,9 @@ class MainActivity
         if (startTop > 0f) {
             startViewWrapper.setTouchStartTop(startTop)
         }
+        if (state == DrawerBehaviorDelegate.STATE_COLLAPSED) {
+            startViewWrapper.closeSearchDialog()
+        }
         // 太麻烦
 //        supportFragmentManager.beginTransaction().also {
 //            if (state == AppBarBehaviorDelegate.STATE_COLLAPSED
@@ -473,26 +479,15 @@ class MainActivity
         }
     }
 
-    private fun startMenuOpenSearch() {
+    private fun startMenuDismissRequest() {
         ui.root.closeDrawer()
-        val searchConfig = pageConfig?.search
-        if (searchConfig != null) {
-            openSearchDialog(
-                initKeyword = searchConfig.keyword,
-                mode = 1,
-                name = searchConfig.name,
-            )
-        } else {
-            openSearchDialog(
-                initKeyword = "",
-                mode = 0,
-                name = null,
-            )
-        }
     }
 
     fun openSearchDialog(initKeyword: String, mode: Int, name: String?) {
-        startViewWrapper.openSearchDialog(initKeyword, mode, name)
+        startViewWrapper.openSearchDialog(initKeyword, mode, name, false)
+        Handler(Looper.getMainLooper()).postDelayed({
+            ui.root.openDrawer()
+        }, 10)
     }
 
     private fun startMenuOpenScanner(callback: (result: String) -> Unit): Boolean {
@@ -761,6 +756,10 @@ class MainActivity
 
     override fun onBackPressed() {
         if (ui.root.isDrawerOpen()) {
+            if (startViewWrapper.showSearchDialog) {
+                startViewWrapper.closeSearchDialog()
+                return
+            }
             ui.root.closeDrawer()
             return
         }

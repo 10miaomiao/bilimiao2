@@ -15,7 +15,7 @@ class StartViewWrapper(
     val activity: Activity,
     val navigateTo: (ComposePage) -> Unit,
     val navigateUrl: (String) -> Unit,
-    val openSearch: () -> Unit,
+    val dismissRequest: () -> Unit,
     val openScanner: (callback: (result: String) -> Unit) -> Boolean,
 ) {
 
@@ -23,11 +23,19 @@ class StartViewWrapper(
 
     private val density = activity.resources.displayMetrics.density
 
-    val touchStart = mutableFloatStateOf(0f)
-    val showSearchDialog = mutableStateOf(false)
-    val searchInitKeyword = mutableStateOf("")
-    val searchInitMode = mutableStateOf(0)
-    val searchSelfName = mutableStateOf<String?>(null)
+    private val _touchStart = mutableFloatStateOf(0f)
+    val touchStart get() = _touchStart.floatValue
+    private val _showSearchDialog = mutableStateOf(false)
+    val showSearchDialog get() = _showSearchDialog.value
+
+    private val _searchInitKeyword = mutableStateOf("")
+    val searchInitKeyword get() = _searchInitKeyword.value
+    private val _searchInitMode = mutableStateOf(0)
+    val searchInitMode get() = _searchInitMode.value
+    private val _searchSelfName = mutableStateOf<String?>(null)
+    val searchSelfName get() = _searchSelfName.value
+    private val _searchAnimation = mutableStateOf(false)
+    val searchAnimation get() = _searchAnimation.value
 
     var shouldCreateCompositionOnAttachedToWindow = true
         private set
@@ -50,18 +58,21 @@ class StartViewWrapper(
         val windowHeightDp = getWindowHeight() / density
         topHeightDp = min(topHeightDp - 200, windowHeightDp - 400)
         topHeightDp = max(topHeightDp, 0f)
-        touchStart.value = topHeightDp
+        _touchStart.value = topHeightDp
     }
 
-    fun openSearchDialog(keyword: String, mode: Int, selfName: String?) {
-        searchInitKeyword.value = keyword
-        searchInitMode.value = mode
-        searchSelfName.value = selfName
-        showSearchDialog.value = true
+    fun openSearchDialog(keyword: String, mode: Int, selfName: String?, animation: Boolean) {
+        _searchAnimation.value = animation
+        _searchInitKeyword.value = keyword
+        _searchInitMode.value = mode
+        _searchSelfName.value = selfName
+        _showSearchDialog.value = true
     }
 
     fun closeSearchDialog() {
-        showSearchDialog.value = false
+        _searchAnimation.value = true
+        _showSearchDialog.value = false
+        dismissRequest()
     }
 
     private fun getWindowHeight(): Int {
