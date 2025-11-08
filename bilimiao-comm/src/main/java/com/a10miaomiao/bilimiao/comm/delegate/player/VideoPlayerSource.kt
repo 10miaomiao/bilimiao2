@@ -100,8 +100,9 @@ class VideoPlayerSource(
         val availableStreamList = videoInfo.streamList.filter {
             it.content != null
         }
-//        playerSource.lastPlayCid = res?: ""
-//        playerSource.lastPlayTime = res.last_play_time ?: 0
+        playerSource.header = mapOf(
+            "User-Agent" to "Mozilla/5.0 BiliDroid/1.41.0 (bbcallen@gmail.com)",
+        )
         if (availableStreamList.isEmpty()) {
             return null
         }
@@ -146,6 +147,10 @@ class VideoPlayerSource(
                 playerSource.url = "[concatenating]\n" + durl.segment.joinToString("\n") { it.url }
             }
         }
+        miaoLogger().d(
+            "获取播放器地址成功",
+            "url" to playerSource.url,
+            "header" to playerSource.header,)
         return playerSource
     }
 

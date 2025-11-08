@@ -127,6 +127,9 @@ class BangumiPlayerSource(
         if (availableStreamList.isEmpty()) {
             return null
         }
+        playerSource.header = mapOf(
+            "User-Agent" to "Mozilla/5.0 BiliDroid/1.41.0 (bbcallen@gmail.com)",
+        )
         playerSource.acceptList = availableStreamList.map {
             val acceptInfo = it.info!!
             PlayerSourceInfo.AcceptInfo(
