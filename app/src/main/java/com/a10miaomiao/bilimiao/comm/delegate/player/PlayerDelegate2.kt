@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.DisplayCutout
 import android.view.WindowManager
+import android.webkit.CookieManager
 import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
@@ -38,6 +39,7 @@ import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
@@ -278,6 +280,7 @@ class PlayerDelegate2(
         val dataSourceArr = dataSource.split("\n")
         val mediaMetadata = getMediaMetadata(dataSource)
         val header = playerSourceInfo?.header ?: emptyMap()
+        val userAgent = header["User-Agent"] ?: DEFAULT_USER_AGENT
         return when (dataSourceArr[0]) {
             "[local-merging]" -> {
                 // 本地音视频分离
@@ -301,7 +304,7 @@ class PlayerDelegate2(
             "[merging]" -> {
                 // 音视频分离
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setUserAgent(userAgent)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 val videoMedia = MediaItem.Builder().apply {
                     setUri(dataSourceArr[1])
@@ -322,7 +325,7 @@ class PlayerDelegate2(
             "[concatenating]" -> {
                 // 视频拼接
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setUserAgent(userAgent)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 ConcatenatingMediaSource().apply {
                     for (i in 1 until dataSourceArr.size) {
@@ -341,7 +344,7 @@ class PlayerDelegate2(
             "[dash-mpd]" -> {
                 // Create a data source factory.
                 val dataSourceFactory = DefaultHttpDataSource.Factory()
-                dataSourceFactory.setUserAgent(DEFAULT_USER_AGENT)
+                dataSourceFactory.setUserAgent(userAgent)
                 dataSourceFactory.setDefaultRequestProperties(header)
                 // Create a DASH media source pointing to a DASH manifest uri.
                 val uri = Uri.parse(dataSourceArr[1])

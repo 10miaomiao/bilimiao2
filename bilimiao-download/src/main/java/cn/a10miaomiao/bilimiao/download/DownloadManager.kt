@@ -83,7 +83,7 @@ class DownloadManager(
             request.addHeader(keys, info.header[keys]!!)
         }
         val call = mClient.newCall(request.build())
-        val response = call!!.execute()
+        val response = call.execute()
         if (!response.isSuccessful) {
             throw Throwable()
         }
