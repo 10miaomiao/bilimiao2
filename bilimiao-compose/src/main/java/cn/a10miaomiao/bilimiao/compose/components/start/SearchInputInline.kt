@@ -184,6 +184,9 @@ fun SearchInputInline(
                 }
             }
             LaunchedEffect(showSuggestList) {
+                if (isEditingHistory) {
+                    return@LaunchedEffect
+                }
                 if (isCompact && showSuggestList.isNotEmpty()) {
                     scrollState.animateScrollTo(scrollState.maxValue)
                 } else {
@@ -209,7 +212,7 @@ fun SearchInputInline(
             if (text.isEmpty() && showSuggestList.isNotEmpty()) {
                 Row(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
                         .fillMaxWidth()
                         .padding(top = 4.dp)
                         .padding(horizontal = 8.dp),
@@ -260,7 +263,7 @@ fun SearchInputInline(
             // Suggestions list displayed as flow chips
             Box(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .fillMaxWidth()
                     .heightIn(max = 200.dp)
                     .verticalScroll(scrollState),
