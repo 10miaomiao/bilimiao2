@@ -158,11 +158,16 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeGestures
+import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.core.view.WindowCompat
+import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import cn.a10miaomiao.bilimiao.compose.common.foundation.add
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.components.start.SearchInputInline
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestInfo
@@ -181,7 +186,7 @@ fun StartViewContent(
     isSearchVisible: Boolean = false,
     searchInitKeyword: String = "",
     searchInitMode: Int = 0,
-    searchSelfName: String? = null,
+    pageSearchMethod: PageSearchMethod? = null,
     searchAnimation: Boolean = true,
     onCloseSearch: () -> Unit = {},
 ) {
@@ -221,7 +226,7 @@ fun StartViewContent(
                     animatedVisibilityScope = this@AnimatedContent,
                     initKeyword = searchInitKeyword,
                     initMode = searchInitMode,
-                    selfSearchName = searchSelfName,
+                    pageSearchMethod = pageSearchMethod,
                     onDismissRequest = onCloseSearch,
                 )
             } else {
@@ -267,8 +272,7 @@ private fun StartIndexList(
         state = listState,
         modifier = modifier,
         contentPadding = WindowInsets
-            .safeContent
-            .only(WindowInsetsSides.Vertical)
+            .safeDrawing
             .asPaddingValues()
             .add(PaddingValues(10.dp)),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -492,7 +496,7 @@ private fun StartFooterCard(
     onDownloadClick: () -> Unit,
     onSettingClick: () -> Unit
 ) {
-    MiaoCard {
+    MiaoOutlinedCard {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),

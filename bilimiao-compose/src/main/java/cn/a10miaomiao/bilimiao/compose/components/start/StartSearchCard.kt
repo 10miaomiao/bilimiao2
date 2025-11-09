@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 
 @Composable
 fun StartSearchCard(
@@ -28,7 +29,7 @@ fun StartSearchCard(
     onClick: () -> Unit,
     onScannerClick: () -> Unit,
 ) {
-    MiaoCard(
+    MiaoOutlinedCard(
         modifier = modifier,
         onClick = {
             onClick()

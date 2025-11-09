@@ -39,6 +39,7 @@ import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.ComposeFragment
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
 import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
@@ -54,7 +55,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPopupMenu
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
-import com.a10miaomiao.bilimiao.comm.navigation.openSearch
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCConfig
 import com.a10miaomiao.bilimiao.comm.scanner.BilimiaoScanner
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
@@ -263,7 +263,7 @@ class MainActivity
         ui.mAppBar.onBackLongClick = this.onBackLongClick
         ui.mAppBar.onMenuItemClick = {
             if (it.prop.action == MenuActions.search) {
-                openSearch(it)
+                openSearchDialog()
             } else {
                 val fragment = currentNav
                 if (fragment is MyPage) {
@@ -370,8 +370,20 @@ class MainActivity
             }
             ui.root.slideUpBottomAppBar()
 
-            config.search
-            pageConfig?.search
+            val searchConfig = config.search
+            val pageSearchMethod = if (searchConfig?.name.isNullOrBlank()) {
+                null
+            } else {
+                object : PageSearchMethod {
+                    override val name: String
+                        get() = searchConfig?.name ?: ""
+
+                    override fun onSearch(keyword: String) {
+                        searchSelfPage(keyword)
+                    }
+                }
+            }
+            startViewWrapper.setPageSearchMethod(pageSearchMethod)
         }
     }
 
@@ -483,8 +495,11 @@ class MainActivity
         ui.root.closeDrawer()
     }
 
-    fun openSearchDialog(initKeyword: String, mode: Int, name: String?) {
-        startViewWrapper.openSearchDialog(initKeyword, mode, name, false)
+    fun openSearchDialog() {
+        val searchConfig = pageConfig?.search
+        val keyword = searchConfig?.keyword ?: ""
+        val mode = if (searchConfig?.name.isNullOrBlank()) 0 else 1
+        startViewWrapper.openSearchDialog(keyword, mode, false)
         Handler(Looper.getMainLooper()).postDelayed({
             ui.root.openDrawer()
         }, 10)

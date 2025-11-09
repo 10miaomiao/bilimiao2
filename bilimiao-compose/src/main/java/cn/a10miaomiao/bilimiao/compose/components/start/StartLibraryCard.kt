@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.pages.mine.HistoryPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.WatchLaterPage
@@ -287,7 +288,7 @@ private fun LibraryItemCard(
     onClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    MiaoCard(
+    MiaoOutlinedCard(
         modifier = Modifier
             .width(cardWidth),
         onClick = onClick,
