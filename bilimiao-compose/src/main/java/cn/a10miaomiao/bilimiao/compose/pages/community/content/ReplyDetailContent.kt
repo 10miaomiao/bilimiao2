@@ -461,6 +461,7 @@ fun ReplyDetailContent(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Comment,
+                            tint = MaterialTheme.colorScheme.onBackground,
                             contentDescription = "回复评论",
                         )
                     }
@@ -475,6 +476,7 @@ fun ReplyDetailContent(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Sort,
+                                tint = MaterialTheme.colorScheme.onBackground,
                                 contentDescription = "列表排序",
                             )
                         }
