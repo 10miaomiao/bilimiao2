@@ -204,7 +204,7 @@ fun TimeRegionDetailListContent(
                 top = 0.dp,
             )
         ) {
-            items(list, { it.id }) {
+            items(list) {
                 VideoItemBox(
                     modifier = Modifier.padding(
                         horizontal = 10.dp,
