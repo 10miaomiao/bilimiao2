@@ -37,3 +37,30 @@ fun MiaoCard(
         content = content,
     )
 }
+
+@Composable
+fun MiaoOutlinedCard(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onClick: () -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(5.dp),
+        enabled = enabled,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        elevation = CardDefaults.outlinedCardElevation(
+            defaultElevation = 1.dp,
+            disabledElevation = 0.dp
+        ),
+        border = CardDefaults.outlinedCardBorder(),
+        onClick = onClick,
+        content = content,
+    )
+}

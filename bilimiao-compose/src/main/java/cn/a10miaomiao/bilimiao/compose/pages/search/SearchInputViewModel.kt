@@ -21,8 +21,9 @@ class SearchInputViewModel(
 
     private val context: Context by instance()
 
-    var historyList = mutableListOf<String>()
-    val suggestListFlow = MutableStateFlow(mutableListOf<SuggestInfo>())
+    val historyListFlow = MutableStateFlow(listOf<SuggestInfo>())
+    val historyList get() = historyListFlow
+    val suggestListFlow = MutableStateFlow(listOf<SuggestInfo>())
     val suggestList get() = suggestListFlow.value
 
     var config: SearchConfigInfo? = null
@@ -31,18 +32,17 @@ class SearchInputViewModel(
     private val searchHistoryDB = SearchHistoryDB(context, SearchHistoryDB.DB_NAME, null, 1)
 
     init {
-        historyList = searchHistoryDB.queryAllHistory()
-        showSearchKeywordHistory()
+        updateHistoryList()
     }
 
-    private fun showSearchKeywordHistory() {
-        suggestListFlow.value = historyList.map {
+    private fun updateHistoryList() {
+        historyListFlow.value = searchHistoryDB.queryAllHistory().map {
             SuggestInfo(
                 text = it,
+                type = SuggestType.HISTORY,
                 value = it,
-                type = SuggestType.HISTORY
             )
-        }.toMutableList()
+        }
     }
 
     private fun getInitSuggestData(
@@ -69,7 +69,6 @@ class SearchInputViewModel(
     fun loadSuggestData(keyword: String, currentText: String) =
         viewModelScope.launch(Dispatchers.IO) {
             if (keyword.isEmpty()) {
-                showSearchKeywordHistory()
                 return@launch
             }
             suggestListFlow.value = getInitSuggestData(keyword)
@@ -102,18 +101,17 @@ class SearchInputViewModel(
     fun addSearchHistory(text: String) {
         searchHistoryDB.deleteHistory(text)
         searchHistoryDB.insertHistory(text)
+        updateHistoryList()
     }
 
     fun deleteSearchHistory(text: String) {
         searchHistoryDB.deleteHistory(text)
-        historyList = searchHistoryDB.queryAllHistory()
-        showSearchKeywordHistory()
+        updateHistoryList()
     }
 
     fun deleteAllSearchHistory() {
         searchHistoryDB.deleteAllHistory()
-        historyList.clear()
-        showSearchKeywordHistory()
+        updateHistoryList()
     }
 
     fun isNumeric(s: String): Boolean {

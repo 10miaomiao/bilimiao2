@@ -9,24 +9,6 @@ fun Activity.openBottomSheet(page: ComposePage) {
     (this as? MainActivity)?.openBottomSheet(page)
 }
 
-fun Activity.openSearch(view: View? = null) {
-    val activity = this as? MainActivity ?: return
-    val searchConfig = activity.pageConfig?.search
-    if (searchConfig != null) {
-        activity.openSearchDialog(
-            initKeyword = searchConfig.keyword,
-            mode = 1,
-            name = searchConfig.name,
-        )
-    } else {
-        activity.openSearchDialog(
-            initKeyword = "",
-            mode = 0,
-            name = null,
-        )
-    }
-}
-
 //fun ScaffoldView.openSearchDrawer() {
 //    openDrawer()
 //    (drawerFragment as? StartFragment)?.openSearchView()

@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.ComposeView
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import kotlin.math.max
 import kotlin.math.min
 
@@ -32,8 +33,10 @@ class StartViewWrapper(
     val searchInitKeyword get() = _searchInitKeyword.value
     private val _searchInitMode = mutableStateOf(0)
     val searchInitMode get() = _searchInitMode.value
-    private val _searchSelfName = mutableStateOf<String?>(null)
-    val searchSelfName get() = _searchSelfName.value
+
+    private val _pageSearchMethod = mutableStateOf<PageSearchMethod?>(null)
+    val pageSearchMethod get() = _pageSearchMethod.value
+
     private val _searchAnimation = mutableStateOf(false)
     val searchAnimation get() = _searchAnimation.value
 
@@ -61,11 +64,14 @@ class StartViewWrapper(
         _touchStart.value = topHeightDp
     }
 
-    fun openSearchDialog(keyword: String, mode: Int, selfName: String?, animation: Boolean) {
+    fun setPageSearchMethod(method: PageSearchMethod?) {
+        _pageSearchMethod.value = method
+    }
+
+    fun openSearchDialog(keyword: String, mode: Int, animation: Boolean) {
         _searchAnimation.value = animation
         _searchInitKeyword.value = keyword
         _searchInitMode.value = mode
-        _searchSelfName.value = selfName
         _showSearchDialog.value = true
     }
 

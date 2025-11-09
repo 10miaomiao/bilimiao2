@@ -7,12 +7,15 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +23,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +50,9 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,9 +64,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowWidthSizeClass
+import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestInfo
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
@@ -74,7 +84,7 @@ fun SearchInputInline(
     animatedVisibilityScope: AnimatedVisibilityScope,
     initKeyword: String,
     initMode: Int,
-    selfSearchName: String?,
+    pageSearchMethod: PageSearchMethod?,
     onDismissRequest: () -> Unit,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
@@ -87,18 +97,19 @@ fun SearchInputInline(
     var text by remember { mutableStateOf(initKeyword) }
     var mode by remember { mutableStateOf(initMode) }
     val focusRequester = remember { FocusRequester() }
+    var isEditingHistory by remember { mutableStateOf(false) }
 
     LaunchedEffect(text) {
         viewModel.loadSuggestData(text, text)
+        if (text.isNotEmpty()) {
+            isEditingHistory = false
+        }
     }
 
     BackHandler {
         onDismissRequest()
     }
 
-    val suggestList by viewModel.suggestListFlow.collectAsState()
-
-    var pendingDelete by remember { mutableStateOf<String?>(null) }
     var showClearAll by remember { mutableStateOf(false) }
 
     fun startSearch(keyword: String) {
@@ -110,9 +121,14 @@ fun SearchInputInline(
         if (mode == 0) {
             pageNavigation.navigate(SearchResultPage(keyword))
         } else {
-//            activity.searchSelfPage(keyword)
+            pageSearchMethod?.onSearch(keyword)
         }
         onDismissRequest()
+    }
+
+    fun deleteHistory(text: String) {
+        viewModel.deleteSearchHistory(text)
+        PopTip.show("已删除")
     }
 
     LaunchedEffect(Unit) {
@@ -128,7 +144,7 @@ fun SearchInputInline(
                     it.imePadding()
                 } else {
                     it
-                        .safeContentPadding()
+                        .safeDrawingPadding()
                         .padding(8.dp)
                 }
             }
@@ -136,7 +152,7 @@ fun SearchInputInline(
         contentAlignment = if (isCompact) Alignment.BottomCenter
             else Alignment.TopStart,
     ) {
-        MiaoCard(
+        MiaoOutlinedCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .run {
@@ -146,15 +162,32 @@ fun SearchInputInline(
                             animatedVisibilityScope = animatedVisibilityScope,
                         )
                     }
-                }
+                },
+            enabled = false,
         ) {
+            val historySuggestList by viewModel.historyListFlow.collectAsState()
+            val suggestList by viewModel.suggestListFlow.collectAsState()
             val scrollState = rememberScrollState()
-            val reversedSuggestList = suggestList.asReversed()
-            LaunchedEffect(reversedSuggestList.size) {
-                if (reversedSuggestList.isEmpty()) {
-                    scrollState.scrollTo(0)
-                } else {
+            LaunchedEffect(historySuggestList) {
+                if (historySuggestList.isEmpty()) {
+                    isEditingHistory = false
+                }
+            }
+            val showSuggestList by remember {
+                derivedStateOf {
+                    when {
+                        text.isEmpty() -> historySuggestList
+                        else -> suggestList
+                    }.let {
+                        if (isCompact) it.asReversed() else it
+                    }
+                }
+            }
+            LaunchedEffect(showSuggestList) {
+                if (isCompact && showSuggestList.isNotEmpty()) {
                     scrollState.animateScrollTo(scrollState.maxValue)
+                } else {
+                    scrollState.scrollTo(0)
                 }
             }
 
@@ -169,35 +202,65 @@ fun SearchInputInline(
                     focusRequester = focusRequester,
                     mode = mode,
                     onModeChange = { mode = it },
-                    selfSearchName = selfSearchName,
+                    pageSearchMethod = pageSearchMethod,
                 )
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "搜索历史",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(
-                    onClick = {
-                        viewModel.deleteSearchHistory(pendingDelete!!)
-                        pendingDelete = null
-                    },
-                    modifier = Modifier.align(Alignment.CenterVertically)
+
+            if (text.isEmpty() && showSuggestList.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("编辑")
+                    Text(
+                        text = "搜索历史",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (historySuggestList.isNotEmpty()) {
+                        val contentPadding = PaddingValues(0.dp)
+                        if (isEditingHistory) {
+                            TextButton(
+                                onClick = { showClearAll = true },
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                                    .height(32.dp),
+                                contentPadding = contentPadding,
+                            ) {
+                                Text("清空")
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            TextButton(
+                                onClick = {
+                                    isEditingHistory = false
+                                },
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                                    .height(32.dp),
+                                contentPadding = contentPadding,
+                            ) {
+                                Text("完成")
+                            }
+                        } else {
+                            TextButton(
+                                onClick = { isEditingHistory = true },
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                                    .height(32.dp),
+                                contentPadding = contentPadding,
+                            ) {
+                                Text("编辑")
+                            }
+                        }
+                    }
                 }
             }
 
             // Suggestions list displayed as flow chips
             Box(
                 modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
                     .heightIn(max = 200.dp)
                     .verticalScroll(scrollState),
@@ -210,24 +273,49 @@ fun SearchInputInline(
                         .padding(bottom = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    reversedSuggestList.forEach { item: SuggestInfo ->
-                        SuggestionChip(
-                            onClick = {
-                                when (item.type) {
-                                    SearchInputViewModel.SuggestType.AV -> {
-                                        pageNavigation.navigateByUri(Uri.parse("bilimiao://video/${item.value}"))
-                                    }
-                                    SearchInputViewModel.SuggestType.SS -> {
-                                        pageNavigation.navigateByUri(Uri.parse("bilimiao://video/${item.value}"))
-                                    }
-                                    else -> {
-                                        startSearch(item.value)
+                    showSuggestList.forEach { item: SuggestInfo ->
+                        val isHistoryItem = item.type == SearchInputViewModel.SuggestType.HISTORY
+                        if (text.isEmpty() && isHistoryItem && isEditingHistory) {
+                            SuggestionChip(
+                                onClick = {
+                                    deleteHistory(item.text)
+                                },
+                                label = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(item.text)
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "删除搜索历史",
+                                            modifier = Modifier.size(12.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
-                                onDismissRequest()
-                            },
-                            label = { Text(item.text) }
-                        )
+                            )
+                        } else {
+                            key(item.text) {
+                                SuggestionChip(
+                                    onClick = {
+                                        when (item.type) {
+                                            SearchInputViewModel.SuggestType.AV -> {
+                                                pageNavigation.navigateByUri(Uri.parse("bilimiao://video/${item.value}"))
+                                            }
+                                            SearchInputViewModel.SuggestType.SS -> {
+                                                pageNavigation.navigateByUri(Uri.parse("bilimiao://video/${item.value}"))
+                                            }
+                                            else -> {
+                                                startSearch(item.value)
+                                            }
+                                        }
+                                        onDismissRequest()
+                                    },
+                                    label = { Text(item.text) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -242,32 +330,12 @@ fun SearchInputInline(
                     focusRequester = focusRequester,
                     mode = mode,
                     onModeChange = { mode = it },
-                    selfSearchName = selfSearchName,
+                    pageSearchMethod = pageSearchMethod,
                 )
             }
         }
     }
 
-    pendingDelete?.let { value ->
-        AlertDialog(
-            onDismissRequest = { pendingDelete = null },
-            title = { Text("确认删除，喵~") },
-            text = { Text("将删除搜索历史关键字") },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.deleteSearchHistory(value)
-                    PopTip.show("已删除")
-                    pendingDelete = null
-                }) { Text("确定") }
-            },
-            dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { showClearAll = true; pendingDelete = null }) { Text("清空全部") }
-                    TextButton(onClick = { pendingDelete = null }) { Text("取消") }
-                }
-            }
-        )
-    }
 
     if (showClearAll) {
         AlertDialog(
@@ -278,6 +346,7 @@ fun SearchInputInline(
                 TextButton(onClick = {
                     viewModel.deleteAllSearchHistory()
                     PopTip.show("已清空了~")
+                    isEditingHistory = false
                     showClearAll = false
                 }) { Text("确定清空") }
             },
@@ -298,7 +367,7 @@ private fun SearchTextField(
     focusRequester: FocusRequester,
     mode: Int,
     onModeChange: (Int) -> Unit,
-    selfSearchName: String?,
+    pageSearchMethod: PageSearchMethod?,
 ) {
     // Bottom input and actions bar
     Surface(
@@ -316,7 +385,7 @@ private fun SearchTextField(
                 SearchModeSelector(
                     mode = mode,
                     onModeChange = onModeChange,
-                    selfSearchName = selfSearchName,
+                    pageSearchMethod = pageSearchMethod,
                 )
             } else {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -377,7 +446,7 @@ private fun SearchTextField(
                 SearchModeSelector(
                     mode = mode,
                     onModeChange = onModeChange,
-                    selfSearchName = selfSearchName,
+                    pageSearchMethod = pageSearchMethod,
                 )
             } else {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -390,7 +459,7 @@ private fun SearchTextField(
 private fun SearchModeSelector(
     mode: Int,
     onModeChange: (Int) -> Unit,
-    selfSearchName: String?
+    pageSearchMethod: PageSearchMethod?,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -402,11 +471,13 @@ private fun SearchModeSelector(
             onClick = { onModeChange(0) },
             label = { Text("全站搜索") }
         )
-        FilterChip(
-            selected = mode == 1,
-            onClick = { onModeChange(1) },
-            label = { Text(selfSearchName ?: "当前页内") }
-        )
+        pageSearchMethod?.let {
+            FilterChip(
+                selected = mode == 1,
+                onClick = { onModeChange(1) },
+                label = { Text(it.name) }
+            )
+        }
         Spacer(modifier = Modifier.weight(1f))
     }
 }

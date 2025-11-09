@@ -31,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
@@ -54,7 +55,7 @@ fun StartUserCard(
     val imageHeight = 100.dp
     val userRowTop = imageHeight - 40.dp
     val userRowHeight = 60.dp
-    MiaoCard(
+    MiaoOutlinedCard(
         modifier = modifier,
     ) {
         Box(

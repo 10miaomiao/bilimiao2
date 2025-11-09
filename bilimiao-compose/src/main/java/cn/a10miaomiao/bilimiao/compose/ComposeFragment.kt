@@ -400,21 +400,7 @@ fun MyStartView(
     val appStore by rememberInstance<AppStore>()
 
     fun openSearch() {
-//        val searchConfig = pageConfig?.search
-//        if (searchConfig != null) {
-//            openSearchDialog(
-//                initKeyword = searchConfig.keyword,
-//                mode = 1,
-//                name = searchConfig.name,
-//            )
-//        } else {
-//            openSearchDialog(
-//                initKeyword = "",
-//                mode = 0,
-//                name = null,
-//            )
-//        }
-        startViewWrapper.openSearchDialog("", 0, null, true)
+        startViewWrapper.openSearchDialog("", 0, true)
     }
 
     if (startViewWrapper.shouldCreateCompositionOnAttachedToWindow) {
@@ -431,7 +417,7 @@ fun MyStartView(
                     isSearchVisible = startViewWrapper.showSearchDialog,
                     searchInitKeyword = startViewWrapper.searchInitKeyword,
                     searchInitMode = startViewWrapper.searchInitMode,
-                    searchSelfName = startViewWrapper.searchSelfName,
+                    pageSearchMethod = startViewWrapper.pageSearchMethod,
                     onCloseSearch = startViewWrapper::closeSearchDialog,
                 )
             }

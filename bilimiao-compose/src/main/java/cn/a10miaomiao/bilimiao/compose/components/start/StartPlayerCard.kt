@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
+import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -51,7 +52,7 @@ fun StartPlayerCard(
     val playListStore by rememberInstance<PlayListStore>()
     val playListState by playListStore.stateFlow.collectAsState()
 
-    MiaoCard(
+    MiaoOutlinedCard(
         modifier = modifier,
         onClick = onClick,
     ) {
