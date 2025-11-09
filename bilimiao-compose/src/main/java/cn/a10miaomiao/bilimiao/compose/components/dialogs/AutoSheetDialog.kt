@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +39,7 @@ fun AutoSheetDialog(
             Box(
                 modifier = Modifier
                     .widthIn(max = 600.dp)
-                    .safeContentPadding()
+                    .safeDrawingPadding()
                     .let { modifier ->
                         if (direction == DirectionState.NONE) {
                             modifier
