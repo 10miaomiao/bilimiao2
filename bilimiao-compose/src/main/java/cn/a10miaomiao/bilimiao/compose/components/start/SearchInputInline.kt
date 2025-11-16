@@ -141,7 +141,7 @@ fun SearchInputInline(
             .fillMaxSize()
             .let {
                 if (isCompact) {
-                    it.imePadding()
+                    it.safeDrawingPadding()
                 } else {
                     it
                         .safeDrawingPadding()
