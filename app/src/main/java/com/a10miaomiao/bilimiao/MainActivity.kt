@@ -20,6 +20,7 @@ import android.view.DisplayCutout
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
+import android.view.WindowManager
 import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -147,6 +148,10 @@ class MainActivity
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API31，安卓11
+            // 设置弹出输入法时不改变窗口高度，使动画更加流畅，高版本安卓可以用imePadding来顶起输入框
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+        }
         super.onCreate(savedInstanceState)
         themeDelegate.onCreate(savedInstanceState)
 
