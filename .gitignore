@@ -10,3 +10,5 @@
 .cxx
 local.properties
 app/signing.properties
+*.class
+META-INF/
