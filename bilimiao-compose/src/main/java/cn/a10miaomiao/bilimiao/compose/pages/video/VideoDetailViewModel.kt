@@ -52,6 +52,7 @@ import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import kotlin.collections.mapNotNull
 
 class VideoDetailViewModel(
     override val di: DI,
@@ -193,8 +194,8 @@ class VideoDetailViewModel(
         val history = detail.history
         if (pages.isNotEmpty()) {
             val page = history?.let { h ->
-                pages.find { it.page?.cid == h.cid }
-            }?.page ?: pages[0].page ?: return
+                pages.find { it.cid == h.cid }
+            } ?: pages[0] ?: return
             playVideo(page)
         }
     }
@@ -203,7 +204,7 @@ class VideoDetailViewModel(
         val arc = detail.getArcData() ?: return
         val author = arc.author ?: return
         videoAidToPlay = arc.aid.toString()
-        val viewPages = detail.pages
+        val viewPages = detail.getPages()
         val ugcSeason = detail.getUgcSeasonData()
         val title = if (viewPages.size > 1) {
             page.part
@@ -262,9 +263,7 @@ class VideoDetailViewModel(
                 ownerName = author.name,
             ).apply {
                 pages = viewPages
-                    .mapNotNull {
-                        it.page
-                    }.map {
+                    .map {
                         VideoPlayerSource.PageInfo(
                             cid = it.cid.toString(),
                             title = it.part,
@@ -330,8 +329,8 @@ class VideoDetailViewModel(
         return ugcSeason ?: activitySeason?.ugcSeason
     }
 
-    fun ViewReply.getPages(): List<bilibili.app.view.v1.ViewPage> {
-        return activitySeason?.pages ?: pages
+    fun ViewReply.getPages(): List<bilibili.app.archive.v1.Page> {
+        return (activitySeason?.pages ?: pages).mapNotNull { it.page }
     }
 
     fun ViewReply.getBvid(): String {
@@ -561,7 +560,7 @@ class VideoDetailViewModel(
                         downloadService,
                         videoDetail.getBvid(),
                         videoArc,
-                        viewPages.mapNotNull { it.page },
+                        viewPages,
                     )
                 }
             }
