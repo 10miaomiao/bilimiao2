@@ -1,20 +1,16 @@
-import cn.a10miaomiao.bilimiao.build.*
-
 plugins {
-    id("com.android.library")
-    id("kotlin-android")
-    id("kotlin-parcelize")
-    id("bilimiao-build")
-    kotlin("plugin.compose")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.android)
     kotlin("plugin.serialization")
+    kotlin("plugin.compose")
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -51,47 +47,46 @@ android {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
-    implementation(Libraries.lifecycle)
-    implementation(Libraries.lifecycleViewModel)
-    implementation(Libraries.datastore)
-    implementation(Libraries.browser)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.browser)
 
-    implementation(Libraries.kotlinxDatetime)
-    implementation(Libraries.kotlinxSerializationJson)
-    implementation(Libraries.kotlinxCoroutinesAndroid)
-    implementation(Libraries.kodeinDi) // 依赖注入
-    implementation(Libraries.kodeinDiCompose)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kodein.di)
+    implementation(libs.kodein.di.compose)
 
-    val composeBom = platform(Libraries.composeBom)
+    val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
-    implementation(Libraries.composeUi)
-    implementation(Libraries.composeFoundation)
-//    implementation(Libraries.composeAnimation)
-    implementation(Libraries.composeMaterial)
-    implementation(Libraries.composeMaterialIconsExtended)
-    implementation(Libraries.composeMaterial3)
-    implementation(Libraries.composeMaterial3WindowSizeClass)
-    implementation(Libraries.composeMaterial3Adaptive)
-    implementation(Libraries.composeUiToolingPreview)
-    implementation(Libraries.activityCompose)
-    implementation(Libraries.navigationCompose)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material3.window.size)
+    implementation(libs.compose.material3.adaptive)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.activity.compose)
+    implementation(libs.compose.navigation)
 
-    implementation(Libraries.accompanistDrawablePainter)
-    implementation(Libraries.accompanistAdaptive)
-    implementation("me.zhanghai.compose.preference:library:1.1.1")
-    implementation("sh.calvin.reorderable:reorderable:2.5.1")
-    implementation(Libraries.materialKolor)
+    implementation(libs.accompanist.drawablepainter)
+    implementation(libs.accompanist.adaptive)
+    implementation(libs.compose.preference)
+    implementation(libs.reorderable)
+    implementation(libs.materialkolor)
 
-    implementation(Libraries.okhttp3)
+    implementation(libs.okhttp3)
     implementation(libs.pbandk.runtime)
-    implementation(Libraries.glide)
-    implementation(Libraries.glideCompose)
-    implementation(Libraries.qrose)
+    implementation(libs.glide)
+    implementation(libs.glide.compose)
+    implementation(libs.qrose)
 
-    implementation(Libraries.dialogX) {
+    implementation(libs.kongzue.dialogx) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
 
@@ -99,9 +94,9 @@ dependencies {
     implementation(project(":bilimiao-download"))
     implementation(project(":bilimiao-cover"))
 
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")

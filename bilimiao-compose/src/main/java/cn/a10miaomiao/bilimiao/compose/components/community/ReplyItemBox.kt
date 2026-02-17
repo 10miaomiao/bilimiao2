@@ -50,7 +50,6 @@ import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
-import kotlinx.android.parcel.Parcelize
 import kotlin.math.max
 import kotlin.math.min
 

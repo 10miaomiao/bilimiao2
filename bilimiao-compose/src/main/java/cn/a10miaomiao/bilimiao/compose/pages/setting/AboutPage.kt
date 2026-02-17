@@ -109,7 +109,11 @@ private class AboutPageViewModel(
 
     val versionName: String = with(fragment.requireActivity()) {
         val packageInfo = packageManager.getPackageInfo(packageName, 0)
-        packageInfo.versionName
+        packageInfo.versionName ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            packageInfo.longVersionCode.toString()
+        } else {
+            packageInfo.versionCode.toString()
+        }
     }
 
     val versionCode: Long = with(fragment.requireActivity()) {

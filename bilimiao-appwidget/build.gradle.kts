@@ -1,10 +1,8 @@
-import cn.a10miaomiao.bilimiao.build.*
 
 plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-parcelize")
-    id("bilimiao-build")
 }
 
 android {
@@ -42,11 +40,11 @@ android {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
