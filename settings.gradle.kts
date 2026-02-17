@@ -1,8 +1,14 @@
 pluginManagement {
     includeBuild("bilimiao-build")
     repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         gradlePluginPortal()
-        google()
         mavenCentral()
     }
 }
@@ -11,9 +17,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://jitpack.io")
         maven("https://maven.aliyun.com/repository/public")
-        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") //pbandk
+        maven("https://jitpack.io")
     }
 }
 rootProject.name = "bilimiao"

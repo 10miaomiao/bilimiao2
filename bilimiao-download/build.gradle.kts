@@ -1,19 +1,17 @@
-import cn.a10miaomiao.bilimiao.build.*
 
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("bilimiao-build")
     kotlin("plugin.serialization")
 }
 
 android {
     namespace = "cn.a10miaomiao.bilimiao.download"
-    compileSdk = 32
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -38,18 +36,19 @@ android {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 
-    implementation(Libraries.kotlinxSerializationJson)
-    implementation(Libraries.okhttp3)
-    implementation(Libraries.pbandkRuntime)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp3)
+    implementation(libs.pbandk.runtime)
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":DanmakuFlameMaster"))
 
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

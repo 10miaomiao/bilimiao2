@@ -1,5 +1,4 @@
 import com.google.protobuf.gradle.*
-import cn.a10miaomiao.bilimiao.build.*
 import java.nio.file.Paths
 
 plugins {
@@ -7,7 +6,6 @@ plugins {
     id("kotlin-android")
     id("kotlin-parcelize")
     id("com.google.protobuf") // proto
-    id("bilimiao-build")
     kotlin("plugin.serialization")
 }
 
@@ -28,7 +26,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-               "proguard-rules.pro"
+                "proguard-rules.pro"
             )
         }
     }
@@ -49,13 +47,12 @@ android {
 
 
 protobuf {
-    val pbandkVersion = Versions.pbandk
     protoc {
         artifact = "com.google.protobuf:protoc:3.12.0"  // 相当于proto编译器
     }
     plugins {
         id("pbandk") {
-            artifact = "pro.streem.pbandk:protoc-gen-pbandk-jvm:$pbandkVersion:jvm8@jar"
+            artifact = "pro.streem.pbandk:protoc-gen-pbandk-jvm:0.16.0:jvm8@jar"
         }
     }
     generateProtoTasks {
@@ -89,30 +86,30 @@ protobuf {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
-    implementation(Libraries.lifecycle)
-    implementation(Libraries.lifecycleViewModel)
-    implementation(Libraries.datastore)
-    implementation(Libraries.browser)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.browser)
 
-    implementation(Libraries.kotlinxSerializationJson)
-    implementation(Libraries.kotlinxCoroutinesAndroid)
-    implementation(Libraries.kodeinDi)
-    implementation(Libraries.glide)
-    implementation(Libraries.dialogX) {
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kodein.di)
+    implementation(libs.glide)
+    implementation(libs.kongzue.dialogx) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
 
-    implementation(Libraries.okhttp3)
-    implementation(Libraries.pbandkRuntime)
+    implementation(libs.okhttp3)
+    implementation(libs.pbandk.runtime)
 
     implementation("javax.annotation:javax.annotation-api:1.2")
 
     implementation(project(":DanmakuFlameMaster"))
 
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -86,7 +86,7 @@ dependencies {
     implementation(Libraries.materialKolor)
 
     implementation(Libraries.okhttp3)
-    implementation(Libraries.pbandkRuntime)
+    implementation(libs.pbandk.runtime)
     implementation(Libraries.glide)
     implementation(Libraries.glideCompose)
     implementation(Libraries.qrose)

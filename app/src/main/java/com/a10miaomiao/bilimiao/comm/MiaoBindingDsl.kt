@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import android.widget.ImageView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.Glide
