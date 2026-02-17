@@ -46,7 +46,7 @@ dependencies {
 
     implementation(Libraries.kotlinxCoroutinesAndroid)
     implementation(Libraries.glide)
-    implementation(Libraries.pbandkRuntime)
+    implementation(libs.pbandk.runtime)
     implementation(Libraries.okhttp3)
 
     // 图片预览工具

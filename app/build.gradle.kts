@@ -1,12 +1,10 @@
-import cn.a10miaomiao.bilimiao.build.*
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    id("com.android.application")
-    id("kotlin-parcelize")
-    id("kotlin-android")
-    id("bilimiao-build")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
 android {
@@ -110,49 +108,52 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
-    implementation(Libraries.lifecycle)
-    implementation(Libraries.lifecycleViewModel)
-    implementation(Libraries.datastore)
-    implementation(Libraries.media)
-    implementation(Libraries.browser)
-    implementation("androidx.profileinstaller:profileinstaller:1.3.1")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.media)
+    implementation(libs.androidx.browser)
+    implementation(libs.androidx.profileinstaller)
 
-    implementation(Libraries.kotlinxCoroutinesAndroid)
-    implementation(Libraries.kodeinDi) // 依赖注入
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kodein.di) // 依赖注入
 
-    implementation(Libraries.recyclerview)
-    implementation(Libraries.baseRecyclerViewAdapterHelper)
-    implementation(Libraries.swiperefreshlayout)
-    implementation(Libraries.foregroundCompat)
-    implementation(Libraries.drawer)
-    implementation(Libraries.dialogX) {
+    implementation(libs.kongzue.dialogx) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
-    implementation(Libraries.materialKolor)
+    implementation(libs.materialkolor)
 
 //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
 //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")
 
-    implementationSplitties()
-    implementationMojito()
+    implementation(libs.splitties.android.base)
+    implementation(libs.splitties.android.base.with.views.dsl)
+    implementation(libs.splitties.android.appcompat)
+    implementation(libs.splitties.android.appcompat.with.views.dsl)
+    implementation(libs.splitties.android.material.components)
+    implementation(libs.splitties.android.material.components.with.views.dsl)
+
+    implementation(libs.mojito)
+    implementation(libs.mojito.sketch)
+    implementation(libs.mojito.glide)
 
     // 播放器相关
-    implementation(Libraries.media3)
-    implementation(Libraries.media3Session)
-    implementation(Libraries.media3Decoder)
-    implementation(Libraries.media3Ui)
-    implementation(Libraries.media3ExoPlayer)
-    implementation(Libraries.media3ExoPlayerDash)
-    implementation(Libraries.gsyVideoPlayer)
+    implementation(libs.androidx.media3.common)
+    implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.media3.decoder)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.dash)
+    implementation(libs.gsy.video.player)
 
-    implementation(Libraries.okhttp3)
-    implementation(Libraries.pbandkRuntime)
-    implementation(Libraries.glide)
-    annotationProcessor(Libraries.glideCompiler)
-    implementation(Libraries.microgSafeParcel)
+    implementation(libs.okhttp3)
+    implementation(libs.pbandk.runtime)
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
+    implementation(libs.microg.safeparcel)
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
@@ -163,12 +164,12 @@ dependencies {
     implementation(project(":DanmakuFlameMaster"))
 
     // 闭源库：百度统计、极验验证
-    "fullImplementation"(Libraries.baiduMobstat)
-    "fullImplementation"(Libraries.sensebot)
+    "fullImplementation"(libs.baidu.mobstat.sdk)
+    "fullImplementation"(libs.geetest.sensebot)
     // av1解码器：https://github.com/androidx/media/tree/release/libraries/decoder_av1
     "fullImplementation"(files("libs/lib-decoder-av1-release.aar"))
 
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

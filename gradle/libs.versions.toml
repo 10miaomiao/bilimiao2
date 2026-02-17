@@ -1,0 +1,121 @@
+[versions]
+agp = "8.13.0"
+kotlin = "2.0.20"
+# jetpack
+core = "1.13.1"
+appcompat = "1.6.1"
+material = "1.12.0"
+lifecycle = "2.8.3"
+navigation = "2.8.0"
+composeBom = "2025.05.00"
+datastore = "1.1.1"
+media = "1.6.0"
+media3 = "1.5.0"
+browser = "1.7.0"
+profileinstaller = "1.3.1"
+# kotlin libraries
+serialization = "1.7.3"
+kotlinxDatetime = "0.6.1"
+kotlinxCoroutines = "1.9.0"
+# third party
+splitties = "3.0.0"
+kodeinDi = "7.12.0"
+okhttp = "4.10.0"
+glide = "4.13.2"
+pbandk = "0.16.0"
+gsyVideoPlayer = "v10.0.0"
+accompanist = "0.35.0-alpha"
+materialKolor = "2.0.2"
+microgSafeParcel = "1.7.1"
+
+# ui components
+recyclerview = "1.2.0"
+swiperefreshlayout = "1.1.0"
+constraintlayout = "2.1.4"
+baseRecyclerViewAdapterHelper = "3.0.4"
+flexbox = "3.0.0"
+foregroundCompat = "1.0.2"
+drawer = "1.0.3"
+dialogX = "0.0.50.beta37"
+mojito = "1.8.7"
+# test
+junit = "4.14-SNAPSHOT"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+
+[libraries]
+# jetpack core
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+androidx-media = { group = "androidx.media", name = "media", version.ref = "media" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+# media3
+androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+androidx-media3-decoder = { group = "androidx.media3", name = "media3-decoder", version.ref = "media3" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+androidx-media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3" }
+androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
+# kotlin libraries
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
+# dependency injection
+kodein-di = { group = "org.kodein.di", name = "kodein-di-framework-android-x", version.ref = "kodeinDi" }
+kodein-di-compose = { group = "org.kodein.di", name = "kodein-di-framework-compose", version.ref = "kodeinDi" }
+# network
+okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+pbandk-runtime = { group = "pro.streem.pbandk", name = "pbandk-runtime", version.ref = "pbandk" }
+pbandk-genlib = { group="pro.streem.pbandk", name="protoc-gen-pbandk-lib", version.ref = "pbandk" }
+# image loading
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
+# ui components
+kongzue-dialogx = { group = "com.github.kongzue", name = "DialogX", version.ref = "dialogX" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+base-recyclerview-adapter-helper = { group = "com.github.CymChad", name = "BaseRecyclerViewAdapterHelper", version.ref = "baseRecyclerViewAdapterHelper" }
+google-android-flexbox = { group = "com.google.android.flexbox", name = "flexbox", version.ref = "flexbox" }
+foreground-compat = { group = "me.zhanghai.android.foregroundcompat", name = "library", version.ref = "foregroundCompat" }
+drakeet-drawer = { group = "com.drakeet.drawer", name = "drawer", version.ref = "drawer" }
+gsy-video-player = { group = "com.github.CarGuo.GSYVideoPlayer", name = "gsyvideoplayer-java", version.ref = "gsyVideoPlayer" }
+mojito = { group = "com.github.mikaelzero.mojito", name = "mojito", version.ref = "mojito" }
+mojito-sketch = { group = "com.github.mikaelzero.mojito", name = "SketchImageViewLoader", version.ref = "mojito" }
+mojito-glide = { group = "com.github.mikaelzero.mojito", name = "GlideImageLoader", version.ref = "mojito" }
+
+# splitties
+splitties-android-base = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-base", version.ref = "splitties" }
+splitties-android-base-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-base-with-views-dsl", version.ref = "splitties" }
+splitties-android-appcompat = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-appcompat", version.ref = "splitties" }
+splitties-android-appcompat-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-appcompat-with-views-dsl", version.ref = "splitties" }
+splitties-android-material-components = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-material-components", version.ref = "splitties" }
+splitties-android-material-components-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-material-components-with-views-dsl", version.ref = "splitties" }
+
+# third party
+materialkolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
+microg-safeparcel = { group = "org.microg", name = "safe-parcel", version.ref = "microgSafeParcel" }
+baidu-mobstat-sdk = { group = "com.baidu.mobstat", name = "mtj-sdk", version = "latest.integration" }
+geetest-sensebot = { group = "com.geetest.sensebot", name = "sensebot", version = "4.3.8.1" }
+
+# test
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+google-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
+
