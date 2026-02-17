@@ -1,10 +1,7 @@
-import cn.a10miaomiao.bilimiao.build.*
-
 plugins {
-    id("com.android.library")
-    id("kotlin-android")
-    id("kotlin-parcelize")
-    id("bilimiao-build")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("plugin.parcelize")
 }
 
 android {
@@ -39,23 +36,23 @@ android {
 }
 
 dependencies {
-    implementation(Libraries.core)
-    implementation(Libraries.appcompat)
-    implementation(Libraries.material)
-    implementation(Libraries.lifecycleViewModel)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-    implementation(Libraries.kotlinxCoroutinesAndroid)
-    implementation(Libraries.glide)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.glide)
     implementation(libs.pbandk.runtime)
-    implementation(Libraries.okhttp3)
+    implementation(libs.okhttp3)
 
-    // 图片预览工具
-    implementationMojito()
+    implementation(libs.mojito)
+    implementation(libs.mojito.sketch)
+    implementation(libs.mojito.glide)
 
     implementation(project(":bilimiao-comm"))
 
-    testImplementation(Libraries.junit)
-    androidTestImplementation(Libraries.androidxJunit)
-    androidTestImplementation(Libraries.espresso)
-
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

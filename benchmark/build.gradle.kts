@@ -21,14 +21,9 @@ android {
         targetSdk = 33
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-//        testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "EMULATOR,DEBUGGABLE"
     }
 
     buildTypes {
-        // This benchmark buildType is used for benchmarking, and should function like your
-        // release build (for example, with minification on). It"s signed with a debug key
-        // for easy local/CI testing.
         create("benchmark") {
             isDebuggable = true
             signingConfig = getByName("debug").signingConfig
@@ -46,10 +41,10 @@ android {
 }
 
 dependencies {
-    implementation("androidx.test.ext:junit:1.1.5")
-    implementation("androidx.test.espresso:espresso-core:3.5.1")
-    implementation("androidx.test.uiautomator:uiautomator:2.2.0")
-    implementation("androidx.benchmark:benchmark-macro-junit4:1.1.1")
+    implementation(libs.androidx.junit)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.uiautomator)
+    implementation(libs.benchmark.macro.junit4)
 }
 
 androidComponents {
