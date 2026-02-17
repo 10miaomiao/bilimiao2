@@ -90,9 +90,8 @@ fun VideoDetailContent(
         mutableStateOf(false)
     }
     val videoStat = arcData.stat
-    val pages = viewModel.run { detailData.getPages() }
-    val videoPages = remember(pages) {
-        pages.mapNotNull { it.page }
+    val videoPages = remember(detailData) {
+        viewModel.run { detailData.getPages() }
     }
     val videoHistory = detailData.history
     val videoReqUser = detailData.activitySeason?.reqUser

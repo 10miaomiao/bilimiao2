@@ -13,7 +13,7 @@ data class RecommendCardInfo (
     val cover: String? = null,
     val title: String = "",
     val uri: String = "",
-    val idx: Long,
+    val idx: Long = 0L,
     val track_id: String? = null,
     val talk_back: String? = null,
     val cover_left_text_1: String? = null,

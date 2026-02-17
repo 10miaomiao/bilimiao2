@@ -497,7 +497,7 @@ class PlayListStore(override val di: DI) :
     }
 
     fun bilibili.app.archive.v1.Arc.toPlayListItem(
-        viewPages: List<bilibili.app.view.v1.ViewPage>,
+        viewPages: List<bilibili.app.archive.v1.Page>,
     ): PlayListItemInfo {
         val from = PlayListFrom.Video(
             aid = aid.toString(),
@@ -511,9 +511,7 @@ class PlayListStore(override val di: DI) :
             ownerId = author!!.mid.toString(),
             ownerName = author.name,
             from = from,
-            videoPages = viewPages.mapNotNull {
-                it.page
-            }.map {
+            videoPages = viewPages.map {
                 PlayListItemInfo.VideoPageInfo(
                     cid = it.cid.toString(),
                     page = it.page,
