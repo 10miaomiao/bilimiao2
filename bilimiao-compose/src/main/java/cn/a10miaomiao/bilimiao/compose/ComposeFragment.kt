@@ -38,6 +38,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -193,12 +194,15 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                     MyImagePreviewer(state, innerPadding)
                                 }
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .nestedScroll(connection)
-                                        .background(MaterialTheme.colorScheme.background),
-                                ) {
-                                    MyNavHost(composeNav, HomePage)
+                                ComposeScaffold(startViewWrapper = startViewWrapper) {
+                                    Box(
+                                        modifier = Modifier
+                                            .nestedScroll(connection)
+                                            .background(MaterialTheme.colorScheme.background),
+                                    ) {
+                                        MyNavHost(composeNav, HomePage)
+                                    }
+                                    MyStartView(startViewWrapper = startViewWrapper)
                                 }
                                 val bottomSheetPage = bottomSheetState.page.collectAsState().value
                                 if (bottomSheetPage != null) {
@@ -213,7 +217,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                             }
                             MessageDialog(messageDialogState)
                         }
-                        MyStartView(startViewWrapper = startViewWrapper)
                     }
                 }
             }

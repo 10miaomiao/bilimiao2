@@ -7,7 +7,7 @@ appcompat = "1.6.1"
 material = "1.12.0"
 lifecycle = "2.8.3"
 navigation = "2.8.0"
-composeBom = "2025.05.00"
+composeBom = "2025.12.00"
 datastore = "1.1.1"
 media = "1.6.0"
 media3 = "1.5.0"
@@ -75,6 +75,8 @@ androidx-media3-session = { group = "androidx.media3", name = "media3-session", 
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+compose-ui-platform = { group = "androidx.compose.ui", name = "ui-platform" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
@@ -82,6 +84,8 @@ compose-material3-window-size = { group = "androidx.compose.material3", name = "
 compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive-android" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+compose-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 # kotlin libraries
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -120,7 +124,7 @@ splitties-android-base-with-views-dsl = { group = "com.louiscad.splitties", name
 splitties-android-appcompat = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-appcompat", version.ref = "splitties" }
 splitties-android-appcompat-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-appcompat-with-views-dsl", version.ref = "splitties" }
 splitties-android-material-components = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-material-components", version.ref = "splitties" }
-splitties-android-material-components-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-material-components-with-views-dsl", version.ref = "splitties" }
+ splitties-android-material-components-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-material-components-with-views-dsl", version.ref = "splitties" }
 
 # third party
 materialkolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
@@ -128,7 +132,6 @@ microg-safeparcel = { group = "org.microg", name = "safe-parcel", version.ref = 
 baidu-mobstat-sdk = { group = "com.baidu.mobstat", name = "mtj-sdk", version = "latest.integration" }
 geetest-sensebot = { group = "com.geetest.sensebot", name = "sensebot", version = "4.3.8.1" }
 # compose additional
-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 glide-compose = { group = "com.github.bumptech.glide", name = "compose", version.ref = "glideCompose" }
 qrose = { group = "io.github.alexzhirkevich", name = "qrose", version.ref = "qrose" }
 compose-preference = { group = "me.zhanghai.compose.preference", name = "library", version.ref = "composePreference" }

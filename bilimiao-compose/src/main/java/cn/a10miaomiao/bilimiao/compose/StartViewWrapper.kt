@@ -1,7 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.app.Activity
+import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.mutableFloatStateOf
@@ -39,6 +41,33 @@ class StartViewWrapper(
 
     private val _searchAnimation = mutableStateOf(false)
     val searchAnimation get() = _searchAnimation.value
+
+    var playerView: View? = null
+    var completionView: View? = null
+    var errorMessageView: View? = null
+    var areaLimitView: View? = null
+    var loadingView: View? = null
+
+    private val _showPlayer = mutableStateOf(false)
+    val showPlayer get() = _showPlayer.value
+
+    private val _orientation = mutableStateOf(1)
+    val orientation get() = _orientation.value
+
+    private val _fullScreenPlayer = mutableStateOf(false)
+    val fullScreenPlayer get() = _fullScreenPlayer.value
+
+    private val _smallModePlayerMinHeight = mutableStateOf(0)
+    val smallModePlayerMinHeight get() = _smallModePlayerMinHeight.value
+
+    private val _smallModePlayerCurrentHeight = mutableStateOf(0)
+    val smallModePlayerCurrentHeight get() = _smallModePlayerCurrentHeight.value
+
+    private val _playerSmallShowAreaWidth = mutableStateOf(0)
+    val playerSmallShowAreaWidth get() = _playerSmallShowAreaWidth.value
+
+    private val _playerSmallShowAreaHeight = mutableStateOf(0)
+    val playerSmallShowAreaHeight get() = _playerSmallShowAreaHeight.value
 
     var shouldCreateCompositionOnAttachedToWindow = true
         private set
@@ -79,6 +108,31 @@ class StartViewWrapper(
         _searchAnimation.value = true
         _showSearchDialog.value = false
         dismissRequest()
+    }
+
+    fun setShowPlayer(value: Boolean) {
+        _showPlayer.value = value
+    }
+
+    fun setOrientation(value: Int) {
+        _orientation.value = value
+    }
+
+    fun setFullScreenPlayer(value: Boolean) {
+        _fullScreenPlayer.value = value
+    }
+
+    fun setSmallModePlayerMinHeight(value: Int) {
+        _smallModePlayerMinHeight.value = value
+    }
+
+    fun setSmallModePlayerCurrentHeight(value: Int) {
+        _smallModePlayerCurrentHeight.value = value
+    }
+
+    fun setPlayerSmallShowArea(width: Int, height: Int) {
+        _playerSmallShowAreaWidth.value = width
+        _playerSmallShowAreaHeight.value = height
     }
 
     private fun getWindowHeight(): Int {

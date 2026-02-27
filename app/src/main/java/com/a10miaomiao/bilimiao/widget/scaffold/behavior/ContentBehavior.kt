@@ -60,10 +60,10 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 updateLayout(false)
             }
             val orientation = parent.orientation
-            if (parent.fullScreenPlayer) {
-                height = 0
-                width = 0
-                child.layout(0, 0, 0, 0)
+            if (parent.fullScreenPlayer && parent.hideContentOnFullScreen) {
+                height = parent.measuredHeight
+                width = parent.measuredWidth
+                child.layout(0, 0, parent.measuredWidth, parent.measuredHeight)
             } else {
                 height = bottom - top
                 width = right - left

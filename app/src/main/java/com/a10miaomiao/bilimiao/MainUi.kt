@@ -2,28 +2,21 @@ package com.a10miaomiao.bilimiao
 
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
 import android.preference.PreferenceManager
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
-import androidx.fragment.app.FragmentContainerView
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.ContentBehavior
-import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
-import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MyBottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import splitties.dimensions.dip
 import splitties.experimental.InternalSplittiesApi
 import splitties.views.backgroundColor
 import splitties.views.dsl.core.*
@@ -36,15 +29,9 @@ class MainUi(
 ) : Ui {
 
     companion object {
-        // 重启activiry时保持播放
         private var keepPlayerView: DanmakuVideoPlayer? = null
     }
 
-//    val mLeftContainerView = inflate<FragmentContainerView>(R.layout.left_fragment) {
-//        backgroundColor = config.windowBackgroundColor
-//        elevation = dip(20).toFloat()
-//        visibility = View.INVISIBLE
-//    }
     val mLeftContainerView = startViewWrapper.getView()
 
     val mContainerView = inflate<View>(R.layout.container_fragment) {
@@ -79,9 +66,9 @@ class MainUi(
     val mPlayerLayout = frameLayout {
         backgroundColor = 0xFF000000.toInt()
 //        elevation = dip(19).toFloat()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            outlineSpotShadowColor = config.shadowColor
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//            outlineSpotShadowColor = config.shadowColor
+//        }
 
         val completionView = inflate<RelativeLayout>(R.layout.include_completion_box)
         val errorMessageView = inflate<RelativeLayout>(R.layout.include_error_message_box)
@@ -137,19 +124,6 @@ class MainUi(
             height = matchParent
             width = matchParent
         })
-
-        addView(mPlayerLayout, lParams {
-            behavior = PlayerBehavior(ctx, null)
-            width = wrapContent
-            height = wrapContent
-        })
-
-//        addView(frameLayout {
-//            backgroundColor = config.blockBackgroundColor
-//            elevation = dip(20).toFloat()
-//        }, lParams {
-//            behavior = PlayerDraggableBehavior(ctx, null)
-//        })
 
         addView(mLeftContainerView, lParams {
             height = matchParent

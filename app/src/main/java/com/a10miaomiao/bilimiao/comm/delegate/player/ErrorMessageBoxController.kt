@@ -14,17 +14,21 @@ import com.google.android.material.button.MaterialButton
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.instance
+import kotlin.getValue
 
 class ErrorMessageBoxController(
-    private var activity: AppCompatActivity,
+    private var views: PlayerViews,
     private val delegate: PlayerDelegate2,
     override val di: DI,
 ) : DIAware {
 
-    val errorMessageLayout = activity.findViewById<RelativeLayout>(R.id.error_message_layout)
-    val errorMessageText = activity.findViewById<TextView>(R.id.error_message_text)
-    val errorMessageRetryBtn = activity.findViewById<MaterialButton>(R.id.error_message_retry_btn)
-    val errorMessageCloseBtn = activity.findViewById<MaterialButton>(R.id.error_message_close_btn)
+    private val activity by di.instance<AppCompatActivity>()
+
+    val errorMessageLayout = views.findViewById<RelativeLayout>(R.id.error_message_layout)
+    val errorMessageText = views.findViewById<TextView>(R.id.error_message_text)
+    val errorMessageRetryBtn = views.findViewById<MaterialButton>(R.id.error_message_retry_btn)
+    val errorMessageCloseBtn = views.findViewById<MaterialButton>(R.id.error_message_close_btn)
 
     init {
         initErrorMessageBox()
