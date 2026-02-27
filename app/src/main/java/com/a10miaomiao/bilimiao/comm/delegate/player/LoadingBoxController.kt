@@ -12,20 +12,20 @@ import com.a10miaomiao.bilimiao.comm.network
 import splitties.views.imageResource
 
 class LoadingBoxController(
-    private val activity: AppCompatActivity,
+    private val views: PlayerViews,
     private val delegate: PlayerDelegate2,
 ) {
 
-    private val loadingLayout = activity.findViewById<FrameLayout>(R.id.player_loading)
-    private val loadingTopLauout = activity.findViewById<LinearLayout>(R.id.loading_top)
-    private val loadingBottomLayout = activity.findViewById<LinearLayout>(R.id.loading_bottom);
-    private val loadingCloseBtn = activity.findViewById<ImageView>(R.id.loading_close)
-    private val loadingMoreBtn = activity.findViewById<ImageView>(R.id.loading_more)
-    private val loadingFullscreenBtn = activity.findViewById<ImageView>(R.id.loading_fullscreen)
-    private val loadingTitle = activity.findViewById<TextView>(R.id.loading_title)
-    private val loadingCover = activity.findViewById<ImageView>(R.id.loading_cover)
-    private val loadingAnimTV = activity.findViewById<ImageView>(R.id.loading_anim_tv)
-    private val loadingText = activity.findViewById<TextView>(R.id.loading_text)
+    private val loadingLayout = views.findViewById<FrameLayout>(R.id.player_loading)
+    private val loadingTopLauout = views.findViewById<LinearLayout>(R.id.loading_top)
+    private val loadingBottomLayout = views.findViewById<LinearLayout>(R.id.loading_bottom);
+    private val loadingCloseBtn = views.findViewById<ImageView>(R.id.loading_close)
+    private val loadingMoreBtn = views.findViewById<ImageView>(R.id.loading_more)
+    private val loadingFullscreenBtn = views.findViewById<ImageView>(R.id.loading_fullscreen)
+    private val loadingTitle = views.findViewById<TextView>(R.id.loading_title)
+    private val loadingCover = views.findViewById<ImageView>(R.id.loading_cover)
+    private val loadingAnimTV = views.findViewById<ImageView>(R.id.loading_anim_tv)
+    private val loadingText = views.findViewById<TextView>(R.id.loading_text)
 
     init {
         initLoadingBox()

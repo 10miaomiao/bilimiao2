@@ -50,6 +50,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerViews
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -65,6 +66,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehaviorDelegate
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
@@ -105,6 +107,15 @@ class MainActivity
         bindSingleton { biliGeetestUtil }
     }
 
+    private val playerViews = object : PlayerViews {
+        override val videoPlayer: DanmakuVideoPlayer
+            get() = ui.mVideoPlayerView
+
+        override fun <T : View> findViewById(id: Int): T {
+            return ui.mPlayerLayout.findViewById(id)!!
+        }
+    }
+
     private val store by lazy { Store(this, di) }
     private val startViewWrapper by lazy {
         StartViewWrapper(
@@ -116,7 +127,7 @@ class MainActivity
         )
     }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
-    private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate2(this, di) }
+    private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate2(this, playerViews, di) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val supportHelper by lazy { SupportHelper(this) }
     private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
@@ -219,6 +230,7 @@ class MainActivity
     private fun initRootView(savedInstanceState: Bundle?) {
         mainUi = MainUi(this, startViewWrapper)
         setContentView(ui.root)
+        setupPlayerViewInWrapper()
         basePlayerDelegate.onCreate(savedInstanceState)
         ui.root.showPlayer = basePlayerDelegate.isPlaying()
         ui.root.playerDelegate = basePlayerDelegate as PlayerDelegate2
@@ -231,10 +243,18 @@ class MainActivity
                 setWindowInsets(insets)
                 insets
             }
-            ui.root.onPlayerChanged = {
+            ui.root.onPlayerChanged = { show ->
+                startViewWrapper.setShowPlayer(show)
+                startViewWrapper.setOrientation(ui.root.orientation)
+                startViewWrapper.setSmallModePlayerMinHeight(ui.root.smallModePlayerMinHeight)
+                startViewWrapper.setSmallModePlayerCurrentHeight(ui.root.smallModePlayerCurrentHeight)
+                startViewWrapper.setPlayerSmallShowArea(ui.root.playerSmallShowArea, (ui.root.playerSmallShowArea / 16 * 9))
                 statusBarHelper.isLightStatusBar =
-                    !it || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
+                    !show || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
                 setWindowInsets(ui.root.rootWindowInsets)
+            }
+            ui.root.onFullScreenPlayerChanged = { fullScreen ->
+                startViewWrapper.setFullScreenPlayer(fullScreen)
             }
         } else {
             setWindowInsetsAndroidL()
@@ -330,6 +350,17 @@ class MainActivity
                 rootView.contentAnimationDuration = it[FlagContentAnimationDuration] ?: 0
             }
         }
+    }
+
+    private fun setupPlayerViewInWrapper() {
+        startViewWrapper.playerView = ui.mPlayerLayout
+
+        startViewWrapper.setShowPlayer(ui.root.showPlayer)
+        startViewWrapper.setOrientation(ui.root.orientation)
+        startViewWrapper.setFullScreenPlayer(ui.root.fullScreenPlayer)
+        startViewWrapper.setSmallModePlayerMinHeight(ui.root.smallModePlayerMinHeight)
+        startViewWrapper.setSmallModePlayerCurrentHeight(ui.root.smallModePlayerCurrentHeight)
+        startViewWrapper.setPlayerSmallShowArea(ui.root.playerSmallShowArea, (ui.root.playerSmallShowArea / 16 * 9))
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -556,13 +587,6 @@ class MainActivity
         windowStore.setBottomSheetContentInsets(
             0, config.bottomSheetTitleHeight, 0, 0
         )
-        val playerLP = ui.mPlayerLayout.layoutParams
-        if (playerLP is ScaffoldView.LayoutParams) {
-            val behavior = playerLP.behavior
-            if (behavior is PlayerBehavior) {
-                behavior.setWindowInsets(left, top, right, bottom)
-            }
-        }
         ui.mAppBar.setWindowInsets(left, top, right, bottom)
         val showPlayer = ui.root.showPlayer
         val fullScreenPlayer = ui.root.fullScreenPlayer
@@ -582,9 +606,6 @@ class MainActivity
             windowStore.setBottomAppBarHeight(config.appBarMenuHeight)
             ui.mContainerView.setPadding(0, 0, 0, 0)
             ui.mSubContainerView.setPadding(0, 0, 0, 0)
-            ui.mPlayerLayout.setPadding(
-                0, if (fullScreenPlayer) 0 else top, 0, 0
-            )
         } else {
             windowStore.setContentInsets(
                 0, top, right, bottom,
@@ -592,9 +613,6 @@ class MainActivity
             windowStore.setBottomAppBarHeight(0)
             ui.mContainerView.setPadding(left, 0, 0, 0)
             ui.mSubContainerView.setPadding(0, 0, 0, 0)
-            ui.mPlayerLayout.setPadding(
-                0, 0, 0, 0
-            )
         }
         basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
         ui.root.statusBarHeight = top
@@ -758,6 +776,8 @@ class MainActivity
         super.onConfigurationChanged(newConfig)
         basePlayerDelegate.onConfigurationChanged(newConfig)
         ui.root.orientation = newConfig.orientation
+        startViewWrapper.setOrientation(ui.root.orientation)
+        startViewWrapper.setPlayerSmallShowArea(ui.root.playerSmallShowArea, (ui.root.playerSmallShowArea / 16 * 9))
         statusBarHelper.isLightStatusBar =
             !ui.root.showPlayer || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {

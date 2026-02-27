@@ -31,7 +31,13 @@ class ScaffoldView @JvmOverloads constructor(
 
     var onPlayerChanged: ((show: Boolean) -> Unit)? = null
     var onDrawerStateChanged: ((state: Int) -> Unit)? = null
+    var onFullScreenPlayerChanged: ((fullScreen: Boolean) -> Unit)? = null
     var playerDelegate: PlayerDelegate2? = null
+
+    /**
+     * 全屏时是否隐藏content，默认为true
+     */
+    var hideContentOnFullScreen = true
 
     /**
      * 横盘时小窗大小
@@ -104,6 +110,7 @@ class ScaffoldView @JvmOverloads constructor(
                 field = value
                 updateLayout(false)
                 onPlayerChanged?.invoke(true)
+                onFullScreenPlayerChanged?.invoke(field)
             }
         }
 

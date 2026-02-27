@@ -84,27 +84,27 @@ import java.net.UnknownHostException
 
 class PlayerDelegate2(
     private var activity: AppCompatActivity,
+    val views: PlayerViews,
     override val di: DI,
 ) : BasePlayerDelegate, DIAware, ExoMediaSourceInterceptListener {
 
     val DEFAULT_REFERER = "https://www.bilibili.com/"
     val DEFAULT_USER_AGENT = "Bilibili Freedoooooom/MarkII"
 
-    val views by lazy { PlayerViews(activity) }
     val controller by lazy {
         PlayerController(activity, this, playerCoroutineScope, di)
     }
     val errorMessageBoxController by lazy {
-        ErrorMessageBoxController(activity, this, di)
+        ErrorMessageBoxController(views, this, di)
     }
     val areaLimitBoxController by lazy {
-        AreaLimitBoxController(activity, this, di)
+        AreaLimitBoxController(views, this, di)
     }
     val completionBoxController by lazy {
-        CompletionBoxController(activity, this, di)
+        CompletionBoxController(views, this, di)
     }
     val loadingBoxController by lazy {
-        LoadingBoxController(activity, this)
+        LoadingBoxController(views, this)
     }
     val scaffoldApp by lazy { activity.getScaffoldView() }
 
