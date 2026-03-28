@@ -69,4 +69,7 @@ object SettingConstants {
     // 倍速值集合
     val PLAYER_SPEED_SETS = setOf("0.5", "1.0", "2.0")
 
+    // 播放器定时关闭默认值(秒)，0表示关闭
+    const val PLAYER_AUTO_STOP_DURATION_DEFAULT = 0
+
 }

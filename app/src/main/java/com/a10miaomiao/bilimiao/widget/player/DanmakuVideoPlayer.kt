@@ -152,6 +152,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // 拓展按钮文本
     private val mExpandBtnTV: TextView by lazy { findViewById(R.id.expand_btn_text) }
 
+    // 定时关闭倒计时显示
+    private val mAutoStopTimerTV: TextView by lazy { findViewById(R.id.auto_stop_timer) }
+
     // 弹幕时间与播放器时间同步
     private val mDanmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
@@ -915,6 +918,25 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     fun serHoldUpButtonOnClickListener(l: OnClickListener) {
         mHoldUpBtn.setOnClickListener(l)
+    }
+
+    /**
+     * 更新定时关闭倒计时显示
+     * @param seconds 剩余秒数，0或负数表示关闭
+     */
+    fun updateAutoStopTimer(seconds: Int) {
+        if (seconds > 0) {
+            val minute = seconds / 60
+            val second = seconds % 60
+            mAutoStopTimerTV.text = if (second == 0) {
+                "${minute}'"
+            } else {
+                "${minute}'${second}\""
+            }
+            mAutoStopTimerTV.visibility = View.VISIBLE
+        } else {
+            mAutoStopTimerTV.visibility = View.GONE
+        }
     }
 
     private var mDialogOffsetText: TextView? = null

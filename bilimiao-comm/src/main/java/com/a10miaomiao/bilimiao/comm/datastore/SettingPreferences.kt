@@ -152,6 +152,8 @@ object SettingPreferences {
     val PlayerHoldShowArea = intPreferencesKey("player_hold_show_area")
     // 小屏是否可拖动
     val PlayerSmallDraggable = booleanPreferencesKey("player_small_draggable")
+    // 播放器定时关闭时间(秒)，0表示关闭
+    val PlayerAutoStopDuration = intPreferencesKey("player_auto_stop_duration")
 
     /**
      * Danmaku
