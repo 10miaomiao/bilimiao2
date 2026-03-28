@@ -713,6 +713,8 @@ class PlayerController(
     }
 
     private var lastRecordedPosition = 0L
+    private var isTimerInitialized = false
+
     override fun onProgress(
         progress: Long,
         secProgress: Long,
@@ -721,20 +723,34 @@ class PlayerController(
     ) {
         delegate.historyReport(currentPosition)
 
-        //定时关闭
+        //定时关闭 - 只在播放状态时减少计时
         val autoStopDuration = playerStore.autoStopDuration
-        if (autoStopDuration != 0) {
+        if (autoStopDuration > 0 && delegate.isPlaying()) {
+            // 第一次调用时，初始化lastRecordedPosition
+            if (!isTimerInitialized) {
+                lastRecordedPosition = currentPosition
+                isTimerInitialized = true
+                return
+            }
+
             val passedTime = (currentPosition - lastRecordedPosition) / 1000
             if (passedTime in 0L..5L) {
                 var remainTimeNew = autoStopDuration - passedTime.toInt()
                 if (remainTimeNew <= 0) {
-                    //时间被消耗完，暂停。
+                    // 时间被消耗完，暂停
                     remainTimeNew = 0
                     delegate.views.videoPlayer.onVideoPause()
+                    isTimerInitialized = false
                 }
                 playerStore.setAutoStopDuration(remainTimeNew)
+                // 同步倒计时到UI
+                delegate.views.videoPlayer.updateAutoStopTimer(remainTimeNew)
             }
             lastRecordedPosition = currentPosition
+        } else if (autoStopDuration == 0) {
+            // 计时器被重置，隐藏UI
+            delegate.views.videoPlayer.updateAutoStopTimer(0)
+            isTimerInitialized = false
         }
     }
 }
