@@ -249,6 +249,7 @@ class MainActivity
                 startViewWrapper.setSmallModePlayerMinHeight(ui.root.smallModePlayerMinHeight)
                 startViewWrapper.setSmallModePlayerCurrentHeight(ui.root.smallModePlayerCurrentHeight)
                 startViewWrapper.setPlayerSmallShowArea(ui.root.playerSmallShowArea, (ui.root.playerSmallShowArea / 16 * 9))
+                startViewWrapper.setPlayerVideoRatio(ui.root.playerVideoRatio)
                 statusBarHelper.isLightStatusBar =
                     !show || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
                 setWindowInsets(ui.root.rootWindowInsets)
@@ -361,6 +362,7 @@ class MainActivity
         startViewWrapper.setSmallModePlayerMinHeight(ui.root.smallModePlayerMinHeight)
         startViewWrapper.setSmallModePlayerCurrentHeight(ui.root.smallModePlayerCurrentHeight)
         startViewWrapper.setPlayerSmallShowArea(ui.root.playerSmallShowArea, (ui.root.playerSmallShowArea / 16 * 9))
+        startViewWrapper.setPlayerVideoRatio(ui.root.playerVideoRatio)
     }
 
     override fun onNewIntent(intent: Intent) {
