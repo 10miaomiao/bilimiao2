@@ -7,7 +7,9 @@ import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -28,7 +30,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 @Composable
 fun ComposeScaffold(
@@ -42,15 +43,19 @@ fun ComposeScaffold(
     val fullScreenPlayer = startViewWrapper.fullScreenPlayer
     val orientation = startViewWrapper.orientation
     val smallModePlayerCurrentHeight = startViewWrapper.smallModePlayerCurrentHeight
+    val smallModePlayerMinHeight = startViewWrapper.smallModePlayerMinHeight
     val playerSmallShowAreaWidth = startViewWrapper.playerSmallShowAreaWidth
     val playerSmallShowAreaHeight = startViewWrapper.playerSmallShowAreaHeight
+    val playerVideoRatio = startViewWrapper.playerVideoRatio
 
     var playerWidth by remember { mutableStateOf(0.dp) }
     var playerHeight by remember { mutableStateOf(0.dp) }
 
-    LaunchedEffect(showPlayer, fullScreenPlayer, orientation, smallModePlayerCurrentHeight, playerSmallShowAreaWidth, playerSmallShowAreaHeight) {
+    LaunchedEffect(showPlayer, fullScreenPlayer, orientation, smallModePlayerCurrentHeight, smallModePlayerMinHeight, playerSmallShowAreaWidth, playerSmallShowAreaHeight, playerVideoRatio) {
         val activity = context as Activity
         val densityValue = activity.resources.displayMetrics.density
+        val screenWidth = activity.resources.displayMetrics.widthPixels
+        val screenHeight = activity.resources.displayMetrics.heightPixels
 
         when {
             fullScreenPlayer -> {
@@ -58,12 +63,19 @@ fun ComposeScaffold(
                 playerHeight = Dp.Infinity
             }
             showPlayer && orientation == 1 -> {
-                playerWidth = Dp.Infinity
-                playerHeight = if (smallModePlayerCurrentHeight > 0) {
-                    (smallModePlayerCurrentHeight / densityValue).dp
+                // 竖屏模式：根据视频比例计算播放器尺寸，限制最大高度为半屏
+                // smallModePlayerMinHeight 和 smallModePlayerCurrentHeight 是像素值
+                val maxHeightByRatio = (screenWidth / playerVideoRatio).toInt()
+                val maxHeight = minOf(maxHeightByRatio, screenHeight / 2)
+                val minHeight = smallModePlayerMinHeight.toFloat().coerceAtLeast(200f * densityValue)
+                val targetHeight = if (smallModePlayerCurrentHeight > 0) {
+                    minOf(smallModePlayerCurrentHeight.toFloat(), maxHeight.toFloat())
                 } else {
-                    200.dp
+                    minHeight
                 }
+                // 竖屏时宽度填满屏幕
+                playerWidth = (screenWidth / densityValue).dp
+                playerHeight = (targetHeight / densityValue).dp
             }
             showPlayer && orientation == 2 -> {
                 playerWidth = if (playerSmallShowAreaWidth > 0) {
@@ -85,7 +97,20 @@ fun ComposeScaffold(
     }
 
     Box(modifier = modifier) {
-        content()
+        Column {
+            // 内容区域，竖屏小窗播放时添加 top padding 避免被遮挡
+            Box(
+                modifier = Modifier.then(
+                    if (showPlayer && orientation == 1 && playerHeight > 0.dp) {
+                        Modifier.padding(top = playerHeight)
+                    } else {
+                        Modifier
+                    }
+                )
+            ) {
+                content()
+            }
+        }
 
         if (showPlayer && playerWidth > 0.dp && playerHeight > 0.dp) {
             PlayerLayer(

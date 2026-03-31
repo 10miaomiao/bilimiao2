@@ -69,6 +69,9 @@ class StartViewWrapper(
     private val _playerSmallShowAreaHeight = mutableStateOf(0)
     val playerSmallShowAreaHeight get() = _playerSmallShowAreaHeight.value
 
+    private val _playerVideoRatio = mutableStateOf(16f / 9f)
+    val playerVideoRatio get() = _playerVideoRatio.value
+
     var shouldCreateCompositionOnAttachedToWindow = true
         private set
 
@@ -133,6 +136,10 @@ class StartViewWrapper(
     fun setPlayerSmallShowArea(width: Int, height: Int) {
         _playerSmallShowAreaWidth.value = width
         _playerSmallShowAreaHeight.value = height
+    }
+
+    fun setPlayerVideoRatio(ratio: Float) {
+        _playerVideoRatio.value = ratio
     }
 
     private fun getWindowHeight(): Int {
