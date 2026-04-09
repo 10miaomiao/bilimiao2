@@ -42,9 +42,9 @@ class MainUi(
         backgroundColor = Color.TRANSPARENT
     }
 
-    val mAppBar = view<AppBarView>{
-        setOnClickListener {  }
-    }
+//    val mAppBar = view<AppBarView>{
+//        setOnClickListener {  }
+//    }
 
     val mVideoPlayerView = keepPlayerView?.apply {
         try {
@@ -101,7 +101,7 @@ class MainUi(
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
         val enableSubContent = prefs.getBoolean(SettingConstants.FLAGS_SUB_CONTENT_SHOW, false)
-        mAppBar.enableSubContent = enableSubContent
+//        mAppBar.enableSubContent = enableSubContent
         if (enableSubContent) {
             addView(mSubContainerView, lParams {
                 behavior = ContentBehavior(ctx, null).let {
@@ -113,11 +113,11 @@ class MainUi(
             })
         }
 
-        addView(mAppBar, lParams {
-            behavior = AppBarBehavior(ctx, null)
-            width = matchParent
-            height = matchParent
-        })
+//        addView(mAppBar, lParams {
+//            behavior = AppBarBehavior(ctx, null)
+//            width = matchParent
+//            height = matchParent
+//        })
 
         addView(mMaskView, lParams {
             behavior = MaskBehavior(ctx, null)

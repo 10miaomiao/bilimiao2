@@ -38,6 +38,10 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
+import cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData
+import cn.a10miaomiao.bilimiao.compose.components.appbar.rememberAppBarState
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -123,6 +127,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         launchUrl = ::launchWebBrowser,
     )
     private val pageConfigState = PageConfigState()
+    private val appBarState = AppBarState()
     private val emitter = SharedFlowEmitter()
     private val uriHandler = object : UriHandler {
         override fun openUri(uri: String) {
@@ -159,6 +164,10 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
 
     lateinit var composeNav: NavHostController
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -168,6 +177,15 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
         val bottomSheetView = FrameLayout(context) // 临时打补丁给windowStore使用，后期会移除windowStore
         bottomSheetView.tag = "bottomSheet"
         return ComposeView(context).apply {
+            appBarState.setOnBackClickListener {
+                onBackPressed()
+            }
+            appBarState.setOnMenuClickListener {
+            }
+            appBarState.setOnMenuItemClickListener {
+                pageConfigState.onMenuItemClick(this@apply, it.toPropInfo())
+            }
+
             setContent {
                 val connection = rememberNestedScrollInteropConnection(container ?: LocalView.current)
                 composeNav = rememberNavController()
@@ -194,7 +212,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                     MyImagePreviewer(state, innerPadding)
                                 }
                             ) {
-                                ComposeScaffold(startViewWrapper = startViewWrapper) {
+                                ComposeScaffold(startViewWrapper = startViewWrapper, appBarState = appBarState) {
                                     Box(
                                         modifier = Modifier
                                             .nestedScroll(connection)
@@ -229,6 +247,10 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
             pageConfigState.collectConfig {
                 _pageConfig = it
                 pageConfig.notifyConfigChanged()
+                // 更新 AppBarState
+                appBarState.title = it.title
+                appBarState.menus = it.menu?.items?.map { item -> MenuItemData.fromPropInfo(item, requireContext()) } ?: emptyList()
+                appBarState.canBack =  it.menu?.checkable != true
             }
         }
     }
