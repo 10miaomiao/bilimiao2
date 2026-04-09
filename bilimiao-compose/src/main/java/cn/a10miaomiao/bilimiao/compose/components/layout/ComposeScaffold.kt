@@ -1,17 +1,26 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
 import android.app.Activity
-import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -28,6 +36,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarConfig
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
+import cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData
+import cn.a10miaomiao.bilimiao.compose.components.appbar.rememberAppBarState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,6 +50,7 @@ import kotlinx.coroutines.launch
 fun ComposeScaffold(
     startViewWrapper: StartViewWrapper,
     modifier: Modifier = Modifier,
+    appBarState: AppBarState? = null,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -63,8 +79,6 @@ fun ComposeScaffold(
                 playerHeight = Dp.Infinity
             }
             showPlayer && orientation == 1 -> {
-                // 竖屏模式：根据视频比例计算播放器尺寸，限制最大高度为半屏
-                // smallModePlayerMinHeight 和 smallModePlayerCurrentHeight 是像素值
                 val maxHeightByRatio = (screenWidth / playerVideoRatio).toInt()
                 val maxHeight = minOf(maxHeightByRatio, screenHeight / 2)
                 val minHeight = smallModePlayerMinHeight.toFloat().coerceAtLeast(200f * densityValue)
@@ -73,7 +87,6 @@ fun ComposeScaffold(
                 } else {
                     minHeight
                 }
-                // 竖屏时宽度填满屏幕
                 playerWidth = (screenWidth / densityValue).dp
                 playerHeight = (targetHeight / densityValue).dp
             }
@@ -96,34 +109,110 @@ fun ComposeScaffold(
         }
     }
 
-    Box(modifier = modifier) {
-        Column {
-            // 内容区域，竖屏小窗播放时添加 top padding 避免被遮挡
-            Box(
-                modifier = Modifier.then(
-                    if (showPlayer && orientation == 1 && playerHeight > 0.dp) {
-                        Modifier.padding(top = playerHeight)
-                    } else {
-                        Modifier
+    Box(modifier = modifier.fillMaxSize()) {
+        // 根据是否有 AppBarState 决定布局
+        if (appBarState != null && appBarState.visible) {
+            when (appBarState.orientation) {
+                AppBarOrientation.Vertical -> {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // AppBar
+                        AppBar(
+                            title = appBarState.title,
+                            canBack = appBarState.canBack,
+                            showPointer = appBarState.showPointer,
+                            pointerOrientation = appBarState.pointerOrientation,
+                            showExchange = appBarState.showExchange,
+                            menus = appBarState.menus,
+                            isNavigationMenu = appBarState.isNavigationMenu,
+                            checkedKey = appBarState.checkedKey,
+                            themeColor = appBarState.themeColor,
+                            backgroundColor = appBarState.backgroundColor,
+                            onBackClick = { appBarState._onBackClick?.invoke() },
+                            onMenuClick = { appBarState._onMenuClick?.invoke() },
+                            onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
+                            onPointerClick = { appBarState._onPointerClick?.invoke() },
+                            onExchangeClick = { appBarState._onExchangeClick?.invoke() },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+
+                        // 内容区域
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(top = if (showPlayer && orientation == 1) playerHeight else 0.dp)
+                        ) {
+                            content()
+                        }
                     }
-                )
-            ) {
-                content()
+                }
+
+                AppBarOrientation.Horizontal -> {
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        // 横屏 AppBar
+                        AppBarHorizontal(
+                            title = appBarState.title,
+                            showBack = appBarState.canBack,
+                            showPointer = appBarState.enableSubContent && appBarState.showPointer,
+                            pointerOrientation = appBarState.pointerOrientation,
+                            showExchange = appBarState.enableSubContent && appBarState.showExchange,
+                            menus = appBarState.menus,
+                            isNavigationMenu = appBarState.isNavigationMenu,
+                            checkedKey = appBarState.checkedKey,
+                            themeColor = appBarState.themeColor,
+                            backgroundColor = appBarState.backgroundColor,
+                            onBackClick = { appBarState._onBackClick?.invoke() },
+                            onMenuClick = { appBarState._onMenuClick?.invoke() },
+                            onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
+                            onPointerClick = { appBarState._onPointerClick?.invoke() },
+                            onExchangeClick = { appBarState._onExchangeClick?.invoke() },
+                            modifier = Modifier.fillMaxHeight(),
+                        )
+
+                        // 右侧分隔线
+                        VerticalDivider(
+                            modifier = Modifier.fillMaxHeight(),
+                            thickness = AppBarConfig.DividerHeight,
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                        )
+
+                        // 内容区域
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        ) {
+                            content()
+                        }
+                    }
+                }
+            }
+        } else {
+            // 无 AppBar 时的原始布局
+            Column {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = if (showPlayer && orientation == 1) playerHeight else 0.dp)
+                ) {
+                    content()
+                }
             }
         }
+    }
 
-        if (showPlayer && playerWidth > 0.dp && playerHeight > 0.dp) {
-            PlayerLayer(
-                startViewWrapper = startViewWrapper,
-                width = playerWidth,
-                height = playerHeight,
-            )
-        }
+    // 播放器层
+    if (showPlayer && playerWidth > 0.dp && playerHeight > 0.dp) {
+        PlayerLayer(
+            startViewWrapper = startViewWrapper,
+            width = playerWidth,
+            height = playerHeight,
+        )
     }
 }
 
 @Composable
-private fun PlayerLayer(
+internal fun PlayerLayer(
     startViewWrapper: StartViewWrapper,
     width: Dp,
     height: Dp,
@@ -139,7 +228,7 @@ private fun PlayerLayer(
     if (playerView == null) {
         return
     }
-    
+
     var offsetX by remember { mutableStateOf(0.dp) }
     var offsetY by remember { mutableStateOf(0.dp) }
     var currentWidth by remember { mutableStateOf(width) }
@@ -159,7 +248,7 @@ private fun PlayerLayer(
     }
 
     val edgeThreshold = 48.dp
-    
+
     val modifier = if (orientation == 2) {
         Modifier
             .offset(x = offsetX, y = offsetY)
@@ -173,7 +262,7 @@ private fun PlayerLayer(
                         val isBottom = offset.y > boxSize.height - edgeThreshold.toPx()
                         val isLeft = offset.x < edgeThreshold.toPx()
                         val isRight = offset.x > boxSize.width - edgeThreshold.toPx()
-                        
+
                         dragMode = when {
                             isBottom && isLeft -> "resize_left"
                             isBottom && isRight -> "resize_right"
@@ -234,7 +323,7 @@ private fun PlayerLayer(
                                 var oy = offsetY.value
                                 val maxX = screenWidth.value - currentWidth.value
                                 val maxY = screenHeight.value - currentHeight.value
-                                
+
                                 while (vx > 0.5f || vy > 0.5f) {
                                     vx *= friction
                                     vy *= friction
@@ -242,15 +331,15 @@ private fun PlayerLayer(
                                     val dirY = if (oy < 0) -1 else if (oy > maxY) -1 else 1
                                     ox += vx * dirX
                                     oy += vy * dirY
-                                    
+
                                     ox = ox.coerceIn(0f, maxX)
                                     oy = oy.coerceIn(0f, maxY)
-                                    
+
                                     offsetX = ox.dp
                                     offsetY = oy.dp
                                     delay(16)
                                 }
-                                
+
                                 offsetX = ox.coerceIn(0f, maxX).dp
                                 offsetY = oy.coerceIn(0f, maxY).dp
                                 velocityX = 0f

@@ -209,7 +209,7 @@ class MainActivity
                     config.blockBackgroundColor
                 }
                 bgColor = (bgColor and 0x00FFFFFF) or (0xF8000000).toInt()
-                ui.mAppBar.updateTheme(themeColor, bgColor)
+//                ui.mAppBar.updateTheme(themeColor, bgColor)
                 themeDelegate.setThemeColor(themeColor)
             }
         }
@@ -284,34 +284,34 @@ class MainActivity
     }
 
     private fun initAppBar() {
-        ui.mAppBar.onBackClick = this.onBackClick
-        ui.mAppBar.onOpenMenuClick = this.onOpenMenuClick
-        ui.mAppBar.onBackLongClick = this.onBackLongClick
-        ui.mAppBar.onMenuItemClick = {
-            if (it.prop.action == MenuActions.search) {
-                openSearchDialog()
-            } else {
-                val fragment = currentNav
-                if (fragment is MyPage) {
-                    val childMenu = it.prop.childMenu
-                    if (childMenu != null) {
-                        val myPopupMenu = MyPopupMenu(
-                            activity = this,
-                            myPage = fragment,
-                            myPageMenu = childMenu,
-                            anchorView = it,
-                        )
-                        myPopupMenu.show()
-                    } else {
-                        fragment.onMenuItemClick(it, it.prop)
-                    }
-                }
-            }
-        }
-        ui.mAppBar.onPointerClick = this.onPointerClick
-        ui.mAppBar.onPointerLongClick = this.onPointerLongClick
-        ui.mAppBar.onExchangeClick = this.onExchangeClick
-        ui.mAppBar.onExchangeLongClick = this.onExchangeLongClick
+//        ui.mAppBar.onBackClick = this.onBackClick
+//        ui.mAppBar.onOpenMenuClick = this.onOpenMenuClick
+//        ui.mAppBar.onBackLongClick = this.onBackLongClick
+//        ui.mAppBar.onMenuItemClick = {
+//            if (it.prop.action == MenuActions.search) {
+//                openSearchDialog()
+//            } else {
+//                val fragment = currentNav
+//                if (fragment is MyPage) {
+//                    val childMenu = it.prop.childMenu
+//                    if (childMenu != null) {
+//                        val myPopupMenu = MyPopupMenu(
+//                            activity = this,
+//                            myPage = fragment,
+//                            myPageMenu = childMenu,
+//                            anchorView = it,
+//                        )
+//                        myPopupMenu.show()
+//                    } else {
+//                        fragment.onMenuItemClick(it, it.prop)
+//                    }
+//                }
+//            }
+//        }
+//        ui.mAppBar.onPointerClick = this.onPointerClick
+//        ui.mAppBar.onPointerLongClick = this.onPointerLongClick
+//        ui.mAppBar.onExchangeClick = this.onExchangeClick
+//        ui.mAppBar.onExchangeLongClick = this.onExchangeLongClick
     }
 
     fun initViewFocusable() {
@@ -387,8 +387,8 @@ class MainActivity
     fun notifyFocusChanged() {
 //        ui.mAppBar.canBack =
 //            currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
-        ui.mAppBar.showPointer = ui.root.subContentShown
-        ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
+//        ui.mAppBar.showPointer = ui.root.subContentShown
+//        ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
         notifyConfigChanged()
     }
     fun notifyConfigChanged(){
@@ -399,13 +399,13 @@ class MainActivity
     fun setMyPageConfig(config: MyPageConfigInfo) {
         if (config.title.isNotBlank()) {
             pageConfig = config
-            ui.mAppBar.canBack =  config.menu?.checkable != true
-            ui.mAppBar.setProp {
-                title = config.title
-                menus = config.getMenuItems()
-                isNavigationMenu = config.menu?.checkable == true
-                navigationKey = config.menu?.checkedKey ?: 0
-            }
+//            ui.mAppBar.canBack =  config.menu?.checkable != true
+//            ui.mAppBar.setProp {
+//                title = config.title
+//                menus = config.getMenuItems()
+//                isNavigationMenu = config.menu?.checkable == true
+//                navigationKey = config.menu?.checkedKey ?: 0
+//            }
             ui.root.slideUpBottomAppBar()
 
             val searchConfig = config.search
@@ -589,7 +589,7 @@ class MainActivity
         windowStore.setBottomSheetContentInsets(
             0, config.bottomSheetTitleHeight, 0, 0
         )
-        ui.mAppBar.setWindowInsets(left, top, right, bottom)
+//        ui.mAppBar.setWindowInsets(left, top, right, bottom)
         val showPlayer = ui.root.showPlayer
         val fullScreenPlayer = ui.root.fullScreenPlayer
         if (ui.root.orientation == ScaffoldView.VERTICAL) {
