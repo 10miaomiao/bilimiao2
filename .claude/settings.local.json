@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | head -50)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :app:compileDebugKotlin 2>&1 | tail -30)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :app:compileFullDebugKotlin 2>&1 | tail -30)",
+      "Bash(./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | head -100)",
+      "Bash(./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | grep -E \"^e:|error:\" | head -50)",
+      "Bash(./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | grep -E \"^e:|error:\" | head -30)",
+      "Bash(./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | grep -E \"^e:|error:|BUILD\" | head -30)",
+      "Bash(./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | grep -E \"^e:|error:|BUILD\" | head -20)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | head -100)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | head -60)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -60)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :app:compileDebugKotlin 2>&1 | tail -80)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :app:compileFossDebugKotlin 2>&1 | tail -60)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :app:compileFullDebugKotlin 2>&1 | tail -40)",
+      "Bash(find \"D:\\\\MyCode\\\\AndroidStudioProjects\\\\bilimiao2\\\\bilimiao-compose\\\\src\\\\main\\\\java\\\\cn\\\\a10miaomiao\\\\bilimiao\\\\compose\\\\components\\\\drawer\" -type f -name \"*.kt\" 2>/dev/null | head -10)",
+      "Bash(cd \"D:\\\\MyCode\\\\AndroidStudioProjects\\\\bilimiao2\" && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | head -100)",
+      "Bash(cd \"D:\\\\MyCode\\\\AndroidStudioProjects\\\\bilimiao2\" && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -50)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -20)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -30)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -15)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -10)",
+      "WebFetch(domain:github.com)",
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -40)"
+    ]
+  }
+}

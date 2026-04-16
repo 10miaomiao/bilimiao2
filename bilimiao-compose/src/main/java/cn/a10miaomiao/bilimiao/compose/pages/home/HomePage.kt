@@ -62,6 +62,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
+import cn.a10miaomiao.bilimiao.compose.components.pager.DrawerAwareHorizontalPager
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomePopularContent
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeRecommendContent
@@ -450,11 +451,14 @@ private fun HomePageContent(
             }
         }
         val saveableStateHolder = rememberSaveableStateHolder()
-        HorizontalPager(
+        DrawerAwareHorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            state = pagerState,
+            pagerState = pagerState,
+            onEdgeSwipeOpen = {
+
+            }
         ) { index ->
             saveableStateHolder.SaveableStateProvider(index) {
                 viewModel.tabs[index].PageContent(viewModel.pageState)

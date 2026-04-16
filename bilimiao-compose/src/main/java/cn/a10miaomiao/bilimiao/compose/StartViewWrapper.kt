@@ -26,6 +26,13 @@ class StartViewWrapper(
 
     private val density = activity.resources.displayMetrics.density
 
+    // 侧滑菜单状态
+    private val _drawerState = mutableStateOf(DRAWER_STATE_COLLAPSED)
+    val drawerState get() = _drawerState.value
+
+    private val _drawerOpen = mutableStateOf(false)
+    val drawerOpen get() = _drawerOpen.value
+
     private val _touchStart = mutableFloatStateOf(0f)
     val touchStart get() = _touchStart.floatValue
     private val _showSearchDialog = mutableStateOf(false)
@@ -144,6 +151,32 @@ class StartViewWrapper(
 
     private fun getWindowHeight(): Int {
         return activity.window.decorView.height
+    }
+
+    fun openDrawer() {
+        _drawerOpen.value = true
+        _drawerState.value = DRAWER_STATE_EXPANDED
+    }
+
+    fun closeDrawer() {
+        _drawerOpen.value = false
+        _drawerState.value = DRAWER_STATE_COLLAPSED
+    }
+
+    fun setDrawerState(state: Int) {
+        _drawerState.value = state
+        _drawerOpen.value = state == DRAWER_STATE_EXPANDED
+    }
+
+    fun isDrawerOpen(): Boolean {
+        return _drawerOpen.value
+    }
+
+    companion object {
+        const val DRAWER_STATE_DRAGGING = 1
+        const val DRAWER_STATE_SETTLING = 2
+        const val DRAWER_STATE_EXPANDED = 3
+        const val DRAWER_STATE_COLLAPSED = 4
     }
 
 }

@@ -132,8 +132,8 @@ class ScaffoldView @JvmOverloads constructor(
 
     var fullScreenDraggable = true //小屏时全屏可拖拽
 
-    var appBarHeight = config.appBarHeight
-    var appBarWidth = config.appBarMenuWidth
+    var appBarHeight = 0
+    var appBarWidth = 0
 
     val contentMinWidth = dip(300) //内容区域每列最小宽度
     val contentMinHeight = dip(200) // 内容区域每列最小高度

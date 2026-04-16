@@ -610,10 +610,10 @@ class MainActivity
             ui.mSubContainerView.setPadding(0, 0, 0, 0)
         } else {
             windowStore.setContentInsets(
-                0, top, right, bottom,
+                left, top, right, bottom,
             )
             windowStore.setBottomAppBarHeight(0)
-            ui.mContainerView.setPadding(left, 0, 0, 0)
+            ui.mContainerView.setPadding(0, 0, 0, 0)
             ui.mSubContainerView.setPadding(0, 0, 0, 0)
         }
         basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
