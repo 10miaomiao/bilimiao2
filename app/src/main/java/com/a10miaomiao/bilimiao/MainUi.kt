@@ -119,17 +119,17 @@ class MainUi(
 //            height = matchParent
 //        })
 
-        addView(mMaskView, lParams {
-            behavior = MaskBehavior(ctx, null)
-            height = matchParent
-            width = matchParent
-        })
-
-        addView(mLeftContainerView, lParams {
-            height = matchParent
-            width = matchParent
-            behavior = DrawerBehavior(ctx, null)
-        })
+//        addView(mMaskView, lParams {
+//            behavior = MaskBehavior(ctx, null)
+//            height = matchParent
+//            width = matchParent
+//        })
+//
+//        addView(mLeftContainerView, lParams {
+//            height = matchParent
+//            width = matchParent
+//            behavior = DrawerBehavior(ctx, null)
+//        })
     }
 
 }

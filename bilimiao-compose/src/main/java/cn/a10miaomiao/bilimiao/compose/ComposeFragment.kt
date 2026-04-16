@@ -38,6 +38,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import cn.a10miaomiao.bilimiao.compose.BilimiaoTheme
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData
@@ -181,6 +182,7 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                 onBackPressed()
             }
             appBarState.setOnMenuClickListener {
+                startViewWrapper.openDrawer()
             }
             appBarState.setOnMenuItemClickListener {
                 pageConfigState.onMenuItemClick(this@apply, it.toPropInfo())
@@ -212,7 +214,26 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                     MyImagePreviewer(state, innerPadding)
                                 }
                             ) {
-                                ComposeScaffold(startViewWrapper = startViewWrapper, appBarState = appBarState) {
+                                ComposeScaffold(
+                                    startViewWrapper = startViewWrapper,
+                                    appBarState = appBarState,
+                                    drawerContent = {
+                                        StartViewContent(
+                                            startTopHeight = startViewWrapper.touchStart.dp,
+                                            navigateTo = startViewWrapper.navigateTo,
+                                            navigateUrl = startViewWrapper.navigateUrl,
+                                            openSearch = {
+                                                startViewWrapper.openSearchDialog("", 0, true)
+                                            },
+                                            openScanner = startViewWrapper.openScanner,
+                                            isSearchVisible = startViewWrapper.showSearchDialog,
+                                            searchInitKeyword = startViewWrapper.searchInitKeyword,
+                                            searchInitMode = startViewWrapper.searchInitMode,
+                                            pageSearchMethod = startViewWrapper.pageSearchMethod,
+                                            onCloseSearch = startViewWrapper::closeSearchDialog,
+                                        )
+                                    }
+                                ) {
                                     Box(
                                         modifier = Modifier
                                             .nestedScroll(connection)
@@ -220,7 +241,6 @@ class ComposeFragment : Fragment(), MyPage, DIAware, OnBackPressedDispatcherOwne
                                     ) {
                                         MyNavHost(composeNav, HomePage)
                                     }
-                                    MyStartView(startViewWrapper = startViewWrapper)
                                 }
                                 val bottomSheetPage = bottomSheetState.page.collectAsState().value
                                 if (bottomSheetPage != null) {
