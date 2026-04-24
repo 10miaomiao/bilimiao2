@@ -67,7 +67,7 @@ import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.google.common.util.concurrent.MoreExecutors
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
@@ -85,6 +85,7 @@ import java.net.UnknownHostException
 class PlayerDelegate2(
     private var activity: AppCompatActivity,
     val views: PlayerViews,
+    val scaffoldApp: PlayerHostState,
     override val di: DI,
 ) : BasePlayerDelegate, DIAware, ExoMediaSourceInterceptListener {
 
@@ -106,7 +107,6 @@ class PlayerDelegate2(
     val loadingBoxController by lazy {
         LoadingBoxController(views, this)
     }
-    val scaffoldApp by lazy { activity.getScaffoldView() }
 
     var picInPicHelper: PicInPicHelper? = null
         private set

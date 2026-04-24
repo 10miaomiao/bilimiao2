@@ -65,10 +65,6 @@ class AppBarState {
     var orientation by mutableStateOf(AppBarOrientation.Vertical)
         internal set
 
-    // 是否启用副内容（横屏时显示指针和交换按钮）
-    var enableSubContent by mutableStateOf(false)
-        internal set
-
     // 事件回调
     internal var _onBackClick: (() -> Unit)? = null
     internal var _onMenuClick: (() -> Unit)? = null
@@ -127,7 +123,6 @@ class AppBarState {
         themeColor = Color.Unspecified
         backgroundColor = Color.Unspecified
         orientation = AppBarOrientation.Vertical
-        enableSubContent = false
         menuExpanded = false
     }
 }
@@ -192,10 +187,6 @@ class AppBarStateScope(
 
     fun orientation(orientation: AppBarOrientation) {
         state.orientation = orientation
-    }
-
-    fun enableSubContent(enable: Boolean) {
-        state.enableSubContent = enable
     }
 
     fun onBackClick(listener: () -> Unit) {

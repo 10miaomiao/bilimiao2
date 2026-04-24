@@ -27,11 +27,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.BiliJsBridge
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContainerView
@@ -97,7 +97,7 @@ private class H5LoginPageViewModel(
             |disable_rcmd/0
         """.trimMargin().replace("\n", "")
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val userStore by instance<UserStore>()
     private val pageNavigation by instance<PageNavigation>()
     private val messageDialog by instance<MessageDialogState>()
@@ -147,7 +147,7 @@ private class H5LoginPageViewModel(
         }
         val userAgent = "$defaultUserAgentString $userAgent"
         view.settings.userAgentString = userAgent
-        val biliJsBridge = BiliJsBridge(fragment, pageNavigation, view)
+        val biliJsBridge = BiliJsBridge(hostBridge, pageNavigation, view)
         view.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
     }
 

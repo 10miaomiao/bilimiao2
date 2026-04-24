@@ -18,7 +18,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
@@ -58,7 +57,7 @@ internal class DownloadListPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val context by instance<Context>()
     private val pageNavigation by instance<PageNavigation>()
 
     var downloadListVersion = 0
@@ -71,7 +70,7 @@ internal class DownloadListPageViewModel(
     }
 
     private fun loadDownloadList() = viewModelScope.launch {
-        val service = DownloadService.getService(fragment.requireContext())
+        val service = DownloadService.getService(context)
         downloadPath = service.getDownloadPath()
         _loadDownloadList(service)
         launch {
@@ -193,11 +192,10 @@ internal class DownloadListPageViewModel(
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = uri
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        fragment.requireContext().startActivity(intent)
+        context.startActivity(intent)
     }
 
     fun copyDownloadPathToClipboard() {
-        val context = fragment.requireContext()
         val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", downloadPath))
         // 安卓13(33)以上操作剪切板会自动提示，无需手动toast

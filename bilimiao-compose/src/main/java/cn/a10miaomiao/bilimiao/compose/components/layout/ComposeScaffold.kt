@@ -184,9 +184,9 @@ fun ComposeScaffold(
                                 AppBarHorizontal(
                                     title = appBarState.title,
                                     showBack = appBarState.canBack,
-                                    showPointer = appBarState.enableSubContent && appBarState.showPointer,
+                                    showPointer = appBarState.showPointer,
                                     pointerOrientation = appBarState.pointerOrientation,
-                                    showExchange = appBarState.enableSubContent && appBarState.showExchange,
+                                    showExchange = appBarState.showExchange,
                                     menus = appBarState.menus,
                                     isNavigationMenu = appBarState.isNavigationMenu,
                                     checkedKey = appBarState.checkedKey,

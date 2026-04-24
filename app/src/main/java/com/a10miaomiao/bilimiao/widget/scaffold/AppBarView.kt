@@ -37,7 +37,7 @@ class AppBarView @JvmOverloads constructor(
     var onExchangeClick: View.OnClickListener? = null
     var onExchangeLongClick: View.OnLongClickListener? = null
 
-    var orientation = ScaffoldView.VERTICAL
+    var orientation = PlayerHostState.VERTICAL
         set(value) {
             if (field != value) {
                 field = value
@@ -116,7 +116,7 @@ class AppBarView @JvmOverloads constructor(
     }
 
     fun createUi (): AppBarUi {
-        return if (orientation == ScaffoldView.HORIZONTAL) {
+        return if (orientation == PlayerHostState.HORIZONTAL) {
             AppBarHorizontalUi(
                 context,
                 this,
@@ -157,7 +157,7 @@ class AppBarView @JvmOverloads constructor(
     }
 
     fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
-        if (orientation == ScaffoldView.VERTICAL) {
+        if (orientation == PlayerHostState.VERTICAL) {
             setPadding(
                 left, 0, right, bottom
             )

@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
@@ -28,7 +27,6 @@ internal class UserFavouriteViewModel(
     val mid: String,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val userStore: UserStore by instance()
 
     private val playerStore by instance<PlayerStore>()

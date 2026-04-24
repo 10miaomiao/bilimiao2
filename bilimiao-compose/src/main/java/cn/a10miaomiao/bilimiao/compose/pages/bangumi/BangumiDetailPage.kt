@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
@@ -102,7 +102,7 @@ private class BangumiDetailPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
     private val bottomSheetState by instance<BottomSheetState>()
@@ -277,7 +277,7 @@ private class BangumiDetailPageViewModel(
             putExtra(Intent.EXTRA_SUBJECT, "bilibili番剧分享")
             putExtra(Intent.EXTRA_TEXT, "$title https://www.bilibili.com/bangumi/play/ep${item.id}")
         }
-        fragment.requireActivity().startActivity(Intent.createChooser(shareIntent, "分享"))
+        hostBridge.activity.startActivity(Intent.createChooser(shareIntent, "分享"))
     }
 
     fun startPlayBangumi(episodes: List<EpisodeInfo>, item: EpisodeInfo) {
@@ -330,7 +330,7 @@ private class BangumiDetailPageViewModel(
                 if (info != null) {
                     val id = info.season_id
                     var url = "https://www.bilibili.com/bangumi/play/ss$id"
-                    BiliUrlMatcher.toUrlLink(fragment.requireContext(), url)
+                    BiliUrlMatcher.toUrlLink(hostBridge.context, url)
                 } else {
                     PopTip.show("请等待信息加载完成")
                 }
@@ -339,7 +339,7 @@ private class BangumiDetailPageViewModel(
                 // 分享番剧
                 val info = detailInfo.value
                 if (info != null) {
-                    val activity = fragment.requireActivity()
+                    val activity = hostBridge.activity
                     var shareIntent = Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
@@ -356,7 +356,7 @@ private class BangumiDetailPageViewModel(
                 // 复制链接
                 val info = detailInfo.value
                 if (info != null) {
-                    val activity = fragment.requireActivity()
+                    val activity = hostBridge.activity
                     val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     var label = "url"
                     var text = "https://www.bilibili.com/bangumi/play/ss${info.season_id}"

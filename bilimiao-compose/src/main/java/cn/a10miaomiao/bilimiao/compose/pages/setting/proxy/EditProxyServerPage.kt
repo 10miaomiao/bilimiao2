@@ -13,7 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -51,12 +51,12 @@ internal class EditProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
     var index = -1
 
     fun getProxyServer(): ProxyServerInfo? {
-        val serverList = ProxyHelper.serverList(fragment.requireContext())
+        val serverList = ProxyHelper.serverList(hostBridge.context)
         if (index in 0 until serverList.size) {
             return serverList[index]
         }
@@ -75,7 +75,7 @@ internal class EditProxyServerPageViewModel(
             return
         }
         ProxyHelper.saveServer(
-            fragment.requireActivity(),
+            hostBridge.activity,
             ProxyServerInfo(
                 name = formState.name,
                 host = formState.host,
@@ -104,7 +104,7 @@ internal class EditProxyServerPageViewModel(
 
     fun deleteProxyServer() {
         ProxyHelper.saveServer(
-            fragment.requireActivity(),
+            hostBridge.activity,
             null,
             index,
         )

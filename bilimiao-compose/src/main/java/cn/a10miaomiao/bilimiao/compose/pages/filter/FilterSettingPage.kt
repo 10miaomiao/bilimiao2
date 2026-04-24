@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -54,11 +53,7 @@ class FilterSettingPage : ComposePage() {
 
 private class FilterSettingPageViewModel(
     override val di: DI,
-) : ViewModel(), DIAware {
-
-    private val fragment by instance<Fragment>()
-
-}
+) : ViewModel(), DIAware
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)

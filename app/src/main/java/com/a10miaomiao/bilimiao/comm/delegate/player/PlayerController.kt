@@ -32,7 +32,7 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
+import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
@@ -216,7 +216,7 @@ class PlayerController(
 
     fun updatePlayerMode(config: Configuration) {
         if (views.videoPlayer.mode != DanmakuVideoPlayer.PlayerMode.FULL) {
-            views.videoPlayer.mode = if (config.orientation == ScaffoldView.VERTICAL) {
+            views.videoPlayer.mode = if (config.orientation == PlayerHostState.VERTICAL) {
                 DanmakuVideoPlayer.PlayerMode.SMALL_TOP
             } else {
                 DanmakuVideoPlayer.PlayerMode.SMALL_FLOAT
@@ -237,7 +237,7 @@ class PlayerController(
             val openMode = SettingPreferences.mapData(activity) {
                 it[PlayerOpenMode] ?: SettingConstants.PLAYER_OPEN_MODE_DEFAULT
             }
-            val autoFullScreen = if (orientation == ScaffoldView.VERTICAL) {
+            val autoFullScreen = if (orientation == PlayerHostState.VERTICAL) {
                 openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN != 0
             } else {
                 openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE != 0
@@ -398,10 +398,10 @@ class PlayerController(
                 it[PlayerFullMode] ?: SettingConstants.PLAYER_FULL_MODE_AUTO,
             )
         }
-        if (scaffoldApp.orientation == ScaffoldView.VERTICAL
+        if (scaffoldApp.orientation == PlayerHostState.VERTICAL
             && openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN != 0) {
             fullScreen(fullMode, onlyFull = true)
-        } else if (scaffoldApp.orientation == ScaffoldView.HORIZONTAL
+        } else if (scaffoldApp.orientation == PlayerHostState.HORIZONTAL
             && openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE != 0
         ){
             fullScreen(fullMode, onlyFull = true)

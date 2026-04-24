@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.config.config
+import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import splitties.dimensions.dip
@@ -100,9 +101,9 @@ class DrawerBehaviorDelegate(
                 ev.action == MotionEvent.ACTION_DOWN
                 && parent.bottomSheetState() == BottomSheetBehavior.STATE_HIDDEN
             ) {
-                this.touchOnAppBar = (parent.orientation == ScaffoldView.VERTICAL
+                this.touchOnAppBar = (parent.orientation == PlayerHostState.VERTICAL
                         && ev.y > (parent.appBar?.top ?: parent.measuredHeight))
-                        || (parent.orientation == ScaffoldView.HORIZONTAL
+                        || (parent.orientation == PlayerHostState.HORIZONTAL
                         && ev.x < (parent.appBar?.right ?: 0))
                 this.initialX = ev.x
                 this.initialY = ev.y

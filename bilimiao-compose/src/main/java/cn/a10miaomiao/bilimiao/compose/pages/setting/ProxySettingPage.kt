@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -46,13 +46,13 @@ private class ProxySettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val context by instance<Context>()
     private val pageNavigation by instance<PageNavigation>()
 
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())
 
     fun readServerList() {
-        serverList.value = ProxyHelper.serverList(fragment.requireContext())
+        serverList.value = ProxyHelper.serverList(context)
     }
 
     fun toAddPage() {

@@ -26,7 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.fragment.app.FragmentActivity
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -57,7 +56,7 @@ import org.kodein.di.compose.rememberInstance
 import java.io.File
 
 private class MyImagePreviewerController(
-    val activity: FragmentActivity,
+    val activity: Activity,
     val imagePreviewerState: ImagePreviewerState,
 ) {
 
@@ -151,7 +150,7 @@ fun MyImagePreviewer(
     imagePreviewerState: ImagePreviewerState,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val activity: FragmentActivity by rememberInstance()
+    val activity: Activity by rememberInstance()
     val controller = remember(imagePreviewerState) {
         MyImagePreviewerController(activity, imagePreviewerState)
     }

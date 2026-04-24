@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -47,7 +47,7 @@ internal class AddProxyServerPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val activity by instance<Activity>()
     private val pageNavigation by instance<PageNavigation>()
 
     fun addProxyServer(
@@ -62,7 +62,7 @@ internal class AddProxyServerPageViewModel(
             return
         }
         ProxyHelper.saveServer(
-            fragment.requireActivity(),
+            activity,
             ProxyServerInfo(
                 name = formState.name,
                 host = formState.host,

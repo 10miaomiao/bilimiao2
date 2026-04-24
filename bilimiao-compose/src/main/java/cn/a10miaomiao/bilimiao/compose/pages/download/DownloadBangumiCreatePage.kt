@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import androidx.fragment.app.Fragment
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
@@ -68,7 +68,7 @@ internal class DownloadBangumiCreatePageViewModel(
     override val di: DI
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val context by instance<Context>()
 
     val isRefreshing = MutableStateFlow(false)
     val listState = MutableStateFlow(LazyListState(0, 0))
@@ -89,7 +89,7 @@ internal class DownloadBangumiCreatePageViewModel(
         id: String
     ) = viewModelScope.launch(Dispatchers.IO) {
         _sid = id
-        val downloadService = DownloadService.getService(fragment.requireContext())
+        val downloadService = DownloadService.getService(context)
         getDowbloadedList(downloadService, id)
         loadBangumiDetail(id)
         try {
@@ -121,7 +121,7 @@ internal class DownloadBangumiCreatePageViewModel(
         cid: String,
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(fragment.requireContext())
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val quality = prefs.getInt("player_quality", 64)
             val res = BiliApiService.playerAPI.getBangumiUrl(
                 epId, cid, quality, fnval = 4048
@@ -206,7 +206,7 @@ internal class DownloadBangumiCreatePageViewModel(
             return
         }
         viewModelScope.launch {
-            val downloadService = DownloadService.getService(fragment.requireContext())
+            val downloadService = DownloadService.getService(context)
             episodeList.forEachIndexed { index, item ->
                 if (checkedList.contains(item.id)) {
                     createDownload(index, item, downloadService)
@@ -371,7 +371,6 @@ internal fun DownloadBangumiCreatePageContent(
     val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
     val windowInsets = windowState.getContentInsets(localContainerView())
 
-    val viewModel: DownloadBangumiCreatePageViewModel = diViewModel()
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
     val listFinished by viewModel.list.finished.collectAsState()

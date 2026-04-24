@@ -3,7 +3,6 @@ package cn.a10miaomiao.bilimiao.compose.common
 import android.content.Intent
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
-import androidx.fragment.app.Fragment
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
@@ -18,12 +17,12 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 class BiliJsBridge(
-    val fragment: Fragment,
+    val hostBridge: ComposeHostBridge,
     val pageNavigation: PageNavigation,
     val webView: WebView,
 //    val closeBrowser: () -> Unit,
 ) {
-    private val activity get() = fragment.requireActivity()
+    private val activity get() = hostBridge.activity
 
     private val allSupportMethod = listOf<String>(
         "global.closeBrowser",
@@ -83,7 +82,7 @@ class BiliJsBridge(
             "view.closeBrowser",
             "view.goBack" -> {
 //                closeBrowser.invoke()
-                activity.runOnUiThread {
+                hostBridge.runOnUiThread {
                     pageNavigation.popBackStack()
                 }
             }
@@ -91,7 +90,7 @@ class BiliJsBridge(
                 webView.reload()
             }
             "share.setShareContent" -> {
-                activity.runOnUiThread {
+                hostBridge.runOnUiThread {
                     PopTip.show("暂不支持分享操作")
                 }
             }
@@ -100,16 +99,16 @@ class BiliJsBridge(
                 val title = defaultData["title"]?.jsonPrimitive?.content ?: ""
                 val text = defaultData["text"]?.jsonPrimitive?.content ?: ""
                 val url = defaultData["url"]?.jsonPrimitive?.content ?: ""
-                activity.runOnUiThread {
+                hostBridge.runOnUiThread {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.putExtra(Intent.EXTRA_TEXT, "$title $url $text");
                     sendIntent.setType("text/plain")
-                    activity.startActivity(sendIntent)
+                    hostBridge.startActivity(sendIntent)
                 }
             }
             "ability.openScheme" -> {
                 val url = event.data.jsonObject["url"]?.jsonPrimitive?.content ?: "" ?: return
-                activity.runOnUiThread {
+                hostBridge.runOnUiThread {
                     val re = BilibiliNavigation.navigationTo(
                         pageNavigation,
                         url
@@ -137,7 +136,7 @@ class BiliJsBridge(
                 }
             }
         }
-        activity.runOnUiThread {
+        hostBridge.runOnUiThread {
             event.callback(result)
         }
     }
@@ -159,7 +158,7 @@ class BiliJsBridge(
                 window.BiliJsBridge.biliInject.biliCallbackReceived($callbackId, $data)
             })()
             """.trimIndent()
-        activity.runOnUiThread {
+        hostBridge.runOnUiThread {
             webView.evaluateJavascript(javascript){ }
         }
     }

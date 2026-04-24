@@ -15,6 +15,7 @@ import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.widget.scaffold.AppBarView
+import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 
 class AppBarBehavior : CoordinatorLayout.Behavior<View> {
@@ -58,11 +59,11 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
                 child.layout(0, 0, 0, 0)
             } else {
                 if (currentState == STATE_SCROLLED_DOWN
-                    && parent.orientation == ScaffoldView.HORIZONTAL) {
+                    && parent.orientation == PlayerHostState.HORIZONTAL) {
                     currentState = STATE_SCROLLED_UP
                     child.translationY = 0f
                 }
-                if (parent.orientation == ScaffoldView.HORIZONTAL) {
+                if (parent.orientation == PlayerHostState.HORIZONTAL) {
                     val width = appBarWidth + child.paddingLeft
                     child.layout(width - parent.measuredWidth, 0, width, parent.measuredHeight)
                 } else {
@@ -96,7 +97,7 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
         if(ev.action == MotionEvent.ACTION_DOWN && parentRef != null){
             if (parentRef!!.fullScreenPlayer) {
             } else {
-                if (parentRef!!.orientation == ScaffoldView.HORIZONTAL) {
+                if (parentRef!!.orientation == PlayerHostState.HORIZONTAL) {
                     val width = appBarWidth + child.paddingLeft
                     left = width - parentRef!!.measuredWidth
                     top = 0
@@ -155,7 +156,7 @@ class AppBarBehavior : CoordinatorLayout.Behavior<View> {
         type: Int,
         consumed: IntArray
     ) {
-        if (parentRef?.orientation == ScaffoldView.HORIZONTAL) {
+        if (parentRef?.orientation == PlayerHostState.HORIZONTAL) {
             return
         }
         if (dyConsumed > 0) {

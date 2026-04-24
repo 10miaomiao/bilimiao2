@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine.content
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -34,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
@@ -73,8 +71,6 @@ private class TagFollowContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val activity by instance<Activity>()
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
     private val myFollowViewModel by instance<MyFollowViewModel>()
