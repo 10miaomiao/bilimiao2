@@ -22,11 +22,11 @@ import splitties.views.dsl.core.wrapContent
 
 class ScaffoldView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : CoordinatorLayout(context, attrs, defStyleAttr) {
+) : CoordinatorLayout(context, attrs, defStyleAttr), PlayerHostState {
 
     companion object {
-        const val HORIZONTAL = 2 // 横屏
-        const val VERTICAL = 1 // 竖屏
+        const val HORIZONTAL = PlayerHostState.HORIZONTAL // 横屏
+        const val VERTICAL = PlayerHostState.VERTICAL // 竖屏
     }
 
     var onPlayerChanged: ((show: Boolean) -> Unit)? = null
@@ -82,7 +82,7 @@ class ScaffoldView @JvmOverloads constructor(
     val isHoldUpPlayer: Boolean
         get() = playerViewSizeStatus == PlayerViewSizeStatus.HOLD_UP
 
-    var orientation = VERTICAL
+    override var orientation = VERTICAL
         set(value) {
             if (field != value) {
                 field = value
@@ -92,7 +92,7 @@ class ScaffoldView @JvmOverloads constructor(
             }
         }
 
-    var showPlayer = false
+    override var showPlayer = false
         set(value) {
             if (field != value) {
                 if (!value) {
@@ -104,7 +104,7 @@ class ScaffoldView @JvmOverloads constructor(
                 onPlayerChanged?.invoke(field)
             }
         }
-    var fullScreenPlayer = false
+    override var fullScreenPlayer = false
         set(value) {
             if (field != value) {
                 field = value
@@ -139,7 +139,7 @@ class ScaffoldView @JvmOverloads constructor(
     val contentMinHeight = dip(200) // 内容区域每列最小高度
 
     val smallModePlayerMinHeight = dip(200) // 竖屏模式下的播放器最小高度
-    var smallModePlayerMaxHeight = smallModePlayerMinHeight // 竖屏模式下的播放器最大高度
+    override var smallModePlayerMaxHeight = smallModePlayerMinHeight // 竖屏模式下的播放器最大高度
         set(value) {
             if (field != value) {
                 field = value
@@ -294,13 +294,13 @@ class ScaffoldView @JvmOverloads constructor(
         }
     }
 
-    fun holdUpPlayer() {
+    override fun holdUpPlayer() {
         playerBehavior?.holdUpPlayer()
     }
 
     private var _playerHeightAnimator: ValueAnimator? = null
 
-    fun animatePlayerHeight(target: Int) {
+    override fun animatePlayerHeight(target: Int) {
         if (orientation == VERTICAL && smallModePlayerCurrentHeight != target) {
             _playerHeightAnimator?.cancel()
             _playerHeightAnimator = ValueAnimator.ofInt(

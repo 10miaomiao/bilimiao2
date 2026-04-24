@@ -10,6 +10,7 @@ import android.view.MotionEvent.ACTION_DOWN
 import android.view.View
 import android.view.View.VISIBLE
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LT
@@ -68,7 +69,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
                 height = bottom - top
                 width = right - left
                 child.layout(left, top, right, bottom)
-                if(orientation == ScaffoldView.VERTICAL){
+                if(orientation == PlayerHostState.VERTICAL){
                     val downHeight = parent.playerSpaceHeight
                     animateTranslationY(downHeight.toFloat())
                 } else {
@@ -165,7 +166,7 @@ class ContentBehavior : CoordinatorLayout.Behavior<View> {
         endTop = 0
         endBottom = mHeight
         // 竖屏
-        if (parentView.orientation == ScaffoldView.VERTICAL) {
+        if (parentView.orientation == PlayerHostState.VERTICAL) {
             if (isOnFocus) {
                 endLeft = 0
                 endRight = mWidth

@@ -31,8 +31,8 @@ class MainBackPopupMenu(
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when (item?.itemId) {
             0 -> {
-                if(activity is MainActivity) {
-                    activity.currentNav.goBackHome()
+                if (activity is MainActivity) {
+                    activity.goBackHome()
                 }
             }
             1 -> {

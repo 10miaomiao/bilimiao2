@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
@@ -20,7 +19,6 @@ class DynamicViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
 
     val tabs = listOf<DynamicPageTab>(

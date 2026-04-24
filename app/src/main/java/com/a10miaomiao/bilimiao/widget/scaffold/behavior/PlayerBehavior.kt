@@ -11,6 +11,7 @@ import androidx.core.animation.addListener
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
+import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import splitties.dimensions.dip
 import kotlin.math.max
@@ -36,7 +37,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
 
     var isShowChild = false
 
-    private var currentOrientation = ScaffoldView.VERTICAL
+    private var currentOrientation = PlayerHostState.VERTICAL
 
     private var behaviorDelegate: PlayerBehaviorDelegate? = null
 
@@ -126,7 +127,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         type: Int
     ): Boolean {
         val parent = parentRef ?: return false
-        return parent.orientation == ScaffoldView.VERTICAL
+        return parent.orientation == PlayerHostState.VERTICAL
                 && parent.showPlayer
                 && !parent.showMaskView
                 && target.tag != false
@@ -150,7 +151,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         // 滚动上拉 且 正在播放 且 不显示遮罩 且 竖屏模式
         if (dy > 0 && parent.showPlayer
             && !parent.showMaskView
-            && parent.orientation== ScaffoldView.VERTICAL
+            && parent.orientation== PlayerHostState.VERTICAL
         ) {
             val playerMinHeight = parent.smallModePlayerMinHeight
             if (parent.smallModePlayerCurrentHeight > playerMinHeight) {
@@ -184,7 +185,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
         val contentView = parentRef?.focusContent ?: return
         if (!parent.showPlayer
             || parent.showMaskView
-            || parent.orientation != ScaffoldView.VERTICAL) {
+            || parent.orientation != PlayerHostState.VERTICAL) {
             // 非正在播放 或 显示遮罩 或 非竖屏模式 时候不处理
             return
         }
@@ -257,7 +258,7 @@ class PlayerBehavior : CoordinatorLayout.Behavior<View> {
             duration = 200
             interpolator = AccelerateInterpolator()
             val contentView = parentRef?.takeIf {
-                it.orientation == ScaffoldView.VERTICAL
+                it.orientation == PlayerHostState.VERTICAL
             }?.content
             child.pivotY = 0f
             child.pivotX = child.width / 2f

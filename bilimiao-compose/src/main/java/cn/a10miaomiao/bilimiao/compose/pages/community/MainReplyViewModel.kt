@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.View
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bilibili.main.community.reply.v1.CursorReply

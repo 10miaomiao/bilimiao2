@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -61,8 +60,6 @@ data class DanmakuDisplaySettingPage(
 private class DanmakuDisplaySettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
-
-    private val fragment by instance<Fragment>()
 
     val modeList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         listOf(

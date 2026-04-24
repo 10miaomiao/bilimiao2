@@ -8,6 +8,7 @@ import androidx.annotation.RestrictTo
 import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LB
 import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView.PlayerViewPlaceStatus.LT
@@ -376,7 +377,7 @@ class PlayerBehaviorDelegate(
     fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         if (parent.showPlayer
             && !parent.fullScreenPlayer
-            && parent.orientation == ScaffoldView.HORIZONTAL
+            && parent.orientation == PlayerHostState.HORIZONTAL
             && !parent.isDrawerOpen()
             && parent.getMaskViewVisibility() != View.VISIBLE
         ) {
@@ -539,7 +540,7 @@ class PlayerBehaviorDelegate(
     fun updateWindowSize(){
         val widthHeightRatio = parent.playerVideoRatio
         val onSmallShowArea = parent.playerSmallShowArea
-        if (parent.orientation == ScaffoldView.HORIZONTAL) {
+        if (parent.orientation == PlayerHostState.HORIZONTAL) {
             if (parent.isHoldUpPlayer) {
                 playerHeight = (parent.dip(parent.playerHoldShowArea) / sqrt(widthHeightRatio)).toInt()
                 playerWidth = (parent.dip(parent.playerHoldShowArea) * sqrt(widthHeightRatio)).toInt()
@@ -592,7 +593,7 @@ class PlayerBehaviorDelegate(
             parent.playerSpaceHeight = 0
             parent.playerSpaceWidth = 0
         } else {
-            if(parent.orientation == ScaffoldView.VERTICAL){
+            if(parent.orientation == PlayerHostState.VERTICAL){
                 parent.playerSpaceHeight = playerHeight + playerView.paddingTop
                 parent.playerSpaceWidth = playerWidth
             } else {
@@ -650,7 +651,7 @@ class PlayerBehaviorDelegate(
         if (parent.fullScreenPlayer) {
             // 全屏
             onFullScreenLayoutChild()
-        } else if (parent.orientation == ScaffoldView.HORIZONTAL) {
+        } else if (parent.orientation == PlayerHostState.HORIZONTAL) {
             // 横向屏幕
             onHorizontalScreenLayoutChild()
         } else {

@@ -2,7 +2,6 @@ package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import android.net.Uri
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -31,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -96,8 +94,6 @@ private class DynamicDetailPageViewModel(
     val dynId: String,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
-    val activity: AppCompatActivity by instance()
     val userStore: UserStore by instance()
 
     private val _loading = MutableStateFlow(false);

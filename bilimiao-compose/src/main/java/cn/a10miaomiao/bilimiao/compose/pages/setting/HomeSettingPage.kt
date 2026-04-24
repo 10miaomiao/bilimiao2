@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -50,8 +49,6 @@ class HomeSettingPage : ComposePage() {
 private class HomeSettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
-
-    private val fragment by instance<Fragment>()
 
     val entryViews = mapOf(
         SettingConstants.HOME_ENTRY_VIEW_DEFAULT to "默认",

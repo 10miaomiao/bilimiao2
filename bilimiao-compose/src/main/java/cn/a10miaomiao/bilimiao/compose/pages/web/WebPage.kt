@@ -24,10 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.BiliJsBridge
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
@@ -77,7 +77,7 @@ private class WebPageViewModel(
             |disable_rcmd/0
         """.trimMargin().replace("\n", "")
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
 
     var webView: WebView? = null
@@ -91,7 +91,7 @@ private class WebPageViewModel(
     }
 
     fun initWebView(view: WebView) {
-        val biliJsBridge = BiliJsBridge(fragment, pageNavigation, view)
+        val biliJsBridge = BiliJsBridge(hostBridge, pageNavigation, view)
         CookieManager.getInstance().setAcceptThirdPartyCookies(view, true)
         view.webViewClient = mWebViewClient
         view.webChromeClient = mWebChromeClient
