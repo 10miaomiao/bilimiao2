@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerCard
@@ -24,12 +24,10 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -75,10 +73,7 @@ private fun ProxySettingPageContent(
     PageConfig(
         title = "区域限制\n-\n代理设置"
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
+    val windowInsets = localContentInsets()
 
     val serverList by viewModel.serverList.collectAsState()
 
@@ -134,7 +129,7 @@ private fun ProxySettingPageContent(
                         modifier = Modifier
                             .height(200.dp)
                             .fillMaxWidth()
-                            .padding(bottom = windowInsets.bottomDp.dp + bottomAppBarHeight.dp),
+                            .padding(bottom = windowInsets.bottom),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -147,7 +142,7 @@ private fun ProxySettingPageContent(
                         modifier = Modifier
                             .height(50.dp)
                             .fillMaxWidth()
-                            .padding(bottom = windowInsets.bottomDp.dp + bottomAppBarHeight.dp),
+                            .padding(bottom = windowInsets.bottom),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(

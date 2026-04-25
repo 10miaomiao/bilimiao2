@@ -8,16 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.AnimatedVisibility
@@ -32,6 +33,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +47,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -55,6 +56,9 @@ import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarConfig
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
+import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.calculateMainContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData
 import cn.a10miaomiao.bilimiao.compose.components.appbar.rememberAppBarState
@@ -139,6 +143,16 @@ fun ComposeScaffold(
         }
     }
 
+    val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
+    val contentInsets = remember(rawWindowInsets, appBarState, showPlayer, orientation) {
+        calculateMainContentInsets(
+            rawWindowInsets = rawWindowInsets,
+            appBarState = appBarState,
+            showPlayer = showPlayer,
+            orientation = orientation,
+        )
+    }
+
     var playerWidth by remember { mutableStateOf(0.dp) }
     var playerHeight by remember { mutableStateOf(0.dp) }
 
@@ -190,40 +204,70 @@ fun ComposeScaffold(
         drawerContent = drawerContent,
         content = {
             // 主内容区
-            Box(modifier = Modifier.fillMaxSize()) {
-                // 根据是否有 AppBarState 决定布局
-                if (appBarState != null && appBarState.visible) {
-                    when (appBarState.orientation) {
-                        AppBarOrientation.Vertical -> {
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                // 内容区域
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
-                                        .padding(top = if (showPlayer && orientation == 1) playerHeight else 0.dp)
-                                        .then(
-                                            if (appBarNestedScrollConnection != null) {
-                                                Modifier.nestedScroll(appBarNestedScrollConnection)
-                                            } else {
-                                                Modifier
-                                            }
-                                        )
-                                ) {
-                                    content()
-                                }
+            CompositionLocalProvider(
+                LocalContentInsets provides contentInsets,
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // 根据是否有 AppBarState 决定布局
+                    if (appBarState != null && appBarState.visible) {
+                        when (appBarState.orientation) {
+                            AppBarOrientation.Vertical -> {
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    // 内容区域
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f)
+                                            .padding(top = if (showPlayer && orientation == 1) playerHeight else 0.dp)
+                                            .then(
+                                                if (appBarNestedScrollConnection != null) {
+                                                    Modifier.nestedScroll(appBarNestedScrollConnection)
+                                                } else {
+                                                    Modifier
+                                                }
+                                            )
+                                    ) {
+                                        content()
+                                    }
 
-                                AnimatedVisibility(
-                                    visible = appBarState.barVisible,
-                                    enter = slideInVertically { it } + fadeIn(),
-                                    exit = slideOutVertically { it } + fadeOut(),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .wrapContentHeight(),
-                                ) {
-                                    AppBar(
+                                    AnimatedVisibility(
+                                        visible = appBarState.barVisible,
+                                        enter = slideInVertically { it } + fadeIn(),
+                                        exit = slideOutVertically { it } + fadeOut(),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight(),
+                                    ) {
+                                        AppBar(
+                                            title = appBarState.title,
+                                            canBack = appBarState.canBack,
+                                            showPointer = appBarState.showPointer,
+                                            pointerOrientation = appBarState.pointerOrientation,
+                                            showExchange = appBarState.showExchange,
+                                            menus = appBarState.menus,
+                                            isNavigationMenu = appBarState.isNavigationMenu,
+                                            checkedKey = appBarState.checkedKey,
+                                            themeColor = appBarState.themeColor,
+                                            backgroundColor = appBarState.backgroundColor,
+                                            menuExpanded = appBarState.menuExpanded,
+                                            appBarState = appBarState,
+                                            onBackClick = { appBarState._onBackClick?.invoke() },
+                                            onMenuClick = { appBarState._onMenuClick?.invoke() },
+                                            onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
+                                            onPointerClick = { appBarState._onPointerClick?.invoke() },
+                                            onExchangeClick = { appBarState._onExchangeClick?.invoke() },
+                                            modifier = Modifier.fillMaxWidth(),
+                                        )
+                                    }
+                                }
+                            }
+
+                            AppBarOrientation.Horizontal -> {
+                                Row(modifier = Modifier.fillMaxSize()) {
+                                    // 横屏 AppBar
+                                    AppBarHorizontal(
                                         title = appBarState.title,
-                                        canBack = appBarState.canBack,
+                                        showBack = appBarState.canBack,
                                         showPointer = appBarState.showPointer,
                                         pointerOrientation = appBarState.pointerOrientation,
                                         showExchange = appBarState.showExchange,
@@ -232,80 +276,54 @@ fun ComposeScaffold(
                                         checkedKey = appBarState.checkedKey,
                                         themeColor = appBarState.themeColor,
                                         backgroundColor = appBarState.backgroundColor,
-                                        menuExpanded = appBarState.menuExpanded,
                                         appBarState = appBarState,
                                         onBackClick = { appBarState._onBackClick?.invoke() },
                                         onMenuClick = { appBarState._onMenuClick?.invoke() },
                                         onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
                                         onPointerClick = { appBarState._onPointerClick?.invoke() },
                                         onExchangeClick = { appBarState._onExchangeClick?.invoke() },
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier.fillMaxHeight(),
                                     )
+
+                                    // 右侧分隔线
+                                    VerticalDivider(
+                                        modifier = Modifier.fillMaxHeight(),
+                                        thickness = AppBarConfig.DividerHeight,
+                                        color = MaterialTheme.colorScheme.outlineVariant,
+                                    )
+
+                                    // 内容区域
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
+                                    ) {
+                                        content()
+                                    }
                                 }
                             }
                         }
-
-                        AppBarOrientation.Horizontal -> {
-                            Row(modifier = Modifier.fillMaxSize()) {
-                                // 横屏 AppBar
-                                AppBarHorizontal(
-                                    title = appBarState.title,
-                                    showBack = appBarState.canBack,
-                                    showPointer = appBarState.showPointer,
-                                    pointerOrientation = appBarState.pointerOrientation,
-                                    showExchange = appBarState.showExchange,
-                                    menus = appBarState.menus,
-                                    isNavigationMenu = appBarState.isNavigationMenu,
-                                    checkedKey = appBarState.checkedKey,
-                                    themeColor = appBarState.themeColor,
-                                    backgroundColor = appBarState.backgroundColor,
-                                    appBarState = appBarState,
-                                    onBackClick = { appBarState._onBackClick?.invoke() },
-                                    onMenuClick = { appBarState._onMenuClick?.invoke() },
-                                    onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
-                                    onPointerClick = { appBarState._onPointerClick?.invoke() },
-                                    onExchangeClick = { appBarState._onExchangeClick?.invoke() },
-                                    modifier = Modifier.fillMaxHeight(),
-                                )
-
-                                // 右侧分隔线
-                                VerticalDivider(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    thickness = AppBarConfig.DividerHeight,
-                                    color = MaterialTheme.colorScheme.outlineVariant,
-                                )
-
-                                // 内容区域
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight()
-                                ) {
-                                    content()
-                                }
+                    } else {
+                        // 无 AppBar 时的原始布局
+                        Column {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(top = if (showPlayer && orientation == 1) playerHeight else 0.dp)
+                            ) {
+                                content()
                             }
                         }
                     }
-                } else {
-                    // 无 AppBar 时的原始布局
-                    Column {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(top = if (showPlayer && orientation == 1) playerHeight else 0.dp)
-                        ) {
-                            content()
-                        }
-                    }
-                }
 
-                // 播放器层
-                if (showPlayer && playerWidth > 0.dp && playerHeight > 0.dp) {
-                    PlayerLayer(
-                        startViewWrapper = startViewWrapper,
-                        width = playerWidth,
-                        height = playerHeight,
-                    )
+                    // 播放器层
+                    if (showPlayer && playerWidth > 0.dp && playerHeight > 0.dp) {
+                        PlayerLayer(
+                            startViewWrapper = startViewWrapper,
+                            width = playerWidth,
+                            height = playerHeight,
+                        )
+                    }
                 }
             }
         }

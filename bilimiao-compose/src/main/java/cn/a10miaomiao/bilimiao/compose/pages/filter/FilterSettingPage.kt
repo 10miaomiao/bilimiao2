@@ -27,17 +27,15 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterTagListContent
 import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterUpperListContent
 import cn.a10miaomiao.bilimiao.compose.pages.filter.content.FilterWordListContent
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -66,9 +64,7 @@ private fun FilterSettingPageContent(
     )
     val scope = rememberCoroutineScope()
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
     val pagerState = rememberPagerState(pageCount = { 3 })
     Column(
         modifier = Modifier.fillMaxSize()
@@ -166,11 +162,11 @@ private fun FilterSettingPageContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(windowStore.bottomAppBarHeightDp.dp),
+                .height(windowInsets.bottom),
             contentAlignment = Alignment.Center
         ) {
             Text(text =  "可进【设置】->【帮助】查看使用方法")
         }
-        Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
+        Spacer(modifier = Modifier.height(windowInsets.bottom))
     }
 }

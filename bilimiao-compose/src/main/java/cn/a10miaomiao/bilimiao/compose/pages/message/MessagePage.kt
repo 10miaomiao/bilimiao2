@@ -34,18 +34,17 @@ import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.AtMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.LikeMessageContent
 import cn.a10miaomiao.bilimiao.compose.pages.message.content.ReplyMessageContent
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.serialization.Serializable
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -128,9 +127,7 @@ private fun MessagePageContent(
     val messageStore: MessageStore by rememberInstance()
     val messageState = messageStore.stateFlow.collectAsState().value
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })
     Column(

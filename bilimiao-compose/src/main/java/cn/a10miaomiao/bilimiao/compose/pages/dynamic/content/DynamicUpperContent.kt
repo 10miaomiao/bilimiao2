@@ -45,11 +45,9 @@ import bilibili.app.dynamic.v2.UpListItem
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import org.kodein.di.compose.rememberInstance
 import androidx.compose.foundation.shape.RoundedCornerShape
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
-import com.a10miaomiao.bilimiao.store.WindowStore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AllInclusive
@@ -173,9 +171,7 @@ fun DynamicUpperContent(
     ) {
         DynamicUpperContentViewModel(it, dynamicViewModel, upper)
     }
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()

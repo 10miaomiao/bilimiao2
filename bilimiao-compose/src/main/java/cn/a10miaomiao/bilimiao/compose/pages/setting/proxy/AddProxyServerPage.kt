@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerForm
@@ -24,12 +24,10 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerFormS
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.rememberProxyServerFormState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -97,9 +95,7 @@ internal fun AddProxyServerPageContent(
         title = "添加代理服务器"
     )
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val scrollState = rememberScrollState()
 
@@ -114,7 +110,7 @@ internal fun AddProxyServerPageContent(
                 start = windowInsets.leftDp.dp,
                 end = windowInsets.rightDp.dp,
                 top = windowInsets.topDp.dp,
-                bottom = windowInsets.bottomDp.dp,
+                bottom = windowInsets.bottom,
             )
     ) {
         ProxyServerForm(

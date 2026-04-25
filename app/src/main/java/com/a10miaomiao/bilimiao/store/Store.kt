@@ -2,7 +2,6 @@ package com.a10miaomiao.bilimiao.store
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -23,7 +22,6 @@ class Store (
 ): DIAware {
 
         val appStore: AppStore by activity.diViewModel(di)
-        val windowStore: WindowStore by activity.diViewModel(di)
         val playListStore: PlayListStore by activity.diViewModel(di)
         val playerStore: PlayerStore by activity.diViewModel(di)
         val userStore: UserStore by activity.diViewModel(di)
@@ -35,7 +33,6 @@ class Store (
 
         fun loadStoreModules(diBuilder: DI.Builder) = diBuilder.run{
                 bindSingleton { appStore }
-                bindSingleton { windowStore }
                 bindSingleton { playListStore }
                 bindSingleton { playerStore }
                 bindSingleton { userStore }
@@ -48,7 +45,6 @@ class Store (
 
         fun onCreate(savedInstanceState: Bundle?) {
                 appStore.init(activity)
-                windowStore.init(activity)
                 playerStore.init(activity)
                 userStore.init(activity)
                 userLibraryStore.init(activity)

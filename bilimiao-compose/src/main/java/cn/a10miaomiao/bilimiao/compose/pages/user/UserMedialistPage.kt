@@ -51,7 +51,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menuunfold
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.components.layout.AutoTwoPaneLayout
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
@@ -69,8 +69,7 @@ import com.a10miaomiao.bilimiao.comm.entity.media.MediaListV2Info
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.store.WindowStore.Insets
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -214,9 +213,7 @@ private class UserMedialistPageViewModel(
 private fun UserMedialistPageContent(
     viewModel: UserMedialistPageViewModel,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     var hideFirstPane by remember {
         mutableStateOf(false)
@@ -293,7 +290,7 @@ private fun UserMedialistPageContent(
 private fun UserMedialistListContent(
     showTowPane: Boolean,
     viewModel: UserMedialistPageViewModel,
-    windowInsets: Insets,
+    windowInsets: ContentInsets,
 ) {
     val isRefreshing = viewModel.isRefreshing.collectAsState().value
     val listFlow = viewModel.list
@@ -396,7 +393,7 @@ private fun UserMedialistListContent(
                 item {
                     ListStateBox(
                         modifier = Modifier.padding(
-                            bottom = windowInsets.bottomDp.dp
+                            bottom = windowInsets.bottom
                         ),
                         loading = listLoading,
                         finished = listFinished,

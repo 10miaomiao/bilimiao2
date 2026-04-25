@@ -248,14 +248,11 @@ class MainActivity : AppCompatActivity(), DIAware {
         val rootComposeView = ComposeView(this).apply {
             setContent {
                 val appState = store.appStore.stateFlow.collectAsState().value
-                val windowState = store.windowStore.stateFlow.collectAsState().value
                 MainActivityComposeHost(
                     navigator = composeNavigator,
                     hostDi = composeHostDi,
                     startViewWrapper = startViewWrapper,
                     appState = appState,
-                    windowState = windowState,
-                    bottomAppBarHeightDp = store.windowStore.bottomAppBarHeightDp,
                     pageConfigState = pageConfigState,
                     emitter = emitter,
                     messageDialogState = messageDialogState,
@@ -444,30 +441,6 @@ class MainActivity : AppCompatActivity(), DIAware {
         bottom: Int,
         displayCutout: DisplayCutout?
     ) {
-        val windowStore = store.windowStore
-        windowStore.setWindowInsets(left, top, right, bottom)
-        windowStore.setBottomSheetContentInsets(0, config.bottomSheetTitleHeight, 0, 0)
-        if (playerHostState.orientation == PlayerHostState.VERTICAL) {
-            if (playerHostState.showPlayer) {
-                windowStore.setContentInsets(
-                    left,
-                    0,
-                    right,
-                    top + bottom + config.appBarTitleHeight + playerHostState.smallModePlayerMinHeight,
-                )
-            } else {
-                windowStore.setContentInsets(
-                    left,
-                    top,
-                    right,
-                    bottom + config.appBarTitleHeight,
-                )
-            }
-            windowStore.setBottomAppBarHeight(config.appBarMenuHeight)
-        } else {
-            windowStore.setContentInsets(left, top, right, bottom)
-            windowStore.setBottomAppBarHeight(0)
-        }
         playerHostState.updateSmallModePlayerMaxHeight()
         basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
         updateStatusBarStyle()

@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.lib.KrcText
@@ -52,7 +54,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -437,9 +438,8 @@ fun Preview(){
 internal fun LyricPageContent(viewModel: LyricPageViewModel){
 
     val playerStore: PlayerStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
     val playerState = playerStore.stateFlow.collectAsState().value
-    val windowState = windowStore.stateFlow.collectAsState().value
+    val windowInsets = localContentInsets()
     val lyric = viewModel.lyric.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
     val title = viewModel.lyricTitle.collectAsState().value
@@ -461,10 +461,14 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
     }
     val scrollState= rememberLazyListState()
     val conf = LocalConfiguration.current
+    val density = LocalDensity.current
     var canvasHeight by remember { mutableFloatStateOf(0f) }
-    val spacerHeight = remember(canvasHeight,windowState.contentInsets.bottom){
+    val bottomInsetPx = remember(windowInsets.bottom, density) {
+        with(density) { windowInsets.bottom.toPx() }
+    }
+    val spacerHeight = remember(canvasHeight, bottomInsetPx, conf.densityDpi) {
         derivedStateOf {
-            ((canvasHeight-windowState.contentInsets.bottom)/2*160/conf.densityDpi).toInt()-50
+            ((canvasHeight - bottomInsetPx) / 2 * 160 / conf.densityDpi).toInt() - 50
         }
     }
     LaunchedEffect(playerState.mainTitle){
@@ -498,7 +502,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                 }
             }
             item {
-                Spacer(modifier = Modifier.height(spacerHeight.value.dp + windowState.contentInsets.bottomDp.dp))
+                Spacer(modifier = Modifier.height(spacerHeight.value.dp + windowInsets.bottom))
             }
         }
     }

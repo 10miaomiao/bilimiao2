@@ -22,7 +22,7 @@ import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
@@ -36,16 +36,15 @@ import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonV2Info
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -366,10 +365,7 @@ internal fun DownloadBangumiCreatePageContent(
     viewModel: DownloadBangumiCreatePageViewModel,
 ) {
     val userStore: UserStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
@@ -453,7 +449,7 @@ internal fun DownloadBangumiCreatePageContent(
                 .padding(
                     start = windowInsets.leftDp.dp,
                     end = windowInsets.rightDp.dp,
-                    bottom = windowInsets.bottomDp.dp
+                    bottom = windowInsets.bottom
                 )
                 .padding(5.dp)
         ) {
@@ -488,7 +484,7 @@ internal fun DownloadBangumiCreatePageContent(
             ) {
                 Text(text = "开始下载(${checkedSet.size})")
             }
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + 10.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottom + 10.dp))
         }
     }
 

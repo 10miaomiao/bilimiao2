@@ -31,16 +31,14 @@ import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -196,9 +194,7 @@ private fun WebPageContent(
     PageConfig(
         title = viewModel.pageTitle.value,
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     Box(
         modifier = Modifier
@@ -209,7 +205,7 @@ private fun WebPageContent(
                 .padding(
                     windowInsets.addPaddingValues(
                         addTop = if (viewModel.hideNavbar.value) -windowInsets.topDp.dp else 0.dp,
-                        addBottom = windowStore.bottomAppBarHeightDp.dp
+                        addBottom = 0.dp
                     )
                 ),
             factory = {
