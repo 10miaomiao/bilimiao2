@@ -23,7 +23,9 @@
       "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -15)",
       "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -10)",
       "WebFetch(domain:github.com)",
-      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -40)"
+      "Bash(cd D:/MyCode/AndroidStudioProjects/bilimiao2 && ./gradlew :bilimiao-compose:compileDebugKotlin 2>&1 | tail -40)",
+      "Bash(./gradlew :bilimiao-compose:compileDebugKotlin :app:compileDebugKotlin)",
+      "Bash(./gradlew :bilimiao-compose:compileDebugKotlin :app:compileFossDebugKotlin)"
     ]
   }
 }

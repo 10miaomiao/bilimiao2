@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine
 
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,7 +41,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -54,13 +54,12 @@ import cn.a10miaomiao.bilimiao.compose.pages.mine.content.TagFollowContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.MessageDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
+import org.kodein.di.bindSingleton
 import org.kodein.di.compose.subDI
 
 @Serializable
@@ -84,9 +83,7 @@ class MyFollowPage() : ComposePage() {
 private fun MyFollowPageContent() {
     val viewModel: MyFollowViewModel by rememberInstance()
     val userStore: UserStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
+    val windowInsets = localContentInsets()
 
     val tagList by viewModel.tagList.data.collectAsState()
     val tagListLoading by viewModel.tagList.loading.collectAsState()

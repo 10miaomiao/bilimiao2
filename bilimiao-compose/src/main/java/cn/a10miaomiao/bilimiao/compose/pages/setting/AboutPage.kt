@@ -38,7 +38,7 @@ import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.layout.DoubleColumnAutofitLayout
@@ -48,7 +48,6 @@ import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -63,7 +62,6 @@ import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 
@@ -297,9 +295,7 @@ private fun AboutPageContent(
     PageConfig(
         title = "关于bilimiao"
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val chainScrollableLayoutState = rememberChainScrollableLayoutState(
         maxScrollPosition = 340.dp,
@@ -312,7 +308,7 @@ private fun AboutPageContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface),
         innerPadding = windowInsets.addPaddingValues(
-            addBottom = windowStore.bottomAppBarHeightDp.dp,
+            addBottom = 0.dp,
         ),
         chainScrollableLayoutState = chainScrollableLayoutState,
         leftMaxWidth = 600.dp,

@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.community.ReplyItemBox
@@ -31,10 +31,8 @@ import cn.a10miaomiao.bilimiao.compose.components.layout.DataDrivenNavigator
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyDetailContent
 import cn.a10miaomiao.bilimiao.compose.pages.community.content.ReplyListContent
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.kodein.di.compose.rememberInstance
 
 @Serializable
 class MainReplyListPage(
@@ -67,9 +65,7 @@ fun MainReplyListPageContent(
     pageTitle: String,
     viewModel: MainReplyViewModel,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val currentReply by viewModel.currentReply.collectAsState()
 

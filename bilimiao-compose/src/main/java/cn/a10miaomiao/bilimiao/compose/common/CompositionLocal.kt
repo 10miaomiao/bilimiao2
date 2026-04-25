@@ -19,6 +19,13 @@ internal val LocalContainerView = staticCompositionLocalOf<ViewGroup?> {
 @Composable
 fun localContainerView() = LocalContainerView.current
 
+internal val LocalContentInsets = staticCompositionLocalOf<ContentInsets> {
+    noLocalProvidedFor("ContentInsets")
+}
+
+@Composable
+fun localContentInsets() = LocalContentInsets.current
+
 internal val LocalPageNavigation = staticCompositionLocalOf<PageNavigation> {
     noLocalProvidedFor("PageNavigation")
 }

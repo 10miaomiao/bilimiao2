@@ -64,9 +64,10 @@ import bilibili.app.view.v1.ViewPage
 import bilibili.app.view.v1.ViewReply
 import bilibili.app.view.v1.ViewReq
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
@@ -93,8 +94,6 @@ import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -114,9 +113,7 @@ class VideoDetailPage(
         val viewModel: VideoDetailViewModel = diViewModel(key = id) {
             VideoDetailViewModel(it, id)
         }
-        val windowStore: WindowStore by rememberInstance()
-        val windowState = windowStore.stateFlow.collectAsState().value
-        val windowInsets = windowState.getContentInsets(localContainerView())
+        val windowInsets = localContentInsets()
 
         val detailData = viewModel.detailData.collectAsState().value
 
@@ -163,7 +160,7 @@ class VideoDetailPage(
 @Composable
 private fun VideoDetailPageContent(
     viewModel: VideoDetailViewModel,
-    windowInsets: Insets,
+    windowInsets: ContentInsets,
     detailData: ViewReply,
     arcData: Arc,
 ) {

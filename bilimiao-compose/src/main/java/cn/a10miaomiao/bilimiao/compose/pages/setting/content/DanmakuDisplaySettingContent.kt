@@ -11,25 +11,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.map
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.sliderPreference
 import me.zhanghai.compose.preference.switchPreference
-import org.kodein.di.compose.rememberInstance
 
 @Composable
 internal fun DanmakuDisplaySettingContent(
     danmakuPreferences: SettingPreferences.Danmaku,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val context = LocalContext.current
     val dataStore = remember {
@@ -230,7 +226,7 @@ internal fun DanmakuDisplaySettingContent(
             item("bottom") {
                 Spacer(
                     modifier = Modifier.height(
-                        windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
+                        windowInsets.bottom
                     )
                 )
             }

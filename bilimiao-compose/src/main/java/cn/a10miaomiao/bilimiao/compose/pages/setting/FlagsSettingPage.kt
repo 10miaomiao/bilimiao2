@@ -11,11 +11,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.serialization.Serializable
-import org.kodein.di.compose.rememberInstance
 
 @Serializable
 class FlagsSettingPage : ComposePage() {
@@ -31,9 +29,7 @@ private fun FlagsSettingPageContent() {
     PageConfig(
         title = "实验性功能"
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     LazyColumn(
         modifier = Modifier
@@ -57,7 +53,7 @@ private fun FlagsSettingPageContent() {
         item("bottom") {
             Spacer(
                 modifier = Modifier.height(
-                    windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
+                    windowInsets.bottom
                 )
             )
         }

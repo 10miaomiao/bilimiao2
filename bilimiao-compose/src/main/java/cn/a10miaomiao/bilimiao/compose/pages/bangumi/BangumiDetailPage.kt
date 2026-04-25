@@ -30,7 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -59,7 +59,6 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.kongzue.dialogx.dialogs.PopTip
@@ -406,10 +405,8 @@ private fun BangumiDetailPageContent(
     viewModel: BangumiDetailPageViewModel,
 ) {
     val playerStore: PlayerStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
     val playerState = playerStore.stateFlow.collectAsState().value
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailInfo = viewModel.detailInfo.collectAsState().value
     val isFollow = viewModel.isFollow.collectAsState().value
@@ -742,8 +739,7 @@ private fun BangumiDetailPageContent(
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)
                     .padding(
-                        bottom = windowStore.bottomAppBarHeightDp.dp
-                                + windowInsets.bottomDp.dp
+                        bottom = windowInsets.bottom
                     ),
                 onClick = {
                     scope.launch {
@@ -760,7 +756,7 @@ private fun BangumiDetailPageContent(
                             viewModel.changeSection(section)
                             episodesListState.scrollToItem(
                                 index = index + offset,
-                                scrollOffset = -windowInsets.top
+                                scrollOffset = -windowInsets.top.value.toInt()
                             )
                         }
                     }

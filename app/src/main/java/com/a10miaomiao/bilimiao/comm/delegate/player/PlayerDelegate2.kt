@@ -63,7 +63,6 @@ import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
@@ -114,7 +113,6 @@ class PlayerDelegate2(
     private val userStore by instance<UserStore>()
     private val playerStore by instance<PlayerStore>()
     private val userLibraryStore by instance<UserLibraryStore>()
-    private val windowStore by instance<WindowStore>()
     private val themeDelegate by instance<ThemeDelegate>()
 
     var playerSourceInfo: PlayerSourceInfo? = null

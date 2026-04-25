@@ -28,7 +28,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
@@ -40,16 +40,15 @@ import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.io.BufferedReader
 import java.io.File
@@ -169,11 +168,9 @@ private fun SettingPageContent(
     PageConfig(
         title = "设置"
     )
-    val windowStore: WindowStore by rememberInstance()
     val userStore: UserStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
     val userState = userStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
     val context = LocalContext.current
     val moreSettingList by viewModel.moreSettingList.collectAsState()
 
@@ -369,7 +366,7 @@ private fun SettingPageContent(
             item("bottom") {
                 Spacer(
                     modifier = Modifier.height(
-                        windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
+                        windowInsets.bottom
                     )
                 )
             }

@@ -15,14 +15,13 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberDI
 import org.kodein.di.instance
 import kotlinx.serialization.Serializable
 
@@ -82,9 +81,7 @@ private fun ColorBox(
 private fun TestPageContent(
     viewModel: TestPageViewModel,
 ) {
-    val windowStore: WindowStore by rememberDI { instance() }
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.windowInsets
+    val windowInsets = localContentInsets()
 
     val scrollState = rememberScrollState()
 
@@ -186,8 +183,7 @@ private fun TestPageContent(
         }
         Spacer(
             modifier = Modifier.height(
-                windowStore.bottomAppBarHeightDp.dp +
-                        windowInsets.bottomDp.dp
+                windowInsets.bottom
             )
         )
 

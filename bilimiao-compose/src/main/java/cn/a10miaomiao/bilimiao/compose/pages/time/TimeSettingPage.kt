@@ -19,17 +19,15 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.time.components.*
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.util.*
 
@@ -50,9 +48,7 @@ private fun TimeSettingPageContent(
 ) {
     PageConfig(title = "时光姬-时间线设置")
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val cardIndex = viewModel.cardIndex.collectAsState().value
 
@@ -88,14 +84,14 @@ private fun TimeSettingPageContent(
                 CustomTime(viewModel)
             }
 
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + 50.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottom + 50.dp))
         }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(10.dp)
-                .padding(bottom = windowInsets.bottomDp.dp),
+                .padding(bottom = windowInsets.bottom),
             contentAlignment = Alignment.BottomStart
         ) {
             Button(

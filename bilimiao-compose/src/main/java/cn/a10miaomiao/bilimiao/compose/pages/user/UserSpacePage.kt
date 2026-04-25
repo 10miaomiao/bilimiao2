@@ -52,9 +52,10 @@ import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -70,8 +71,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.compose.rememberInstance
@@ -101,9 +100,7 @@ private fun UserSpacePageContent(
     viewModel: UserSpaceViewModel,
     archiveViewModel: UserArchiveViewModel,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailData = viewModel.detailData.collectAsState().value
 //    val slideDistance = LocalDensity.current.run {
@@ -168,7 +165,7 @@ private fun UserSpacePageLoadingContent(
 private fun UserSpacePageDetailContent(
     viewModel: UserSpaceViewModel,
     archiveViewModel: UserArchiveViewModel,
-    windowInsets: Insets,
+    windowInsets: ContentInsets,
     detailData: SpaceInfo,
 ) {
     val isFollow = viewModel.isFollow.collectAsState().value

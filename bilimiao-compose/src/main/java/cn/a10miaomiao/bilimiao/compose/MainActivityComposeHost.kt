@@ -7,6 +7,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,11 +44,14 @@ import androidx.navigation.compose.rememberNavController
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
+import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
-import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
+import cn.a10miaomiao.bilimiao.compose.common.bottomSheetContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.calculateMainContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
@@ -61,7 +66,6 @@ import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerP
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffold
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.store.AppStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
@@ -114,8 +118,6 @@ fun MainActivityComposeHost(
     hostDi: DI,
     startViewWrapper: StartViewWrapper,
     appState: AppStore.State,
-    windowState: WindowStore.State,
-    bottomAppBarHeightDp: Float,
     pageConfigState: PageConfigState,
     emitter: SharedFlowEmitter,
     messageDialogState: MessageDialogState,
@@ -134,6 +136,16 @@ fun MainActivityComposeHost(
     val pageConfig = pageConfigState.collectConfigAsState().value
     val bottomSheetPage by bottomSheetState.page.collectAsState()
     val orientation = startViewWrapper.orientation
+    val showPlayer = startViewWrapper.showPlayer
+    val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
+    val mainContentInsets = remember(rawWindowInsets, appBarState, showPlayer, orientation) {
+        calculateMainContentInsets(
+            rawWindowInsets = rawWindowInsets,
+            appBarState = appBarState,
+            showPlayer = showPlayer,
+            orientation = orientation,
+        )
+    }
 
     LaunchedEffect(navController) {
         navigator.attach(navController)
@@ -185,11 +197,8 @@ fun MainActivityComposeHost(
     ) {
         withDI(di = hostDi) {
             BilimiaoTheme(appState = appState) {
-                val windowInsets = windowState.getContentInsets(localContainerView())
                 ImagePreviewerProvider(
-                    contentPadding = windowInsets.addPaddingValues(
-                        addBottom = bottomAppBarHeightDp.dp,
-                    ),
+                    contentPadding = mainContentInsets.toPaddingValues(),
                     previewer = { state, innerPadding ->
                         MyImagePreviewer(state, innerPadding)
                     }
@@ -283,6 +292,7 @@ fun MyBottomSheet(
     ) {
         CompositionLocalProvider(
             LocalContainerView provides container,
+            LocalContentInsets provides bottomSheetContentInsets(),
             LocalPageConfigState provides pageConfigState,
             LocalPageNavigation provides pageNavigation,
         ) {

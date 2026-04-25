@@ -34,9 +34,10 @@ import bilibili.app.dynamic.v2.OpusItem
 import bilibili.app.dynamic.v2.Paragraph
 import bilibili.app.dynamic.v2.PicParagraph
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.community.ReplyItemBox
@@ -51,8 +52,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -142,9 +141,7 @@ private class DynamicOpusPageViewModel(
 private fun DynamicOpusPageContent(
     viewModel: DynamicOpusPageViewModel
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailData = viewModel.detailData.collectAsState().value
 
@@ -205,7 +202,7 @@ private fun DynamicDetailPageLoadingContent(
 @Composable
 private fun DynamicDetailPageDetailContent(
     viewModel: DynamicOpusPageViewModel,
-    windowInsets: Insets,
+    windowInsets: ContentInsets,
     detailData: OpusItem,
 ) {
     val oid = detailData.oid.toString()
