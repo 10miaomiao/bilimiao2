@@ -52,6 +52,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
+import cn.a10miaomiao.bilimiao.compose.components.appbar.LocalAppBarState
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialog
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
@@ -132,6 +133,7 @@ fun MainActivityComposeHost(
     val appBarState = remember { AppBarState() }
     val pageConfig = pageConfigState.collectConfigAsState().value
     val bottomSheetPage by bottomSheetState.page.collectAsState()
+    val orientation = startViewWrapper.orientation
 
     LaunchedEffect(navController) {
         navigator.attach(navController)
@@ -144,13 +146,24 @@ fun MainActivityComposeHost(
             }
         }
     }
-    LaunchedEffect(pageConfig, appBarBackgroundColor) {
-        appBarState.title = pageConfig.title
-        appBarState.menus = pageConfig.menu?.items?.map { item ->
+    LaunchedEffect(pageConfig, appBarBackgroundColor, orientation) {
+        val menus = pageConfig.menu?.items?.map { item ->
             cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData.fromPropInfo(item, startViewWrapper.activity)
         } ?: emptyList()
+        appBarState.title = pageConfig.title
+        appBarState.menus = menus
         appBarState.canBack = pageConfig.menu?.checkable != true
+        appBarState.isNavigationMenu = pageConfig.menu?.checkable == true
+        appBarState.checkedKey = pageConfig.menu?.takeIf { it.checkable }?.checkedKey
         appBarState.backgroundColor = appBarBackgroundColor
+        appBarState.orientation = if (orientation == 2) {
+            cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Horizontal
+        } else {
+            cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Vertical
+        }
+        appBarState.syncExpandedMenusWith(menus)
+        appBarState.showBar()
+        appBarState.showMenu()
     }
     LaunchedEffect(onBackClick) {
         appBarState.setOnBackClickListener(onBackClick)
@@ -168,6 +181,7 @@ fun MainActivityComposeHost(
         LocalPageNavigation provides navigator.pageNavigation,
         LocalEmitter provides emitter,
         LocalUriHandler provides navigator.uriHandler,
+        LocalAppBarState provides appBarState,
     ) {
         withDI(di = hostDi) {
             BilimiaoTheme(appState = appState) {

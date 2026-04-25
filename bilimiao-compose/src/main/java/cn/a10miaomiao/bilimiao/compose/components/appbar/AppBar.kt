@@ -1,25 +1,19 @@
 package cn.a10miaomiao.bilimiao.compose.components.appbar
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -27,20 +21,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.R
 
@@ -77,6 +65,8 @@ fun AppBar(
     checkedKey: Int? = null,
     themeColor: Color = MaterialTheme.colorScheme.primary,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    menuExpanded: Boolean = true,
+    appBarState: AppBarState,
     onBackClick: () -> Unit = {},
     onMenuClick: () -> Unit = {},
     onMenuItemClick: (MenuItemData) -> Unit = {},
@@ -107,6 +97,8 @@ fun AppBar(
             isNavigationMenu = isNavigationMenu,
             checkedKey = checkedKey,
             themeColor = themeColor,
+            menuExpanded = menuExpanded,
+            appBarState = appBarState,
             onBackClick = onBackClick,
             onMenuClick = onMenuClick,
             onMenuItemClick = onMenuItemClick,
@@ -161,102 +153,80 @@ private fun AppBarMenuRow(
     isNavigationMenu: Boolean,
     checkedKey: Int?,
     themeColor: Color,
+    menuExpanded: Boolean,
+    appBarState: AppBarState,
     onBackClick: () -> Unit,
     onMenuClick: () -> Unit,
     onMenuItemClick: (MenuItemData) -> Unit,
     onPointerClick: () -> Unit,
     onExchangeClick: () -> Unit,
 ) {
-    val contentColor = LocalContentColor.current
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-//            .height(AppBarConfig.MenuHeight)
+            .height(AppBarConfig.MenuHeight)
             .padding(horizontal = AppBarConfig.NavigationIconPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // 导航图标
         NavigationIcon(
             icon = if (canBack) AppBarNavigationIcon.Back else AppBarNavigationIcon.Menu,
             onClick = if (canBack) onBackClick else onMenuClick,
         )
 
-        // 指针图标（可选）
         if (showPointer) {
-            val pointerRotation = if (pointerOrientation) 0f else 180f
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures(
-                            onHorizontalDrag = { _, _ -> },
-                            onDragEnd = { onPointerClick() }
-                        )
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_pointer_24dp),
-                    contentDescription = "指针",
-                    tint = contentColor.copy(alpha = 0.45f),
-                    modifier = Modifier
-                        .padding(AppBarConfig.NavigationIconPadding)
-                        .then(
-                            if (pointerRotation != 0f) {
-                                Modifier.layout { measurable, constraints ->
-                                    val placeable = measurable.measure(constraints)
-                                    layout(constraints.maxWidth, constraints.maxHeight) {
-                                        placeable.placeRelative(
-                                            constraints.maxWidth - placeable.width,
-                                            (constraints.maxHeight - placeable.height) / 2
-                                        )
-                                    }
-                                }
-                            } else Modifier
-                        ),
-                )
-            }
-        }
-
-        // 交换图标（可选）
-        if (showExchange) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_exchange_24dp),
-                contentDescription = "交换",
-                tint = contentColor.copy(alpha = 0.45f),
-                modifier = Modifier
-                    .padding(AppBarConfig.NavigationIconPadding)
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures(
-                            onHorizontalDrag = { _, _ -> },
-                            onDragEnd = { onExchangeClick() }
-                        )
-                    },
+            AppBarIconButton(
+                iconRes = R.drawable.ic_pointer_24dp,
+                contentDescription = "指针",
+                rotation = if (pointerOrientation) 0f else 180f,
+                onClick = onPointerClick,
             )
         }
 
-        // 菜单列表
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.End,
+        if (showExchange) {
+            AppBarIconButton(
+                iconRes = R.drawable.ic_exchange_24dp,
+                contentDescription = "交换",
+                onClick = onExchangeClick,
+            )
+        }
+
+        AnimatedVisibility(
+            visible = menuExpanded,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut(),
+            modifier = Modifier.weight(1f, fill = false),
         ) {
-            menus.forEach { menuItem ->
-                if (isNavigationMenu) {
-                    CheckableMenuItem(
-                        data = menuItem,
-                        checked = checkedKey == menuItem.key,
-                        themeColor = themeColor,
-                        onClick = onMenuItemClick,
-                    )
-                } else {
-                    MenuItem(
-                        data = menuItem,
-                        onClick = onMenuItemClick,
-                    )
-                }
-            }
+            VerticalAppBarMenus(
+                menus = menus,
+                isNavigationMenu = isNavigationMenu,
+                checkedKey = checkedKey,
+                themeColor = themeColor,
+                appBarState = appBarState,
+                onMenuItemClick = onMenuItemClick,
+            )
         }
     }
+}
+
+@Composable
+private fun AppBarIconButton(
+    iconRes: Int,
+    contentDescription: String,
+    rotation: Float = 0f,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Icon(
+        painter = painterResource(id = iconRes),
+        contentDescription = contentDescription,
+        tint = LocalContentColor.current.copy(alpha = 0.45f),
+        modifier = Modifier
+            .padding(AppBarConfig.NavigationIconPadding)
+            .rotate(rotation)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = false),
+                onClick = onClick,
+            ),
+    )
 }
