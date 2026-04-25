@@ -1,15 +1,16 @@
 package cn.a10miaomiao.bilimiao.compose.components.appbar
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -37,71 +38,185 @@ fun MenuItem(
     data: MenuItemData,
     onClick: (MenuItemData) -> Unit,
     modifier: Modifier = Modifier,
+    expandable: Boolean = false,
+    expanded: Boolean = false,
+    verticalLayout: Boolean = true,
+    depth: Int = 0,
 ) {
-    val contentColor = LocalContentColor.current
-    val interactionSource = remember { MutableInteractionSource() }
+    BaseMenuItem(
+        data = data,
+        checked = false,
+        themeColor = Color.Unspecified,
+        onClick = onClick,
+        modifier = modifier,
+        expandable = expandable,
+        expanded = expanded,
+        verticalLayout = verticalLayout,
+        depth = depth,
+    )
+}
 
-    Column(
-        modifier = modifier
-            .width(AppBarConfig.MenuItemMinWidth)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = ripple(bounded = false),
-                onClick = { onClick(data) }
-            )
-            .padding(vertical = AppBarConfig.NavigationIconPadding)
-            .semantics {
-                data.contentDescription?.let { contentDescription = it }
-            },
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        // 图标
-        Box(
-            modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
-            contentAlignment = Alignment.Center,
+@Composable
+internal fun BaseMenuItem(
+    data: MenuItemData,
+    checked: Boolean,
+    themeColor: Color,
+    onClick: (MenuItemData) -> Unit,
+    modifier: Modifier = Modifier,
+    expandable: Boolean = false,
+    expanded: Boolean = false,
+    verticalLayout: Boolean = true,
+    depth: Int = 0,
+) {
+    val contentColor = if (checked) {
+        themeColor
+    } else {
+        LocalContentColor.current
+    }
+    val subContentColor = if (checked) {
+        themeColor.copy(alpha = 0.7f)
+    } else {
+        contentColor.copy(alpha = 0.45f)
+    }
+    val interactionSource = remember { MutableInteractionSource() }
+    val paddingStart = if (verticalLayout) {
+        AppBarConfig.NavigationIconPadding + (depth * 12).dp
+    } else {
+        0.dp
+    }
+
+    val containerModifier = modifier
+        .width(if (verticalLayout) AppBarConfig.MenuWidth else AppBarConfig.MenuItemMinWidth)
+        .clickable(
+            interactionSource = interactionSource,
+            indication = ripple(bounded = false),
+            onClick = { onClick(data) }
+        )
+        .padding(
+            start = paddingStart,
+            end = AppBarConfig.NavigationIconPadding,
+            top = AppBarConfig.NavigationIconPadding,
+            bottom = AppBarConfig.NavigationIconPadding,
+        )
+        .semantics {
+            data.contentDescription?.let { contentDescription = it }
+        }
+
+    if (verticalLayout) {
+        Row(
+            modifier = containerModifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            when {
-                data.iconVector != null -> {
-                    androidx.compose.material3.Icon(
-                        imageVector = data.iconVector,
-                        contentDescription = data.title,
-                        tint = contentColor,
-                        modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
-                    )
-                }
-                data.iconResource != null -> {
-                    androidx.compose.material3.Icon(
-                        painter = painterResource(id = data.iconResource),
-                        contentDescription = data.title,
-                        tint = contentColor,
-                        modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
-                    )
-                }
+            MenuItemIcon(data = data, contentColor = contentColor)
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                MenuItemTexts(
+                    data = data,
+                    contentColor = contentColor,
+                    subContentColor = subContentColor,
+                    textAlign = TextAlign.Start,
+                )
+            }
+            if (expandable) {
+                ExpandIndicator(expanded = expanded, contentColor = subContentColor)
             }
         }
-
-        // 标题
-        if (data.title.isNotEmpty()) {
-            Text(
-                text = data.title,
-                color = contentColor,
-                fontSize = AppBarConfig.TitleTextSize.value.sp,
+    } else {
+        Column(
+            modifier = containerModifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
+                MenuItemIcon(data = data, contentColor = contentColor)
+            }
+            MenuItemTexts(
+                data = data,
+                contentColor = contentColor,
+                subContentColor = subContentColor,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = AppBarConfig.SubTitleMarginTop),
             )
-        }
-
-        // 副标题
-        data.subTitle?.let { subTitle ->
-            Text(
-                text = subTitle.replace("\n", " "),
-                color = contentColor.copy(alpha = 0.45f),
-                fontSize = AppBarConfig.SubTitleTextSize.value.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = AppBarConfig.SubTitleMarginTop),
-            )
+            if (expandable) {
+                ExpandIndicator(expanded = expanded, contentColor = subContentColor)
+            }
         }
     }
+}
+
+@Composable
+private fun MenuItemIcon(
+    data: MenuItemData,
+    contentColor: Color,
+) {
+    Box(
+        modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            data.iconVector != null -> {
+                Icon(
+                    imageVector = data.iconVector,
+                    contentDescription = data.title,
+                    tint = contentColor,
+                    modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
+                )
+            }
+            data.iconResource != null -> {
+                Icon(
+                    painter = painterResource(id = data.iconResource),
+                    contentDescription = data.title,
+                    tint = contentColor,
+                    modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MenuItemTexts(
+    data: MenuItemData,
+    contentColor: Color,
+    subContentColor: Color,
+    textAlign: TextAlign,
+) {
+    if (data.title.isNotEmpty()) {
+        Text(
+            text = data.title,
+            color = contentColor,
+            fontSize = AppBarConfig.TitleTextSize.value.sp,
+            textAlign = textAlign,
+            modifier = Modifier.padding(top = AppBarConfig.SubTitleMarginTop),
+        )
+    }
+
+    data.subTitle?.let { subTitle ->
+        Text(
+            text = subTitle.replace("\n", " "),
+            color = subContentColor,
+            fontSize = AppBarConfig.SubTitleTextSize.value.sp,
+            textAlign = textAlign,
+            modifier = Modifier.padding(top = AppBarConfig.SubTitleMarginTop),
+        )
+    }
+}
+
+@Composable
+private fun ExpandIndicator(
+    expanded: Boolean,
+    contentColor: Color,
+) {
+    Text(
+        text = if (expanded) "▴" else "▾",
+        color = contentColor,
+        fontSize = AppBarConfig.TitleTextSize.value.sp,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.width(AppBarConfig.NavigationIconSize),
+    )
 }
 
 /**

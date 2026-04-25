@@ -1,14 +1,13 @@
 package cn.a10miaomiao.bilimiao.compose.components.appbar
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -20,19 +19,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.R
 
@@ -69,6 +63,7 @@ fun AppBarHorizontal(
     checkedKey: Int? = null,
     themeColor: Color = MaterialTheme.colorScheme.primary,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    appBarState: AppBarState,
     onBackClick: () -> Unit = {},
     onMenuClick: () -> Unit = {},
     onMenuItemClick: (MenuItemData) -> Unit = {},
@@ -98,48 +93,20 @@ fun AppBarHorizontal(
                 modifier = Modifier.width(AppBarConfig.MenuWidth),
             )
 
-            // 指针图标（可选）
             if (showPointer) {
-                var pointerRotation by remember { mutableFloatStateOf(if (pointerOrientation) 0f else 180f) }
-                Box(
-                    modifier = Modifier
-                        .width(AppBarConfig.MenuWidth)
-                        .pointerInput(Unit) {
-                            detectVerticalDragGestures(
-                                onVerticalDrag = { _, dragAmount ->
-                                    pointerRotation += dragAmount * 0.1f
-                                },
-                                onDragEnd = { onPointerClick() }
-                            )
-                        },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_pointer_24dp),
-                        contentDescription = "指针",
-                        tint = contentColor.copy(alpha = 0.45f),
-                        modifier = Modifier
-                            .padding(AppBarConfig.NavigationIconPadding)
-                            .rotate(pointerRotation),
-                    )
-                }
+                AppBarHorizontalIconButton(
+                    iconRes = R.drawable.ic_pointer_24dp,
+                    contentDescription = "指针",
+                    rotation = if (pointerOrientation) 0f else 180f,
+                    onClick = onPointerClick,
+                )
             }
 
-            // 交换图标（可选）
             if (showExchange) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_exchange_24dp),
+                AppBarHorizontalIconButton(
+                    iconRes = R.drawable.ic_exchange_24dp,
                     contentDescription = "交换",
-                    tint = contentColor.copy(alpha = 0.45f),
-                    modifier = Modifier
-                        .width(AppBarConfig.MenuWidth)
-                        .padding(AppBarConfig.NavigationIconPadding)
-                        .pointerInput(Unit) {
-                            detectVerticalDragGestures(
-                                onVerticalDrag = { _, _ -> },
-                                onDragEnd = { onExchangeClick() }
-                            )
-                        },
+                    onClick = onExchangeClick,
                 )
             }
 
@@ -177,24 +144,39 @@ fun AppBarHorizontal(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Top,
             ) {
-                menus.forEach { menuItem ->
-                    if (isNavigationMenu) {
-                        CheckableMenuItem(
-                            data = menuItem,
-                            checked = checkedKey == menuItem.key,
-                            themeColor = themeColor,
-                            onClick = onMenuItemClick,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    } else {
-                        MenuItem(
-                            data = menuItem,
-                            onClick = onMenuItemClick,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                }
+                HorizontalAppBarMenus(
+                    menus = menus,
+                    isNavigationMenu = isNavigationMenu,
+                    checkedKey = checkedKey,
+                    themeColor = themeColor,
+                    appBarState = appBarState,
+                    onMenuItemClick = onMenuItemClick,
+                )
             }
         }
     }
+}
+
+@Composable
+private fun AppBarHorizontalIconButton(
+    iconRes: Int,
+    contentDescription: String,
+    rotation: Float = 0f,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Icon(
+        painter = painterResource(id = iconRes),
+        contentDescription = contentDescription,
+        tint = LocalContentColor.current.copy(alpha = 0.45f),
+        modifier = Modifier
+            .width(AppBarConfig.MenuWidth)
+            .padding(AppBarConfig.NavigationIconPadding)
+            .rotate(rotation)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = false),
+                onClick = onClick,
+            ),
+    )
 }

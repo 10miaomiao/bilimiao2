@@ -13,12 +13,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -41,6 +50,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
+import kotlin.math.abs
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarConfig
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
@@ -74,6 +84,39 @@ fun ComposeScaffold(
     val modalDrawerState = rememberDrawerState(
         initialValue = if (drawerState == 3) DrawerValue.Open else DrawerValue.Closed
     )
+    val appBarNestedScrollConnection = remember(appBarState, orientation) {
+        if (appBarState == null) {
+            null
+        } else {
+            object : NestedScrollConnection {
+                override fun onPostScroll(
+                    consumed: androidx.compose.ui.geometry.Offset,
+                    available: androidx.compose.ui.geometry.Offset,
+                    source: NestedScrollSource,
+                ): androidx.compose.ui.geometry.Offset {
+                    if (appBarState.orientation != AppBarOrientation.Vertical) {
+                        appBarState.showBar()
+                        appBarState.showMenu()
+                        return androidx.compose.ui.geometry.Offset.Zero
+                    }
+                    if (source != NestedScrollSource.UserInput) {
+                        return androidx.compose.ui.geometry.Offset.Zero
+                    }
+                    if (abs(consumed.y) < 0.5f) {
+                        return androidx.compose.ui.geometry.Offset.Zero
+                    }
+                    if (consumed.y < 0) {
+                        appBarState.hideMenu()
+                        appBarState.hideBar()
+                    } else if (consumed.y > 0) {
+                        appBarState.showBar()
+                        appBarState.showMenu()
+                    }
+                    return androidx.compose.ui.geometry.Offset.Zero
+                }
+            }
+        }
+    }
 
     LaunchedEffect(drawerState) {
         when (drawerState) {
@@ -86,6 +129,13 @@ fun ComposeScaffold(
         when (modalDrawerState.currentValue) {
             DrawerValue.Open -> startViewWrapper.setDrawerState(3)
             DrawerValue.Closed -> startViewWrapper.setDrawerState(4)
+        }
+    }
+
+    LaunchedEffect(appBarState?.orientation) {
+        if (appBarState?.orientation == AppBarOrientation.Horizontal) {
+            appBarState.showBar()
+            appBarState.showMenu()
         }
     }
 
@@ -152,29 +202,46 @@ fun ComposeScaffold(
                                         .fillMaxWidth()
                                         .weight(1f)
                                         .padding(top = if (showPlayer && orientation == 1) playerHeight else 0.dp)
+                                        .then(
+                                            if (appBarNestedScrollConnection != null) {
+                                                Modifier.nestedScroll(appBarNestedScrollConnection)
+                                            } else {
+                                                Modifier
+                                            }
+                                        )
                                 ) {
                                     content()
                                 }
 
-                                // AppBar
-                                AppBar(
-                                    title = appBarState.title,
-                                    canBack = appBarState.canBack,
-                                    showPointer = appBarState.showPointer,
-                                    pointerOrientation = appBarState.pointerOrientation,
-                                    showExchange = appBarState.showExchange,
-                                    menus = appBarState.menus,
-                                    isNavigationMenu = appBarState.isNavigationMenu,
-                                    checkedKey = appBarState.checkedKey,
-                                    themeColor = appBarState.themeColor,
-                                    backgroundColor = appBarState.backgroundColor,
-                                    onBackClick = { appBarState._onBackClick?.invoke() },
-                                    onMenuClick = { appBarState._onMenuClick?.invoke() },
-                                    onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
-                                    onPointerClick = { appBarState._onPointerClick?.invoke() },
-                                    onExchangeClick = { appBarState._onExchangeClick?.invoke() },
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
+                                AnimatedVisibility(
+                                    visible = appBarState.barVisible,
+                                    enter = slideInVertically { it } + fadeIn(),
+                                    exit = slideOutVertically { it } + fadeOut(),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight(),
+                                ) {
+                                    AppBar(
+                                        title = appBarState.title,
+                                        canBack = appBarState.canBack,
+                                        showPointer = appBarState.showPointer,
+                                        pointerOrientation = appBarState.pointerOrientation,
+                                        showExchange = appBarState.showExchange,
+                                        menus = appBarState.menus,
+                                        isNavigationMenu = appBarState.isNavigationMenu,
+                                        checkedKey = appBarState.checkedKey,
+                                        themeColor = appBarState.themeColor,
+                                        backgroundColor = appBarState.backgroundColor,
+                                        menuExpanded = appBarState.menuExpanded,
+                                        appBarState = appBarState,
+                                        onBackClick = { appBarState._onBackClick?.invoke() },
+                                        onMenuClick = { appBarState._onMenuClick?.invoke() },
+                                        onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
+                                        onPointerClick = { appBarState._onPointerClick?.invoke() },
+                                        onExchangeClick = { appBarState._onExchangeClick?.invoke() },
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
                             }
                         }
 
@@ -192,6 +259,7 @@ fun ComposeScaffold(
                                     checkedKey = appBarState.checkedKey,
                                     themeColor = appBarState.themeColor,
                                     backgroundColor = appBarState.backgroundColor,
+                                    appBarState = appBarState,
                                     onBackClick = { appBarState._onBackClick?.invoke() },
                                     onMenuClick = { appBarState._onMenuClick?.invoke() },
                                     onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },

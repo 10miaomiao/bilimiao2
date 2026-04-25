@@ -2,8 +2,11 @@ package cn.a10miaomiao.bilimiao.compose.components.appbar
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -72,9 +75,15 @@ class AppBarState {
     internal var _onPointerClick: (() -> Unit)? = null
     internal var _onExchangeClick: (() -> Unit)? = null
 
-    // 菜单是否展开（用于竖屏模式）
-    var menuExpanded by mutableStateOf(false)
+    // 底栏是否显示（用于竖屏模式）
+    var barVisible by mutableStateOf(true)
         internal set
+
+    // 菜单是否展开（用于竖屏模式）
+    var menuExpanded by mutableStateOf(true)
+        internal set
+
+    private val expandedMenuPaths = mutableStateListOf<String>()
 
     // 设置返回按钮点击事件
     fun setOnBackClickListener(listener: () -> Unit) {
@@ -101,6 +110,15 @@ class AppBarState {
         _onExchangeClick = listener
     }
 
+    // 显示/隐藏底栏
+    fun showBar() {
+        barVisible = true
+    }
+
+    fun hideBar() {
+        barVisible = false
+    }
+
     // 显示/隐藏菜单
     fun showMenu() {
         menuExpanded = true
@@ -108,6 +126,48 @@ class AppBarState {
 
     fun hideMenu() {
         menuExpanded = false
+    }
+
+    fun isMenuExpanded(path: List<Int>): Boolean {
+        return expandedMenuPaths.contains(path.toMenuPathKey())
+    }
+
+    fun toggleMenuExpanded(path: List<Int>) {
+        val key = path.toMenuPathKey()
+        val parentKey = path.dropLast(2).toMenuPathKey()
+        expandedMenuPaths.removeAll {
+            if (parentKey.isEmpty()) {
+                !it.contains("/")
+            } else {
+                it.startsWith("$parentKey/") && it.count { ch -> ch == '/' } == path.size / 2
+            }
+        }
+        if (!expandedMenuPaths.remove(key)) {
+            expandedMenuPaths.add(key)
+        }
+    }
+
+    fun clearExpandedMenus() {
+        expandedMenuPaths.clear()
+    }
+
+    fun syncExpandedMenusWith(menus: List<MenuItemData>) {
+        if (expandedMenuPaths.isEmpty()) {
+            return
+        }
+        val validPaths = buildSet {
+            fun collect(items: List<MenuItemData>, parentPath: List<Int>) {
+                items.forEachIndexed { index, item ->
+                    if (!item.childMenu.isNullOrEmpty()) {
+                        val path = parentPath + item.key + index
+                        add(path.toMenuPathKey())
+                        collect(item.childMenu, path)
+                    }
+                }
+            }
+            collect(menus, emptyList())
+        }
+        expandedMenuPaths.removeAll { it !in validPaths }
     }
 
     // 重置状态
@@ -123,8 +183,14 @@ class AppBarState {
         themeColor = Color.Unspecified
         backgroundColor = Color.Unspecified
         orientation = AppBarOrientation.Vertical
-        menuExpanded = false
+        barVisible = true
+        menuExpanded = true
+        clearExpandedMenus()
     }
+}
+
+private fun List<Int>.toMenuPathKey(): String {
+    return joinToString(separator = "/")
 }
 
 /**
@@ -140,7 +206,7 @@ fun rememberAppBarState(): AppBarState {
 /**
  * CompositionLocal 用于在组件树中提供 AppBarState
  */
-val LocalAppBarState: CompositionLocal<AppBarState?> = compositionLocalOf { null }
+val LocalAppBarState: ProvidableCompositionLocal<AppBarState?> = compositionLocalOf { null }
 
 /**
  * AppBar DSL 构建器
@@ -215,4 +281,36 @@ class AppBarStateScope(
  */
 fun AppBarState.configure(block: AppBarStateScope.() -> Unit) {
     AppBarStateScope(this).block()
+}
+
+@Composable
+fun PageAppBarEffect(
+    showPointer: Boolean = false,
+    pointerOrientation: Boolean = true,
+    showExchange: Boolean = false,
+    onPointerClick: (() -> Unit)? = null,
+    onExchangeClick: (() -> Unit)? = null,
+) {
+    val appBarState = LocalAppBarState.current ?: return
+    DisposableEffect(
+        appBarState,
+        showPointer,
+        pointerOrientation,
+        showExchange,
+        onPointerClick,
+        onExchangeClick,
+    ) {
+        appBarState.showPointer = showPointer
+        appBarState.pointerOrientation = pointerOrientation
+        appBarState.showExchange = showExchange
+        appBarState.setOnPointerClickListener(onPointerClick ?: {})
+        appBarState.setOnExchangeClickListener(onExchangeClick ?: {})
+        onDispose {
+            appBarState.showPointer = false
+            appBarState.pointerOrientation = true
+            appBarState.showExchange = false
+            appBarState.setOnPointerClickListener {}
+            appBarState.setOnExchangeClickListener {}
+        }
+    }
 }

@@ -2,9 +2,9 @@ package cn.a10miaomiao.bilimiao.compose.components.appbar
 
 import android.content.Context
 import androidx.annotation.DrawableRes
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
+import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
 
 /**
  * 菜单项数据
@@ -23,6 +23,10 @@ data class MenuItemData(
     @DrawableRes val iconResource: Int? = null,
     /** 子菜单 */
     val childMenu: List<MenuItemData>? = null,
+    /** 子菜单是否为可选中菜单 */
+    val checkable: Boolean = false,
+    /** 子菜单当前选中的 key */
+    val checkedKey: Int? = null,
     /** 内容描述（无障碍） */
     val contentDescription: String? = null,
 ) {
@@ -43,6 +47,8 @@ data class MenuItemData(
                 childMenu = propInfo.childMenu?.items?.let { items ->
                     items.map { fromPropInfo(it, context) }
                 },
+                checkable = propInfo.childMenu?.checkable == true,
+                checkedKey = propInfo.childMenu?.takeIf { it.checkable }?.checkedKey,
                 contentDescription = propInfo.contentDescription,
             )
         }
@@ -57,20 +63,35 @@ data class MenuItemData(
             title = title,
             subTitle = subTitle,
             iconResource = iconResource,
-            childMenu = childMenu?.let { children ->
-                com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu().apply {
-                    children.forEach { child ->
-                        myItem {
-                            key = child.key
-                            title = child.title
-                            subTitle = child.subTitle
-                            iconResource = child.iconResource
-                        }
-                    }
-                }
-            },
+            childMenu = childMenu?.toMyPageMenu(
+                checkable = checkable,
+                checkedKey = checkedKey,
+            ),
             contentDescription = contentDescription,
         )
+    }
+
+    private fun List<MenuItemData>.toMyPageMenu(
+        checkable: Boolean,
+        checkedKey: Int?,
+    ): MyPageMenu {
+        return MyPageMenu().apply {
+            this.checkable = checkable
+            this.checkedKey = checkedKey ?: 0
+            forEach { child ->
+                myItem {
+                    key = child.key
+                    title = child.title
+                    subTitle = child.subTitle
+                    iconResource = child.iconResource
+                    childMenu = child.childMenu?.toMyPageMenu(
+                        checkable = child.checkable,
+                        checkedKey = child.checkedKey,
+                    )
+                    contentDescription = child.contentDescription
+                }
+            }
+        }
     }
 }
 
