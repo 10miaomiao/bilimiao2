@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
@@ -48,10 +49,11 @@ import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.bottomSheetContentInsets
-import cn.a10miaomiao.bilimiao.compose.common.calculateMainContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
+import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffoldPlayerLayoutState
+import cn.a10miaomiao.bilimiao.compose.components.layout.calculateComposeScaffoldLayout
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
@@ -130,7 +132,6 @@ fun MainActivityComposeHost(
     onInitialDeepLinkConsumed: () -> Unit = {},
     onReady: () -> Unit = {},
 ) {
-    val connection = rememberNestedScrollInteropConnection(containerView ?: LocalView.current)
     val navController = rememberNavController()
     val appBarState = remember { AppBarState() }
     val pageConfig = pageConfigState.collectConfigAsState().value
@@ -138,13 +139,23 @@ fun MainActivityComposeHost(
     val orientation = startViewWrapper.orientation
     val showPlayer = startViewWrapper.showPlayer
     val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
-    val mainContentInsets = remember(rawWindowInsets, appBarState, showPlayer, orientation) {
-        calculateMainContentInsets(
+    val mainContentInsets = with(LocalDensity.current) {
+        calculateComposeScaffoldLayout(
+            viewportWidth = with(this) { startViewWrapper.activity.resources.displayMetrics.widthPixels.toDp() },
+            viewportHeight = with(this) { startViewWrapper.activity.resources.displayMetrics.heightPixels.toDp() },
             rawWindowInsets = rawWindowInsets,
             appBarState = appBarState,
-            showPlayer = showPlayer,
-            orientation = orientation,
-        )
+            playerState = ComposeScaffoldPlayerLayoutState(
+                showPlayer = showPlayer,
+                fullScreenPlayer = startViewWrapper.fullScreenPlayer,
+                orientation = orientation,
+                smallModePlayerCurrentHeight = startViewWrapper.smallModePlayerCurrentHeight,
+                smallModePlayerMinHeight = startViewWrapper.smallModePlayerMinHeight,
+                playerSmallShowAreaWidth = startViewWrapper.playerSmallShowAreaWidth,
+                playerSmallShowAreaHeight = startViewWrapper.playerSmallShowAreaHeight,
+                playerVideoRatio = startViewWrapper.playerVideoRatio,
+            ),
+        ).contentInsets
     }
 
     LaunchedEffect(navController) {
@@ -223,14 +234,7 @@ fun MainActivityComposeHost(
                             )
                         }
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .nestedScroll(connection)
-                                .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
-                        ) {
-                            MyNavHost(navController, HomePage)
-                        }
+                        MyNavHost(navController, HomePage)
                     }
                     if (bottomSheetPage != null) {
                         MyBottomSheet(
