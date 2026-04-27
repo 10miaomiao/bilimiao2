@@ -3,7 +3,6 @@ package cn.a10miaomiao.bilimiao.compose.components.appbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -78,82 +77,67 @@ fun AppBarHorizontal(
             .fillMaxHeight()
             .width(AppBarConfig.MenuWidth)
             .background(backgroundColor)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // 导航图标区域
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            // 返回/菜单按钮
-            NavigationIcon(
-                icon = if (showBack) AppBarNavigationIcon.Back else AppBarNavigationIcon.Menu,
-                onClick = if (showBack) onBackClick else onMenuClick,
-                modifier = Modifier.width(AppBarConfig.MenuWidth),
+        // 返回/菜单按钮
+        NavigationIcon(
+            icon = if (showBack) AppBarNavigationIcon.Back else AppBarNavigationIcon.Menu,
+            onClick = if (showBack) onBackClick else onMenuClick,
+            modifier = Modifier.width(AppBarConfig.MenuWidth),
+        )
+
+        if (showPointer) {
+            AppBarHorizontalIconButton(
+                iconRes = R.drawable.ic_pointer_24dp,
+                contentDescription = "指针",
+                rotation = if (pointerOrientation) 0f else 180f,
+                onClick = onPointerClick,
             )
+        }
 
-            if (showPointer) {
-                AppBarHorizontalIconButton(
-                    iconRes = R.drawable.ic_pointer_24dp,
-                    contentDescription = "指针",
-                    rotation = if (pointerOrientation) 0f else 180f,
-                    onClick = onPointerClick,
-                )
-            }
-
-            if (showExchange) {
-                AppBarHorizontalIconButton(
-                    iconRes = R.drawable.ic_exchange_24dp,
-                    contentDescription = "交换",
-                    onClick = onExchangeClick,
-                )
-            }
-
-            // 标题
-            if (!title.isNullOrEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .width(AppBarConfig.MenuWidth)
-                        .padding(AppBarConfig.NavigationIconPadding),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = title.replace("\n", " "),
-                        color = contentColor.copy(alpha = 0.45f),
-                        fontSize = AppBarConfig.TitleTextSize.value.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-
-            // 分割线
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = AppBarConfig.DividerHeight,
-                color = MaterialTheme.colorScheme.outlineVariant,
+        if (showExchange) {
+            AppBarHorizontalIconButton(
+                iconRes = R.drawable.ic_exchange_24dp,
+                contentDescription = "交换",
+                onClick = onExchangeClick,
             )
+        }
 
-            // 菜单列表
-            Column(
+        // 标题
+        if (!title.isNullOrEmpty()) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Top,
+                    .width(AppBarConfig.MenuWidth)
+                    .padding(AppBarConfig.NavigationIconPadding),
+                contentAlignment = Alignment.Center,
             ) {
-                HorizontalAppBarMenus(
-                    menus = menus,
-                    isNavigationMenu = isNavigationMenu,
-                    checkedKey = checkedKey,
-                    themeColor = themeColor,
-                    appBarState = appBarState,
-                    onMenuItemClick = onMenuItemClick,
+                Text(
+                    text = title.replace("\n", " "),
+                    color = contentColor.copy(alpha = 0.45f),
+                    fontSize = AppBarConfig.TitleTextSize.value.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
+
+        // 分割线
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(),
+            thickness = AppBarConfig.DividerHeight,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+
+        HorizontalAppBarMenus(
+            menus = menus,
+            isNavigationMenu = isNavigationMenu,
+            checkedKey = checkedKey,
+            themeColor = themeColor,
+            appBarState = appBarState,
+            onMenuItemClick = onMenuItemClick,
+        )
     }
 }
 
