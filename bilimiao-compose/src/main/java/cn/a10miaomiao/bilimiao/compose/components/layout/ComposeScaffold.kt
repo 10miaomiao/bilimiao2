@@ -1,43 +1,63 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.snapTo
+import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.DrawerValue
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
@@ -48,18 +68,29 @@ import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.roundToInt
+
+private const val DrawerMaxWidth = 400
+private const val DrawerScrimMaxAlpha = 0.4f
+private const val DrawerSettleDurationMillis = 250
+
+private enum class ComposeDrawerValue {
+    Closed,
+    Open,
+}
 
 @Composable
 fun ComposeScaffold(
     startViewWrapper: StartViewWrapper,
     modifier: Modifier = Modifier,
     appBarState: AppBarState? = null,
+    allowDrawerOpenGesture: Boolean = true,
     drawerContent: @Composable () -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val context = LocalContext.current
-
     val showPlayer = startViewWrapper.showPlayer
     val fullScreenPlayer = startViewWrapper.fullScreenPlayer
     val orientation = startViewWrapper.orientation
@@ -70,9 +101,6 @@ fun ComposeScaffold(
     val playerVideoRatio = startViewWrapper.playerVideoRatio
     val drawerState = startViewWrapper.drawerState
 
-    val modalDrawerState = rememberDrawerState(
-        initialValue = if (drawerState == 3) DrawerValue.Open else DrawerValue.Closed
-    )
     val appBarNestedScrollConnection = remember(appBarState, orientation) {
         if (appBarState == null) {
             null
@@ -107,20 +135,6 @@ fun ComposeScaffold(
         }
     }
 
-    LaunchedEffect(drawerState) {
-        when (drawerState) {
-            3 -> modalDrawerState.open()
-            4 -> modalDrawerState.close()
-        }
-    }
-
-    LaunchedEffect(modalDrawerState.currentValue) {
-        when (modalDrawerState.currentValue) {
-            DrawerValue.Open -> startViewWrapper.setDrawerState(3)
-            DrawerValue.Closed -> startViewWrapper.setDrawerState(4)
-        }
-    }
-
     LaunchedEffect(appBarState?.orientation) {
         if (appBarState?.orientation == AppBarOrientation.Horizontal) {
             appBarState.showBar()
@@ -129,6 +143,7 @@ fun ComposeScaffold(
     }
 
     val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
+    val density = LocalDensity.current
     val playerLayoutState = remember(
         showPlayer,
         fullScreenPlayer,
@@ -150,21 +165,127 @@ fun ComposeScaffold(
             playerVideoRatio = playerVideoRatio,
         )
     }
+    val drawerController = rememberComposeDrawerController(
+        initialState = drawerState,
+        onStateChanged = startViewWrapper::setDrawerState,
+    )
+    var drawerMeasuredWidthPx by remember(orientation) { mutableIntStateOf(0) }
 
-    ModalNavigationDrawer(
-        modifier = modifier.fillMaxSize(),
-        drawerState = modalDrawerState,
-        drawerContent = drawerContent,
-        content = {
+    LaunchedEffect(drawerMeasuredWidthPx) {
+        drawerController.updateDrawerWidth(drawerMeasuredWidthPx.toFloat())
+    }
+
+    LaunchedEffect(drawerState, drawerMeasuredWidthPx) {
+        if (drawerMeasuredWidthPx <= 0) {
+            return@LaunchedEffect
+        }
+        when (drawerState) {
+            StartViewWrapper.DRAWER_STATE_EXPANDED -> drawerController.open()
+            StartViewWrapper.DRAWER_STATE_COLLAPSED -> drawerController.close()
+        }
+    }
+
+    LaunchedEffect(drawerController.currentValue, drawerController.targetValue) {
+        drawerController.syncWrapperState()
+    }
+
+    BoxWithConstraints(
+        modifier = modifier.fillMaxSize()
+    ) {
+        val layoutResult = with(density) {
+            calculateComposeScaffoldLayout(
+                viewportWidth = maxWidth,
+                viewportHeight = maxHeight,
+                rawWindowInsets = rawWindowInsets,
+                appBarState = appBarState,
+                playerState = playerLayoutState,
+            )
+        }
+        val maxHeightPx = with(density) { maxHeight.toPx() }
+        val leftEdgeWidthPx = with(density) { 40.dp.toPx() }
+        val appBarGestureRect = layoutResult.appBarHorizontalBounds ?: layoutResult.appBarVerticalBounds
+        val drawerWidth = if (maxWidth > DrawerMaxWidth.dp) DrawerMaxWidth.dp else maxWidth
+        val scrimAlpha = drawerController.openFraction * DrawerScrimMaxAlpha
+        val drawerGestureModifier = Modifier.anchoredDraggable(
+            state = drawerController.state,
+            orientation = Orientation.Horizontal,
+            enabled = true,
+            flingBehavior = AnchoredDraggableDefaults.flingBehavior(
+                state = drawerController.state,
+                positionalThreshold = { distance -> distance * 0.5f },
+            ),
+        )
+        val appBarDrawerGestureModifier = if (
+            allowDrawerOpenGesture && drawerController.settledValue == ComposeDrawerValue.Closed
+        ) {
+            Modifier
+                .pointerInput(startViewWrapper) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        startViewWrapper.setTouchStartTop(down.position.y)
+                    }
+                }
+                .then(drawerGestureModifier)
+        } else {
+            Modifier
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(
+                    allowDrawerOpenGesture,
+                    drawerController.settledValue,
+                    leftEdgeWidthPx,
+                    appBarGestureRect,
+                ) {
+                    if (!allowDrawerOpenGesture || drawerController.settledValue != ComposeDrawerValue.Closed) {
+                        return@pointerInput
+                    }
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        if (!isDrawerOpenGestureStart(down.position, leftEdgeWidthPx, appBarGestureRect)) {
+                            return@awaitEachGesture
+                        }
+                        startViewWrapper.setTouchStartTop(down.position.y)
+                        val pointerId = down.id
+                        val velocityTracker = VelocityTracker()
+                        velocityTracker.addPosition(down.uptimeMillis, down.position)
+                        var dragging = false
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+                            if (!change.pressed) {
+                                if (dragging) {
+                                    drawerController.scope.launch {
+                                        drawerController.state.settle(velocityTracker.calculateVelocity().x)
+                                    }
+                                }
+                                break
+                            }
+                            if (!change.positionChanged()) {
+                                continue
+                            }
+                            velocityTracker.addPosition(change.uptimeMillis, change.position)
+                            val deltaX = change.position.x - down.position.x
+                            val deltaY = change.position.y - down.position.y
+                            if (!dragging) {
+                                if (kotlin.math.abs(deltaY) > kotlin.math.abs(deltaX) || deltaX <= 0f) {
+                                    break
+                                }
+                                dragging = true
+                            }
+                            val consumed = drawerController.state.dispatchRawDelta(deltaX - drawerController.dragConsumedDelta)
+                            drawerController.dragConsumedDelta += consumed
+                            if (consumed != 0f) {
+                                change.consume()
+                            }
+                        }
+                        drawerController.dragConsumedDelta = 0f
+                    }
+                }
+        ) {
             SubcomposeLayout(modifier = Modifier.fillMaxSize()) { constraints ->
-                val layoutResult = calculateComposeScaffoldLayout(
-                    viewportWidth = with(this) { constraints.maxWidth.toDp() },
-                    viewportHeight = with(this) { constraints.maxHeight.toDp() },
-                    rawWindowInsets = rawWindowInsets,
-                    appBarState = appBarState,
-                    playerState = playerLayoutState,
-                )
-
                 val contentPlaceable = subcompose("content-${layoutResult.contentInsets}") {
                     CompositionLocalProvider(
                         LocalContentInsets provides layoutResult.contentInsets,
@@ -172,13 +293,13 @@ fun ComposeScaffold(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .then(
-                                    if (appBarNestedScrollConnection != null) {
-                                        Modifier.nestedScroll(appBarNestedScrollConnection)
-                                    } else {
-                                        Modifier
-                                    }
-                                )
+//                                .then(
+//                                    if (appBarNestedScrollConnection != null) {
+//                                        Modifier.nestedScroll(appBarNestedScrollConnection)
+//                                    } else {
+//                                        Modifier
+//                                    }
+//                                )
                                 .background(MaterialTheme.colorScheme.background)
                         ) {
                             content()
@@ -211,7 +332,9 @@ fun ComposeScaffold(
                                 onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
                                 onPointerClick = { appBarState._onPointerClick?.invoke() },
                                 onExchangeClick = { appBarState._onExchangeClick?.invoke() },
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .then(appBarDrawerGestureModifier),
                             )
                         }
                     }.single().measure(boundsConstraints(layoutResult.appBarVerticalBounds!!))
@@ -272,8 +395,173 @@ fun ComposeScaffold(
                     }
                 }
             }
+
+            if (drawerController.isOpen) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(drawerGestureModifier)
+                        .background(Color.Black.copy(alpha = scrimAlpha))
+                        .pointerInput(Unit) {
+                            detectTapGestures {
+                                drawerController.scope.launch {
+                                    drawerController.close()
+                                }
+                            }
+                        }
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(drawerWidth)
+                    .offset {
+                        IntOffset(drawerController.currentOffset.roundToInt(), 0)
+                    }
+                    .onSizeChanged {
+                        drawerMeasuredWidthPx = it.width
+                    }
+                    .then(drawerGestureModifier)
+            ) {
+                drawerContent()
+            }
         }
+    }
+}
+
+private fun isDrawerOpenGestureStart(
+    position: Offset,
+    leftEdgeWidthPx: Float,
+    appBarGestureRect: Rect?,
+): Boolean {
+    return position.x <= leftEdgeWidthPx || appBarGestureRect?.contains(position) == true
+}
+
+private class ComposeDrawerController(
+    initialState: Int,
+    private val onStateChanged: (Int) -> Unit,
+    val scope: CoroutineScope,
+) {
+    private var drawerWidthPx by mutableFloatStateOf(0f)
+    private var lastDispatchedState by mutableIntStateOf(initialState)
+    private var programmaticChange by mutableStateOf(false)
+    var dragConsumedDelta by mutableFloatStateOf(0f)
+
+    val state = AnchoredDraggableState(
+        initialValue = initialState.toDrawerValue(),
+        positionalThreshold = { distance -> distance * 0.5f },
+        velocityThreshold = { drawerWidthPx / 10f },
+        snapAnimationSpec = tween(durationMillis = DrawerSettleDurationMillis),
+        decayAnimationSpec = exponentialDecay(),
     )
+
+    val currentValue: ComposeDrawerValue
+        get() = state.currentValue
+
+    val targetValue: ComposeDrawerValue
+        get() = state.targetValue
+
+    val settledValue: ComposeDrawerValue
+        get() = state.settledValue
+
+    val isAnimationRunning: Boolean
+        get() = state.isAnimationRunning
+
+    val currentOffset: Float
+        get() = if (drawerWidthPx <= 0f || state.offset.isNaN()) -drawerWidthPx else state.requireOffset()
+
+    val openFraction: Float
+        get() = if (drawerWidthPx <= 0f) 0f else ((drawerWidthPx + currentOffset) / drawerWidthPx).coerceIn(0f, 1f)
+
+    val isOpen: Boolean
+        get() = openFraction > 0f || settledValue == ComposeDrawerValue.Open || isAnimationRunning
+
+    suspend fun updateDrawerWidth(widthPx: Float) {
+        if (widthPx <= 0f || drawerWidthPx == widthPx) {
+            return
+        }
+        drawerWidthPx = widthPx
+        state.updateAnchors(
+            DraggableAnchors {
+                ComposeDrawerValue.Closed at -drawerWidthPx
+                ComposeDrawerValue.Open at 0f
+            }
+        )
+    }
+
+    suspend fun open() {
+        if (drawerWidthPx <= 0f || targetValue == ComposeDrawerValue.Open) {
+            return
+        }
+        programmaticChange = true
+        dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
+        state.snapTo(ComposeDrawerValue.Open)
+        programmaticChange = false
+        dispatchState(StartViewWrapper.DRAWER_STATE_EXPANDED)
+    }
+
+    suspend fun close() {
+        if (drawerWidthPx <= 0f || targetValue == ComposeDrawerValue.Closed) {
+            return
+        }
+        programmaticChange = true
+        dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
+        state.snapTo(ComposeDrawerValue.Closed)
+        programmaticChange = false
+        dispatchState(StartViewWrapper.DRAWER_STATE_COLLAPSED)
+    }
+
+    fun syncWrapperState() {
+        if (programmaticChange) {
+            return
+        }
+        when {
+            isAnimationRunning -> {
+                dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
+            }
+            settledValue == ComposeDrawerValue.Open && targetValue == ComposeDrawerValue.Open -> {
+                dispatchState(StartViewWrapper.DRAWER_STATE_EXPANDED)
+            }
+            settledValue == ComposeDrawerValue.Closed && targetValue == ComposeDrawerValue.Closed -> {
+                dispatchState(StartViewWrapper.DRAWER_STATE_COLLAPSED)
+            }
+            else -> {
+                dispatchState(StartViewWrapper.DRAWER_STATE_DRAGGING)
+            }
+        }
+    }
+
+    private fun dispatchState(state: Int) {
+        if (lastDispatchedState == state) {
+            return
+        }
+        lastDispatchedState = state
+        onStateChanged(state)
+    }
+}
+
+@Composable
+private fun rememberComposeDrawerController(
+    initialState: Int,
+    onStateChanged: (Int) -> Unit,
+): ComposeDrawerController {
+    val scope = rememberCoroutineScope()
+    return remember(scope, onStateChanged) {
+        ComposeDrawerController(
+            initialState = initialState,
+            onStateChanged = onStateChanged,
+            scope = scope,
+        )
+    }
+}
+
+private fun Int.toDrawerValue(): ComposeDrawerValue {
+    return if (this == StartViewWrapper.DRAWER_STATE_EXPANDED) {
+        ComposeDrawerValue.Open
+    } else {
+        ComposeDrawerValue.Closed
+    }
 }
 
 private fun boundsConstraints(bounds: Rect): Constraints {
@@ -306,6 +594,7 @@ internal fun PlayerLayer(
     val loadingView = startViewWrapper.loadingView
     val orientation = startViewWrapper.orientation
     val density = LocalDensity.current
+    val context = LocalContext.current
 
     if (playerView == null) {
         return
@@ -316,7 +605,6 @@ internal fun PlayerLayer(
     var currentWidth by remember { mutableStateOf(with(density) { baseBounds.width.toDp() }) }
     var currentHeight by remember { mutableStateOf(with(density) { baseBounds.height.toDp() }) }
 
-    val context = LocalContext.current
     val screenWidth = density.run { context.resources.displayMetrics.widthPixels.toDp() }
 
     LaunchedEffect(baseBounds) {
@@ -326,7 +614,6 @@ internal fun PlayerLayer(
             offsetX = 0.dp
             offsetY = 0.dp
         } else if (offsetX == 0.dp && offsetY == 0.dp) {
-            // Initialize landscape default position to top-right (matching native RT default)
             offsetX = screenWidth - currentWidth
             offsetY = 0.dp
         }
@@ -337,15 +624,13 @@ internal fun PlayerLayer(
             .offset(x = offsetX, y = offsetY)
             .size(currentWidth, currentHeight)
             .pointerInput(Unit) {
-                detectTransformGestures(panZoomLock = true) { centroid, pan, zoom, rotation ->
+                detectTransformGestures(panZoomLock = true) { _, pan, zoom, _ ->
                     if (zoom != 1f) {
-                        // Pinch to resize
                         val newWidth = (currentWidth.value * zoom).coerceIn(200f, 800f).dp
                         val newHeight = (currentHeight.value * zoom).coerceIn(112f, 450f).dp
                         currentWidth = newWidth
                         currentHeight = newHeight
                     } else {
-                        // Single finger drag to move
                         offsetX += pan.x.toDp()
                         offsetY += pan.y.toDp()
                     }
@@ -360,12 +645,10 @@ internal fun PlayerLayer(
             .then(
                 if (baseBounds.width == Float.POSITIVE_INFINITY || baseBounds.height == Float.POSITIVE_INFINITY) {
                     Modifier.fillMaxSize()
-                } else if (orientation == 1){
+                } else if (orientation == 1) {
                     Modifier
                         .background(Color.Black)
-                        .padding(
-                            top = windowInsets.top,
-                        )
+                        .padding(top = windowInsets.top)
                         .size(currentWidth, currentHeight)
                 } else {
                     Modifier.size(currentWidth, currentHeight)
@@ -374,11 +657,8 @@ internal fun PlayerLayer(
             .then(modifier)
     ) {
         AndroidView(
-            factory = { ctx ->
-                playerView
-            },
-            onReset = { view ->
-//                (view.parent as ViewGroup).removeView(view)
+            factory = { playerView },
+            onReset = { _ ->
             },
             modifier = Modifier.fillMaxSize()
         )

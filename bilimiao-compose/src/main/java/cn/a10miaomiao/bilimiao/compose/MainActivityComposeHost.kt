@@ -138,6 +138,7 @@ fun MainActivityComposeHost(
     val bottomSheetPage by bottomSheetState.page.collectAsState()
     val orientation = startViewWrapper.orientation
     val showPlayer = startViewWrapper.showPlayer
+    val allowDrawerOpenGesture = bottomSheetPage == null && !startViewWrapper.fullScreenPlayer
     val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
     val mainContentInsets = with(LocalDensity.current) {
         calculateComposeScaffoldLayout(
@@ -217,6 +218,7 @@ fun MainActivityComposeHost(
                     ComposeScaffold(
                         startViewWrapper = startViewWrapper,
                         appBarState = appBarState,
+                        allowDrawerOpenGesture = allowDrawerOpenGesture,
                         drawerContent = {
                             StartViewContent(
                                 startTopHeight = startViewWrapper.touchStart.dp,
