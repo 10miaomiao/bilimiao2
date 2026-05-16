@@ -11,9 +11,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -31,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
 
 /**
  * AppBar 组件
@@ -74,10 +80,14 @@ fun AppBar(
     onExchangeClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val safePadding = WindowInsets.safeDrawing.only(
+        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+    ).asPaddingValues()
     Column(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
+            .padding(safePadding)
     ) {
         // 标题区域
         AppBarTitle(
@@ -106,12 +116,12 @@ fun AppBar(
             onExchangeClick = onExchangeClick,
         )
 
-        // 分割线
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            thickness = AppBarConfig.DividerHeight,
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
+//        // 分割线
+//        HorizontalDivider(
+//            modifier = Modifier.fillMaxWidth(),
+//            thickness = AppBarConfig.DividerHeight,
+//            color = MaterialTheme.colorScheme.outlineVariant,
+//        )
     }
 }
 
@@ -165,7 +175,7 @@ private fun AppBarMenuRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(AppBarConfig.MenuHeight)
-            .padding(horizontal = AppBarConfig.NavigationIconPadding),
+            .padding(start = AppBarConfig.NavigationIconPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NavigationIcon(

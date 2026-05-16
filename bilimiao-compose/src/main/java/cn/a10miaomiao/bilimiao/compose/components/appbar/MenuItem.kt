@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
@@ -76,35 +79,28 @@ internal fun BaseMenuItem(
     val subContentColor = if (checked) {
         themeColor.copy(alpha = 0.7f)
     } else {
-        contentColor.copy(alpha = 0.45f)
+        contentColor.copy(alpha = 0.7f)
     }
     val interactionSource = remember { MutableInteractionSource() }
-    val paddingStart = if (verticalLayout) {
-        AppBarConfig.NavigationIconPadding + (depth * 12).dp
-    } else {
-        0.dp
-    }
-
-    val containerModifier = modifier
-        .width(if (verticalLayout) AppBarConfig.MenuWidth else AppBarConfig.MenuItemMinWidth)
-        .clickable(
-            interactionSource = interactionSource,
-            indication = ripple(bounded = false),
-            onClick = { onClick(data) }
-        )
-        .padding(
-            start = paddingStart,
-            end = AppBarConfig.NavigationIconPadding,
-            top = AppBarConfig.NavigationIconPadding,
-            bottom = AppBarConfig.NavigationIconPadding,
-        )
-        .semantics {
-            data.contentDescription?.let { contentDescription = it }
-        }
 
     if (verticalLayout) {
         Row(
-            modifier = containerModifier,
+            modifier = modifier
+                .width(AppBarConfig.MenuWidth)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(bounded = false),
+                    onClick = { onClick(data) }
+                )
+                .padding(
+                    start = AppBarConfig.NavigationIconPadding + (depth * 12).dp,
+                    end = AppBarConfig.NavigationIconPadding,
+                    top = AppBarConfig.NavigationIconPadding,
+                    bottom = AppBarConfig.NavigationIconPadding,
+                )
+                .semantics {
+                    data.contentDescription?.let { contentDescription = it }
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -126,23 +122,31 @@ internal fun BaseMenuItem(
         }
     } else {
         Column(
-            modifier = containerModifier,
+            modifier = modifier
+                .widthIn(min = AppBarConfig.MenuItemMinWidth)
+                .fillMaxHeight()
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(bounded = false),
+                    onClick = { onClick(data) }
+                )
+                .padding(
+                    start = AppBarConfig.NavigationIconPadding,
+                    end = AppBarConfig.NavigationIconPadding,
+                )
+                .semantics {
+                    data.contentDescription?.let { contentDescription = it }
+                },
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
-            Box(
-                contentAlignment = Alignment.Center,
-            ) {
-                MenuItemIcon(data = data, contentColor = contentColor)
-            }
+            MenuItemIcon(data = data, contentColor = contentColor)
             MenuItemTexts(
                 data = data,
                 contentColor = contentColor,
                 subContentColor = subContentColor,
                 textAlign = TextAlign.Center,
             )
-            if (expandable) {
-                ExpandIndicator(expanded = expanded, contentColor = subContentColor)
-            }
         }
     }
 }
@@ -152,28 +156,20 @@ private fun MenuItemIcon(
     data: MenuItemData,
     contentColor: Color,
 ) {
-    Box(
-        modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
-        contentAlignment = Alignment.Center,
-    ) {
-        when {
-            data.iconVector != null -> {
-                Icon(
-                    imageVector = data.iconVector,
-                    contentDescription = data.title,
-                    tint = contentColor,
-                    modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
-                )
-            }
-            data.iconResource != null -> {
-                Icon(
-                    painter = painterResource(id = data.iconResource),
-                    contentDescription = data.title,
-                    tint = contentColor,
-                    modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
-                )
-            }
-        }
+    if (data.iconVector != null) {
+        Icon(
+            imageVector = data.iconVector,
+            contentDescription = data.title,
+            tint = contentColor,
+            modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
+        )
+    } else if (data.iconResource != null) {
+        Icon(
+            painter = painterResource(id = data.iconResource),
+            contentDescription = data.title,
+            tint = contentColor,
+            modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
+        )
     }
 }
 
@@ -190,7 +186,6 @@ private fun MenuItemTexts(
             color = contentColor,
             fontSize = AppBarConfig.TitleTextSize.value.sp,
             textAlign = textAlign,
-            modifier = Modifier.padding(top = AppBarConfig.SubTitleMarginTop),
         )
     }
 

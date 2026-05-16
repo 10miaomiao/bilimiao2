@@ -59,7 +59,7 @@ internal fun Density.calculateComposeScaffoldLayout(
         0.dp
     }
     val verticalAppBarHeight = if (hasVerticalAppBar) {
-        AppBarConfig.Height
+        AppBarConfig.Height + rawWindowInsets.bottom
     } else {
         0.dp
     }
@@ -94,7 +94,7 @@ internal fun Density.calculateComposeScaffoldLayout(
     )
 
     val appBarVerticalBounds = if (hasVerticalAppBar) {
-        val appBarHeightPx = AppBarConfig.Height.roundToPx()
+        val appBarHeightPx = (AppBarConfig.Height + rawWindowInsets.bottom).roundToPx()
         Rect(
             left = 0f,
             top = (viewportHeightPx - appBarHeightPx).toFloat(),
@@ -106,12 +106,12 @@ internal fun Density.calculateComposeScaffoldLayout(
     }
 
     val appBarHorizontalBounds = if (hasHorizontalAppBar) {
-        val appBarWidthPx = horizontalAppBarWidth.roundToPx()
+        val appBarWidthPx = (horizontalAppBarWidth + rawWindowInsets.left).roundToPx()
         Rect(
-            left = rawWindowInsets.left.toPx(),
-            top = rawWindowInsets.top.toPx(),
+            left = 0f,
+            top = 0f,
             right = rawWindowInsets.left.toPx() + appBarWidthPx,
-            bottom = viewportHeightPx.toFloat() - rawWindowInsets.bottom.toPx(),
+            bottom = viewportHeightPx.toFloat(),
         )
     } else {
         null
