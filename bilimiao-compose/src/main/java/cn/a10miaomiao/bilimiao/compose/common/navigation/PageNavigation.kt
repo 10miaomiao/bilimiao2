@@ -50,9 +50,15 @@ class PageNavigation(
         navigate(route, navOptions(builder))
     }
 
-    fun popBackStack() {
-        if (!hostController.popBackStack()) {
-            onClose()
+    fun canPopBackStack(): Boolean {
+        return hostController.previousBackStackEntry != null
+    }
+
+    fun popBackStack(): Boolean {
+        return hostController.popBackStack().also {
+            if (!it) {
+                onClose()
+            }
         }
     }
 

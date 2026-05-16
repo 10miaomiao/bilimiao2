@@ -9,6 +9,7 @@ interface ComposeHostBridge {
     val activity: Activity
 
     fun finishHost()
+    fun onBackPressed()
     fun startActivity(intent: Intent)
     fun runOnUiThread(action: () -> Unit)
 }

@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
+import com.kongzue.dialogx.dialogs.PopTip
 
 class MainActivity : AppCompatActivity(), DIAware {
 
@@ -102,7 +103,6 @@ class MainActivity : AppCompatActivity(), DIAware {
     private val emitter = SharedFlowEmitter()
     private val composeNavigator = MainActivityComposeNavigator(
         launchUrl = ::launchWebBrowser,
-        onClose = { finish() },
     )
     private var appBarBackgroundColor by mutableStateOf(ComposeColor.Unspecified)
     private val composeHostBridge = object : ComposeHostBridge {
@@ -114,6 +114,10 @@ class MainActivity : AppCompatActivity(), DIAware {
 
         override fun finishHost() {
             finish()
+        }
+
+        override fun onBackPressed() {
+            this@MainActivity.onBackPressed()
         }
 
         override fun startActivity(intent: Intent) {
@@ -137,6 +141,7 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
     private var pageConfig: MyPageConfigInfo? = null
     private var pendingDeepLink: Uri? = null
+    private var lastExitBackPressedTime = 0L
 
     private lateinit var playerLayout: FrameLayout
     private lateinit var videoPlayerView: DanmakuVideoPlayer
@@ -601,7 +606,23 @@ class MainActivity : AppCompatActivity(), DIAware {
         if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
-        composeNavigator.popBackStack()
+        if (composeNavigator.canPopBackStack()) {
+            composeNavigator.popBackStack()
+        } else {
+            handleRootBackPressed()
+        }
+    }
+
+    private fun handleRootBackPressed() {
+        if (!basePlayerDelegate.onBackPressed()) {
+            val now = System.currentTimeMillis()
+            if (now - lastExitBackPressedTime > 2000) {
+                PopTip.show("再按一次退出bilimiao")
+                lastExitBackPressedTime = now
+            } else {
+                finish()
+            }
+        }
     }
 
     override fun attachBaseContext(newBase: Context) {

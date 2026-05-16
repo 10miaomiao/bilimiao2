@@ -103,8 +103,12 @@ class MainActivityComposeNavigator(
         pageNavigation.navigate(page)
     }
 
-    fun popBackStack() {
-        pageNavigation.popBackStack()
+    fun canPopBackStack(): Boolean {
+        return pageNavigation.canPopBackStack()
+    }
+
+    fun popBackStack(): Boolean {
+        return pageNavigation.popBackStack()
     }
 
     fun goBackHome() {
