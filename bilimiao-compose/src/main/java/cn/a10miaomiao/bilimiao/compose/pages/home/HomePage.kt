@@ -70,7 +70,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeTimeMachineContent
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
@@ -84,7 +83,6 @@ import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -165,9 +163,6 @@ private class HomePageViewModel(
     private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
 
-    private val playerDelegate by instance<BasePlayerDelegate>()
-
-    private var lastBackPressedTime = 0L
 
     private val _tabs = mutableStateOf(getTabs(appStore.state.home))
     val tabs get() = _tabs.value
@@ -343,16 +338,7 @@ private class HomePageViewModel(
     }
 
     fun backPressed() {
-        if (playerDelegate.onBackPressed()) {
-            return
-        }
-        val now = System.currentTimeMillis()
-        if (now - lastBackPressedTime > 2000) {
-            PopTip.show("再按一次退出bilimiao")
-            lastBackPressedTime = now
-        } else {
-            hostBridge.finishHost()
-        }
+        hostBridge.onBackPressed()
     }
 
 }
