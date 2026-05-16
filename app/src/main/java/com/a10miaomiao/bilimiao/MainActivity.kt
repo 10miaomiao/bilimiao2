@@ -257,8 +257,6 @@ class MainActivity : AppCompatActivity(), DIAware {
                     emitter = emitter,
                     messageDialogState = messageDialogState,
                     bottomSheetState = bottomSheetState,
-                    containerView = playerHostState.contentContainerView,
-                    bottomSheetContainerView = playerHostState.bottomSheetContainerView,
                     appBarBackgroundColor = appBarBackgroundColor,
                     onBackClick = ::onBackPressed,
                     initialDeepLink = pendingDeepLink,
@@ -628,11 +626,6 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     private inner class DirectComposePlayerHostState : PlayerHostState {
-        val contentContainerView = FrameLayout(this@MainActivity)
-        val bottomSheetContainerView = FrameLayout(this@MainActivity).apply {
-            tag = "bottomSheet"
-        }
-
         override var showPlayer: Boolean = false
             set(value) {
                 field = value
