@@ -185,7 +185,11 @@ fun ComposeScaffold(
         }
     }
 
-    LaunchedEffect(drawerController.currentValue, drawerController.targetValue) {
+    LaunchedEffect(
+        drawerController.openFraction,
+        drawerController.currentValue,
+        drawerController.targetValue,
+    ) {
         drawerController.syncWrapperState()
     }
 

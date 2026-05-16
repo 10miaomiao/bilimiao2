@@ -248,10 +248,6 @@ fun MainActivityComposeHost(
             }
         }
     }
-
-    BackHandler(startViewWrapper.isDrawerOpen()) {
-        startViewWrapper.closeDrawer()
-    }
 }
 
 @Composable
