@@ -243,7 +243,7 @@ private fun CollapsingAppBarMenuRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(AppBarConfig.MenuHeight)
-            .padding(horizontal = AppBarConfig.NavigationIconPadding),
+            .padding(start = AppBarConfig.NavigationIconPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // 导航图标
@@ -256,6 +256,7 @@ private fun CollapsingAppBarMenuRow(
         Row(
             modifier = Modifier
                 .weight(1f)
+//                .padding(end = AppBarConfig.NavigationIconPadding)
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.End,
         ) {
