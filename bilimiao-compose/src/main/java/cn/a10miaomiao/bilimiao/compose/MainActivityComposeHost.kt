@@ -2,7 +2,6 @@ package cn.a10miaomiao.bilimiao.compose
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -44,7 +43,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.common.LocalContainerView
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
@@ -124,8 +122,6 @@ fun MainActivityComposeHost(
     emitter: SharedFlowEmitter,
     messageDialogState: MessageDialogState,
     bottomSheetState: BottomSheetState,
-    containerView: ViewGroup?,
-    bottomSheetContainerView: ViewGroup?,
     appBarBackgroundColor: androidx.compose.ui.graphics.Color,
     onBackClick: () -> Unit,
     initialDeepLink: Uri? = null,
@@ -200,7 +196,6 @@ fun MainActivityComposeHost(
     }
 
     CompositionLocalProvider(
-        LocalContainerView provides containerView,
         LocalPageConfigState provides pageConfigState,
         LocalPageNavigation provides navigator.pageNavigation,
         LocalEmitter provides emitter,
@@ -240,7 +235,6 @@ fun MainActivityComposeHost(
                     }
                     if (bottomSheetPage != null) {
                         MyBottomSheet(
-                            container = bottomSheetContainerView,
                             page = bottomSheetPage!!,
                             onClose = bottomSheetState::close,
                         )
@@ -273,7 +267,6 @@ fun MyNavHost(
 @SuppressLint("RestrictedApi")
 @Composable
 fun MyBottomSheet(
-    container: ViewGroup?,
     page: ComposePage,
     onClose: () -> Unit,
 ) {
@@ -297,7 +290,6 @@ fun MyBottomSheet(
         }
     ) {
         CompositionLocalProvider(
-            LocalContainerView provides container,
             LocalContentInsets provides bottomSheetContentInsets(),
             LocalPageConfigState provides pageConfigState,
             LocalPageNavigation provides pageNavigation,
