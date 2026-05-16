@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         }
 
         override fun onBackPressed() {
-            this@MainActivity.onBackPressed()
+            this@MainActivity.handleActivityBackPressed()
         }
 
         override fun startActivity(intent: Intent) {
@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity(), DIAware {
                     messageDialogState = messageDialogState,
                     bottomSheetState = bottomSheetState,
                     appBarBackgroundColor = appBarBackgroundColor,
-                    onBackClick = ::onBackPressed,
+                    onBackClick = ::handleActivityBackPressed,
                     initialDeepLink = pendingDeepLink,
                     onInitialDeepLinkConsumed = {
                         pendingDeepLink = null
@@ -594,7 +594,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         }
     }
 
-    override fun onBackPressed() {
+    private fun handleActivityBackPressed() {
         if (startViewWrapper.isDrawerOpen()) {
             if (startViewWrapper.showSearchDialog) {
                 startViewWrapper.closeSearchDialog()

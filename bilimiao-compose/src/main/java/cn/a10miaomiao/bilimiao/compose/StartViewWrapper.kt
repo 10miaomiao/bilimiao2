@@ -165,7 +165,7 @@ class StartViewWrapper(
 
     fun setDrawerState(state: Int) {
         _drawerState.value = state
-        _drawerOpen.value = state == DRAWER_STATE_EXPANDED
+        _drawerOpen.value = state != DRAWER_STATE_COLLAPSED
     }
 
     fun isDrawerOpen(): Boolean {
