@@ -13,10 +13,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import kotlin.math.roundToInt
@@ -33,26 +35,25 @@ internal fun VerticalAppBarMenus(
     menus: List<MenuItemData>,
     isNavigationMenu: Boolean,
     checkedKey: Int?,
-    themeColor: androidx.compose.ui.graphics.Color,
     appBarState: AppBarState,
     onMenuItemClick: (MenuItemData) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val anchors = remember { mutableStateMapOf<String, MenuAnchor>() }
     Box(modifier = modifier.fillMaxWidth()) {
+        val reversedMenu = menus.asReversed()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.End,
         ) {
-            menus.forEachIndexed { index, menuItem ->
+            reversedMenu.forEachIndexed { index, menuItem ->
                 val itemPath = listOf(menuItem.key, index)
-                TopLevelMenuItem(
+                VerticalTopLevelMenuItem(
                     data = menuItem,
                     menuCheckable = isNavigationMenu,
                     checked = checkedKey == menuItem.key,
-                    themeColor = themeColor,
                     appBarState = appBarState,
                     onMenuItemClick = onMenuItemClick,
                     path = itemPath,
@@ -60,14 +61,13 @@ internal fun VerticalAppBarMenus(
                 )
             }
         }
-        menus.forEachIndexed { index, menuItem ->
+        reversedMenu.forEachIndexed { index, menuItem ->
             val itemPath = listOf(menuItem.key, index)
             if (appBarState.isMenuExpanded(itemPath)) {
                 MenuPopupCascade(
                     menus = menuItem.childMenu.orEmpty(),
                     menuCheckable = menuItem.checkable,
                     checkedKey = menuItem.checkedKey,
-                    themeColor = themeColor,
                     appBarState = appBarState,
                     onMenuItemClick = onMenuItemClick,
                     parentPath = itemPath,
@@ -86,27 +86,28 @@ internal fun HorizontalAppBarMenus(
     menus: List<MenuItemData>,
     isNavigationMenu: Boolean,
     checkedKey: Int?,
-    themeColor: androidx.compose.ui.graphics.Color,
     appBarState: AppBarState,
     onMenuItemClick: (MenuItemData) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val anchors = remember { mutableStateMapOf<String, MenuAnchor>() }
     Box(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             menus.forEachIndexed { index, menuItem ->
                 val itemPath = listOf(menuItem.key, index)
-                TopLevelMenuItem(
+                HorizontalTopLevelMenuItem(
                     data = menuItem,
                     menuCheckable = isNavigationMenu,
                     checked = checkedKey == menuItem.key,
-                    themeColor = themeColor,
                     appBarState = appBarState,
                     onMenuItemClick = onMenuItemClick,
                     path = itemPath,
                     onAnchorChanged = { anchors[itemPath.toPathKey()] = it },
                     modifier = Modifier.fillMaxWidth(),
-                    verticalLayout = true,
                 )
             }
         }
@@ -117,7 +118,6 @@ internal fun HorizontalAppBarMenus(
                     menus = menuItem.childMenu.orEmpty(),
                     menuCheckable = menuItem.checkable,
                     checkedKey = menuItem.checkedKey,
-                    themeColor = themeColor,
                     appBarState = appBarState,
                     onMenuItemClick = onMenuItemClick,
                     parentPath = itemPath,
@@ -132,17 +132,64 @@ internal fun HorizontalAppBarMenus(
 }
 
 @Composable
-private fun TopLevelMenuItem(
+private fun VerticalTopLevelMenuItem(
     data: MenuItemData,
     menuCheckable: Boolean,
     checked: Boolean,
-    themeColor: androidx.compose.ui.graphics.Color,
     appBarState: AppBarState,
     onMenuItemClick: (MenuItemData) -> Unit,
     path: List<Int>,
     onAnchorChanged: (MenuAnchor) -> Unit,
     modifier: Modifier = Modifier,
-    verticalLayout: Boolean = false,
+) {
+    TopLevelTreeMenuItem(
+        data = data,
+        menuCheckable = menuCheckable,
+        checked = checked,
+        appBarState = appBarState,
+        onMenuItemClick = onMenuItemClick,
+        path = path,
+        onAnchorChanged = onAnchorChanged,
+        modifier = modifier,
+        vertical = true,
+    )
+}
+
+@Composable
+private fun HorizontalTopLevelMenuItem(
+    data: MenuItemData,
+    menuCheckable: Boolean,
+    checked: Boolean,
+    appBarState: AppBarState,
+    onMenuItemClick: (MenuItemData) -> Unit,
+    path: List<Int>,
+    onAnchorChanged: (MenuAnchor) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TopLevelTreeMenuItem(
+        data = data,
+        menuCheckable = menuCheckable,
+        checked = checked,
+        appBarState = appBarState,
+        onMenuItemClick = onMenuItemClick,
+        path = path,
+        onAnchorChanged = onAnchorChanged,
+        modifier = modifier,
+        vertical = false,
+    )
+}
+
+@Composable
+private fun TopLevelTreeMenuItem(
+    data: MenuItemData,
+    menuCheckable: Boolean,
+    checked: Boolean,
+    appBarState: AppBarState,
+    onMenuItemClick: (MenuItemData) -> Unit,
+    path: List<Int>,
+    onAnchorChanged: (MenuAnchor) -> Unit,
+    modifier: Modifier = Modifier,
+    vertical: Boolean,
 ) {
     val hasChildren = !data.childMenu.isNullOrEmpty()
     val expanded = hasChildren && appBarState.isMenuExpanded(path)
@@ -165,25 +212,25 @@ private fun TopLevelMenuItem(
             )
         )
     }
-    if (menuCheckable) {
-        CheckableMenuItem(
+    if (vertical) {
+        VerticalTopLevelAppBarTreeMenuItem(
             data = data,
             checked = checked,
-            themeColor = themeColor,
-            onClick = onClick,
-            modifier = anchorModifier,
             expandable = hasChildren,
             expanded = expanded,
-            verticalLayout = verticalLayout,
+            onClick = onClick,
+            modifier = anchorModifier,
+            checkable = menuCheckable,
         )
     } else {
-        MenuItem(
+        HorizontalTopLevelAppBarTreeMenuItem(
             data = data,
-            onClick = onClick,
-            modifier = anchorModifier,
+            checked = checked,
             expandable = hasChildren,
             expanded = expanded,
-            verticalLayout = verticalLayout,
+            onClick = onClick,
+            modifier = anchorModifier,
+            checkable = menuCheckable,
         )
     }
 }
@@ -193,7 +240,6 @@ private fun MenuPopupCascade(
     menus: List<MenuItemData>,
     menuCheckable: Boolean,
     checkedKey: Int?,
-    themeColor: androidx.compose.ui.graphics.Color,
     appBarState: AppBarState,
     onMenuItemClick: (MenuItemData) -> Unit,
     parentPath: List<Int>,
@@ -224,7 +270,7 @@ private fun MenuPopupCascade(
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
             tonalElevation = AppBarConfig.DividerHeight,
-            shadowElevation = AppBarConfig.NavigationIconPadding,
+            shadowElevation = AppBarConfig.NavigationPadding,
         ) {
             Box {
                 Column(modifier = Modifier.width(AppBarConfig.MenuWidth)) {
@@ -252,24 +298,21 @@ private fun MenuPopupCascade(
                                 )
                             }
                         if (menuCheckable) {
-                            CheckableMenuItem(
+                            AppBarTreeCheckableMenuItem(
                                 data = menuItem,
                                 checked = checkedKey == menuItem.key,
-                                themeColor = themeColor,
-                                onClick = onClick,
-                                modifier = itemModifier,
                                 expandable = hasChildren,
                                 expanded = expanded,
-                                verticalLayout = true,
+                                onClick = onClick,
+                                modifier = itemModifier,
                             )
                         } else {
-                            MenuItem(
+                            AppBarTreeMenuItem(
                                 data = menuItem,
-                                onClick = onClick,
-                                modifier = itemModifier,
                                 expandable = hasChildren,
                                 expanded = expanded,
-                                verticalLayout = true,
+                                onClick = onClick,
+                                modifier = itemModifier,
                             )
                         }
                     }
@@ -281,7 +324,6 @@ private fun MenuPopupCascade(
                             menus = menuItem.childMenu.orEmpty(),
                             menuCheckable = menuItem.checkable,
                             checkedKey = menuItem.checkedKey,
-                            themeColor = themeColor,
                             appBarState = appBarState,
                             onMenuItemClick = onMenuItemClick,
                             parentPath = itemPath,

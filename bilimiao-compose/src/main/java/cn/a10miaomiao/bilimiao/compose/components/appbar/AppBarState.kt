@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
@@ -54,14 +53,6 @@ class AppBarState {
 
     // 当前选中的菜单项key
     var checkedKey by mutableStateOf<Int?>(null)
-        internal set
-
-    // 主题色
-    var themeColor by mutableStateOf(Color.Unspecified)
-        internal set
-
-    // 背景色
-    var backgroundColor by mutableStateOf(Color.Unspecified)
         internal set
 
     // 布局方向
@@ -180,8 +171,6 @@ class AppBarState {
         menus = emptyList()
         isNavigationMenu = false
         checkedKey = null
-        themeColor = Color.Unspecified
-        backgroundColor = Color.Unspecified
         orientation = AppBarOrientation.Vertical
         barVisible = true
         menuExpanded = true
@@ -242,14 +231,6 @@ class AppBarStateScope(
 //        val menu = MyPageMenu().apply(block)
 //        state.menus = menu.items.map { MenuItemData.fromPropInfo(it) }
 //    }
-
-    fun themeColor(color: Color) {
-        state.themeColor = color
-    }
-
-    fun backgroundColor(color: Color) {
-        state.backgroundColor = color
-    }
 
     fun orientation(orientation: AppBarOrientation) {
         state.orientation = orientation
