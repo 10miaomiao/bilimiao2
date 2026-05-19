@@ -96,8 +96,6 @@ fun rememberCollapsingAppBarState(): CollapsingAppBarState {
  * @param menus 菜单列表
  * @param isNavigationMenu 是否为导航菜单模式
  * @param checkedKey 当前选中的菜单项key
- * @param themeColor 主题色
- * @param backgroundColor 背景色
  * @param onBackClick 返回按钮点击
  * @param onMenuClick 菜单按钮点击
  * @param onMenuItemClick 菜单项点击
@@ -112,8 +110,6 @@ fun CollapsingAppBar(
     menus: List<MenuItemData> = emptyList(),
     isNavigationMenu: Boolean = false,
     checkedKey: Int? = null,
-    themeColor: Color = MaterialTheme.colorScheme.primary,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     onBackClick: () -> Unit = {},
     onMenuClick: () -> Unit = {},
     onMenuItemClick: (MenuItemData) -> Unit = {},
@@ -177,7 +173,6 @@ fun CollapsingAppBar(
                     menus = menus,
                     isNavigationMenu = isNavigationMenu,
                     checkedKey = checkedKey,
-                    themeColor = themeColor,
                     onBackClick = {
                         if (state.isCollapsed) {
                             state.expand(scope)
@@ -199,7 +194,7 @@ fun CollapsingAppBar(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                backgroundColor,
+                                MaterialTheme.colorScheme.surface,
                             )
                         )
                     )
@@ -234,7 +229,6 @@ private fun CollapsingAppBarMenuRow(
     menus: List<MenuItemData>,
     isNavigationMenu: Boolean,
     checkedKey: Int?,
-    themeColor: Color,
     onBackClick: () -> Unit,
     onMenuClick: () -> Unit,
     onMenuItemClick: (MenuItemData) -> Unit,
@@ -243,7 +237,7 @@ private fun CollapsingAppBarMenuRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(AppBarConfig.MenuHeight)
-            .padding(start = AppBarConfig.NavigationIconPadding),
+            .padding(start = AppBarConfig.NavigationPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // 导航图标
@@ -262,14 +256,13 @@ private fun CollapsingAppBarMenuRow(
         ) {
             menus.forEach { menuItem ->
                 if (isNavigationMenu) {
-                    CheckableMenuItem(
+                    AppBarNavigationItem(
                         data = menuItem,
                         checked = checkedKey == menuItem.key,
-                        themeColor = themeColor,
                         onClick = onMenuItemClick,
                     )
                 } else {
-                    MenuItem(
+                    DefaultAppBarMenuItem(
                         data = menuItem,
                         onClick = onMenuItemClick,
                     )

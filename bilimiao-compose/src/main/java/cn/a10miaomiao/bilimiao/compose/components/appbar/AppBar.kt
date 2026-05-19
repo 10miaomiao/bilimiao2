@@ -7,7 +7,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -29,11 +32,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
@@ -50,8 +54,6 @@ import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
  * @param menus 菜单列表
  * @param isNavigationMenu 是否为导航菜单模式
  * @param checkedKey 当前选中的菜单项key
- * @param themeColor 主题色
- * @param backgroundColor 背景色
  * @param onBackClick 返回按钮点击
  * @param onMenuClick 菜单按钮点击
  * @param onMenuItemClick 菜单项点击
@@ -69,8 +71,6 @@ fun AppBar(
     menus: List<MenuItemData> = emptyList(),
     isNavigationMenu: Boolean = false,
     checkedKey: Int? = null,
-    themeColor: Color = MaterialTheme.colorScheme.primary,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     menuExpanded: Boolean = true,
     appBarState: AppBarState,
     onBackClick: () -> Unit = {},
@@ -86,7 +86,7 @@ fun AppBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(backgroundColor)
+            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f))
             .padding(safePadding)
     ) {
         // 标题区域
@@ -106,7 +106,6 @@ fun AppBar(
             menus = menus,
             isNavigationMenu = isNavigationMenu,
             checkedKey = checkedKey,
-            themeColor = themeColor,
             menuExpanded = menuExpanded,
             appBarState = appBarState,
             onBackClick = onBackClick,
@@ -162,7 +161,6 @@ private fun AppBarMenuRow(
     menus: List<MenuItemData>,
     isNavigationMenu: Boolean,
     checkedKey: Int?,
-    themeColor: Color,
     menuExpanded: Boolean,
     appBarState: AppBarState,
     onBackClick: () -> Unit,
@@ -175,7 +173,7 @@ private fun AppBarMenuRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(AppBarConfig.MenuHeight)
-            .padding(start = AppBarConfig.NavigationIconPadding),
+            .padding(start = AppBarConfig.NavigationPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NavigationIcon(
@@ -206,14 +204,30 @@ private fun AppBarMenuRow(
             exit = slideOutVertically { it } + fadeOut(),
             modifier = Modifier.weight(1f, fill = false),
         ) {
-            VerticalAppBarMenus(
-                menus = menus,
-                isNavigationMenu = isNavigationMenu,
-                checkedKey = checkedKey,
-                themeColor = themeColor,
-                appBarState = appBarState,
-                onMenuItemClick = onMenuItemClick,
-            )
+            if (isNavigationMenu) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    menus.forEach { menuItem ->
+                        AppBarNavigationItem(
+                            data = menuItem,
+                            checked = checkedKey == menuItem.key,
+                            onClick = onMenuItemClick,
+                        )
+                    }
+                }
+            } else {
+                VerticalAppBarMenus(
+                    menus = menus,
+                    isNavigationMenu = isNavigationMenu,
+                    checkedKey = checkedKey,
+                    appBarState = appBarState,
+                    onMenuItemClick = onMenuItemClick,
+                )
+            }
         }
     }
 }
@@ -231,7 +245,6 @@ private fun AppBarIconButton(
         contentDescription = contentDescription,
         tint = LocalContentColor.current.copy(alpha = 0.45f),
         modifier = Modifier
-            .padding(AppBarConfig.NavigationIconPadding)
             .rotate(rotation)
             .clickable(
                 interactionSource = interactionSource,

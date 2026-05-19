@@ -2,18 +2,12 @@ package cn.a10miaomiao.bilimiao.compose.components.appbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -25,134 +19,43 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.R
 
-/**
- * AppBar 菜单项
- *
- * @param data 菜单项数据
- * @param onClick 点击回调
- * @param modifier 修饰符
- */
-@Composable
-fun MenuItem(
-    data: MenuItemData,
-    onClick: (MenuItemData) -> Unit,
-    modifier: Modifier = Modifier,
-    expandable: Boolean = false,
-    expanded: Boolean = false,
-    verticalLayout: Boolean = true,
-    depth: Int = 0,
-) {
-    BaseMenuItem(
-        data = data,
-        checked = false,
-        themeColor = Color.Unspecified,
-        onClick = onClick,
-        modifier = modifier,
-        expandable = expandable,
-        expanded = expanded,
-        verticalLayout = verticalLayout,
-        depth = depth,
-    )
-}
+internal data class AppBarMenuItemColors(
+    val contentColor: Color,
+    val subContentColor: Color,
+)
 
 @Composable
-internal fun BaseMenuItem(
-    data: MenuItemData,
+internal fun appBarMenuItemColors(
     checked: Boolean,
-    themeColor: Color,
-    onClick: (MenuItemData) -> Unit,
-    modifier: Modifier = Modifier,
-    expandable: Boolean = false,
-    expanded: Boolean = false,
-    verticalLayout: Boolean = true,
-    depth: Int = 0,
-) {
+): AppBarMenuItemColors {
     val contentColor = if (checked) {
-        themeColor
+        MaterialTheme.colorScheme.primary
     } else {
         LocalContentColor.current
     }
     val subContentColor = if (checked) {
-        themeColor.copy(alpha = 0.7f)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
     } else {
         contentColor.copy(alpha = 0.7f)
     }
-    val interactionSource = remember { MutableInteractionSource() }
+    return AppBarMenuItemColors(
+        contentColor = contentColor,
+        subContentColor = subContentColor,
+    )
+}
 
-    if (verticalLayout) {
-        Row(
-            modifier = modifier
-                .width(AppBarConfig.MenuWidth)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = ripple(bounded = false),
-                    onClick = { onClick(data) }
-                )
-                .padding(
-                    start = AppBarConfig.NavigationIconPadding + (depth * 12).dp,
-                    end = AppBarConfig.NavigationIconPadding,
-                    top = AppBarConfig.NavigationIconPadding,
-                    bottom = AppBarConfig.NavigationIconPadding,
-                )
-                .semantics {
-                    data.contentDescription?.let { contentDescription = it }
-                },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            MenuItemIcon(data = data, contentColor = contentColor)
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.Start,
-            ) {
-                MenuItemTexts(
-                    data = data,
-                    contentColor = contentColor,
-                    subContentColor = subContentColor,
-                    textAlign = TextAlign.Start,
-                )
-            }
-            if (expandable) {
-                ExpandIndicator(expanded = expanded, contentColor = subContentColor)
-            }
-        }
-    } else {
-        Column(
-            modifier = modifier
-                .widthIn(min = AppBarConfig.MenuItemMinWidth)
-                .fillMaxHeight()
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = ripple(bounded = false),
-                    onClick = { onClick(data) }
-                )
-                .padding(
-                    start = AppBarConfig.NavigationIconPadding,
-                    end = AppBarConfig.NavigationIconPadding,
-                )
-                .semantics {
-                    data.contentDescription?.let { contentDescription = it }
-                },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            MenuItemIcon(data = data, contentColor = contentColor)
-            MenuItemTexts(
-                data = data,
-                contentColor = contentColor,
-                subContentColor = subContentColor,
-                textAlign = TextAlign.Center,
-            )
-        }
+internal fun Modifier.appBarMenuItemSemantics(data: MenuItemData): Modifier {
+    return semantics {
+        data.contentDescription?.let { contentDescription = it }
     }
 }
 
 @Composable
-private fun MenuItemIcon(
+internal fun AppBarMenuItemIcon(
+    modifier: Modifier = Modifier,
     data: MenuItemData,
     contentColor: Color,
 ) {
@@ -161,67 +64,55 @@ private fun MenuItemIcon(
             imageVector = data.iconVector,
             contentDescription = data.title,
             tint = contentColor,
-            modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
+            modifier = modifier
+                .size(AppBarConfig.MenuItemIconSize),
         )
     } else if (data.iconResource != null) {
         Icon(
             painter = painterResource(id = data.iconResource),
             contentDescription = data.title,
             tint = contentColor,
-            modifier = Modifier.size(AppBarConfig.MenuItemIconSize),
+            modifier = modifier
+                .size(AppBarConfig.MenuItemIconSize),
         )
     }
 }
 
 @Composable
-private fun MenuItemTexts(
+internal fun AppBarMenuItemTexts(
     data: MenuItemData,
     contentColor: Color,
     subContentColor: Color,
     textAlign: TextAlign,
+    replaceSubTitle: Boolean = true,
 ) {
     if (data.title.isNotEmpty()) {
         Text(
             text = data.title,
             color = contentColor,
             fontSize = AppBarConfig.TitleTextSize.value.sp,
+            lineHeight = AppBarConfig.TitleTextSize.value.sp,
             textAlign = textAlign,
         )
     }
 
     data.subTitle?.let { subTitle ->
         Text(
-            text = subTitle.replace("\n", " "),
+            text = if (replaceSubTitle) {
+                subTitle.replace("\n", " ")
+            } else {
+                subTitle
+            },
             color = subContentColor,
             fontSize = AppBarConfig.SubTitleTextSize.value.sp,
+            lineHeight = AppBarConfig.SubTitleTextSize.value.sp * 1.5,
             textAlign = textAlign,
-            modifier = Modifier.padding(top = AppBarConfig.SubTitleMarginTop),
+            modifier = Modifier
+                .padding(top = AppBarConfig.SubTitleMarginTop),
         )
     }
 }
 
-@Composable
-private fun ExpandIndicator(
-    expanded: Boolean,
-    contentColor: Color,
-) {
-    Text(
-        text = if (expanded) "▴" else "▾",
-        color = contentColor,
-        fontSize = AppBarConfig.TitleTextSize.value.sp,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.width(AppBarConfig.NavigationIconSize),
-    )
-}
-
-/**
- * AppBar 导航按钮
- *
- * @param icon 类型
- * @param onClick 点击回调
- * @param modifier 修饰符
- * @param customIconResource 自定义图标资源（当 icon == Custom 时使用）
- */
 @Composable
 fun NavigationIcon(
     icon: AppBarNavigationIcon,
@@ -245,11 +136,10 @@ fun NavigationIcon(
                 interactionSource = interactionSource,
                 indication = ripple(bounded = false),
                 onClick = onClick
-            )
-            .padding(AppBarConfig.NavigationIconPadding),
+            ),
         contentAlignment = Alignment.Center,
     ) {
-        androidx.compose.material3.Icon(
+        Icon(
             painter = painterResource(id = iconResource),
             contentDescription = when (icon) {
                 AppBarNavigationIcon.Back -> "返回"

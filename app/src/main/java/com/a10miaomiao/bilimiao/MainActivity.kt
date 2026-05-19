@@ -262,7 +262,6 @@ class MainActivity : AppCompatActivity(), DIAware {
                     emitter = emitter,
                     messageDialogState = messageDialogState,
                     bottomSheetState = bottomSheetState,
-                    appBarBackgroundColor = appBarBackgroundColor,
                     onBackClick = ::handleActivityBackPressed,
                     initialDeepLink = pendingDeepLink,
                     onInitialDeepLinkConsumed = {

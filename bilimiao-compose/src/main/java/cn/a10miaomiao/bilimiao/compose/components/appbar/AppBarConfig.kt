@@ -27,7 +27,7 @@ object AppBarConfig {
     val MenuItemIconSize: Dp = 20.dp
 
     /** 菜单项图标水平间距 */
-    val MenuItemIconMarginHorizontal: Dp = 5.dp
+    val MenuItemIconMargin: Dp = 2.dp
 
     /** 标题文字大小 */
     val TitleTextSize: Dp = 12.dp
@@ -38,8 +38,8 @@ object AppBarConfig {
     /** 副标题上边距 */
     val SubTitleMarginTop: Dp = 2.dp
 
-    /** 导航图标内边距 */
-    val NavigationIconPadding: Dp = 10.dp
+    /** 导航内边距 */
+    val NavigationPadding: Dp = 10.dp
 
     /** 导航图标大小 */
     val NavigationIconSize: Dp = 24.dp

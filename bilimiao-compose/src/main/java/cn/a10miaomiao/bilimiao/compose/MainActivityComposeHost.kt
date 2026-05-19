@@ -126,7 +126,6 @@ fun MainActivityComposeHost(
     emitter: SharedFlowEmitter,
     messageDialogState: MessageDialogState,
     bottomSheetState: BottomSheetState,
-    appBarBackgroundColor: androidx.compose.ui.graphics.Color,
     onBackClick: () -> Unit,
     initialDeepLink: Uri? = null,
     onInitialDeepLinkConsumed: () -> Unit = {},
@@ -170,7 +169,7 @@ fun MainActivityComposeHost(
             }
         }
     }
-    LaunchedEffect(pageConfig, appBarBackgroundColor, orientation) {
+    LaunchedEffect(pageConfig, orientation) {
         val menus = pageConfig.menu?.items?.map { item ->
             cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData.fromPropInfo(item, startViewWrapper.activity)
         } ?: emptyList()
@@ -179,7 +178,6 @@ fun MainActivityComposeHost(
         appBarState.canBack = pageConfig.menu?.checkable != true
         appBarState.isNavigationMenu = pageConfig.menu?.checkable == true
         appBarState.checkedKey = pageConfig.menu?.takeIf { it.checkable }?.checkedKey
-        appBarState.backgroundColor = appBarBackgroundColor
         appBarState.orientation = if (orientation == 2) {
             cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Horizontal
         } else {
