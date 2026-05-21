@@ -593,6 +593,13 @@ class MainActivity : AppCompatActivity(), DIAware {
         }
     }
 
+    override fun onBackPressed() {
+        if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
+            return
+        }
+        super.onBackPressed()
+    }
+
     private fun handleActivityBackPressed() {
         if (startViewWrapper.isDrawerOpen()) {
             if (startViewWrapper.showSearchDialog) {
@@ -600,9 +607,6 @@ class MainActivity : AppCompatActivity(), DIAware {
                 return
             }
             startViewWrapper.closeDrawer()
-            return
-        }
-        if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
         if (composeNavigator.canPopBackStack()) {
