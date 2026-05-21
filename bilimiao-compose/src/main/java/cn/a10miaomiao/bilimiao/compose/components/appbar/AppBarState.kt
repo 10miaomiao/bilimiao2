@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
 
@@ -74,7 +73,13 @@ class AppBarState {
     var menuExpanded by mutableStateOf(true)
         internal set
 
+    var activeRootMenuPath by mutableStateOf<String?>(null)
+        private set
+
     private val expandedMenuPaths = mutableStateListOf<String>()
+
+    val hasExpandedSubMenus: Boolean
+        get() = expandedMenuPaths.isNotEmpty()
 
     // 设置返回按钮点击事件
     fun setOnBackClickListener(listener: () -> Unit) {
@@ -119,33 +124,60 @@ class AppBarState {
         menuExpanded = false
     }
 
-    fun isMenuExpanded(path: List<Int>): Boolean {
-        return expandedMenuPaths.contains(path.toMenuPathKey())
+    fun isRootMenuActive(path: List<Int>): Boolean {
+        return activeRootMenuPath == path.toMenuPathKey()
     }
 
-    fun toggleMenuExpanded(path: List<Int>) {
+    fun toggleRootMenu(path: List<Int>) {
+        val key = path.toMenuPathKey()
+        if (activeRootMenuPath == key) {
+            closeRootMenu()
+            return
+        }
+        activeRootMenuPath = key
+        expandedMenuPaths.clear()
+    }
+
+    fun closeRootMenu() {
+        activeRootMenuPath = null
+        expandedMenuPaths.clear()
+    }
+
+    fun isSubMenuExpanded(path: List<Int>): Boolean {
+        return expandedMenuPaths.lastOrNull() == path.toMenuPathKey()
+    }
+
+    fun toggleSubMenu(path: List<Int>) {
+        if (activeRootMenuPath == null) {
+            return
+        }
         val key = path.toMenuPathKey()
         val parentKey = path.dropLast(2).toMenuPathKey()
-        expandedMenuPaths.removeAll {
-            if (parentKey.isEmpty()) {
-                !it.contains("/")
-            } else {
-                it.startsWith("$parentKey/") && it.count { ch -> ch == '/' } == path.size / 2
-            }
-        }
-        if (!expandedMenuPaths.remove(key)) {
+        trimExpandedMenusTo(parentKey)
+        if (expandedMenuPaths.lastOrNull() == key) {
+            expandedMenuPaths.removeAt(expandedMenuPaths.lastIndex)
+        } else {
             expandedMenuPaths.add(key)
         }
     }
 
+    fun getCurrentMenuParentPath(): List<Int>? {
+        return (expandedMenuPaths.lastOrNull() ?: activeRootMenuPath)?.toMenuPathList()
+    }
+
+    fun navigateBackMenuLevel() {
+        if (expandedMenuPaths.isNotEmpty()) {
+            expandedMenuPaths.removeAt(expandedMenuPaths.lastIndex)
+        } else {
+            closeRootMenu()
+        }
+    }
+
     fun clearExpandedMenus() {
-        expandedMenuPaths.clear()
+        closeRootMenu()
     }
 
     fun syncExpandedMenusWith(menus: List<MenuItemData>) {
-        if (expandedMenuPaths.isEmpty()) {
-            return
-        }
         val validPaths = buildSet {
             fun collect(items: List<MenuItemData>, parentPath: List<Int>) {
                 items.forEachIndexed { index, item ->
@@ -158,7 +190,27 @@ class AppBarState {
             }
             collect(menus, emptyList())
         }
-        expandedMenuPaths.removeAll { it !in validPaths }
+        val activeRootPath = activeRootMenuPath
+        if (activeRootPath == null) {
+            expandedMenuPaths.clear()
+            return
+        }
+        if (activeRootPath !in validPaths) {
+            closeRootMenu()
+            return
+        }
+        val validExpandedPaths = mutableListOf<String>()
+        var expectedParent = activeRootPath
+        expandedMenuPaths.forEach { path ->
+            val actualParent = path.toMenuPathList().dropLast(2).toMenuPathKey()
+            if (path !in validPaths || actualParent != expectedParent) {
+                return@forEach
+            }
+            validExpandedPaths += path
+            expectedParent = path
+        }
+        expandedMenuPaths.clear()
+        expandedMenuPaths.addAll(validExpandedPaths)
     }
 
     // 重置状态
@@ -176,10 +228,32 @@ class AppBarState {
         menuExpanded = true
         clearExpandedMenus()
     }
+
+    private fun trimExpandedMenusTo(parentKey: String) {
+        if (parentKey.isEmpty()) {
+            expandedMenuPaths.clear()
+            return
+        }
+        val parentIndex = expandedMenuPaths.indexOf(parentKey)
+        if (parentIndex == -1) {
+            expandedMenuPaths.clear()
+            return
+        }
+        while (expandedMenuPaths.size > parentIndex + 1) {
+            expandedMenuPaths.removeAt(expandedMenuPaths.lastIndex)
+        }
+    }
 }
 
 private fun List<Int>.toMenuPathKey(): String {
     return joinToString(separator = "/")
+}
+
+private fun String.toMenuPathList(): List<Int> {
+    if (isEmpty()) {
+        return emptyList()
+    }
+    return split("/").map { it.toInt() }
 }
 
 /**

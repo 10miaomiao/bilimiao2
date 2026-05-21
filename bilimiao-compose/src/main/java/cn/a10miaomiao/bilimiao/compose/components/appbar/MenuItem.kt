@@ -85,13 +85,15 @@ internal fun AppBarMenuItemTexts(
     subContentColor: Color,
     textAlign: TextAlign,
     replaceSubTitle: Boolean = true,
+    titleFontSize: androidx.compose.ui.unit.TextUnit = AppBarConfig.TitleTextSize.value.sp,
+    subTitleFontSize: androidx.compose.ui.unit.TextUnit = AppBarConfig.SubTitleTextSize.value.sp,
 ) {
     if (data.title.isNotEmpty()) {
         Text(
             text = data.title,
             color = contentColor,
-            fontSize = AppBarConfig.TitleTextSize.value.sp,
-            lineHeight = AppBarConfig.TitleTextSize.value.sp,
+            fontSize = titleFontSize,
+            lineHeight = titleFontSize,
             textAlign = textAlign,
         )
     }
@@ -104,8 +106,8 @@ internal fun AppBarMenuItemTexts(
                 subTitle
             },
             color = subContentColor,
-            fontSize = AppBarConfig.SubTitleTextSize.value.sp,
-            lineHeight = AppBarConfig.SubTitleTextSize.value.sp * 1.5,
+            fontSize = subTitleFontSize,
+            lineHeight = subTitleFontSize * 1.5,
             textAlign = textAlign,
             modifier = Modifier
                 .padding(top = AppBarConfig.SubTitleMarginTop),

@@ -8,8 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -156,31 +160,40 @@ private fun TreeRowLayout(
         modifier = modifier
             .fillMaxWidth()
             .clickable(
-                interactionSource = interactionSource,
-                indication = ripple(bounded = false),
                 onClick = { onClick(data) }
             )
-            .padding(
-                start = AppBarConfig.NavigationPadding,
-                end = AppBarConfig.NavigationPadding,
-                top = AppBarConfig.NavigationPadding,
-                bottom = AppBarConfig.NavigationPadding,
-            )
+            .padding(AppBarConfig.NavigationPadding)
             .appBarMenuItemSemantics(data),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         AppBarMenuItemIcon(data = data, contentColor = colors.contentColor)
-        Column(
+        Row(
             modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            AppBarMenuItemTexts(
-                data = data,
-                contentColor = colors.contentColor,
-                subContentColor = colors.subContentColor,
-                textAlign = TextAlign.Start,
-            )
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                AppBarMenuItemTexts(
+                    data = data,
+                    contentColor = colors.contentColor,
+                    subContentColor = colors.subContentColor,
+                    textAlign = TextAlign.Start,
+                    titleFontSize = 14.sp,
+                    subTitleFontSize = 12.sp,
+                )
+            }
+            if (checkable && checked) {
+                Icon(
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = "已选中",
+                    tint = colors.contentColor,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
         }
         if (expandable) {
             TreeExpandIndicator(
