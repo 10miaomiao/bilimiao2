@@ -1,8 +1,8 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,6 +18,7 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -76,6 +77,7 @@ import kotlin.math.roundToInt
 private const val DrawerMaxWidth = 400
 private const val DrawerScrimMaxAlpha = 0.4f
 private const val DrawerSettleDurationMillis = 250
+private const val DrawerVelocityThresholdFraction = 0.1f
 
 private enum class ComposeDrawerValue {
     Closed,
@@ -262,7 +264,7 @@ fun ComposeScaffold(
                             if (!change.pressed) {
                                 if (dragging) {
                                     drawerController.scope.launch {
-                                        drawerController.state.settle(velocityTracker.calculateVelocity().x)
+                                        drawerController.settle(velocityTracker.calculateVelocity().x)
                                     }
                                 }
                                 break
@@ -450,10 +452,6 @@ private class ComposeDrawerController(
 
     val state = AnchoredDraggableState(
         initialValue = initialState.toDrawerValue(),
-        positionalThreshold = { distance -> distance * 0.5f },
-        velocityThreshold = { drawerWidthPx / 10f },
-        snapAnimationSpec = tween(durationMillis = DrawerSettleDurationMillis),
-        decayAnimationSpec = exponentialDecay(),
     )
 
     val currentValue: ComposeDrawerValue
@@ -510,6 +508,33 @@ private class ComposeDrawerController(
         state.snapTo(ComposeDrawerValue.Closed)
         programmaticChange = false
         dispatchState(StartViewWrapper.DRAWER_STATE_COLLAPSED)
+    }
+
+    suspend fun settle(velocity: Float) {
+        if (drawerWidthPx <= 0f) {
+            return
+        }
+        val threshold = drawerWidthPx * DrawerVelocityThresholdFraction
+        val target = when {
+            velocity >= threshold -> ComposeDrawerValue.Open
+            velocity <= -threshold -> ComposeDrawerValue.Closed
+            openFraction >= 0.5f -> ComposeDrawerValue.Open
+            else -> ComposeDrawerValue.Closed
+        }
+        programmaticChange = true
+        dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
+        state.animateTo(
+            target,
+            animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
+        )
+        programmaticChange = false
+        dispatchState(
+            if (target == ComposeDrawerValue.Open) {
+                StartViewWrapper.DRAWER_STATE_EXPANDED
+            } else {
+                StartViewWrapper.DRAWER_STATE_COLLAPSED
+            }
+        )
     }
 
     fun syncWrapperState() {
@@ -610,7 +635,7 @@ internal fun PlayerLayer(
     LaunchedEffect(baseBounds) {
         currentWidth = with(density) { baseBounds.width.toDp() }
         currentHeight = with(density) { baseBounds.height.toDp() }
-        if (orientation != 2) {
+        if (orientation != Configuration.ORIENTATION_LANDSCAPE) {
             offsetX = 0.dp
             offsetY = 0.dp
         } else if (offsetX == 0.dp && offsetY == 0.dp) {
@@ -619,7 +644,7 @@ internal fun PlayerLayer(
         }
     }
 
-    val modifier = if (orientation == 2 && !startViewWrapper.fullScreenPlayer) {
+    val modifier = if (orientation == Configuration.ORIENTATION_LANDSCAPE && !startViewWrapper.fullScreenPlayer) {
         Modifier
             .offset(x = offsetX, y = offsetY)
             .size(currentWidth, currentHeight)
@@ -645,7 +670,7 @@ internal fun PlayerLayer(
             .then(
                 if (baseBounds.width == Float.POSITIVE_INFINITY || baseBounds.height == Float.POSITIVE_INFINITY) {
                     Modifier.fillMaxSize()
-                } else if (orientation == 1) {
+                } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
                     Modifier
                         .background(Color.Black)
                         .padding(top = windowInsets.top)

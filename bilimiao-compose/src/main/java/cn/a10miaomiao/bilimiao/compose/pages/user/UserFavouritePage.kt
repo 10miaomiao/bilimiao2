@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -113,13 +117,13 @@ private fun UserFavouritePageContent(
         menu = rememberMyMenu {
             myItem {
                 key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 title = "更多"
                 childMenu = myMenu {
                     myItem {
                         key = MenuKeys.add
                         title = "新建收藏夹"
-                        iconFileName = "ic_add_white_24dp"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Add
                     }
                 }
             }

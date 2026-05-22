@@ -3,6 +3,10 @@ package cn.a10miaomiao.bilimiao.compose.pages.mine
 import android.content.Context
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -407,23 +411,23 @@ private fun HistoryPageContent(
                 myItem {
                     key = MenuKeys.complete
                     title = "完成编辑"
-                    iconFileName = "ic_baseline_check_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Check
                 }
                 myItem {
                     key = MenuKeys.delete
                     title = "删除选中"
-                    iconFileName = "ic_baseline_delete_outline_24"
+                    iconVector = androidx.compose.material.icons.Icons.Outlined.Delete
                 }
             } else {
                 myItem {
                     key = MenuKeys.more
                     title = "更多"
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     childMenu = myMenu {
                         myItem {
                             key = MenuKeys.edit
                             title = "批量管理"
-                            iconFileName = "ic_baseline_edit_note_24"
+                            iconVector = androidx.compose.material.icons.Icons.Default.EditNote
                         }
                         myItem {
                             key = MenuKeys.clear
@@ -435,7 +439,7 @@ private fun HistoryPageContent(
                     key = MenuKeys.search
                     action = MenuActions.search
                     title = "搜索"
-                    iconFileName = "ic_search_gray"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Search
                 }
             }
         },

@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -300,7 +304,7 @@ internal fun UserSeasonDetailContent(
         menu = rememberMyMenu(favState) {
             myItem {
                 key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 title = "更多"
                 childMenu = myMenu {
                     myItem {
@@ -312,13 +316,13 @@ internal fun UserSeasonDetailContent(
             if (favState == 1) {
                 myItem {
                     key = -MenuKeys.follow
-                    iconFileName = "ic_baseline_favorite_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Favorite
                     title = "已订阅"
                 }
             } else if (favState == 0){
                 myItem {
                     key = MenuKeys.follow
-                    iconFileName = "ic_outline_favorite_border_24"
+                    iconVector = androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                     title = "订阅"
                 }
             }

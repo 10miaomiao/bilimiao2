@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -325,7 +329,7 @@ internal fun UserFavouriteDetailContent(
                 val selfFav = viewModel.isSelfFav()
                 myItem {
                     key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     title = "更多"
                     childMenu = myMenu {
                         myItem {
@@ -349,17 +353,17 @@ internal fun UserFavouriteDetailContent(
                 myItem {
                     key = MenuKeys.search
                     action = MenuActions.search
-                    iconFileName = "ic_search_gray"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Search
                     title = "搜索"
                 }
                 if (detailInfo != null && !selfFav) {
                     myItem {
                         key = MenuKeys.follow
                         if (detailInfo?.fav_state == 1) {
-                            iconFileName = "ic_baseline_favorite_24"
+                            iconVector = androidx.compose.material.icons.Icons.Default.Favorite
                             title = "已订阅"
                         } else {
-                            iconFileName = "ic_outline_favorite_border_24"
+                            iconVector = androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                             title = "订阅"
                         }
                     }

@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.time
 
 import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -128,7 +132,7 @@ private fun TimeRegionDetailPageContent(
         menu = rememberMyMenu(timeText, rankOrder) {
             myItem {
                 key = MenuKeys.filter
-                iconFileName = "ic_baseline_filter_list_grey_24"
+                iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                 title = viewModel.getRankOrderText()
                 childMenu = myMenu {
                     checkable = true

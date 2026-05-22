@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -113,7 +117,7 @@ private fun UserSpaceSearchPageContent(
             myItem {
                 key = MenuKeys.search
                 title = "继续搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
             }
         },
         search = SearchConfigInfo(
