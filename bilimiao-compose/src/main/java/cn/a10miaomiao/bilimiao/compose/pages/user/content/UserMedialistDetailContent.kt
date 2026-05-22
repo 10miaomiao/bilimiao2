@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -251,7 +255,7 @@ fun UserMedialistDetailContent(
         menu = rememberMyMenu() {
             myItem {
                 key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 title = "更多"
                 childMenu = myMenu {
                     myItem {

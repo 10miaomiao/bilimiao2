@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.download
 
 import android.content.ClipData
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -215,7 +219,7 @@ internal fun DownloadListPageContent(
             myMenu {
                 myItem {
                     key = 0
-                    iconFileName = "ic_baseline_lightbulb_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Lightbulb
                     title = "提示"
                 }
             }

@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
+import android.content.res.Configuration
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -75,7 +76,7 @@ internal fun Density.calculateComposeScaffoldLayout(
         top = if (
             playerState.showPlayer &&
             !playerState.fullScreenPlayer &&
-            playerState.orientation == 1 &&
+            playerState.orientation == Configuration.ORIENTATION_PORTRAIT &&
             playerBounds != null
         ) {
             playerBounds.bottom.toDp()

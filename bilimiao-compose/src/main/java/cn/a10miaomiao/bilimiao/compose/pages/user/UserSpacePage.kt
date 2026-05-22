@@ -1,6 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -175,7 +178,7 @@ private fun UserSpacePageDetailContent(
         menu = rememberMyMenu(isFollow, viewModel.isFiltered, viewModel.currentPage, rankOrder) {
             myItem {
                 key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 title = "更多"
                 childMenu = myMenu {
                     if (!viewModel.isSelf) {
@@ -213,7 +216,7 @@ private fun UserSpacePageDetailContent(
                         "click" -> "最多播放"
                         else -> "排序"
                     }
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     childMenu = myMenu {
                         checkable = true
                         checkedKey = when(rankOrder) {
@@ -237,17 +240,17 @@ private fun UserSpacePageDetailContent(
             myItem {
                 key = MenuKeys.search
                 title = "搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
                 action = MenuActions.search
             }
             if (!viewModel.isSelf) {
                 myItem {
                     key = MenuKeys.follow
                     if (isFollow) {
-                        iconFileName = "ic_baseline_favorite_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Favorite
                         title = "已关注"
                     } else {
-                        iconFileName = "ic_outline_favorite_border_24"
+                        iconVector = androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                         title = "关注"
                     }
                 }

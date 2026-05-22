@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.lyric
 
 import android.app.Activity
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.util.Base64
 import android.view.View
 import androidx.compose.animation.AnimatedContentScope
@@ -524,7 +528,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                 myItem {
                     key = 1
                     this.title = "歌词源"
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 }
                 myItem {
                     key = 2
@@ -535,7 +539,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                     }else {
                         String.format("%.1f",offset/1000f) + 's'
                     }
-                    iconFileName = "ic_history_gray_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.History
                 }
             }
         }

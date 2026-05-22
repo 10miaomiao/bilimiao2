@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.playlist
 
 import android.view.HapticFeedbackConstants
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
@@ -152,24 +156,24 @@ private fun PlayListPageContent(
                     myItem {
                         key = MenuKeys.complete
                         title = "完成编辑"
-                        iconFileName = "ic_baseline_check_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Check
                     }
                     myItem {
                         key = MenuKeys.delete
                         title = "移除选中"
-                        iconFileName = "ic_baseline_delete_outline_24"
+                        iconVector = androidx.compose.material.icons.Icons.Outlined.Delete
                     }
                 } else {
                     myItem {
                         key = MenuKeys.edit
                         title = "编辑列表"
-                        iconFileName = "ic_baseline_edit_note_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.EditNote
                     }
                 }
                 myItem {
                     key = MenuKeys.clear
                     title = "清空列表"
-                    iconFileName = "ic_baseline_clear_all_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.ClearAll
                 }
             }
         }

@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.widget.scaffold.behavior.AppBarBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.ContentBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehavior
 import com.a10miaomiao.bilimiao.widget.scaffold.behavior.MaskBehavior
@@ -87,7 +86,6 @@ class ScaffoldView @JvmOverloads constructor(
             if (field != value) {
                 field = value
                 playerViewSizeStatus = PlayerViewSizeStatus.NORMAL
-                this.appBar?.orientation = orientation
                 updateLayout(false)
             }
         }
@@ -132,7 +130,6 @@ class ScaffoldView @JvmOverloads constructor(
 
     var fullScreenDraggable = true //小屏时全屏可拖拽
 
-    var appBarHeight = 0
     var appBarWidth = 0
 
     val contentMinWidth = dip(300) //内容区域每列最小宽度
@@ -154,9 +151,6 @@ class ScaffoldView @JvmOverloads constructor(
     var contentAnimationDuration = 0
     var playerSpaceHeight = 0
     var playerSpaceWidth = 0 // 窗口所占大小，也算上了窗口与边缘的距离
-
-    var appBar: AppBarView? = null
-    var appBarBehavior: AppBarBehavior? = null
 
     var content: View? = null
     var contentBehavior: ContentBehavior? = null
@@ -200,14 +194,6 @@ class ScaffoldView @JvmOverloads constructor(
     ) {
         if (params is LayoutParams) {
             when (val behavior = params.behavior) {
-                is AppBarBehavior -> {
-                    if (child is AppBarView) {
-                        child.orientation = orientation
-                        this.appBar = child
-                        this.appBarBehavior = behavior
-                    }
-                }
-
                 is ContentBehavior -> {
                     if (behavior.isSub) {
                         this.subContent = child
@@ -266,14 +252,6 @@ class ScaffoldView @JvmOverloads constructor(
         return drawerBehavior?.getTouchStartY() ?: 0f
     }
 
-    fun slideUpBottomAppBar() {
-        if (orientation == VERTICAL) {
-            appBar?.let {
-                appBarBehavior?.slideUp(it)
-            }
-        }
-    }
-
     fun setMaskViewVisibility(visibility: Int) {
         maskView?.visibility = visibility
     }
@@ -284,14 +262,6 @@ class ScaffoldView @JvmOverloads constructor(
 
     fun setMaskViewAlpha(alpha: Float) {
         maskView?.alpha = alpha
-    }
-
-    fun slideDownBottomAppBar() {
-        if (orientation == VERTICAL) {
-            appBar?.let {
-                appBarBehavior?.slideDown(it)
-            }
-        }
     }
 
     override fun holdUpPlayer() {

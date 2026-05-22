@@ -2,6 +2,10 @@ package cn.a10miaomiao.bilimiao.compose.pages.mine
 
 import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -382,18 +386,18 @@ private fun WatchLaterPageContent(
                 myItem {
                     key = MenuKeys.complete
                     title = "完成编辑"
-                    iconFileName = "ic_baseline_check_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Check
                 }
                 myItem {
                     key = MenuKeys.delete
                     title = "移除选中"
-                    iconFileName = "ic_baseline_delete_outline_24"
+                    iconVector = androidx.compose.material.icons.Icons.Outlined.Delete
                 }
             } else {
                 myItem {
                     key = MenuKeys.more
                     title = "更多"
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     childMenu = myMenu {
                         myItem {
                             key = MenuKeys.playList
@@ -416,7 +420,7 @@ private fun WatchLaterPageContent(
                 myItem {
                     key = MenuKeys.sort
                     title = if (viewModel.listAsc) "最早添加" else "最近添加"
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     childMenu = myMenu {
                         checkable = true
                         checkedKey = if (viewModel.listAsc) 2 else 1

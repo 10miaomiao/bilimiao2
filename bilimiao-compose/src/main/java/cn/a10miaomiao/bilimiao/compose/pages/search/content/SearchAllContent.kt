@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.search.content
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.view.View
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -214,12 +218,12 @@ private fun SearchAllContentConfig(
                 key = MenuKeys.search
                 action = MenuActions.search
                 title = "继续搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
             }
             myItem {
                 key = MenuKeys.sort
                 title = rankOrder.second
-                iconFileName = "ic_baseline_filter_list_grey_24"
+                iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                 childMenu = myMenu {
                     checkable = true
                     checkedKey = 10 + rankOrder.first
@@ -234,7 +238,7 @@ private fun SearchAllContentConfig(
             myItem {
                 key = MenuKeys.filter
                 title = if (hasFilter) "已筛选" else "筛选"
-                iconFileName = "ic_baseline_filter_list_alt_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.FilterAlt
             }
         },
         search = SearchConfigInfo(

@@ -14,13 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import cn.a10miaomiao.bilimiao.compose.R
 
 internal data class AppBarMenuItemColors(
     val contentColor: Color,
@@ -59,17 +60,9 @@ internal fun AppBarMenuItemIcon(
     data: MenuItemData,
     contentColor: Color,
 ) {
-    if (data.iconVector != null) {
+    data.iconVector?.let {
         Icon(
-            imageVector = data.iconVector,
-            contentDescription = data.title,
-            tint = contentColor,
-            modifier = modifier
-                .size(AppBarConfig.MenuItemIconSize),
-        )
-    } else if (data.iconResource != null) {
-        Icon(
-            painter = painterResource(id = data.iconResource),
+            imageVector = it,
             contentDescription = data.title,
             tint = contentColor,
             modifier = modifier
@@ -120,15 +113,13 @@ fun NavigationIcon(
     icon: AppBarNavigationIcon,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    customIconResource: Int? = null,
 ) {
     val contentColor = LocalContentColor.current
     val interactionSource = remember { MutableInteractionSource() }
 
-    val iconResource = when (icon) {
-        AppBarNavigationIcon.Back -> R.drawable.ic_back_24dp
-        AppBarNavigationIcon.Menu -> R.drawable.ic_baseline_menu_24
-        AppBarNavigationIcon.Custom -> customIconResource ?: R.drawable.ic_back_24dp
+    val iconVector = when (icon) {
+        AppBarNavigationIcon.Back -> Icons.AutoMirrored.Filled.ArrowBack
+        AppBarNavigationIcon.Menu -> Icons.Filled.Menu
     }
 
     Box(
@@ -142,11 +133,10 @@ fun NavigationIcon(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            painter = painterResource(id = iconResource),
+            imageVector = iconVector,
             contentDescription = when (icon) {
                 AppBarNavigationIcon.Back -> "返回"
                 AppBarNavigationIcon.Menu -> "菜单"
-                AppBarNavigationIcon.Custom -> null
             },
             tint = contentColor,
             modifier = Modifier.size(AppBarConfig.NavigationIconSize),

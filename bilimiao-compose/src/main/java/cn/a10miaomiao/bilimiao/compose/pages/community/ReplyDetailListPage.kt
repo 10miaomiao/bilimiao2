@@ -1,5 +1,9 @@
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -160,14 +164,14 @@ private fun ReplyDetailListPageContent(
             if (enterUrl.isNotEmpty()) {
                 myItem {
                     key = MenuKeys.url
-                    iconFileName = "ic_link_black_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Link
                     title = "评论来源"
                 }
             }
             if (parentId != 0L) {
                 myItem {
                     key = MenuKeys.parent
-                    iconFileName = "ic_link_black_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Link
                     title = "上级评论"
                 }
             }

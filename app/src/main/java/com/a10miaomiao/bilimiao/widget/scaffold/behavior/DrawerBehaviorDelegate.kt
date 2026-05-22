@@ -102,9 +102,9 @@ class DrawerBehaviorDelegate(
                 && parent.bottomSheetState() == BottomSheetBehavior.STATE_HIDDEN
             ) {
                 this.touchOnAppBar = (parent.orientation == PlayerHostState.VERTICAL
-                        && ev.y > (parent.appBar?.top ?: parent.measuredHeight))
+                        && ev.y > parent.measuredHeight - appBarHeight)
                         || (parent.orientation == PlayerHostState.HORIZONTAL
-                        && ev.x < (parent.appBar?.right ?: 0))
+                        && ev.x < appBarWidth)
                 this.initialX = ev.x
                 this.initialY = ev.y
             } else if (

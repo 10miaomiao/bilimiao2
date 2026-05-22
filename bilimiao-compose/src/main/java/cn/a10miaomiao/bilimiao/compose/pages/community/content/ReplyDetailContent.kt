@@ -23,12 +23,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Comment
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -386,19 +383,19 @@ fun ReplyDetailContent(
             menu = rememberMyMenu(sortOrder) {
                 myItem {
                     key = MenuKeys.send
-                    iconFileName = "ic_baseline_send_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Send
                     title = "回复评论"
                 }
                 if (userStore.isSelf(memberId?.toString() ?: "")) {
                     myItem {
                         key = MenuKeys.delete
-                        iconFileName = "ic_baseline_delete_outline_24"
+                        iconVector = androidx.compose.material.icons.Icons.Outlined.Delete
                         title = "删除评论"
                     }
                 }
                 myItem {
                     key = MenuKeys.sort
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     title = sortOrderList
                         .find { it.first == sortOrder }
                         ?.second ?: "排序"

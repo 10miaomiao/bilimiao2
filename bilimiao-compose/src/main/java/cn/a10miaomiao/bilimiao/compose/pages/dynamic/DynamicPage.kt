@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -65,17 +69,17 @@ private fun DynamicPageContent(
             myItem {
                 key = MenuKeys.home
                 title = "首页"
-                iconFileName = "ic_baseline_home_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.Home
             }
             myItem {
                 key = MenuKeys.dynamic
                 title = "动态"
-                iconFileName = "ic_baseline_icecream_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.Icecream
             }
             myItem {
                 key = MenuKeys.searchInHome
                 title = "搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
                 action = MenuActions.search
             }
         }

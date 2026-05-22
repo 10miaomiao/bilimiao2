@@ -27,13 +27,3 @@ fun Activity.getScaffoldView(): ScaffoldView {
     return getView(rootView, ScaffoldView::class.java)
         ?: throw Exception("NOT ScaffoldView")
 }
-
-fun Activity.getAppBarView(): AppBarView {
-    val rootView = findViewById<ViewGroup>(android.R.id.content)
-    return getView(rootView, AppBarView::class.java)
-        ?: throw Exception("NOT AppBarView")
-}
-
-inline fun Fragment.getAppBarView (): AppBarView {
-    return requireActivity().getAppBarView()
-}

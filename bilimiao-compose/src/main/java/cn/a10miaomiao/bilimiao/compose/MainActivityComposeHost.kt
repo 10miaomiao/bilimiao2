@@ -1,6 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -171,14 +172,14 @@ fun MainActivityComposeHost(
     }
     LaunchedEffect(pageConfig, orientation) {
         val menus = pageConfig.menu?.items?.map { item ->
-            cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData.fromPropInfo(item, startViewWrapper.activity)
+            cn.a10miaomiao.bilimiao.compose.components.appbar.MenuItemData.fromPropInfo(item)
         } ?: emptyList()
         appBarState.title = pageConfig.title
         appBarState.menus = menus
         appBarState.canBack = pageConfig.menu?.checkable != true
         appBarState.isNavigationMenu = pageConfig.menu?.checkable == true
         appBarState.checkedKey = pageConfig.menu?.takeIf { it.checkable }?.checkedKey
-        appBarState.orientation = if (orientation == 2) {
+        appBarState.orientation = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Horizontal
         } else {
             cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Vertical

@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.components.image
 
 import android.app.Activity
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -160,7 +164,7 @@ fun MyImagePreviewer(
             myItem {
                 key = MenuKeys.more
                 title = "更多"
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 childMenu = myMenu {
                     myItem {
                         key = 1
@@ -175,7 +179,7 @@ fun MyImagePreviewer(
             myItem {
                 key = MenuKeys.save
                 title = "保存图片"
-                iconFileName = "ic_baseline_save_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.Save
             }
         }
     )

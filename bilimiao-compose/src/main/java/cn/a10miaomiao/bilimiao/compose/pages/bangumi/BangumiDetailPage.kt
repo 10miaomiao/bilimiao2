@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.bangumi
 
 import android.content.ClipData
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -494,7 +498,7 @@ private fun BangumiDetailPageContent(
             myMenu {
                 myItem {
                     key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     title = "更多"
 
                     childMenu = myMenu {
@@ -523,10 +527,10 @@ private fun BangumiDetailPageContent(
                 myItem {
                     key = MenuKeys.follow
                     if (isFollow) {
-                        iconFileName = "ic_baseline_favorite_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Favorite
                         title = "已追番"
                     } else {
-                        iconFileName = "ic_outline_favorite_border_24"
+                        iconVector = androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                         title = "追番"
                     }
                 }
