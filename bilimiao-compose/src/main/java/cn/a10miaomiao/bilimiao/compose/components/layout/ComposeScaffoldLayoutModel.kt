@@ -1,29 +1,43 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
-import android.content.res.Configuration
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.PlayerFloatingLayoutState
+import cn.a10miaomiao.bilimiao.compose.PlayerPortraitLayoutState
 import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarConfig
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import kotlin.math.min
 
+internal enum class PlayerDisplayMode {
+    Hidden,
+    EmbeddedPortrait,
+    FloatingLandscape,
+    Fullscreen,
+}
+
 internal data class ComposeScaffoldPlayerLayoutState(
     val showPlayer: Boolean,
     val fullScreenPlayer: Boolean,
     val orientation: Int,
-    val smallModePlayerCurrentHeight: Int,
-    val smallModePlayerMinHeight: Int,
-    val playerSmallShowAreaWidth: Int,
-    val playerSmallShowAreaHeight: Int,
+    val portraitState: PlayerPortraitLayoutState,
+    val floatingState: PlayerFloatingLayoutState,
     val playerVideoRatio: Float,
-)
+) {
+    val displayMode: PlayerDisplayMode
+        get() = when {
+            !showPlayer -> PlayerDisplayMode.Hidden
+            fullScreenPlayer -> PlayerDisplayMode.Fullscreen
+            orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
+            orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
+            else -> PlayerDisplayMode.Hidden
+        }
+}
 
-internal data class ComposeScaffoldLayoutResult(
-    val contentInsets: ContentInsets,
+internal data class ComposeScaffoldGeometryResult(
     val contentBounds: Rect,
     val appBarVerticalBounds: Rect?,
     val appBarHorizontalBounds: Rect?,
@@ -39,6 +53,32 @@ internal data class ComposeScaffoldLayoutResult(
         get() = playerBounds != null
 }
 
+internal data class ComposeScaffoldLayoutResult(
+    val contentInsets: ContentInsets,
+    val geometry: ComposeScaffoldGeometryResult,
+) {
+    val contentBounds: Rect
+        get() = geometry.contentBounds
+
+    val appBarVerticalBounds: Rect?
+        get() = geometry.appBarVerticalBounds
+
+    val appBarHorizontalBounds: Rect?
+        get() = geometry.appBarHorizontalBounds
+
+    val playerBounds: Rect?
+        get() = geometry.playerBounds
+
+    val hasVerticalAppBar: Boolean
+        get() = geometry.hasVerticalAppBar
+
+    val hasHorizontalAppBar: Boolean
+        get() = geometry.hasHorizontalAppBar
+
+    val hasPlayer: Boolean
+        get() = geometry.hasPlayer
+}
+
 internal fun Density.calculateComposeScaffoldLayout(
     viewportWidth: Dp,
     viewportHeight: Dp,
@@ -46,6 +86,31 @@ internal fun Density.calculateComposeScaffoldLayout(
     appBarState: AppBarState?,
     playerState: ComposeScaffoldPlayerLayoutState,
 ): ComposeScaffoldLayoutResult {
+    val geometry = calculateComposeScaffoldGeometry(
+        viewportWidth = viewportWidth,
+        viewportHeight = viewportHeight,
+        rawWindowInsets = rawWindowInsets,
+        appBarState = appBarState,
+        playerState = playerState,
+    )
+    val contentInsets = calculateComposeScaffoldContentInsets(
+        rawWindowInsets = rawWindowInsets,
+        playerState = playerState,
+        geometry = geometry,
+    )
+    return ComposeScaffoldLayoutResult(
+        contentInsets = contentInsets,
+        geometry = geometry,
+    )
+}
+
+private fun Density.calculateComposeScaffoldGeometry(
+    viewportWidth: Dp,
+    viewportHeight: Dp,
+    rawWindowInsets: ContentInsets,
+    appBarState: AppBarState?,
+    playerState: ComposeScaffoldPlayerLayoutState,
+): ComposeScaffoldGeometryResult {
     val viewportWidthPx = viewportWidth.roundToPx()
     val viewportHeightPx = viewportHeight.roundToPx()
     val hasHorizontalAppBar = appBarState?.visible == true &&
@@ -59,11 +124,6 @@ internal fun Density.calculateComposeScaffoldLayout(
     } else {
         0.dp
     }
-    val verticalAppBarHeight = if (hasVerticalAppBar) {
-        AppBarConfig.Height + rawWindowInsets.bottom
-    } else {
-        0.dp
-    }
 
     val playerBounds = calculatePlayerBounds(
         viewportWidth = viewportWidth,
@@ -71,27 +131,19 @@ internal fun Density.calculateComposeScaffoldLayout(
         playerState = playerState,
     )
 
-    val contentInsets = ContentInsets(
-        left = 0.dp,
-        top = if (
-            playerState.showPlayer &&
-            !playerState.fullScreenPlayer &&
-            playerState.orientation == Configuration.ORIENTATION_PORTRAIT &&
-            playerBounds != null
-        ) {
-            playerBounds.bottom.toDp()
-        } else {
-            rawWindowInsets.top
-        },
-        right = rawWindowInsets.right,
-        bottom = rawWindowInsets.bottom + verticalAppBarHeight,
-    )
-
+    val embeddedPortraitContentTopPx = if (
+        playerState.displayMode == PlayerDisplayMode.EmbeddedPortrait &&
+        playerBounds != null
+    ) {
+        rawWindowInsets.top.toPx() + playerBounds.height
+    } else {
+        0f
+    }
     val contentBounds = Rect(
         left = (rawWindowInsets.left + horizontalAppBarWidth).toPx(),
-        top = 0f,
-        right = (viewportWidthPx).toFloat(),
-        bottom = (viewportHeightPx).toFloat(),
+        top = embeddedPortraitContentTopPx,
+        right = viewportWidthPx.toFloat(),
+        bottom = embeddedPortraitContentTopPx + viewportHeightPx.toFloat(),
     )
 
     val appBarVerticalBounds = if (hasVerticalAppBar) {
@@ -118,12 +170,41 @@ internal fun Density.calculateComposeScaffoldLayout(
         null
     }
 
-    return ComposeScaffoldLayoutResult(
-        contentInsets = contentInsets,
+    return ComposeScaffoldGeometryResult(
         contentBounds = contentBounds,
         appBarVerticalBounds = appBarVerticalBounds,
         appBarHorizontalBounds = appBarHorizontalBounds,
         playerBounds = playerBounds,
+    )
+}
+
+private fun Density.calculateComposeScaffoldContentInsets(
+    rawWindowInsets: ContentInsets,
+    playerState: ComposeScaffoldPlayerLayoutState,
+    geometry: ComposeScaffoldGeometryResult,
+): ContentInsets {
+    val verticalAppBarInset = if (geometry.hasVerticalAppBar) {
+        AppBarConfig.Height
+    } else {
+        0.dp
+    }
+    val embeddedPortraitPlayerInset = if (
+        playerState.displayMode == PlayerDisplayMode.EmbeddedPortrait &&
+        geometry.playerBounds != null
+    ) {
+        geometry.playerBounds.height.toDp() + rawWindowInsets.top
+    } else {
+        0.dp
+    }
+    return ContentInsets(
+        left = 0.dp,
+        top = if (playerState.displayMode == PlayerDisplayMode.EmbeddedPortrait) {
+            0.dp
+        } else {
+            rawWindowInsets.top
+        },
+        right = rawWindowInsets.right,
+        bottom = rawWindowInsets.bottom + verticalAppBarInset + embeddedPortraitPlayerInset,
     )
 }
 
@@ -132,25 +213,20 @@ private fun Density.calculatePlayerBounds(
     viewportHeight: Dp,
     playerState: ComposeScaffoldPlayerLayoutState,
 ): Rect? {
-    if (!playerState.showPlayer) {
-        return null
-    }
-    if (playerState.fullScreenPlayer) {
-        return Rect(
+    return when (playerState.displayMode) {
+        PlayerDisplayMode.Hidden -> null
+        PlayerDisplayMode.Fullscreen -> Rect(
             left = 0f,
             top = 0f,
             right = viewportWidth.roundToPx().toFloat(),
             bottom = viewportHeight.roundToPx().toFloat(),
         )
-    }
-    return when (playerState.orientation) {
-        1 -> {
+        PlayerDisplayMode.EmbeddedPortrait -> {
             val maxHeightByRatio = viewportWidth.value / playerState.playerVideoRatio
             val maxHeight = min(maxHeightByRatio, viewportHeight.value / 2f).dp
-            val minHeight = playerState.smallModePlayerMinHeight.toDp()
-                .coerceAtLeast(200.dp)
-            val targetHeight = if (playerState.smallModePlayerCurrentHeight > 0) {
-                playerState.smallModePlayerCurrentHeight.toDp().coerceAtMost(maxHeight)
+            val minHeight = playerState.portraitState.minHeightPx.toDp().coerceAtLeast(200.dp)
+            val targetHeight = if (playerState.portraitState.currentHeightPx > 0) {
+                playerState.portraitState.currentHeightPx.toDp().coerceAtMost(maxHeight)
             } else {
                 minHeight
             }
@@ -161,24 +237,23 @@ private fun Density.calculatePlayerBounds(
                 bottom = targetHeight.roundToPx().toFloat(),
             )
         }
-        2 -> {
-            val width = if (playerState.playerSmallShowAreaWidth > 0) {
-                (playerState.playerSmallShowAreaWidth / density).dp
-            } else {
-                480.dp
+        PlayerDisplayMode.FloatingLandscape -> {
+            val widthPx = when {
+                playerState.floatingState.initialized && playerState.floatingState.widthPx > 0f -> playerState.floatingState.widthPx
+                playerState.floatingState.defaultWidthPx > 0f -> playerState.floatingState.defaultWidthPx
+                else -> 480.dp.toPx()
             }
-            val height = if (playerState.playerSmallShowAreaHeight > 0) {
-                (playerState.playerSmallShowAreaHeight / density).dp
-            } else {
-                270.dp
+            val heightPx = when {
+                playerState.floatingState.initialized && playerState.floatingState.heightPx > 0f -> playerState.floatingState.heightPx
+                playerState.floatingState.defaultHeightPx > 0f -> playerState.floatingState.defaultHeightPx
+                else -> 270.dp.toPx()
             }
             Rect(
                 left = 0f,
                 top = 0f,
-                right = width.roundToPx().toFloat(),
-                bottom = height.roundToPx().toFloat(),
+                right = widthPx,
+                bottom = heightPx,
             )
         }
-        else -> null
     }
 }

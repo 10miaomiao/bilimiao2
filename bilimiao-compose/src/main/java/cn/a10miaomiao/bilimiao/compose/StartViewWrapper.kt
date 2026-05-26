@@ -1,9 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.app.Activity
-import android.view.Gravity
 import android.view.View
-import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.mutableFloatStateOf
@@ -14,19 +12,35 @@ import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import kotlin.math.max
 import kotlin.math.min
 
+data class PlayerPortraitLayoutState(
+    val minHeightPx: Int = 0,
+    val currentHeightPx: Int = 0,
+    val maxHeightPx: Int = 0,
+)
+
+data class PlayerFloatingLayoutState(
+    val defaultWidthPx: Float = 0f,
+    val defaultHeightPx: Float = 0f,
+    val widthPx: Float = 0f,
+    val heightPx: Float = 0f,
+    val offsetXPx: Float = 0f,
+    val offsetYPx: Float = 0f,
+    val initialized: Boolean = false,
+)
+
 class StartViewWrapper(
     val activity: Activity,
     val navigateTo: (ComposePage) -> Unit,
     val navigateUrl: (String) -> Unit,
     val dismissRequest: () -> Unit,
     val openScanner: (callback: (result: String) -> Unit) -> Boolean,
+    private val onFloatingPlayerLayoutStateChanged: (PlayerFloatingLayoutState) -> Unit = {},
 ) {
 
     private val composeView = ComposeView(activity)
 
     private val density = activity.resources.displayMetrics.density
 
-    // 侧滑菜单状态
     private val _drawerState = mutableStateOf(DRAWER_STATE_COLLAPSED)
     val drawerState get() = _drawerState.value
 
@@ -64,17 +78,11 @@ class StartViewWrapper(
     private val _fullScreenPlayer = mutableStateOf(false)
     val fullScreenPlayer get() = _fullScreenPlayer.value
 
-    private val _smallModePlayerMinHeight = mutableStateOf(0)
-    val smallModePlayerMinHeight get() = _smallModePlayerMinHeight.value
+    private val _portraitPlayerLayoutState = mutableStateOf(PlayerPortraitLayoutState())
+    val portraitPlayerLayoutState get() = _portraitPlayerLayoutState.value
 
-    private val _smallModePlayerCurrentHeight = mutableStateOf(0)
-    val smallModePlayerCurrentHeight get() = _smallModePlayerCurrentHeight.value
-
-    private val _playerSmallShowAreaWidth = mutableStateOf(0)
-    val playerSmallShowAreaWidth get() = _playerSmallShowAreaWidth.value
-
-    private val _playerSmallShowAreaHeight = mutableStateOf(0)
-    val playerSmallShowAreaHeight get() = _playerSmallShowAreaHeight.value
+    private val _floatingPlayerLayoutState = mutableStateOf(PlayerFloatingLayoutState())
+    val floatingPlayerLayoutState get() = _floatingPlayerLayoutState.value
 
     private val _playerVideoRatio = mutableStateOf(16f / 9f)
     val playerVideoRatio get() = _playerVideoRatio.value
@@ -132,17 +140,17 @@ class StartViewWrapper(
         _fullScreenPlayer.value = value
     }
 
-    fun setSmallModePlayerMinHeight(value: Int) {
-        _smallModePlayerMinHeight.value = value
+    fun setPortraitPlayerLayoutState(state: PlayerPortraitLayoutState) {
+        _portraitPlayerLayoutState.value = state
     }
 
-    fun setSmallModePlayerCurrentHeight(value: Int) {
-        _smallModePlayerCurrentHeight.value = value
+    fun setFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
+        _floatingPlayerLayoutState.value = state
     }
 
-    fun setPlayerSmallShowArea(width: Int, height: Int) {
-        _playerSmallShowAreaWidth.value = width
-        _playerSmallShowAreaHeight.value = height
+    fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
+        _floatingPlayerLayoutState.value = state
+        onFloatingPlayerLayoutStateChanged(state)
     }
 
     fun setPlayerVideoRatio(ratio: Float) {

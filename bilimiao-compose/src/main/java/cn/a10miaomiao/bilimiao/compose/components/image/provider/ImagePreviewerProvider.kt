@@ -1,14 +1,14 @@
 package cn.a10miaomiao.bilimiao.compose.components.image.provider
 
 import androidx.activity.compose.BackHandler
-import androidx.collection.mutableIntSetOf
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.IntState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
@@ -17,14 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.LayoutDirection
-import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
-import cn.a10miaomiao.bilimiao.compose.components.image.viewer.AnyComposable
+import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.PreviewerState
-import com.bumptech.glide.Glide
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Stable
@@ -47,7 +44,7 @@ class ImagePreviewerController {
     val imagePreviewerState: State<ImagePreviewerState?> get() = _imagePreviewerState
 
     private var _enterIndex = mutableIntStateOf(-1)
-    val enterIndex: IntState get() =  _enterIndex
+    val enterIndex: IntState get() = _enterIndex
     var enterAnimationSpec: AnimationSpec<Float>? = null
         private set
 
@@ -91,7 +88,6 @@ class ImagePreviewerController {
     fun isImageLoaded(imageUrl: String): Boolean {
         return _imageLoaded.value.contains(imageUrl)
     }
-
 }
 
 internal val LocalImagePreviewerController = staticCompositionLocalOf<ImagePreviewerController> {
@@ -103,7 +99,6 @@ fun localImagePreviewerController() = LocalImagePreviewerController.current
 
 @Composable
 fun ImagePreviewerProvider(
-    contentPadding: PaddingValues = PaddingValues(),
     previewer: @Composable (ImagePreviewerState, PaddingValues) -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -117,43 +112,63 @@ fun ImagePreviewerProvider(
     )
     val imagePreviewerState = controller.imagePreviewerState.value
     if (imagePreviewerState != null) {
-        val previewerState = imagePreviewerState.previewerState
-        previewer(imagePreviewerState, contentPadding)
-        val enterIndex = controller.enterIndex.value
-        LocalDensity.current.apply {
-            LaunchedEffect(enterIndex) {
-                if (enterIndex != -1) {
-                    val left = contentPadding.calculateLeftPadding(LayoutDirection.Ltr).toPx()
-                    val right = contentPadding.calculateLeftPadding(LayoutDirection.Ltr).toPx()
-                    val top = contentPadding.calculateTopPadding().toPx()
-                    val bottom = contentPadding.calculateBottomPadding().toPx()
-                    previewerState.offsetSize = Size(
-                        height = (top - bottom).div(2f),
-                        width = (left - right).div(2f),
-                    )
-                    previewerState.enterTransform(
-                        enterIndex,
-                        controller.enterAnimationSpec
-                    )
-                    controller.clearEnter()
+        ImagePreviewerOverlay(
+            controller = controller,
+            imagePreviewerState = imagePreviewerState,
+            previewer = previewer,
+            onBack = {
+                scope.launch {
+                    imagePreviewerState.previewerState.exitTransform()
                 }
+            },
+        )
+    }
+}
+
+@Composable
+private fun ImagePreviewerOverlay(
+    controller: ImagePreviewerController,
+    imagePreviewerState: ImagePreviewerState,
+    previewer: @Composable (ImagePreviewerState, PaddingValues) -> Unit,
+    onBack: () -> Unit,
+) {
+    val previewerState = imagePreviewerState.previewerState
+    val enterIndex = controller.enterIndex.value
+    val contentPadding = WindowInsets.safeDrawing.toContentInsets().toPaddingValues()
+    previewer(imagePreviewerState, contentPadding)
+    LocalDensity.current.apply {
+        LaunchedEffect(enterIndex, contentPadding) {
+            if (enterIndex != -1) {
+                val left = contentPadding.calculateLeftPadding(LayoutDirection.Ltr).toPx()
+                val right = contentPadding.calculateRightPadding(LayoutDirection.Ltr).toPx()
+                val top = contentPadding.calculateTopPadding().toPx()
+                val bottom = contentPadding.calculateBottomPadding().toPx()
+                previewerState.offsetSize = Size(
+                    height = (top - bottom).div(2f),
+                    width = (left - right).div(2f),
+                )
+                previewerState.enterTransform(
+                    enterIndex,
+                    controller.enterAnimationSpec
+                )
+                controller.clearEnter()
             }
         }
-        LaunchedEffect(
-            previewerState.canClose,
-            previewerState.animating,
-            enterIndex,
-        ) {
-            if (enterIndex == -1 &&
-                !previewerState.canClose &&
-                !previewerState.animating) {
-                controller.clearState()
-            }
+    }
+    LaunchedEffect(
+        previewerState.canClose,
+        previewerState.animating,
+        enterIndex,
+    ) {
+        if (enterIndex == -1 &&
+            !previewerState.canClose &&
+            !previewerState.animating) {
+            controller.clearState()
         }
-        BackHandler {
-            if (!previewerState.animating) scope.launch {
-                previewerState.exitTransform()
-            }
+    }
+    BackHandler {
+        if (!previewerState.animating) {
+            onBack()
         }
     }
 }
