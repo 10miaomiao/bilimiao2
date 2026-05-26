@@ -2,6 +2,8 @@ package cn.a10miaomiao.bilimiao.compose.components.layout
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -11,7 +13,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.anchoredDraggable
@@ -62,13 +63,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
-import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
+import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -96,10 +97,8 @@ fun ComposeScaffold(
     val showPlayer = startViewWrapper.showPlayer
     val fullScreenPlayer = startViewWrapper.fullScreenPlayer
     val orientation = startViewWrapper.orientation
-    val smallModePlayerCurrentHeight = startViewWrapper.smallModePlayerCurrentHeight
-    val smallModePlayerMinHeight = startViewWrapper.smallModePlayerMinHeight
-    val playerSmallShowAreaWidth = startViewWrapper.playerSmallShowAreaWidth
-    val playerSmallShowAreaHeight = startViewWrapper.playerSmallShowAreaHeight
+    val portraitPlayerLayoutState = startViewWrapper.portraitPlayerLayoutState
+    val floatingPlayerLayoutState = startViewWrapper.floatingPlayerLayoutState
     val playerVideoRatio = startViewWrapper.playerVideoRatio
     val drawerState = startViewWrapper.drawerState
 
@@ -150,20 +149,16 @@ fun ComposeScaffold(
         showPlayer,
         fullScreenPlayer,
         orientation,
-        smallModePlayerCurrentHeight,
-        smallModePlayerMinHeight,
-        playerSmallShowAreaWidth,
-        playerSmallShowAreaHeight,
+        portraitPlayerLayoutState,
+        floatingPlayerLayoutState,
         playerVideoRatio,
     ) {
         ComposeScaffoldPlayerLayoutState(
             showPlayer = showPlayer,
             fullScreenPlayer = fullScreenPlayer,
             orientation = orientation,
-            smallModePlayerCurrentHeight = smallModePlayerCurrentHeight,
-            smallModePlayerMinHeight = smallModePlayerMinHeight,
-            playerSmallShowAreaWidth = playerSmallShowAreaWidth,
-            playerSmallShowAreaHeight = playerSmallShowAreaHeight,
+            portraitState = portraitPlayerLayoutState,
+            floatingState = floatingPlayerLayoutState,
             playerVideoRatio = playerVideoRatio,
         )
     }
@@ -207,11 +202,25 @@ fun ComposeScaffold(
                 playerState = playerLayoutState,
             )
         }
+        MiaoLogger("ComposeScaffold").d(
+            "contentBounds" to layoutResult.contentBounds
+        )
         val maxHeightPx = with(density) { maxHeight.toPx() }
         val leftEdgeWidthPx = with(density) { 40.dp.toPx() }
         val appBarGestureRect = layoutResult.appBarHorizontalBounds ?: layoutResult.appBarVerticalBounds
         val drawerWidth = if (maxWidth > DrawerMaxWidth.dp) DrawerMaxWidth.dp else maxWidth
         val scrimAlpha = drawerController.openFraction * DrawerScrimMaxAlpha
+        val contentOffsetY = remember { Animatable(0f) }
+
+        LaunchedEffect(layoutResult.contentBounds.top) {
+            contentOffsetY.animateTo(
+                targetValue = layoutResult.contentBounds.top,
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = CubicBezierEasing(0.2f, 0f, 0f, 1f),
+                ),
+            )
+        }
         val drawerGestureModifier = Modifier.anchoredDraggable(
             state = drawerController.state,
             orientation = Orientation.Horizontal,
@@ -292,7 +301,7 @@ fun ComposeScaffold(
                 }
         ) {
             SubcomposeLayout(modifier = Modifier.fillMaxSize()) { constraints ->
-                val contentPlaceable = subcompose("content-${layoutResult.contentInsets}") {
+                val contentPlaceable = subcompose("content") {
                     CompositionLocalProvider(
                         LocalContentInsets provides layoutResult.contentInsets,
                     ) {
@@ -375,16 +384,24 @@ fun ComposeScaffold(
                         PlayerLayer(
                             startViewWrapper = startViewWrapper,
                             baseBounds = layoutResult.playerBounds!!,
-                            windowInsets = rawWindowInsets,
+                            portraitTopInset = rawWindowInsets.top,
                         )
-                    }.single().measure(boundsConstraints(layoutResult.playerBounds!!))
+                    }.single().measure(
+                        constraints.copy(
+                            minWidth = 0,
+                            minHeight = 0,
+                        )
+                    )
                 } else {
                     null
                 }
 
                 layout(constraints.maxWidth, constraints.maxHeight) {
                     val contentRect = layoutResult.contentBounds
-                    contentPlaceable.placeRelative(contentRect.left.toInt(), contentRect.top.toInt())
+                    contentPlaceable.placeRelative(
+                        contentRect.left.toInt(),
+                        contentOffsetY.value.toInt(),
+                    )
 
                     layoutResult.appBarHorizontalBounds?.let { rect ->
                         horizontalAppBarPlaceable?.placeRelative(rect.left.toInt(), rect.top.toInt())
@@ -610,7 +627,7 @@ private fun contentConstraints(rootConstraints: Constraints, bounds: Rect): Cons
 internal fun PlayerLayer(
     startViewWrapper: StartViewWrapper,
     baseBounds: Rect,
-    windowInsets: ContentInsets
+    portraitTopInset: Dp,
 ) {
     val playerView = startViewWrapper.playerView
     val completionView = startViewWrapper.completionView
@@ -630,34 +647,136 @@ internal fun PlayerLayer(
     var currentWidth by remember { mutableStateOf(with(density) { baseBounds.width.toDp() }) }
     var currentHeight by remember { mutableStateOf(with(density) { baseBounds.height.toDp() }) }
 
+    val displayMode = when {
+        !startViewWrapper.showPlayer -> PlayerDisplayMode.Hidden
+        startViewWrapper.fullScreenPlayer -> PlayerDisplayMode.Fullscreen
+        orientation == Configuration.ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
+        orientation == Configuration.ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
+        else -> PlayerDisplayMode.Hidden
+    }
     val screenWidth = density.run { context.resources.displayMetrics.widthPixels.toDp() }
 
-    LaunchedEffect(baseBounds) {
-        currentWidth = with(density) { baseBounds.width.toDp() }
-        currentHeight = with(density) { baseBounds.height.toDp() }
-        if (orientation != Configuration.ORIENTATION_LANDSCAPE) {
-            offsetX = 0.dp
-            offsetY = 0.dp
-        } else if (offsetX == 0.dp && offsetY == 0.dp) {
-            offsetX = screenWidth - currentWidth
-            offsetY = 0.dp
+    LaunchedEffect(baseBounds, displayMode, startViewWrapper.portraitPlayerLayoutState, startViewWrapper.floatingPlayerLayoutState) {
+        val defaultWidth = with(density) { baseBounds.width.toDp() }
+        val defaultHeight = with(density) { baseBounds.height.toDp() }
+        when (displayMode) {
+            PlayerDisplayMode.Hidden,
+            PlayerDisplayMode.Fullscreen,
+            PlayerDisplayMode.EmbeddedPortrait,
+            -> {
+                currentWidth = defaultWidth
+                currentHeight = defaultHeight
+                offsetX = 0.dp
+                offsetY = 0.dp
+            }
+            PlayerDisplayMode.FloatingLandscape -> {
+                val floatingState = startViewWrapper.floatingPlayerLayoutState
+                if (floatingState.initialized) {
+                    currentWidth = with(density) { floatingState.widthPx.toDp() }
+                    currentHeight = with(density) { floatingState.heightPx.toDp() }
+                    offsetX = with(density) { floatingState.offsetXPx.toDp() }
+                    offsetY = with(density) { floatingState.offsetYPx.toDp() }
+                } else {
+                    currentWidth = defaultWidth
+                    currentHeight = defaultHeight
+                    offsetX = screenWidth - currentWidth
+                    offsetY = 0.dp
+                    startViewWrapper.updateFloatingPlayerLayoutState(
+                        floatingState.copy(
+                            defaultWidthPx = with(density) { currentWidth.toPx() },
+                            defaultHeightPx = with(density) { currentHeight.toPx() },
+                            widthPx = with(density) { currentWidth.toPx() },
+                            heightPx = with(density) { currentHeight.toPx() },
+                            offsetXPx = with(density) { offsetX.toPx() },
+                            offsetYPx = with(density) { offsetY.toPx() },
+                            initialized = true,
+                        )
+                    )
+                }
+            }
         }
     }
 
-    val modifier = if (orientation == Configuration.ORIENTATION_LANDSCAPE && !startViewWrapper.fullScreenPlayer) {
+    val modifier = if (displayMode == PlayerDisplayMode.FloatingLandscape) {
         Modifier
             .offset(x = offsetX, y = offsetY)
             .size(currentWidth, currentHeight)
             .pointerInput(Unit) {
-                detectTransformGestures(panZoomLock = true) { _, pan, zoom, _ ->
-                    if (zoom != 1f) {
-                        val newWidth = (currentWidth.value * zoom).coerceIn(200f, 800f).dp
-                        val newHeight = (currentHeight.value * zoom).coerceIn(112f, 450f).dp
-                        currentWidth = newWidth
-                        currentHeight = newHeight
-                    } else {
-                        offsetX += pan.x.toDp()
-                        offsetY += pan.y.toDp()
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    val downPos = down.position
+
+                    val bottomEdgePx = 12.dp.toPx()
+                    val isBottomEdge = currentHeight.toPx() - downPos.y <= bottomEdgePx
+
+                    val startOffsetX = offsetX
+                    val startWidth = currentWidth
+                    val startHeight = currentHeight
+                    val startWidthPx = startWidth.toPx()
+                    val startHeightPx = startHeight.toPx()
+                    val aspectRatio = startWidthPx / startHeightPx
+
+                    val pointerId = down.id
+                    var dragging = false
+
+                    val minWidthPx = 200.dp.toPx()
+                    val maxWidthPx = 800.dp.toPx()
+                    val minHeightPx = 112.dp.toPx()
+                    val maxHeightPx = 450.dp.toPx()
+
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+                        if (!change.pressed) break
+                        if (!change.positionChanged()) continue
+
+                        val deltaX = change.position.x - downPos.x
+                        val deltaY = change.position.y - downPos.y
+
+                        if (!dragging) {
+                            if (abs(deltaX) < 2f && abs(deltaY) < 2f) continue
+                            dragging = true
+                        }
+
+                        if (isBottomEdge) {
+                            val newHeightPx = (startHeightPx + deltaY).coerceIn(minHeightPx, maxHeightPx)
+                            val newWidthPx = (newHeightPx * aspectRatio).coerceIn(minWidthPx, maxWidthPx)
+                            val clampedHeightPx = newWidthPx / aspectRatio
+                            val deltaWPx = newWidthPx - startWidthPx
+
+                            currentWidth = newWidthPx.toDp()
+                            currentHeight = clampedHeightPx.toDp()
+                            val zoneWidth = startWidthPx / 3
+                            offsetX = when {
+                                downPos.x < zoneWidth -> startOffsetX - deltaWPx.toDp()
+                                downPos.x < zoneWidth * 2 -> startOffsetX - (deltaWPx / 2).toDp()
+                                else -> startOffsetX
+                            }
+                            startViewWrapper.updateFloatingPlayerLayoutState(
+                                startViewWrapper.floatingPlayerLayoutState.copy(
+                                    widthPx = newWidthPx,
+                                    heightPx = clampedHeightPx,
+                                    offsetXPx = with(density) { offsetX.toPx() },
+                                    offsetYPx = with(density) { offsetY.toPx() },
+                                    initialized = true,
+                                )
+                            )
+                            change.consume()
+                        } else {
+                            val pan = change.position - change.previousPosition
+                            offsetX += pan.x.toDp()
+                            offsetY += pan.y.toDp()
+                            startViewWrapper.updateFloatingPlayerLayoutState(
+                                startViewWrapper.floatingPlayerLayoutState.copy(
+                                    widthPx = with(density) { currentWidth.toPx() },
+                                    heightPx = with(density) { currentHeight.toPx() },
+                                    offsetXPx = with(density) { offsetX.toPx() },
+                                    offsetYPx = with(density) { offsetY.toPx() },
+                                    initialized = true,
+                                )
+                            )
+                            change.consume()
+                        }
                     }
                 }
             }
@@ -670,10 +789,10 @@ internal fun PlayerLayer(
             .then(
                 if (baseBounds.width == Float.POSITIVE_INFINITY || baseBounds.height == Float.POSITIVE_INFINITY) {
                     Modifier.fillMaxSize()
-                } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                } else if (displayMode == PlayerDisplayMode.EmbeddedPortrait) {
                     Modifier
                         .background(Color.Black)
-                        .padding(top = windowInsets.top)
+                        .padding(top = portraitTopInset)
                         .size(currentWidth, currentHeight)
                 } else {
                     Modifier.size(currentWidth, currentHeight)

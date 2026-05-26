@@ -34,12 +34,16 @@ data class ContentInsets(
 fun WindowInsets.toContentInsets(): ContentInsets {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    return remember(this, density, layoutDirection) {
+    val leftPx = getLeft(density, layoutDirection)
+    val topPx = getTop(density)
+    val rightPx = getRight(density, layoutDirection)
+    val bottomPx = getBottom(density)
+    return remember(leftPx, topPx, rightPx, bottomPx) {
         ContentInsets(
-            left = with(density) { getLeft(this, layoutDirection).toDp() },
-            top = with(density) { getTop(this).toDp() },
-            right = with(density) { getRight(this, layoutDirection).toDp() },
-            bottom = with(density) { getBottom(this).toDp() },
+            left = with(density) { leftPx.toDp() },
+            top = with(density) { topPx.toDp() },
+            right = with(density) { rightPx.toDp() },
+            bottom = with(density) { bottomPx.toDp() },
         )
     }
 }

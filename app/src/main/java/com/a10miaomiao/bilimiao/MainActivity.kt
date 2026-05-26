@@ -40,6 +40,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeNavigator
+import cn.a10miaomiao.bilimiao.compose.PlayerFloatingLayoutState
+import cn.a10miaomiao.bilimiao.compose.PlayerPortraitLayoutState
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -162,6 +164,7 @@ class MainActivity : AppCompatActivity(), DIAware {
             this::startMenuNavigateUrl,
             this::startMenuDismissRequest,
             this::startMenuOpenScanner,
+            playerHostState::updateFloatingPlayerLayoutState,
         )
     }
     private val basePlayerDelegate: BasePlayerDelegate by lazy {
@@ -325,12 +328,8 @@ class MainActivity : AppCompatActivity(), DIAware {
         startViewWrapper.setShowPlayer(playerHostState.showPlayer)
         startViewWrapper.setOrientation(playerHostState.orientation)
         startViewWrapper.setFullScreenPlayer(playerHostState.fullScreenPlayer)
-        startViewWrapper.setSmallModePlayerMinHeight(playerHostState.smallModePlayerMinHeight)
-        startViewWrapper.setSmallModePlayerCurrentHeight(playerHostState.smallModePlayerCurrentHeight)
-        startViewWrapper.setPlayerSmallShowArea(
-            playerHostState.playerSmallShowArea,
-            playerHostState.playerSmallShowArea / 16 * 9,
-        )
+        startViewWrapper.setPortraitPlayerLayoutState(playerHostState.portraitLayoutState)
+        startViewWrapper.setFloatingPlayerLayoutState(playerHostState.floatingLayoutState)
         startViewWrapper.setPlayerVideoRatio(playerHostState.playerVideoRatio)
     }
 
@@ -443,7 +442,6 @@ class MainActivity : AppCompatActivity(), DIAware {
         bottom: Int,
         displayCutout: DisplayCutout?
     ) {
-        playerHostState.updateSmallModePlayerMaxHeight()
         basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
         updateStatusBarStyle()
     }
@@ -582,7 +580,6 @@ class MainActivity : AppCompatActivity(), DIAware {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         playerHostState.orientation = newConfig.orientation
-        startViewWrapper.setOrientation(playerHostState.orientation)
         playerHostState.updateSmallModePlayerMaxHeight()
         basePlayerDelegate.onConfigurationChanged(newConfig)
         updateStatusBarStyle()
@@ -597,10 +594,6 @@ class MainActivity : AppCompatActivity(), DIAware {
         if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
-        super.onBackPressed()
-    }
-
-    private fun handleActivityBackPressed() {
         if (startViewWrapper.isDrawerOpen()) {
             if (startViewWrapper.showSearchDialog) {
                 startViewWrapper.closeSearchDialog()
@@ -609,6 +602,10 @@ class MainActivity : AppCompatActivity(), DIAware {
             startViewWrapper.closeDrawer()
             return
         }
+        super.onBackPressed()
+    }
+
+    private fun handleActivityBackPressed() {
         if (composeNavigator.canPopBackStack()) {
             composeNavigator.popBackStack()
         } else {
@@ -674,16 +671,27 @@ class MainActivity : AppCompatActivity(), DIAware {
             }
 
         val smallModePlayerMinHeight: Int = (200 * resources.displayMetrics.density).toInt()
-        var smallModePlayerCurrentHeight: Int = smallModePlayerMinHeight
+        private var portraitCurrentHeightPx: Int = smallModePlayerMinHeight
             set(value) {
                 field = value
-                startViewWrapper.setSmallModePlayerCurrentHeight(value)
+                syncPortraitPlayerLayoutState()
             }
         override var smallModePlayerMaxHeight: Int = smallModePlayerMinHeight
+            set(value) {
+                field = value
+                syncPortraitPlayerLayoutState()
+            }
+        private var floatingPlayerLayoutState = PlayerFloatingLayoutState()
         var playerSmallShowArea: Int = 480
             set(value) {
                 field = value
-                startViewWrapper.setPlayerSmallShowArea(value, value / 16 * 9)
+                val widthPx = value * resources.displayMetrics.density
+                val heightPx = widthPx / (16f / 9f)
+                floatingPlayerLayoutState = floatingPlayerLayoutState.copy(
+                    defaultWidthPx = widthPx,
+                    defaultHeightPx = heightPx,
+                )
+                syncFloatingPlayerLayoutState()
             }
         var playerVideoRatio: Float = 16f / 9f
             set(value) {
@@ -692,11 +700,27 @@ class MainActivity : AppCompatActivity(), DIAware {
                 updateSmallModePlayerMaxHeight()
             }
 
+        val portraitLayoutState: PlayerPortraitLayoutState
+            get() = PlayerPortraitLayoutState(
+                minHeightPx = smallModePlayerMinHeight,
+                currentHeightPx = portraitCurrentHeightPx,
+                maxHeightPx = smallModePlayerMaxHeight,
+            )
+
+        val floatingLayoutState: PlayerFloatingLayoutState
+            get() = floatingPlayerLayoutState
+
+        var smallModePlayerCurrentHeight: Int
+            get() = portraitCurrentHeightPx
+            set(value) {
+                portraitCurrentHeightPx = value
+            }
+
         override fun animatePlayerHeight(target: Int) {
-            if (orientation != PlayerHostState.VERTICAL || smallModePlayerCurrentHeight == target) {
+            if (orientation != PlayerHostState.VERTICAL || portraitCurrentHeightPx == target) {
                 return
             }
-            val animator = android.animation.ValueAnimator.ofInt(smallModePlayerCurrentHeight, target)
+            val animator = android.animation.ValueAnimator.ofInt(portraitCurrentHeightPx, target)
             animator.duration = 200
             animator.addUpdateListener {
                 smallModePlayerCurrentHeight = it.animatedValue as Int
@@ -711,11 +735,32 @@ class MainActivity : AppCompatActivity(), DIAware {
             val metrics = resources.displayMetrics
             val maxHeightByRatio = (metrics.widthPixels / playerVideoRatio).toInt()
             smallModePlayerMaxHeight = minOf(maxHeightByRatio, metrics.heightPixels / 2)
-            if (smallModePlayerCurrentHeight > smallModePlayerMaxHeight) {
-                smallModePlayerCurrentHeight = smallModePlayerMaxHeight
+            if (portraitCurrentHeightPx > smallModePlayerMaxHeight) {
+                portraitCurrentHeightPx = smallModePlayerMaxHeight
             }
-            startViewWrapper.setSmallModePlayerMinHeight(smallModePlayerMinHeight)
-            startViewWrapper.setSmallModePlayerCurrentHeight(smallModePlayerCurrentHeight)
+            syncPortraitPlayerLayoutState()
+        }
+
+        fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
+            floatingPlayerLayoutState = state.copy(
+                defaultWidthPx = state.defaultWidthPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultWidthPx,
+                defaultHeightPx = state.defaultHeightPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultHeightPx,
+            )
+            syncFloatingPlayerLayoutState()
+        }
+
+        private fun syncPortraitPlayerLayoutState() {
+            if (startViewWrapper.portraitPlayerLayoutState == portraitLayoutState) {
+                return
+            }
+            startViewWrapper.setPortraitPlayerLayoutState(portraitLayoutState)
+        }
+
+        private fun syncFloatingPlayerLayoutState() {
+            if (startViewWrapper.floatingPlayerLayoutState == floatingPlayerLayoutState) {
+                return
+            }
+            startViewWrapper.setFloatingPlayerLayoutState(floatingPlayerLayoutState)
         }
     }
 

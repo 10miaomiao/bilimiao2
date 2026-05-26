@@ -3,13 +3,9 @@ package cn.a10miaomiao.bilimiao.compose
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -32,12 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -49,10 +41,7 @@ import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.bottomSheetContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
-import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
-import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffoldPlayerLayoutState
-import cn.a10miaomiao.bilimiao.compose.components.layout.calculateComposeScaffoldLayout
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
@@ -139,26 +128,25 @@ fun MainActivityComposeHost(
     val orientation = startViewWrapper.orientation
     val showPlayer = startViewWrapper.showPlayer
     val allowDrawerOpenGesture = bottomSheetPage == null && !startViewWrapper.fullScreenPlayer
-    val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
-    val mainContentInsets = with(LocalDensity.current) {
-        calculateComposeScaffoldLayout(
-            viewportWidth = with(this) { startViewWrapper.activity.resources.displayMetrics.widthPixels.toDp() },
-            viewportHeight = with(this) { startViewWrapper.activity.resources.displayMetrics.heightPixels.toDp() },
-            rawWindowInsets = rawWindowInsets,
-            appBarState = appBarState,
-            playerState = ComposeScaffoldPlayerLayoutState(
-                showPlayer = showPlayer,
-                fullScreenPlayer = startViewWrapper.fullScreenPlayer,
-                orientation = orientation,
-                smallModePlayerCurrentHeight = startViewWrapper.smallModePlayerCurrentHeight,
-                smallModePlayerMinHeight = startViewWrapper.smallModePlayerMinHeight,
-                playerSmallShowAreaWidth = startViewWrapper.playerSmallShowAreaWidth,
-                playerSmallShowAreaHeight = startViewWrapper.playerSmallShowAreaHeight,
-                playerVideoRatio = startViewWrapper.playerVideoRatio,
-            ),
-        ).contentInsets
+    val portraitPlayerLayoutState = startViewWrapper.portraitPlayerLayoutState
+    val floatingPlayerLayoutState = startViewWrapper.floatingPlayerLayoutState
+    val playerLayoutState = remember(
+        showPlayer,
+        startViewWrapper.fullScreenPlayer,
+        orientation,
+        portraitPlayerLayoutState,
+        floatingPlayerLayoutState,
+        startViewWrapper.playerVideoRatio,
+    ) {
+        ComposeScaffoldPlayerLayoutState(
+            showPlayer = showPlayer,
+            fullScreenPlayer = startViewWrapper.fullScreenPlayer,
+            orientation = orientation,
+            portraitState = portraitPlayerLayoutState,
+            floatingState = floatingPlayerLayoutState,
+            playerVideoRatio = startViewWrapper.playerVideoRatio,
+        )
     }
-
     LaunchedEffect(navController) {
         navigator.attach(navController)
         onReady()
@@ -208,7 +196,6 @@ fun MainActivityComposeHost(
         withDI(di = hostDi) {
             BilimiaoTheme(appState = appState) {
                 ImagePreviewerProvider(
-                    contentPadding = mainContentInsets.toPaddingValues(),
                     previewer = { state, innerPadding ->
                         MyImagePreviewer(state, innerPadding)
                     }
