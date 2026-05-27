@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
@@ -71,6 +72,7 @@ import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -202,6 +204,8 @@ fun ComposeScaffold(
                 playerState = playerLayoutState,
             )
         }
+        val viewportWidth = maxWidth
+        val viewportHeight = maxHeight
         MiaoLogger("ComposeScaffold").d(
             "contentBounds" to layoutResult.contentBounds
         )
@@ -385,6 +389,9 @@ fun ComposeScaffold(
                             startViewWrapper = startViewWrapper,
                             baseBounds = layoutResult.playerBounds!!,
                             portraitTopInset = rawWindowInsets.top,
+                            safeDrawingInsets = rawWindowInsets,
+                            viewportWidth = viewportWidth,
+                            viewportHeight = viewportHeight,
                         )
                     }.single().measure(
                         constraints.copy(
@@ -628,6 +635,9 @@ internal fun PlayerLayer(
     startViewWrapper: StartViewWrapper,
     baseBounds: Rect,
     portraitTopInset: Dp,
+    safeDrawingInsets: ContentInsets = ContentInsets(),
+    viewportWidth: Dp = 0.dp,
+    viewportHeight: Dp = 0.dp,
 ) {
     val playerView = startViewWrapper.playerView
     val completionView = startViewWrapper.completionView
@@ -642,10 +652,12 @@ internal fun PlayerLayer(
         return
     }
 
-    var offsetX by remember { mutableStateOf(0.dp) }
-    var offsetY by remember { mutableStateOf(0.dp) }
     var currentWidth by remember { mutableStateOf(with(density) { baseBounds.width.toDp() }) }
     var currentHeight by remember { mutableStateOf(with(density) { baseBounds.height.toDp() }) }
+    val scope = rememberCoroutineScope()
+    var offsetX by remember { mutableStateOf(0.dp) }
+    var offsetY by remember { mutableStateOf(0.dp) }
+    var isDragging by remember { mutableStateOf(false) }
 
     val displayMode = when {
         !startViewWrapper.showPlayer -> PlayerDisplayMode.Hidden
@@ -654,9 +666,71 @@ internal fun PlayerLayer(
         orientation == Configuration.ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
         else -> PlayerDisplayMode.Hidden
     }
-    val screenWidth = density.run { context.resources.displayMetrics.widthPixels.toDp() }
+    val screenWidth = viewportWidth
+    val screenHeight = viewportHeight
 
-    LaunchedEffect(baseBounds, displayMode, startViewWrapper.portraitPlayerLayoutState, startViewWrapper.floatingPlayerLayoutState) {
+    fun clampFloatingOffset(
+        ox: Dp,
+        oy: Dp,
+        w: Dp,
+        h: Dp,
+    ): Pair<Dp, Dp> {
+        val minX = safeDrawingInsets.left
+        val minY = safeDrawingInsets.top
+        val maxX = (screenWidth - safeDrawingInsets.right - w).coerceAtLeast(minX)
+        val maxY = (screenHeight - safeDrawingInsets.bottom - h).coerceAtLeast(minY)
+        return ox.coerceIn(minX, maxX) to oy.coerceIn(minY, maxY)
+    }
+
+    fun updateFloatingState() {
+        startViewWrapper.updateFloatingPlayerLayoutState(
+            startViewWrapper.floatingPlayerLayoutState.copy(
+                widthPx = with(density) { currentWidth.toPx() },
+                heightPx = with(density) { currentHeight.toPx() },
+                offsetXPx = with(density) { offsetX.toPx() },
+                offsetYPx = with(density) { offsetY.toPx() },
+                initialized = true,
+            )
+        )
+    }
+
+    suspend fun animateToSafeArea() {
+        val (targetX, targetY) = clampFloatingOffset(offsetX, offsetY, currentWidth, currentHeight)
+        if (targetX == offsetX && targetY == offsetY) return
+        val targetOffsetXPx = with(density) { targetX.toPx() }
+        val targetOffsetYPx = with(density) { targetY.toPx() }
+        val startOffsetXPx = with(density) { offsetX.toPx() }
+        val startOffsetYPx = with(density) { offsetY.toPx() }
+        coroutineScope {
+            launch {
+                animate(
+                    initialValue = startOffsetXPx,
+                    targetValue = targetOffsetXPx,
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = CubicBezierEasing(0.2f, 0f, 0f, 1f),
+                    ),
+                ) { value, _ ->
+                    offsetX = with(density) { value.toDp() }
+                }
+            }
+            launch {
+                animate(
+                    initialValue = startOffsetYPx,
+                    targetValue = targetOffsetYPx,
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = CubicBezierEasing(0.2f, 0f, 0f, 1f),
+                    ),
+                ) { value, _ ->
+                    offsetY = with(density) { value.toDp() }
+                }
+            }
+        }
+        updateFloatingState()
+    }
+
+    LaunchedEffect(baseBounds, displayMode, startViewWrapper.portraitPlayerLayoutState, if (isDragging) null else startViewWrapper.floatingPlayerLayoutState) {
         val defaultWidth = with(density) { baseBounds.width.toDp() }
         val defaultHeight = with(density) { baseBounds.height.toDp() }
         when (displayMode) {
@@ -674,13 +748,33 @@ internal fun PlayerLayer(
                 if (floatingState.initialized) {
                     currentWidth = with(density) { floatingState.widthPx.toDp() }
                     currentHeight = with(density) { floatingState.heightPx.toDp() }
-                    offsetX = with(density) { floatingState.offsetXPx.toDp() }
-                    offsetY = with(density) { floatingState.offsetYPx.toDp() }
+                    val (clampedX, clampedY) = clampFloatingOffset(
+                        with(density) { floatingState.offsetXPx.toDp() },
+                        with(density) { floatingState.offsetYPx.toDp() },
+                        currentWidth,
+                        currentHeight,
+                    )
+                    offsetX = clampedX
+                    offsetY = clampedY
+                    if (with(density) { clampedX.toPx() } != floatingState.offsetXPx || with(density) { clampedY.toPx() } != floatingState.offsetYPx) {
+                        startViewWrapper.updateFloatingPlayerLayoutState(
+                            floatingState.copy(
+                                offsetXPx = with(density) { clampedX.toPx() },
+                                offsetYPx = with(density) { clampedY.toPx() },
+                            )
+                        )
+                    }
                 } else {
                     currentWidth = defaultWidth
                     currentHeight = defaultHeight
-                    offsetX = screenWidth - currentWidth
-                    offsetY = 0.dp
+                    val (initX, initY) = clampFloatingOffset(
+                        screenWidth - currentWidth,
+                        0.dp,
+                        currentWidth,
+                        currentHeight,
+                    )
+                    offsetX = initX
+                    offsetY = initY
                     startViewWrapper.updateFloatingPlayerLayoutState(
                         floatingState.copy(
                             defaultWidthPx = with(density) { currentWidth.toPx() },
@@ -718,6 +812,7 @@ internal fun PlayerLayer(
 
                     val pointerId = down.id
                     var dragging = false
+                    isDragging = true
 
                     val minWidthPx = 200.dp.toPx()
                     val maxWidthPx = 800.dp.toPx()
@@ -727,7 +822,13 @@ internal fun PlayerLayer(
                     while (true) {
                         val event = awaitPointerEvent()
                         val change = event.changes.firstOrNull { it.id == pointerId } ?: break
-                        if (!change.pressed) break
+                        if (!change.pressed) {
+                            isDragging = false
+                            if (dragging) {
+                                scope.launch { animateToSafeArea() }
+                            }
+                            break
+                        }
                         if (!change.positionChanged()) continue
 
                         val deltaX = change.position.x - downPos.x
@@ -752,29 +853,13 @@ internal fun PlayerLayer(
                                 downPos.x < zoneWidth * 2 -> startOffsetX - (deltaWPx / 2).toDp()
                                 else -> startOffsetX
                             }
-                            startViewWrapper.updateFloatingPlayerLayoutState(
-                                startViewWrapper.floatingPlayerLayoutState.copy(
-                                    widthPx = newWidthPx,
-                                    heightPx = clampedHeightPx,
-                                    offsetXPx = with(density) { offsetX.toPx() },
-                                    offsetYPx = with(density) { offsetY.toPx() },
-                                    initialized = true,
-                                )
-                            )
+                            updateFloatingState()
                             change.consume()
                         } else {
                             val pan = change.position - change.previousPosition
                             offsetX += pan.x.toDp()
                             offsetY += pan.y.toDp()
-                            startViewWrapper.updateFloatingPlayerLayoutState(
-                                startViewWrapper.floatingPlayerLayoutState.copy(
-                                    widthPx = with(density) { currentWidth.toPx() },
-                                    heightPx = with(density) { currentHeight.toPx() },
-                                    offsetXPx = with(density) { offsetX.toPx() },
-                                    offsetYPx = with(density) { offsetY.toPx() },
-                                    initialized = true,
-                                )
-                            )
+                            updateFloatingState()
                             change.consume()
                         }
                     }
