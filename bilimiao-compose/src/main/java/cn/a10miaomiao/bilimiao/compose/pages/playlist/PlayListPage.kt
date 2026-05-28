@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
-import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -124,7 +123,7 @@ private fun PlayListPageContent(
         playListStore.clearPlayList()
     }
 
-    fun menuItemClick (view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick (menuItem: MenuItemPropInfo) {
         when(menuItem.key) {
             MenuKeys.clear -> {
                 showClearTipsDialog.value = true

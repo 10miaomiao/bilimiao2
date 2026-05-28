@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.time
 
-import android.view.View
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
@@ -106,7 +105,7 @@ private class TimeRegionDetailPageViewModel(
         return timeSettingStore.getRankOrderText()
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.time -> {
                 bottomSheetState.open(TimeSettingPage())

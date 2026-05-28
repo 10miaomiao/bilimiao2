@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine
 
 import android.content.Context
-import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
@@ -381,7 +380,7 @@ private fun HistoryPageContent(
         viewModel.clearHistoryList()
     }
 
-    fun menuItemClick (view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick (menuItem: MenuItemPropInfo) {
         when(menuItem.key) {
             MenuKeys.clear -> {
                 showClearTipsDialog.value = true

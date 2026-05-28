@@ -254,7 +254,7 @@ private fun UserFollowPageContent(
     )
     PageListener(
         pageConfigId,
-        onMenuItemClick = fun(_, item) {
+        onMenuItemClick = fun(item) {
             val key = item.key ?: return
             if (item.key in orderTypeToNameMap.keys.indices) {
                 val value = orderTypeToNameMap.keys.elementAt(key)

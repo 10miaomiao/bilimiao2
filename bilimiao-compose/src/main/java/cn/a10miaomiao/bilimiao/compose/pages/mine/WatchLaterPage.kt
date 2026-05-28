@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine
 
-import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
@@ -343,7 +342,7 @@ private fun WatchLaterPageContent(
     val enableEditMode = remember {
         mutableStateOf(false)
     }
-    fun menuItemClick (view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick (menuItem: MenuItemPropInfo) {
         when(menuItem.key) {
             1 -> {
                 viewModel.setListAsc(false)

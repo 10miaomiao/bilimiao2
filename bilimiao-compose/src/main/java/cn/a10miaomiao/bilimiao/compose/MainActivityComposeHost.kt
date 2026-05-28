@@ -182,7 +182,7 @@ fun MainActivityComposeHost(
             startViewWrapper.openDrawer()
         }
         appBarState.setOnMenuItemClickListener {
-            pageConfigState.onMenuItemClick(startViewWrapper.activity.window.decorView, it.toPropInfo())
+            pageConfigState.onMenuItemClick(it.toPropInfo())
         }
     }
 

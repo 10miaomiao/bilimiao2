@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.community.content
 
-import android.view.View
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -323,7 +322,7 @@ private class ReplyDetailContentViewModel(
         editDialogState.show(params)
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (val key = item.key) {
             in 0..10 -> {
                 setSortOrder(key!!)

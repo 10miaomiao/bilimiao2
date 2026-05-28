@@ -9,7 +9,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.View
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -325,7 +324,7 @@ private class BangumiDetailPageViewModel(
         basePlayerDelegate.openPlayer(playerSource)
     }
 
-    fun menuItemClick(view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick(menuItem: MenuItemPropInfo) {
         when (menuItem.key) {
             1 -> {
                 // 用浏览器打开

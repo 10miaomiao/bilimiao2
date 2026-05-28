@@ -8,7 +8,6 @@ import androidx.compose.material.icons.outlined.*
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.AnimatedContentScope
@@ -326,7 +325,7 @@ private class HomePageViewModel(
 //        }
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.dynamic -> {
                 val nav = pageNavigation.hostController

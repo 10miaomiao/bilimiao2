@@ -6,7 +6,6 @@ import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import android.util.Base64
-import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -405,17 +404,17 @@ internal class LyricPageViewModel(
         }
     }
 
-    fun menuItemClick(view: View, menuItem: MenuItemPropInfo){
+    fun menuItemClick(menuItem: MenuItemPropInfo){
         when (menuItem.key) {
             1 -> {
                 if(source.value.isEmpty()){
                     PopTip.show("无歌词源")
                 } else {
-                    LyricSourcePopupMenu(activity,this).show(view)
+                    LyricSourcePopupMenu(activity,this).show(activity.window.decorView)
                 }
             }
             2 -> {
-                LyricOffsetPopupMenu(activity,this).show(view)
+                LyricOffsetPopupMenu(activity,this).show(activity.window.decorView)
             }
         }
     }
