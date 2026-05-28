@@ -150,7 +150,7 @@ private fun MyFollowPageContent() {
     PageListener(
         configId = pageConfigId,
         onMenuItemClick = remember(currentPage, tagList) {
-            { _, item ->
+            { item ->
                 when (item.key) {
                     in orderTypeToNameMap.keys.indices -> {
                         val value = orderTypeToNameMap.keys.elementAt(item.key!!)

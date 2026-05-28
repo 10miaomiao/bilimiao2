@@ -237,7 +237,7 @@ internal fun DownloadListPageContent(
     var showHelpDialog by remember { mutableStateOf(false) }
     PageListener(
         pageConfigId,
-        onMenuItemClick = { _, menuItem ->
+        onMenuItemClick = { menuItem ->
             when(menuItem.key) {
                 0 -> showHelpDialog = true
             }

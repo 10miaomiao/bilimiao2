@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.community
 
 import android.content.Context
-import android.view.View
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.lifecycle.ViewModel
@@ -291,7 +290,7 @@ class MainReplyViewModel(
         editDialogState.show(params)
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (val key = item.key) {
             in 0..10 -> {
                 setSortOrder(key!!)

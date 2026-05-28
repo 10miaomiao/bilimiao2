@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import android.view.View
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
@@ -106,7 +105,7 @@ private fun UserFavouritePageContent(
         }
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         if (item.key == MenuKeys.add) {
             showAddDialog = true
         }

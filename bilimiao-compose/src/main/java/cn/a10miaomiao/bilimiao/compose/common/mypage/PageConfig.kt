@@ -1,7 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.common.mypage
 
-import android.content.Context
-import android.view.View
 import androidx.compose.runtime.*
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
@@ -15,8 +13,8 @@ import kotlinx.coroutines.flow.debounce
 
 private var _configId = 0
 interface OnMyPageListener {
-    fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo)
-    fun onSearchSelfPage(context: Context, keyword: String)
+    fun onMenuItemClick(menuItem: MenuItemPropInfo)
+    fun onSearchSelfPage(keyword: String)
 }
 
 class PageConfigState {
@@ -59,16 +57,16 @@ class PageConfigState {
         listenerMap.remove(id)
     }
 
-    fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+    fun onMenuItemClick(menuItem: MenuItemPropInfo) {
         val id = configFlow.value.id
         val listener = listenerMap[id] ?: return
-        listener.onMenuItemClick(view, menuItem)
+        listener.onMenuItemClick(menuItem)
     }
 
-    fun onSearchSelfPage(context: Context, keyword: String) {
+    fun onSearchSelfPage(keyword: String) {
         val id = configFlow.value.id
         val listener = listenerMap[id] ?: return
-        listener.onSearchSelfPage(context, keyword)
+        listener.onSearchSelfPage(keyword)
     }
 
     class Cofing(
@@ -112,7 +110,7 @@ fun PageConfig(
 fun PageListener(
     configId: Int,
     onSearchSelfPage: ((keyword: String) -> Unit)? = null,
-    onMenuItemClick: ((view: View, menuItem: MenuItemPropInfo) -> Unit)? = null
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
 ) {
     val pageConfigInfo = LocalPageConfigState.current
     if (configId == -1 || pageConfigInfo == null) {
@@ -120,11 +118,11 @@ fun PageListener(
     }
     DisposableEffect(configId, onSearchSelfPage, onMenuItemClick) {
         val listener = object : OnMyPageListener {
-            override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
-                onMenuItemClick?.invoke(view, menuItem)
+            override fun onMenuItemClick(menuItem: MenuItemPropInfo) {
+                onMenuItemClick?.invoke(menuItem)
             }
 
-            override fun onSearchSelfPage(context: Context, keyword: String) {
+            override fun onSearchSelfPage(keyword: String) {
                 onSearchSelfPage?.invoke(keyword)
             }
         }

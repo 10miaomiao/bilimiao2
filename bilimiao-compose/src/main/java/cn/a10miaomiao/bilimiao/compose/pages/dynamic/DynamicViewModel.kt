@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
@@ -42,7 +41,7 @@ class DynamicViewModel(
         })
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.home -> {
                 toHomePage()

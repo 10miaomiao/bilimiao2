@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -212,7 +211,7 @@ private class UserMedialistDetailViewMode(
         _isAutoPlay.value = value
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.playList -> {
                 addPlayList()

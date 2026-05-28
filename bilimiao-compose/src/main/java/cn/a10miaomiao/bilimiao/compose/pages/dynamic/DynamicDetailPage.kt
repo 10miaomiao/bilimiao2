@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import android.net.Uri
-import android.view.View
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -137,7 +136,7 @@ private class DynamicDetailPageViewModel(
         }
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.home -> {
             }

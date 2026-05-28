@@ -127,7 +127,7 @@ private class MyImagePreviewerController(
         isDownloading.value = true
     }
 
-    fun menuItemClick(view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick(menuItem: MenuItemPropInfo) {
         val page = imagePreviewerState.previewerState.currentPage
         val model = imagePreviewerState.imageModels[page]
         when (menuItem.key) {

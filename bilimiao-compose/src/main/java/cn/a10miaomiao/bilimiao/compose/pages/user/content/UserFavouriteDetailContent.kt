@@ -386,7 +386,7 @@ internal fun UserFavouriteDetailContent(
     PageListener(
         pageConfigId,
         onMenuItemClick = remember(detailInfo) {
-            { _, item ->
+            { item ->
                 when (item.key) {
                     MenuKeys.follow -> {
                         if (detailInfo?.fav_state == 1) {

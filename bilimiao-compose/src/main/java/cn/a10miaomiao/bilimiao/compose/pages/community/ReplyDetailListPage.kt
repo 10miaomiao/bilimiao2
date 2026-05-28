@@ -179,7 +179,7 @@ private fun ReplyDetailListPageContent(
     )
     PageListener(
         configId = configId,
-        onMenuItemClick = { _, menuItem ->
+        onMenuItemClick = { menuItem ->
             when (menuItem.key) {
                 MenuKeys.parent -> {
                     pageNavigation.navigate(ReplyDetailListPage(

@@ -366,7 +366,7 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     fun searchSelfPage(keyword: String) {
-        pageConfigState.onSearchSelfPage(this, keyword)
+        pageConfigState.onSearchSelfPage(keyword)
     }
 
     fun openBottomSheet(page: ComposePage) {

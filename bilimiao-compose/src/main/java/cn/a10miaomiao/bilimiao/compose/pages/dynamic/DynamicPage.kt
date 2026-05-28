@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
-import android.view.View
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
