@@ -517,8 +517,10 @@ private class ComposeDrawerController(
             return
         }
         programmaticChange = true
-        dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
-        state.snapTo(ComposeDrawerValue.Open)
+        state.animateTo(
+            ComposeDrawerValue.Open,
+            animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
+        )
         programmaticChange = false
         dispatchState(StartViewWrapper.DRAWER_STATE_EXPANDED)
     }
@@ -528,8 +530,10 @@ private class ComposeDrawerController(
             return
         }
         programmaticChange = true
-        dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
-        state.snapTo(ComposeDrawerValue.Closed)
+        state.animateTo(
+            ComposeDrawerValue.Closed,
+            animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
+        )
         programmaticChange = false
         dispatchState(StartViewWrapper.DRAWER_STATE_COLLAPSED)
     }
