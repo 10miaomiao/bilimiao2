@@ -1,23 +1,19 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.ChainScrollableLayout
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.ChainScrollableLayoutState
 import kotlin.math.roundToInt
@@ -35,6 +31,7 @@ fun DoubleColumnAutofitLayout(
     BoxWithConstraints(
         modifier = modifier
     ) {
+        val layoutDirection = LocalLayoutDirection.current
         if (maxWidth > leftMaxWidth) {
             Row() {
                 Box(
@@ -43,7 +40,10 @@ fun DoubleColumnAutofitLayout(
                     leftContent(
                         Orientation.Horizontal,
                         PaddingValues.Absolute(
-                            left = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                            left = if (layoutDirection == LayoutDirection.Ltr)
+                                innerPadding.calculateStartPadding(layoutDirection) else 0.dp,
+                            right = if (layoutDirection == LayoutDirection.Rtl)
+                                innerPadding.calculateEndPadding(layoutDirection) else 0.dp,
                             top = innerPadding.calculateTopPadding(),
                             bottom = innerPadding.calculateBottomPadding(),
                         )
@@ -55,9 +55,12 @@ fun DoubleColumnAutofitLayout(
                     content(
                         Orientation.Horizontal,
                         PaddingValues.Absolute(
+                            left = if (layoutDirection == LayoutDirection.Rtl)
+                                innerPadding.calculateStartPadding(layoutDirection) else 0.dp,
+                            right = if (layoutDirection == LayoutDirection.Ltr)
+                                innerPadding.calculateEndPadding(layoutDirection) else 0.dp,
                             top = innerPadding.calculateTopPadding(),
                             bottom = innerPadding.calculateBottomPadding(),
-                            right = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
                         )
                     )
                 }
@@ -70,31 +73,28 @@ fun DoubleColumnAutofitLayout(
                 }
             }
             val scrollableState = rememberScrollState()
+            val scrollOffset = chainScrollableLayoutState.getOffsetYValue()
+            val alpha = ((leftMaxHeightPx + scrollOffset) / leftMaxHeightPx).coerceIn(0f, 1f)
+            val offsetY = scrollOffset.roundToInt()
             ChainScrollableLayout(
                 modifier = modifier,
                 state = chainScrollableLayoutState,
             ) { state ->
-                val alpha = (leftMaxHeightPx + state.getOffsetYValue()) / leftMaxHeightPx
-                val offsetY by animateIntAsState(
-                    targetValue = state.getOffsetYValue().roundToInt(), label = "",
-                )
                 Box(
                     modifier = Modifier
-                        .animateContentSize()
                         .height(leftMaxHeight)
-                        .offset {
-                            IntOffset(0, offsetY)
-                        }
+                        .offset { IntOffset(0, offsetY) }
                         .alpha(alpha)
-                        .nestedScroll(state.nestedScroll)
                         .scrollable(scrollableState, Orientation.Vertical),
                 ) {
                     leftContent(
                         Orientation.Vertical,
                         PaddingValues.Absolute(
                             top = innerPadding.calculateTopPadding(),
-                            left = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
-                            right = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                            left = if (layoutDirection == LayoutDirection.Ltr)
+                                innerPadding.calculateStartPadding(layoutDirection) else 0.dp,
+                            right = if (layoutDirection == LayoutDirection.Rtl)
+                                innerPadding.calculateEndPadding(layoutDirection) else 0.dp,
                         )
                     )
                 }
@@ -111,9 +111,10 @@ fun DoubleColumnAutofitLayout(
                         Orientation.Vertical,
                         PaddingValues.Absolute(
                             bottom = innerPadding.calculateBottomPadding() + chainScrollableLayoutState.minScrollPosition,
-                            left = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
-                            right = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
-//                            top = density.run { (state.maxPx + state.getOffsetYValue()).toDp() }
+                            left = if (layoutDirection == LayoutDirection.Ltr)
+                                innerPadding.calculateStartPadding(layoutDirection) else 0.dp,
+                            right = if (layoutDirection == LayoutDirection.Rtl)
+                                innerPadding.calculateEndPadding(layoutDirection) else 0.dp,
                         )
                     )
                 }

@@ -54,9 +54,9 @@ class ChainScrollableLayoutState(
      * Set number of scroll position
      */
     fun setOffsetY(value: Float) {
+        offsetYState.value = value
         coroutineScope.launch {
             offsetY.snapTo(value)
-            offsetYState.value = value
         }
     }
 
@@ -66,26 +66,35 @@ class ChainScrollableLayoutState(
     }
 
     val nestedScroll = object : NestedScrollConnection {
+        // 向上滑动时，优先将头部收起
         override fun onPreScroll(
             available: Offset,
             source: NestedScrollSource
         ): Offset {
             if (
-                available.y > 0f
-                && getOffsetYValue() < 0f
+                available.y < 0
+                && getOffsetYValue() > minPx - maxPx
             ) {
-                setOffsetY(minOf(getOffsetYValue() + available.y, 0f))
+                setOffsetY(maxOf(getOffsetYValue() + available.y, minPx - maxPx))
                 return available
             }
             return Offset.Zero
         }
 
+        // 向下滑动时，优先将头部展开
         override fun onPostScroll(
             consumed: Offset,
             available: Offset,
             source: NestedScrollSource
         ): Offset {
-            return super.onPostScroll(consumed, available, source)
+            if (
+                available.y > 0
+                && getOffsetYValue() < 0
+            ) {
+                setOffsetY(minOf(getOffsetYValue() + available.y, 0f))
+                return available
+            }
+            return Offset.Zero
         }
     }
 
