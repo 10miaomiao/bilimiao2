@@ -206,9 +206,6 @@ fun ComposeScaffold(
         }
         val viewportWidth = maxWidth
         val viewportHeight = maxHeight
-        MiaoLogger("ComposeScaffold").d(
-            "contentBounds" to layoutResult.contentBounds
-        )
         val maxHeightPx = with(density) { maxHeight.toPx() }
         val leftEdgeWidthPx = with(density) { 40.dp.toPx() }
         val appBarGestureRect = layoutResult.appBarHorizontalBounds ?: layoutResult.appBarVerticalBounds

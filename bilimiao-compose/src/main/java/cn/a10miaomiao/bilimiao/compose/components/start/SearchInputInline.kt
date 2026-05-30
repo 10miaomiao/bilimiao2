@@ -158,8 +158,7 @@ fun SearchInputInline(
     ) {
         MiaoOutlinedCard(
             modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 480.dp),
+                .widthIn(max = 400.dp),
             enabled = false,
         ) {
             val historySuggestList by viewModel.historyListFlow.collectAsState()
