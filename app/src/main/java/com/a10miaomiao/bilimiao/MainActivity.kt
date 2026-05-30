@@ -399,7 +399,6 @@ class MainActivity : AppCompatActivity(), DIAware {
         val keyword = searchConfig?.keyword ?: ""
         val mode = if (searchConfig?.name.isNullOrBlank()) 0 else 1
         startViewWrapper.openSearchDialog(keyword, mode, false)
-        startViewWrapper.openDrawer()
     }
 
     private fun startMenuOpenScanner(callback: (result: String) -> Unit): Boolean {
@@ -594,11 +593,11 @@ class MainActivity : AppCompatActivity(), DIAware {
         if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
+        if (startViewWrapper.showSearchDialog) {
+            startViewWrapper.closeSearchDialog()
+            return
+        }
         if (startViewWrapper.isDrawerOpen()) {
-            if (startViewWrapper.showSearchDialog) {
-                startViewWrapper.closeSearchDialog()
-                return
-            }
             startViewWrapper.closeDrawer()
             return
         }

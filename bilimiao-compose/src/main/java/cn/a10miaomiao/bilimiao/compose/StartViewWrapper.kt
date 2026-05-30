@@ -125,7 +125,6 @@ class StartViewWrapper(
     fun closeSearchDialog() {
         _searchAnimation.value = true
         _showSearchDialog.value = false
-        dismissRequest()
     }
 
     fun setShowPlayer(value: Boolean) {
