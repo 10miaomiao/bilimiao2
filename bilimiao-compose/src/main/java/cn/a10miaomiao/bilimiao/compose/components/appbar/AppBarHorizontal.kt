@@ -2,11 +2,9 @@ package cn.a10miaomiao.bilimiao.compose.components.appbar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -15,10 +13,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -83,7 +82,6 @@ fun AppBarHorizontal(
             .fillMaxHeight()
             .width(AppBarConfig.MenuWidth)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .verticalScroll(rememberScrollState())
             .padding(safePadding),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -126,16 +124,20 @@ fun AppBarHorizontal(
         }
 
         if (isNavigationMenu) {
-            Column(
+            LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                menus.forEach { menuItem ->
+                items(
+                    items = menus,
+                    key = { it.key },
+                ) { menuItem ->
                     AppBarNavigationItem(
                         data = menuItem,
                         checked = checkedKey == menuItem.key,
                         onClick = onMenuItemClick,
+                        modifier = Modifier.animateItem(),
                     )
                 }
             }

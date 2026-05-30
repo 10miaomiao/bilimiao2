@@ -8,7 +8,9 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,14 +90,17 @@ internal fun VerticalAppBarMenus(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        val reversedMenu = menus.asReversed()
-        Row(
+        LazyRow(
             modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
+            reverseLayout = true,
         ) {
-            reversedMenu.forEachIndexed { index, menuItem ->
+            items(
+                items = menus,
+                key = { it.key },
+            ) { menuItem ->
+                val index = menus.indexOf(menuItem)
                 val itemPath = listOf(menuItem.key, index)
                 VerticalTopLevelMenuItem(
                     data = menuItem,
@@ -105,11 +110,12 @@ internal fun VerticalAppBarMenus(
                     onMenuItemClick = onMenuItemClick,
                     path = itemPath,
                     onAnchorChanged = { anchors[itemPath.toPathKey()] = it },
+                    modifier = Modifier.animateItem(),
                 )
             }
         }
         SharedRootMenuPopup(
-            menus = reversedMenu,
+            menus = menus,
             appBarState = appBarState,
             onMenuItemClick = onMenuItemClick,
             anchors = anchors,
@@ -132,12 +138,16 @@ internal fun HorizontalAppBarMenus(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            menus.forEachIndexed { index, menuItem ->
+            items(
+                items = menus,
+                key = { it.key },
+            ) { menuItem ->
+                val index = menus.indexOf(menuItem)
                 val itemPath = listOf(menuItem.key, index)
                 HorizontalTopLevelMenuItem(
                     data = menuItem,
@@ -147,7 +157,7 @@ internal fun HorizontalAppBarMenus(
                     onMenuItemClick = onMenuItemClick,
                     path = itemPath,
                     onAnchorChanged = { anchors[itemPath.toPathKey()] = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().animateItem(),
                 )
             }
         }

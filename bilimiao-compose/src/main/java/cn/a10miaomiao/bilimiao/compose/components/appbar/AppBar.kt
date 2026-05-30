@@ -7,7 +7,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -205,17 +205,20 @@ private fun AppBarMenuRow(
             modifier = Modifier.weight(1f, fill = false),
         ) {
             if (isNavigationMenu) {
-                Row(
+                LazyRow(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                 ) {
-                    menus.forEach { menuItem ->
+                    items(
+                        items = menus,
+                        key = { it.key },
+                    ) { menuItem ->
                         AppBarNavigationItem(
                             data = menuItem,
                             checked = checkedKey == menuItem.key,
                             onClick = onMenuItemClick,
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
