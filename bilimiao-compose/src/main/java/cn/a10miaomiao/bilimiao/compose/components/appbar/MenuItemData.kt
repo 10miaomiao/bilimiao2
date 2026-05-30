@@ -25,6 +25,8 @@ data class MenuItemData(
     val checkedKey: Int? = null,
     /** 内容描述（无障碍） */
     val contentDescription: String? = null,
+    /** 操作动作 */
+    val action: String? = null,
 ) {
     companion object {
         /**
@@ -42,6 +44,7 @@ data class MenuItemData(
                 checkable = propInfo.childMenu?.checkable == true,
                 checkedKey = propInfo.childMenu?.takeIf { it.checkable }?.checkedKey,
                 contentDescription = propInfo.contentDescription,
+                action = propInfo.action,
             )
         }
     }
@@ -60,6 +63,7 @@ data class MenuItemData(
                 checkedKey = checkedKey,
             ),
             contentDescription = contentDescription,
+            action = action,
         )
     }
 
@@ -81,6 +85,7 @@ data class MenuItemData(
                         checkedKey = child.checkedKey,
                     )
                     contentDescription = child.contentDescription
+                    action = child.action
                 }
             }
         }

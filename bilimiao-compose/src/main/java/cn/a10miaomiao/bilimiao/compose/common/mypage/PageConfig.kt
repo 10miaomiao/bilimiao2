@@ -1,10 +1,12 @@
 package cn.a10miaomiao.bilimiao.compose.common.mypage
 
 import androidx.compose.runtime.*
+import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,10 @@ class PageConfigState {
     private val configFlow = MutableStateFlow(Cofing(-1))
     private val configList = mutableListOf<Cofing>()
     private val listenerMap = mutableMapOf<Int, OnMyPageListener>()
+
+    var openSearch: (() -> Unit)? = null
+
+    val currentConfig: Cofing get() = configFlow.value
 
     fun addConfig(id: Int, configBuilder: (Cofing) -> Unit) {
         configList.add(Cofing(id).apply(configBuilder))
@@ -58,6 +64,10 @@ class PageConfigState {
     }
 
     fun onMenuItemClick(menuItem: MenuItemPropInfo) {
+        if (menuItem.action == MenuActions.search) {
+            openSearch?.invoke()
+            return
+        }
         val id = configFlow.value.id
         val listener = listenerMap[id] ?: return
         listener.onMenuItemClick(menuItem)

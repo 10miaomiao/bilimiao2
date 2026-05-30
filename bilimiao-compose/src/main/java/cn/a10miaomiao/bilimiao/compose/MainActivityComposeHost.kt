@@ -54,6 +54,7 @@ import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffold
+import cn.a10miaomiao.bilimiao.compose.components.start.SearchOverlay
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import org.kodein.di.DI
@@ -185,6 +186,14 @@ fun MainActivityComposeHost(
             pageConfigState.onMenuItemClick(it.toPropInfo())
         }
     }
+    LaunchedEffect(startViewWrapper, pageConfigState) {
+        pageConfigState.openSearch = {
+            val searchConfig = pageConfigState.currentConfig.search
+            val keyword = searchConfig?.keyword ?: ""
+            val mode = if (searchConfig?.name.isNullOrBlank()) 0 else 1
+            startViewWrapper.openSearchDialog(keyword, mode, false)
+        }
+    }
 
     CompositionLocalProvider(
         LocalPageConfigState provides pageConfigState,
@@ -210,19 +219,23 @@ fun MainActivityComposeHost(
                                 navigateTo = startViewWrapper.navigateTo,
                                 navigateUrl = startViewWrapper.navigateUrl,
                                 openSearch = {
+                                    startViewWrapper.closeDrawer()
                                     startViewWrapper.openSearchDialog("", 0, true)
                                 },
                                 openScanner = startViewWrapper.openScanner,
-                                isSearchVisible = startViewWrapper.showSearchDialog,
-                                searchInitKeyword = startViewWrapper.searchInitKeyword,
-                                searchInitMode = startViewWrapper.searchInitMode,
-                                pageSearchMethod = startViewWrapper.pageSearchMethod,
-                                onCloseSearch = startViewWrapper::closeSearchDialog,
                             )
                         }
                     ) {
                         MyNavHost(navController, HomePage)
                     }
+                    SearchOverlay(
+                        visible = startViewWrapper.showSearchDialog,
+                        searchAnimation = startViewWrapper.searchAnimation,
+                        initKeyword = startViewWrapper.searchInitKeyword,
+                        initMode = startViewWrapper.searchInitMode,
+                        pageSearchMethod = startViewWrapper.pageSearchMethod,
+                        onDismissRequest = startViewWrapper::closeSearchDialog,
+                    )
                     if (bottomSheetPage != null) {
                         MyBottomSheet(
                             page = bottomSheetPage!!,

@@ -3,9 +3,6 @@ package cn.a10miaomiao.bilimiao.compose.components.start
 import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -76,12 +73,9 @@ import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.rememberInstance
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SearchInputInline(
     modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     initKeyword: String,
     initMode: Int,
     pageSearchMethod: PageSearchMethod?,
@@ -154,15 +148,7 @@ fun SearchInputInline(
     ) {
         MiaoOutlinedCard(
             modifier = Modifier
-                .fillMaxWidth()
-                .run {
-                    with(sharedTransitionScope) {
-                        sharedElement(
-                            rememberSharedContentState(key = "search"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        )
-                    }
-                },
+                .fillMaxWidth(),
             enabled = false,
         ) {
             val historySuggestList by viewModel.historyListFlow.collectAsState()
