@@ -66,7 +66,6 @@ import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
-import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
 import com.google.common.util.concurrent.MoreExecutors
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType

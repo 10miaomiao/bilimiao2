@@ -1,4 +1,4 @@
-package com.a10miaomiao.bilimiao.widget.scaffold
+package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.res.Configuration
 

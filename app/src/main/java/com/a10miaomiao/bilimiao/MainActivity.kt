@@ -67,7 +67,7 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
-import com.a10miaomiao.bilimiao.widget.scaffold.PlayerHostState
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerHostState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.materialkolor.hct.Hct
 import kotlinx.coroutines.Dispatchers
