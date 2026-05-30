@@ -159,11 +159,10 @@ private fun Density.calculateComposeScaffoldGeometry(
     }
 
     val appBarHorizontalBounds = if (hasHorizontalAppBar) {
-        val appBarWidthPx = (horizontalAppBarWidth + rawWindowInsets.left).roundToPx()
         Rect(
             left = 0f,
             top = 0f,
-            right = rawWindowInsets.left.toPx() + appBarWidthPx,
+            right = (rawWindowInsets.left + horizontalAppBarWidth).toPx(),
             bottom = viewportHeightPx.toFloat(),
         )
     } else {

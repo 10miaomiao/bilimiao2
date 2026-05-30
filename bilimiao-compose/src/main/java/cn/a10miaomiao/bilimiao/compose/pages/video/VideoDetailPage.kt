@@ -181,7 +181,7 @@ private fun VideoDetailPageContent(
 
     val isShowCover = playerState.aid != arcData.aid.toString()
     val headerCoverHeight = 200.dp
-    val headerHeight = remember(isShowCover) {
+    val headerHeight = remember(isShowCover, windowInsets.topDp) {
         if (isShowCover) {
             windowInsets.topDp.dp + headerCoverHeight
         } else {
