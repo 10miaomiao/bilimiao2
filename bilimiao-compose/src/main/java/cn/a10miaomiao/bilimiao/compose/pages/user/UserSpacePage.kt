@@ -47,7 +47,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -277,7 +276,6 @@ private fun UserSpacePageDetailContent(
         density.run { maxHeaderSize.value.first.toDp() } > 600.dp
     }
     val scrollableState = rememberScrollState()
-
     val scope = rememberCoroutineScope()
     val emitter = localEmitter()
 
@@ -298,7 +296,6 @@ private fun UserSpacePageDetailContent(
                     )
                 }
                 .background(MaterialTheme.colorScheme.background)
-                .nestedScroll(state.nestedScroll)
                 .scrollable(scrollableState, Orientation.Vertical),
         ) {
             UserSpaceHeader(
@@ -348,7 +345,6 @@ private fun UserSpacePageDetailContent(
                         start = windowInsets.leftDp.dp,
                         end = windowInsets.rightDp.dp,
                     )
-                    .nestedScroll(state.nestedScroll)
                     .scrollable(scrollableState, Orientation.Vertical),
                 selectedTabIndex = viewModel.pagerState.currentPage,
                 indicator = { positions ->

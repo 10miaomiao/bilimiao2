@@ -50,7 +50,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -304,7 +303,6 @@ private fun VideoDetailPageContent(
                                 end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
                             )
                             .background(MaterialTheme.colorScheme.surface)
-                            .nestedScroll(chainScrollableLayoutState.nestedScroll)
                             .scrollable(rememberScrollState(), Orientation.Vertical),
                         selectedTabIndex = pagerState.currentPage,
                         indicator = { positions ->
