@@ -269,6 +269,28 @@ class ImageSaveUtil(
             return urlArr.last()
         }
 
+        fun getImageUri(context: Context, file: File): Uri {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, file.name)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/*")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                }
+                val resolver = context.contentResolver
+                val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                uri?.let {
+                    resolver.openOutputStream(it)?.use { output ->
+                        file.inputStream().use { input ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+                uri ?: Uri.fromFile(file)
+            } else {
+                Uri.fromFile(file)
+            }
+        }
+
         private fun getImageFormat(fileName: String): Pair<Bitmap.CompressFormat, String> {
             return if (fileName.uppercase().endsWith(".PNG")) {
                 Bitmap.CompressFormat.PNG to "image/PNG"
