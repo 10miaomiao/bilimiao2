@@ -4,7 +4,8 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -247,25 +247,28 @@ private fun CollapsingAppBarMenuRow(
         )
 
         // 菜单列表
-        Row(
+        LazyRow(
             modifier = Modifier
-                .weight(1f)
-//                .padding(end = AppBarConfig.NavigationIconPadding)
-                .horizontalScroll(rememberScrollState()),
+                .weight(1f),
             horizontalArrangement = Arrangement.End,
         ) {
-            menus.forEach { menuItem ->
-                if (isNavigationMenu) {
-                    AppBarNavigationItem(
-                        data = menuItem,
-                        checked = checkedKey == menuItem.key,
-                        onClick = onMenuItemClick,
-                    )
-                } else {
-                    DefaultAppBarMenuItem(
-                        data = menuItem,
-                        onClick = onMenuItemClick,
-                    )
+            items(
+                items = menus,
+                key = { it.key },
+            ) { menuItem ->
+                Box(modifier = Modifier.animateItem()) {
+                    if (isNavigationMenu) {
+                        AppBarNavigationItem(
+                            data = menuItem,
+                            checked = checkedKey == menuItem.key,
+                            onClick = onMenuItemClick,
+                        )
+                    } else {
+                        DefaultAppBarMenuItem(
+                            data = menuItem,
+                            onClick = onMenuItemClick,
+                        )
+                    }
                 }
             }
         }
