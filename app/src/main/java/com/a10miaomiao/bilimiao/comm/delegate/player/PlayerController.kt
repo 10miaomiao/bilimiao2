@@ -112,7 +112,6 @@ class PlayerController(
             danmakuSwitchClick(it)
             true
         }
-        serHoldUpButtonOnClickListener(that::holdUpPlayer)
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)
         updatePlayerMode(activity.resources.configuration)
