@@ -47,7 +47,7 @@ class ChainScrollableLayoutState(
     val maxPx = density.run { maxScrollPosition.toPx() }
     val minPx = density.run { minScrollPosition.toPx() }
 
-    fun getOffsetYValue(): Float = offsetY.value
+    fun getOffsetYValue(): Float = offsetYState.value
 
     /**
      * 修改滚动的位置
@@ -66,32 +66,43 @@ class ChainScrollableLayoutState(
     }
 
     val nestedScroll = object : NestedScrollConnection {
-        // 向上滑动时，优先将头部收起
+        /**
+         * 在内容滚动之前处理头部的折叠和展开
+         * 参考 Material 3 TopAppBarScrollBehavior 的实现模式：
+         * - 向上滑动：优先折叠头部（消费全部滚动量）
+         * - 向下滑动：优先展开头部（只消费头部需要的部分，剩余传给内容）
+         */
         override fun onPreScroll(
             available: Offset,
             source: NestedScrollSource
         ): Offset {
-            if (
-                available.y < 0
-                && getOffsetYValue() > minPx - maxPx
-            ) {
-                setOffsetY(maxOf(getOffsetYValue() + available.y, minPx - maxPx))
-                return available
+            val currentOffset = getOffsetYValue()
+            // 向上滑动时，优先将头部收起
+            if (available.y < 0 && currentOffset > minPx - maxPx) {
+                val newOffset = maxOf(currentOffset + available.y, minPx - maxPx)
+                setOffsetY(newOffset)
+                return Offset(0f, newOffset - currentOffset)
+            }
+            // 向下滑动时，优先将头部展开
+            if (available.y > 0 && currentOffset < 0) {
+                val consumed = minOf(available.y, -currentOffset)
+                setOffsetY(currentOffset + consumed)
+                return Offset(0f, consumed)
             }
             return Offset.Zero
         }
 
-        // 向下滑动时，优先将头部展开
+        /**
+         * 内容滚动后，处理剩余的展开（例如内容滚到顶部后继续下拉展开头部）
+         */
         override fun onPostScroll(
             consumed: Offset,
             available: Offset,
             source: NestedScrollSource
         ): Offset {
-            if (
-                available.y > 0
-                && getOffsetYValue() < 0
-            ) {
-                setOffsetY(minOf(getOffsetYValue() + available.y, 0f))
+            val currentOffset = getOffsetYValue()
+            if (available.y > 0 && currentOffset < 0) {
+                setOffsetY(minOf(currentOffset + available.y, 0f))
                 return available
             }
             return Offset.Zero

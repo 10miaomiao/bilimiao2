@@ -40,6 +40,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.defaultPreviewBackground
@@ -203,6 +204,7 @@ fun MyImagePreviewer(
                             DropdownMenu(
                                 expanded = showMoreMenu,
                                 onDismissRequest = { showMoreMenu = false },
+                                offset = DpOffset(0.dp, 4.dp),
                             ) {
                                 DropdownMenuItem(
                                     text = { Text("复制图片链接") },
