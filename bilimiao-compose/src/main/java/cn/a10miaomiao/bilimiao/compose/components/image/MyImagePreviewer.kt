@@ -11,8 +11,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -155,6 +160,8 @@ fun MyImagePreviewer(
     }
     var showMoreMenu by remember { mutableStateOf(false) }
 
+    val windowInsets = WindowInsets.safeDrawing
+
     ImagePreviewer(
         contentPadding = contentPadding,
         state = imagePreviewerState.previewerState,
@@ -178,7 +185,13 @@ fun MyImagePreviewer(
             background = defaultPreviewBackground,
             foreground = {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
+                        .padding(
+                            WindowInsets.safeDrawing
+                                .only(WindowInsetsSides.Bottom + WindowInsetsSides.End)
+                                .asPaddingValues()
+                        )
+                        .padding(bottom = 40.dp),
                     contentAlignment = Alignment.BottomEnd,
                 ) {
                     Row(
@@ -195,7 +208,7 @@ fun MyImagePreviewer(
                             contentDescription = "保存图片",
                             onClick = controller::saveImageFile,
                         )
-                        Box {
+                        Box() {
                             CapsuleIconButton(
                                 icon = Icons.Default.MoreVert,
                                 contentDescription = "更多",
@@ -204,7 +217,6 @@ fun MyImagePreviewer(
                             DropdownMenu(
                                 expanded = showMoreMenu,
                                 onDismissRequest = { showMoreMenu = false },
-                                offset = DpOffset(0.dp, 4.dp),
                             ) {
                                 DropdownMenuItem(
                                     text = { Text("复制图片链接") },
@@ -219,19 +231,19 @@ fun MyImagePreviewer(
                                         )
                                     },
                                 )
-                                DropdownMenuItem(
-                                    text = { Text("分享图片") },
-                                    onClick = {
-                                        showMoreMenu = false
-                                        controller.shareImage()
-                                    },
-                                    leadingIcon = {
-                                        Icon(
-                                            Icons.Default.Share,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("分享图片") },
+//                                    onClick = {
+//                                        showMoreMenu = false
+//                                        controller.shareImage()
+//                                    },
+//                                    leadingIcon = {
+//                                        Icon(
+//                                            Icons.Default.Share,
+//                                            contentDescription = null,
+//                                        )
+//                                    },
+//                                )
                             }
                         }
                     }

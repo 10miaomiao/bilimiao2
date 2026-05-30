@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.pointer.pointerInput
@@ -442,6 +443,9 @@ fun ComposeScaffold(
                     .offset {
                         IntOffset(drawerController.currentOffset.roundToInt(), 0)
                     }
+                    .then(
+                        if (drawerMeasuredWidthPx == 0) Modifier.graphicsLayer { alpha = 0f } else Modifier
+                    )
                     .onSizeChanged {
                         drawerMeasuredWidthPx = it.width
                     }

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import cn.a10miaomiao.bilimiao.compose.R
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.localImagePreviewerController
@@ -200,6 +201,8 @@ fun UserSpaceHeader(
     val seriesList = archiveViewModel.seriesList.collectAsState().value
     val seriesTotal = archiveViewModel.seriesTotal.collectAsState().value
 
+    val contentInsets = localContentInsets()
+
     Box(
         modifier = modifier,
     ) {
@@ -214,6 +217,10 @@ fun UserSpaceHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(
+                    start = contentInsets.left,
+                    end = contentInsets.right,
+                )
                 .padding(top = 80.dp, start = 10.dp)
         ) {
             Row(
