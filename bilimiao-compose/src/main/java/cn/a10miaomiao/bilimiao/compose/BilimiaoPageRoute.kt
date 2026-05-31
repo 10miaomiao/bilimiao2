@@ -52,6 +52,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.FlagsSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.HomeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.AutoStopTimerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
@@ -194,6 +195,7 @@ class BilimiaoPageRoute (
         composable<HomeSettingPage>()
         composable<ThemeSettingPage>()
         composable<VideoSettingPage>()
+        composable<AutoStopTimerPage>()
         composable<DanmakuSettingPage>()
         composable<DanmakuDisplaySettingPage>()
         composable<FlagsSettingPage>()

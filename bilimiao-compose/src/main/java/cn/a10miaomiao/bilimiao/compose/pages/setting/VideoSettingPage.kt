@@ -4,15 +4,12 @@ import android.os.Build
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,7 +32,6 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.SliderPreference
 import me.zhanghai.compose.preference.listPreference
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
@@ -135,6 +131,10 @@ private class VideoSettingPageViewModel(
 
     fun proxyClick() {
         pageNavigation.navigate(ProxySettingPage())
+    }
+
+    fun autoStopTimerClick() {
+        pageNavigation.navigate(AutoStopTimerPage())
     }
 
 }
@@ -322,47 +322,16 @@ private fun VideoSettingPageContent(
                     it.size < 10
                 }
             )
-            // PlayerAutoStopDuration
-            item(key = "auto_stop_duration", contentType = "SliderPreference") {
-                val state = playerStore.autoStopDurationFlow.collectAsState()
-                val sliderState = remember {
-                    mutableFloatStateOf(state.value.toFloat())
-                }
-                SliderPreference(
-                    value = state.value.toFloat(),
-                    onValueChange = {
-                        playerStore.setAutoStopDuration(it.toInt())
-                    },
-                    sliderValue = sliderState.value,
-                    onSliderValueChange = {
-                        sliderState.value = it
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    title = {
-                        Text(text = "播放器定时关闭")
-                    },
-                    summary = {
-                        Text(text = "视频播放的时长，而不是实际经过的时间")
-                    },
-                    valueRange = 0f..3600f,
-                    valueText = {
-                        val value = sliderState.value.toInt()
-                        if (value == 0) {
-                            Text(text = "关闭")
-                        } else {
-                            val second = value % 60
-                            val minute = value / 60
-                            if (minute == 0) {
-                                Text("${second}秒")
-                            } else if (second == 0) {
-                                Text("${minute}分钟")
-                            } else {
-                                Text("${minute}分${second}秒")
-                            }
-                        }
-                    },
-                )
-            }
+            preference(
+                key = "auto_stop_duration",
+                title = {
+                    Text("播放器定时关闭")
+                },
+                summary = {
+                    Text("视频播放的时长，而不是实际经过的时间")
+                },
+                onClick = viewModel::autoStopTimerClick
+            )
 
             preferenceCategory(
                 key = "small",
