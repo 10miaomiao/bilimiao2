@@ -1,9 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -72,10 +72,10 @@ fun DoubleColumnAutofitLayout(
                     leftMaxHeight.roundToPx().toFloat() - chainScrollableLayoutState.minScrollPosition.roundToPx()
                 }
             }
-            val scrollableState = rememberScrollState()
-            val scrollOffset = chainScrollableLayoutState.getOffsetYValue()
-            val alpha = ((leftMaxHeightPx + scrollOffset) / leftMaxHeightPx).coerceIn(0f, 1f)
-            val offsetY = scrollOffset.roundToInt()
+            val scrollableState = rememberScrollableState { 0f }
+            val scrollOffset = chainScrollableLayoutState.getHeightOffset()
+            val alpha = (1f - scrollOffset / leftMaxHeightPx).coerceIn(0f, 1f)
+            val offsetY = (-scrollOffset).roundToInt()
             ChainScrollableLayout(
                 modifier = modifier,
                 state = chainScrollableLayoutState,

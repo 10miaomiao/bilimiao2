@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,7 +31,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -303,7 +303,7 @@ private fun VideoDetailPageContent(
                                 end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
                             )
                             .background(MaterialTheme.colorScheme.surface)
-                            .scrollable(rememberScrollState(), Orientation.Vertical),
+                            .scrollable(rememberScrollableState { 0f }, Orientation.Vertical),
                         selectedTabIndex = pagerState.currentPage,
                         indicator = { positions ->
                             TabRowDefaults.PrimaryIndicator(

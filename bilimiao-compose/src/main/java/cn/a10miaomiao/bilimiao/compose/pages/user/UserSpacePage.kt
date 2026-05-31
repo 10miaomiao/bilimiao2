@@ -21,6 +21,7 @@ import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -32,7 +33,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -275,7 +275,7 @@ private fun UserSpacePageDetailContent(
     val isLargeScreen = remember(maxHeaderSize.value.first) {
         density.run { maxHeaderSize.value.first.toDp() } > 600.dp
     }
-    val scrollableState = rememberScrollState()
+    val headerScrollableState = rememberScrollableState { 0f }
     val scope = rememberCoroutineScope()
     val emitter = localEmitter()
 
@@ -283,20 +283,18 @@ private fun UserSpacePageDetailContent(
         modifier = Modifier.fillMaxSize(),
         state = chainScrollableLayoutState,
     ) { state ->
-        val alpha = (state.maxPx + state.getOffsetYValue()) / state.maxPx
+        val alpha = (1f - state.getHeightOffset() / state.maxCollapsiblePx).coerceIn(0f, 1f)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset {
                     IntOffset(
                         0,
-                        state
-                            .getOffsetYValue()
-                            .roundToInt()
+                        (-state.getHeightOffset()).roundToInt()
                     )
                 }
                 .background(MaterialTheme.colorScheme.background)
-                .scrollable(scrollableState, Orientation.Vertical),
+                .scrollable(headerScrollableState, Orientation.Vertical),
         ) {
             UserSpaceHeader(
                 modifier = Modifier
@@ -333,7 +331,7 @@ private fun UserSpacePageDetailContent(
                 .offset {
                     IntOffset(
                         0,
-                        (state.maxPx + state.getOffsetYValue()).roundToInt()
+                        (state.maxPx - state.getHeightOffset()).roundToInt()
                     )
                 },
         ) {
@@ -345,7 +343,7 @@ private fun UserSpacePageDetailContent(
                         start = windowInsets.leftDp.dp,
                         end = windowInsets.rightDp.dp,
                     )
-                    .scrollable(scrollableState, Orientation.Vertical),
+                    .scrollable(headerScrollableState, Orientation.Vertical),
                 selectedTabIndex = viewModel.pagerState.currentPage,
                 indicator = { positions ->
                     TabRowDefaults.PrimaryIndicator(
