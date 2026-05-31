@@ -77,6 +77,15 @@
                 android:text="00:00"
                 android:textColor="#ffffff" />
 
+            <TextView
+                android:id="@+id/auto_stop_timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:text=""
+                android:textColor="#ff6666"
+                android:visibility="gone" />
+
             <ImageView
                 android:id="@+id/send_danmaku_mini"
                 android:layout_width="36dp"

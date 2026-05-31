@@ -145,6 +145,9 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     // 拓展按钮文本
     private val mExpandBtnTV: TextView by lazy { findViewById(R.id.expand_btn_text) }
 
+    // 定时关闭倒计时显示
+    private val mAutoStopTimerTV: TextView by lazy { findViewById(R.id.auto_stop_timer) }
+
     // 弹幕时间与播放器时间同步
     private val mDanmakuTime = object : DanmakuTimer() {
         private var lastTime = 0L
