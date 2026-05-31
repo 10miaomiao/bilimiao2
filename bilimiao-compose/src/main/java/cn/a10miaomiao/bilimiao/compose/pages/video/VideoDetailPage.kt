@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,7 +31,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +50,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -64,9 +63,10 @@ import bilibili.app.view.v1.ViewPage
 import bilibili.app.view.v1.ViewReply
 import bilibili.app.view.v1.ViewReq
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
@@ -93,8 +93,6 @@ import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -114,9 +112,7 @@ class VideoDetailPage(
         val viewModel: VideoDetailViewModel = diViewModel(key = id) {
             VideoDetailViewModel(it, id)
         }
-        val windowStore: WindowStore by rememberInstance()
-        val windowState = windowStore.stateFlow.collectAsState().value
-        val windowInsets = windowState.getContentInsets(localContainerView())
+        val windowInsets = localContentInsets()
 
         val detailData = viewModel.detailData.collectAsState().value
 
@@ -163,7 +159,7 @@ class VideoDetailPage(
 @Composable
 private fun VideoDetailPageContent(
     viewModel: VideoDetailViewModel,
-    windowInsets: Insets,
+    windowInsets: ContentInsets,
     detailData: ViewReply,
     arcData: Arc,
 ) {
@@ -184,7 +180,7 @@ private fun VideoDetailPageContent(
 
     val isShowCover = playerState.aid != arcData.aid.toString()
     val headerCoverHeight = 200.dp
-    val headerHeight = remember(isShowCover) {
+    val headerHeight = remember(isShowCover, windowInsets.topDp) {
         if (isShowCover) {
             windowInsets.topDp.dp + headerCoverHeight
         } else {
@@ -307,8 +303,7 @@ private fun VideoDetailPageContent(
                                 end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
                             )
                             .background(MaterialTheme.colorScheme.surface)
-                            .nestedScroll(chainScrollableLayoutState.nestedScroll)
-                            .scrollable(rememberScrollState(), Orientation.Vertical),
+                            .scrollable(rememberScrollableState { 0f }, Orientation.Vertical),
                         selectedTabIndex = pagerState.currentPage,
                         indicator = { positions ->
                             TabRowDefaults.PrimaryIndicator(

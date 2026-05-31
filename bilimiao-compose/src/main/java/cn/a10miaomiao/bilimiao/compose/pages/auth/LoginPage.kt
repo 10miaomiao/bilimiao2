@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedContentScope
@@ -16,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,16 +41,15 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -269,10 +268,7 @@ private fun LoginPageContent(
 ) {
     PageConfig(title = "登录BILIBILI")
     val userStore: UserStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
+    val windowInsets = localContentInsets()
 
     val loading by viewModel.loading.collectAsState()
     val userName by viewModel.userName.collectAsState()
@@ -308,7 +304,7 @@ private fun LoginPageContent(
                 .height(80.dp)
                 .padding(
                     top = windowInsets.topDp.dp,
-                    bottom = windowInsets.bottomDp.dp,
+                    bottom = windowInsets.bottom,
                     start = windowInsets.leftDp.dp,
                     end = windowInsets.rightDp.dp,
                 ),
@@ -416,7 +412,7 @@ private fun LoginPageContent(
                     Text(text = "二维码登录")
                 }
             }
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottom))
 
         }
     }

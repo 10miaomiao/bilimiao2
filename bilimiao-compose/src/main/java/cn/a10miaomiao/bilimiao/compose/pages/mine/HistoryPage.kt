@@ -1,8 +1,11 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine
 
 import android.content.Context
-import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,7 +62,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.Navigation
@@ -72,7 +74,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -95,7 +97,6 @@ import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -120,7 +121,6 @@ import kotlinx.datetime.todayIn
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -366,9 +366,7 @@ private fun HistoryPageContent(
     pageWidth: Dp,
 ) {
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val showClearTipsDialog = remember {
         mutableStateOf(false)
@@ -382,7 +380,7 @@ private fun HistoryPageContent(
         viewModel.clearHistoryList()
     }
 
-    fun menuItemClick (view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick (menuItem: MenuItemPropInfo) {
         when(menuItem.key) {
             MenuKeys.clear -> {
                 showClearTipsDialog.value = true
@@ -412,23 +410,23 @@ private fun HistoryPageContent(
                 myItem {
                     key = MenuKeys.complete
                     title = "完成编辑"
-                    iconFileName = "ic_baseline_check_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Check
                 }
                 myItem {
                     key = MenuKeys.delete
                     title = "删除选中"
-                    iconFileName = "ic_baseline_delete_outline_24"
+                    iconVector = androidx.compose.material.icons.Icons.Outlined.Delete
                 }
             } else {
                 myItem {
                     key = MenuKeys.more
                     title = "更多"
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     childMenu = myMenu {
                         myItem {
                             key = MenuKeys.edit
                             title = "批量管理"
-                            iconFileName = "ic_baseline_edit_note_24"
+                            iconVector = androidx.compose.material.icons.Icons.Default.EditNote
                         }
                         myItem {
                             key = MenuKeys.clear
@@ -440,7 +438,7 @@ private fun HistoryPageContent(
                     key = MenuKeys.search
                     action = MenuActions.search
                     title = "搜索"
-                    iconFileName = "ic_search_gray"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Search
                 }
             }
         },
@@ -525,7 +523,7 @@ private fun HistoryPageContent(
                 .fillMaxWidth()
                 .weight(1f),
             viewModel = viewModel,
-            bottomEdgePadding = windowInsets.bottomDp.dp,
+            bottomEdgePadding = windowInsets.bottom,
             sideTimeline = sideTimeline,
             listState = listState,
             enableEdit = enableEditMode.value,

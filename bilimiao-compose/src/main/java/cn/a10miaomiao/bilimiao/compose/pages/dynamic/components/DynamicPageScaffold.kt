@@ -42,13 +42,11 @@ import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.launch
-import org.kodein.di.compose.rememberInstance
 
 @Composable
 fun DynamicPageScaffold(
@@ -59,9 +57,7 @@ fun DynamicPageScaffold(
     pagerState: PagerState,
     selectedUpper: UpListItem? = null,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
     val scope = rememberCoroutineScope()
 
     BoxWithConstraints {
@@ -121,9 +117,7 @@ private fun DynamicAllAndVideoWrap(
     toUpper: () -> Unit,
     isMiniUpList: Boolean = false,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val scope = rememberCoroutineScope()
     val tabs = listOf(
@@ -248,9 +242,7 @@ fun DynamicUpperWrap(
     isMiniUpList: Boolean = false,
     selectedUpper: UpListItem,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     Row(
         modifier = Modifier

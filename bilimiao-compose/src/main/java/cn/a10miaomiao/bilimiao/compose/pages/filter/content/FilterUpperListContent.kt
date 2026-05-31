@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -41,8 +40,6 @@ import org.kodein.di.instance
 private class FilterUpperListContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
-
-    private val fragment by instance<Fragment>()
 
     private val filterStore by instance<FilterStore>()
 

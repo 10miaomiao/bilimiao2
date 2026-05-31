@@ -29,18 +29,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.R
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteFolderType
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
-import org.kodein.di.compose.rememberInstance
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -49,9 +47,7 @@ internal fun UserFavouriteListContent(
     showTowPane: Boolean,
     folderType: UserFavouriteFolderType,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val (listFlow, isRefreshingFlow) = remember(viewModel, folderType) {
         viewModel.getListAndIsRefreshingFlow(folderType)
@@ -138,7 +134,7 @@ internal fun UserFavouriteListContent(
             item {
                 ListStateBox(
                     modifier = Modifier.padding(
-                        bottom = windowInsets.bottomDp.dp
+                        bottom = windowInsets.bottom
                     ),
                     loading = listLoading,
                     finished = listFinished,

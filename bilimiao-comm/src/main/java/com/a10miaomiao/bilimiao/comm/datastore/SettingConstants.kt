@@ -2,8 +2,6 @@ package com.a10miaomiao.bilimiao.comm.datastore
 
 object SettingConstants {
 
-    const val FLAGS_SUB_CONTENT_SHOW = "flags_sub_content_show"
-
     const val HOME_ENTRY_VIEW_DEFAULT = 0 // 时光姬
     const val HOME_ENTRY_VIEW_RECOMMEND = 1 // 推荐
     const val HOME_ENTRY_VIEW_POPULAR = 2 // 热门

@@ -8,40 +8,46 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.DisplayCutout
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.FrameLayout
+import android.widget.RelativeLayout
+import androidx.compose.ui.platform.ComposeView
 import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentOnAttachListener
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
-import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
-import cn.a10miaomiao.bilimiao.compose.ComposeFragment
+import cn.a10miaomiao.bilimiao.compose.MainActivityComposeHost
+import cn.a10miaomiao.bilimiao.compose.MainActivityComposeNavigator
+import cn.a10miaomiao.bilimiao.compose.PlayerFloatingLayoutState
+import cn.a10miaomiao.bilimiao.compose.PlayerPortraitLayoutState
 import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
+import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
-import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
+import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
+import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
 import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -50,49 +56,30 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerViews
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
-import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MyPopupMenu
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
-import com.a10miaomiao.bilimiao.comm.network.BiliGRPCConfig
 import com.a10miaomiao.bilimiao.comm.scanner.BilimiaoScanner
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.page.MainBackPopupMenu
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
-import com.a10miaomiao.bilimiao.widget.scaffold.ScaffoldView
-import com.a10miaomiao.bilimiao.widget.scaffold.behavior.DrawerBehaviorDelegate
-import com.a10miaomiao.bilimiao.widget.scaffold.behavior.PlayerBehavior
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
+import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerHostState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.common.util.concurrent.MoreExecutors
-import com.kongzue.dialogx.dialogs.PopTip
-import com.materialkolor.dynamiccolor.MaterialDynamicColors
 import com.materialkolor.hct.Hct
-import com.materialkolor.ktx.DynamicScheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
-import splitties.views.backgroundColor
+import com.kongzue.dialogx.dialogs.PopTip
 
-
-class MainActivity
-    : AppCompatActivity(),
-    DIAware {
-
-    private var mainUi: MainUi? = null
-    private val ui get() = mainUi!!
+class MainActivity : AppCompatActivity(), DIAware {
 
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
@@ -106,6 +93,70 @@ class MainActivity
     }
 
     private val store by lazy { Store(this, di) }
+    private val themeDelegate by lazy { ThemeDelegate(this, di) }
+    private val statusBarHelper by lazy { StatusBarHelper(this) }
+    private val supportHelper by lazy { SupportHelper(this) }
+    private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
+
+    private val playerHostState by lazy { DirectComposePlayerHostState() }
+    private val messageDialogState = cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState()
+    private val bottomSheetState = BottomSheetState()
+    private val pageConfigState = PageConfigState()
+    private val emitter = SharedFlowEmitter()
+    private val composeNavigator = MainActivityComposeNavigator(
+        launchUrl = ::launchWebBrowser,
+    )
+    private var appBarBackgroundColor by mutableStateOf(ComposeColor.Unspecified)
+    private val composeHostBridge = object : ComposeHostBridge {
+        override val context: Context
+            get() = this@MainActivity
+
+        override val activity: Activity
+            get() = this@MainActivity
+
+        override fun finishHost() {
+            finish()
+        }
+
+        override fun onBackPressed() {
+            this@MainActivity.handleActivityBackPressed()
+        }
+
+        override fun startActivity(intent: Intent) {
+            this@MainActivity.startActivity(intent)
+        }
+
+        override fun runOnUiThread(action: () -> Unit) {
+            this@MainActivity.runOnUiThread(action)
+        }
+    }
+    private val composeHostDi by lazy {
+        DI.lazy {
+            extend(di)
+            bindSingleton<ComposeHostBridge> { composeHostBridge }
+            bindSingleton { Bundle() }
+            bindSingleton { messageDialogState }
+            bindSingleton { emitter }
+            bindSingleton { composeNavigator.pageNavigation }
+            bindSingleton { bottomSheetState }
+        }
+    }
+    private var pageConfig: MyPageConfigInfo? = null
+    private var pendingDeepLink: Uri? = null
+    private var lastExitBackPressedTime = 0L
+
+    private lateinit var playerLayout: FrameLayout
+    private lateinit var videoPlayerView: DanmakuVideoPlayer
+
+    private val playerViews = object : PlayerViews {
+        override val videoPlayer: DanmakuVideoPlayer
+            get() = videoPlayerView
+
+        override fun <T : View> findViewById(id: Int): T {
+            return playerLayout.findViewById(id)!!
+        }
+    }
+
     private val startViewWrapper by lazy {
         StartViewWrapper(
             this,
@@ -113,60 +164,29 @@ class MainActivity
             this::startMenuNavigateUrl,
             this::startMenuDismissRequest,
             this::startMenuOpenScanner,
+            playerHostState::updateFloatingPlayerLayoutState,
         )
     }
-    private val themeDelegate by lazy { ThemeDelegate(this, di) }
-    private val basePlayerDelegate: BasePlayerDelegate by lazy { PlayerDelegate2(this, di) }
-    private val statusBarHelper by lazy { StatusBarHelper(this) }
-    private val supportHelper by lazy { SupportHelper(this) }
-    private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
-
-    private lateinit var navHostFragment: ComposeFragment
-
-    private var subNavHostFragment: ComposeFragment? = null
-
-    val currentNav: ComposeFragment
-        get() = if (ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
-    val anotherNav: ComposeFragment
-        get() = if (!ui.root.focusOnMain) navHostFragment else subNavHostFragment ?: navHostFragment
-
-    // 指示器，指示新页面该出现的地方
-    val pointerNav: ComposeFragment get() {
-        return if (ui.root.subContentShown) {
-            if (ui.root.pointerExchanged == ui.root.contentExchanged) {
-                navHostFragment
-            } else {
-                subNavHostFragment ?: navHostFragment
-            }
-        } else {
-            currentNav
-        }
+    private val basePlayerDelegate: BasePlayerDelegate by lazy {
+        PlayerDelegate2(this, playerViews, playerHostState, di)
     }
 
-
-    var pageConfig: MyPageConfigInfo? = null
-        private set
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API31，安卓11
-            // 设置弹出输入法时不改变窗口高度，使动画更加流畅，高版本安卓可以用imePadding来顶起输入框
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         }
         super.onCreate(savedInstanceState)
         themeDelegate.onCreate(savedInstanceState)
 
-        // 统计服务
         BilimiaoStatService.setAuthorizedState(this, false)
         BilimiaoStatService.start(this)
 
-        // 安卓13开始手动申请通知权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                //2、申请权限: 参数二：权限的数组；参数三：请求码
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -176,210 +196,164 @@ class MainActivity
         }
 
         store.onCreate(savedInstanceState)
+        pendingDeepLink = intent.data
+        initRootView(savedInstanceState)
 
         lifecycleScope.launch {
-            store.appStore.stateFlow.mapNotNull {
-                it.theme
-            }.flowOn(Dispatchers.Main).collect {
-                if (mainUi == null) {
-                    initRootView(savedInstanceState)
-                }
-                val themeColor = it.color
-                var bgColor = if (it.appBarType == 0) {
-                    val hct = Hct.fromInt(themeColor)
-                    val isDark = when(it.darkMode) {
-                        0 -> themeDelegate.isSystemInDark()
-                        1 -> false
-                        else -> true
+            store.appStore.stateFlow.mapNotNull { it.theme }
+                .flowOn(Dispatchers.Main)
+                .collect {
+                    val themeColor = it.color
+                    val bgColor = if (it.appBarType == 0) {
+                        val hct = Hct.fromInt(themeColor)
+                        val isDark = when (it.darkMode) {
+                            0 -> themeDelegate.isSystemInDark()
+                            1 -> false
+                            else -> true
+                        }
+                        val tone = if (isDark) 20.0 else 90.0
+                        Hct.from(hct.hue, 10.0, tone).toInt()
+                    } else {
+                        config.blockBackgroundColor
                     }
-                    val tone = if (isDark) 20.0 else 90.0
-                    Hct.from(hct.hue, 10.0, tone).toInt()
-                } else {
-                    config.blockBackgroundColor
+                    themeDelegate.setThemeColor(themeColor)
+                    appBarBackgroundColor = ComposeColor(
+                        (bgColor and 0x00FFFFFF) or (0xF8000000).toInt()
+                    )
                 }
-                bgColor = (bgColor and 0x00FFFFFF) or (0xF8000000).toInt()
-                ui.mAppBar.updateTheme(themeColor, bgColor)
-                themeDelegate.setThemeColor(themeColor)
-            }
         }
         lifecycleScope.launch {
             store.appStore.stateFlow.mapNotNull {
                 it.isLockScreenOrientationPortrait
             }.flowOn(Dispatchers.Main).collect {
-                if (!ui.root.fullScreenPlayer) {
-                    this@MainActivity.requestedOrientation = when (it) {
-                        true -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT // 竖屏锁定
+                if (!playerHostState.fullScreenPlayer) {
+                    requestedOrientation = when (it) {
+                        true -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                         else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     }
                 }
             }
         }
+        lifecycleScope.launch {
+            pageConfigState.collectConfig {
+                setMyPageConfig(
+                    MyPageConfigInfo(
+                        title = it.title,
+                        menu = it.menu,
+                        search = it.search,
+                    )
+                )
+            }
+        }
     }
 
     private fun initRootView(savedInstanceState: Bundle?) {
-        mainUi = MainUi(this, startViewWrapper)
-        setContentView(ui.root)
+        createPlayerViews()
+        setupPlayerViewInWrapper()
         basePlayerDelegate.onCreate(savedInstanceState)
-        ui.root.showPlayer = basePlayerDelegate.isPlaying()
-        ui.root.playerDelegate = basePlayerDelegate as PlayerDelegate2
-        ui.root.onDrawerStateChanged = ::onDrawerStateChanged
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ui.root.rootWindowInsets?.let {
-                setWindowInsets(it)
+        playerHostState.showPlayer = basePlayerDelegate.isPlaying()
+
+        val rootComposeView = ComposeView(this).apply {
+            setContent {
+                val appState = store.appStore.stateFlow.collectAsState().value
+                MainActivityComposeHost(
+                    navigator = composeNavigator,
+                    hostDi = composeHostDi,
+                    startViewWrapper = startViewWrapper,
+                    appState = appState,
+                    pageConfigState = pageConfigState,
+                    emitter = emitter,
+                    messageDialogState = messageDialogState,
+                    bottomSheetState = bottomSheetState,
+                    onBackClick = ::handleActivityBackPressed,
+                    initialDeepLink = pendingDeepLink,
+                    onInitialDeepLinkConsumed = {
+                        pendingDeepLink = null
+                    },
+                    onReady = {
+                        pendingDeepLink?.let {
+                            if (composeNavigator.navigateByUri(it)) {
+                                pendingDeepLink = null
+                            }
+                        }
+                    },
+                )
             }
-            ui.root.setOnApplyWindowInsetsListener { v, insets ->
-                setWindowInsets(insets)
-                insets
-            }
-            ui.root.onPlayerChanged = {
-                statusBarHelper.isLightStatusBar =
-                    !it || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
-                setWindowInsets(ui.root.rootWindowInsets)
-            }
-        } else {
-            setWindowInsetsAndroidL()
         }
+        setContentView(rootComposeView)
 
-        initNavController()
-        initAppBar()
-        initSettingPreferences()
-        initViewFocusable()
-    }
-
-    private fun initNavController() {
-        navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as ComposeFragment
-        navHostFragment.pageConfig.setConfig = this::notifyConfigChanged
-        if (findViewById<View?>(R.id.nav_host_fragment_sub) != null) {
-            val _subNavHostFragment = supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment_sub) as ComposeFragment
-            _subNavHostFragment.pageConfig.setConfig = this::notifyConfigChanged
-            subNavHostFragment = _subNavHostFragment
-        }
-
-        intent.data?.let {
-            navHostFragment.navigateByUri(it)
-        }
-    }
-
-    private fun initAppBar() {
-        ui.mAppBar.onBackClick = this.onBackClick
-        ui.mAppBar.onOpenMenuClick = this.onOpenMenuClick
-        ui.mAppBar.onBackLongClick = this.onBackLongClick
-        ui.mAppBar.onMenuItemClick = {
-            if (it.prop.action == MenuActions.search) {
-                openSearchDialog()
+        findViewById<View>(android.R.id.content).post {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
+                findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { _, insets ->
+                    setWindowInsets(insets)
+                    insets
+                }
             } else {
-                val fragment = currentNav
-                if (fragment is MyPage) {
-                    val childMenu = it.prop.childMenu
-                    if (childMenu != null) {
-                        val myPopupMenu = MyPopupMenu(
-                            activity = this,
-                            myPage = fragment,
-                            myPageMenu = childMenu,
-                            anchorView = it,
-                        )
-                        myPopupMenu.show()
-                    } else {
-                        fragment.onMenuItemClick(it, it.prop)
-                    }
-                }
+                setWindowInsetsAndroidL()
             }
         }
-        ui.mAppBar.onPointerClick = this.onPointerClick
-        ui.mAppBar.onPointerLongClick = this.onPointerLongClick
-        ui.mAppBar.onExchangeClick = this.onExchangeClick
-        ui.mAppBar.onExchangeLongClick = this.onExchangeLongClick
+        updateStatusBarStyle()
     }
 
-    fun initViewFocusable() {
-        ui.root.isFocusable = true
-        ui.root.appBar?.isFocusable = true
-        ui.root.content?.isFocusable = true
-        ui.root.subContent?.isFocusable = true
-        ui.root.isFocusableInTouchMode = true
-        ui.root.appBar?.isFocusableInTouchMode = true
-        ui.root.content?.isFocusableInTouchMode = true
-        ui.root.subContent?.isFocusableInTouchMode = true
+    private fun createPlayerViews() {
+        videoPlayerView = PlayerViewKeeper.keepPlayerView?.apply {
+            try {
+                (parent as? ViewGroup)?.removeAllViews()
+                val contextField = View::class.java.getDeclaredField("mContext")
+                contextField.isAccessible = true
+                if (contextField.get(this) is Context) {
+                    contextField.set(this, this@MainActivity)
+                }
+            } catch (_: Exception) {
+            }
+        } ?: layoutInflater.inflate(R.layout.include_palyer2, null, false) as DanmakuVideoPlayer
+        PlayerViewKeeper.keepPlayerView = videoPlayerView
 
-        ui.root.content?.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) changeFocus(true)
-        }
-        ui.root.subContent?.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) changeFocus(false)
+        playerLayout = FrameLayout(this).apply {
+            setBackgroundColor(Color.BLACK)
+            addView(videoPlayerView, FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            ))
+            addView(layoutInflater.inflate(R.layout.include_completion_box, this, false))
+            addView(layoutInflater.inflate(R.layout.include_error_message_box, this, false))
+            addView(layoutInflater.inflate(R.layout.include_area_limit_box, this, false))
+            addView(layoutInflater.inflate(R.layout.include_player_loading, this, false))
         }
     }
 
-    private fun initSettingPreferences() = lifecycleScope.launch {
-        SettingPreferences.run {
-            val rootView = ui.root
-            dataStore.data.collect {
-                val playerSmallShowArea = it[PlayerSmallShowArea] ?: 480
-                val playerHoldShowArea = it[PlayerSmallShowArea] ?: 130
-                val contentDefaultSplit = (it[FlagContentSplit] ?: 35) / 100f
-                if (playerSmallShowArea != rootView.playerSmallShowArea
-                    || playerHoldShowArea != rootView.playerHoldShowArea
-                    || contentDefaultSplit != rootView.contentDefaultSplit) {
-                    rootView.playerSmallShowArea = playerSmallShowArea
-                    rootView.playerHoldShowArea = playerHoldShowArea
-                    rootView.contentDefaultSplit = contentDefaultSplit
-                    rootView.updateLayout()
-                }
-                rootView.fullScreenDraggable = it[PlayerSmallDraggable] ?: false
-                rootView.contentAnimationDuration = it[FlagContentAnimationDuration] ?: 0
-            }
-        }
+    private fun setupPlayerViewInWrapper() {
+        startViewWrapper.playerView = playerLayout
+        startViewWrapper.setShowPlayer(playerHostState.showPlayer)
+        startViewWrapper.setOrientation(playerHostState.orientation)
+        startViewWrapper.setFullScreenPlayer(playerHostState.fullScreenPlayer)
+        startViewWrapper.setPortraitPlayerLayoutState(playerHostState.portraitLayoutState)
+        startViewWrapper.setFloatingPlayerLayoutState(playerHostState.floatingLayoutState)
+        startViewWrapper.setPlayerVideoRatio(playerHostState.playerVideoRatio)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent.data?.let {
-            navHostFragment.navigateByUri(it)
+        pendingDeepLink = intent.data
+        pendingDeepLink?.let {
+            if (composeNavigator.navigateByUri(it)) {
+                pendingDeepLink = null
+            }
         }
     }
 
-    //焦点改变时提示页面标题
-    private fun changeFocus(focusOnMain: Boolean) {
-        if (ui.root.focusOnMain != focusOnMain) {
-            ui.root.focusOnMain = focusOnMain
-            //双内容区时自动切换指示器
-            if (ui.root.pointerAutoChange && ui.root.subContentShown) {
-                ui.root.pointerExchanged = !ui.root.pointerExchanged
-            }
-            notifyFocusChanged()
+    private fun setMyPageConfig(config: MyPageConfigInfo) {
+        if (config.title.isBlank()) {
+            return
         }
-    }
-
-    fun notifyFocusChanged() {
-//        ui.mAppBar.canBack =
-//            currentNav.navController.currentDestination?.id != MainNavGraph.dest.main
-        ui.mAppBar.showPointer = ui.root.subContentShown
-        ui.mAppBar.pointerOrientation = ui.root.pointerExchanged
-        notifyConfigChanged()
-    }
-    fun notifyConfigChanged(){
-        setMyPageConfig(currentNav.pageConfig.configInfo)
-    }
-
-
-    fun setMyPageConfig(config: MyPageConfigInfo) {
-        if (config.title.isNotBlank()) {
-            pageConfig = config
-            ui.mAppBar.canBack =  config.menu?.checkable != true
-            ui.mAppBar.setProp {
-                title = config.title
-                menus = config.getMenuItems()
-                isNavigationMenu = config.menu?.checkable == true
-                navigationKey = config.menu?.checkedKey ?: 0
-            }
-            ui.root.slideUpBottomAppBar()
-
-            val searchConfig = config.search
-            val pageSearchMethod = if (searchConfig?.name.isNullOrBlank()) {
+        pageConfig = config
+        val searchConfig = config.search
+        startViewWrapper.setPageSearchMethod(
+            if (searchConfig?.name.isNullOrBlank()) {
                 null
             } else {
-                object : PageSearchMethod {
+                object : cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod {
                     override val name: String
                         get() = searchConfig?.name ?: ""
 
@@ -388,116 +362,36 @@ class MainActivity
                     }
                 }
             }
-            startViewWrapper.setPageSearchMethod(pageSearchMethod)
-        }
-    }
-
-    private fun goBackHome(): Boolean {
-        currentNav.goBackHome()
-        return true
-    }
-
-    private val onBackClick = View.OnClickListener {
-        onBackPressed()
-    }
-
-    private val onOpenMenuClick = View.OnClickListener {
-        ui.root.openDrawer()
-    }
-
-    private val onBackLongClick = View.OnLongClickListener {
-        if (ui.root.showPlayer) {
-            MainBackPopupMenu(
-                this@MainActivity,
-                it,
-                basePlayerDelegate
-            ).show()
-            true
-        } else {
-            goBackHome()
-        }
-    }
-    private val onPointerClick = View.OnClickListener {
-        ui.root.pointerExchanged = !ui.root.pointerExchanged
-        notifyFocusChanged()
-    }
-    private val onPointerLongClick = View.OnLongClickListener {
-        ui.root.pointerAutoChange = !ui.root.pointerAutoChange
-        true
-    }
-    private val onExchangeClick = View.OnClickListener {
-        if (!ui.root.subContentShown) {
-            //单内容区，将焦点给到另一区域
-            changeFocus(!ui.root.focusOnMain)
-            ui.root.updateLayout(true)
-        } else {
-            //双内容区，互换
-            ui.root.contentExchanged = !ui.root.contentExchanged
-        }
-        //指示器不锁定时，交换一次方向
-        if (ui.root.pointerAutoChange) {
-            ui.root.pointerExchanged = !ui.root.pointerExchanged
-            notifyFocusChanged()
-        }
-    }
-    private val onExchangeLongClick = View.OnLongClickListener {
-        //长按强制全屏
-        ui.root.showSubContent = !ui.root.showSubContent
-        ui.root.updateLayout(true)
-        notifyFocusChanged()
-        //小窗行为跟随
-        if (!ui.root.subContentShown) {
-            ui.root.playerBehavior?.holdUpPlayer()
-        } else {
-            ui.root.playerBehavior?.holdDownPlayer()
-        }
-        true
-    }
-
-    fun onDrawerStateChanged(state: Int) {
-        val startTop = ui.root.getDrawerTouchStartY()
-        if (startTop > 0f) {
-            startViewWrapper.setTouchStartTop(startTop)
-        }
-        if (state == DrawerBehaviorDelegate.STATE_COLLAPSED) {
-            startViewWrapper.closeSearchDialog()
-        }
-        // 太麻烦
-//        supportFragmentManager.beginTransaction().also {
-//            if (state == AppBarBehaviorDelegate.STATE_COLLAPSED
-//                && leftFragment.isVisible) {
-//                leftFragment.hideSoftInput()
-//                it.hide(leftFragment)
-//            } else if (leftFragment.isHidden) {
-//                it.show(leftFragment)
-//            }
-//        }.commit()
+        )
     }
 
     fun searchSelfPage(keyword: String) {
-        currentNav.onSearchSelfPage(this, keyword)
+        pageConfigState.onSearchSelfPage(keyword)
     }
 
     fun openBottomSheet(page: ComposePage) {
-        navHostFragment.openBottomSheet(page)
+        bottomSheetState.open(page)
+    }
+
+    fun goBackHome() {
+        composeNavigator.goBackHome()
     }
 
     private fun startMenuNavigate(page: ComposePage) {
-        ui.root.closeDrawer()
-        pointerNav.navigate(page)
+        startViewWrapper.closeDrawer()
+        composeNavigator.navigate(page)
     }
 
     private fun startMenuNavigateUrl(url: String) {
-        ui.root.closeDrawer()
+        startViewWrapper.closeDrawer()
         val uri = Uri.parse(url)
-        if (!pointerNav.navigateByUri(uri)) {
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            startActivity(intent)
+        if (!composeNavigator.navigateByUri(uri)) {
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
         }
     }
 
     private fun startMenuDismissRequest() {
-        ui.root.closeDrawer()
+        startViewWrapper.closeDrawer()
     }
 
     fun openSearchDialog() {
@@ -505,13 +399,10 @@ class MainActivity
         val keyword = searchConfig?.keyword ?: ""
         val mode = if (searchConfig?.name.isNullOrBlank()) 0 else 1
         startViewWrapper.openSearchDialog(keyword, mode, false)
-        Handler(Looper.getMainLooper()).postDelayed({
-            ui.root.openDrawer()
-        }, 10)
     }
 
     private fun startMenuOpenScanner(callback: (result: String) -> Unit): Boolean {
-        ui.root.closeDrawer()
+        startViewWrapper.closeDrawer()
         return BilimiaoScanner.openScanner(
             this,
             themeDelegate.themeColor.toInt(),
@@ -535,9 +426,10 @@ class MainActivity
         val top = insets.systemWindowInsetTop
         val right = insets.stableInsetRight
         val bottom = insets.systemWindowInsetBottom
-        var displayCutout: DisplayCutout? = null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            displayCutout = insets.displayCutout
+        val displayCutout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            insets.displayCutout
+        } else {
+            null
         }
         setWindowInsets(left, top, right, bottom, displayCutout)
     }
@@ -549,71 +441,24 @@ class MainActivity
         bottom: Int,
         displayCutout: DisplayCutout?
     ) {
-        val windowStore = store.windowStore
-        windowStore.setWindowInsets(
-            left, top, right, bottom,
-        )
-        windowStore.setBottomSheetContentInsets(
-            0, config.bottomSheetTitleHeight, 0, 0
-        )
-        val playerLP = ui.mPlayerLayout.layoutParams
-        if (playerLP is ScaffoldView.LayoutParams) {
-            val behavior = playerLP.behavior
-            if (behavior is PlayerBehavior) {
-                behavior.setWindowInsets(left, top, right, bottom)
-            }
-        }
-        ui.mAppBar.setWindowInsets(left, top, right, bottom)
-        val showPlayer = ui.root.showPlayer
-        val fullScreenPlayer = ui.root.fullScreenPlayer
-        if (ui.root.orientation == ScaffoldView.VERTICAL) {
-            if (showPlayer) {
-                windowStore.setContentInsets(
-                    left,
-                    0,
-                    right,
-                    top + bottom + config.appBarTitleHeight + ui.root.smallModePlayerMinHeight,
-                )
-            } else {
-                windowStore.setContentInsets(
-                    left, top, right, bottom + config.appBarTitleHeight,
-                )
-            }
-            windowStore.setBottomAppBarHeight(config.appBarMenuHeight)
-            ui.mContainerView.setPadding(0, 0, 0, 0)
-            ui.mSubContainerView.setPadding(0, 0, 0, 0)
-            ui.mPlayerLayout.setPadding(
-                0, if (fullScreenPlayer) 0 else top, 0, 0
-            )
-        } else {
-            windowStore.setContentInsets(
-                0, top, right, bottom,
-            )
-            windowStore.setBottomAppBarHeight(0)
-            ui.mContainerView.setPadding(left, 0, 0, 0)
-            ui.mSubContainerView.setPadding(0, 0, 0, 0)
-            ui.mPlayerLayout.setPadding(
-                0, 0, 0, 0
-            )
-        }
         basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
-        ui.root.statusBarHeight = top
-        ui.root.updateLayout(false)
+        updateStatusBarStyle()
+    }
+
+    private fun updateStatusBarStyle() {
+        statusBarHelper.isLightStatusBar =
+            !playerHostState.showPlayer || (playerHostState.orientation == PlayerHostState.HORIZONTAL && !playerHostState.fullScreenPlayer)
     }
 
     override fun onResume() {
         super.onResume()
         basePlayerDelegate.onResume()
-
-        // 百度移动统计埋点
         BilimiaoStatService.onResume(this)
     }
 
     override fun onPause() {
         super.onPause()
         basePlayerDelegate.onPause()
-
-        // 百度移动统计埋点
         BilimiaoStatService.onPause(this)
     }
 
@@ -634,33 +479,29 @@ class MainActivity
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        miaoLogger() debug "onKeyUp: $keyCode"
         when (keyCode) {
             KeyEvent.KEYCODE_SPACE -> {
-                val videoPlayer = mainUi?.mVideoPlayerView
-                if (videoPlayer != null && mainUi?.root?.showPlayer == true) {
-                    if (videoPlayer.isInPlayingState) {
-                        videoPlayer.onVideoPause()
+                if (playerHostState.showPlayer) {
+                    if (videoPlayerView.isInPlayingState) {
+                        videoPlayerView.onVideoPause()
                     } else {
-                        videoPlayer.onVideoResume()
+                        videoPlayerView.onVideoResume()
                     }
                     return true
                 }
             }
             KeyEvent.KEYCODE_DPAD_LEFT -> {
-                val videoPlayer = mainUi?.mVideoPlayerView
-                if (videoPlayer != null && mainUi?.root?.showPlayer == true) {
-                    videoPlayer.seekTo(videoPlayer.currentPosition - 5000)
+                if (playerHostState.showPlayer) {
+                    videoPlayerView.seekTo(videoPlayerView.currentPosition - 5000)
                 }
             }
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                val videoPlayer = mainUi?.mVideoPlayerView
-                if (videoPlayer != null && mainUi?.root?.showPlayer == true) {
-                    videoPlayer.seekTo(videoPlayer.currentPosition + 5000)
+                if (playerHostState.showPlayer) {
+                    videoPlayerView.seekTo(videoPlayerView.currentPosition + 5000)
                 }
             }
             KeyEvent.KEYCODE_ESCAPE -> {
-                if (mainUi?.root?.showPlayer == true) {
+                if (playerHostState.showPlayer) {
                     basePlayerDelegate.onBackPressed()
                 }
             }
@@ -672,16 +513,11 @@ class MainActivity
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             BilimiaoScanner.REQUEST_CODE -> {
-                BilimiaoScanner.onActivityResult(
-                    ActivityResult(resultCode, data)
-                )
+                BilimiaoScanner.onActivityResult(ActivityResult(resultCode, data))
             }
         }
     }
 
-    /**
-     * 通知权限设置界面跳转
-     */
     private fun jumpNotificationSetting() {
         val intent = Intent()
         try {
@@ -698,33 +534,25 @@ class MainActivity
                 intent.data = Uri.parse("package:$packageName")
             }
             startActivity(intent)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            val uri = Uri.fromParts("package", packageName, null)
-            intent.data = uri
+            intent.data = Uri.fromParts("package", packageName, null)
             startActivity(intent)
         }
     }
 
-    /**
-     * 通知权限授权提示
-     */
     private fun showNotificationPermissionTips() {
         MaterialAlertDialogBuilder(this).apply {
             setTitle("请求授权”通知权限“")
             setMessage("从Android13开始，需要您授予通知权限，在您向该应用授予该权限之前，该应用都将无法发送通知。\n受影响的功能：通知栏播放器控制器、下载进度通知")
             setCancelable(false)
-            setPositiveButton("去授权") { dialog, _ ->
+            setPositiveButton("去授权") { _, _ ->
                 jumpNotificationSetting()
             }
             setNegativeButton("拒绝", null)
         }.show()
     }
 
-    /**
-     * 判断授权的方法  授权成功直接调用写入方法  这是监听的回调
-     * 参数  上下文   授权结果的数组   申请授权的数组
-     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -739,7 +567,6 @@ class MainActivity
         }
     }
 
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
@@ -747,56 +574,196 @@ class MainActivity
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         basePlayerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        if (isInPictureInPictureMode) { // 进入画中画模式，则隐藏其它控件
-
-        } else {
-
-        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        playerHostState.orientation = newConfig.orientation
+        playerHostState.updateSmallModePlayerMaxHeight()
         basePlayerDelegate.onConfigurationChanged(newConfig)
-        ui.root.orientation = newConfig.orientation
-        statusBarHelper.isLightStatusBar =
-            !ui.root.showPlayer || (ui.root.orientation == ScaffoldView.HORIZONTAL && !ui.root.fullScreenPlayer)
+        updateStatusBarStyle()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             setWindowInsetsAndroidL()
+        } else {
+            findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
         }
-    }
-
-    private fun onHostNavBack(): Boolean {
-//        if (ui.mAppBar.canBack) {
-            currentNav.onBackPressed()
-            return true
-//        } else {
-//            return false
-//        }
     }
 
     override fun onBackPressed() {
-        if (ui.root.isDrawerOpen()) {
-            if (startViewWrapper.showSearchDialog) {
-                startViewWrapper.closeSearchDialog()
-                return
-            }
-            ui.root.closeDrawer()
+        if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
-        if (ui.root.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
+        if (startViewWrapper.showSearchDialog) {
+            startViewWrapper.closeSearchDialog()
             return
         }
-        if (onHostNavBack()) {
+        if (startViewWrapper.isDrawerOpen()) {
+            startViewWrapper.closeDrawer()
             return
         }
         super.onBackPressed()
     }
 
+    private fun handleActivityBackPressed() {
+        if (composeNavigator.canPopBackStack()) {
+            composeNavigator.popBackStack()
+        } else {
+            handleRootBackPressed()
+        }
+    }
+
+    private fun handleRootBackPressed() {
+        if (!basePlayerDelegate.onBackPressed()) {
+            val now = System.currentTimeMillis()
+            if (now - lastExitBackPressedTime > 2000) {
+                PopTip.show("再按一次退出bilimiao")
+                lastExitBackPressedTime = now
+            } else {
+                finish()
+            }
+        }
+    }
+
     override fun attachBaseContext(newBase: Context) {
-        val configuration: Configuration = newBase.resources.configuration
+        val configuration = newBase.resources.configuration
         ScreenDpiUtil.readCustomConfiguration(configuration)
         val newContext = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(newContext)
     }
 
+    private fun launchWebBrowser(uri: Uri) {
+        val typedValue = TypedValue()
+        val attrId = com.google.android.material.R.attr.colorSurfaceVariant
+        theme.resolveAttribute(attrId, typedValue, true)
+        val intent = CustomTabsIntent.Builder()
+            .setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(ContextCompat.getColor(this, typedValue.resourceId))
+                    .build()
+            )
+            .build()
+        intent.launchUrl(this, uri)
+    }
+
+    private inner class DirectComposePlayerHostState : PlayerHostState {
+        override var showPlayer: Boolean = false
+            set(value) {
+                field = value
+                startViewWrapper.setShowPlayer(value)
+                updateStatusBarStyle()
+                findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
+            }
+
+        override var fullScreenPlayer: Boolean = false
+            set(value) {
+                field = value
+                startViewWrapper.setFullScreenPlayer(value)
+                updateStatusBarStyle()
+                findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
+            }
+
+        override var orientation: Int = resources.configuration.orientation
+            set(value) {
+                field = value
+                startViewWrapper.setOrientation(value)
+                updateStatusBarStyle()
+            }
+
+        val smallModePlayerMinHeight: Int = (200 * resources.displayMetrics.density).toInt()
+        private var portraitCurrentHeightPx: Int = smallModePlayerMinHeight
+            set(value) {
+                field = value
+                syncPortraitPlayerLayoutState()
+            }
+        override var smallModePlayerMaxHeight: Int = smallModePlayerMinHeight
+            set(value) {
+                field = value
+                syncPortraitPlayerLayoutState()
+            }
+        private var floatingPlayerLayoutState = PlayerFloatingLayoutState()
+        var playerSmallShowArea: Int = 480
+            set(value) {
+                field = value
+                val widthPx = value * resources.displayMetrics.density
+                val heightPx = widthPx / (16f / 9f)
+                floatingPlayerLayoutState = floatingPlayerLayoutState.copy(
+                    defaultWidthPx = widthPx,
+                    defaultHeightPx = heightPx,
+                )
+                syncFloatingPlayerLayoutState()
+            }
+        var playerVideoRatio: Float = 16f / 9f
+            set(value) {
+                field = value
+                startViewWrapper.setPlayerVideoRatio(value)
+                updateSmallModePlayerMaxHeight()
+            }
+
+        val portraitLayoutState: PlayerPortraitLayoutState
+            get() = PlayerPortraitLayoutState(
+                minHeightPx = smallModePlayerMinHeight,
+                currentHeightPx = portraitCurrentHeightPx,
+                maxHeightPx = smallModePlayerMaxHeight,
+            )
+
+        val floatingLayoutState: PlayerFloatingLayoutState
+            get() = floatingPlayerLayoutState
+
+        var smallModePlayerCurrentHeight: Int
+            get() = portraitCurrentHeightPx
+            set(value) {
+                portraitCurrentHeightPx = value
+            }
+
+        override fun animatePlayerHeight(target: Int) {
+            if (orientation != PlayerHostState.VERTICAL || portraitCurrentHeightPx == target) {
+                return
+            }
+            val animator = android.animation.ValueAnimator.ofInt(portraitCurrentHeightPx, target)
+            animator.duration = 200
+            animator.addUpdateListener {
+                smallModePlayerCurrentHeight = it.animatedValue as Int
+            }
+            animator.start()
+        }
+
+        override fun holdUpPlayer() {
+        }
+
+        fun updateSmallModePlayerMaxHeight() {
+            val metrics = resources.displayMetrics
+            val maxHeightByRatio = (metrics.widthPixels / playerVideoRatio).toInt()
+            smallModePlayerMaxHeight = minOf(maxHeightByRatio, metrics.heightPixels / 2)
+            if (portraitCurrentHeightPx > smallModePlayerMaxHeight) {
+                portraitCurrentHeightPx = smallModePlayerMaxHeight
+            }
+            syncPortraitPlayerLayoutState()
+        }
+
+        fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
+            floatingPlayerLayoutState = state.copy(
+                defaultWidthPx = state.defaultWidthPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultWidthPx,
+                defaultHeightPx = state.defaultHeightPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultHeightPx,
+            )
+            syncFloatingPlayerLayoutState()
+        }
+
+        private fun syncPortraitPlayerLayoutState() {
+            if (startViewWrapper.portraitPlayerLayoutState == portraitLayoutState) {
+                return
+            }
+            startViewWrapper.setPortraitPlayerLayoutState(portraitLayoutState)
+        }
+
+        private fun syncFloatingPlayerLayoutState() {
+            if (startViewWrapper.floatingPlayerLayoutState == floatingPlayerLayoutState) {
+                return
+            }
+            startViewWrapper.setFloatingPlayerLayoutState(floatingPlayerLayoutState)
+        }
+    }
+
+    private object PlayerViewKeeper {
+        var keepPlayerView: DanmakuVideoPlayer? = null
+    }
 }

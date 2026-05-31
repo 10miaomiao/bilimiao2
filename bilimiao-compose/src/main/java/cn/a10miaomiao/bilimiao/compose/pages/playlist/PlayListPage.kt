@@ -1,7 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.playlist
 
 import android.view.HapticFeedbackConstants
-import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -37,13 +40,12 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -56,12 +58,11 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.serialization.Serializable
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -103,9 +104,7 @@ private fun PlayListPageContent(
 ) {
     val playerStore: PlayerStore by rememberInstance()
     val playListStore: PlayListStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState by windowStore.stateFlow.collectAsState()
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
     val playListState by playListStore.stateFlow.collectAsState()
     val playerState by playerStore.stateFlow.collectAsState()
 
@@ -124,7 +123,7 @@ private fun PlayListPageContent(
         playListStore.clearPlayList()
     }
 
-    fun menuItemClick (view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick (menuItem: MenuItemPropInfo) {
         when(menuItem.key) {
             MenuKeys.clear -> {
                 showClearTipsDialog.value = true
@@ -156,24 +155,24 @@ private fun PlayListPageContent(
                     myItem {
                         key = MenuKeys.complete
                         title = "完成编辑"
-                        iconFileName = "ic_baseline_check_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Check
                     }
                     myItem {
                         key = MenuKeys.delete
                         title = "移除选中"
-                        iconFileName = "ic_baseline_delete_outline_24"
+                        iconVector = androidx.compose.material.icons.Icons.Outlined.Delete
                     }
                 } else {
                     myItem {
                         key = MenuKeys.edit
                         title = "编辑列表"
-                        iconFileName = "ic_baseline_edit_note_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.EditNote
                     }
                 }
                 myItem {
                     key = MenuKeys.clear
                     title = "清空列表"
-                    iconFileName = "ic_baseline_clear_all_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.ClearAll
                 }
             }
         }
@@ -327,7 +326,7 @@ private fun PlayListPageContent(
                 .fillMaxSize()
                 .padding(
                     top = windowInsets.topDp.dp,
-                    bottom = windowInsets.bottomDp.dp,
+                    bottom = windowInsets.bottom,
                     start = windowInsets.leftDp.dp,
                     end = windowInsets.rightDp.dp,
                 )

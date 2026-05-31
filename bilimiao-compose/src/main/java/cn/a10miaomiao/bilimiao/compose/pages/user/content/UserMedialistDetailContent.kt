@@ -1,7 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.net.Uri
-import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bilibili.app.view.v1.Episode
@@ -38,7 +40,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menuunfold
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -62,7 +64,6 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,7 +71,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 private class UserMedialistDetailViewMode(
@@ -211,7 +211,7 @@ private class UserMedialistDetailViewMode(
         _isAutoPlay.value = value
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.playList -> {
                 addPlayList()
@@ -240,9 +240,7 @@ fun UserMedialistDetailContent(
             bizTitle = bizTitle,
         )
     }
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
@@ -256,7 +254,7 @@ fun UserMedialistDetailContent(
         menu = rememberMyMenu() {
             myItem {
                 key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 title = "更多"
                 childMenu = myMenu {
                     myItem {
@@ -353,7 +351,7 @@ fun UserMedialistDetailContent(
                 ) {
                     ListStateBox(
                         modifier = Modifier.padding(
-                            bottom = windowInsets.bottomDp.dp
+                            bottom = windowInsets.bottom
                         ),
                         loading = listLoading,
                         finished = listFinished,

@@ -1,7 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.search.content
 
 import android.net.Uri
-import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,7 +37,7 @@ import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -55,14 +58,12 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 typealias SearchItem = bilibili.polymer.app.search.v1.Item
@@ -178,7 +179,7 @@ private class SearchAllContentViewModel(
         refresh()
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         val key = item.key ?: return
         when (key) {
             in 10..19 -> {
@@ -216,12 +217,12 @@ private fun SearchAllContentConfig(
                 key = MenuKeys.search
                 action = MenuActions.search
                 title = "继续搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
             }
             myItem {
                 key = MenuKeys.sort
                 title = rankOrder.second
-                iconFileName = "ic_baseline_filter_list_grey_24"
+                iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                 childMenu = myMenu {
                     checkable = true
                     checkedKey = 10 + rankOrder.first
@@ -236,7 +237,7 @@ private fun SearchAllContentConfig(
             myItem {
                 key = MenuKeys.filter
                 title = if (hasFilter) "已筛选" else "筛选"
-                iconFileName = "ic_baseline_filter_list_alt_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.FilterAlt
             }
         },
         search = SearchConfigInfo(
@@ -262,9 +263,7 @@ internal fun SearchAllContent(
     if (isActive) {
         SearchAllContentConfig(keyword, viewModel)
     }
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()

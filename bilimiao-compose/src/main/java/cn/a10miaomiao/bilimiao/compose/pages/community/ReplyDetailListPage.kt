@@ -1,5 +1,9 @@
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -12,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
@@ -22,7 +25,7 @@ import bilibili.main.community.reply.v1.ReplyInfo
 import bilibili.main.community.reply.v1.ReplyInfoReq
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -39,16 +42,15 @@ import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -148,9 +150,7 @@ private fun ReplyDetailListPageContent(
     enterUrl: String = "",
 ) {
     val pageNavigation: PageNavigation by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailData = viewModel.detailData.collectAsState().value
     val loading = viewModel.loading.collectAsState().value
@@ -164,14 +164,14 @@ private fun ReplyDetailListPageContent(
             if (enterUrl.isNotEmpty()) {
                 myItem {
                     key = MenuKeys.url
-                    iconFileName = "ic_link_black_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Link
                     title = "评论来源"
                 }
             }
             if (parentId != 0L) {
                 myItem {
                     key = MenuKeys.parent
-                    iconFileName = "ic_link_black_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Link
                     title = "上级评论"
                 }
             }
@@ -179,7 +179,7 @@ private fun ReplyDetailListPageContent(
     )
     PageListener(
         configId = configId,
-        onMenuItemClick = { _, menuItem ->
+        onMenuItemClick = { menuItem ->
             when (menuItem.key) {
                 MenuKeys.parent -> {
                     pageNavigation.navigate(ReplyDetailListPage(

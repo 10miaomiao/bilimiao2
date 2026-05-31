@@ -97,7 +97,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.foundation.ScaleIndication
@@ -127,7 +126,6 @@ import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.kongzue.dialogx.dialogs.PopTip
@@ -136,21 +134,6 @@ import org.kodein.di.compose.rememberInstance
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import android.app.Activity
 import android.net.Uri
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
@@ -165,16 +148,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.core.view.WindowCompat
-import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import cn.a10miaomiao.bilimiao.compose.common.foundation.add
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
-import cn.a10miaomiao.bilimiao.compose.components.start.SearchInputInline
-import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel
-import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestInfo
-import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestType
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun StartViewContent(
     modifier: Modifier = Modifier,
@@ -183,76 +160,23 @@ fun StartViewContent(
     navigateUrl: (String) -> Unit,
     openSearch: () -> Unit,
     openScanner: (callback: (String) -> Unit) -> Boolean,
-    isSearchVisible: Boolean = false,
-    searchInitKeyword: String = "",
-    searchInitMode: Int = 0,
-    pageSearchMethod: PageSearchMethod? = null,
-    searchAnimation: Boolean = true,
-    onCloseSearch: () -> Unit = {},
 ) {
     val listState = rememberLazyListState()
-
-    SharedTransitionLayout(
-        modifier = modifier
-    ) {
-        AnimatedContent(
-            isSearchVisible,
-            transitionSpec = {
-                // 从下往上进入，从上往下退出，并带有透明过渡
-                if (searchAnimation) {
-                    (
-                        slideInHorizontally(
-                            initialOffsetX = { fullWidth -> -fullWidth },
-                            animationSpec = tween(durationMillis = 200)
-                        ) + fadeIn(animationSpec = tween(durationMillis = 200))
-                        ) togetherWith (
-                        slideOutHorizontally(
-                            targetOffsetX = { fullWidth -> -fullWidth },
-                            animationSpec = tween(durationMillis = 250)
-                        ) + fadeOut(animationSpec = tween(durationMillis = 250))
-                    )
-                } else {
-                    // 无动画
-                    fadeIn(animationSpec = tween(0)) togetherWith
-                            fadeOut(animationSpec = tween(0))
-                }
-            },
-            label = "basic_transition"
-        ) { targetState ->
-            if (targetState) {
-                SearchInputInline(
-                    modifier = Modifier,
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedVisibilityScope = this@AnimatedContent,
-                    initKeyword = searchInitKeyword,
-                    initMode = searchInitMode,
-                    pageSearchMethod = pageSearchMethod,
-                    onDismissRequest = onCloseSearch,
-                )
-            } else {
-                StartIndexList(
-                    modifier = modifier,
-                    listState = listState,
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedVisibilityScope = this@AnimatedContent,
-                    startTopHeight = startTopHeight,
-                    openSearch = openSearch,
-                    openScanner = openScanner,
-                    navigateTo = navigateTo,
-                    navigateUrl = navigateUrl,
-                )
-            }
-        }
-    }
+    StartIndexList(
+        modifier = modifier,
+        listState = listState,
+        startTopHeight = startTopHeight,
+        openSearch = openSearch,
+        openScanner = openScanner,
+        navigateTo = navigateTo,
+        navigateUrl = navigateUrl,
+    )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun StartIndexList(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     startTopHeight: Dp = 200.dp,
     openSearch: () -> Unit,
     openScanner: (onResult: (String) -> Unit) -> Boolean,
@@ -368,15 +292,6 @@ private fun StartIndexList(
         }
         item {
             StartSearchCard(
-                modifier = Modifier
-                    .run {
-                        with(sharedTransitionScope) {
-                            sharedElement(
-                                rememberSharedContentState(key = "search"),
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            )
-                        }
-                    },
                 onClick = {
                     openSearch()
                 },

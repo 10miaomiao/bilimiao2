@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.net.Uri
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
@@ -30,7 +29,6 @@ class UserArchiveViewModel(
     private val vmid: String,
 ) : ViewModel(), DIAware {
 
-    val fragment: Fragment by instance()
     private val pageNavigation by instance<PageNavigation>()
     //    var regionList = listOf<CheckPopupMenu.MenuItemInfo<Int>>(
 //        CheckPopupMenu.MenuItemInfo("全部(0)", 0),

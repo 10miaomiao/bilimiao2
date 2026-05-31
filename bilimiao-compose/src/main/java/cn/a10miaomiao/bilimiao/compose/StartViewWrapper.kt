@@ -12,17 +12,40 @@ import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import kotlin.math.max
 import kotlin.math.min
 
+data class PlayerPortraitLayoutState(
+    val minHeightPx: Int = 0,
+    val currentHeightPx: Int = 0,
+    val maxHeightPx: Int = 0,
+)
+
+data class PlayerFloatingLayoutState(
+    val defaultWidthPx: Float = 0f,
+    val defaultHeightPx: Float = 0f,
+    val widthPx: Float = 0f,
+    val heightPx: Float = 0f,
+    val offsetXPx: Float = 0f,
+    val offsetYPx: Float = 0f,
+    val initialized: Boolean = false,
+)
+
 class StartViewWrapper(
     val activity: Activity,
     val navigateTo: (ComposePage) -> Unit,
     val navigateUrl: (String) -> Unit,
     val dismissRequest: () -> Unit,
     val openScanner: (callback: (result: String) -> Unit) -> Boolean,
+    private val onFloatingPlayerLayoutStateChanged: (PlayerFloatingLayoutState) -> Unit = {},
 ) {
 
     private val composeView = ComposeView(activity)
 
     private val density = activity.resources.displayMetrics.density
+
+    private val _drawerState = mutableStateOf(DRAWER_STATE_COLLAPSED)
+    val drawerState get() = _drawerState.value
+
+    private val _drawerOpen = mutableStateOf(false)
+    val drawerOpen get() = _drawerOpen.value
 
     private val _touchStart = mutableFloatStateOf(0f)
     val touchStart get() = _touchStart.floatValue
@@ -39,6 +62,30 @@ class StartViewWrapper(
 
     private val _searchAnimation = mutableStateOf(false)
     val searchAnimation get() = _searchAnimation.value
+
+    var playerView: View? = null
+    var completionView: View? = null
+    var errorMessageView: View? = null
+    var areaLimitView: View? = null
+    var loadingView: View? = null
+
+    private val _showPlayer = mutableStateOf(false)
+    val showPlayer get() = _showPlayer.value
+
+    private val _orientation = mutableStateOf(1)
+    val orientation get() = _orientation.value
+
+    private val _fullScreenPlayer = mutableStateOf(false)
+    val fullScreenPlayer get() = _fullScreenPlayer.value
+
+    private val _portraitPlayerLayoutState = mutableStateOf(PlayerPortraitLayoutState())
+    val portraitPlayerLayoutState get() = _portraitPlayerLayoutState.value
+
+    private val _floatingPlayerLayoutState = mutableStateOf(PlayerFloatingLayoutState())
+    val floatingPlayerLayoutState get() = _floatingPlayerLayoutState.value
+
+    private val _playerVideoRatio = mutableStateOf(16f / 9f)
+    val playerVideoRatio get() = _playerVideoRatio.value
 
     var shouldCreateCompositionOnAttachedToWindow = true
         private set
@@ -78,11 +125,65 @@ class StartViewWrapper(
     fun closeSearchDialog() {
         _searchAnimation.value = true
         _showSearchDialog.value = false
-        dismissRequest()
+    }
+
+    fun setShowPlayer(value: Boolean) {
+        _showPlayer.value = value
+    }
+
+    fun setOrientation(value: Int) {
+        _orientation.value = value
+    }
+
+    fun setFullScreenPlayer(value: Boolean) {
+        _fullScreenPlayer.value = value
+    }
+
+    fun setPortraitPlayerLayoutState(state: PlayerPortraitLayoutState) {
+        _portraitPlayerLayoutState.value = state
+    }
+
+    fun setFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
+        _floatingPlayerLayoutState.value = state
+    }
+
+    fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
+        _floatingPlayerLayoutState.value = state
+        onFloatingPlayerLayoutStateChanged(state)
+    }
+
+    fun setPlayerVideoRatio(ratio: Float) {
+        _playerVideoRatio.value = ratio
     }
 
     private fun getWindowHeight(): Int {
         return activity.window.decorView.height
+    }
+
+    fun openDrawer() {
+        _drawerOpen.value = true
+        _drawerState.value = DRAWER_STATE_EXPANDED
+    }
+
+    fun closeDrawer() {
+        _drawerOpen.value = false
+        _drawerState.value = DRAWER_STATE_COLLAPSED
+    }
+
+    fun setDrawerState(state: Int) {
+        _drawerState.value = state
+        _drawerOpen.value = state != DRAWER_STATE_COLLAPSED
+    }
+
+    fun isDrawerOpen(): Boolean {
+        return _drawerOpen.value
+    }
+
+    companion object {
+        const val DRAWER_STATE_DRAGGING = 1
+        const val DRAWER_STATE_SETTLING = 2
+        const val DRAWER_STATE_EXPANDED = 3
+        const val DRAWER_STATE_COLLAPSED = 4
     }
 
 }

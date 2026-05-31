@@ -22,13 +22,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
@@ -40,16 +40,15 @@ import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.io.BufferedReader
 import java.io.File
@@ -70,7 +69,7 @@ private class SettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
 
     val moreSettingList = MutableStateFlow(listOf<MiaoSettingInfo>())
@@ -81,7 +80,7 @@ private class SettingPageViewModel(
 
     private fun loadMoreSettingList() {
         try {
-            val context = fragment.requireContext()
+            val context = hostBridge.context
             val file = File(context.filesDir, "settingList.json")
             if (!file.exists()) {
                 return
@@ -106,13 +105,13 @@ private class SettingPageViewModel(
         val urlRegex = """^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$""".toRegex()
         if (urlRegex.matches(url)) {
             BiliUrlMatcher.toUrlLink(
-                fragment.requireActivity(),
+                hostBridge.activity,
                 url,
             )
             return
         } else {
             val intent = Intent(Intent.ACTION_VIEW)
-            val activity = fragment.requireActivity()
+            val activity = hostBridge.activity
             try {
                 intent.data = Uri.parse(item.url)
                 activity.startActivity(intent)
@@ -130,7 +129,7 @@ private class SettingPageViewModel(
     }
 
     fun toDipSettingPage() {
-        val activity = fragment.requireActivity()
+        val activity = hostBridge.activity
         val className = "com.a10miaomiao.bilimiao.activity.DensitySettingActivity";
         val intent = Intent(activity, Class.forName(className))
         activity.startActivity(intent)
@@ -169,11 +168,9 @@ private fun SettingPageContent(
     PageConfig(
         title = "设置"
     )
-    val windowStore: WindowStore by rememberInstance()
     val userStore: UserStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
     val userState = userStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
     val context = LocalContext.current
     val moreSettingList by viewModel.moreSettingList.collectAsState()
 
@@ -369,7 +366,7 @@ private fun SettingPageContent(
             item("bottom") {
                 Spacer(
                     modifier = Modifier.height(
-                        windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
+                        windowInsets.bottom
                     )
                 )
             }

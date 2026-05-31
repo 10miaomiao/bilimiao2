@@ -1,10 +1,13 @@
 package cn.a10miaomiao.bilimiao.compose.pages.home
 
 import android.content.Context
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.AnimatedContentScope
@@ -42,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -50,18 +52,20 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
+import cn.a10miaomiao.bilimiao.compose.components.pager.DrawerAwareHorizontalPager
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomePopularContent
 import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeRecommendContent
@@ -69,7 +73,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeTimeMachineContent
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
@@ -82,9 +85,7 @@ import com.a10miaomiao.bilimiao.comm.store.AppStore.HomeSettingState
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -99,7 +100,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.io.IOException
 import java.util.Calendar
@@ -163,12 +163,9 @@ private class HomePageViewModel(
 ) : ViewModel(), DIAware {
 
     private val appStore by instance<AppStore>()
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
 
-    private val playerDelegate by instance<BasePlayerDelegate>()
-
-    private var lastBackPressedTime = 0L
 
     private val _tabs = mutableStateOf(getTabs(appStore.state.home))
     val tabs get() = _tabs.value
@@ -328,7 +325,7 @@ private class HomePageViewModel(
 //        }
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.dynamic -> {
                 val nav = pageNavigation.hostController
@@ -344,16 +341,7 @@ private class HomePageViewModel(
     }
 
     fun backPressed() {
-        if (playerDelegate.onBackPressed()) {
-            return
-        }
-        val now = System.currentTimeMillis()
-        if (now - lastBackPressedTime > 2000) {
-            PopTip.show("再按一次退出bilimiao")
-            lastBackPressedTime = now
-        } else {
-            fragment.requireActivity().finish()
-        }
+        hostBridge.onBackPressed()
     }
 
 }
@@ -371,17 +359,17 @@ private fun HomePageContent(
             myItem {
                 key = MenuKeys.home
                 title = "首页"
-                iconFileName = "ic_baseline_home_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.Home
             }
             myItem {
                 key = MenuKeys.dynamic
                 title = "动态"
-                iconFileName = "ic_baseline_icecream_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.Icecream
             }
             myItem {
                 key = MenuKeys.searchInHome
                 title = "搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
                 action = MenuActions.search
             }
         }
@@ -396,9 +384,7 @@ private fun HomePageContent(
 
     val scope = rememberCoroutineScope()
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
 
     val pagerState = rememberPagerState(
@@ -450,11 +436,14 @@ private fun HomePageContent(
             }
         }
         val saveableStateHolder = rememberSaveableStateHolder()
-        HorizontalPager(
+        DrawerAwareHorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            state = pagerState,
+            pagerState = pagerState,
+            onEdgeSwipeOpen = {
+
+            }
         ) { index ->
             saveableStateHolder.SaveableStateProvider(index) {
                 viewModel.tabs[index].PageContent(viewModel.pageState)

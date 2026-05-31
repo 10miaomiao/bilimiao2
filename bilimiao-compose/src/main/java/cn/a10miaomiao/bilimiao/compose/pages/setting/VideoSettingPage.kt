@@ -19,12 +19,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
@@ -34,7 +33,6 @@ import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SliderPreference
@@ -42,9 +40,9 @@ import me.zhanghai.compose.preference.listPreference
 import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -61,7 +59,6 @@ private class VideoSettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
 
     private val fnvalSelection = mapOf(
@@ -150,9 +147,7 @@ private fun VideoSettingPageContent(
     PageConfig(
         title = "播放设置"
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
     val playerStore: PlayerStore by rememberInstance()
 
     val context = LocalContext.current
@@ -446,7 +441,7 @@ private fun VideoSettingPageContent(
             item("bottom") {
                 Spacer(
                     modifier = Modifier.height(
-                        windowInsets.bottomDp.dp + windowStore.bottomAppBarHeightDp.dp
+                        windowInsets.bottom
                     )
                 )
             }

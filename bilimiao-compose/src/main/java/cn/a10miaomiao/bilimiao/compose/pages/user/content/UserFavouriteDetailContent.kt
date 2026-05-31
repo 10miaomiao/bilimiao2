@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user.content
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
@@ -42,7 +45,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menuunfold
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -73,14 +76,12 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 private class UserFavouriteDetailViewModel(
@@ -311,9 +312,7 @@ internal fun UserFavouriteDetailContent(
         UserFavouriteDetailViewModel(it, mediaId, mediaTitle, keyword)
     }
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailInfo by viewModel.mediaInfo.collectAsState()
     val list by viewModel.list.data.collectAsState()
@@ -330,7 +329,7 @@ internal fun UserFavouriteDetailContent(
                 val selfFav = viewModel.isSelfFav()
                 myItem {
                     key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     title = "更多"
                     childMenu = myMenu {
                         myItem {
@@ -354,17 +353,17 @@ internal fun UserFavouriteDetailContent(
                 myItem {
                     key = MenuKeys.search
                     action = MenuActions.search
-                    iconFileName = "ic_search_gray"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Search
                     title = "搜索"
                 }
                 if (detailInfo != null && !selfFav) {
                     myItem {
                         key = MenuKeys.follow
                         if (detailInfo?.fav_state == 1) {
-                            iconFileName = "ic_baseline_favorite_24"
+                            iconVector = androidx.compose.material.icons.Icons.Default.Favorite
                             title = "已订阅"
                         } else {
-                            iconFileName = "ic_outline_favorite_border_24"
+                            iconVector = androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                             title = "订阅"
                         }
                     }
@@ -387,7 +386,7 @@ internal fun UserFavouriteDetailContent(
     PageListener(
         pageConfigId,
         onMenuItemClick = remember(detailInfo) {
-            { _, item ->
+            { item ->
                 when (item.key) {
                     MenuKeys.follow -> {
                         if (detailInfo?.fav_state == 1) {
@@ -494,7 +493,7 @@ internal fun UserFavouriteDetailContent(
                 ) {
                     ListStateBox(
                         modifier = Modifier.padding(
-                            bottom = windowInsets.bottomDp.dp
+                            bottom = windowInsets.bottom
                         ),
                         loading = listLoading,
                         finished = listFinished,

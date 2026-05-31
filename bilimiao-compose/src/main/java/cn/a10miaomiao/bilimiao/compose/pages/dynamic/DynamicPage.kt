@@ -1,6 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
-import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -39,10 +42,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.home.content.HomeTimeMachineContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.kodein.di.compose.rememberInstance
 
 @Serializable
 class DynamicPage : ComposePage() {
@@ -67,17 +68,17 @@ private fun DynamicPageContent(
             myItem {
                 key = MenuKeys.home
                 title = "首页"
-                iconFileName = "ic_baseline_home_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.Home
             }
             myItem {
                 key = MenuKeys.dynamic
                 title = "动态"
-                iconFileName = "ic_baseline_icecream_24"
+                iconVector = androidx.compose.material.icons.Icons.Default.Icecream
             }
             myItem {
                 key = MenuKeys.searchInHome
                 title = "搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
                 action = MenuActions.search
             }
         }
@@ -89,9 +90,7 @@ private fun DynamicPageContent(
 
     val scope = rememberCoroutineScope()
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val upperList by viewModel.upList.collectAsState()
     val selectedUpper by viewModel.selectedUpper.collectAsState()
@@ -131,7 +130,7 @@ private fun DynamicPageContent(
                         .fillMaxHeight(),
                     safePadding = PaddingValues(
                         top = windowInsets.topDp.dp,
-                        bottom = windowInsets.bottomDp.dp
+                        bottom = windowInsets.bottom
                     ),
                     upperList = upperList,
                     selectedUpper = if (pagerState.currentPage == 1) {

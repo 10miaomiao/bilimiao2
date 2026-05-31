@@ -11,16 +11,19 @@ import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.google.android.material.button.MaterialButton
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.instance
 
 class AreaLimitBoxController(
-    private var activity: AppCompatActivity,
+    private var views: PlayerViews,
     private val delegate: PlayerDelegate2,
     override val di: DI,
 ) : DIAware {
 
-    val areaLimitLayout = activity.findViewById<RelativeLayout>(R.id.area_limit_layout)
-    val areaLimitOkBtn = activity.findViewById<MaterialButton>(R.id.area_limit_ok_btn)
-    val areaLimitCloseBtn = activity.findViewById<MaterialButton>(R.id.area_limit_close_btn)
+    private val activity by di.instance<AppCompatActivity>()
+
+    val areaLimitLayout = views.findViewById<RelativeLayout>(R.id.area_limit_layout)
+    val areaLimitOkBtn = views.findViewById<MaterialButton>(R.id.area_limit_ok_btn)
+    val areaLimitCloseBtn = views.findViewById<MaterialButton>(R.id.area_limit_close_btn)
 
     init {
         initAreaLimitBox()

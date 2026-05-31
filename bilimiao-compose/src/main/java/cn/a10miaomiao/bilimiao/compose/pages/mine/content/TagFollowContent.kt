@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine.content
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -34,11 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -56,15 +54,14 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.string
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.localDI
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 private class TagFollowContentModel(
@@ -73,8 +70,6 @@ private class TagFollowContentModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val activity by instance<Activity>()
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
     private val myFollowViewModel by instance<MyFollowViewModel>()
@@ -400,10 +395,8 @@ internal fun TagFollowContent(
         }
     )
     val myFollowViewModel: MyFollowViewModel by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
     val userStore: UserStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
@@ -452,7 +445,7 @@ internal fun TagFollowContent(
             ) {
                 ListStateBox(
                     modifier = Modifier.padding(
-                        bottom = windowInsets.bottomDp.dp
+                        bottom = windowInsets.bottom
                     ),
                     loading = listLoading,
                     finished = listFinished,

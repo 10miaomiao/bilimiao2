@@ -31,7 +31,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -71,11 +70,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // 根布局组件
     private val mRootLayout: RelativeLayout by lazy { findViewById(R.id.root_layout) }
-
-    // 小窗顶部拖动横条
-    private val mDragBarLayout: FrameLayout by lazy { findViewById(R.id.layout_drag_bar) }
-    private val mDragBar: View by lazy { findViewById(R.id.drag_bar) }
-    private val mHoldUpBtn: View by lazy { findViewById(R.id.hold_up) }
 
     // 顶栏更多按钮
     private val mMoreBtn: View by lazy { findViewById(R.id.more) }
@@ -350,11 +344,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mMiniSendDanmakuIV.visibility = VISIBLE
                 mSendDanmakuTV.visibility = GONE
                 mBackButton.setImageResource(R.drawable.ic_close_white_24dp)
-                if (mode == PlayerMode.SMALL_FLOAT) {
-                    mDragBarLayout.visibility = mTopContainer.visibility
-                } else {
-                    mDragBarLayout.visibility = GONE
-                }
                 updateDanmakuMargin()
             }
             PlayerMode.FULL -> {
@@ -363,7 +352,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
                 mMiniSendDanmakuIV.visibility = GONE
                 mSendDanmakuTV.visibility = VISIBLE
                 mBackButton.setImageResource(R.drawable.ic_arrow_back_white_24dp)
-                mDragBarLayout.visibility = GONE
                 updateDanmakuMargin()
             }
         }
@@ -667,16 +655,8 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             if (view.id == mBottomLayout.id) {
                 mBottomSubtitleTV.translationY =
                     if (visibility == VISIBLE) 0f else dip(40).toFloat()
-                when (mode) {
-                    PlayerMode.SMALL_FLOAT -> {
-                        mDragBarLayout.visibility = visibility
-                    }
-                    PlayerMode.SMALL_TOP -> {
-                        mDragBarLayout.visibility = View.GONE
-                    }
-                    PlayerMode.FULL -> {
-                        statusBarHelper?.isShowStatus = visibility == View.VISIBLE
-                    }
+                if (mode == PlayerMode.FULL) {
+                    statusBarHelper?.isShowStatus = visibility == View.VISIBLE
                 }
             }
         }
@@ -913,10 +893,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
         mMiniSendDanmakuIV.setOnLongClickListener(l)
     }
 
-    fun serHoldUpButtonOnClickListener(l: OnClickListener) {
-        mHoldUpBtn.setOnClickListener(l)
-    }
-
     private var mDialogOffsetText: TextView? = null
     override fun showProgressDialog(
         deltaX: Float,
@@ -1126,22 +1102,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     fun hideController() {
         hideAllWidget()
         cancelDismissControlViewTimer()
-    }
-
-    fun showSmallDargBar() {
-        if (mode == PlayerMode.SMALL_FLOAT) {
-            mDragBarLayout.visibility = VISIBLE
-        } else {
-            mDragBarLayout.visibility = GONE
-        }
-    }
-
-    fun hideSmallDargBar() {
-        mDragBarLayout.visibility = mTopContainer.visibility
-    }
-
-    fun getHoldButtonWidth():Int{
-        return mHoldUpBtn.measuredWidth
     }
 
     fun setHoldStatus(isHold:Boolean){

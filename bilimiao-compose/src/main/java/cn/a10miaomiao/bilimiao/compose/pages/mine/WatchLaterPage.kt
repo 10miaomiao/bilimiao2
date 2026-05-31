@@ -1,7 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine
 
-import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +43,7 @@ import bilibili.app.interfaces.v1.CursorItem
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -70,7 +73,6 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,7 +81,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -341,7 +342,7 @@ private fun WatchLaterPageContent(
     val enableEditMode = remember {
         mutableStateOf(false)
     }
-    fun menuItemClick (view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick (menuItem: MenuItemPropInfo) {
         when(menuItem.key) {
             1 -> {
                 viewModel.setListAsc(false)
@@ -384,18 +385,18 @@ private fun WatchLaterPageContent(
                 myItem {
                     key = MenuKeys.complete
                     title = "完成编辑"
-                    iconFileName = "ic_baseline_check_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Check
                 }
                 myItem {
                     key = MenuKeys.delete
                     title = "移除选中"
-                    iconFileName = "ic_baseline_delete_outline_24"
+                    iconVector = androidx.compose.material.icons.Icons.Outlined.Delete
                 }
             } else {
                 myItem {
                     key = MenuKeys.more
                     title = "更多"
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     childMenu = myMenu {
                         myItem {
                             key = MenuKeys.playList
@@ -418,7 +419,7 @@ private fun WatchLaterPageContent(
                 myItem {
                     key = MenuKeys.sort
                     title = if (viewModel.listAsc) "最早添加" else "最近添加"
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     childMenu = myMenu {
                         checkable = true
                         checkedKey = if (viewModel.listAsc) 2 else 1
@@ -446,9 +447,7 @@ private fun WatchLaterPageContent(
         }
     )
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val listFlow = viewModel.list
     val list by listFlow.data.collectAsState()
