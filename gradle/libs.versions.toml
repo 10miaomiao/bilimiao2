@@ -17,7 +17,6 @@ serialization = "1.7.3"
 kotlinxDatetime = "0.6.1"
 kotlinxCoroutines = "1.9.0"
 # third party
-splitties = "3.0.0"
 kodeinDi = "7.12.0"
 okhttp = "4.10.0"
 glide = "4.13.2"
@@ -97,14 +96,6 @@ gsy-video-player = { group = "com.github.CarGuo.GSYVideoPlayer", name = "gsyvide
 mojito = { group = "com.github.mikaelzero.mojito", name = "mojito", version.ref = "mojito" }
 mojito-sketch = { group = "com.github.mikaelzero.mojito", name = "SketchImageViewLoader", version.ref = "mojito" }
 mojito-glide = { group = "com.github.mikaelzero.mojito", name = "GlideImageLoader", version.ref = "mojito" }
-
-# splitties
-splitties-android-base = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-base", version.ref = "splitties" }
-splitties-android-base-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-base-with-views-dsl", version.ref = "splitties" }
-splitties-android-appcompat = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-appcompat", version.ref = "splitties" }
-splitties-android-appcompat-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-appcompat-with-views-dsl", version.ref = "splitties" }
-splitties-android-material-components = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-material-components", version.ref = "splitties" }
- splitties-android-material-components-with-views-dsl = { group = "com.louiscad.splitties", name = "splitties-fun-pack-android-material-components-with-views-dsl", version.ref = "splitties" }
 
 # third party
 materialkolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
