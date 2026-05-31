@@ -10,8 +10,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import splitties.views.imageDrawable
-import splitties.views.imageResource
 
 fun RequestManager.loadImageUrl(
     value: String,
@@ -26,7 +24,7 @@ fun ImageView.network(
     suffix: String = "",
 )  {
     if (url.isBlank()) {
-        imageDrawable = null
+        setImageDrawable(null)
         return
     }
     Glide.with(context)

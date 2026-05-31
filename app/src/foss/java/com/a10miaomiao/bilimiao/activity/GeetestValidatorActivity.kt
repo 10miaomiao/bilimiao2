@@ -3,36 +3,20 @@ package com.a10miaomiao.bilimiao.activity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.setPadding
 import androidx.lifecycle.lifecycleScope
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.config.config
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.kodein.di.DI
-import splitties.dimensions.dip
-import splitties.experimental.InternalSplittiesApi
-import splitties.views.backgroundColor
-import splitties.views.dsl.core.Ui
-import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.setContentView
-import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.verticalLayout
-import splitties.views.dsl.core.view
-import splitties.views.dsl.core.wrapContent
-import splitties.views.dsl.core.wrapInScrollView
 
 class GeetestValidatorActivity : AppCompatActivity() {
 
@@ -55,14 +39,52 @@ class GeetestValidatorActivity : AppCompatActivity() {
         ThemeDelegate(this@GeetestValidatorActivity, di)
     }
 
+    private lateinit var webView: WebView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         mCallback = tempCallback
         themeDelegate.onCreate(savedInstanceState)
         super.onCreate(savedInstanceState)
         val jsBridge = JsBridge(this)
-        val ui = GeetestValidatorUi(this, jsBridge)
-        setContentView(ui)
-        getGTApi(ui.webView)
+        val root = buildLayout(jsBridge)
+        setContentView(root)
+        getGTApi(webView)
+    }
+
+    private fun buildLayout(jsBridge: JsBridge): View {
+        val toolBar = MaterialToolbar(this).apply {
+            id = View.generateViewId()
+            clipToPadding = true
+            fitsSystemWindows = true
+            setTitle(R.string.geetest_validator)
+            setNavigationOnClickListener {
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
+
+        webView = WebView(this).apply {
+            settings.javaScriptEnabled = true
+            addJavascriptInterface(jsBridge, "JsBridge")
+        }
+
+        return LinearLayout(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            orientation = LinearLayout.VERTICAL
+            fitsSystemWindows = true
+
+            addView(toolBar, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ))
+
+            addView(webView, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0, 1f
+            ))
+        }
     }
 
     private fun getGTApi(
@@ -99,45 +121,6 @@ class GeetestValidatorActivity : AppCompatActivity() {
         @JavascriptInterface
         fun close() {
             activity.finish()
-        }
-    }
-
-    @OptIn(InternalSplittiesApi::class)
-    private class GeetestValidatorUi(
-        val activity: GeetestValidatorActivity,
-        val jsBridge: JsBridge,
-    ) : Ui {
-        override val ctx = activity
-
-        val toolBar = view<MaterialToolbar>(View.generateViewId()) {
-            clipToPadding = true
-            fitsSystemWindows = true
-            setTitle(R.string.geetest_validator)
-            setNavigationOnClickListener {
-                activity.onBackPressed()
-            }
-        }
-
-        val webView = view<WebView> {
-            settings.apply {
-                javaScriptEnabled = true
-            }
-            addJavascriptInterface(jsBridge, "JsBridge")
-        }
-
-        override val root: View = verticalLayout {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            fitsSystemWindows = true
-
-            addView(toolBar, lParams(matchParent, wrapContent))
-
-            addView(webView, lParams(matchParent, matchParent) {
-                weight = 1f
-            })
-
         }
     }
 

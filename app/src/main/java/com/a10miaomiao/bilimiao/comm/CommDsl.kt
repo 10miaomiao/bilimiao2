@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.createViewModelLazy
 import androidx.lifecycle.*
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -30,14 +29,14 @@ fun <VM : ViewModel> Fragment.diViewModel(
     vmClass: KClass<VM>,
     di: DI,
 ): Lazy<VM> {
-    return createViewModelLazy(vmClass, { this.viewModelStore }) {
+    return ViewModelLazy(vmClass, { this.viewModelStore }, {
         newViewModelFactory<VM> {
             val constructor = vmClass.java.getDeclaredConstructor(
                 DI::class.java
             )
             constructor.newInstance(di)
         }
-    }
+    })
 }
 
 inline fun <reified VM : ViewModel> Fragment.diViewModel(

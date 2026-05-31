@@ -4,108 +4,93 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.setPadding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.config.config
-import com.google.android.material.appbar.MaterialToolbar
-import org.kodein.di.DI
-import splitties.dimensions.dip
-import splitties.experimental.InternalSplittiesApi
-import splitties.views.backgroundColor
-import splitties.views.dsl.core.Ui
-import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.setContentView
-import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.verticalLayout
-import splitties.views.dsl.core.view
-import splitties.views.dsl.core.wrapContent
-import splitties.views.dsl.core.wrapInScrollView
 
-class LogViewerActivity : AppCompatActivity() {
-
-    private val di: DI = DI.lazy {}
-
-    private val themeDelegate by lazy {
-        ThemeDelegate(this@LogViewerActivity, di)
-    }
-
-    private var mLogSummary = ""
+class LogViewerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        themeDelegate.onCreate(savedInstanceState)
-        val ui = LogViewerUi(this)
-        setContentView(ui)
-
-        val logSummary = intent.getStringExtra("log_summary")
-        if (!logSummary.isNullOrEmpty()) {
-            mLogSummary = logSummary
-            ui.logText.text = logSummary
+        val logSummary = intent.getStringExtra("log_summary") ?: ""
+        setContent {
+            LogViewerScreen(
+                logSummary = logSummary,
+                onBack = { onBackPressedDispatcher.onBackPressed() },
+                onCopy = { copyLogText(it) }
+            )
         }
     }
 
-    private fun copyLogText() {
-        val logSummary = mLogSummary
+    private fun copyLogText(text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("log", logSummary)
+        val clip = ClipData.newPlainText("log", text)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, "复制成功(●'◡'●)", Toast.LENGTH_SHORT).show()
     }
+}
 
-    @OptIn(InternalSplittiesApi::class)
-    class LogViewerUi(
-        val activity: LogViewerActivity
-    ) : Ui {
-        override val ctx = activity
-
-        val toolBar = view<MaterialToolbar>(View.generateViewId()) {
-            clipToPadding = true
-            fitsSystemWindows = true
-            setTitle(R.string.log_viewer)
-            setNavigationOnClickListener {
-                activity.onBackPressed()
-            }
-            menu.add(Menu.FIRST, 1, 0, "复制日志").also {
-                it.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-            }
-            setOnMenuItemClickListener {
-                when(it.itemId) {
-                    1 -> {
-                        activity.copyLogText()
-                    }
+@Composable
+private fun LogViewerScreen(
+    logSummary: String,
+    onBack: () -> Unit,
+    onCopy: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val bgColor = remember { context.config.windowBackgroundColor }
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        TopAppBar(
+            title = { Text(stringResource(R.string.log_viewer)) },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 }
-                true
+            },
+            actions = {
+                IconButton(onClick = { onCopy(logSummary) }) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null)
+                }
             }
-        }
-
-        val logText = textView {
-            setPadding(dip(10))
-            setTextIsSelectable(true)
-        }
-
-        override val root: View = verticalLayout {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        SelectionContainer(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(androidx.compose.ui.graphics.Color(bgColor))
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = logSummary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                fontSize = 14.sp,
             )
-            fitsSystemWindows = true
-
-            addView(toolBar, lParams(matchParent, wrapContent))
-
-            addView(verticalLayout {
-                addView(logText, lParams(matchParent, wrapContent))
-            }.wrapInScrollView {
-                backgroundColor = config.windowBackgroundColor
-            }, lParams(matchParent, matchParent))
-
         }
     }
 }

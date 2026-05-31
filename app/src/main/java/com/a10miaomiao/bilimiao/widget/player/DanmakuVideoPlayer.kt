@@ -51,8 +51,7 @@ import master.flame.danmaku.danmaku.model.DanmakuTimer
 import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
 import master.flame.danmaku.ui.widget.DanmakuView
-import splitties.dimensions.dip
-import splitties.views.backgroundColor
+import com.a10miaomiao.bilimiao.comm.utils.dip
 import kotlin.math.min
 
 
@@ -313,7 +312,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
             pm.show()
         }
         mBottomSubtitleTV.setTextColor(Color.parseColor("#FFFFFF"))
-        mBottomSubtitleTV.backgroundColor = Color.parseColor("#66000000")
+        mBottomSubtitleTV.setBackgroundColor(Color.parseColor("#66000000"))
 
         val lockClickListener = OnLockClickListener()
         mLock.setOnClickListener(lockClickListener)

@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.network
-import splitties.views.imageResource
 
 class LoadingBoxController(
     private val views: PlayerViews,
@@ -59,7 +58,7 @@ class LoadingBoxController(
     fun hideLoading() {
         (loadingAnimTV.drawable as? AnimationDrawable)?.stop()
         loadingLayout.visibility = View.GONE
-        loadingCover.imageResource = 0
+        loadingCover.setImageResource(0)
         loadingText.text = ""
     }
 

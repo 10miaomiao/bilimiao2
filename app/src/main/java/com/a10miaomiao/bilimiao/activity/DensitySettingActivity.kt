@@ -4,53 +4,56 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.text.InputType
-import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import com.a10miaomiao.bilimiao.Bilimiao
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.button.MaterialButton
 import com.kongzue.dialogx.dialogs.PopTip
-import org.kodein.di.DI
-import splitties.dimensions.dip
-import splitties.experimental.InternalSplittiesApi
-import splitties.views.backgroundColor
-import splitties.views.dsl.core.Ui
-import splitties.views.dsl.core.editText
-import splitties.views.dsl.core.horizontalMargin
-import splitties.views.dsl.core.lParams
-import splitties.views.dsl.core.matchParent
-import splitties.views.dsl.core.setContentView
-import splitties.views.dsl.core.textView
-import splitties.views.dsl.core.verticalLayout
-import splitties.views.dsl.core.view
-import splitties.views.dsl.core.wrapContent
-import splitties.views.dsl.core.wrapInScrollView
-import splitties.views.textColorResource
 
-class DensitySettingActivity : AppCompatActivity() {
-
-    private val di: DI = DI.lazy {}
-
-    private val themeDelegate by lazy {
-        ThemeDelegate(this@DensitySettingActivity, di)
-    }
+class DensitySettingActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        themeDelegate.onCreate(savedInstanceState)
-        val ui = DensitySettingUi(this)
-        setContentView(ui)
+        setContent {
+            DensitySettingScreen(
+                onBack = { onBackPressedDispatcher.onBackPressed() },
+                onConfirm = { dpi, fontScale -> setCustomConfiguration(dpi, fontScale) }
+            )
+        }
     }
 
     override fun onBackPressed() {
         if (isChanged()) {
-            // 直接重启APP
             val intent = packageManager.getLaunchIntentForPackage(packageName)!!
             val componentName = intent.component
             val mainIntent = Intent.makeRestartActivityTask(componentName)
@@ -72,9 +75,9 @@ class DensitySettingActivity : AppCompatActivity() {
     private fun reStartActivity() {
         val intent = intent
         intent.putExtra("changed", true)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        finish();
-        overridePendingTransition(0, 0);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        finish()
+        overridePendingTransition(0, 0)
         startActivity(intent)
     }
 
@@ -88,99 +91,78 @@ class DensitySettingActivity : AppCompatActivity() {
         val newContext = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(newContext)
     }
+}
 
+@Composable
+private fun DensitySettingScreen(
+    onBack: () -> Unit,
+    onConfirm: (Int, Float) -> Unit,
+) {
+    val context = LocalContext.current
+    val bgColor = remember { context.config.windowBackgroundColor }
+    val defaultDpi = remember { ScreenDpiUtil.getDefaultDpi() }
+    val defaultFontScale = remember { ScreenDpiUtil.getDefaultFontScale() }
+    val currentDpi = remember { context.resources.configuration.densityDpi.toString() }
+    val currentFontScale = remember { context.resources.configuration.fontScale.toString() }
+    val dpiText = remember { mutableStateOf(currentDpi) }
+    val fontScaleText = remember { mutableStateOf(currentFontScale) }
 
-    @OptIn(InternalSplittiesApi::class)
-    class DensitySettingUi(
-        val activity: DensitySettingActivity
-    ) : Ui {
-
-        override val ctx = activity
-
-        val toolBar = view<MaterialToolbar>(View.generateViewId()) {
-            clipToPadding = true
-            fitsSystemWindows = true
-            setTitle(R.string.density_setting)
-            setNavigationIcon(R.drawable.ic_back_24dp)
-            setNavigationOnClickListener {
-                activity.onBackPressed()
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        TopAppBar(
+            title = { Text(stringResource(R.string.density_setting)) },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                }
             }
-        }
-
-        val dipEditText = editText {
-            setRawInputType(InputType.TYPE_CLASS_NUMBER)
-            setText(resources.configuration.densityDpi.toString())
-        }
-
-        val fontScaleEditText = editText {
-            setRawInputType(InputType.TYPE_CLASS_NUMBER)
-            setText(resources.configuration.fontScale.toString())
-        }
-
-        override val root: View = verticalLayout {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(bgColor))
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 10.dp)
+        ) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(text = "系统默认DPI：$defaultDpi", fontSize = 14.sp)
+            Text(text = "当前应用内DPI修改：", fontSize = 14.sp)
+            OutlinedTextField(
+                value = dpiText.value,
+                onValueChange = { dpiText.value = it },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
             )
-            fitsSystemWindows = true
 
-            addView(toolBar, lParams(matchParent, wrapContent))
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(text = "系统默认字体缩放：$defaultFontScale", fontSize = 14.sp)
+            Text(text = "当前字体缩放修改：", fontSize = 14.sp)
+            OutlinedTextField(
+                value = fontScaleText.value,
+                onValueChange = { fontScaleText.value = it },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+            )
 
-            addView(textView {
-                text = "系统默认DPI：${ScreenDpiUtil.getDefaultDpi()}"
-            }, lParams(matchParent, wrapContent) {
-                topMargin = dip(10)
-                horizontalMargin = dip(10)
-            })
-            addView(textView {
-                text = "当前应用内DPI修改："
-            }, lParams(matchParent, wrapContent) {
-                horizontalMargin = dip(10)
-            })
-            addView(dipEditText, lParams(matchParent, wrapContent) {
-                horizontalMargin = dip(10)
-            })
-
-            addView(textView {
-                text = "系统默认字体缩放：${ScreenDpiUtil.getDefaultFontScale()}"
-            }, lParams(matchParent, wrapContent) {
-                topMargin = dip(10)
-                horizontalMargin = dip(10)
-            })
-            addView(textView {
-                text = "当前字体缩放修改："
-            }, lParams(matchParent, wrapContent) {
-                horizontalMargin = dip(10)
-            })
-            addView(fontScaleEditText, lParams(matchParent, wrapContent) {
-                horizontalMargin = dip(10)
-            })
-
-
-            addView(view<MaterialButton> {
-                text = "确认修改"
-                backgroundColor = activity.themeDelegate.themeColor.toInt()
-                textColorResource = R.color.white
-
-                setOnClickListener {
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(
+                onClick = {
                     try {
-                        val dipStr = dipEditText.text.toString()
-                        val dpi = dipStr.toInt()
-                        val fontScaleStr = fontScaleEditText.text.toString()
-                        val fontScale = fontScaleStr.toFloat()
-                        activity.setCustomConfiguration(dpi, fontScale)
+                        val dpi = dpiText.value.toInt()
+                        val fontScale = fontScaleText.value.toFloat()
+                        onConfirm(dpi, fontScale)
                     } catch (ex: NumberFormatException) {
                         PopTip.show("请输入整数")
                     }
-                }
-            }, lParams(matchParent, wrapContent) {
-                horizontalMargin = dip(10)
-                bottomMargin = dip(10)
-            })
-        }.wrapInScrollView(height = ViewGroup.LayoutParams.MATCH_PARENT) {
-            backgroundColor = config.windowBackgroundColor
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(text = "确认修改")
+            }
+            Spacer(modifier = Modifier.height(10.dp))
         }
-
     }
-
 }

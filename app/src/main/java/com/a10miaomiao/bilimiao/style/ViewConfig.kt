@@ -8,8 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.attr
-import splitties.dimensions.dip
-import splitties.views.dsl.core.matchParent
+import com.a10miaomiao.bilimiao.comm.utils.dip
 
 class ViewConfig(val context: Context) {
     val pagePadding = context.dip(10)
