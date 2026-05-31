@@ -746,7 +746,7 @@ private fun BangumiDetailPageContent(
                     ),
                 onClick = {
                     scope.launch {
-                        chainScrollableLayoutState.scrollToMax()
+                        chainScrollableLayoutState.scrollToCollapsed()
                         val (section, index) = viewModel.findSectionEpisodeIndex(
                             it.last_ep_id
                         )
