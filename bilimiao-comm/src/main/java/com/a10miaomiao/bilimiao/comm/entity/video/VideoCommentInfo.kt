@@ -5,7 +5,6 @@ data class VideoCommentInfo(
     val blacklist: Int,
     val config: Config,
     val page: Page,
-//    val hots: List<VideoCommentReplyInfo>,
     val notice: Any,
     val replies: List<VideoCommentReplyInfo>,
     val root: VideoCommentReplyInfo?,

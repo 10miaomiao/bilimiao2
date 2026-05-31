@@ -513,17 +513,6 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     // end
 
-//    override fun setProgressAndTime(
-//        progress: Long,
-//        secProgress: Long,
-//        currentTime: Long,
-//        totalTime: Long,
-//        forceChange: Boolean
-//    ) {
-//        super.setProgressAndTime(progress, secProgress, currentTime, totalTime, forceChange)
-//        setBottomSubtitleText(currentTime)
-//    }
-
     override fun startProgressTimer() {
         super.startProgressTimer()
         if (subtitleBody.isNotEmpty()) {
