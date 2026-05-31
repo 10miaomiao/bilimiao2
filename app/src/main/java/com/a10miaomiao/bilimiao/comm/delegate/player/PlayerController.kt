@@ -17,6 +17,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuSettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.AutoStopTimerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import com.a10miaomiao.bilimiao.R
@@ -111,6 +112,9 @@ class PlayerController(
         setSendDanmakuButtonOnLongClickListener {
             danmakuSwitchClick(it)
             true
+        }
+        autoStopTimerView.setOnClickListener {
+            activity.openBottomSheet(AutoStopTimerPage())
         }
         videoPlayerCallBack = that
         setGSYVideoProgressListener(that)

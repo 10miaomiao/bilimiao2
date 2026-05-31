@@ -24,14 +24,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.compose.rememberInstance
+import org.kodein.di.instance
 
 @Serializable
 class AutoStopTimerPage : ComposePage() {
@@ -65,9 +65,7 @@ private fun AutoStopTimerPageContent(
         title = "定时关闭"
     )
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val autoStopDuration by viewModel.autoStopDurationFlow.collectAsState()
     var sliderValue by remember(autoStopDuration) { mutableFloatStateOf(autoStopDuration.toFloat()) }
