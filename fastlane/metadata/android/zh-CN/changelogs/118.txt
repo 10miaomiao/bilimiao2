@@ -1,0 +1,6 @@
+1.增加 全面Compose化重构，UI全面迁移至Jetpack Compose
+2.增加 Compose版AppBar多级菜单
+3.增加 独立的定时关闭设置页面
+4.重构 侧滑界面完全Compose化
+5.重构 播放器迁移至Compose侧
+ヽ(=^･ω･^=)丿儿童节快乐
