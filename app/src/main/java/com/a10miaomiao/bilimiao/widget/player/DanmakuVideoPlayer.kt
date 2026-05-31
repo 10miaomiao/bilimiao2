@@ -251,6 +251,7 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
     val speedView: View get() = mPlaySpeed
     val speedValueTextView: View get() = mPlaySpeedValue
     val moreBtn: View get() = mMoreBtn
+    val autoStopTimerView: View get() = mAutoStopTimerTV
 
     // 是否处于锁定状态
     var isLock: Boolean = false
@@ -882,6 +883,25 @@ class DanmakuVideoPlayer : StandardGSYVideoPlayer {
 
     fun setSendDanmakuButtonOnLongClickListener(l: OnLongClickListener) {
         mMiniSendDanmakuIV.setOnLongClickListener(l)
+    }
+
+    /**
+     * 更新定时关闭倒计时显示
+     * @param seconds 剩余秒数，0或负数表示关闭
+     */
+    fun updateAutoStopTimer(seconds: Int) {
+        if (seconds > 0) {
+            val minute = seconds / 60
+            val second = seconds % 60
+            mAutoStopTimerTV.text = if (second == 0) {
+                "${minute}'"
+            } else {
+                "${minute}'${second}\""
+            }
+            mAutoStopTimerTV.visibility = View.VISIBLE
+        } else {
+            mAutoStopTimerTV.visibility = View.GONE
+        }
     }
 
     private var mDialogOffsetText: TextView? = null
