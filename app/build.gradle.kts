@@ -118,7 +118,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.media)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.profileinstaller)
 
@@ -137,9 +136,6 @@ dependencies {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
     implementation(libs.materialkolor)
-
-    //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
-    //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")
 
     implementation(libs.splitties.android.base)
     implementation(libs.splitties.android.base.with.views.dsl)
@@ -170,7 +166,6 @@ dependencies {
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))
     implementation(project(":bilimiao-cover"))
-//    implementation project(":bilimiao-appwidget")
     implementation(project(":bilimiao-compose"))
     // 弹幕引擎
     implementation(project(":DanmakuFlameMaster"))

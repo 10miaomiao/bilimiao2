@@ -9,7 +9,6 @@ lifecycle = "2.8.3"
 navigation = "2.8.0"
 composeBom = "2026.04.01"
 datastore = "1.1.1"
-media = "1.6.0"
 media3 = "1.5.0"
 browser = "1.7.0"
 profileinstaller = "1.3.1"
@@ -29,13 +28,7 @@ materialKolor = "2.0.2"
 microgSafeParcel = "1.7.1"
 
 # ui components
-recyclerview = "1.2.0"
-swiperefreshlayout = "1.1.0"
 constraintlayout = "2.1.4"
-baseRecyclerViewAdapterHelper = "3.0.4"
-flexbox = "3.0.0"
-foregroundCompat = "1.0.2"
-drawer = "1.0.3"
 dialogX = "0.0.50.beta37"
 mojito = "1.8.7"
 # compose additional
@@ -60,9 +53,6 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
-androidx-media = { group = "androidx.media", name = "media", version.ref = "media" }
-androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
-androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 # media3
 androidx-media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
@@ -76,7 +66,6 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
-compose-ui-platform = { group = "androidx.compose.ui", name = "ui-platform" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
@@ -85,14 +74,12 @@ compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", na
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-compose-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 # kotlin libraries
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 # accompanist
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
-accompanist-adaptive = { group = "com.google.accompanist", name = "accompanist-adaptive", version.ref = "accompanist" }
 # dependency injection
 kodein-di = { group = "org.kodein.di", name = "kodein-di-framework-android-x", version.ref = "kodeinDi" }
 kodein-di-compose = { group = "org.kodein.di", name = "kodein-di-framework-compose", version.ref = "kodeinDi" }
@@ -105,14 +92,7 @@ glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "gl
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
 # ui components
 kongzue-dialogx = { group = "com.github.kongzue", name = "DialogX", version.ref = "dialogX" }
-androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
-androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-
-base-recyclerview-adapter-helper = { group = "com.github.CymChad", name = "BaseRecyclerViewAdapterHelper", version.ref = "baseRecyclerViewAdapterHelper" }
-google-android-flexbox = { group = "com.google.android.flexbox", name = "flexbox", version.ref = "flexbox" }
-foreground-compat = { group = "me.zhanghai.android.foregroundcompat", name = "library", version.ref = "foregroundCompat" }
-drakeet-drawer = { group = "com.drakeet.drawer", name = "drawer", version.ref = "drawer" }
 gsy-video-player = { group = "com.github.CarGuo.GSYVideoPlayer", name = "gsyvideoplayer-java", version.ref = "gsyVideoPlayer" }
 mojito = { group = "com.github.mikaelzero.mojito", name = "mojito", version.ref = "mojito" }
 mojito-sketch = { group = "com.github.mikaelzero.mojito", name = "SketchImageViewLoader", version.ref = "mojito" }

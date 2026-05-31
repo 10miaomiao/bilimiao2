@@ -75,7 +75,6 @@ dependencies {
     implementation(libs.compose.navigation)
 
     implementation(libs.accompanist.drawablepainter)
-    implementation(libs.accompanist.adaptive)
     implementation(libs.compose.preference)
     implementation(libs.reorderable)
     implementation(libs.materialkolor)

@@ -109,8 +109,6 @@ dependencies {
     implementation(libs.okhttp3)
     implementation(libs.pbandk.runtime)
 
-    implementation("javax.annotation:javax.annotation-api:1.2")
-
     implementation(project(":DanmakuFlameMaster"))
 
     testImplementation(libs.junit)
