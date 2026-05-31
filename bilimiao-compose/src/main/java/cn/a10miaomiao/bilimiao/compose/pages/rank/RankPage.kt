@@ -22,22 +22,19 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.rank.content.RankListContent
 import com.a10miaomiao.bilimiao.comm.store.RegionStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 
@@ -55,7 +52,6 @@ private class RankPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val regionStore: RegionStore by instance()
 
     val regionNames = mutableStateListOf<String>()
@@ -87,9 +83,7 @@ private fun RankPageContent(
         title = "排行榜"
     )
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val pagerState = rememberPagerState { viewModel.regionIds.size }
     val currentPage = pagerState.currentPage

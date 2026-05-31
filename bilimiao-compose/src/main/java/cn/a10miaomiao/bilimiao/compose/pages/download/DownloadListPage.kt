@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.download
 
 import android.content.ClipData
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -18,13 +22,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -33,14 +36,12 @@ import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -58,7 +59,7 @@ internal class DownloadListPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val context by instance<Context>()
     private val pageNavigation by instance<PageNavigation>()
 
     var downloadListVersion = 0
@@ -71,7 +72,7 @@ internal class DownloadListPageViewModel(
     }
 
     private fun loadDownloadList() = viewModelScope.launch {
-        val service = DownloadService.getService(fragment.requireContext())
+        val service = DownloadService.getService(context)
         downloadPath = service.getDownloadPath()
         _loadDownloadList(service)
         launch {
@@ -193,11 +194,10 @@ internal class DownloadListPageViewModel(
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = uri
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        fragment.requireContext().startActivity(intent)
+        context.startActivity(intent)
     }
 
     fun copyDownloadPathToClipboard() {
-        val context = fragment.requireContext()
         val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", downloadPath))
         // 安卓13(33)以上操作剪切板会自动提示，无需手动toast
@@ -219,16 +219,13 @@ internal fun DownloadListPageContent(
             myMenu {
                 myItem {
                     key = 0
-                    iconFileName = "ic_baseline_lightbulb_24"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Lightbulb
                     title = "提示"
                 }
             }
         }
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
+    val windowInsets = localContentInsets()
 
     var status by remember { mutableStateOf(0) }
     val downloadList by viewModel.downloadList.collectAsState()
@@ -240,7 +237,7 @@ internal fun DownloadListPageContent(
     var showHelpDialog by remember { mutableStateOf(false) }
     PageListener(
         pageConfigId,
-        onMenuItemClick = { _, menuItem ->
+        onMenuItemClick = { menuItem ->
             when(menuItem.key) {
                 0 -> showHelpDialog = true
             }
@@ -346,7 +343,7 @@ internal fun DownloadListPageContent(
             )
         }
         item {
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottom))
         }
     }
 

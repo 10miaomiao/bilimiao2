@@ -1,6 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.pages.time
 
-import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +26,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
@@ -31,7 +33,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -41,12 +43,10 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -105,7 +105,7 @@ private class TimeRegionDetailPageViewModel(
         return timeSettingStore.getRankOrderText()
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.time -> {
                 bottomSheetState.open(TimeSettingPage())
@@ -131,7 +131,7 @@ private fun TimeRegionDetailPageContent(
         menu = rememberMyMenu(timeText, rankOrder) {
             myItem {
                 key = MenuKeys.filter
-                iconFileName = "ic_baseline_filter_list_grey_24"
+                iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                 title = viewModel.getRankOrderText()
                 childMenu = myMenu {
                     checkable = true
@@ -170,9 +170,7 @@ private fun TimeRegionDetailPageContent(
         onMenuItemClick = viewModel::menuItemClick,
     )
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val pagerState = viewModel.pagerState
     val currentPage = pagerState.currentPage

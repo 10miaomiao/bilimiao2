@@ -13,16 +13,16 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 
 class CompletionBoxController(
-    private var activity: AppCompatActivity,
+    private var views: PlayerViews,
     private val delegate: PlayerDelegate2,
     override val di: DI,
 ) : DIAware {
 
-    val completionLayout = activity.findViewById<RelativeLayout>(R.id.completion_layout)
-    val completionText = activity.findViewById<TextView>(R.id.completion_text)
-    val completionTextHold = activity.findViewById<TextView>(R.id.completion_text_hold)
-    val completionRetryBtn = activity.findViewById<MaterialButton>(R.id.completion_retry_btn)
-    val completionCloseBtn = activity.findViewById<MaterialButton>(R.id.completion_close_btn)
+    val completionLayout = views.findViewById<RelativeLayout>(R.id.completion_layout)
+    val completionText = views.findViewById<TextView>(R.id.completion_text)
+    val completionTextHold = views.findViewById<TextView>(R.id.completion_text_hold)
+    val completionRetryBtn = views.findViewById<MaterialButton>(R.id.completion_retry_btn)
+    val completionCloseBtn = views.findViewById<MaterialButton>(R.id.completion_close_btn)
 
     init {
         initCompletionBox()

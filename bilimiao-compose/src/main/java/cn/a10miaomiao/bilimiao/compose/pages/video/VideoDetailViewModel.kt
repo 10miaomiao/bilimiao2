@@ -5,7 +5,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.view.View
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -548,7 +547,7 @@ class VideoDetailViewModel(
         clipboard.setPrimaryClip(clip)
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         val videoDetail = detailData.value ?: return
         val videoArc = videoDetail.getArcData() ?: return
         val viewPages = videoDetail.getPages()

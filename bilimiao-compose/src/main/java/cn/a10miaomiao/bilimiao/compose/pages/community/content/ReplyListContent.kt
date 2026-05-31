@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.community.content
 
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
@@ -59,13 +63,13 @@ fun ReplyListContent(
             menu = rememberMyMenu(sortOrder) {
                 myItem {
                     key = MenuKeys.send
-                    iconFileName = "ic_baseline_send_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Send
                     title = "发布评论"
                 }
                 val sortOrderList = viewModel.sortOrderList
                 myItem {
                     key = MenuKeys.sort
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     title = sortOrderList
                         .find { it.first == sortOrder }
                         ?.second ?: "排序"

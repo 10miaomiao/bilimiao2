@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.mutableStateOf
@@ -218,7 +217,7 @@ class UserSpaceViewModel(
         ))
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             // 取消屏蔽
             1 -> filterUpperDelete()

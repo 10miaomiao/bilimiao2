@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -63,7 +63,6 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -79,7 +78,6 @@ import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 @Serializable
 class SMSLoginPage : ComposePage() {
@@ -298,10 +296,7 @@ private fun SMSLoginPageCompose(
 ) {
     PageConfig(title = "手机号登录")
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
+    val windowInsets = localContentInsets()
 
     val selectedCid by viewModel.selectedCid.collectAsState()
     val telNumber by viewModel.telNumber.collectAsState()
@@ -422,7 +417,7 @@ private fun SMSLoginPageCompose(
                     text = "登录"
                 )
             }
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottom))
         }
     }
 

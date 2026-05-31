@@ -1,6 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -18,6 +21,7 @@ import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -29,7 +33,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -44,7 +47,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -52,9 +54,10 @@ import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -70,8 +73,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.compose.rememberInstance
@@ -101,9 +102,7 @@ private fun UserSpacePageContent(
     viewModel: UserSpaceViewModel,
     archiveViewModel: UserArchiveViewModel,
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailData = viewModel.detailData.collectAsState().value
 //    val slideDistance = LocalDensity.current.run {
@@ -168,7 +167,7 @@ private fun UserSpacePageLoadingContent(
 private fun UserSpacePageDetailContent(
     viewModel: UserSpaceViewModel,
     archiveViewModel: UserArchiveViewModel,
-    windowInsets: Insets,
+    windowInsets: ContentInsets,
     detailData: SpaceInfo,
 ) {
     val isFollow = viewModel.isFollow.collectAsState().value
@@ -178,7 +177,7 @@ private fun UserSpacePageDetailContent(
         menu = rememberMyMenu(isFollow, viewModel.isFiltered, viewModel.currentPage, rankOrder) {
             myItem {
                 key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 title = "更多"
                 childMenu = myMenu {
                     if (!viewModel.isSelf) {
@@ -216,7 +215,7 @@ private fun UserSpacePageDetailContent(
                         "click" -> "最多播放"
                         else -> "排序"
                     }
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     childMenu = myMenu {
                         checkable = true
                         checkedKey = when(rankOrder) {
@@ -240,17 +239,17 @@ private fun UserSpacePageDetailContent(
             myItem {
                 key = MenuKeys.search
                 title = "搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
                 action = MenuActions.search
             }
             if (!viewModel.isSelf) {
                 myItem {
                     key = MenuKeys.follow
                     if (isFollow) {
-                        iconFileName = "ic_baseline_favorite_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Favorite
                         title = "已关注"
                     } else {
-                        iconFileName = "ic_outline_favorite_border_24"
+                        iconVector = androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                         title = "关注"
                     }
                 }
@@ -276,8 +275,7 @@ private fun UserSpacePageDetailContent(
     val isLargeScreen = remember(maxHeaderSize.value.first) {
         density.run { maxHeaderSize.value.first.toDp() } > 600.dp
     }
-    val scrollableState = rememberScrollState()
-
+    val headerScrollableState = rememberScrollableState { 0f }
     val scope = rememberCoroutineScope()
     val emitter = localEmitter()
 
@@ -285,21 +283,18 @@ private fun UserSpacePageDetailContent(
         modifier = Modifier.fillMaxSize(),
         state = chainScrollableLayoutState,
     ) { state ->
-        val alpha = (state.maxPx + state.getOffsetYValue()) / state.maxPx
+        val alpha = (1f - state.getHeightOffset() / state.maxCollapsiblePx).coerceIn(0f, 1f)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset {
                     IntOffset(
                         0,
-                        state
-                            .getOffsetYValue()
-                            .roundToInt()
+                        (-state.getHeightOffset()).roundToInt()
                     )
                 }
                 .background(MaterialTheme.colorScheme.background)
-                .nestedScroll(state.nestedScroll)
-                .scrollable(scrollableState, Orientation.Vertical),
+                .scrollable(headerScrollableState, Orientation.Vertical),
         ) {
             UserSpaceHeader(
                 modifier = Modifier
@@ -336,7 +331,7 @@ private fun UserSpacePageDetailContent(
                 .offset {
                     IntOffset(
                         0,
-                        (state.maxPx + state.getOffsetYValue()).roundToInt()
+                        (state.maxPx - state.getHeightOffset()).roundToInt()
                     )
                 },
         ) {
@@ -348,8 +343,7 @@ private fun UserSpacePageDetailContent(
                         start = windowInsets.leftDp.dp,
                         end = windowInsets.rightDp.dp,
                     )
-                    .nestedScroll(state.nestedScroll)
-                    .scrollable(scrollableState, Orientation.Vertical),
+                    .scrollable(headerScrollableState, Orientation.Vertical),
                 selectedTabIndex = viewModel.pagerState.currentPage,
                 indicator = { positions ->
                     TabRowDefaults.PrimaryIndicator(

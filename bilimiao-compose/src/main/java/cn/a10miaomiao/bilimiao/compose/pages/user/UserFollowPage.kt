@@ -1,22 +1,21 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import android.app.Activity
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -35,16 +34,15 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 
@@ -68,9 +66,7 @@ private class UserFollowPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
     private val pageNavigation by instance<PageNavigation>()
-    private val activity by instance<Activity>()
     private val userStore by instance<UserStore>()
 
     var mid = "0"
@@ -218,9 +214,7 @@ private fun UserFollowPageContent(
     viewModel: UserFollowPageViewModel,
 ) {
     val userStore: UserStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
+    val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()
     val listLoading by viewModel.list.loading.collectAsState()
@@ -242,7 +236,7 @@ private fun UserFollowPageContent(
             myMenu {
                 myItem {
                     key = 1
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     title = viewModel.orderTypeToNameMap[orderType]
                     childMenu = myMenu {
                         checkable = true
@@ -260,7 +254,7 @@ private fun UserFollowPageContent(
     )
     PageListener(
         pageConfigId,
-        onMenuItemClick = fun(_, item) {
+        onMenuItemClick = fun(item) {
             val key = item.key ?: return
             if (item.key in orderTypeToNameMap.keys.indices) {
                 val value = orderTypeToNameMap.keys.elementAt(key)
@@ -359,7 +353,7 @@ private fun UserFollowPageContent(
             ) {
                 ListStateBox(
                     modifier = Modifier.padding(
-                        bottom = windowInsets.bottomDp.dp
+                        bottom = windowInsets.bottom
                     ),
                     loading = listLoading,
                     finished = listFinished,

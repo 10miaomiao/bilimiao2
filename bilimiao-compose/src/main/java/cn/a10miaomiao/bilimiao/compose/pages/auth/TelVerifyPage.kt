@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
@@ -11,13 +12,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
@@ -35,7 +34,6 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -46,7 +44,6 @@ import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -330,10 +327,7 @@ private fun TelVerifyPageCompose(
 ) {
     PageConfig(title = "帐号验证")
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
+    val windowInsets = localContentInsets()
 
     val verifyType by viewModel.verifyType.collectAsState()
     val tmpAccountInfo by viewModel.tmpAccountInfo.collectAsState()
@@ -472,7 +466,7 @@ private fun TelVerifyPageCompose(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
+            Spacer(modifier = Modifier.height(windowInsets.bottom))
         }
     }
 

@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.video.content
 
 import android.net.Uri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -102,7 +106,7 @@ fun VideoDetailContent(
             menu = rememberMyMenu(listPosition, videoReqUser.favorite, videoStat?.share) {
                 myItem {
                     key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     title = "更多"
                     childMenu = myMenu {
                         myItem {
@@ -134,22 +138,22 @@ fun VideoDetailContent(
                 }
                 myItem {
                     key = MenuKeys.download
-                    iconFileName = "ic_arrow_downward_gray_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.ArrowDownward
                     title = "下载"
                 }
                 myItem {
                     key = MenuKeys.favourite
                     if (videoReqUser.favorite == 1) {
-                        iconFileName = "ic_baseline_star_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Star
                         title = "已收藏"
                     } else {
-                        iconFileName = "ic_baseline_star_outline_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.StarOutline
                         title = "收藏"
                     }
                 }
                 myItem {
                     key = MenuKeys.add
-                    iconFileName = "ic_add_white_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Add
                     title = "添加至"
                     childMenu = myMenu {
                         if (listPosition != -1) {

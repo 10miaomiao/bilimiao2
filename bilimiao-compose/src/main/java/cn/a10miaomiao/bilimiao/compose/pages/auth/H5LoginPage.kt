@@ -27,14 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.BiliJsBridge
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -50,7 +50,6 @@ import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -59,7 +58,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 
@@ -97,7 +95,7 @@ private class H5LoginPageViewModel(
             |disable_rcmd/0
         """.trimMargin().replace("\n", "")
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val userStore by instance<UserStore>()
     private val pageNavigation by instance<PageNavigation>()
     private val messageDialog by instance<MessageDialogState>()
@@ -147,7 +145,7 @@ private class H5LoginPageViewModel(
         }
         val userAgent = "$defaultUserAgentString $userAgent"
         view.settings.userAgentString = userAgent
-        val biliJsBridge = BiliJsBridge(fragment, pageNavigation, view)
+        val biliJsBridge = BiliJsBridge(hostBridge, pageNavigation, view)
         view.addJavascriptInterface(biliJsBridge, "_BiliJsBridge")
     }
 
@@ -359,9 +357,7 @@ private fun H5LoginPageContent(
     PageConfig(
         title = viewModel.pageTitle.value,
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     Box(
         modifier = Modifier
@@ -372,7 +368,7 @@ private fun H5LoginPageContent(
                 .padding(
                     windowInsets.addPaddingValues(
                         addTop = if (viewModel.hideNavbar.value) -windowInsets.topDp.dp else 0.dp,
-                        addBottom = windowStore.bottomAppBarHeightDp.dp
+                        addBottom = 0.dp
                     )
                 ),
             factory = {

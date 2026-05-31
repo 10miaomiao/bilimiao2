@@ -1,12 +1,12 @@
 package cn.a10miaomiao.bilimiao.compose.common.mypage
 
-import android.content.Context
-import android.view.View
 import androidx.compose.runtime.*
+import com.a10miaomiao.bilimiao.comm.mypage.MenuActions
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPage
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,14 +15,18 @@ import kotlinx.coroutines.flow.debounce
 
 private var _configId = 0
 interface OnMyPageListener {
-    fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo)
-    fun onSearchSelfPage(context: Context, keyword: String)
+    fun onMenuItemClick(menuItem: MenuItemPropInfo)
+    fun onSearchSelfPage(keyword: String)
 }
 
 class PageConfigState {
     private val configFlow = MutableStateFlow(Cofing(-1))
     private val configList = mutableListOf<Cofing>()
     private val listenerMap = mutableMapOf<Int, OnMyPageListener>()
+
+    var openSearch: (() -> Unit)? = null
+
+    val currentConfig: Cofing get() = configFlow.value
 
     fun addConfig(id: Int, configBuilder: (Cofing) -> Unit) {
         configList.add(Cofing(id).apply(configBuilder))
@@ -59,16 +63,20 @@ class PageConfigState {
         listenerMap.remove(id)
     }
 
-    fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
+    fun onMenuItemClick(menuItem: MenuItemPropInfo) {
+        if (menuItem.action == MenuActions.search) {
+            openSearch?.invoke()
+            return
+        }
         val id = configFlow.value.id
         val listener = listenerMap[id] ?: return
-        listener.onMenuItemClick(view, menuItem)
+        listener.onMenuItemClick(menuItem)
     }
 
-    fun onSearchSelfPage(context: Context, keyword: String) {
+    fun onSearchSelfPage(keyword: String) {
         val id = configFlow.value.id
         val listener = listenerMap[id] ?: return
-        listener.onSearchSelfPage(context, keyword)
+        listener.onSearchSelfPage(keyword)
     }
 
     class Cofing(
@@ -112,7 +120,7 @@ fun PageConfig(
 fun PageListener(
     configId: Int,
     onSearchSelfPage: ((keyword: String) -> Unit)? = null,
-    onMenuItemClick: ((view: View, menuItem: MenuItemPropInfo) -> Unit)? = null
+    onMenuItemClick: ((menuItem: MenuItemPropInfo) -> Unit)? = null
 ) {
     val pageConfigInfo = LocalPageConfigState.current
     if (configId == -1 || pageConfigInfo == null) {
@@ -120,11 +128,11 @@ fun PageListener(
     }
     DisposableEffect(configId, onSearchSelfPage, onMenuItemClick) {
         val listener = object : OnMyPageListener {
-            override fun onMenuItemClick(view: View, menuItem: MenuItemPropInfo) {
-                onMenuItemClick?.invoke(view, menuItem)
+            override fun onMenuItemClick(menuItem: MenuItemPropInfo) {
+                onMenuItemClick?.invoke(menuItem)
             }
 
-            override fun onSearchSelfPage(context: Context, keyword: String) {
+            override fun onSearchSelfPage(keyword: String) {
                 onSearchSelfPage?.invoke(keyword)
             }
         }

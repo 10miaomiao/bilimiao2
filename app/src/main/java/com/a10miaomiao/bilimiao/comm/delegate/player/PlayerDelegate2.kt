@@ -63,11 +63,9 @@ import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
-import com.a10miaomiao.bilimiao.widget.scaffold.getScaffoldView
 import com.google.common.util.concurrent.MoreExecutors
 import com.kongzue.dialogx.dialogs.PopTip
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
@@ -84,29 +82,29 @@ import java.net.UnknownHostException
 
 class PlayerDelegate2(
     private var activity: AppCompatActivity,
+    val views: PlayerViews,
+    val scaffoldApp: PlayerHostState,
     override val di: DI,
 ) : BasePlayerDelegate, DIAware, ExoMediaSourceInterceptListener {
 
     val DEFAULT_REFERER = "https://www.bilibili.com/"
     val DEFAULT_USER_AGENT = "Bilibili Freedoooooom/MarkII"
 
-    val views by lazy { PlayerViews(activity) }
     val controller by lazy {
         PlayerController(activity, this, playerCoroutineScope, di)
     }
     val errorMessageBoxController by lazy {
-        ErrorMessageBoxController(activity, this, di)
+        ErrorMessageBoxController(views, this, di)
     }
     val areaLimitBoxController by lazy {
-        AreaLimitBoxController(activity, this, di)
+        AreaLimitBoxController(views, this, di)
     }
     val completionBoxController by lazy {
-        CompletionBoxController(activity, this, di)
+        CompletionBoxController(views, this, di)
     }
     val loadingBoxController by lazy {
-        LoadingBoxController(activity, this)
+        LoadingBoxController(views, this)
     }
-    val scaffoldApp by lazy { activity.getScaffoldView() }
 
     var picInPicHelper: PicInPicHelper? = null
         private set
@@ -114,7 +112,6 @@ class PlayerDelegate2(
     private val userStore by instance<UserStore>()
     private val playerStore by instance<PlayerStore>()
     private val userLibraryStore by instance<UserLibraryStore>()
-    private val windowStore by instance<WindowStore>()
     private val themeDelegate by instance<ThemeDelegate>()
 
     var playerSourceInfo: PlayerSourceInfo? = null

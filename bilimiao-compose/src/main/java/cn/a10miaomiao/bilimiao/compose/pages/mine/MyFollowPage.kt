@@ -1,5 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,8 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,7 +43,6 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -54,13 +56,12 @@ import cn.a10miaomiao.bilimiao.compose.pages.mine.content.TagFollowContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.MessageDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
+import org.kodein.di.bindSingleton
 import org.kodein.di.compose.subDI
 
 @Serializable
@@ -84,9 +85,7 @@ class MyFollowPage() : ComposePage() {
 private fun MyFollowPageContent() {
     val viewModel: MyFollowViewModel by rememberInstance()
     val userStore: UserStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(LocalView.current)
+    val windowInsets = localContentInsets()
 
     val tagList by viewModel.tagList.data.collectAsState()
     val tagListLoading by viewModel.tagList.loading.collectAsState()
@@ -110,7 +109,7 @@ private fun MyFollowPageContent() {
                 ) {
                     myItem {
                         key = MenuKeys.more
-                        iconFileName = "ic_more_vert_grey_24dp"
+                        iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                         title = "更多"
                         childMenu = myMenu {
                             myItem {
@@ -126,12 +125,12 @@ private fun MyFollowPageContent() {
                 }
                 myItem {
                     key = MenuKeys.search
-                    iconFileName = "ic_search_gray"
+                    iconVector = androidx.compose.material.icons.Icons.Default.Search
                     title = "搜索"
                 }
                 myItem {
                     key = MenuKeys.filter
-                    iconFileName = "ic_baseline_filter_list_grey_24"
+                    iconVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Sort
                     title = viewModel.orderTypeToNameMap[orderType]
                     childMenu = myMenu {
                         checkable = true
@@ -151,7 +150,7 @@ private fun MyFollowPageContent() {
     PageListener(
         configId = pageConfigId,
         onMenuItemClick = remember(currentPage, tagList) {
-            { _, item ->
+            { item ->
                 when (item.key) {
                     in orderTypeToNameMap.keys.indices -> {
                         val value = orderTypeToNameMap.keys.elementAt(item.key!!)

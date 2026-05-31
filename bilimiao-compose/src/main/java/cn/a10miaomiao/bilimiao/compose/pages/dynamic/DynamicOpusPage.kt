@@ -1,8 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import android.net.Uri
-import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -36,9 +33,10 @@ import bilibili.app.dynamic.v2.OpusItem
 import bilibili.app.dynamic.v2.Paragraph
 import bilibili.app.dynamic.v2.PicParagraph
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.community.ReplyItemBox
@@ -53,8 +51,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
-import com.a10miaomiao.bilimiao.store.WindowStore.Insets
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,8 +82,6 @@ private class DynamicOpusPageViewModel(
     val dynId: String,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
-    val activity: AppCompatActivity by instance()
     val userStore: UserStore by instance()
 
     private val _loading = MutableStateFlow(false);
@@ -135,7 +129,7 @@ private class DynamicOpusPageViewModel(
         }
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
         }
     }
@@ -146,9 +140,7 @@ private class DynamicOpusPageViewModel(
 private fun DynamicOpusPageContent(
     viewModel: DynamicOpusPageViewModel
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailData = viewModel.detailData.collectAsState().value
 
@@ -209,7 +201,7 @@ private fun DynamicDetailPageLoadingContent(
 @Composable
 private fun DynamicDetailPageDetailContent(
     viewModel: DynamicOpusPageViewModel,
-    windowInsets: Insets,
+    windowInsets: ContentInsets,
     detailData: OpusItem,
 ) {
     val oid = detailData.oid.toString()

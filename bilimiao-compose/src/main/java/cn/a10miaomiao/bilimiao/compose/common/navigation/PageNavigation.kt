@@ -6,7 +6,6 @@ import androidx.annotation.MainThread
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavDestination
@@ -51,9 +50,15 @@ class PageNavigation(
         navigate(route, navOptions(builder))
     }
 
-    fun popBackStack() {
-        if (!hostController.popBackStack()) {
-            onClose()
+    fun canPopBackStack(): Boolean {
+        return hostController.previousBackStackEntry != null
+    }
+
+    fun popBackStack(): Boolean {
+        return hostController.popBackStack().also {
+            if (!it) {
+                onClose()
+            }
         }
     }
 

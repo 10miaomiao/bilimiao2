@@ -1,6 +1,10 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.foundation.combinedTabDoubleClick
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -37,12 +41,10 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSearchDynamicConte
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenuItem
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -115,7 +117,7 @@ private fun UserSpaceSearchPageContent(
             myItem {
                 key = MenuKeys.search
                 title = "继续搜索"
-                iconFileName = "ic_search_gray"
+                iconVector = androidx.compose.material.icons.Icons.Default.Search
             }
         },
         search = SearchConfigInfo(
@@ -123,9 +125,7 @@ private fun UserSpaceSearchPageContent(
             keyword = keyword,
         )
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { viewModel.tabs.size })

@@ -1,8 +1,11 @@
 package cn.a10miaomiao.bilimiao.compose.pages.lyric
 
 import android.app.Activity
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.util.Base64
-import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +44,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.pages.lyric.lib.KrcText
@@ -52,7 +57,6 @@ import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -400,17 +404,17 @@ internal class LyricPageViewModel(
         }
     }
 
-    fun menuItemClick(view: View, menuItem: MenuItemPropInfo){
+    fun menuItemClick(menuItem: MenuItemPropInfo){
         when (menuItem.key) {
             1 -> {
                 if(source.value.isEmpty()){
                     PopTip.show("无歌词源")
                 } else {
-                    LyricSourcePopupMenu(activity,this).show(view)
+                    LyricSourcePopupMenu(activity,this).show(activity.window.decorView)
                 }
             }
             2 -> {
-                LyricOffsetPopupMenu(activity,this).show(view)
+                LyricOffsetPopupMenu(activity,this).show(activity.window.decorView)
             }
         }
     }
@@ -437,9 +441,8 @@ fun Preview(){
 internal fun LyricPageContent(viewModel: LyricPageViewModel){
 
     val playerStore: PlayerStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
     val playerState = playerStore.stateFlow.collectAsState().value
-    val windowState = windowStore.stateFlow.collectAsState().value
+    val windowInsets = localContentInsets()
     val lyric = viewModel.lyric.collectAsState().value
     val offset = viewModel.offset.collectAsState().value
     val title = viewModel.lyricTitle.collectAsState().value
@@ -461,10 +464,14 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
     }
     val scrollState= rememberLazyListState()
     val conf = LocalConfiguration.current
+    val density = LocalDensity.current
     var canvasHeight by remember { mutableFloatStateOf(0f) }
-    val spacerHeight = remember(canvasHeight,windowState.contentInsets.bottom){
+    val bottomInsetPx = remember(windowInsets.bottom, density) {
+        with(density) { windowInsets.bottom.toPx() }
+    }
+    val spacerHeight = remember(canvasHeight, bottomInsetPx, conf.densityDpi) {
         derivedStateOf {
-            ((canvasHeight-windowState.contentInsets.bottom)/2*160/conf.densityDpi).toInt()-50
+            ((canvasHeight - bottomInsetPx) / 2 * 160 / conf.densityDpi).toInt() - 50
         }
     }
     LaunchedEffect(playerState.mainTitle){
@@ -498,7 +505,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                 }
             }
             item {
-                Spacer(modifier = Modifier.height(spacerHeight.value.dp + windowState.contentInsets.bottomDp.dp))
+                Spacer(modifier = Modifier.height(spacerHeight.value.dp + windowInsets.bottom))
             }
         }
     }
@@ -520,7 +527,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                 myItem {
                     key = 1
                     this.title = "歌词源"
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 }
                 myItem {
                     key = 2
@@ -531,7 +538,7 @@ internal fun LyricPageContent(viewModel: LyricPageViewModel){
                     }else {
                         String.format("%.1f",offset/1000f) + 's'
                     }
-                    iconFileName = "ic_history_gray_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.History
                 }
             }
         }

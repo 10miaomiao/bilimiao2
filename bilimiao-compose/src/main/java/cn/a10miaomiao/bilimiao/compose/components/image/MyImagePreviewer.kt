@@ -4,68 +4,79 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.view.View
-import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
-import androidx.fragment.app.FragmentActivity
-import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
-import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
+import cn.a10miaomiao.bilimiao.compose.components.image.previewer.defaultPreviewBackground
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerState
-import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
-import cn.a10miaomiao.bilimiao.compose.components.image.viewer.AnyComposable
-import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.PreviewerState
-import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
-import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
-import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
-import com.a10miaomiao.bilimiao.comm.mypage.myMenu
+import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.TransformLayerScope
 import com.a10miaomiao.bilimiao.comm.utils.ImageSaveUtil
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestManager
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.GlideSubcomposition
 import com.bumptech.glide.integration.compose.RequestState
-import com.bumptech.glide.integration.compose.placeholder
-import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.kongzue.dialogx.dialogs.PopTip
 import org.kodein.di.compose.rememberInstance
 import java.io.File
 
 private class MyImagePreviewerController(
-    val activity: FragmentActivity,
+    val activity: Activity,
     val imagePreviewerState: ImagePreviewerState,
 ) {
 
     val isDownloading = mutableStateOf(false)
 
-    fun saveImageFile(
-        imageUrl: String,
-    ) {
+    private fun getCurrentImageUrl(): String {
+        val page = imagePreviewerState.previewerState.currentPage
+        val model = imagePreviewerState.imageModels[page]
+        return model.originalUrl
+    }
+
+    fun saveImageFile() {
+        val imageUrl = getCurrentImageUrl()
         val target = object : CustomTarget<File>() {
             override fun onResourceReady(
                 resource: File,
@@ -93,27 +104,35 @@ private class MyImagePreviewerController(
         isDownloading.value = true
     }
 
-    fun copyImageUrl(imageUrl: String) {
+    fun copyImageUrl() {
+        val imageUrl = getCurrentImageUrl()
         val clipboardManager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipData = ClipData.newPlainText("imageUrl", imageUrl)
         clipboardManager.setPrimaryClip(clipData)
         PopTip.show("图片链接已复制到剪切板")
     }
 
-    fun shareImage(imageUrl: String) {
+    fun shareImage() {
+        val imageUrl = getCurrentImageUrl()
         val target = object : CustomTarget<File>() {
             override fun onResourceReady(
                 resource: File,
                 transition: Transition<in File>?
             ) {
                 if (isDownloading.value) {
-
+                    val uri = ImageSaveUtil.getImageUri(activity, resource)
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "image/*"
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    activity.startActivity(Intent.createChooser(shareIntent, "分享图片"))
                     isDownloading.value = false
                 }
             }
 
             override fun onLoadCleared(placeholder: Drawable?) {
-                PopTip.show("原图下载失败")
+                PopTip.show("图片加载失败")
                 isDownloading.value = false
             }
         }
@@ -122,22 +141,6 @@ private class MyImagePreviewerController(
             .load(imageUrl)
             .into(target)
         isDownloading.value = true
-    }
-
-    fun menuItemClick(view: View, menuItem: MenuItemPropInfo) {
-        val page = imagePreviewerState.previewerState.currentPage
-        val model = imagePreviewerState.imageModels[page]
-        when (menuItem.key) {
-            MenuKeys.save -> {
-                saveImageFile(model.originalUrl)
-            }
-            1 -> {
-                copyImageUrl(model.originalUrl)
-            }
-            2 -> {
-                shareImage(model.originalUrl)
-            }
-        }
     }
 
     fun cancelDownloading() {
@@ -151,39 +154,14 @@ fun MyImagePreviewer(
     imagePreviewerState: ImagePreviewerState,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val activity: FragmentActivity by rememberInstance()
+    val activity: Activity by rememberInstance()
     val controller = remember(imagePreviewerState) {
         MyImagePreviewerController(activity, imagePreviewerState)
     }
-    val pageConfigId = PageConfig(
-        title = "查看图片",
-        menu = rememberMyMenu {
-            myItem {
-                key = MenuKeys.more
-                title = "更多"
-                iconFileName = "ic_more_vert_grey_24dp"
-                childMenu = myMenu {
-                    myItem {
-                        key = 1
-                        title = "复制图片链接"
-                    }
-//                    myItem {
-//                        key = 2
-//                        title = "分享图片"
-//                    }
-                }
-            }
-            myItem {
-                key = MenuKeys.save
-                title = "保存图片"
-                iconFileName = "ic_baseline_save_24"
-            }
-        }
-    )
-    PageListener(
-        configId = pageConfigId,
-        onMenuItemClick = controller::menuItemClick,
-    )
+    var showMoreMenu by remember { mutableStateOf(false) }
+
+    val windowInsets = WindowInsets.safeDrawing
+
     ImagePreviewer(
         contentPadding = contentPadding,
         state = imagePreviewerState.previewerState,
@@ -202,7 +180,76 @@ fun MyImagePreviewer(
                 painterState.value,
                 Size(model.width, model.height)
             )
-        }
+        },
+        previewerLayer = TransformLayerScope(
+            background = defaultPreviewBackground,
+            foreground = {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(
+                            WindowInsets.safeDrawing
+                                .only(WindowInsetsSides.Bottom + WindowInsetsSides.End)
+                                .asPaddingValues()
+                        )
+                        .padding(bottom = 40.dp),
+                    contentAlignment = Alignment.BottomEnd,
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .clip(MaterialTheme.shapes.extraLarge)
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CapsuleIconButton(
+                            icon = Icons.Default.Download,
+                            contentDescription = "保存图片",
+                            onClick = controller::saveImageFile,
+                        )
+                        Box() {
+                            CapsuleIconButton(
+                                icon = Icons.Default.MoreVert,
+                                contentDescription = "更多",
+                                onClick = { showMoreMenu = true },
+                            )
+                            DropdownMenu(
+                                expanded = showMoreMenu,
+                                onDismissRequest = { showMoreMenu = false },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("复制图片链接") },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        controller.copyImageUrl()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.ContentCopy,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                )
+//                                DropdownMenuItem(
+//                                    text = { Text("分享图片") },
+//                                    onClick = {
+//                                        showMoreMenu = false
+//                                        controller.shareImage()
+//                                    },
+//                                    leadingIcon = {
+//                                        Icon(
+//                                            Icons.Default.Share,
+//                                            contentDescription = null,
+//                                        )
+//                                    },
+//                                )
+                            }
+                        }
+                    }
+                }
+            },
+        ),
     )
     if (controller.isDownloading.value) {
         AlertDialog(
@@ -218,6 +265,25 @@ fun MyImagePreviewer(
             text = {
                 LinearProgressIndicator()
             }
+        )
+    }
+}
+
+@Composable
+private fun CapsuleIconButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    onClick: () -> Unit,
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.size(40.dp),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(24.dp),
         )
     }
 }

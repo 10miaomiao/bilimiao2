@@ -1,6 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import android.view.View
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -34,7 +37,7 @@ import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
@@ -49,12 +52,11 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import org.kodein.di.compose.rememberInstance
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserFavouritePage(
@@ -77,10 +79,8 @@ private fun UserFavouritePageContent(
     type: String = "created"
 ) {
     val userStore: UserStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
     val playerStore: PlayerStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
     val saveableStateHolder = rememberSaveableStateHolder()
     val listData = viewModel.createdList.data.collectAsState().value
     val openMediaDetail = viewModel.openedMedia.collectAsState().value
@@ -105,7 +105,7 @@ private fun UserFavouritePageContent(
         }
     }
 
-    fun menuItemClick(view: View, item: MenuItemPropInfo) {
+    fun menuItemClick(item: MenuItemPropInfo) {
         if (item.key == MenuKeys.add) {
             showAddDialog = true
         }
@@ -116,13 +116,13 @@ private fun UserFavouritePageContent(
         menu = rememberMyMenu {
             myItem {
                 key = MenuKeys.more
-                iconFileName = "ic_more_vert_grey_24dp"
+                iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                 title = "更多"
                 childMenu = myMenu {
                     myItem {
                         key = MenuKeys.add
                         title = "新建收藏夹"
-                        iconFileName = "ic_add_white_24dp"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Add
                     }
                 }
             }

@@ -3,9 +3,6 @@ package cn.a10miaomiao.bilimiao.compose.components.start
 import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -62,6 +60,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowWidthSizeClass
 import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
@@ -76,12 +76,9 @@ import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.rememberInstance
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SearchInputInline(
     modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     initKeyword: String,
     initMode: Int,
     pageSearchMethod: PageSearchMethod?,
@@ -94,14 +91,21 @@ fun SearchInputInline(
     val pageNavigation: PageNavigation by rememberInstance()
     val activity: Activity by rememberInstance()
 
-    var text by remember { mutableStateOf(initKeyword) }
+    var text by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = initKeyword,
+                selection = TextRange(initKeyword.length)
+            )
+        )
+    }
     var mode by remember { mutableStateOf(initMode) }
     val focusRequester = remember { FocusRequester() }
     var isEditingHistory by remember { mutableStateOf(false) }
 
-    LaunchedEffect(text) {
-        viewModel.loadSuggestData(text, text)
-        if (text.isNotEmpty()) {
+    LaunchedEffect(text.text) {
+        viewModel.loadSuggestData(text.text, text.text)
+        if (text.text.isNotEmpty()) {
             isEditingHistory = false
         }
     }
@@ -154,15 +158,7 @@ fun SearchInputInline(
     ) {
         MiaoOutlinedCard(
             modifier = Modifier
-                .fillMaxWidth()
-                .run {
-                    with(sharedTransitionScope) {
-                        sharedElement(
-                            rememberSharedContentState(key = "search"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        )
-                    }
-                },
+                .widthIn(max = 400.dp),
             enabled = false,
         ) {
             val historySuggestList by viewModel.historyListFlow.collectAsState()
@@ -176,7 +172,7 @@ fun SearchInputInline(
             val showSuggestList by remember {
                 derivedStateOf {
                     when {
-                        text.isEmpty() -> historySuggestList
+                        text.text.isEmpty() -> historySuggestList
                         else -> suggestList
                     }.let {
                         if (isCompact) it.asReversed() else it
@@ -199,8 +195,8 @@ fun SearchInputInline(
                     modifier = Modifier
                         .fillMaxWidth(),
                     isCompact = false,
-                    text = text,
-                    onTextChange = { text = it },
+                    text = text.text,
+                    onTextChange = { text = TextFieldValue(it, TextRange(it.length)) },
                     onSearch = ::startSearch,
                     focusRequester = focusRequester,
                     mode = mode,
@@ -209,7 +205,7 @@ fun SearchInputInline(
                 )
             }
 
-            if (text.isEmpty() && showSuggestList.isNotEmpty()) {
+            if (text.text.isEmpty() && showSuggestList.isNotEmpty()) {
                 Row(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surfaceContainer)
@@ -278,7 +274,7 @@ fun SearchInputInline(
                 ) {
                     showSuggestList.forEach { item: SuggestInfo ->
                         val isHistoryItem = item.type == SearchInputViewModel.SuggestType.HISTORY
-                        if (text.isEmpty() && isHistoryItem && isEditingHistory) {
+                        if (text.text.isEmpty() && isHistoryItem && isEditingHistory) {
                             SuggestionChip(
                                 onClick = {
                                     deleteHistory(item.text)
@@ -327,8 +323,8 @@ fun SearchInputInline(
                     modifier = Modifier
                         .fillMaxWidth(),
                     isCompact = true,
-                    text = text,
-                    onTextChange = { text = it },
+                    text = text.text,
+                    onTextChange = { text = TextFieldValue(it, TextRange(it.length)) },
                     onSearch = ::startSearch,
                     focusRequester = focusRequester,
                     mode = mode,

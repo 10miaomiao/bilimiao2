@@ -30,7 +30,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
@@ -38,7 +38,7 @@ import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.layout.DoubleColumnAutofitLayout
@@ -48,7 +48,6 @@ import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoAdInfo
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -63,7 +62,6 @@ import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.preferenceCategory
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 
@@ -99,15 +97,15 @@ private class AboutPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val activity by instance<Activity>()
     private val pageNavigation by instance<PageNavigation>()
 
-    val applicationIcon: Drawable = with(fragment.requireActivity()) {
+    val applicationIcon: Drawable = with(activity) {
         val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
         applicationInfo.loadIcon(packageManager)
     }
 
-    val versionName: String = with(fragment.requireActivity()) {
+    val versionName: String = with(activity) {
         val packageInfo = packageManager.getPackageInfo(packageName, 0)
         packageInfo.versionName ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo.longVersionCode.toString()
@@ -116,7 +114,7 @@ private class AboutPageViewModel(
         }
     }
 
-    val versionCode: Long = with(fragment.requireActivity()) {
+    val versionCode: Long = with(activity) {
         val packageInfo = packageManager.getPackageInfo(packageName, 0)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo.longVersionCode
@@ -229,7 +227,7 @@ private class AboutPageViewModel(
         val urlRegex = """^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$""".toRegex()
         if (urlRegex.matches(url)) {
             BiliUrlMatcher.toUrlLink(
-                fragment.requireActivity(),
+                activity,
                 url,
             )
             return
@@ -237,7 +235,6 @@ private class AboutPageViewModel(
         runCatching {
             val emailRegex = """^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""".toRegex()
             val intent = Intent(Intent.ACTION_VIEW)
-            val activity = fragment.requireActivity()
             if (emailRegex.matches(url)) {
                 intent.data = Uri.parse("mailto:$url")
             } else {
@@ -255,7 +252,7 @@ private class AboutPageViewModel(
             try {
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse(version.url)
-                fragment.requireActivity().startActivity(intent)
+                activity.startActivity(intent)
             } catch (e: Exception) {
                 PopTip.show("打开失败:" + version.url)
             }
@@ -298,9 +295,7 @@ private fun AboutPageContent(
     PageConfig(
         title = "关于bilimiao"
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val chainScrollableLayoutState = rememberChainScrollableLayoutState(
         maxScrollPosition = 340.dp,
@@ -313,7 +308,7 @@ private fun AboutPageContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface),
         innerPadding = windowInsets.addPaddingValues(
-            addBottom = windowStore.bottomAppBarHeightDp.dp,
+            addBottom = 0.dp,
         ),
         chainScrollableLayoutState = chainScrollableLayoutState,
         leftMaxWidth = 600.dp,

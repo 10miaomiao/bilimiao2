@@ -16,12 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerCard
@@ -29,12 +28,11 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.proxy.BiliUposInfo
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.Serializable
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -147,9 +145,7 @@ internal fun SelectProxyServerPageContent(
         title = "区域限制-选择代理"
     )
     val basePlayerDelegate: BasePlayerDelegate by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val selectedUpos by viewModel.selectedUpos.collectAsState()
     var uposMenuExpanded by remember { mutableStateOf(false) }
@@ -204,7 +200,7 @@ internal fun SelectProxyServerPageContent(
                         modifier = Modifier
                             .height(200.dp)
                             .fillMaxWidth()
-                            .padding(bottom = windowInsets.bottomDp.dp),
+                            .padding(bottom = windowInsets.bottom),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -217,7 +213,7 @@ internal fun SelectProxyServerPageContent(
                         modifier = Modifier
                             .height(50.dp)
                             .fillMaxWidth()
-                            .padding(bottom = windowInsets.bottomDp.dp),
+                            .padding(bottom = windowInsets.bottom),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(

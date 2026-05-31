@@ -1,11 +1,14 @@
 package cn.a10miaomiao.bilimiao.compose.pages.bangumi
 
 import android.content.ClipData
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.View
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
@@ -30,7 +33,7 @@ import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -59,7 +62,6 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.kongzue.dialogx.dialogs.PopTip
@@ -102,7 +104,7 @@ private class BangumiDetailPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
     private val bottomSheetState by instance<BottomSheetState>()
@@ -277,7 +279,7 @@ private class BangumiDetailPageViewModel(
             putExtra(Intent.EXTRA_SUBJECT, "bilibili番剧分享")
             putExtra(Intent.EXTRA_TEXT, "$title https://www.bilibili.com/bangumi/play/ep${item.id}")
         }
-        fragment.requireActivity().startActivity(Intent.createChooser(shareIntent, "分享"))
+        hostBridge.activity.startActivity(Intent.createChooser(shareIntent, "分享"))
     }
 
     fun startPlayBangumi(episodes: List<EpisodeInfo>, item: EpisodeInfo) {
@@ -322,7 +324,7 @@ private class BangumiDetailPageViewModel(
         basePlayerDelegate.openPlayer(playerSource)
     }
 
-    fun menuItemClick(view: View, menuItem: MenuItemPropInfo) {
+    fun menuItemClick(menuItem: MenuItemPropInfo) {
         when (menuItem.key) {
             1 -> {
                 // 用浏览器打开
@@ -330,7 +332,7 @@ private class BangumiDetailPageViewModel(
                 if (info != null) {
                     val id = info.season_id
                     var url = "https://www.bilibili.com/bangumi/play/ss$id"
-                    BiliUrlMatcher.toUrlLink(fragment.requireContext(), url)
+                    BiliUrlMatcher.toUrlLink(hostBridge.context, url)
                 } else {
                     PopTip.show("请等待信息加载完成")
                 }
@@ -339,7 +341,7 @@ private class BangumiDetailPageViewModel(
                 // 分享番剧
                 val info = detailInfo.value
                 if (info != null) {
-                    val activity = fragment.requireActivity()
+                    val activity = hostBridge.activity
                     var shareIntent = Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
@@ -356,7 +358,7 @@ private class BangumiDetailPageViewModel(
                 // 复制链接
                 val info = detailInfo.value
                 if (info != null) {
-                    val activity = fragment.requireActivity()
+                    val activity = hostBridge.activity
                     val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     var label = "url"
                     var text = "https://www.bilibili.com/bangumi/play/ss${info.season_id}"
@@ -406,10 +408,8 @@ private fun BangumiDetailPageContent(
     viewModel: BangumiDetailPageViewModel,
 ) {
     val playerStore: PlayerStore by rememberInstance()
-    val windowStore: WindowStore by rememberInstance()
     val playerState = playerStore.stateFlow.collectAsState().value
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailInfo = viewModel.detailInfo.collectAsState().value
     val isFollow = viewModel.isFollow.collectAsState().value
@@ -497,7 +497,7 @@ private fun BangumiDetailPageContent(
             myMenu {
                 myItem {
                     key = MenuKeys.more
-                    iconFileName = "ic_more_vert_grey_24dp"
+                    iconVector = androidx.compose.material.icons.Icons.Default.MoreVert
                     title = "更多"
 
                     childMenu = myMenu {
@@ -526,10 +526,10 @@ private fun BangumiDetailPageContent(
                 myItem {
                     key = MenuKeys.follow
                     if (isFollow) {
-                        iconFileName = "ic_baseline_favorite_24"
+                        iconVector = androidx.compose.material.icons.Icons.Default.Favorite
                         title = "已追番"
                     } else {
-                        iconFileName = "ic_outline_favorite_border_24"
+                        iconVector = androidx.compose.material.icons.Icons.Outlined.FavoriteBorder
                         title = "追番"
                     }
                 }
@@ -742,12 +742,11 @@ private fun BangumiDetailPageContent(
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)
                     .padding(
-                        bottom = windowStore.bottomAppBarHeightDp.dp
-                                + windowInsets.bottomDp.dp
+                        bottom = windowInsets.bottom
                     ),
                 onClick = {
                     scope.launch {
-                        chainScrollableLayoutState.scrollToMax()
+                        chainScrollableLayoutState.scrollToCollapsed()
                         val (section, index) = viewModel.findSectionEpisodeIndex(
                             it.last_ep_id
                         )
@@ -760,7 +759,7 @@ private fun BangumiDetailPageContent(
                             viewModel.changeSection(section)
                             episodesListState.scrollToItem(
                                 index = index + offset,
-                                scrollOffset = -windowInsets.top
+                                scrollOffset = -windowInsets.top.value.toInt()
                             )
                         }
                     }

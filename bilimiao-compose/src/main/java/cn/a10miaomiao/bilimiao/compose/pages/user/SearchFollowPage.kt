@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,13 +16,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.input.SearchBox
@@ -34,14 +32,12 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -58,7 +54,6 @@ private class SearchFollowPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val activity by instance<Activity>()
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
 
@@ -143,9 +138,7 @@ private fun SearchFollowPageContent(
     PageConfig(
         title = "搜索我的关注"
     )
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val searchText by viewModel.searchText.collectAsState()
     val list by viewModel.list.data.collectAsState()
@@ -207,7 +200,7 @@ private fun SearchFollowPageContent(
                             GridItemSpan(maxLineSpan)
                         }
                     ) {
-                        Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp))
+                        Spacer(modifier = Modifier.height(windowInsets.bottom))
                     }
                 }
             }

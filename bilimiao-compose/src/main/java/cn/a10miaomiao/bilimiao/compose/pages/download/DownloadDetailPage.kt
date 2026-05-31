@@ -10,13 +10,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
+import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.download.components.DownloadDetailItem
@@ -25,14 +25,12 @@ import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.LocalPlayerSource
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
-import com.a10miaomiao.bilimiao.store.WindowStore
 import com.kongzue.dialogx.dialogs.PopTip
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 import java.io.File
 
@@ -52,7 +50,7 @@ internal class DownloadDetailPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val fragment by instance<Fragment>()
+    private val hostBridge by instance<ComposeHostBridge>()
     private val pageNavigation by instance<PageNavigation>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
@@ -64,7 +62,7 @@ internal class DownloadDetailPageViewModel(
     fun loadDownloadDetail(
         dirPath: String,
     ) = viewModelScope.launch {
-        val service = DownloadService.getService(fragment.requireContext())
+        val service = DownloadService.getService(hostBridge.context)
         downloadService = service
         _loadDownloadDetail(service, dirPath)
         if (downloadInfo.value == null) {
@@ -160,7 +158,7 @@ internal class DownloadDetailPageViewModel(
     fun itemClick(item: DownloadItemInfo) {
         if (item.is_completed) {
             basePlayerDelegate.openPlayer(LocalPlayerSource(
-                activity = fragment.requireActivity(),
+                activity = hostBridge.activity,
                 entryDirPath = item.dir_path,
                 id = item.id.toString(),
                 title = item.title,
@@ -183,7 +181,7 @@ internal class DownloadDetailPageViewModel(
     ) {
         val info = downloadInfo?.value ?: return
         viewModelScope.launch {
-            val service = DownloadService.getService(fragment.requireContext())
+            val service = DownloadService.getService(hostBridge.context)
             service.deleteDownload(info.dir_path, item.dir_path)
             PopTip.show("已删除：" + info.title + "-"  +item.title)
             _loadDownloadDetail(service, dirPath)
@@ -203,10 +201,7 @@ internal fun DownloadDetailPageContent(
         title = "下载详情"
     )
 
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
-    val bottomAppBarHeight = windowStore.bottomAppBarHeightDp
+    val windowInsets = localContentInsets()
 
     val downloadInfo by viewModel.downloadInfo.collectAsState()
     val downloadItems by viewModel.downloadItems.collectAsState()
@@ -251,7 +246,7 @@ internal fun DownloadDetailPageContent(
                 )
             }
             item {
-                Spacer(modifier = Modifier.height(windowInsets.bottomDp.dp + bottomAppBarHeight.dp))
+                Spacer(modifier = Modifier.height(windowInsets.bottom))
             }
         }
     }

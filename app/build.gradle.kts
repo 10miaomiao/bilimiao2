@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    kotlin("plugin.compose")
 }
 
 android {
@@ -13,10 +14,10 @@ android {
 
     defaultConfig {
         applicationId = "com.a10miaomiao.bilimiao"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 35
-        versionCode = 117
-        versionName = "2.4.8.1"
+        versionCode = 118
+        versionName = "2.5.0 alpha"
 
         flavorDimensions("default")
 
@@ -91,6 +92,9 @@ android {
         jvmTarget = "1.8"
     }
 
+    buildFeatures {
+        compose = true
+    }
 
     lint {
         checkReleaseBuilds = false
@@ -118,16 +122,24 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.androidx.profileinstaller)
 
+    // Compose dependencies for Player wrapper
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.runtime)
+    implementation(libs.activity.compose)
+
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kodein.di) // 依赖注入
+    implementation(libs.kodein.di)
 
     implementation(libs.kongzue.dialogx) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
     implementation(libs.materialkolor)
 
-//    implementation("com.github.li-xiaojun:XPopup:2.9.13")
-//    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")
+    //    implementation("com.github.li-xiaojun:XPopup:2.9.13")
+    //    implementation("com.github.lihangleo2:ShadowLayout:3.2.4")
 
     implementation(libs.splitties.android.base)
     implementation(libs.splitties.android.base.with.views.dsl)

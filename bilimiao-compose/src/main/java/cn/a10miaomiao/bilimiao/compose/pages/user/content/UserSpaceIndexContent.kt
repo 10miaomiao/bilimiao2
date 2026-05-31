@@ -37,16 +37,14 @@ import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
-import cn.a10miaomiao.bilimiao.compose.common.localContainerView
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.components.bangumi.MiniBangumiItemBox
 import cn.a10miaomiao.bilimiao.compose.components.favourite.MiniFavouriteItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceViewModel
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.a10miaomiao.bilimiao.store.WindowStore
 import kotlinx.coroutines.launch
-import org.kodein.di.compose.rememberInstance
 
 @Composable
 private fun IndexTitle(
@@ -106,9 +104,7 @@ private fun IndexTitle(
 fun UserSpaceIndexContent(
     viewModel: UserSpaceViewModel
 ) {
-    val windowStore: WindowStore by rememberInstance()
-    val windowState = windowStore.stateFlow.collectAsState().value
-    val windowInsets = windowState.getContentInsets(localContainerView())
+    val windowInsets = localContentInsets()
 
     val detailData = viewModel.detailData.collectAsState().value ?: return Box {}
 
