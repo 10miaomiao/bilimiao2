@@ -24,7 +24,6 @@ import com.a10miaomiao.bilimiao.comm.store.AppStore.HomeSettingState
 import com.a10miaomiao.bilimiao.comm.store.AppStore.ThemeSettingState
 import com.a10miaomiao.bilimiao.config.config
 import com.google.android.material.color.DynamicColors
-import com.kongzue.dialogx.DialogX
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.DIAware

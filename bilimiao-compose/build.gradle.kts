@@ -88,9 +88,6 @@ dependencies {
     implementation(libs.glide.compose)
     implementation(libs.qrose)
 
-    implementation(libs.kongzue.dialogx) {
-        exclude("com.github.kongzue.DialogX", "DialogXInterface")
-    }
     implementation(libs.sonner)
 
     implementation(project(":bilimiao-comm"))

@@ -56,7 +56,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.mine.content.TagFollowContent
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.kongzue.dialogx.dialogs.MessageDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -174,15 +173,19 @@ private fun MyFollowPageContent() {
                     MenuKeys.delete -> {
                         val tagInfo = tagList[currentPage]
                         if (tagInfo.count > 0) {
-                            MessageDialog.build()
-                                .setTitle("提示")
-                                .setMessage("该分组下还有关注的人\n删除后将会放到默认分组")
-                                .setOkButton("确定") { _, _ ->
-                                    viewModel.deleteTag(tagInfo.tagid)
-                                    false
-                                }
-                                .setCancelButton("取消")
-                                .show()
+                            viewModel.messageDialog.open(
+                                title = "提示",
+                                text = "该分组下还有关注的人\n删除后将会放到默认分组",
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        viewModel.deleteTag(tagInfo.tagid)
+                                        viewModel.messageDialog.close()
+                                    }) {
+                                        Text("确定")
+                                    }
+                                },
+                                closeText = "取消",
+                            )
                         } else {
                             viewModel.deleteTag(tagInfo.tagid)
                         }

@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.pages.mine
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingItemInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.FollowingListAction
@@ -30,6 +31,7 @@ internal class MyFollowViewModel(
 
     private val pageNavigation by instance<PageNavigation>()
     private val userStore by instance<UserStore>()
+    val messageDialog: MessageDialogState by instance()
 
     val count = MutableStateFlow(1)
     val isRefreshing = MutableStateFlow(false)
