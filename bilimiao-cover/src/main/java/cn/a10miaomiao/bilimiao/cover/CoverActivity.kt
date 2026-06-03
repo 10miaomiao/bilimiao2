@@ -82,7 +82,7 @@ class CoverActivity : AppCompatActivity() {
             if (extras.containsKey(Intent.EXTRA_TEXT)) {
                 val text = extras.getString(Intent.EXTRA_TEXT)!!
                 val urlInfo = BiliUrlMatcher.findIDByUrl(text)
-                val type = urlInfo[0].toUpperCase()
+                val type = urlInfo[0].uppercase()
                 val id = urlInfo[1]
                 if (type == "未知类型") {
                     val textList = text.split(" ")
@@ -98,7 +98,7 @@ class CoverActivity : AppCompatActivity() {
                 }
                 Unit
             } else if (extras.containsKey("id") && extras.containsKey("type")) {
-                val type = extras.getString("type")!!.toUpperCase()
+                val type = extras.getString("type")!!.uppercase()
                 val id = extras.getString("id")!!
                 viewModel.setConfig(type, id)
             } else {

@@ -1,6 +1,6 @@
 [versions]
 agp = "8.13.0"
-kotlin = "2.0.20"
+kotlin = "2.3.0"
 # jetpack
 core = "1.13.1"
 appcompat = "1.6.1"
@@ -31,6 +31,7 @@ constraintlayout = "2.1.4"
 dialogX = "0.0.50.beta37"
 mojito = "1.8.7"
 # compose additional
+sonner = "0.3.9"
 activityCompose = "1.9.0"
 glideCompose = "1.0.0-beta01"
 qrose = "1.0.1"
@@ -103,6 +104,7 @@ microg-safeparcel = { group = "org.microg", name = "safe-parcel", version.ref = 
 baidu-mobstat-sdk = { group = "com.baidu.mobstat", name = "mtj-sdk", version = "latest.integration" }
 geetest-sensebot = { group = "com.geetest.sensebot", name = "sensebot", version = "4.3.8.1" }
 # compose additional
+sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 glide-compose = { group = "com.github.bumptech.glide", name = "compose", version.ref = "glideCompose" }
 qrose = { group = "io.github.alexzhirkevich", name = "qrose", version.ref = "qrose" }
 compose-preference = { group = "me.zhanghai.compose.preference", name = "library", version.ref = "composePreference" }
