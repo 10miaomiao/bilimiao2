@@ -95,7 +95,7 @@ import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.kongzue.dialogx.dialogs.TipDialog
 import com.kongzue.dialogx.dialogs.WaitDialog
 import kotlinx.coroutines.CoroutineScope
@@ -193,7 +193,7 @@ class ReplyEditDialogState(
                 if (res.isSuccess) {
                     val result = res.requireData()
                     _visible.value = false
-                    PopTip.show(result.success_toast)
+                    GlobalToaster.show(result.success_toast)
                     _input.value = TextFieldValue("")
                     delay(1000L)
                     onAddReply(result.reply)

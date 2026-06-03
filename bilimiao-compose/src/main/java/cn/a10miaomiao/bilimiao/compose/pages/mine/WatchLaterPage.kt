@@ -73,7 +73,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -178,7 +178,7 @@ private class WatchLaterPageViewModel(
                 }
             } else {
                 list.fail.value = res.message
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -207,15 +207,15 @@ private class WatchLaterPageViewModel(
                 .json<MessageInfo>()
             if (res.code == 0) {
                 list.data.value = newItems
-                PopTip.show("已移除选中的${deleteItems.size}个视频")
+                GlobalToaster.show("已移除选中的${deleteItems.size}个视频")
                 _selectedItemMap.clear()
                 updateUserLibrary()
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show("失败:$e")
+            GlobalToaster.show("失败:$e")
         } finally {
             messageDialog.close()
         }
@@ -230,13 +230,13 @@ private class WatchLaterPageViewModel(
                 .json<MessageInfo>()
             if (res.code == 0) {
                 refreshList()
-                PopTip.show("操作成功")
+                GlobalToaster.show("操作成功")
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show("失败:$e")
+            GlobalToaster.show("失败:$e")
         } finally {
             messageDialog.close()
         }
@@ -251,13 +251,13 @@ private class WatchLaterPageViewModel(
                 .json<MessageInfo>()
             if (res.code == 0) {
                 refreshList()
-                PopTip.show("操作成功")
+                GlobalToaster.show("操作成功")
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show("失败:$e")
+            GlobalToaster.show("失败:$e")
         } finally {
             messageDialog.close()
         }
@@ -367,7 +367,7 @@ private fun WatchLaterPageContent(
             MenuKeys.delete -> {
                 val selectedKeys = viewModel.selectedItemMap.keys
                 if (selectedKeys.isEmpty()) {
-                    PopTip.show("未选中任何视频")
+                    GlobalToaster.show("未选中任何视频")
                 } else {
                     viewModel.deleteToview(selectedKeys)
                 }

@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -63,7 +63,7 @@ private class FilterWordListContentModel(
         if (filterWordList.indexOf(text) == -1) {
             filterStore.addWord(text)
         } else {
-            PopTip.show("该关键字已存在")
+            GlobalToaster.show("该关键字已存在")
         }
     }
 
@@ -74,7 +74,7 @@ private class FilterWordListContentModel(
     fun deleteSelected(selectedMap: Map<String, Int>) {
         val keywordList = selectedMap.keys.toList()
         if (keywordList.isEmpty()) {
-            PopTip.show("未选择关键字")
+            GlobalToaster.show("未选择关键字")
         }
         filterStore.deleteWord(keywordList)
     }

@@ -59,7 +59,7 @@ import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -133,7 +133,7 @@ private class HomeRecommendContentViewModel(
                 }
                 list.finished.value = itemsList.isEmpty()
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
                 throw Exception(res.message)
             }
         } catch (e: Exception) {

@@ -27,7 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerFormS
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.rememberProxyServerFormState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyHelper
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -65,11 +65,11 @@ internal class EditProxyServerPageViewModel(
         formState: ProxyServerFormState
     ) {
         if (formState.name.isBlank()) {
-            PopTip.show("请填写服务器名称")
+            GlobalToaster.show("请填写服务器名称")
             return
         }
         if (formState.host.isBlank()) {
-            PopTip.show("请填写服务器地址")
+            GlobalToaster.show("请填写服务器地址")
             return
         }
         ProxyHelper.saveServer(
@@ -96,7 +96,7 @@ internal class EditProxyServerPageViewModel(
             ),
             index,
         )
-        PopTip.show("修改成功")
+        GlobalToaster.show("修改成功")
         pageNavigation.popBackStack()
     }
 
@@ -106,7 +106,7 @@ internal class EditProxyServerPageViewModel(
             null,
             index,
         )
-        PopTip.show("删除成功")
+        GlobalToaster.show("删除成功")
         pageNavigation.popBackStack()
     }
 }

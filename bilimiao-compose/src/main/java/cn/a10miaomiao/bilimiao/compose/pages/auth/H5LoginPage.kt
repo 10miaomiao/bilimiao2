@@ -50,7 +50,7 @@ import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -165,7 +165,7 @@ private class H5LoginPageViewModel(
                 return true
             }
             if (url.indexOf("bilibili://") == 0) {
-                PopTip.show("不支持打开的链接：$url")
+                GlobalToaster.show("不支持打开的链接：$url")
                 return true
             }
             return false

@@ -36,7 +36,7 @@ import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -202,7 +202,7 @@ internal class DownloadListPageViewModel(
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", downloadPath))
         // 安卓13(33)以上操作剪切板会自动提示，无需手动toast
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){
-            PopTip.show("已复制路径到剪切板")
+            GlobalToaster.show("已复制路径到剪切板")
         }
     }
 }

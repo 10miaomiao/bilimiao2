@@ -68,7 +68,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -147,7 +147,7 @@ private class UserSeasonDetailViewModel(
             ).awaitCall().json<ResponseData<ArchiveRelationInfo>>()
             favState.value = if (res.requireData().season_fav) 1 else 0
         } catch (e: Exception) {
-            PopTip.show("获取订阅状态失败")
+            GlobalToaster.show("获取订阅状态失败")
             e.printStackTrace()
         }
     }
@@ -201,7 +201,7 @@ private class UserSeasonDetailViewModel(
     fun addPlayList() {
         val season = seasonInfo.value
         if (season == null) {
-            PopTip.show("数据加载中，请稍后再试")
+            GlobalToaster.show("数据加载中，请稍后再试")
             return
         }
         val currentId = curSection.value?.id
@@ -224,14 +224,14 @@ private class UserSeasonDetailViewModel(
                 .awaitCall()
                 .json<MessageInfo>()
             if (res.isSuccess) {
-                PopTip.show("订阅成功")
+                GlobalToaster.show("订阅成功")
                 favState.value = 1
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show(e.message ?: e.toString())
+            GlobalToaster.show(e.message ?: e.toString())
         }
     }
 
@@ -244,14 +244,14 @@ private class UserSeasonDetailViewModel(
                 .awaitCall()
                 .json<MessageInfo>()
             if (res.isSuccess) {
-                PopTip.show("已取消订阅")
+                GlobalToaster.show("已取消订阅")
                 favState.value = 0
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show(e.message ?: e.toString())
+            GlobalToaster.show(e.message ?: e.toString())
         }
     }
 

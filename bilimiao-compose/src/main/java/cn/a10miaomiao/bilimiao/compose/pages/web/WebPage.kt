@@ -35,7 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -122,7 +122,7 @@ private class WebPageViewModel(
                 return true
             }
             if (url.indexOf("bilibili://") == 0) {
-                PopTip.show("不支持打开的链接：$url")
+                GlobalToaster.show("不支持打开的链接：$url")
                 return true
             }
             return false

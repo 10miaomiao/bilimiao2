@@ -72,7 +72,7 @@ import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestInfo
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.rememberInstance
 
@@ -118,7 +118,7 @@ fun SearchInputInline(
 
     fun startSearch(keyword: String) {
         if (keyword.isEmpty()) {
-            PopTip.show("请输入ID或关键字")
+            GlobalToaster.show("请输入ID或关键字")
             return
         }
         viewModel.addSearchHistory(keyword)
@@ -132,7 +132,7 @@ fun SearchInputInline(
 
     fun deleteHistory(text: String) {
         viewModel.deleteSearchHistory(text)
-        PopTip.show("已删除")
+        GlobalToaster.show("已删除")
     }
 
     LaunchedEffect(Unit) {
@@ -344,7 +344,7 @@ fun SearchInputInline(
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deleteAllSearchHistory()
-                    PopTip.show("已清空了~")
+                    GlobalToaster.show("已清空了~")
                     isEditingHistory = false
                     showClearAll = false
                 }) { Text("确定清空") }

@@ -58,7 +58,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.serialization.Serializable
 import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
@@ -136,7 +136,7 @@ private fun PlayListPageContent(
                 val selectedKeys = selectedItemsMap.keys
                 selectedKeys.remove(playerState.cid) // 移除当前播放的视频
                 if (selectedKeys.isEmpty()) {
-                    PopTip.show("未选中任何视频")
+                    GlobalToaster.show("未选中任何视频")
                 } else {
                     playListStore.removeItems(selectedKeys)
                 }

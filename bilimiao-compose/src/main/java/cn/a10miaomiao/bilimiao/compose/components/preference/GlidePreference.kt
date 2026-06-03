@@ -13,7 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import me.zhanghai.compose.preference.Preference
 
 inline fun LazyListScope.glidePreference(
@@ -67,7 +67,7 @@ fun GlidePreference(
                     onClick = {
                         showDialog = false
                         GlideCacheUtil.clearImageAllCache(context)
-                        PopTip.show("清理完成，已清理$cacheSize")
+                        GlobalToaster.show("清理完成，已清理$cacheSize")
                         cacheSize = "0Byte"
                     }
                 ) {

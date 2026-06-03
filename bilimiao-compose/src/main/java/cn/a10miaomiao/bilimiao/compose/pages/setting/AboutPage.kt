@@ -52,7 +52,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -209,14 +209,14 @@ private class AboutPageViewModel(
                     AppVersionState.NotUpdate
                 }
             } else {
-                PopTip.show(res.msg)
+                GlobalToaster.show(res.msg)
                 versionState.value = AppVersionState.Fail(
                     message = res.msg
                 )
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show("网络异常，检测失败")
+            GlobalToaster.show("网络异常，检测失败")
             versionState.value = AppVersionState.Fail(
                 message = e.message ?: e.toString()
             )
@@ -242,7 +242,7 @@ private class AboutPageViewModel(
             }
             activity.startActivity(intent)
         }.onFailure {
-            PopTip.show("打开失败")
+            GlobalToaster.show("打开失败")
         }
     }
 
@@ -254,10 +254,10 @@ private class AboutPageViewModel(
                 intent.data = Uri.parse(version.url)
                 activity.startActivity(intent)
             } catch (e: Exception) {
-                PopTip.show("打开失败:" + version.url)
+                GlobalToaster.show("打开失败:" + version.url)
             }
         } else {
-            PopTip.show("没有更新")
+            GlobalToaster.show("没有更新")
         }
     }
 

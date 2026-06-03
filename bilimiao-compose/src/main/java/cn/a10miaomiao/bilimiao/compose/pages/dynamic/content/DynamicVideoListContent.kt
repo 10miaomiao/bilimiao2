@@ -41,7 +41,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicVideoInfo
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -185,7 +185,7 @@ class DynamicVideoListContentViewModel(
                 ))
             }
             else -> {
-                PopTip.show("未知跳转类型")
+                GlobalToaster.show("未知跳转类型")
             }
         }
     }

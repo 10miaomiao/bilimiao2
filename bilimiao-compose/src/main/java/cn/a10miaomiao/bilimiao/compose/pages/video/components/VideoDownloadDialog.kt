@@ -49,7 +49,7 @@ import cn.a10miaomiao.bilimiao.download.DownloadService
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -186,7 +186,7 @@ class VideoDownloadDialogState(
                 )
             }
         }
-        PopTip.show("成功创建${checkedSize}条记录")
+        GlobalToaster.show("成功创建${checkedSize}条记录")
         dismiss()
         _checkedMap.clear()
     }

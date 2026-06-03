@@ -25,7 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.rememberPreferenceState
 
@@ -108,7 +108,7 @@ fun CustomSetsPreference(
                             if (valueCanEdit(text)) {
                                 editDialogState.value = EditDialogState.Update(text)
                             } else {
-                                PopTip.show("禁止编辑")
+                                GlobalToaster.show("禁止编辑")
                             }
                         },
                         content = {
@@ -153,7 +153,7 @@ fun CustomSetsPreference(
                                 v.toString(),
                             ))
                             editDialogState.value = EditDialogState.Closed
-                            PopTip.show("添加成功")
+                            GlobalToaster.show("添加成功")
                         }
                     }
                 ) {
@@ -208,7 +208,7 @@ fun CustomSetsPreference(
                             }.toSet()
                         )
                         editDialogState.value = EditDialogState.Closed
-                        PopTip.show("移除成功")
+                        GlobalToaster.show("移除成功")
                     }
                 ) {
                     Text(

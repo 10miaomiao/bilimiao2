@@ -77,7 +77,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 
 class MainActivity : AppCompatActivity(), DIAware {
 
@@ -616,7 +616,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         if (!basePlayerDelegate.onBackPressed()) {
             val now = System.currentTimeMillis()
             if (now - lastExitBackPressedTime > 2000) {
-                PopTip.show("再按一次退出bilimiao")
+                GlobalToaster.show("再按一次退出bilimiao")
                 lastExitBackPressedTime = now
             } else {
                 finish()

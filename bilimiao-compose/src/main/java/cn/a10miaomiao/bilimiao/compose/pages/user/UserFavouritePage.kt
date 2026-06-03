@@ -52,7 +52,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
@@ -307,10 +307,10 @@ private fun UserFavouritePageContent(
                         privacy = formState.privacy,
                     )
                 }.onSuccess {
-                    PopTip.show("创建成功")
+                    GlobalToaster.show("创建成功")
                     showAddDialog = false
                 }.onFailure {
-                    PopTip.show(it.message ?: it.toString())
+                    GlobalToaster.show(it.message ?: it.toString())
                 }
             }
         }

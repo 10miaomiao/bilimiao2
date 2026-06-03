@@ -79,7 +79,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.kongzue.dialogx.dialogs.TipDialog
 import com.kongzue.dialogx.dialogs.WaitDialog
 import kotlinx.coroutines.Dispatchers
@@ -206,11 +206,11 @@ private class ReplyDetailContentViewModel(
                 newList[index] = newItem
                 list.data.value = newList
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
+            GlobalToaster.show("喵喵被搞坏了:" + e.message ?: e.toString())
         }
     }
 
@@ -252,7 +252,7 @@ private class ReplyDetailContentViewModel(
                 .json<MessageInfo>()
             if (res.isSuccess) {
                 withContext(Dispatchers.Main) {
-                    PopTip.show("删除成功")
+                    GlobalToaster.show("删除成功")
                     messageDialog.close()
                     if (currentReply.id == reply.id) {
                         onDeletedReply(reply)

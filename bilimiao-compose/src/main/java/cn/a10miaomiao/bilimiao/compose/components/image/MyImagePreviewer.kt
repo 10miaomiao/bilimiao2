@@ -58,7 +58,7 @@ import com.bumptech.glide.integration.compose.GlideSubcomposition
 import com.bumptech.glide.integration.compose.RequestState
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import org.kodein.di.compose.rememberInstance
 import java.io.File
 
@@ -93,7 +93,7 @@ private class MyImagePreviewerController(
             }
 
             override fun onLoadCleared(placeholder: Drawable?) {
-                PopTip.show("原图下载失败")
+                GlobalToaster.show("原图下载失败")
                 isDownloading.value = false
             }
         }
@@ -109,7 +109,7 @@ private class MyImagePreviewerController(
         val clipboardManager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipData = ClipData.newPlainText("imageUrl", imageUrl)
         clipboardManager.setPrimaryClip(clipData)
-        PopTip.show("图片链接已复制到剪切板")
+        GlobalToaster.show("图片链接已复制到剪切板")
     }
 
     fun shareImage() {
@@ -132,7 +132,7 @@ private class MyImagePreviewerController(
             }
 
             override fun onLoadCleared(placeholder: Drawable?) {
-                PopTip.show("图片加载失败")
+                GlobalToaster.show("图片加载失败")
                 isDownloading.value = false
             }
         }

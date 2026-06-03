@@ -61,7 +61,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -129,7 +129,7 @@ private class DynamicDetailPageViewModel(
             _detailData.value = res.item
         } catch (e: Exception) {
             _fail.value = e
-            PopTip.show("网络错误")
+            GlobalToaster.show("网络错误")
             e.printStackTrace()
         } finally {
             _loading.value = false

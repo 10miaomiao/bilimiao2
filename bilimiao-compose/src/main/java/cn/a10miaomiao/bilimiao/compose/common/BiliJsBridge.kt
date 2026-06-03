@@ -9,7 +9,7 @@ import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeToSequence
@@ -91,7 +91,7 @@ class BiliJsBridge(
             }
             "share.setShareContent" -> {
                 hostBridge.runOnUiThread {
-                    PopTip.show("暂不支持分享操作")
+                    GlobalToaster.show("暂不支持分享操作")
                 }
             }
             "share.showShareMpcWindow" -> {

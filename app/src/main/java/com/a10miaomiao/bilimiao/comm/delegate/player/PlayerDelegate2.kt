@@ -46,7 +46,6 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.PicInPicHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
 import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
@@ -67,7 +66,7 @@ import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoMediaSourceInterceptListener
 import com.a10miaomiao.bilimiao.widget.player.media3.ExoSourceManager
 import com.google.common.util.concurrent.MoreExecutors
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoPlayer
 import kotlinx.coroutines.Dispatchers
@@ -248,7 +247,7 @@ class PlayerDelegate2(
         if (scaffoldApp.showPlayer) {
             val now = System.currentTimeMillis()
             if (now - lastBackPressedTime > 2000) {
-                PopTip.show("再按一次退出播放")
+                GlobalToaster.show("再按一次退出播放")
                 lastBackPressedTime = now
             } else {
                 closePlayer()
@@ -415,7 +414,7 @@ class PlayerDelegate2(
             lastPosition = views.videoPlayer.currentPositionWhenPlaying
             speed = newSpeed
             views.videoPlayer.setSpeed(speed, true)
-            PopTip.show("已切换到${speed}倍速").showTop()
+            GlobalToaster.show("已切换到${speed}倍速")
             playerCoroutineScope.launch(Dispatchers.IO) {
                 SettingPreferences.edit(activity) {
                     it[PlayerSpeed] = newSpeed
@@ -428,7 +427,7 @@ class PlayerDelegate2(
         if (quality != newQuality) {
             lastPosition = views.videoPlayer.currentPositionWhenPlaying
             quality = newQuality
-            PopTip.show("正在切换清晰度").showTop()
+            GlobalToaster.show("正在切换清晰度")
             playerCoroutineScope.launch(Dispatchers.Main) {
                 loadPlayerSource(
                     isChangedQuality = true
@@ -480,13 +479,9 @@ class PlayerDelegate2(
                 lastPosition = 0L
                 val lastTimeStr = NumberUtil.converDuration(sourceInfo.lastPlayTime / 1000)
                 controller.postPrepared(sourceInfo.lastPlayCid) {
-                    PopTip.show("自动恢复:$lastTimeStr", "重新开始")
-                        .showTop()
-                        .showLong()
-                        .setButton { dialog, v ->
-                            views.videoPlayer.startPlayLogic()
-                            false
-                        }
+                    GlobalToaster.showWithAction("自动恢复:$lastTimeStr", "重新开始") {
+                        views.videoPlayer.startPlayLogic()
+                    }
                 }
             } else if (sourceInfo.lastPlayCid == source.id) {
                 // 从进度0开始记录播放历史
@@ -498,9 +493,9 @@ class PlayerDelegate2(
 
             if (isChangedQuality) {
                 if (sourceInfo.quality == quality) {
-                    PopTip.show("已切换至【${sourceInfo.description}】").showTop()
+                    GlobalToaster.show("已切换至【${sourceInfo.description}】")
                 } else {
-                    PopTip.show("清晰度切换失败").showTop()
+                    GlobalToaster.show("清晰度切换失败")
                 }
             } else {
                 views.videoPlayer.subtitleSourceList = withContext(Dispatchers.IO) {
@@ -552,7 +547,7 @@ class PlayerDelegate2(
             } catch (e: Throwable) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    PopTip.show(e.message.toString()).showTop()
+                    GlobalToaster.show(e.message.toString())
                 }
             }
         }
@@ -607,7 +602,7 @@ class PlayerDelegate2(
             views.videoPlayer.setSpeed(speed, true)
             // 播放倍速提示
             if (speed != 1f) {
-                PopTip.show("注意，当前为${speed}倍速").showTop()
+                GlobalToaster.show("注意，当前为${speed}倍速")
             }
         }
         // 播放器是否默认全屏播放

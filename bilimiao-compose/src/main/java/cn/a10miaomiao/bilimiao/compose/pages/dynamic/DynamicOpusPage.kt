@@ -51,7 +51,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -122,7 +122,7 @@ private class DynamicOpusPageViewModel(
             }
         } catch (e: Exception) {
             _fail.value = e
-            PopTip.show("网络错误")
+            GlobalToaster.show("网络错误")
             e.printStackTrace()
         } finally {
             _loading.value = false

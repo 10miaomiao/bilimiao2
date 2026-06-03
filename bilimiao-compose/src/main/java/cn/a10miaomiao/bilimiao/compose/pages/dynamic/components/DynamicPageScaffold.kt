@@ -45,7 +45,7 @@ import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.launch
 
 @Composable
@@ -91,7 +91,7 @@ fun DynamicPageScaffold(
                                 if (pagerState.pageCount > 1) {
                                     pagerState.animateScrollToPage(1)
                                 } else {
-                                    PopTip.show("请先登录喵")
+                                    GlobalToaster.show("请先登录喵")
                                 }
                             }
                         },

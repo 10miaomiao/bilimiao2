@@ -5,7 +5,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.time.components.getMonthDayNum
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -75,7 +75,7 @@ class TimeSettingViewMode(
                 timeFrom.set(start)
                 timeTo.set(end)
             } else if (start != null) {
-                PopTip.show("时间间隔不能大于30天")
+                GlobalToaster.show("时间间隔不能大于30天")
             } else {
                 timeFrom.year = -1
             }
@@ -102,7 +102,7 @@ class TimeSettingViewMode(
             else -> currentTime.value
         })
         if (timeInfo.timeFrom.year == -1) {
-            PopTip.show("请选择时间范围")
+            GlobalToaster.show("请选择时间范围")
             return
         }
         timeSettingStore.setTime(

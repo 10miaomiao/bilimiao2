@@ -21,7 +21,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -135,14 +135,11 @@ class PlayListStore(override val di: DI) :
                 !keys.contains(it.cid)
             }
         }
-        PopTip.show("已移除选中视频", "恢复")
-            .showLong()
-            .setButton { _, _ ->
-                this.setState {
-                    this.items = originalItems
-                }
-                false
+        GlobalToaster.showWithAction("已移除选中视频", "恢复") {
+            this.setState {
+                this.items = originalItems
             }
+        }
     }
 
     fun setPlayList(info: UgcSeasonInfo, index: Int) {
@@ -275,7 +272,7 @@ class PlayListStore(override val di: DI) :
                         pageNum++
                     } else {
                         withContext(Dispatchers.Main) {
-                            PopTip.show(res.message)
+                            GlobalToaster.show(res.message)
                         }
                         loadFinish = true
                     }
@@ -336,7 +333,7 @@ class PlayListStore(override val di: DI) :
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
-                PopTip.show(e.toString())
+                GlobalToaster.show(e.toString())
             }
         }
 
@@ -402,7 +399,7 @@ class PlayListStore(override val di: DI) :
                         items.addAll(newItems)
                         loadFinish = !res.requireData().has_more
                     } else {
-                        PopTip.show(res.message)
+                        GlobalToaster.show(res.message)
                         loadFinish = true
                     }
                 } catch (e: Exception) {
@@ -481,7 +478,7 @@ class PlayListStore(override val di: DI) :
                     loadFinish = !data.has_more || listData.isEmpty() || data.next_key.isBlank()
                     startKey = data.next_key
                 } else {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                     loadFinish = true
                 }
             } catch (e: Exception) {

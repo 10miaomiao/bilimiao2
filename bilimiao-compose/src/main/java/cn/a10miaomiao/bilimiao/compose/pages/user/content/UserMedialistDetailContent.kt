@@ -64,7 +64,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -104,7 +104,7 @@ private class UserMedialistDetailViewMode(
             "series" -> "5"
             "season" -> "8"
             else -> {
-                PopTip.show("未知类型：$bizType")
+                GlobalToaster.show("未知类型：$bizType")
                 list.fail.value = "未知类型：$bizType"
                 return@launch
             }
@@ -137,7 +137,7 @@ private class UserMedialistDetailViewMode(
                 lastOid = mediaList?.lastOrNull()?.id ?: ""
                 list.finished.value = !res.data.has_more
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
                 list.fail.value = res.message
             }
         } catch (e: Exception) {
@@ -191,7 +191,7 @@ private class UserMedialistDetailViewMode(
             "series" -> "5"
             "season" -> "8"
             else -> {
-                PopTip.show("未知类型：$bizType")
+                GlobalToaster.show("未知类型：$bizType")
                 list.fail.value = "未知类型：$bizType"
                 return
             }

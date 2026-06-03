@@ -64,7 +64,7 @@ import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -163,13 +163,13 @@ private class BangumiDetailPageViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                PopTip.show("无法连接到御坂网络")
+                GlobalToaster.show("无法连接到御坂网络")
             }
         } finally {
             loading.value = false
@@ -201,13 +201,13 @@ private class BangumiDetailPageViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                PopTip.show("无法连接到御坂网络")
+                GlobalToaster.show("无法连接到御坂网络")
             }
         } finally {
             sectionLoading.value = false
@@ -231,7 +231,7 @@ private class BangumiDetailPageViewModel(
             if (res.isSuccess) {
                 isFollow.value = mode == 1
                 withContext(Dispatchers.Main) {
-                    PopTip.show(
+                    GlobalToaster.show(
                         if (mode == 1) {
                             res.result?.toast ?: "追番成功"
                         } else {
@@ -241,12 +241,12 @@ private class BangumiDetailPageViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                 }
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                PopTip.show("网络错误")
+                GlobalToaster.show("网络错误")
             }
             e.printStackTrace()
         }
@@ -334,7 +334,7 @@ private class BangumiDetailPageViewModel(
                     var url = "https://www.bilibili.com/bangumi/play/ss$id"
                     BiliUrlMatcher.toUrlLink(hostBridge.context, url)
                 } else {
-                    PopTip.show("请等待信息加载完成")
+                    GlobalToaster.show("请等待信息加载完成")
                 }
             }
             2 -> {
@@ -350,7 +350,7 @@ private class BangumiDetailPageViewModel(
                     }
                     activity.startActivity(Intent.createChooser(shareIntent, "分享"))
                 } else {
-                    PopTip.show("请等待信息加载完成")
+                    GlobalToaster.show("请等待信息加载完成")
                 }
 
             }
@@ -364,9 +364,9 @@ private class BangumiDetailPageViewModel(
                     var text = "https://www.bilibili.com/bangumi/play/ss${info.season_id}"
                     val clip = ClipData.newPlainText(label, text)
                     clipboard.setPrimaryClip(clip)
-                    PopTip.show("已复制：$text")
+                    GlobalToaster.show("已复制：$text")
                 } else {
-                    PopTip.show("请等待信息加载完成")
+                    GlobalToaster.show("请等待信息加载完成")
                 }
             }
             4 -> {
@@ -375,7 +375,7 @@ private class BangumiDetailPageViewModel(
                 if (info != null) {
                     bottomSheetState.open(DownloadBangumiCreatePage(info.season_id))
                 } else {
-                    PopTip.show("请等待信息加载完成")
+                    GlobalToaster.show("请等待信息加载完成")
                 }
             }
 
@@ -483,10 +483,10 @@ private fun BangumiDetailPageContent(
                         }
                     }
                 } else {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                 }
             } catch (e: Exception) {
-                PopTip.show("网络错误")
+                GlobalToaster.show("网络错误")
             }
         }
     }

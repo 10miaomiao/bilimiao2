@@ -24,7 +24,6 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
-import com.a10miaomiao.bilimiao.comm.dialogx.showTop
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
@@ -33,7 +32,7 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
 import com.a10miaomiao.bilimiao.widget.player.VideoPlayerCallBack
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener
 import com.shuyu.gsyvideoplayer.utils.GSYVideoType
 import com.shuyu.gsyvideoplayer.video.base.GSYVideoView
@@ -352,19 +351,16 @@ class PlayerController(
                     it[danmakuMode.show] = show
                 }
             } else {
-                PopTip.show("弹幕功能已关闭，请手动打开", "打开")
-                    .showTop()
-                    .setButton { _, _ ->
-                        scope.launch {
-                            SettingPreferences.edit(activity) {
-                                it[DanmakuEnable] = true
-                                it[DanmakuDefault.show] = true
-                                it[danmakuMode.show] = true
-                            }
+                GlobalToaster.showWithAction("弹幕功能已关闭，请手动打开", "打开") {
+                    scope.launch {
+                        SettingPreferences.edit(activity) {
+                            it[DanmakuEnable] = true
+                            it[DanmakuDefault.show] = true
+                            it[danmakuMode.show] = true
                         }
-                        views.videoPlayer.isShowDanmaku = true
-                        false
                     }
+                    views.videoPlayer.isShowDanmaku = true
+                }
             }
         }
     }
@@ -514,7 +510,7 @@ class PlayerController(
 
     private fun showSendDanmakuPage(view: View) {
         if (!userStore.isLogin()) {
-            PopTip.show("请先登录")
+            GlobalToaster.show("请先登录")
             return
         }
         if (
@@ -547,10 +543,10 @@ class PlayerController(
                         delegate.picInPicHelper?.enterPictureInPictureMode(aspectRatio)
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        PopTip.show("此设备不支持小窗播放")
+                        GlobalToaster.show("此设备不支持小窗播放")
                     }
                 } else {
-                    PopTip.show("小窗播放功能需要安卓8.0及以上版本")
+                    GlobalToaster.show("小窗播放功能需要安卓8.0及以上版本")
                 }
             }
 

@@ -44,7 +44,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePageV
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,7 +83,7 @@ class VideoCoinDialogState(
                 .json<MessageInfo>()
             withContext(Dispatchers.Main) {
                 if (res.isSuccess) {
-                    PopTip.show("感谢投币")
+                    GlobalToaster.show("感谢投币")
                     dismiss()
                     onChanged(num)
                 } else {
