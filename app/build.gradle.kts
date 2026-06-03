@@ -10,11 +10,11 @@ plugins {
 
 android {
     namespace = "com.a10miaomiao.bilimiao"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.a10miaomiao.bilimiao"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 35
         versionCode = 118
         versionName = "2.5.0 alpha"
@@ -88,9 +88,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 
     buildFeatures {
         compose = true
@@ -106,6 +103,12 @@ android {
         includeInApk = false
         // Disables dependency metadata when building Android App Bundles.
         includeInBundle = false
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
     }
 }
 

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
@@ -30,9 +30,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 
     buildFeatures {
         compose = true
@@ -43,6 +40,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
     }
 }
 
@@ -88,6 +91,7 @@ dependencies {
     implementation(libs.kongzue.dialogx) {
         exclude("com.github.kongzue.DialogX", "DialogXInterface")
     }
+    implementation(libs.sonner)
 
     implementation(project(":bilimiao-comm"))
     implementation(project(":bilimiao-download"))

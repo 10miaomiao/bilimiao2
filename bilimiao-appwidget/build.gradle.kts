@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
@@ -33,10 +33,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     namespace = "cn.a10miaomiao.bilimiao.appwidget"
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+    }
 }
 
 dependencies {
