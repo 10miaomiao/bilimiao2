@@ -20,7 +20,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.kongzue.dialogx.dialogs.BottomMenu
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -58,7 +58,7 @@ class ImageSaveUtil(
         val clipboardManager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipData = ClipData.newPlainText("imageUrl", imageUrl)
         clipboardManager.setPrimaryClip(clipData)
-        PopTip.show("图片链接已复制到剪切板")
+        GlobalToaster.show("图片链接已复制到剪切板")
     }
 
     /**
@@ -81,7 +81,7 @@ class ImageSaveUtil(
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {
-                    PopTip.show("原图下载失败")
+                    GlobalToaster.show("原图下载失败")
                 }
             })
     }
@@ -101,7 +101,7 @@ class ImageSaveUtil(
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     saveImageToAlbum(activity, fileName, bitmap)
-                    PopTip.show("已保存至系统相册，文件名:${fileName}")
+                    GlobalToaster.show("已保存至系统相册，文件名:${fileName}")
                     return
                 } else if (
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
@@ -121,15 +121,15 @@ class ImageSaveUtil(
                 // 保存图片文件
                 val outFile = File(path + fileName)
                 if (outFile.exists()) {
-                    PopTip.show("图片已存在")
+                    GlobalToaster.show("图片已存在")
                     return
                 }
                 outFile.writeBitmap(bitmap)
-                PopTip.show("图片已保存至 ${outFile.path}")
+                GlobalToaster.show("图片已保存至 ${outFile.path}")
                 notifyPhoto(activity, outFile)
             } catch (e: Exception) {
                 e.printStackTrace()
-                PopTip.show("保存失败：" + e.message ?: e.toString())
+                GlobalToaster.show("保存失败：" + e.message ?: e.toString())
             }
         }
 
@@ -141,7 +141,7 @@ class ImageSaveUtil(
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     saveImageToAlbum(activity, fileName, inputFile)
-                    PopTip.show("已保存至系统相册，文件名:${fileName}")
+                    GlobalToaster.show("已保存至系统相册，文件名:${fileName}")
                     return
                 } else if (
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
@@ -161,15 +161,15 @@ class ImageSaveUtil(
                 // 保存图片文件
                 val outFile = File(path + fileName)
                 if (outFile.exists()) {
-                    PopTip.show("图片已存在")
+                    GlobalToaster.show("图片已存在")
                     return
                 }
                 inputFile.copyTo(outFile)
-                PopTip.show("图片已保存至 ${outFile.path}")
+                GlobalToaster.show("图片已保存至 ${outFile.path}")
                 notifyPhoto(activity, outFile)
             } catch (e: Exception) {
                 e.printStackTrace()
-                PopTip.show("保存失败：" + e.message ?: e.toString())
+                GlobalToaster.show("保存失败：" + e.message ?: e.toString())
             }
         }
 

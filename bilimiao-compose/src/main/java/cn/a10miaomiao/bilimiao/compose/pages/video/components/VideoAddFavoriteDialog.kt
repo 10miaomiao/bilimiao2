@@ -52,7 +52,7 @@ import com.a10miaomiao.bilimiao.comm.entity.media.MediaResponseInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -142,7 +142,7 @@ class VideoAddFavoriteDialogState(
                         onChanged(1)
                     }
                     aid = ""
-                    PopTip.show("操作成功")
+                    GlobalToaster.show("操作成功")
                     dismiss()
                 } else {
                     snackbar.showSnackbar(res.message)

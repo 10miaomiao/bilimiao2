@@ -36,7 +36,7 @@ import com.a10miaomiao.bilimiao.comm.entity.bangumi.SeasonV2Info
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -154,13 +154,13 @@ internal class DownloadBangumiCreatePageViewModel(
                 _seasonDetail = res.data
             } else {
                 withContext(Dispatchers.Main) {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                PopTip.show("无法连接到御坂网络")
+                GlobalToaster.show("无法连接到御坂网络")
             }
         }
     }
@@ -191,17 +191,17 @@ internal class DownloadBangumiCreatePageViewModel(
 
     fun startDownload() {
         if (_seasonDetail == null) {
-            PopTip.show("番剧信息未加载")
+            GlobalToaster.show("番剧信息未加载")
             return
         }
         val checkedList = checkedSet.value
         val episodeList = list.data.value
         if (checkedList.isEmpty()) {
-            PopTip.show("请选择分集")
+            GlobalToaster.show("请选择分集")
             return
         }
         if (acceptQuality.value.quality == 0) {
-            PopTip.show("请选择清晰度")
+            GlobalToaster.show("请选择清晰度")
             return
         }
         viewModelScope.launch {
@@ -212,7 +212,7 @@ internal class DownloadBangumiCreatePageViewModel(
                 }
             }
             withContext(Dispatchers.Main) {
-                PopTip.show("成功创建${checkedList.size}条记录")
+                GlobalToaster.show("成功创建${checkedList.size}条记录")
             }
             checkedSet.value = emptySet()
             getDowbloadedList(downloadService, _sid)

@@ -42,7 +42,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -106,7 +106,7 @@ private class UserLikeArchivePageViewModel(
                 list.pageNum = pageNum
                 list.finished.value = list.data.value.size >= res.requireData().count
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
                 throw Exception(res.message)
             }
         } catch (e: Exception) {

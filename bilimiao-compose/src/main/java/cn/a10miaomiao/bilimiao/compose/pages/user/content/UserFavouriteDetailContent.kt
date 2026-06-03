@@ -76,7 +76,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -184,7 +184,7 @@ private class UserFavouriteDetailViewModel(
                 }
                 return
             } else {
-                PopTip.show("自动连播仅支持普通视频")
+                GlobalToaster.show("自动连播仅支持普通视频")
             }
         }
         if (ugcInfo != null) {
@@ -197,7 +197,7 @@ private class UserFavouriteDetailViewModel(
     fun addPlayList() {
         val media = mediaInfo.value
         if (media == null) {
-            PopTip.show("数据加载中，请稍后再试")
+            GlobalToaster.show("数据加载中，请稍后再试")
             return
         }
         playListStore.setFavoriteList(media.id, media.title)
@@ -249,14 +249,14 @@ private class UserFavouriteDetailViewModel(
                 .awaitCall()
                 .json<MessageInfo>()
             if (res.isSuccess) {
-                PopTip.show("订阅成功")
+                GlobalToaster.show("订阅成功")
                 refresh()
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show(e.message ?: e.toString())
+            GlobalToaster.show(e.message ?: e.toString())
         }
     }
 
@@ -269,14 +269,14 @@ private class UserFavouriteDetailViewModel(
                 .awaitCall()
                 .json<MessageInfo>()
             if (res.isSuccess) {
-                PopTip.show("已取消订阅")
+                GlobalToaster.show("已取消订阅")
                 refresh()
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show(e.message ?: e.toString())
+            GlobalToaster.show(e.message ?: e.toString())
         }
     }
 
@@ -532,12 +532,12 @@ internal fun UserFavouriteDetailContent(
                         )
                     }.onSuccess {
                         loading = false
-                        PopTip.show("修改成功")
+                        GlobalToaster.show("修改成功")
                         showEditDialog = false
                         onRefresh()
                     }.onFailure {
                         loading = false
-                        PopTip.show(it.message ?: it.toString())
+                        GlobalToaster.show(it.message ?: it.toString())
                     }
                 }
                 Unit
@@ -589,11 +589,11 @@ internal fun UserFavouriteDetailContent(
                 onClose()
             }.onSuccess {
                 loading = false
-                PopTip.show("修改成功")
+                GlobalToaster.show("修改成功")
                 showEditDialog = false
             }.onFailure {
                 loading = false
-                PopTip.show(it.message ?: it.toString())
+                GlobalToaster.show(it.message ?: it.toString())
             }
         }
         AlertDialog(

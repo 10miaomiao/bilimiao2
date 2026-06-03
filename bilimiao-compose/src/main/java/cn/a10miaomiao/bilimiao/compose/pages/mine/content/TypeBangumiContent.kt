@@ -50,7 +50,7 @@ import com.a10miaomiao.bilimiao.comm.entity.bangumi.MyBangumiFollowListInfo
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.MyBangumiInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -179,16 +179,16 @@ class TypeBangumiContentViewModel(
                     it.season_id != item.season_id
                 }
                 if (status == 0) {
-                    PopTip.show("已取消$typeName")
+                    GlobalToaster.show("已取消$typeName")
                 } else {
-                    PopTip.show("操作成功")
+                    GlobalToaster.show("操作成功")
                 }
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show("操作失败：" + (e.message ?: e.toString()))
+            GlobalToaster.show("操作失败：" + (e.message ?: e.toString()))
         }
 
     }

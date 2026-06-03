@@ -15,7 +15,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -113,10 +113,10 @@ class UserStore(override val di: DI) :
                 setState {
                     info = null
                 }
-                PopTip.show("登录失效，请重新登录")
+                GlobalToaster.show("登录失效，请重新登录")
             }
         } catch (e: Exception) { 
-            PopTip.show("无法连接到御坂网络")
+            GlobalToaster.show("无法连接到御坂网络")
             e.printStackTrace()
         }
     }

@@ -73,7 +73,7 @@ import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -154,7 +154,7 @@ private class UserMedialistPageViewModel(
                 list.finished.value = list.data.value.size >= result.page.total
                 list.pageNum = pageNum
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
                 list.fail.value = res.message
             }
         } catch (e: Exception) {

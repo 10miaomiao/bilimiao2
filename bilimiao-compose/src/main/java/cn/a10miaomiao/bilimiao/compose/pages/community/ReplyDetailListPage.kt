@@ -42,7 +42,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -128,11 +128,11 @@ private class ReplyDetailListPageViewModel(
                     )
                     _detailData.value = newItem
                 } else {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                PopTip.show("喵喵被搞坏了:" + e.message ?: e.toString())
+                GlobalToaster.show("喵喵被搞坏了:" + e.message ?: e.toString())
             }
         }
     }

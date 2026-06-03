@@ -14,7 +14,7 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -68,7 +68,7 @@ class RegionStore(override val di: DI) :
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show("读取分区列表遇到错误")
+            GlobalToaster.show("读取分区列表遇到错误")
         }
         // 从网络读取最新版本的分区列表
         if (!isBestRegion && System.currentTimeMillis() - networkTime > 3600000) {
@@ -100,7 +100,7 @@ class RegionStore(override val di: DI) :
                 )
             } else {
                 withContext(Dispatchers.Main) {
-                    PopTip.show(res.message)
+                    GlobalToaster.show(res.message)
                 }
             }
         } catch (e: Exception) {

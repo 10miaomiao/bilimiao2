@@ -42,7 +42,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -289,7 +289,7 @@ class VideoDetailViewModel(
      */
     fun addVideoHistoryToview() = viewModelScope.launch(Dispatchers.IO) {
         if (!userStore.isLogin()) {
-            PopTip.show("请先登录")
+            GlobalToaster.show("请先登录")
             return@launch
         }
         try {
@@ -299,7 +299,7 @@ class VideoDetailViewModel(
                 .awaitCall()
                 .json<MessageInfo>()
             if (res.code == 0) {
-                PopTip.show("已添加至稍后再看")
+                GlobalToaster.show("已添加至稍后再看")
                 userLibraryStore.appendWatchLater(
                     UserLibraryStore.WatchLaterInfo(
                         aid = arcData.aid,
@@ -308,11 +308,11 @@ class VideoDetailViewModel(
                     )
                 )
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show(e.toString())
+            GlobalToaster.show(e.toString())
         }
     }
 
@@ -439,7 +439,7 @@ class VideoDetailViewModel(
         reqUser: bilibili.app.view.v1.ReqUser?,
     ) = viewModelScope.launch(Dispatchers.IO) {
         if (!userStore.isLogin()) {
-            PopTip.show("请先登录")
+            GlobalToaster.show("请先登录")
             return@launch
         }
         try {
@@ -454,17 +454,17 @@ class VideoDetailViewModel(
             if (res.isSuccess) {
                 val state = if (reqUser?.like == 1) 0 else 1
                 if (state == 1) {
-                    PopTip.show("点赞成功")
+                    GlobalToaster.show("点赞成功")
                 } else {
-                    PopTip.show("已取消点赞")
+                    GlobalToaster.show("已取消点赞")
                 }
                 updateLikeState(state)
             } else {
-                PopTip.show(res.message)
+                GlobalToaster.show(res.message)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            PopTip.show(e.message ?: e.toString())
+            GlobalToaster.show(e.message ?: e.toString())
         }
     }
 
@@ -513,7 +513,7 @@ class VideoDetailViewModel(
 
     fun openCoinDialog(aid: String, copyright: Int) {
         if (!userStore.isLogin()) {
-            PopTip.show("请先登录")
+            GlobalToaster.show("请先登录")
             return
         }
         coinDialogState.show(aid, copyright)
@@ -521,7 +521,7 @@ class VideoDetailViewModel(
 
     fun openAddFavoriteDialog(aid: String) {
         if (!userStore.isLogin()) {
-            PopTip.show("请先登录")
+            GlobalToaster.show("请先登录")
             return
         }
         addFavoriteDialogState.show(aid)
@@ -579,19 +579,19 @@ class VideoDetailViewModel(
                 // 复制链接
                 val text = "http://www.bilibili.com/video/${videoDetail.getBvid()}"
                 copyPlainText("URL", text)
-                PopTip.show("已复制：$text")
+                GlobalToaster.show("已复制：$text")
             }
             4 -> {
                 // 复制AV号
                 val text = "av${videoArc.aid}"
                 copyPlainText("URL", text)
-                PopTip.show("已复制：$text")
+                GlobalToaster.show("已复制：$text")
             }
             5 -> {
                 // 复制BV号
                 val text = videoDetail.getBvid()
                 copyPlainText("URL", text)
-                PopTip.show("已复制：$text")
+                GlobalToaster.show("已复制：$text")
             }
             6 -> {
                 // 保存封面
@@ -607,9 +607,9 @@ class VideoDetailViewModel(
                             current + 1
                         )
                     }
-                    PopTip.show("已添加至下一个播放")
+                    GlobalToaster.show("已添加至下一个播放")
                 } else {
-                    PopTip.show("添加失败，找不到正在播放的视频")
+                    GlobalToaster.show("添加失败，找不到正在播放的视频")
                 }
             }
             12 -> {
@@ -620,7 +620,7 @@ class VideoDetailViewModel(
                         state.items.size,
                     )
                 }
-                PopTip.show("已添加至最后一个播放")
+                GlobalToaster.show("已添加至最后一个播放")
             }
             13 -> {
                 // 添加至稍后再看

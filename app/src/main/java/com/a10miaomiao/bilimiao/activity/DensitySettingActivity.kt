@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
 import com.a10miaomiao.bilimiao.config.config
-import com.kongzue.dialogx.dialogs.PopTip
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 
 class DensitySettingActivity : ComponentActivity() {
 
@@ -66,7 +66,7 @@ class DensitySettingActivity : ComponentActivity() {
 
     fun setCustomConfiguration(dpi: Int, fontScale: Float) {
         if (dpi <= 0 || fontScale <= 0f) {
-            PopTip.show("请输入大于0的整数")
+            GlobalToaster.show("请输入大于0的整数")
         }
         ScreenDpiUtil.saveCustomConfiguration(dpi, fontScale)
         reStartActivity()
@@ -155,7 +155,7 @@ private fun DensitySettingScreen(
                         val fontScale = fontScaleText.value.toFloat()
                         onConfirm(dpi, fontScale)
                     } catch (ex: NumberFormatException) {
-                        PopTip.show("请输入整数")
+                        GlobalToaster.show("请输入整数")
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

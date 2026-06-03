@@ -26,10 +26,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
+import com.dokar.sonner.Toaster
+import com.dokar.sonner.rememberToasterState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -204,6 +208,10 @@ fun MainActivityComposeHost(
     ) {
         withDI(di = hostDi) {
             BilimiaoTheme(appState = appState) {
+                val toasterState = rememberToasterState()
+                LaunchedEffect(toasterState) {
+                    GlobalToaster.init(toasterState)
+                }
                 ImagePreviewerProvider(
                     previewer = { state, innerPadding ->
                         MyImagePreviewer(state, innerPadding)
@@ -244,6 +252,11 @@ fun MainActivityComposeHost(
                     }
                 }
                 MessageDialog(messageDialogState)
+                Toaster(
+                    state = toasterState,
+                    alignment = Alignment.BottomCenter,
+                    richColors = true,
+                )
             }
         }
     }
