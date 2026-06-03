@@ -9,8 +9,6 @@ import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.AESUtil
 import com.a10miaomiao.bilimiao.comm.utils.MiaoEncryptDecrypt
-import com.kongzue.dialogx.DialogX
-import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
 import kotlinx.serialization.encodeToString
 import java.io.File
 
@@ -33,9 +31,6 @@ class BilimiaoCommApp(
     fun onCreate() {
         commApp = this
         readAuthInfo()
-
-        DialogX.init(app)
-        DialogX.globalStyle = MaterialYouStyle.style()
     }
 
     fun setCookie(cookieInfo: LoginInfo.CookieInfo) {

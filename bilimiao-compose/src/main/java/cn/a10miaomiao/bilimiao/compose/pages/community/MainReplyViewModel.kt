@@ -26,8 +26,6 @@ import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
-import com.kongzue.dialogx.dialogs.TipDialog
-import com.kongzue.dialogx.dialogs.WaitDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -245,7 +243,7 @@ class MainReplyViewModel(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    TipDialog.show(res.message, WaitDialog.TYPE.WARNING)
+                    GlobalToaster.show(res.message)
                     messageDialog.close()
                 }
             }

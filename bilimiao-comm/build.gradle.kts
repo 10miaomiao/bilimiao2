@@ -105,9 +105,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kodein.di)
     implementation(libs.glide)
-    implementation(libs.kongzue.dialogx) {
-        exclude("com.github.kongzue.DialogX", "DialogXInterface")
-    }
     implementation(libs.sonner)
 
     implementation(libs.okhttp3)

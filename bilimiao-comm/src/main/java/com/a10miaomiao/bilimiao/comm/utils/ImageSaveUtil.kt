@@ -19,7 +19,6 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
-import com.kongzue.dialogx.dialogs.BottomMenu
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import java.io.File
 import java.io.FileOutputStream
@@ -32,24 +31,6 @@ class ImageSaveUtil(
     val activity: Activity,
     val imageUrl: String,
 ) {
-
-    private val menuItems = arrayOf<String>(
-        "保存图片",
-        "复制图片链接",
-    )
-
-    fun showMemu(context: Context = activity) {
-        BottomMenu.show(menuItems)
-            .setOnMenuItemClickListener { _, _, index ->
-                when(index) {
-                    0 -> downloadAndSaveImage()
-                    1 -> copyImageUrl()
-                }
-                false
-            }
-    }
-
-
 
     /**
      * 复制图片链接到剪切板

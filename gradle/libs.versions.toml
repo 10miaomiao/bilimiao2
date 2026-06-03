@@ -28,7 +28,6 @@ microgSafeParcel = "1.7.1"
 
 # ui components
 constraintlayout = "2.1.4"
-dialogX = "0.0.50.beta37"
 mojito = "1.8.7"
 # compose additional
 sonner = "0.3.9"
@@ -91,7 +90,6 @@ pbandk-genlib = { group="pro.streem.pbandk", name="protoc-gen-pbandk-lib", versi
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
 # ui components
-kongzue-dialogx = { group = "com.github.kongzue", name = "DialogX", version.ref = "dialogX" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 gsy-video-player = { group = "com.github.CarGuo.GSYVideoPlayer", name = "gsyvideoplayer-java", version.ref = "gsyVideoPlayer" }
 mojito = { group = "com.github.mikaelzero.mojito", name = "mojito", version.ref = "mojito" }

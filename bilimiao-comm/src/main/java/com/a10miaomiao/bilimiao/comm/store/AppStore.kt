@@ -13,7 +13,6 @@ import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.message.UnreadMessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.kongzue.dialogx.DialogX
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -87,13 +86,10 @@ class AppStore(override val di: DI) :
             }
         }
         if (mode == 0) {
-            DialogX.globalTheme = DialogX.THEME.AUTO
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         } else if (mode == 1) {
-            DialogX.globalTheme = DialogX.THEME.LIGHT
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         } else if (mode == 2) {
-            DialogX.globalTheme = DialogX.THEME.DARK
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         }
     }

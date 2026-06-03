@@ -137,9 +137,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kodein.di)
 
-    implementation(libs.kongzue.dialogx) {
-        exclude("com.github.kongzue.DialogX", "DialogXInterface")
-    }
     implementation(libs.materialkolor)
 
     implementation(libs.mojito)
