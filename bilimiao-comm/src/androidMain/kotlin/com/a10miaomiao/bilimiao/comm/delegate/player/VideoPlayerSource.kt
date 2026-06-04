@@ -22,7 +22,7 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 class VideoPlayerSource(
-    val mainTitle: String, //视频名字，不是分p名
+    override val mainTitle: String, //视频名字，不是分p名
     override val title: String,
     override val coverUrl: String,
     var aid: String, // av号
