@@ -23,7 +23,7 @@ class PageNavigation(
     private val navHostController: () -> NavHostController,
     private val launchUrl: (uri: Uri) -> Unit,
     private val onClose: () -> Unit = {},
-) {
+) : PageNavigator {
 
     val hostController get() = navHostController()
 
@@ -33,6 +33,10 @@ class PageNavigation(
         }.isSuccess.also {
             if (!it) miaoLogger() debug "[NotFoundPage]:deepLink=${deepLink}"
         }
+    }
+
+    override fun <T : ComposePage> navigate(route: T) {
+        navigate(route, null, null)
     }
 
     fun <T : ComposePage> navigate(
@@ -50,11 +54,11 @@ class PageNavigation(
         navigate(route, navOptions(builder))
     }
 
-    fun canPopBackStack(): Boolean {
+    override fun canPopBackStack(): Boolean {
         return hostController.previousBackStackEntry != null
     }
 
-    fun popBackStack(): Boolean {
+    override fun popBackStack(): Boolean {
         return hostController.popBackStack().also {
             if (!it) {
                 onClose()
@@ -62,21 +66,25 @@ class PageNavigation(
         }
     }
 
-    fun <T : ComposePage> popBackStack(
+    override fun <T : ComposePage> popBackStack(
         route: T,
         inclusive: Boolean,
-        saveState: Boolean = false
+        saveState: Boolean
     ) {
         if(!hostController.popBackStack(route, inclusive, saveState)) {
             onClose()
         }
     }
 
+    override fun navigateByUri(uriString: String): Boolean {
+        return navigateByUri(Uri.parse(uriString))
+    }
+
     fun navigateToVideoInfo(id: String) {
         hostController.navigate(VideoDetailPage(id))
     }
 
-    fun launchWebBrowser(url: String) {
+    override fun launchWebBrowser(url: String) {
         launchWebBrowser(Uri.parse(url))
     }
 

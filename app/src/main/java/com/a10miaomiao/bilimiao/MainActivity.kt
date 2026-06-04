@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity(), DIAware {
             bindSingleton { messageDialogState }
             bindSingleton { emitter }
             bindSingleton { composeNavigator.pageNavigation }
+            bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator> { composeNavigator.pageNavigation }
             bindSingleton { bottomSheetState }
         }
     }

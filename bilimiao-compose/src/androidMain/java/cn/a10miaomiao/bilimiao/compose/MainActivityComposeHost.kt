@@ -299,6 +299,9 @@ fun MyBottomSheet(
             bindSingleton(
                 overrides = true
             ) { pageNavigation }
+            bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator>(
+                overrides = true
+            ) { pageNavigation }
         }
     ) {
         CompositionLocalProvider(
