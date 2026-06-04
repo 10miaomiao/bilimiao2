@@ -11,6 +11,7 @@ abstract class BasePlayerSource() {
     abstract val coverUrl: String
     abstract val ownerId: String
     abstract val ownerName: String
+    open val mainTitle: String = "" // 视频主标题(分P所属的视频标题)
     abstract suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo
     abstract fun getSourceIds(): PlayerSourceIds
 
