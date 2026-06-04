@@ -29,6 +29,7 @@ import cn.a10miaomiao.bilimiao.compose.components.preference.multiSelectIntPrefe
 import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -152,7 +153,7 @@ private fun VideoSettingPageContent(
 
     val context = LocalContext.current
     val dataStore = remember {
-        SettingPreferences.run { context.dataStore }
+        context.dataStore
     }
 
     ProvidePreferenceLocals(

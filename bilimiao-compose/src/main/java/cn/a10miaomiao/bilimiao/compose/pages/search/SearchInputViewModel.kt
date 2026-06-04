@@ -1,25 +1,23 @@
 package cn.a10miaomiao.bilimiao.compose.pages.search
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a10miaomiao.bilimiao.comm.db.SearchHistoryDB
+import com.a10miaomiao.bilimiao.comm.db.createSearchHistoryDatabase
+import com.a10miaomiao.bilimiao.comm.db.entity.SearchHistoryEntity
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.json.JSONTokener
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.instance
 
 class SearchInputViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
-
-    private val context: Context by instance()
 
     val historyListFlow = MutableStateFlow(listOf<SuggestInfo>())
     val historyList get() = historyListFlow
@@ -29,18 +27,18 @@ class SearchInputViewModel(
     var config: SearchConfigInfo? = null
     var searchMode = 0 // 0为全站搜索，1为页面自身搜索
 
-    private val searchHistoryDB = SearchHistoryDB(context, SearchHistoryDB.DB_NAME, null, 1)
+    private val searchHistoryDao = createSearchHistoryDatabase().searchHistoryDao()
 
     init {
         updateHistoryList()
     }
 
     private fun updateHistoryList() {
-        historyListFlow.value = searchHistoryDB.queryAllHistory().map {
+        historyListFlow.value = runBlocking { searchHistoryDao.queryAllHistory() }.map {
             SuggestInfo(
-                text = it,
+                text = it.keyword,
                 type = SuggestType.HISTORY,
-                value = it,
+                value = it.keyword,
             )
         }
     }
@@ -99,18 +97,20 @@ class SearchInputViewModel(
         }
 
     fun addSearchHistory(text: String) {
-        searchHistoryDB.deleteHistory(text)
-        searchHistoryDB.insertHistory(text)
+        runBlocking {
+            searchHistoryDao.deleteHistory(text)
+            searchHistoryDao.insertHistory(SearchHistoryEntity(keyword = text))
+        }
         updateHistoryList()
     }
 
     fun deleteSearchHistory(text: String) {
-        searchHistoryDB.deleteHistory(text)
+        runBlocking { searchHistoryDao.deleteHistory(text) }
         updateHistoryList()
     }
 
     fun deleteAllSearchHistory() {
-        searchHistoryDB.deleteAllHistory()
+        runBlocking { searchHistoryDao.deleteAllHistory() }
         updateHistoryList()
     }
 

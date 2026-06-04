@@ -24,6 +24,7 @@ import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.listStylePreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ListPreferenceType
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -68,7 +69,7 @@ private fun HomeSettingPageContent(
 
     val context = LocalContext.current
     val dataStore = remember {
-        SettingPreferences.run { context.dataStore }
+        context.dataStore
     }
 
     ProvidePreferenceLocals(

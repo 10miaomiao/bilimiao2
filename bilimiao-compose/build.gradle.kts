@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.sonner)
 
     implementation(project(":bilimiao-comm"))
+    implementation(libs.androidx.room.runtime)
     implementation(project(":bilimiao-download"))
     implementation(project(":bilimiao-cover"))
 

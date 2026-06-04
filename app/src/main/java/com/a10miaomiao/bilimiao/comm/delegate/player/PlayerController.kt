@@ -22,7 +22,12 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
+import com.a10miaomiao.bilimiao.comm.entity.player.toVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
+import com.a10miaomiao.bilimiao.comm.datastore.edit
+import com.a10miaomiao.bilimiao.comm.datastore.getData
+import com.a10miaomiao.bilimiao.comm.datastore.mapData
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.store.AppStore
@@ -268,11 +273,9 @@ class PlayerController(
                 )
             }
         }
-        SettingPreferences.run {
-            activity.dataStore.data.collect {
-                initVideoSetting(it)
-                initDanmakuContext(it)
-            }
+        activity.dataStore.data.collect {
+            initVideoSetting(it)
+            initDanmakuContext(it)
         }
     }
 

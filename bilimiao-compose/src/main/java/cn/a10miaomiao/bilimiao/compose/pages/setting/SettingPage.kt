@@ -35,6 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.glidePreference
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
 import com.a10miaomiao.bilimiao.comm.entity.miao.MiaoSettingInfo
 import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
@@ -175,7 +176,7 @@ private fun SettingPageContent(
     val moreSettingList by viewModel.moreSettingList.collectAsState()
 
     val dataStore = remember {
-        SettingPreferences.run { context.dataStore }
+        context.dataStore
     }
     val showLogoutDialog = remember {
         mutableStateOf(false)

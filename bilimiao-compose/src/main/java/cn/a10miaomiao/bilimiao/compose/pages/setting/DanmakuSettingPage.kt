@@ -23,6 +23,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -92,7 +93,7 @@ private fun DanmakuSettingPageContent(
 
     val context = LocalContext.current
     val dataStore = remember {
-        SettingPreferences.run { context.dataStore }
+        context.dataStore
     }
     val danmakuEnableArr by dataStore.data.map {
         arrayOf(
