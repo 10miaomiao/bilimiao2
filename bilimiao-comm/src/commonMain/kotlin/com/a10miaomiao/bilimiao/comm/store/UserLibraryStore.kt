@@ -59,13 +59,13 @@ class UserLibraryStore (override val di: DI) :
 //        val bangumi: BangumiInfo = BangumiInfo(),
     )
 
-    private val userStore: UserStore by instance()
+    private val userStore: UserStateProvider by instance()
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
 
     override fun init() {
-        val mid = userStore.state.info?.mid
+        val mid = userStore.info?.mid
         viewModelScope.launch {
             loadHistoryData()
             if (mid != null) {
