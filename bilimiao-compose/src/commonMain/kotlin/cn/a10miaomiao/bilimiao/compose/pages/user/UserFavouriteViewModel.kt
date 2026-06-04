@@ -14,7 +14,6 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -26,8 +25,6 @@ internal class UserFavouriteViewModel(
     override val di: DI,
     val mid: String,
 ) : ViewModel(), DIAware {
-
-    private val userStore: UserStore by instance()
 
     private val playerStore by instance<PlayerStore>()
     private val playListStore by instance<PlayListStore>()
