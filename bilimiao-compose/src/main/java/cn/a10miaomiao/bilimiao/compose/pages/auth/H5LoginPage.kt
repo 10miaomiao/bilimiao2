@@ -126,7 +126,12 @@ private class H5LoginPageViewModel(
             }
             userAgentString = defaultUserAgentString
             allowContentAccess = true
-            allowFileAccess = true
+            // The H5 login WebView only loads https Bilibili passport URLs
+            // (see loadUrl(startUrl) below). It does not need file://
+            // access, and the _BiliJsBridge interface attached in
+            // setBiliAppWebView would be reachable from a same-origin
+            // file:// page if a stray file URL ever landed here.
+            allowFileAccess = false
             cacheMode = WebSettings.LOAD_DEFAULT
             databaseEnabled = true
             domStorageEnabled = true

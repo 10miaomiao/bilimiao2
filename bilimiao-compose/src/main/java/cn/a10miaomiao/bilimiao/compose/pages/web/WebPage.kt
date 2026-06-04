@@ -101,7 +101,12 @@ private class WebPageViewModel(
             }
             userAgentString = "$defaultUserAgentString $userAgent"
             allowContentAccess = true
-            allowFileAccess = true
+            // WebPage is opened with startUrl, which is always an http or
+            // https URL routed through BilibiliNavigation. It does not
+            // need file:// access, and the _BiliJsBridge interface
+            // attached below would be reachable from a same-origin
+            // file:// page if a stray file URL ever landed here.
+            allowFileAccess = false
             cacheMode = WebSettings.LOAD_DEFAULT
             databaseEnabled = true
             domStorageEnabled = true
