@@ -1,8 +1,90 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.library")
+    id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
     kotlin("plugin.serialization")
-    kotlin("plugin.compose")
+}
+
+kotlin {
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        }
+    }
+    jvm("desktop")
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.coroutines.core)
+
+                implementation(libs.kodein.di.core)
+                implementation(libs.kodein.di.compose)
+                implementation(libs.kmp.lifecycle.viewmodel.compose)
+
+                implementation(libs.okhttp3)
+                implementation(libs.pbandk.runtime)
+                implementation(libs.materialkolor)
+                implementation(libs.reorderable)
+                implementation(libs.sonner)
+                implementation(libs.coil.compose)
+                implementation(libs.coil.network.okhttp)
+                implementation(libs.compose.navigation)
+                implementation(libs.compose.material.icons.extended.kmp)
+
+                implementation(project(":bilimiao-comm"))
+            }
+        }
+        androidMain {
+            kotlin.srcDir("src/androidMain/java")
+            resources.srcDir("src/androidMain/res")
+            dependencies {
+                implementation(libs.androidx.core.ktx)
+                implementation(libs.androidx.appcompat)
+                implementation(libs.material)
+                implementation(libs.androidx.datastore.preferences)
+                implementation(libs.androidx.browser)
+
+                implementation(libs.kotlinx.coroutines.android)
+                implementation(libs.activity.compose)
+                implementation(libs.compose.material.icons.extended)
+                implementation(libs.compose.material3.window.size)
+                implementation(libs.compose.material3.adaptive)
+
+                implementation(libs.accompanist.drawablepainter)
+                implementation(libs.glide)
+                implementation(libs.glide.compose)
+                implementation(libs.qrose)
+                implementation(libs.compose.preference)
+
+                implementation(libs.kodein.di)
+                implementation(libs.kodein.di.compose)
+
+                implementation(libs.androidx.room.runtime)
+
+                implementation(project(":bilimiao-download"))
+                implementation(project(":bilimiao-cover"))
+            }
+        }
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.common)
+                implementation(libs.kotlinx.coroutines.core)
+            }
+        }
+    }
 }
 
 android {
@@ -10,7 +92,7 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 35
+        version = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -41,65 +123,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
 
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
-    }
-}
-
-dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.browser)
-
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kodein.di)
-    implementation(libs.kodein.di.compose)
-
-    val composeBom = platform(libs.androidx.compose.bom)
-    implementation(composeBom)
-    implementation(libs.compose.ui)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material)
-    implementation(libs.compose.material.icons.extended)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.material3.window.size)
-    implementation(libs.compose.material3.adaptive)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.activity.compose)
-    implementation(libs.compose.navigation)
-
-    implementation(libs.accompanist.drawablepainter)
-    implementation(libs.compose.preference)
-    implementation(libs.reorderable)
-    implementation(libs.materialkolor)
-
-    implementation(libs.okhttp3)
-    implementation(libs.pbandk.runtime)
-    implementation(libs.glide)
-    implementation(libs.glide.compose)
-    implementation(libs.qrose)
-
-    implementation(libs.sonner)
-
-    implementation(project(":bilimiao-comm"))
-    implementation(libs.androidx.room.runtime)
-    implementation(project(":bilimiao-download"))
-    implementation(project(":bilimiao-cover"))
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(composeBom)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 }

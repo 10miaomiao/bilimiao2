@@ -53,8 +53,8 @@ class TimeSettingStore(override val di: DI) :
 
     override fun copyState() = state.copy()
 
-    override fun init(context: Context) {
-        super.init(context)
+    override fun init() {
+        super.init()
         initState()
     }
 

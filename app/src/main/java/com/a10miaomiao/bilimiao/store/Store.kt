@@ -44,14 +44,14 @@ class Store (
         }
 
         fun onCreate(savedInstanceState: Bundle?) {
-                appStore.init(activity)
-                playerStore.init(activity)
-                userStore.init(activity)
-                userLibraryStore.init(activity)
-                messageStore.init(activity)
-                timeSettingStore.init(activity)
-                filterStore.init(activity)
-                regionStore.init(activity)
+                appStore.init()
+                playerStore.init()
+                userStore.init()
+                userLibraryStore.init()
+                messageStore.init()
+                timeSettingStore.init()
+                filterStore.init()
+                regionStore.init()
         }
 
         fun onDestroy() {

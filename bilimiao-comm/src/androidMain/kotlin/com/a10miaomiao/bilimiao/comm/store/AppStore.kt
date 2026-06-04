@@ -48,8 +48,8 @@ class AppStore(override val di: DI) :
 
     private val context: Context by instance()
 
-    override fun init(context: Context) {
-        super.init(context)
+    override fun init() {
+        super.init()
         SettingPreferences.launch(viewModelScope) {
             context.dataStore.data.collect {
                 val themeType = it[ThemeType] ?: SettingConstants.THEME_TYPE_DEFAULT

@@ -1,6 +1,5 @@
 package com.a10miaomiao.bilimiao.comm.store
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -47,8 +46,8 @@ class UserStore(override val di: DI) :
 
     private val messageStore: MessageStore by instance()
 
-    override fun init(context: Context) {
-        super.init(context)
+    override fun init() {
+        super.init()
         if (BilimiaoCommCore.instance.loginInfo != null)  {
             readUserInfo()
             loadInfo()
