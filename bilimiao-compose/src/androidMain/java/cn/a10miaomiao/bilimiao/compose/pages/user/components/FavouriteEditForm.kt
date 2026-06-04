@@ -20,23 +20,6 @@ import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import org.kodein.di.compose.rememberInstance
 
-internal sealed class FavouriteEditDialogState {
-    data object Add : FavouriteEditDialogState()
-
-    data class Update(
-        val id: String,
-        val cover: String,
-        val title: String,
-        val intro: String,
-        val privacy: Int,
-    ) : FavouriteEditDialogState()
-
-    data class Delete(
-        val id: String,
-        val title: String,
-    ) : FavouriteEditDialogState()
-}
-
 internal class FavouriteEditFormState(
     initialTitle: String,
     initialIntro: String,
