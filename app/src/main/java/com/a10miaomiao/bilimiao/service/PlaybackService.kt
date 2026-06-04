@@ -12,7 +12,7 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.a10miaomiao.bilimiao.MainActivity
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences.dataStore
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.coroutines.CoroutineScope
@@ -47,10 +47,10 @@ class PlaybackService : MediaSessionService(), MediaSession.Callback {
         }
     }
 
-    private suspend fun initPlayerSetting() = SettingPreferences.run {
+    private suspend fun initPlayerSetting() {
         var isInitial = true
         dataStore.data.map {
-            it[PlayerNotification] ?: true
+            it[SettingPreferences.PlayerNotification] ?: true
         }.collect {
             showNotification = it
             if (isInitial) {

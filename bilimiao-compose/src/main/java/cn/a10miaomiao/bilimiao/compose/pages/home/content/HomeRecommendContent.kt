@@ -48,6 +48,7 @@ import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
@@ -90,10 +91,8 @@ private class HomeRecommendContentViewModel(
 
     init {
         viewModelScope.launch {
-            SettingPreferences.run {
-                context.dataStore.data.map {
-                    it[HomeRecommendListStyle] ?: 0
-                }
+            context.dataStore.data.map {
+                it[SettingPreferences.HomeRecommendListStyle] ?: 0
             }.collect {
                 listStyle.value = it
             }

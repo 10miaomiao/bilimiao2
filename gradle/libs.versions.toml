@@ -21,6 +21,9 @@ kodeinDi = "7.12.0"
 okhttp = "4.10.0"
 glide = "4.13.2"
 pbandk = "0.16.0"
+# database
+room = "2.7.0"
+ksp = "2.3.0"
 gsyVideoPlayer = "v10.0.0"
 accompanist = "0.35.0-alpha"
 materialKolor = "2.0.2"
@@ -76,16 +79,22 @@ activity-compose = { group = "androidx.activity", name = "activity-compose", ver
 # kotlin libraries
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 # accompanist
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 # dependency injection
 kodein-di = { group = "org.kodein.di", name = "kodein-di-framework-android-x", version.ref = "kodeinDi" }
+kodein-di-core = { group = "org.kodein.di", name = "kodein-di", version.ref = "kodeinDi" }
 kodein-di-compose = { group = "org.kodein.di", name = "kodein-di-framework-compose", version.ref = "kodeinDi" }
 # network
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 pbandk-runtime = { group = "pro.streem.pbandk", name = "pbandk-runtime", version.ref = "pbandk" }
 pbandk-genlib = { group="pro.streem.pbandk", name="protoc-gen-pbandk-lib", version.ref = "pbandk" }
+# database
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.2" }
 # image loading
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
@@ -120,8 +129,10 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrains-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 jetbrains-kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 google-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

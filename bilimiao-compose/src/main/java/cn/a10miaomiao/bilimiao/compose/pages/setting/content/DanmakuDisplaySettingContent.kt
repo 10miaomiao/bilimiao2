@@ -15,6 +15,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.dataStore
 import kotlinx.coroutines.flow.map
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preferenceCategory
@@ -29,7 +30,7 @@ internal fun DanmakuDisplaySettingContent(
 
     val context = LocalContext.current
     val dataStore = remember {
-        SettingPreferences.run { context.dataStore }
+        context.dataStore
     }
 
     val enableSetting = if (danmakuPreferences.name != "default") {
