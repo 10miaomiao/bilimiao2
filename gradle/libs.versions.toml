@@ -1,12 +1,13 @@
 [versions]
 agp = "8.13.0"
 kotlin = "2.3.0"
+composeMultiplatform = "1.8.1"
 # jetpack
 core = "1.13.1"
 appcompat = "1.6.1"
 material = "1.12.0"
 lifecycle = "2.8.3"
-navigation = "2.8.0"
+navigation = "2.9.0-beta03"
 composeBom = "2026.04.01"
 datastore = "1.1.1"
 media3 = "1.5.0"
@@ -36,6 +37,7 @@ mojito = "1.8.7"
 sonner = "0.3.9"
 activityCompose = "1.9.0"
 glideCompose = "1.0.0-beta01"
+coil = "3.1.0"
 qrose = "1.0.1"
 composePreference = "1.1.1"
 reorderable = "2.5.1"
@@ -53,6 +55,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+kmp-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
@@ -70,11 +73,12 @@ compose-foundation = { group = "androidx.compose.foundation", name = "foundation
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+compose-material-icons-extended-kmp = { group = "org.jetbrains.compose.material", name = "material-icons-extended", version = "1.7.3" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-material3-window-size = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive-android" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 # kotlin libraries
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
@@ -113,6 +117,8 @@ geetest-sensebot = { group = "com.geetest.sensebot", name = "sensebot", version 
 # compose additional
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 glide-compose = { group = "com.github.bumptech.glide", name = "compose", version.ref = "glideCompose" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 qrose = { group = "io.github.alexzhirkevich", name = "qrose", version.ref = "qrose" }
 compose-preference = { group = "me.zhanghai.compose.preference", name = "library", version.ref = "composePreference" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
@@ -131,6 +137,7 @@ android-test = { id = "com.android.test", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrains-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrains-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 jetbrains-kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 google-protobuf = { id = "com.google.protobuf", version = "0.9.4" }

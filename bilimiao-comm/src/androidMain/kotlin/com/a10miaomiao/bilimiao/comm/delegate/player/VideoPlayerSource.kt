@@ -29,7 +29,7 @@ class VideoPlayerSource(
     override var id: String, // cid
     override val ownerId: String,
     override val ownerName: String,
-): BasePlayerSource() {
+): BasePlayerSource(), DanmakuProvider {
 
     var pages = emptyList<PageInfo>()
 

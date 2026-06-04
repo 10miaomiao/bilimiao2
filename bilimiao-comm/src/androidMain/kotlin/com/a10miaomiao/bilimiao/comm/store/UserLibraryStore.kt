@@ -1,6 +1,5 @@
 package com.a10miaomiao.bilimiao.comm.store
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bilibili.app.interfaces.v1.Cursor
@@ -65,7 +64,7 @@ class UserLibraryStore (override val di: DI) :
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
 
-    override fun init(context: Context) {
+    override fun init() {
         val mid = userStore.state.info?.mid
         viewModelScope.launch {
             loadHistoryData()

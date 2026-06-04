@@ -447,8 +447,12 @@ class PlayerDelegate2(
         val source = playerSource ?: return
         try {
             loadingBoxController.print("装载弹幕数据...")
-            val danmukuParser = withContext(Dispatchers.IO) {
-                source.getDanmakuParser()
+            val danmukuParser = if (source is DanmakuProvider) {
+                withContext(Dispatchers.IO) {
+                    source.getDanmakuParser()
+                }
+            } else {
+                null
             }
             loadingBoxController.println("成功")
             loadingBoxController.print("获取视频信息...")

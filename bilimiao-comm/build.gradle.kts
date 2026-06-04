@@ -28,6 +28,8 @@ kotlin {
                 implementation(libs.okhttp3)
                 implementation(libs.pbandk.runtime)
                 implementation(libs.kodein.di.core)
+                implementation(libs.kmp.lifecycle.viewmodel.compose)
+                implementation(libs.sonner)
                 implementation(libs.androidx.datastore.preferences)
                 implementation(libs.androidx.room.runtime)
             }
@@ -38,8 +40,6 @@ kotlin {
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.androidx.appcompat)
                 implementation(libs.material)
-                implementation(libs.androidx.lifecycle.runtime.ktx)
-                implementation(libs.androidx.lifecycle.viewmodel.ktx)
                 implementation(libs.androidx.browser)
 
                 implementation(libs.androidx.compose.bom)
@@ -47,7 +47,6 @@ kotlin {
 
                 implementation(libs.kodein.di)
                 implementation(libs.glide)
-                implementation(libs.sonner)
 
                 implementation(project(":DanmakuFlameMaster"))
             }

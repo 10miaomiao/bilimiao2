@@ -43,14 +43,14 @@ class RegionStore(override val di: DI) :
 
     private var networkTime = 0L
 
-    override fun init(context: Context) {
-        super.init(context)
+    override fun init() {
+        super.init()
         // 加载分区列表
         SettingPreferences.launch(viewModelScope, Dispatchers.IO) {
-            context.dataStore.data.map {
+            activity.dataStore.data.map {
                 it[IsBestRegion] ?: false
             }.collect {
-                loadRegionData(context, it)
+                loadRegionData(activity, it)
             }
         }
     }

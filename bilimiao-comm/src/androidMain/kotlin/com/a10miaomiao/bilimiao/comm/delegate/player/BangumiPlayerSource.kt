@@ -39,7 +39,7 @@ class BangumiPlayerSource(
     override val coverUrl: String,
     override val ownerId: String,
     override val ownerName: String,
-): BasePlayerSource() {
+): BasePlayerSource(), DanmakuProvider {
 
     var episodes = emptyList<EpisodeInfo>()
 

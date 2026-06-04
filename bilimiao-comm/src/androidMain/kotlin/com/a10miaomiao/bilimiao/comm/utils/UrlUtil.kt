@@ -2,9 +2,9 @@ package com.a10miaomiao.bilimiao.comm.utils
 
 import android.net.Uri
 
-object UrlUtil {
+actual object UrlUtil {
 
-    fun autoHttps(url: String) =if ("://" in url) {
+    actual fun autoHttps(url: String) = if ("://" in url) {
         url.replace("http://","https://")
     } else {
         "https:$url"
@@ -26,7 +26,7 @@ object UrlUtil {
         return keyValueMap
     }
 
-    fun replaceHost(url: String, host: String): String {
+    actual fun replaceHost(url: String, host: String): String {
         return url.replace(":\\\\?\\/\\\\?\\/[^\\/]+\\\\?\\/".toRegex(), "://${host}/")
     }
 

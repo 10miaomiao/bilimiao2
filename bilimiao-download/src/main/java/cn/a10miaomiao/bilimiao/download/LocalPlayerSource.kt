@@ -6,6 +6,7 @@ import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadMediaFileInfo
 import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
+import com.a10miaomiao.bilimiao.comm.delegate.player.DanmakuProvider
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
@@ -23,7 +24,7 @@ class LocalPlayerSource(
     override val id: String,
     override val title: String,
     override val coverUrl: String,
-): BasePlayerSource() {
+): BasePlayerSource(), DanmakuProvider {
 
     override val ownerId: String
         get() = ""
