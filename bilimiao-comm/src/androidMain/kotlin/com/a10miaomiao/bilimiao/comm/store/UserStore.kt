@@ -25,7 +25,7 @@ import org.kodein.di.instance
 import java.io.File
 
 class UserStore(override val di: DI) :
-    ViewModel(), BaseStore<UserStore.State> {
+    ViewModel(), BaseStore<UserStore.State>, UserStateProvider {
 
     data class State (
         var info: UserInfo? = null
@@ -41,6 +41,8 @@ class UserStore(override val di: DI) :
 
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
+
+    override val info: UserInfo? get() = state.info
 
     private val activity: AppCompatActivity by instance()
 
@@ -134,8 +136,8 @@ class UserStore(override val di: DI) :
 
     fun isSelf(mid: String) = state.info?.mid == mid.toLong()
 
-    fun isLogin() = state.info != null
+    override fun isLogin() = state.info != null
 
-    fun isVip() = (state.info?.vip_type ?: 0) > 0
+    override fun isVip() = (state.info?.vip_type ?: 0) > 0
 
 }

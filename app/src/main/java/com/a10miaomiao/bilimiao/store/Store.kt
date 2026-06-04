@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
+import com.a10miaomiao.bilimiao.comm.store.UserStateProvider
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -36,6 +37,7 @@ class Store (
                 bindSingleton { playListStore }
                 bindSingleton { playerStore }
                 bindSingleton { userStore }
+                bindSingleton<UserStateProvider> { userStore }
                 bindSingleton { userLibraryStore }
                 bindSingleton { messageStore }
                 bindSingleton { timeSettingStore }
