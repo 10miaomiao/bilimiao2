@@ -18,7 +18,9 @@ internal class SystemMessageContentModel(
 
 @Composable
 fun SystemMessageContent() {
-    val viewModel: SystemMessageContentModel = diViewModel()
+    val viewModel: SystemMessageContentModel = diViewModel {
+        SystemMessageContentModel(it)
+    }
     val windowInsets = localContentInsets()
 
     Column {
