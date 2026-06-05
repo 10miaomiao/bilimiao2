@@ -280,7 +280,7 @@ internal fun CustomTime(
                 }
                 if (abs(_startTime.getGapCount(dateModel)) > 30) {
                     // TODO: toast
-                } else if (dateModel.getDate().time > _startTime.getDate().time) {
+                } else if (dateModel.toLocalDate() > _startTime.toLocalDate()) {
                     endTime = dateModel
                 } else {
                     endTime = _startTime

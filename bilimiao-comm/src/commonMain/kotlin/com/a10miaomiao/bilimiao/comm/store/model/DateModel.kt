@@ -1,7 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.store.model
 
 
-import java.util.*
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
 class DateModel() {
     var year = 2009
@@ -17,12 +19,12 @@ class DateModel() {
 
     fun getValue(span: String = "") = "$year$span${fillZero(month)}$span${fillZero(date)}"
 
-    fun getDate() = Date(year - 1900, month - 1, date)
+    fun toLocalDate() = LocalDate(year, month, date)
 
-    fun setDate(date: Date): DateModel {
-        year = date.year + 1900
-        month = date.month + 1
-        this.date = date.date
+    fun setDate(date: LocalDate): DateModel {
+        year = date.year
+        month = date.monthNumber
+        this.date = date.dayOfMonth
         return this
     }
 
@@ -89,19 +91,15 @@ class DateModel() {
      * 根据获取gapCount天后的时间
      */
     fun getTimeByGapCount(gapCount: Int): DateModel {
-        var calendar = Calendar.getInstance()
-        calendar.time = getDate()
-        calendar.add(Calendar.DATE, gapCount)//参数-，换为1则为加1代表在原来时间的基础上减少一天一天;ps:加减月数 小时同加减天数
-        return DateModel().setDate(calendar.time)
+        val newDate = toLocalDate().plus(gapCount, DateTimeUnit.DAY)
+        return DateModel().setDate(newDate)
     }
 
     /**
      * 计算时间间隔
      */
     fun getGapCount(date: DateModel): Int {
-        val startL = getDate().time
-        val endL = date.getDate().time
-        return ((endL - startL) / (1000 * 60 * 60 * 24)).toInt()
+        return (date.toLocalDate().toEpochDays() - toLocalDate().toEpochDays())
     }
 
     fun set(newDate: DateModel) {

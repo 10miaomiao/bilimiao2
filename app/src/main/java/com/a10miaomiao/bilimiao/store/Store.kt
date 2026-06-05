@@ -13,6 +13,8 @@ import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.store.UserStateProvider
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import com.a10miaomiao.bilimiao.comm.store.SettingsProvider
+import com.a10miaomiao.bilimiao.comm.store.AndroidSettingsProvider
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
@@ -33,6 +35,7 @@ class Store (
         val regionStore: RegionStore by activity.diViewModel(di)
 
         fun loadStoreModules(diBuilder: DI.Builder) = diBuilder.run{
+                bindSingleton<SettingsProvider> { AndroidSettingsProvider(activity) }
                 bindSingleton { appStore }
                 bindSingleton { playListStore }
                 bindSingleton { playerStore }
