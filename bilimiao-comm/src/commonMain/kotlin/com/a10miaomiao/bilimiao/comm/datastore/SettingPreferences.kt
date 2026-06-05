@@ -1,11 +1,54 @@
 package com.a10miaomiao.bilimiao.comm.datastore
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+
+expect val appDataStore: DataStore<Preferences>
+
+inline fun SettingPreferences.launch(
+    scope: CoroutineScope,
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+    crossinline block: suspend SettingPreferences.() -> Unit
+) = scope.launch(context, start) {
+    block()
+}
+
+suspend fun SettingPreferences.editPreferences(
+    transform: suspend SettingPreferences.(MutablePreferences) -> Unit
+) {
+    appDataStore.edit {
+        transform(it)
+    }
+}
+
+suspend fun SettingPreferences.readPreferences(
+    block: suspend SettingPreferences.(Preferences) -> Unit
+) {
+    val preferences = appDataStore.data.first()
+    block(preferences)
+}
+
+suspend fun <T> SettingPreferences.mapPreferences(
+    block: suspend SettingPreferences.(Preferences) -> T
+): T {
+    val preferences = appDataStore.data.first()
+    return block(preferences)
+}
 
 object SettingPreferences {
 

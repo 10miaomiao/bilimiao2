@@ -12,7 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
@@ -23,7 +22,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.dataStore
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -91,9 +90,8 @@ private fun DanmakuSettingPageContent(
     )
     val windowInsets = localContentInsets()
 
-    val context = LocalContext.current
     val dataStore = remember {
-        context.dataStore
+        appDataStore
     }
     val danmakuEnableArr by dataStore.data.map {
         arrayOf(

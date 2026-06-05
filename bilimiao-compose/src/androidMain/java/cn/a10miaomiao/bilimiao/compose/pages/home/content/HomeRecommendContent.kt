@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.home.content
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,7 +47,7 @@ import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.dataStore
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.home.HomeRecommendInfo
@@ -76,7 +75,6 @@ private class HomeRecommendContentViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val context: Context by instance()
     private val pageNavigation: PageNavigation by instance()
     private val filterStore: FilterStore by instance()
 
@@ -90,7 +88,7 @@ private class HomeRecommendContentViewModel(
 
     init {
         viewModelScope.launch {
-            context.dataStore.data.map {
+            appDataStore.data.map {
                 it[SettingPreferences.HomeRecommendListStyle] ?: 0
             }.collect {
                 listStyle.value = it

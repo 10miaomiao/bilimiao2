@@ -34,7 +34,8 @@ import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ThemeColorButton
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.dataStore
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
+import com.a10miaomiao.bilimiao.comm.platform.getMaterialYouColor
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import kotlinx.serialization.Serializable
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -72,7 +73,7 @@ private class ThemeSettingPageViewModel(
         1 to "纯色",
     )
     val appBarTypeListSize get() = appBarTypeList.size
-    val materialYouColor get() = appStore.materialYouColor
+    val materialYouColor get() = getMaterialYouColor()
 
     val colorList = listOf<Pair<Long, String>>(
         0xFFFB7299 to "少女粉",

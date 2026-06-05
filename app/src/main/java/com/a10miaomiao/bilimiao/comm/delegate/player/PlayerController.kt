@@ -24,7 +24,7 @@ import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.entity.player.toVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.dataStore
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.datastore.edit
 import com.a10miaomiao.bilimiao.comm.datastore.getData
 import com.a10miaomiao.bilimiao.comm.datastore.mapData
@@ -273,7 +273,7 @@ class PlayerController(
                 )
             }
         }
-        activity.dataStore.data.collect {
+        appDataStore.data.collect {
             initVideoSetting(it)
             initDanmakuContext(it)
         }
