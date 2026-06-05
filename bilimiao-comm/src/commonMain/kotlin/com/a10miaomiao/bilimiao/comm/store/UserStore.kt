@@ -1,25 +1,19 @@
 package com.a10miaomiao.bilimiao.comm.store
 
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommCore
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
-import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
+import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
-import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.io.File
@@ -43,8 +37,6 @@ class UserStore(override val di: DI) :
     override fun copyState() = state.copy()
 
     override val info: UserInfo? get() = state.info
-
-    private val activity: AppCompatActivity by instance()
 
     private val messageStore: MessageStore by instance()
 
@@ -73,7 +65,7 @@ class UserStore(override val di: DI) :
     }
 
     private fun seveUserInfo(userInfo: UserInfo?) {
-        val file = File(activity.filesDir.path + "/user.data")
+        val file = File(PlatformProviders.context.filesDir, "user.data")
         if (userInfo != null) {
             val jsonStr = MiaoJson.toJson(userInfo)
             file.writeText(jsonStr)
@@ -84,7 +76,7 @@ class UserStore(override val di: DI) :
 
     private fun readUserInfo() {
         try {
-            val file = File(activity.filesDir.path + "/user.data")
+            val file = File(PlatformProviders.context.filesDir, "user.data")
             if (file.exists()) {
                 val jsonStr = file.readText()
                 val localInfo = MiaoJson.fromJson<UserInfo>(jsonStr)
@@ -116,7 +108,7 @@ class UserStore(override val di: DI) :
                 }
                 GlobalToaster.show("登录失效，请重新登录")
             }
-        } catch (e: Exception) { 
+        } catch (e: Exception) {
             GlobalToaster.show("无法连接到御坂网络")
             e.printStackTrace()
         }
