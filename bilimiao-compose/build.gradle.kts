@@ -43,6 +43,7 @@ kotlin {
                 implementation(libs.coil.network.okhttp)
                 implementation(libs.compose.navigation)
                 implementation(libs.compose.material.icons.extended.kmp)
+                implementation(libs.androidx.datastore.preferences)
 
                 implementation(project(":bilimiao-comm"))
             }
@@ -54,7 +55,6 @@ kotlin {
                 implementation(libs.androidx.core.ktx)
                 implementation(libs.androidx.appcompat)
                 implementation(libs.material)
-                implementation(libs.androidx.datastore.preferences)
                 implementation(libs.androidx.browser)
 
                 implementation(libs.kotlinx.coroutines.android)

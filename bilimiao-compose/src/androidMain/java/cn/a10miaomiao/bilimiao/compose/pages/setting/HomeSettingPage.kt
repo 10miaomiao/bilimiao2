@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.setting
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -8,13 +7,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -32,14 +29,15 @@ import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.instance
 
 @Serializable
 class HomeSettingPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: HomeSettingPageViewModel = diViewModel()
+        val viewModel: HomeSettingPageViewModel = diViewModel {
+            HomeSettingPageViewModel(it)
+        }
         HomeSettingPageContent(viewModel)
     }
 }

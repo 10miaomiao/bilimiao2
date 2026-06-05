@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.rememberPreferenceState
-import java.lang.Float.min
+import kotlin.math.min
 
 inline fun LazyListScope.listStylePreference(
     key: String,
