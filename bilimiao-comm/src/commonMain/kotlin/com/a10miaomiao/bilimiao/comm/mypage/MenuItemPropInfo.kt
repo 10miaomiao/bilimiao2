@@ -1,6 +1,5 @@
 package com.a10miaomiao.bilimiao.comm.mypage
 
-import android.view.View
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class MenuItemPropInfo (
@@ -9,7 +8,7 @@ data class MenuItemPropInfo (
     var title: String? = null,
     var subTitle: String? = null,
     var iconVector: ImageVector? = null,
-    var visibility: Int = View.VISIBLE,
+    var visibility: Int = 0,
     var childMenu: MyPageMenu? = null,
     var contentDescription: String? = null,
 ) {

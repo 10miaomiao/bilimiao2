@@ -1,9 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate
 
-import android.os.Bundle
-
 interface BaseDelegate {
-    fun onCreate(savedInstanceState: Bundle?)
+    fun onCreate()
     fun onResume()
     fun onPause()
     fun onStart()

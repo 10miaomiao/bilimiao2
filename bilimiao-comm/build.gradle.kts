@@ -30,7 +30,7 @@ kotlin {
                 implementation(libs.kodein.di.core)
                 implementation(libs.kmp.lifecycle.viewmodel.compose)
                 implementation(libs.sonner)
-                implementation(libs.androidx.datastore.preferences)
+                api(libs.androidx.datastore.preferences)
                 implementation(libs.androidx.room.runtime)
             }
         }
@@ -94,7 +94,7 @@ android {
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].proto {
-        srcDir("src/androidMain/proto")
+        srcDir("src/commonMain/proto")
         include("**/*.proto")
     }
     sourceSets["main"].java {

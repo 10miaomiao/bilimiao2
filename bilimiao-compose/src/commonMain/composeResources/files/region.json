@@ -1,0 +1,566 @@
+{
+  "code": 0,
+  "message": "ok",
+  "data": [
+    {
+      "tid": 13,
+      "reid": 0,
+      "name": "番剧",
+      "uri": "bilibili://pgc/bangumi",
+      "type": 1,
+      "children": [
+        {
+          "tid": 33,
+          "reid": 13,
+          "name": "连载动画",
+          "type": 0
+        },
+        {
+          "tid": 32,
+          "reid": 13,
+          "name": "完结动画",
+          "type": 0
+        },
+        {
+          "tid": 51,
+          "reid": 13,
+          "name": "资讯",
+          "type": 0
+        },
+        {
+          "tid": 152,
+          "reid": 13,
+          "name": "官方延伸",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 167,
+      "reid": 0,
+      "name": "国创",
+      "uri": "bilibili://pgc/domestic",
+      "type": 1,
+      "children": [
+        {
+          "tid": 153,
+          "reid": 167,
+          "name": "国产动画",
+          "type": 0
+        },
+        {
+          "tid": 168,
+          "reid": 167,
+          "name": "国产原创相关",
+          "type": 0
+        },
+        {
+          "tid": 170,
+          "reid": 167,
+          "name": "资讯",
+          "type": 0
+        },
+        {
+          "tid": 169,
+          "reid": 167,
+          "name": "布袋戏",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 1,
+      "reid": 0,
+      "name": "动画",
+      "uri": "bilibili://region/1",
+      "type": 0,
+      "children": [
+        {
+          "tid": 24,
+          "reid": 1,
+          "name": "MAD·AMV",
+          "type": 0
+        },
+        {
+          "tid": 25,
+          "reid": 1,
+          "name": "MMD·3D",
+          "type": 0
+        },
+        {
+          "tid": 47,
+          "reid": 1,
+          "name": "短片·手书·配音",
+          "type": 0
+        },
+        {
+          "tid": 27,
+          "reid": 1,
+          "name": "综合",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 3,
+      "reid": 0,
+      "name": "音乐",
+      "uri": "bilibili://region/3",
+      "type": 0,
+      "children": [
+        {
+          "tid": 31,
+          "reid": 3,
+          "name": "翻唱",
+          "type": 0
+        },
+        {
+          "tid": 30,
+          "reid": 3,
+          "name": "VOCALOID·UTAU",
+          "type": 0
+        },
+        {
+          "tid": 59,
+          "reid": 3,
+          "name": "演奏",
+          "type": 0
+        },
+        {
+          "tid": 54,
+          "reid": 3,
+          "name": "OP/ED/OST",
+          "type": 0
+        },
+        {
+          "tid": 28,
+          "reid": 3,
+          "name": "原创音乐",
+          "type": 0
+        },
+        {
+          "tid": 29,
+          "reid": 3,
+          "name": "三次元音乐",
+          "type": 0
+        },
+        {
+          "tid": 130,
+          "reid": 3,
+          "name": "音乐选集",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 129,
+      "reid": 0,
+      "name": "舞蹈",
+      "uri": "bilibili://region/129",
+      "type": 0,
+      "children": [
+        {
+          "tid": 20,
+          "reid": 129,
+          "name": "宅舞",
+          "type": 0
+        },
+        {
+          "tid": 154,
+          "reid": 129,
+          "name": "三次元舞蹈",
+          "type": 0
+        },
+        {
+          "tid": 156,
+          "reid": 129,
+          "name": "舞蹈教程",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 4,
+      "reid": 0,
+      "name": "游戏",
+      "uri": "bilibili://region/4",
+      "type": 0,
+      "children": [
+        {
+          "tid": 17,
+          "reid": 4,
+          "name": "单机游戏",
+          "type": 0
+        },
+        {
+          "tid": 171,
+          "reid": 4,
+          "name": "电子竞技",
+          "type": 0
+        },
+        {
+          "tid": 172,
+          "reid": 4,
+          "name": "手机游戏",
+          "type": 0
+        },
+        {
+          "tid": 65,
+          "reid": 4,
+          "name": "网络游戏",
+          "type": 0
+        },
+        {
+          "tid": 173,
+          "reid": 4,
+          "name": "桌游棋牌",
+          "type": 0
+        },
+        {
+          "tid": 121,
+          "reid": 4,
+          "name": "GMV",
+          "type": 0
+        },
+        {
+          "tid": 136,
+          "reid": 4,
+          "name": "音游",
+          "type": 0
+        },
+        {
+          "tid": 19,
+          "reid": 4,
+          "name": "Mugen",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 36,
+      "reid": 0,
+      "name": "科技",
+      "uri": "bilibili://region/36",
+      "type": 0,
+      "children": [
+        {
+          "tid": 37,
+          "reid": 36,
+          "name": "纪录片"
+        },
+        {
+          "tid": 124,
+          "reid": 36,
+          "name": "趣味科普人文",
+          "type": 0
+        },
+        {
+          "tid": 122,
+          "reid": 36,
+          "name": "野生技术协会",
+          "type": 0
+        },
+        {
+          "tid": 39,
+          "reid": 36,
+          "name": "演讲·公开课",
+          "type": 0
+        },
+        {
+          "tid": 96,
+          "reid": 36,
+          "name": "星海",
+          "type": 0
+        },
+        {
+          "tid": 95,
+          "reid": 36,
+          "name": "数码",
+          "type": 0
+        },
+        {
+          "tid": 98,
+          "reid": 36,
+          "name": "机械",
+          "type": 0
+        },
+        {
+          "tid": 176,
+          "reid": 36,
+          "name": "汽车",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 160,
+      "reid": 0,
+      "name": "生活",
+      "uri": "bilibili://region/160",
+      "type": 0,
+      "children": [
+        {
+          "tid": 138,
+          "reid": 160,
+          "name": "搞笑",
+          "type": 0
+        },
+        {
+          "tid": 21,
+          "reid": 160,
+          "name": "日常",
+          "type": 0
+        },
+        {
+          "tid": 76,
+          "reid": 160,
+          "name": "美食圈",
+          "type": 0
+        },
+        {
+          "tid": 75,
+          "reid": 160,
+          "name": "动物圈",
+          "type": 0
+        },
+        {
+          "tid": 161,
+          "reid": 160,
+          "name": "手工",
+          "type": 0
+        },
+        {
+          "tid": 162,
+          "reid": 160,
+          "name": "绘画",
+          "type": 0
+        },
+        {
+          "tid": 175,
+          "reid": 160,
+          "name": "ASMR",
+          "type": 0
+        },
+        {
+          "tid": 163,
+          "reid": 160,
+          "name": "运动",
+          "type": 0
+        },
+        {
+          "tid": 174,
+          "reid": 160,
+          "name": "其他",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 119,
+      "reid": 0,
+      "name": "鬼畜",
+      "uri": "bilibili://region/119",
+      "type": 0,
+      "children": [
+        {
+          "tid": 22,
+          "reid": 119,
+          "name": "鬼畜调教",
+          "type": 0
+        },
+        {
+          "tid": 26,
+          "reid": 119,
+          "name": "音MAD",
+          "type": 0
+        },
+        {
+          "tid": 126,
+          "reid": 119,
+          "name": "人力VOCALOID",
+          "type": 0
+        },
+        {
+          "tid": 127,
+          "reid": 119,
+          "name": "教程演示",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 155,
+      "reid": 0,
+      "name": "时尚",
+      "uri": "bilibili://region/155",
+      "type": 0,
+      "children": [
+        {
+          "tid": 157,
+          "reid": 155,
+          "name": "美妆",
+          "type": 0
+        },
+        {
+          "tid": 158,
+          "reid": 155,
+          "name": "服饰",
+          "type": 0
+        },
+        {
+          "tid": 159,
+          "reid": 155,
+          "name": "资讯",
+          "type": 0
+        },
+        {
+          "tid": 164,
+          "reid": 155,
+          "name": "健身",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 165,
+      "reid": 0,
+      "name": "广告",
+      "uri": "bilibili://advertise/home?tid=165",
+      "type": 1,
+      "children": [
+        {
+          "tid": 166,
+          "reid": 165,
+          "name": "广告",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 5,
+      "reid": 0,
+      "name": "娱乐",
+      "uri": "bilibili://region/5",
+      "type": 0,
+      "children": [
+        {
+          "tid": 71,
+          "reid": 5,
+          "name": "综艺",
+          "type": 0
+        },
+        {
+          "tid": 137,
+          "reid": 5,
+          "name": "明星",
+          "type": 0
+        },
+        {
+          "tid": 131,
+          "reid": 5,
+          "name": "Korea相关",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 181,
+      "reid": 0,
+      "name": "影视",
+      "uri": "bilibili://region/181",
+      "type": 0,
+      "children": [
+        {
+          "tid": 182,
+          "reid": 181,
+          "name": "影视杂谈",
+          "type": 0
+        },
+        {
+          "tid": 183,
+          "reid": 181,
+          "name": "影视剪辑",
+          "type": 0
+        },
+        {
+          "tid": 85,
+          "reid": 181,
+          "name": "短片",
+          "type": 0
+        },
+        {
+          "tid": 184,
+          "reid": 181,
+          "name": "预告·资讯",
+          "type": 0
+        },
+        {
+          "tid": 86,
+          "reid": 181,
+          "name": "特摄",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 23,
+      "reid": 0,
+      "name": "电影",
+      "uri": "bilibili://region/23",
+      "type": 0,
+      "children": [
+        {
+          "tid": 147,
+          "reid": 23,
+          "name": "国产电影",
+          "type": 0
+        },
+        {
+          "tid": 145,
+          "reid": 23,
+          "name": "欧美电影",
+          "type": 0
+        },
+        {
+          "tid": 146,
+          "reid": 23,
+          "name": "日本电影",
+          "type": 0
+        },
+        {
+          "tid": 83,
+          "reid": 23,
+          "name": "其他国家",
+          "type": 0
+        }
+      ]
+    },
+    {
+      "tid": 11,
+      "reid": 0,
+      "name": "电视剧",
+      "uri": "bilibili://region/11",
+      "type": 0,
+      "children": [
+        {
+          "tid": 185,
+          "reid": 11,
+          "name": "内地剧",
+          "type": 0
+        },
+        {
+          "tid": 186,
+          "reid": 11,
+          "name": "港台剧",
+          "type": 0
+        },
+        {
+          "tid": 187,
+          "reid": 11,
+          "name": "海外剧",
+          "type": 0
+        }
+      ]
+    }
+  ]
+}

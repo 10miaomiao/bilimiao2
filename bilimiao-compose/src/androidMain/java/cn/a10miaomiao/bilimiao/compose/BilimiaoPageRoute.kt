@@ -1,9 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import ReplyDetailListPage
-import android.annotation.SuppressLint
-import android.net.Uri
-import android.os.Bundle
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -14,7 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
-import androidx.navigation.serialization.decodeArguments
+import androidx.navigation.toRoute
 import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
 import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughOut
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -74,8 +71,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceSearchPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
-import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import kotlinx.serialization.serializer
 import kotlin.reflect.KType
 
 class BilimiaoPageRoute (
@@ -328,7 +323,6 @@ class BilimiaoPageRoute (
         return materialFadeThroughOut()
     }
 
-    @SuppressLint("RestrictedApi")
     inline fun <reified T: ComposePage> composable(
         typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
         deepLinks: List<NavDeepLink> = emptyList(),
@@ -348,7 +342,6 @@ class BilimiaoPageRoute (
         (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
             SizeTransform?)? = null,
     ) {
-        val serializer = serializer<T>()
         builder.composable<T>(
             typeMap = typeMap,
             deepLinks = deepLinks,
@@ -358,9 +351,7 @@ class BilimiaoPageRoute (
             popExitTransition = popExitTransition,
             sizeTransform = sizeTransform,
         ) { backStackEntry ->
-            val bundle = backStackEntry.arguments ?: Bundle()
-            val typeMap = backStackEntry.destination.arguments.mapValues { it.value.type }
-            val page = serializer.decodeArguments(bundle, typeMap)
+            val page = backStackEntry.toRoute<T>()
             page.Content()
         }
     }

@@ -58,7 +58,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.home.components.HomeTimeMachineTime
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
-import com.a10miaomiao.bilimiao.comm.store.RegionStore
+import cn.a10miaomiao.bilimiao.compose.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil

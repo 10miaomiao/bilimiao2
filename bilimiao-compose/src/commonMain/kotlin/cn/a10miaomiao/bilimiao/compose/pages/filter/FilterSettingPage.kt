@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.filter
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,13 +17,11 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -36,14 +33,15 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.instance
 
 @Serializable
 class FilterSettingPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: FilterSettingPageViewModel = diViewModel()
+        val viewModel: FilterSettingPageViewModel = diViewModel {
+            FilterSettingPageViewModel(it)
+        }
         FilterSettingPageContent(viewModel)
     }
 

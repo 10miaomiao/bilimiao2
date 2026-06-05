@@ -30,7 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.pages.rank.content.RankListContent
-import com.a10miaomiao.bilimiao.comm.store.RegionStore
+import cn.a10miaomiao.bilimiao.compose.store.RegionStore
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI

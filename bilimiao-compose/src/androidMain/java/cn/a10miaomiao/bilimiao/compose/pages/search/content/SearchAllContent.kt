@@ -56,7 +56,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
-import com.a10miaomiao.bilimiao.comm.store.RegionStore
+import cn.a10miaomiao.bilimiao.compose.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

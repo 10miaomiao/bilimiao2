@@ -2,23 +2,15 @@ package cn.a10miaomiao.bilimiao.compose.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.navigation.NavHostController
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 
 
 private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }
 
-internal val LocalContentInsets = staticCompositionLocalOf<ContentInsets> {
-    noLocalProvidedFor("ContentInsets")
-}
-
-@Composable
-fun localContentInsets() = LocalContentInsets.current
-
-internal val LocalPageNavigation = staticCompositionLocalOf<PageNavigation> {
+internal val LocalPageNavigation = staticCompositionLocalOf<PageNavigator> {
     noLocalProvidedFor("PageNavigation")
 }
 
