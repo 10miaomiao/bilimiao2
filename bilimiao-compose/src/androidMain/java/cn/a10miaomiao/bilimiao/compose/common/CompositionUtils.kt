@@ -34,40 +34,6 @@ fun WindowInsets.toContentInsets(): ContentInsets {
     }
 }
 
-@Composable
-fun ContentInsets.addPaddingValues(
-    addLeft: Dp = 0.dp,
-    addRight: Dp = 0.dp,
-    addTop: Dp = 0.dp,
-    addBottom: Dp = 0.dp,
-): PaddingValues {
-    return remember(this, addLeft, addRight, addTop, addBottom) {
-        PaddingValues.Absolute(
-            left = max(left + addLeft, 0.dp),
-            right = max(right + addRight, 0.dp),
-            top = max(top + addTop, 0.dp),
-            bottom = max(bottom + addBottom, 0.dp),
-        )
-    }
-}
-
-@Composable
-fun ContentInsets.toPaddingValues(
-    left: Dp? = null,
-    right: Dp? = null,
-    top: Dp? = null,
-    bottom: Dp? = null,
-): PaddingValues {
-    return remember(this, left, right, top, bottom) {
-        PaddingValues.Absolute(
-            left = left ?: this.left,
-            right = right ?: this.right,
-            top = top ?: this.top,
-            bottom = bottom ?: this.bottom,
-        )
-    }
-}
-
 fun ContentInsets.toWindowInsets(
     addLeft: Dp = 0.dp,
     addRight: Dp = 0.dp,
