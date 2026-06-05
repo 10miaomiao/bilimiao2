@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.components.video
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -15,26 +14,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_default_placeholder_img_tv
+import bilimiao.bilimiao_compose.generated.resources.bili_fail_placeholder_img_tv
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Danmukunum
@@ -44,7 +40,7 @@ import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun MiniVideoItemBox(
@@ -74,8 +70,8 @@ fun MiniVideoItemBox(
                     contentScale = ContentScale.Crop,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    placeholder = painterResource(R.drawable.bili_default_placeholder_img_tv),
-                    error = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+                    placeholder = painterResource(Res.drawable.bili_default_placeholder_img_tv),
+                    error = painterResource(Res.drawable.bili_fail_placeholder_img_tv),
                 )
             }
             Row(

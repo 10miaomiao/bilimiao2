@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.components.video
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,20 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.text
-import androidx.compose.ui.semantics.textSubstitution
-import androidx.compose.ui.semantics.traversalIndex
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_default_placeholder_img_tv
+import bilimiao.bilimiao_compose.generated.resources.bili_fail_placeholder_img_tv
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Danmukunum
@@ -48,7 +41,7 @@ import cn.a10miaomiao.bilimiao.compose.common.foundation.htmlText
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun VideoItemBox(
@@ -84,8 +77,8 @@ fun VideoItemBox(
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
-                    placeholder = painterResource(R.drawable.bili_default_placeholder_img_tv),
-                    error = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+                    placeholder = painterResource(Res.drawable.bili_default_placeholder_img_tv),
+                    error = painterResource(Res.drawable.bili_fail_placeholder_img_tv),
                 )
                 if (duration != null) {
                     Box(
@@ -125,7 +118,7 @@ fun VideoItemBox(
                 .weight(1f)
                 .height(85.dp)
                 .padding(start = 5.dp)
-                .zIndex(-1f), // 适配无障碍功能，优先播报视频标题
+                .zIndex(-1f),
         ) {
             if (title != null) {
                 if (isHtml) {
@@ -228,21 +221,4 @@ fun VideoItemBox(
         }
 
     }
-}
-
-
-@Preview
-@Composable
-fun VideoItemBoxPreview() {
-    VideoItemBox(
-        modifier = Modifier.width(400.dp),
-        title = "【原神拜年纪】让风告诉你",
-        upperName = "原神",
-        pic = "http://i0.hdslb.com/bfs/archive/9b920aa311b26f2d17ef7aece043cdcdbca6b27b.jpg",
-        playNum = "1234523",
-        damukuNum = "234234",
-        onClick = {
-
-        }
-    )
 }
