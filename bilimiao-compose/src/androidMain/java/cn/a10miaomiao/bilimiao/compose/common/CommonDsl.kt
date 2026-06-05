@@ -7,7 +7,7 @@ import cn.a10miaomiao.bilimiao.compose.R
 import org.kodein.di.DI
 import org.kodein.di.compose.localDI
 
-val defaultNavOptions get() = NavOptions.Builder()
+actual val defaultNavOptions: NavOptions get() = NavOptions.Builder()
     .setEnterAnim(R.anim.miao_fragment_open_enter)
     .setExitAnim(R.anim.miao_fragment_open_exit)
     .setPopEnterAnim(R.anim.miao_fragment_close_enter)
