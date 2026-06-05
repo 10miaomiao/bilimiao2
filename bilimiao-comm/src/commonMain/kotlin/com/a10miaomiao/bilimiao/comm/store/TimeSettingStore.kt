@@ -1,16 +1,14 @@
 package com.a10miaomiao.bilimiao.comm.store
 
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
-import com.a10miaomiao.bilimiao.comm.BilimiaoCommCore
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 import org.kodein.di.instance
-import java.util.*
 
 class TimeSettingStore(override val di: DI) :
     ViewModel(), BaseStore<TimeSettingStore.State> {
@@ -49,7 +47,7 @@ class TimeSettingStore(override val di: DI) :
         timeTo = DateModel(),
     ))
 
-    private val activity: AppCompatActivity by instance()
+    private val settings: SettingsProvider by instance()
 
     override fun copyState() = state.copy()
 
@@ -59,12 +57,11 @@ class TimeSettingStore(override val di: DI) :
     }
 
     fun initState () {
-        val sp = activity.getSharedPreferences(BilimiaoCommCore.APP_NAME, Context.MODE_PRIVATE)
-        val timeType = readTimeType(sp)
+        val timeType = readTimeType()
         setTime(
             timeType,
-            readTime(sp, timeType, TIME_FROM),
-            readTime(sp, timeType, TIME_TO)
+            readTime(timeType, TIME_FROM),
+            readTime(timeType, TIME_TO)
         )
     }
 
@@ -85,39 +82,34 @@ class TimeSettingStore(override val di: DI) :
         }
     }
 
-    fun readTimeType(
-        sp: SharedPreferences,
-    ): Int {
-        return sp.getInt(TIME_TYPE, TIME_TYPE_CURRENT)
+    private fun readTimeType(): Int {
+        return settings.getInt(TIME_TYPE, TIME_TYPE_CURRENT)
     }
 
-    fun readTime(
-        sp: SharedPreferences,
+    private fun readTime(
         timeType: Int,
         timeName: String,
     ): DateModel {
         val dateModel = DateModel()
         if (timeType == 0) {
-            val now = Date()
-            dateModel.setDate(now)
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+            dateModel.setDate(today)
             if (timeName == TIME_FROM) {
                 return dateModel.getTimeByGapCount(-7)
             }
             return dateModel
         }
-        val timeStr = sp.getString(timeName, "20180909")!!
+        val timeStr = settings.getString(timeName, "20180909")
         dateModel.setValue(timeStr)
         return dateModel
     }
 
     fun save() {
-        val sp = activity.getSharedPreferences(BilimiaoCommCore.APP_NAME, Context.MODE_PRIVATE)
-        val editor = sp.edit()
-        editor.putString(TIME_FROM, state.timeFrom.getValue())
-        editor.putString(TIME_TO, state.timeTo.getValue())
-//        editor.putBoolean(TIME_IS_LINK, isLink)
-        editor.putInt(TIME_TYPE, state.timeType)
-        editor.apply()
+        settings.edit()
+            .putString(TIME_FROM, state.timeFrom.getValue())
+            .putString(TIME_TO, state.timeTo.getValue())
+            .putInt(TIME_TYPE, state.timeType)
+            .apply()
     }
 
     fun setTime(

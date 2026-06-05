@@ -1,25 +1,25 @@
 package cn.a10miaomiao.bilimiao.compose.pages.time
 
 import androidx.lifecycle.ViewModel
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.pages.time.components.getMonthDayNum
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.model.DateModel
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
-import java.util.Date
 
 class TimeSettingViewMode(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
     private val timeSettingStore by instance<TimeSettingStore>()
-    private val pageNavigation by instance<PageNavigation>()
-
-//    private val calendar = Calendar.getInstance()
+    private val pageNavigator by instance<PageNavigator>()
 
     val cardIndex = MutableStateFlow(timeSettingStore.state.timeType)
 
@@ -30,17 +30,14 @@ class TimeSettingViewMode(
     }
 
     val maxDate = DateModel().also {
-        it.setDate(Date())
-//        it.year = Calendar.getInstance().get(Calendar.YEAR)
-//        it.month = Calendar.getInstance().get(Calendar.MONTH + 1)
-//        it.date = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+        it.setDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
     }
 
     val yearCount = maxDate.year - minDate.year + 1
 
     val currentTime = MutableStateFlow(TimeInfo().apply {
-        val now = Date()
-        timeTo.setDate(now)
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        timeTo.setDate(today)
         timeFrom.set(timeTo.getTimeByGapCount(-7)) //最近7天
     })
 
@@ -111,7 +108,7 @@ class TimeSettingViewMode(
             timeInfo.timeTo.copy(),
         )
         timeSettingStore.save()
-        pageNavigation.popBackStack()
+        pageNavigator.popBackStack()
     }
 
     class TimeInfo(
