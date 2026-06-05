@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.player
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,12 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -60,7 +58,9 @@ class SendDanmakuPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: SendDanmakuViewModel = diViewModel()
+        val viewModel: SendDanmakuViewModel = diViewModel {
+            SendDanmakuViewModel(it)
+        }
         SendDanmakuPageContent(viewModel)
     }
 }
@@ -74,7 +74,7 @@ internal class SendDanmakuViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val pageNavigation by instance<PageNavigation>()
+    private val pageNavigation by instance<PageNavigator>()
     private val playerDelegate by instance<BasePlayerDelegate>()
 
     val focusRequester = FocusRequester()
