@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 data class RegionInfo(
     var tid: Int,
     var reid: Int,
-    var icon: Int? = null,
+    var icon: String? = null,
     var logo: String? = null,
     var name: String,
     var uri: String? = null,

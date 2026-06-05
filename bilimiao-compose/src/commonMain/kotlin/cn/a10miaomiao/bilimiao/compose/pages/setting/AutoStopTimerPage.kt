@@ -38,7 +38,9 @@ class AutoStopTimerPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: AutoStopTimerPageViewModel = diViewModel()
+        val viewModel: AutoStopTimerPageViewModel = diViewModel {
+            AutoStopTimerPageViewModel(it)
+        }
         AutoStopTimerPageContent(viewModel)
     }
 }

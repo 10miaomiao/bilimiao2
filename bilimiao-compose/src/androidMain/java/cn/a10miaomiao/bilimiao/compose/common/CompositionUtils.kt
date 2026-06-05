@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -16,19 +15,6 @@ import androidx.compose.ui.unit.max
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarConfig
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
-
-@Immutable
-data class ContentInsets(
-    val left: Dp = 0.dp,
-    val top: Dp = 0.dp,
-    val right: Dp = 0.dp,
-    val bottom: Dp = 0.dp,
-) {
-    val leftDp get() = left.value
-    val topDp get() = top.value
-    val rightDp get() = right.value
-    val bottomDp get() = bottom.value
-}
 
 @Composable
 fun WindowInsets.toContentInsets(): ContentInsets {

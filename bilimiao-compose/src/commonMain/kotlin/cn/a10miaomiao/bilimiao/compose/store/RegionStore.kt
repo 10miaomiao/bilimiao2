@@ -1,33 +1,26 @@
-package com.a10miaomiao.bilimiao.comm.store
+package cn.a10miaomiao.bilimiao.compose.store
 
-import android.app.Activity
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a10miaomiao.bilimiao.comm.R
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.datastore.dataStore
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.datastore.launch
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
-import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.region.RegionInfo
 import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
-import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
+import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
+import bilimiao.bilimiao_compose.generated.resources.Res
 import org.kodein.di.DI
-import org.kodein.di.instance
-import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
 
 class RegionStore(override val di: DI) :
     ViewModel(), BaseStore<RegionStore.State> {
@@ -39,29 +32,26 @@ class RegionStore(override val di: DI) :
     override val stateFlow = MutableStateFlow(State())
     override fun copyState() = state.copy()
 
-    private val activity: Activity by di.instance()
+    private val filesDir = PlatformProviders.context.filesDir
 
     private var networkTime = 0L
 
     override fun init() {
         super.init()
-        // 加载分区列表
         SettingPreferences.launch(viewModelScope, Dispatchers.IO) {
-            activity.dataStore.data.map {
-                it[IsBestRegion] ?: false
+            appDataStore.data.map {
+                it[SettingPreferences.IsBestRegion] ?: false
             }.collect {
-                loadRegionData(activity, it)
+                loadRegionData(it)
             }
         }
     }
 
     suspend fun loadRegionData(
-        context: Context,
         isBestRegion: Boolean,
     ) {
-        // 加载分区列表
         try {
-            val jsonStr = readRegionJson(context, isBestRegion)!!
+            val jsonStr = readRegionJson(isBestRegion)!!
             val result = MiaoJson.fromJson<ResponseData<List<RegionInfo>>>(jsonStr)
             val data = result.requireData()
             data.forEachIndexed(::regionIcon)
@@ -72,13 +62,12 @@ class RegionStore(override val di: DI) :
             e.printStackTrace()
             GlobalToaster.show("读取分区列表遇到错误")
         }
-        // 从网络读取最新版本的分区列表
         if (!isBestRegion && System.currentTimeMillis() - networkTime > 3600000) {
-            getRegionsByNetwork(context)
+            getRegionsByNetwork()
         }
     }
 
-    suspend fun getRegionsByNetwork(context: Context) {
+    suspend fun getRegionsByNetwork() {
         try {
             val res = BiliApiService.regionAPI
                 .regions()
@@ -90,9 +79,7 @@ class RegionStore(override val di: DI) :
                     regions = regionList.toMutableList()
                 }
                 networkTime = System.currentTimeMillis()
-                // 保存到本地
                 writeRegionJson(
-                    context,
                     ResponseData(
                         code = 0,
                         data = regionList,
@@ -110,56 +97,46 @@ class RegionStore(override val di: DI) :
         }
     }
 
-    /**
-     * 读取assets下的json数据
-     */
-    private fun readRegionJson(
-        context: Context,
+    private suspend fun readRegionJson(
         isBestRegion: Boolean,
     ): String? {
-        try {
-            val inputStream = if (isBestRegion || !File(context.filesDir, "region.json").exists()) {
-                context.assets.open("region.json")
+        return try {
+            val cachedFile = File(filesDir, "region.json")
+            if (isBestRegion || !cachedFile.exists()) {
+                val bytes = Res.readBytes("files/region.json")
+                String(bytes)
             } else {
-                context.openFileInput("region.json")
+                cachedFile.readText()
             }
-            val br = BufferedReader(InputStreamReader(inputStream))
-            val stringBuilder = StringBuilder()
-            var str: String? = br.readLine()
-            while (str != null) {
-                stringBuilder.append(str)
-                str = br.readLine()
-            }
-            return stringBuilder.toString()
         } catch (e: IOException) {
             e.printStackTrace()
-            return null
+            null
         }
     }
 
-    private fun writeRegionJson(context: Context, region: ResponseData<List<RegionInfo>>) {
+    private fun writeRegionJson(region: ResponseData<List<RegionInfo>>) {
         try {
             val jsonStr = MiaoJson.toJson(region)
-            val outputStream = context.openFileOutput("region.json", Context.MODE_PRIVATE);
-            outputStream.write(jsonStr.toByteArray());
-            outputStream.close();
+            val file = File(filesDir, "region.json")
+            file.writeText(jsonStr)
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
-    /**
-     * 分区图标
-     */
+    companion object {
+        private val regionIconNames = arrayOf(
+            "ic_region_fj", "ic_region_fj_domestic", "ic_region_dh",
+            "ic_region_yy", "ic_region_wd", "ic_region_yx",
+            "ic_region_kj", "ic_region_sh", "ic_region_gc",
+            "ic_region_ss", "ic_region_ad", "ic_region_yl",
+            "ic_region_ys", "ic_region_dy", "ic_region_dsj"
+        )
+    }
+
     private fun regionIcon(index: Int, item: RegionInfo) {
-        if (item.logo == null) {
-            item.icon = intArrayOf(
-                R.drawable.ic_region_fj, R.drawable.ic_region_fj_domestic, R.drawable.ic_region_dh,
-                R.drawable.ic_region_yy, R.drawable.ic_region_wd, R.drawable.ic_region_yx,
-                R.drawable.ic_region_kj, R.drawable.ic_region_sh, R.drawable.ic_region_gc,
-                R.drawable.ic_region_ss, R.drawable.ic_region_ad, R.drawable.ic_region_yl,
-                R.drawable.ic_region_ys, R.drawable.ic_region_dy, R.drawable.ic_region_dsj
-            )[index]
+        if (item.logo == null && index in regionIconNames.indices) {
+            item.icon = regionIconNames[index]
         }
     }
 }

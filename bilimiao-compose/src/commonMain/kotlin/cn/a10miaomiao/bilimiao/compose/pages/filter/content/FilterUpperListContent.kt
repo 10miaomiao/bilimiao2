@@ -56,7 +56,9 @@ private class FilterUpperListContentModel(
 
 @Composable
 internal fun FilterUpperListContent() {
-    val viewModel: FilterUpperListContentModel = diViewModel()
+    val viewModel: FilterUpperListContentModel = diViewModel {
+        FilterUpperListContentModel(it)
+    }
 
     val state by viewModel.stateFlow.collectAsState()
     val filterUpperList = state.filterUpperList

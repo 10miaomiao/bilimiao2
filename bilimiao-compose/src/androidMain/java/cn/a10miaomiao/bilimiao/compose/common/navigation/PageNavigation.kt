@@ -80,7 +80,7 @@ class PageNavigation(
         return navigateByUri(Uri.parse(uriString))
     }
 
-    fun navigateToVideoInfo(id: String) {
+    override fun navigateToVideoInfo(id: String) {
         hostController.navigate(VideoDetailPage(id))
     }
 

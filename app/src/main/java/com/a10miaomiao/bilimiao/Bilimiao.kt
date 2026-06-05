@@ -25,12 +25,12 @@ class Bilimiao: Application() {
     override fun onCreate() {
         super.onCreate()
         AppCrashHandler.getInstance(this)
+        commApp.onCreate()
         setDefaultNightMode()
         Mojito.initialize(
             GlideImageLoader.with(this),
             SketchImageLoadFactory()
         )
-        commApp.onCreate()
     }
 
     private fun setDefaultNightMode() {

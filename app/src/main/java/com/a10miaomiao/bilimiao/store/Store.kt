@@ -8,7 +8,7 @@ import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
-import com.a10miaomiao.bilimiao.comm.store.RegionStore
+import cn.a10miaomiao.bilimiao.compose.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.store.UserStateProvider

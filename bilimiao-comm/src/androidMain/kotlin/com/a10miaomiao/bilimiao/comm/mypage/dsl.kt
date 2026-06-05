@@ -19,8 +19,3 @@ fun Fragment.myPageConfig (init: MyPageConfigInfo.() -> Unit): MyPageConfig {
 fun myMenuItem (init: MenuItemPropInfo.() -> Unit): MenuItemPropInfo {
     return MenuItemPropInfo().apply(init)
 }
-
-inline fun myMenu (init: MyPageMenu.() -> Unit): MyPageMenu {
-    return MyPageMenu().apply(init)
-}
-

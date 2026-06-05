@@ -8,5 +8,6 @@ interface PageNavigator {
     fun popBackStack(): Boolean
     fun <T : ComposePage> popBackStack(route: T, inclusive: Boolean, saveState: Boolean = false)
     fun navigateByUri(uriString: String): Boolean
+    fun navigateToVideoInfo(id: String)
     fun launchWebBrowser(url: String)
 }

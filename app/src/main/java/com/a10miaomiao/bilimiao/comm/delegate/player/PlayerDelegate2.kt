@@ -156,7 +156,7 @@ class PlayerDelegate2(
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate() {
         playerCoroutineScope.onCreate()
         initPlayer()
         val intentFilter = IntentFilter().apply {
@@ -663,7 +663,11 @@ class PlayerDelegate2(
         return scaffoldApp.showPlayer
     }
 
-    override fun setWindowInsets(
+    override fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {
+        setWindowInsets(left, top, right, bottom, null)
+    }
+
+    fun setWindowInsets(
         left: Int,
         top: Int,
         right: Int,
@@ -680,7 +684,11 @@ class PlayerDelegate2(
         }
     }
 
-    override fun onPictureInPictureModeChanged(
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        onPictureInPictureModeChanged(isInPictureInPictureMode, null)
+    }
+
+    fun onPictureInPictureModeChanged(
         isInPictureInPictureMode: Boolean,
         newConfig: Configuration?
     ) {
@@ -708,8 +716,11 @@ class PlayerDelegate2(
         }
     }
 
+    override fun onConfigurationChanged(orientation: Int) {
+        // No-op: use the Configuration overload from Android
+    }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
+    fun onConfigurationChanged(newConfig: Configuration) {
         controller.updatePlayerMode(newConfig)
         if (scaffoldApp.orientation != newConfig.orientation) {
             controller.onChangedScreenOrientation(newConfig.orientation)

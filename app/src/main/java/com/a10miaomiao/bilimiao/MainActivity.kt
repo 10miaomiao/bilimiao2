@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity(), DIAware {
             playerHostState::updateFloatingPlayerLayoutState,
         )
     }
-    private val basePlayerDelegate: BasePlayerDelegate by lazy {
+    private val basePlayerDelegate: PlayerDelegate2 by lazy {
         PlayerDelegate2(this, playerViews, playerHostState, di)
     }
 
@@ -251,7 +251,7 @@ class MainActivity : AppCompatActivity(), DIAware {
     private fun initRootView(savedInstanceState: Bundle?) {
         createPlayerViews()
         setupPlayerViewInWrapper()
-        basePlayerDelegate.onCreate(savedInstanceState)
+        basePlayerDelegate.onCreate()
         playerHostState.showPlayer = basePlayerDelegate.isPlaying()
 
         val rootComposeView = ComposeView(this).apply {
