@@ -27,9 +27,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.top_bg1
+import bilimiao.bilimiao_compose.generated.resources.ic_message
+import bilimiao.bilimiao_compose.generated.resources.bili_akari_img
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
@@ -68,7 +71,7 @@ fun StartUserCard(
                     .fillMaxWidth()
                     .height(imageHeight)
                     .align(Alignment.TopCenter),
-                painter = painterResource(R.drawable.top_bg1),
+                painter = painterResource(Res.drawable.top_bg1),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )
@@ -108,7 +111,7 @@ fun StartUserCard(
                             modifier = Modifier
                                 .size(60.dp)
                                 .clip(CircleShape),
-                            painter = painterResource(R.drawable.bili_akari_img),
+                            painter = painterResource(Res.drawable.bili_akari_img),
                             contentDescription = "login"
                         )
                     } else {
@@ -224,7 +227,7 @@ private fun StartUserMessageBox(
     ) {
         val totalCount = messageState.totalCount()
         Image(
-            painter = painterResource(id = R.drawable.ic_message),
+            painter = painterResource(Res.drawable.ic_message),
             contentDescription = "message",
             modifier = Modifier
                 .size(40.dp)

@@ -43,7 +43,7 @@ class RankPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: RankPageViewModel = diViewModel()
+        val viewModel: RankPageViewModel = diViewModel { RankPageViewModel(it) }
         RankPageContent(viewModel)
     }
 }

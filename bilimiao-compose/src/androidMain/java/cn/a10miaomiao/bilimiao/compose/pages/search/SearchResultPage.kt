@@ -46,7 +46,7 @@ class SearchResultPage(
 
     @Composable
     override fun Content() {
-        val viewModel: SearchPageViewModel = diViewModel()
+        val viewModel: SearchPageViewModel = diViewModel { SearchPageViewModel(it) }
         SearchResultPageContent(viewModel, keyword)
     }
 }

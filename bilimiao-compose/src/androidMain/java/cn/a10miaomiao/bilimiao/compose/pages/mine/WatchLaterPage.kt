@@ -88,7 +88,7 @@ class WatchLaterPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: WatchLaterPageViewModel = diViewModel()
+        val viewModel: WatchLaterPageViewModel = diViewModel { WatchLaterPageViewModel(it) }
         WatchLaterPageContent(viewModel)
     }
 }

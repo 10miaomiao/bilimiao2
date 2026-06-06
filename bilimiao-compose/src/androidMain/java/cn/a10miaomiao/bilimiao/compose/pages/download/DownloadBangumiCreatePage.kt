@@ -54,7 +54,7 @@ class DownloadBangumiCreatePage(
 
     @Composable
     override fun Content() {
-        val viewModel: DownloadBangumiCreatePageViewModel = diViewModel()
+        val viewModel: DownloadBangumiCreatePageViewModel = diViewModel { DownloadBangumiCreatePageViewModel(it) }
         LaunchedEffect(id) {
             viewModel.loadEpisodeList(id)
         }

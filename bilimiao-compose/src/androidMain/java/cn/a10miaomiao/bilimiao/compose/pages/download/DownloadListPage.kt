@@ -49,7 +49,7 @@ class DownloadListPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: DownloadListPageViewModel = diViewModel()
+        val viewModel: DownloadListPageViewModel = diViewModel { DownloadListPageViewModel(it) }
         DownloadListPageContent(viewModel)
     }
 

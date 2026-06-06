@@ -128,7 +128,7 @@ class HistoryPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: HistoryPageViewModel = diViewModel()
+        val viewModel: HistoryPageViewModel = diViewModel { HistoryPageViewModel(it) }
         BoxWithConstraints {
             HistoryPageContent(viewModel, maxWidth)
         }

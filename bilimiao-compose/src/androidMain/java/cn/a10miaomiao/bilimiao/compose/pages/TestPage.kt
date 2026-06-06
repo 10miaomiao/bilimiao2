@@ -30,7 +30,7 @@ class TestPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: TestPageViewModel = diViewModel()
+        val viewModel: TestPageViewModel = diViewModel { TestPageViewModel(it) }
         TestPageContent(viewModel)
     }
 

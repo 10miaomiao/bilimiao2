@@ -59,7 +59,7 @@ class QrCodeLoginPage : ComposePage() {
 
     @Composable
     override fun Content() {
-         val viewModel: QrCodeLoginPageViewModel = diViewModel()
+         val viewModel: QrCodeLoginPageViewModel = diViewModel { QrCodeLoginPageViewModel(it) }
         QrCodeLoginPageContent(viewModel)
     }
 

@@ -74,7 +74,7 @@ class MainActivityComposeNavigator(
 
     val pageNavigation = PageNavigation(
         navHostController = { navController ?: error("Compose NavHost is not ready") },
-        launchUrl = launchUrl,
+        launchUrl = { url -> launchUrl(Uri.parse(url)) },
         onClose = onClose,
     )
 
@@ -91,7 +91,7 @@ class MainActivityComposeNavigator(
     }
 
     fun navigateByUri(deepLink: Uri): Boolean {
-        return pageNavigation.navigateByUri(deepLink)
+        return pageNavigation.navigateByUri(deepLink.toString())
     }
 
     fun navigate(page: ComposePage) {

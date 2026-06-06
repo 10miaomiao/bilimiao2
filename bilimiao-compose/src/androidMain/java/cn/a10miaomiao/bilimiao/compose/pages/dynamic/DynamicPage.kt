@@ -50,7 +50,7 @@ class DynamicPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: DynamicViewModel = diViewModel()
+        val viewModel: DynamicViewModel = diViewModel { DynamicViewModel(it) }
         DynamicPageContent(viewModel)
     }
 }

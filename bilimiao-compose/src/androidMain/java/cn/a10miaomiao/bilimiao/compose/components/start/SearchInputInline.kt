@@ -87,7 +87,7 @@ fun SearchInputInline(
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isCompact = windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
 
-    val viewModel: SearchInputViewModel = diViewModel()
+    val viewModel: SearchInputViewModel = diViewModel { SearchInputViewModel(it) }
     val pageNavigation: PageNavigation by rememberInstance()
     val activity: Activity by rememberInstance()
 
@@ -300,10 +300,10 @@ fun SearchInputInline(
                                     onClick = {
                                         when (item.type) {
                                             SearchInputViewModel.SuggestType.AV -> {
-                                                pageNavigation.navigateByUri(Uri.parse("bilimiao://video/${item.value}"))
+                                                pageNavigation.navigateByUri("bilimiao://video/${item.value}")
                                             }
                                             SearchInputViewModel.SuggestType.SS -> {
-                                                pageNavigation.navigateByUri(Uri.parse("bilimiao://video/${item.value}"))
+                                                pageNavigation.navigateByUri("bilimiao://video/${item.value}")
                                             }
                                             else -> {
                                                 startSearch(item.value)

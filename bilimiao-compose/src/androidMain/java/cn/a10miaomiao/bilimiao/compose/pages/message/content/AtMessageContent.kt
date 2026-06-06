@@ -156,7 +156,7 @@ private class AtMessageContentModel(
 
 @Composable
 internal fun AtMessageContent() {
-    val viewModel: AtMessageContentModel = diViewModel()
+    val viewModel: AtMessageContentModel = diViewModel { AtMessageContentModel(it) }
     val windowInsets = localContentInsets()
 
 

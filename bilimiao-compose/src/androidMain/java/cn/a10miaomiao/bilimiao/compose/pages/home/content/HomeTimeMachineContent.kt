@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.BilimiaoPageRoute
-import cn.a10miaomiao.bilimiao.compose.R
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
@@ -123,7 +122,7 @@ private class HomeTimeMachineContentViewModel(
 internal fun HomeTimeMachineContent(
     pageState: HomePageState
 ) {
-    val viewModel: HomeTimeMachineContentViewModel = diViewModel()
+    val viewModel: HomeTimeMachineContentViewModel = diViewModel { HomeTimeMachineContentViewModel(it) }
     val windowInsets = localContentInsets()
 
     val regionList by viewModel.regionList.collectAsState()

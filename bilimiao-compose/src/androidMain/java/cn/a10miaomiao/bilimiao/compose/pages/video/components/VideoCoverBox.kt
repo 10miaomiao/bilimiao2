@@ -36,16 +36,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.ic_bili_tv_play
+import bilimiao.bilimiao_compose.generated.resources.bili_fail_placeholder_img_tv
+import bilimiao.bilimiao_compose.generated.resources.bili_default_placeholder_img_tv
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import org.kodein.di.compose.rememberInstance
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -74,8 +76,8 @@ fun VideoCoverBox(
             model = UrlUtil.autoHttps(pic),
             contentDescription = title,
             modifier = Modifier.fillMaxSize(),
-            placeholder = painterResource(R.drawable.bili_default_placeholder_img_tv),
-            error = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+            placeholder = painterResource(Res.drawable.bili_default_placeholder_img_tv),
+            error = painterResource(Res.drawable.bili_fail_placeholder_img_tv),
             contentScale = ContentScale.Crop,
         )
         Row(
@@ -131,7 +133,7 @@ fun VideoCoverBox(
             }
         }
         Image(
-            painter = painterResource(R.drawable.ic_bili_tv_play),
+            painter = painterResource(Res.drawable.ic_bili_tv_play),
             contentDescription = "立即播放",
             modifier = Modifier
                 .align(Alignment.Center)

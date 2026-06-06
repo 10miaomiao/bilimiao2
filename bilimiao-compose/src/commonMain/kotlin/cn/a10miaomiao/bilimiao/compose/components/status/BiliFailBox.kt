@@ -13,9 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_fail_img
+import org.jetbrains.compose.resources.painterResource
 import java.net.UnknownHostException
 
 @Composable
@@ -42,7 +43,7 @@ fun BiliFailBox(
             modifier = Modifier
                 .widthIn(max = 150.dp)
                 .aspectRatio(1f),
-            painter = painterResource(id = R.drawable.bili_fail_img),
+            painter = painterResource(Res.drawable.bili_fail_img),
             contentDescription = "fail",
         )
         Text(

@@ -29,7 +29,8 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_akari_img
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Common
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Delete
@@ -48,7 +49,7 @@ import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.max
 import kotlin.math.min
 
@@ -266,7 +267,7 @@ fun ReplyItemBox(
     ) {
         AsyncImage(
             model = UrlUtil.autoHttps(avatar) + "@200w_200h",
-            placeholder = painterResource(R.drawable.bili_akari_img),
+            placeholder = painterResource(Res.drawable.bili_akari_img),
             contentDescription = null,
             modifier = Modifier
                 .padding(top = 2.dp)

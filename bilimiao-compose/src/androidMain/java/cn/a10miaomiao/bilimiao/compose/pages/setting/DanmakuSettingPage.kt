@@ -38,7 +38,7 @@ class DanmakuSettingPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: DanmakuSettingPageViewModel = diViewModel()
+        val viewModel: DanmakuSettingPageViewModel = diViewModel { DanmakuSettingPageViewModel(it) }
         DanmakuSettingPageContent(viewModel)
     }
 }

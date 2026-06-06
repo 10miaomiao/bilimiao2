@@ -74,7 +74,7 @@ class PlayListPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: PlayListPageViewModel = diViewModel()
+        val viewModel: PlayListPageViewModel = diViewModel { PlayListPageViewModel(it) }
         PlayListPageContent(viewModel)
     }
 }

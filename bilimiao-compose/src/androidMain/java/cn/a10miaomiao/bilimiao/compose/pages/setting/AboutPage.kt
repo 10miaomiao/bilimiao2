@@ -34,7 +34,8 @@ import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_akari_img
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
@@ -49,7 +50,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.BiliUrlMatcher
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
@@ -69,7 +70,7 @@ class AboutPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: AboutPageViewModel = diViewModel()
+        val viewModel: AboutPageViewModel = diViewModel { AboutPageViewModel(it) }
         AboutPageContent(viewModel)
     }
 }
@@ -478,8 +479,8 @@ private fun AboutPageContent(
                                 AsyncImage(
                                     model = avatarUrl,
                                     contentDescription = null,
-                                    placeholder = painterResource(R.drawable.bili_akari_img),
-                                    error = painterResource(R.drawable.bili_akari_img),
+                                    placeholder = painterResource(Res.drawable.bili_akari_img),
+                                    error = painterResource(Res.drawable.bili_akari_img),
                                     modifier = Modifier
                                         .padding(end = 8.dp)
                                         .size(48.dp)

@@ -175,7 +175,7 @@ private class HomeRecommendContentViewModel(
 
 @Composable
 internal fun HomeRecommendContent() {
-    val viewModel: HomeRecommendContentViewModel = diViewModel()
+    val viewModel: HomeRecommendContentViewModel = diViewModel { HomeRecommendContentViewModel(it) }
     val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()

@@ -40,7 +40,7 @@ class EditProxyServerPage(
 
     @Composable
     override fun Content() {
-        val viewModel: EditProxyServerPageViewModel = diViewModel()
+        val viewModel: EditProxyServerPageViewModel = diViewModel { EditProxyServerPageViewModel(it) }
         EditProxyServerPageContent(index, viewModel)
     }
 

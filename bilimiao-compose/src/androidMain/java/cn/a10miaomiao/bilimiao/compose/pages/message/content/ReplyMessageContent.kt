@@ -163,7 +163,7 @@ private class ReplyMessageContentModel(
 
 @Composable
 internal fun ReplyMessageContent() {
-    val viewModel: ReplyMessageContentModel = diViewModel()
+    val viewModel: ReplyMessageContentModel = diViewModel { ReplyMessageContentModel(it) }
     val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()

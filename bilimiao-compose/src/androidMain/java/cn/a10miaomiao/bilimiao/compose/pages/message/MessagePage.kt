@@ -52,7 +52,7 @@ class MessagePage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: MessagePageViewModel = diViewModel()
+        val viewModel: MessagePageViewModel = diViewModel { MessagePageViewModel(it) }
         MessagePageContent(viewModel)
     }
 

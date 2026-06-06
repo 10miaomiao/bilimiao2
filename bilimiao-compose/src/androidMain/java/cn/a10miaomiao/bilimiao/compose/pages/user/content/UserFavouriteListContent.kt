@@ -25,10 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_fail_placeholder_img_tv
+import bilimiao.bilimiao_compose.generated.resources.bili_default_placeholder_img_tv
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
@@ -37,7 +39,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteFolderType
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteViewModel
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun UserFavouriteListContent(
@@ -97,8 +99,8 @@ internal fun UserFavouriteListContent(
                             modifier = Modifier
                                 .size(width = 120.dp, height = 80.dp)
                                 .clip(RoundedCornerShape(5.dp)),
-                            placeholder = painterResource(R.drawable.bili_default_placeholder_img_tv),
-                            error = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+                            placeholder = painterResource(Res.drawable.bili_default_placeholder_img_tv),
+                            error = painterResource(Res.drawable.bili_fail_placeholder_img_tv),
                         )
 
                         Column(

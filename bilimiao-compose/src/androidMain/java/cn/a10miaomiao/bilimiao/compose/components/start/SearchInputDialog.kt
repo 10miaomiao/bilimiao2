@@ -63,7 +63,7 @@ fun SearchInputDialog(
     selfSearchName: String?,
     onDismissRequest: () -> Unit,
 ) {
-    val viewModel: SearchInputViewModel = cn.a10miaomiao.bilimiao.compose.common.diViewModel()
+    val viewModel: SearchInputViewModel = cn.a10miaomiao.bilimiao.compose.common.diViewModel { SearchInputViewModel(it) }
     val pageNavigation: PageNavigation by rememberInstance()
     val activity: Activity by rememberInstance()
 
@@ -119,8 +119,8 @@ fun SearchInputDialog(
                         modifier = Modifier
                             .clickable {
                                 when (item.type) {
-                                    SuggestType.AV -> pageNavigation.navigateByUri(Uri.parse("bilimiao://video/${item.value}"))
-                                    SuggestType.SS -> pageNavigation.navigateByUri(Uri.parse("bilimiao://bangumi/${item.value}"))
+                                    SuggestType.AV -> pageNavigation.navigateByUri("bilimiao://video/${item.value}")
+                                    SuggestType.SS -> pageNavigation.navigateByUri("bilimiao://bangumi/${item.value}")
                                     else -> startSearch(item.value)
                                 }
                             },

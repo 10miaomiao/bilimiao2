@@ -188,7 +188,7 @@ private fun ReplyDetailListPageContent(
                     ))
                 }
                 MenuKeys.url -> {
-                    pageNavigation.navigateByUri(Uri.parse(enterUrl))
+                    pageNavigation.navigateByUri(enterUrl)
                 }
             }
 

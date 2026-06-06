@@ -80,7 +80,7 @@ class LyricPage :ComposePage(){
 
     @Composable
     override fun Content() {
-        val viewModel: LyricPageViewModel = diViewModel()
+        val viewModel: LyricPageViewModel = diViewModel { LyricPageViewModel(it) }
         LyricPageContent(viewModel)
     }
 }

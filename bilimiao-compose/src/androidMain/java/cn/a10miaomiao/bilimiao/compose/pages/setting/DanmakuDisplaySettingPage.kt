@@ -47,7 +47,7 @@ data class DanmakuDisplaySettingPage(
 
     @Composable
     override fun Content() {
-        val viewModel: DanmakuDisplaySettingPageViewModel = diViewModel()
+        val viewModel: DanmakuDisplaySettingPageViewModel = diViewModel { DanmakuDisplaySettingPageViewModel(it) }
         val initialMode = name
         DanmakuDisplaySettingPageContent(
             viewModel,
