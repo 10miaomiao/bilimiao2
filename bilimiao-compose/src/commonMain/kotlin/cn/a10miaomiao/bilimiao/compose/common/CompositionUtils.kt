@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.common
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
@@ -15,6 +14,9 @@ import androidx.compose.ui.unit.max
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarConfig
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
+
+const val ORIENTATION_PORTRAIT = 1
+const val ORIENTATION_LANDSCAPE = 2
 
 @Composable
 fun WindowInsets.toContentInsets(): ContentInsets {
@@ -70,12 +72,12 @@ fun calculateMainContentInsets(
     if (isHorizontal) {
         return rawWindowInsets
     }
-    val verticalBottomChrome = if (appBarState?.visible != false && orientation == Configuration.ORIENTATION_PORTRAIT) {
+    val verticalBottomChrome = if (appBarState?.visible != false && orientation == ORIENTATION_PORTRAIT) {
         AppBarConfig.Height
     } else {
         0.dp
     }
-    return if (orientation == Configuration.ORIENTATION_PORTRAIT && showPlayer) {
+    return if (orientation == ORIENTATION_PORTRAIT && showPlayer) {
         rawWindowInsets.copy(
             top = 0.dp,
             bottom = rawWindowInsets.top + rawWindowInsets.bottom + verticalBottomChrome,
