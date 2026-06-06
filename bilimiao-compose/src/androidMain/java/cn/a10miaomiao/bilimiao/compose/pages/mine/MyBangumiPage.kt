@@ -47,7 +47,7 @@ class MyBangumiPage(
 
     @Composable
     override fun Content() {
-        val viewModel: SearchPageViewModel = diViewModel()
+        val viewModel: SearchPageViewModel = diViewModel { SearchPageViewModel(it) }
         MyBangumiPageContent(viewModel, type)
     }
 }

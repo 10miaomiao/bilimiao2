@@ -10,8 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.json.JSONObject
-import org.json.JSONTokener
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 
@@ -73,14 +75,12 @@ class SearchInputViewModel(
             try {
                 val res = BiliApiService.searchApi.suggestList(keyword).awaitCall()
                 val jsonStr = res.body!!.string()
-                val jsonParser = JSONTokener(jsonStr)
-                val jsonArray =
-                    (jsonParser.nextValue() as JSONObject).getJSONObject("result")
-                        .getJSONArray("tag")
-                if (keyword == currentText) {
+                val jsonObj = Json.parseToJsonElement(jsonStr).jsonObject
+                val jsonArray = jsonObj["result"]?.jsonObject?.get("tag")?.jsonArray
+                if (keyword == currentText && jsonArray != null) {
                     suggestListFlow.value = getInitSuggestData(keyword).apply {
-                        for (i in 0 until jsonArray.length()) {
-                            val value = jsonArray.getJSONObject(i).getString("value")
+                        for (element in jsonArray) {
+                            val value = element.jsonObject["value"]?.jsonPrimitive?.content ?: continue
                             add(
                                 SuggestInfo(
                                     text = value,
@@ -115,7 +115,7 @@ class SearchInputViewModel(
     }
 
     fun isNumeric(s: String): Boolean {
-        return s.toCharArray().all { Character.isDigit(it) }
+        return s.all { it.isDigit() }
     }
 
     enum class SuggestType {

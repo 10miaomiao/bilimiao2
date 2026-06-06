@@ -29,12 +29,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cn.a10miaomiao.bilimiao.compose.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.filled.Tune
 
 /**
  * AppBar 横屏布局
@@ -94,7 +96,7 @@ fun AppBarHorizontal(
 
         if (showPointer) {
             AppBarHorizontalIconButton(
-                iconRes = R.drawable.ic_pointer_24dp,
+                icon = Icons.Default.Tune,
                 contentDescription = "指针",
                 rotation = if (pointerOrientation) 0f else 180f,
                 onClick = onPointerClick,
@@ -103,7 +105,7 @@ fun AppBarHorizontal(
 
         if (showExchange) {
             AppBarHorizontalIconButton(
-                iconRes = R.drawable.ic_exchange_24dp,
+                icon = Icons.Default.SwapVert,
                 contentDescription = "交换",
                 onClick = onExchangeClick,
             )
@@ -155,14 +157,14 @@ fun AppBarHorizontal(
 
 @Composable
 private fun AppBarHorizontalIconButton(
-    iconRes: Int,
+    icon: ImageVector,
     contentDescription: String,
     rotation: Float = 0f,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Icon(
-        painter = painterResource(id = iconRes),
+        imageVector = icon,
         contentDescription = contentDescription,
         tint = LocalContentColor.current.copy(alpha = 0.45f),
         modifier = Modifier

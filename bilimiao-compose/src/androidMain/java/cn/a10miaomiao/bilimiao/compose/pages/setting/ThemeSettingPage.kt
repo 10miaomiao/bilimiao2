@@ -48,7 +48,7 @@ class ThemeSettingPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: ThemeSettingPageViewModel = diViewModel()
+        val viewModel: ThemeSettingPageViewModel = diViewModel { ThemeSettingPageViewModel(it) }
         ThemeSettingPageContent(viewModel)
     }
 

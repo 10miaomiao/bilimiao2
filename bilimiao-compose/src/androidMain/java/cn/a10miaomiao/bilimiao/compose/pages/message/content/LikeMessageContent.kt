@@ -147,7 +147,7 @@ private class LikeMessageContentModel(
 
 @Composable
 internal fun LikeMessageContent() {
-    val viewModel: LikeMessageContentModel = diViewModel()
+    val viewModel: LikeMessageContentModel = diViewModel { LikeMessageContentModel(it) }
     val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()

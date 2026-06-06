@@ -1,14 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.common.navigation
 
-import android.net.Uri
-import android.util.TypedValue
-import androidx.annotation.MainThread
-import androidx.browser.customtabs.CustomTabColorSchemeParams
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.core.content.ContextCompat
-import androidx.navigation.NavController
-import androidx.navigation.NavDeepLinkRequest
-import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
@@ -16,22 +7,24 @@ import androidx.navigation.Navigator
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
-import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
+
+/**
+ * 平台相关的 deep link 导航实现
+ */
+internal expect fun navigateDeepLink(navHostController: NavHostController, deepLink: String): Boolean
 
 class PageNavigation(
     private val navHostController: () -> NavHostController,
-    private val launchUrl: (uri: Uri) -> Unit,
+    private val launchUrl: (url: String) -> Unit,
     private val onClose: () -> Unit = {},
 ) : PageNavigator {
 
     val hostController get() = navHostController()
 
-    fun navigateByUri(deepLink: Uri): Boolean {
-        return runCatching {
-            hostController.navigate(deepLink)
-        }.isSuccess.also {
-            if (!it) miaoLogger() debug "[NotFoundPage]:deepLink=${deepLink}"
+    private fun navigateByUriInternal(deepLink: String): Boolean {
+        return navigateDeepLink(hostController, deepLink).also {
+            if (!it) miaoLogger() debug "[NotFoundPage]:deepLink=$deepLink"
         }
     }
 
@@ -77,19 +70,15 @@ class PageNavigation(
     }
 
     override fun navigateByUri(uriString: String): Boolean {
-        return navigateByUri(Uri.parse(uriString))
+        return navigateByUriInternal(uriString)
     }
 
     override fun navigateToVideoInfo(id: String) {
-        hostController.navigate(VideoDetailPage(id))
+        navigateByUriInternal("bilimiao://video/$id")
     }
 
     override fun launchWebBrowser(url: String) {
-        launchWebBrowser(Uri.parse(url))
-    }
-
-    fun launchWebBrowser(uri: Uri) {
-        launchUrl(uri)
+        launchUrl(url)
     }
 
 }

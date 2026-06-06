@@ -45,7 +45,7 @@ class SearchFollowPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: SearchFollowPageViewModel = diViewModel()
+        val viewModel: SearchFollowPageViewModel = diViewModel { SearchFollowPageViewModel(it) }
         SearchFollowPageContent(viewModel)
     }
 }

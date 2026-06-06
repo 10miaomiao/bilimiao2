@@ -88,7 +88,7 @@ data class BangumiDetailPage(
 
     @Composable
     override fun Content() {
-        val viewModel: BangumiDetailPageViewModel = diViewModel()
+        val viewModel: BangumiDetailPageViewModel = diViewModel { BangumiDetailPageViewModel(it) }
         BangumiDetailPageContent(
             id = id,
             epid = epId,

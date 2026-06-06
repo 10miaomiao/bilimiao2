@@ -113,7 +113,7 @@ object HomePage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: HomePageViewModel = diViewModel()
+        val viewModel: HomePageViewModel = diViewModel { HomePageViewModel(it) }
         HomePageContent(viewModel)
     }
 

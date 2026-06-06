@@ -15,9 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_loading_img2
+import bilimiao.bilimiao_compose.generated.resources.bili_loading_img1
+import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.delay
 
 @Composable
@@ -27,8 +29,8 @@ fun BiliLoadingBox(modifier: Modifier) {
         delay(100)
         i = 1 - i
     }
-    val img1 = painterResource(id = R.drawable.bili_loading_img1)
-    val img2 = painterResource(id = R.drawable.bili_loading_img2)
+    val img1 = painterResource(Res.drawable.bili_loading_img1)
+    val img2 = painterResource(Res.drawable.bili_loading_img2)
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,

@@ -196,9 +196,7 @@ private class SearchAllContentViewModel(
     }
 
     fun toDetailPage(item: SearchItem) {
-        pageNavigation.navigateByUri(
-            Uri.parse(item.uri)
-        )
+        pageNavigation.navigateByUri(item.uri)
     }
 
 }

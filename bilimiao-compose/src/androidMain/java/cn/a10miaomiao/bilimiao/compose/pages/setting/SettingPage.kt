@@ -61,7 +61,7 @@ class SettingPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: SettingPageViewModel = diViewModel()
+        val viewModel: SettingPageViewModel = diViewModel { SettingPageViewModel(it) }
         SettingPageContent(viewModel)
     }
 }

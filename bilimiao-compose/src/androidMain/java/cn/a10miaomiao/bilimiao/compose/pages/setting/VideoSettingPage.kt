@@ -46,7 +46,7 @@ class VideoSettingPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: VideoSettingPageViewModel = diViewModel()
+        val viewModel: VideoSettingPageViewModel = diViewModel { VideoSettingPageViewModel(it) }
         VideoSettingPageContent(viewModel)
     }
 }

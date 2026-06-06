@@ -40,7 +40,7 @@ class SelectProxyServerPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: SelectProxyServerPageViewModel = diViewModel()
+        val viewModel: SelectProxyServerPageViewModel = diViewModel { SelectProxyServerPageViewModel(it) }
         SelectProxyServerPageContent(viewModel)
     }
 

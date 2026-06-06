@@ -41,7 +41,7 @@ data class DownloadDetailPage(
 
     @Composable
     override fun Content() {
-        val viewModel: DownloadDetailPageViewModel = diViewModel()
+        val viewModel: DownloadDetailPageViewModel = diViewModel { DownloadDetailPageViewModel(it) }
         DownloadDetailPageContent(path, viewModel)
     }
 

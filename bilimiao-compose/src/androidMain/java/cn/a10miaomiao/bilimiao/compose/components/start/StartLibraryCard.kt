@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.components.start
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,13 +24,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.ic_nav_watchlater
+import bilimiao.bilimiao_compose.generated.resources.ic_nav_history
+import bilimiao.bilimiao_compose.generated.resources.ic_nav_fav
+import bilimiao.bilimiao_compose.generated.resources.ic_nav_bangumi
+import org.jetbrains.compose.resources.DrawableResource
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
@@ -66,7 +70,7 @@ fun StartLibraryCard(
             LibraryItemCard(
                 cardWidth,
                 "收藏",
-                R.drawable.ic_nav_fav,
+                Res.drawable.ic_nav_fav,
                 onClick = {
                     if (userId != null) {
                         navigateTo(UserFavouritePage(userId.toString()))
@@ -129,7 +133,7 @@ fun StartLibraryCard(
             LibraryItemCard(
                 cardWidth,
                 "追番/剧",
-                R.drawable.ic_nav_bangumi,
+                Res.drawable.ic_nav_bangumi,
                 onClick = {
                     if (userId != null) {
                         navigateTo(MyBangumiPage())
@@ -179,7 +183,7 @@ fun StartLibraryCard(
             LibraryItemCard(
                 cardWidth,
                 "历史",
-                R.drawable.ic_nav_history,
+                Res.drawable.ic_nav_history,
                 onClick = {
                     navigateTo(HistoryPage())
                 },
@@ -222,7 +226,7 @@ fun StartLibraryCard(
             LibraryItemCard(
                 cardWidth,
                 "稍后看",
-                R.drawable.ic_nav_watchlater,
+                Res.drawable.ic_nav_watchlater,
                 onClick = {
                     if (userId != null) {
                         navigateTo(WatchLaterPage())
@@ -284,7 +288,7 @@ fun StartLibraryCard(
 private fun LibraryItemCard(
     cardWidth: Dp,
     cardName: String,
-    @DrawableRes iconResId: Int,
+    iconResId: DrawableResource,
     onClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {

@@ -35,7 +35,7 @@ class AddProxyServerPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: AddProxyServerPageViewModel = diViewModel()
+        val viewModel: AddProxyServerPageViewModel = diViewModel { AddProxyServerPageViewModel(it) }
         AddProxyServerPageContent(viewModel)
     }
 

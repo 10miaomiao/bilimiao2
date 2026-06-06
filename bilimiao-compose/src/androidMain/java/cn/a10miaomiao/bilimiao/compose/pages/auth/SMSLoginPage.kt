@@ -84,7 +84,7 @@ class SMSLoginPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: SMSLoginPageViewModel = diViewModel()
+        val viewModel: SMSLoginPageViewModel = diViewModel { SMSLoginPageViewModel(it) }
         SMSLoginPageCompose(viewModel)
     }
 

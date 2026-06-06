@@ -16,7 +16,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
 import com.a10miaomiao.bilimiao.comm.entity.bangumi.EpisodeInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
@@ -65,7 +64,10 @@ fun BangumiEpisodeItem(
                         fontSize = 12.sp,
                         modifier = Modifier
                             .background(
-                                color = Color(item.badge_info.bg_color.toColorInt()),
+                                color = run {
+                                    val hex = item.badge_info.bg_color.removePrefix("#")
+                                    Color(hex.toLong(16) or if (hex.length == 6) 0xFF000000 else 0)
+                                },
                                 shape = RoundedCornerShape(5.dp)
                             )
                             .padding(horizontal = 4.dp, vertical = 2.dp)

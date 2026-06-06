@@ -55,7 +55,7 @@ data class TelVerifyPage(
 
     @Composable
     override fun Content() {
-        val viewModel: TelVerifyPageViewModel = diViewModel()
+        val viewModel: TelVerifyPageViewModel = diViewModel { TelVerifyPageViewModel(it) }
         LaunchedEffect(code, requestId, source) {
             viewModel.code = code
             viewModel.requestId = requestId

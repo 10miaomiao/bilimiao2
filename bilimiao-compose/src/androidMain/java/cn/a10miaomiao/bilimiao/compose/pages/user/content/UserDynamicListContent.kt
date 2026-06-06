@@ -111,7 +111,7 @@ private class UserDynamicListContentViewModel(
         val extend = item.extend ?: return
         val toUrl = extend.cardUrl
         try {
-            pageNavigation.navigateByUri(Uri.parse(toUrl))
+            pageNavigation.navigateByUri(toUrl)
         } catch (e: Exception) {
             e.printStackTrace()
         }

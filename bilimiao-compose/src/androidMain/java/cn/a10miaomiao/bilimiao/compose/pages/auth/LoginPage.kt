@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -25,7 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.ic_33_hide
+import bilimiao.bilimiao_compose.generated.resources.ic_33
+import bilimiao.bilimiao_compose.generated.resources.ic_22_hide
+import bilimiao.bilimiao_compose.generated.resources.ic_22
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -60,7 +64,7 @@ class LoginPage : ComposePage() {
 
     @Composable
     override fun Content() {
-        val viewModel: LoginPageViewModel = diViewModel()
+        val viewModel: LoginPageViewModel = diViewModel { LoginPageViewModel(it) }
         LaunchedEffect(Unit) {
             viewModel.checkLogin()
         }
@@ -312,20 +316,20 @@ private fun LoginPageContent(
         ) {
             if (passwordIsFocus) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_22_hide),
+                    painter = painterResource(Res.drawable.ic_22_hide),
                     contentDescription = "22娘遮眼",
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.ic_33_hide),
+                    painter = painterResource(Res.drawable.ic_33_hide),
                     contentDescription = "33娘遮眼",
                 )
             } else {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_22),
+                    painter = painterResource(Res.drawable.ic_22),
                     contentDescription = "22娘",
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.ic_33),
+                    painter = painterResource(Res.drawable.ic_33),
                     contentDescription = "33娘",
                 )
             }

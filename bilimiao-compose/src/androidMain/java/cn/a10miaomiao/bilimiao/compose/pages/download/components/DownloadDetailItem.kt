@@ -15,12 +15,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_fail_placeholder_img_tv
+import bilimiao.bilimiao_compose.generated.resources.bili_default_placeholder_img_tv
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadItemInfo
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun DownloadDetailItem(
@@ -51,8 +53,8 @@ fun DownloadDetailItem(
                         model = UrlUtil.autoHttps(item.cover) + "@672w_378h_1c_",
                         contentScale = ContentScale.Crop,
                         contentDescription = null,
-                        placeholder = painterResource(R.drawable.bili_default_placeholder_img_tv),
-                        error = painterResource(R.drawable.bili_fail_placeholder_img_tv),
+                        placeholder = painterResource(Res.drawable.bili_default_placeholder_img_tv),
+                        error = painterResource(Res.drawable.bili_fail_placeholder_img_tv),
                         modifier = Modifier
                             .size(width = 60.dp, height = 40.dp)
                             .clip(RoundedCornerShape(5.dp))

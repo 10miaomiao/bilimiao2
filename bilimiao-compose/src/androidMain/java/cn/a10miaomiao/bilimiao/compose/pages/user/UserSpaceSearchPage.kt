@@ -55,7 +55,7 @@ class UserSpaceSearchPage(
 
     @Composable
     override fun Content() {
-        val viewModel: UserSpaceSearchPageViewModel = diViewModel()
+        val viewModel: UserSpaceSearchPageViewModel = diViewModel { UserSpaceSearchPageViewModel(it) }
         UserSpaceSearchPageContent(viewModel, id.toLong(), keyword)
     }
 }

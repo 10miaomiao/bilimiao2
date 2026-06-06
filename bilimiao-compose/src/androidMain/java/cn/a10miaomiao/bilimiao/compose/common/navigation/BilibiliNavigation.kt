@@ -82,7 +82,7 @@ object BilibiliNavigation {
             return true
         }
 
-        return pageNavigation.navigateByUri(uri)
+        return pageNavigation.navigateByUri(uri.toString())
     }
 
     fun navigationToWeb(
@@ -111,7 +111,7 @@ object BilibiliNavigation {
             )
         } else {
             // 非B站网页使用外部浏览器打开
-            pageNavigation.launchWebBrowser(uri)
+            pageNavigation.launchWebBrowser(uri.toString())
         }
     }
 

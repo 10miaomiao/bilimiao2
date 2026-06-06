@@ -20,11 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.R
+import bilimiao.bilimiao_compose.generated.resources.Res
+import bilimiao.bilimiao_compose.generated.resources.bili_akari_img
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
-import androidx.compose.ui.res.painterResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun UserInfoCard(
@@ -46,7 +47,7 @@ internal fun UserInfoCard(
         ) {
             AsyncImage(
                 model = UrlUtil.autoHttps(face) + "@200w_200h",
-                placeholder = painterResource(R.drawable.bili_akari_img),
+                placeholder = painterResource(Res.drawable.bili_akari_img),
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)

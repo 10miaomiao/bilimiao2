@@ -209,7 +209,7 @@ private fun EntranceListBox(
 
 @Composable
 internal fun HomePopularContent() {
-    val viewModel: HomePopularContentViewModel = diViewModel()
+    val viewModel: HomePopularContentViewModel = diViewModel { HomePopularContentViewModel(it) }
     val windowInsets = localContentInsets()
 
     val list by viewModel.list.data.collectAsState()
