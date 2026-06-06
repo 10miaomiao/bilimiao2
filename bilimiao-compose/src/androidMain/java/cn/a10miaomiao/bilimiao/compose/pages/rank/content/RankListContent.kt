@@ -1,7 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.rank.content
 
-import android.app.Activity
-import android.net.Uri
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

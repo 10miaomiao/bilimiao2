@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import android.content.Context
-import android.net.Uri
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding

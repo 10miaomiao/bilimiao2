@@ -6,7 +6,7 @@ import android.content.ContextWrapper
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween

@@ -1,6 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.components.image.provider
 
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets

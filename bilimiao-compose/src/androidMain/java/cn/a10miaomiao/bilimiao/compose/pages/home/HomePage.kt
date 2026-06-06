@@ -1,14 +1,14 @@
 package cn.a10miaomiao.bilimiao.compose.pages.home
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.ExperimentalFoundationApi

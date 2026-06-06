@@ -1,6 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.community
 
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

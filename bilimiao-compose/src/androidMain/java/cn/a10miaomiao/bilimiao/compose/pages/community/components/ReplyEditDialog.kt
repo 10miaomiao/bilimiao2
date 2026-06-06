@@ -1,6 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.community.components
 
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi

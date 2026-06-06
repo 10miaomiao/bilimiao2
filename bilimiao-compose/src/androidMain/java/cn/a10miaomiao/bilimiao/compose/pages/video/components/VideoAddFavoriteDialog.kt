@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
+import cn.a10miaomiao.bilimiao.compose.common.toColorInt
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
 import cn.a10miaomiao.bilimiao.compose.pages.community.ReplyEditParams
