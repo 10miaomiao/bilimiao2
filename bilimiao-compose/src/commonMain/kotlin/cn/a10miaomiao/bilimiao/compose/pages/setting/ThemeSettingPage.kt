@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -29,7 +28,6 @@ import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
-import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ThemeColorButton
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -38,7 +36,6 @@ import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.platform.getMaterialYouColor
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import kotlinx.serialization.Serializable
-import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
