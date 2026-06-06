@@ -2,7 +2,6 @@ package cn.a10miaomiao.bilimiao.compose.pages.auth
 
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -145,7 +144,7 @@ private class LoginPageViewModel(
                             confirmButton = {
                                 TextButton(
                                     onClick = {
-                                        val params = UrlUtil.getQueryKeyValueMap(Uri.parse(loginInfo.url))
+                                        val params = UrlUtil.getQueryKeyValueMap(loginInfo.url)
                                         if (params.containsKey("tmp_token")
                                             && params.containsKey("request_id")
                                             && params.containsKey("source")
@@ -239,7 +238,7 @@ private class LoginPageViewModel(
     }
 
     override suspend fun getGTApiJson(): JSONObject? {
-        val queryMap = UrlUtil.getQueryKeyValueMap(Uri.parse(verifyUrl))
+        val queryMap = UrlUtil.getQueryKeyValueMap(verifyUrl)
         if (queryMap.containsKey("recaptcha_token")) {
             recaptchaToken = queryMap["recaptcha_token"] ?: ""
             return JSONObject().apply {

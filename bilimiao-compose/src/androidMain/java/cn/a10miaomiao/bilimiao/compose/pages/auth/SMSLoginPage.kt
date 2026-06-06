@@ -1,7 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.auth
 
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -274,7 +273,7 @@ private class SMSLoginPageViewModel(
     }
 
     override suspend fun getGTApiJson(): JSONObject? {
-        val queryMap = UrlUtil.getQueryKeyValueMap(Uri.parse(recaptchaUrl))
+        val queryMap = UrlUtil.getQueryKeyValueMap(recaptchaUrl)
         if (queryMap.containsKey("recaptcha_token")) {
             recaptchaToken = queryMap["recaptcha_token"] ?: ""
             return JSONObject().apply {
