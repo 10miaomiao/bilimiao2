@@ -1,7 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose
 
-import android.os.Build
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,7 +58,6 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -85,7 +82,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.runtime.DisposableEffect
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -130,8 +127,6 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
-import android.app.Activity
-import android.net.Uri
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
@@ -145,7 +140,6 @@ import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.GenericShape
-import androidx.core.view.WindowCompat
 import cn.a10miaomiao.bilimiao.compose.common.foundation.add
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage

@@ -1,8 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.components.start
 
 import android.app.Activity
-import android.net.Uri
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

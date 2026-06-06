@@ -1,7 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.pages.mine
 
 import android.content.Context
-import androidx.activity.compose.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*

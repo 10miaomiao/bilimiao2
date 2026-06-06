@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.user
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions

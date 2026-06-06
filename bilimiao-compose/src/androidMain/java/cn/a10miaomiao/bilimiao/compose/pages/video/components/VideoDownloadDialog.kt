@@ -38,7 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
+import cn.a10miaomiao.bilimiao.compose.common.toColorInt
 import androidx.lifecycle.viewModelScope
 import bilibili.app.archive.v1.Arc
 import bilibili.app.archive.v1.Page
