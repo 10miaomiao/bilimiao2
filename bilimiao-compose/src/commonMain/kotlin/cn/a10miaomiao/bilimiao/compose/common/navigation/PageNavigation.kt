@@ -17,6 +17,7 @@ internal expect fun navigateDeepLink(navHostController: NavHostController, deepL
 class PageNavigation(
     private val navHostController: () -> NavHostController,
     private val launchUrl: (url: String) -> Unit,
+    private val scannerLauncher: (callback: (result: String) -> Unit) -> Boolean = { false },
     private val onClose: () -> Unit = {},
 ) : PageNavigator {
 
@@ -79,6 +80,10 @@ class PageNavigation(
 
     override fun launchWebBrowser(url: String) {
         launchUrl(url)
+    }
+
+    override fun openScanner(callback: (result: String) -> Unit): Boolean {
+        return scannerLauncher(callback)
     }
 
 }

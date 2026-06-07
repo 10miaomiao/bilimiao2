@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
-import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -56,14 +55,19 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
+import android.view.View
+import cn.a10miaomiao.bilimiao.compose.AndroidPlayerViews
+import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
+import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
+import cn.a10miaomiao.bilimiao.compose.PlayerState
+import cn.a10miaomiao.bilimiao.compose.StartViewState
+
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
@@ -90,20 +94,22 @@ private enum class ComposeDrawerValue {
 
 @Composable
 fun ComposeScaffold(
-    startViewWrapper: StartViewWrapper,
+    startViewState: StartViewState,
+    androidPlayerViews: AndroidPlayerViews? = null,
     modifier: Modifier = Modifier,
     appBarState: AppBarState? = null,
     allowDrawerOpenGesture: Boolean = true,
     drawerContent: @Composable () -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val showPlayer = startViewWrapper.showPlayer
-    val fullScreenPlayer = startViewWrapper.fullScreenPlayer
-    val orientation = startViewWrapper.orientation
-    val portraitPlayerLayoutState = startViewWrapper.portraitPlayerLayoutState
-    val floatingPlayerLayoutState = startViewWrapper.floatingPlayerLayoutState
-    val playerVideoRatio = startViewWrapper.playerVideoRatio
-    val drawerState = startViewWrapper.drawerState
+    val playerState = startViewState.playerState
+    val showPlayer = playerState.showPlayer
+    val fullScreenPlayer = playerState.fullScreenPlayer
+    val orientation = playerState.orientation
+    val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
+    val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
+    val playerVideoRatio = playerState.playerVideoRatio
+    val drawerState = startViewState.drawerState
 
     val appBarNestedScrollConnection = remember(appBarState, orientation) {
         if (appBarState == null) {
@@ -148,6 +154,7 @@ fun ComposeScaffold(
 
     val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
     val density = LocalDensity.current
+    val densityFloat = density.density
     val playerLayoutState = remember(
         showPlayer,
         fullScreenPlayer,
@@ -167,7 +174,7 @@ fun ComposeScaffold(
     }
     val drawerController = rememberComposeDrawerController(
         initialState = drawerState,
-        onStateChanged = startViewWrapper::setDrawerState,
+        onStateChanged = startViewState::setDrawerState,
     )
     var drawerMeasuredWidthPx by remember(orientation) { mutableIntStateOf(0) }
 
@@ -180,8 +187,8 @@ fun ComposeScaffold(
             return@LaunchedEffect
         }
         when (drawerState) {
-            StartViewWrapper.DRAWER_STATE_EXPANDED -> drawerController.open()
-            StartViewWrapper.DRAWER_STATE_COLLAPSED -> drawerController.close()
+            StartViewState.DRAWER_STATE_EXPANDED -> drawerController.open()
+            StartViewState.DRAWER_STATE_COLLAPSED -> drawerController.close()
         }
     }
 
@@ -236,10 +243,10 @@ fun ComposeScaffold(
             allowDrawerOpenGesture && drawerController.settledValue == ComposeDrawerValue.Closed
         ) {
             Modifier
-                .pointerInput(startViewWrapper) {
+                .pointerInput(startViewState) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        startViewWrapper.setTouchStartTop(down.position.y)
+                        startViewState.setTouchStartTop(down.position.y, maxHeightPx.toInt(), densityFloat)
                     }
                 }
                 .then(drawerGestureModifier)
@@ -264,7 +271,7 @@ fun ComposeScaffold(
                         if (!isDrawerOpenGestureStart(down.position, leftEdgeWidthPx, appBarGestureRect)) {
                             return@awaitEachGesture
                         }
-                        startViewWrapper.setTouchStartTop(down.position.y)
+                        startViewState.setTouchStartTop(down.position.y, maxHeightPx.toInt(), densityFloat)
                         val pointerId = down.id
                         val velocityTracker = VelocityTracker()
                         velocityTracker.addPosition(down.uptimeMillis, down.position)
@@ -384,7 +391,8 @@ fun ComposeScaffold(
                 val playerPlaceable = if (layoutResult.hasPlayer) {
                     subcompose("player") {
                         PlayerLayer(
-                            startViewWrapper = startViewWrapper,
+                            playerState = playerState,
+                            playerView = androidPlayerViews?.playerView,
                             baseBounds = layoutResult.playerBounds!!,
                             portraitTopInset = rawWindowInsets.top,
                             safeDrawingInsets = rawWindowInsets,
@@ -523,7 +531,7 @@ private class ComposeDrawerController(
             animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
         )
         programmaticChange = false
-        dispatchState(StartViewWrapper.DRAWER_STATE_EXPANDED)
+        dispatchState(StartViewState.DRAWER_STATE_EXPANDED)
     }
 
     suspend fun close() {
@@ -536,7 +544,7 @@ private class ComposeDrawerController(
             animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
         )
         programmaticChange = false
-        dispatchState(StartViewWrapper.DRAWER_STATE_COLLAPSED)
+        dispatchState(StartViewState.DRAWER_STATE_COLLAPSED)
     }
 
     suspend fun settle(velocity: Float) {
@@ -551,7 +559,7 @@ private class ComposeDrawerController(
             else -> ComposeDrawerValue.Closed
         }
         programmaticChange = true
-        dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
+        dispatchState(StartViewState.DRAWER_STATE_SETTLING)
         state.animateTo(
             target,
             animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
@@ -559,9 +567,9 @@ private class ComposeDrawerController(
         programmaticChange = false
         dispatchState(
             if (target == ComposeDrawerValue.Open) {
-                StartViewWrapper.DRAWER_STATE_EXPANDED
+                StartViewState.DRAWER_STATE_EXPANDED
             } else {
-                StartViewWrapper.DRAWER_STATE_COLLAPSED
+                StartViewState.DRAWER_STATE_COLLAPSED
             }
         )
     }
@@ -572,16 +580,16 @@ private class ComposeDrawerController(
         }
         when {
             isAnimationRunning -> {
-                dispatchState(StartViewWrapper.DRAWER_STATE_SETTLING)
+                dispatchState(StartViewState.DRAWER_STATE_SETTLING)
             }
             settledValue == ComposeDrawerValue.Open && targetValue == ComposeDrawerValue.Open -> {
-                dispatchState(StartViewWrapper.DRAWER_STATE_EXPANDED)
+                dispatchState(StartViewState.DRAWER_STATE_EXPANDED)
             }
             settledValue == ComposeDrawerValue.Closed && targetValue == ComposeDrawerValue.Closed -> {
-                dispatchState(StartViewWrapper.DRAWER_STATE_COLLAPSED)
+                dispatchState(StartViewState.DRAWER_STATE_COLLAPSED)
             }
             else -> {
-                dispatchState(StartViewWrapper.DRAWER_STATE_DRAGGING)
+                dispatchState(StartViewState.DRAWER_STATE_DRAGGING)
             }
         }
     }
@@ -611,7 +619,7 @@ private fun rememberComposeDrawerController(
 }
 
 private fun Int.toDrawerValue(): ComposeDrawerValue {
-    return if (this == StartViewWrapper.DRAWER_STATE_EXPANDED) {
+    return if (this == StartViewState.DRAWER_STATE_EXPANDED) {
         ComposeDrawerValue.Open
     } else {
         ComposeDrawerValue.Closed
@@ -637,21 +645,16 @@ private fun contentConstraints(rootConstraints: Constraints, bounds: Rect): Cons
 
 @Composable
 internal fun PlayerLayer(
-    startViewWrapper: StartViewWrapper,
+    playerState: PlayerState,
+    playerView: View?,
     baseBounds: Rect,
     portraitTopInset: Dp,
     safeDrawingInsets: ContentInsets = ContentInsets(),
     viewportWidth: Dp = 0.dp,
     viewportHeight: Dp = 0.dp,
 ) {
-    val playerView = startViewWrapper.playerView
-    val completionView = startViewWrapper.completionView
-    val errorMessageView = startViewWrapper.errorMessageView
-    val areaLimitView = startViewWrapper.areaLimitView
-    val loadingView = startViewWrapper.loadingView
-    val orientation = startViewWrapper.orientation
+    val orientation = playerState.orientation
     val density = LocalDensity.current
-    val context = LocalContext.current
 
     if (playerView == null) {
         return
@@ -665,10 +668,10 @@ internal fun PlayerLayer(
     var isDragging by remember { mutableStateOf(false) }
 
     val displayMode = when {
-        !startViewWrapper.showPlayer -> PlayerDisplayMode.Hidden
-        startViewWrapper.fullScreenPlayer -> PlayerDisplayMode.Fullscreen
-        orientation == Configuration.ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
-        orientation == Configuration.ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
+        !playerState.showPlayer -> PlayerDisplayMode.Hidden
+        playerState.fullScreenPlayer -> PlayerDisplayMode.Fullscreen
+        orientation == ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
+        orientation == ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
         else -> PlayerDisplayMode.Hidden
     }
     val screenWidth = viewportWidth
@@ -688,8 +691,8 @@ internal fun PlayerLayer(
     }
 
     fun updateFloatingState() {
-        startViewWrapper.updateFloatingPlayerLayoutState(
-            startViewWrapper.floatingPlayerLayoutState.copy(
+        playerState.updateFloatingPlayerLayoutState(
+            playerState.floatingPlayerLayoutState.copy(
                 widthPx = with(density) { currentWidth.toPx() },
                 heightPx = with(density) { currentHeight.toPx() },
                 offsetXPx = with(density) { offsetX.toPx() },
@@ -735,7 +738,7 @@ internal fun PlayerLayer(
         updateFloatingState()
     }
 
-    LaunchedEffect(baseBounds, displayMode, startViewWrapper.portraitPlayerLayoutState, if (isDragging) null else startViewWrapper.floatingPlayerLayoutState) {
+    LaunchedEffect(baseBounds, displayMode, playerState.portraitPlayerLayoutState, if (isDragging) null else playerState.floatingPlayerLayoutState) {
         val defaultWidth = with(density) { baseBounds.width.toDp() }
         val defaultHeight = with(density) { baseBounds.height.toDp() }
         when (displayMode) {
@@ -749,7 +752,7 @@ internal fun PlayerLayer(
                 offsetY = 0.dp
             }
             PlayerDisplayMode.FloatingLandscape -> {
-                val floatingState = startViewWrapper.floatingPlayerLayoutState
+                val floatingState = playerState.floatingPlayerLayoutState
                 if (floatingState.initialized) {
                     currentWidth = with(density) { floatingState.widthPx.toDp() }
                     currentHeight = with(density) { floatingState.heightPx.toDp() }
@@ -762,7 +765,7 @@ internal fun PlayerLayer(
                     offsetX = clampedX
                     offsetY = clampedY
                     if (with(density) { clampedX.toPx() } != floatingState.offsetXPx || with(density) { clampedY.toPx() } != floatingState.offsetYPx) {
-                        startViewWrapper.updateFloatingPlayerLayoutState(
+                        playerState.updateFloatingPlayerLayoutState(
                             floatingState.copy(
                                 offsetXPx = with(density) { clampedX.toPx() },
                                 offsetYPx = with(density) { clampedY.toPx() },
@@ -780,7 +783,7 @@ internal fun PlayerLayer(
                     )
                     offsetX = initX
                     offsetY = initY
-                    startViewWrapper.updateFloatingPlayerLayoutState(
+                    playerState.updateFloatingPlayerLayoutState(
                         floatingState.copy(
                             defaultWidthPx = with(density) { currentWidth.toPx() },
                             defaultHeightPx = with(density) { currentHeight.toPx() },

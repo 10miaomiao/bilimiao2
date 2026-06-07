@@ -10,4 +10,5 @@ interface PageNavigator {
     fun navigateByUri(uriString: String): Boolean
     fun navigateToVideoInfo(id: String)
     fun launchWebBrowser(url: String)
+    fun openScanner(callback: (result: String) -> Unit): Boolean
 }

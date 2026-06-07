@@ -1,8 +1,8 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
 import android.net.Uri
+import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -71,6 +71,7 @@ import org.kodein.di.compose.withDI
 
 class MainActivityComposeNavigator(
     private val launchUrl: (Uri) -> Unit,
+    private val scannerLauncher: (callback: (result: String) -> Unit) -> Boolean = { false },
     private val onClose: () -> Unit = {},
 ) {
     private var navController: NavHostController? = null
@@ -78,6 +79,7 @@ class MainActivityComposeNavigator(
     val pageNavigation = PageNavigation(
         navHostController = { navController ?: error("Compose NavHost is not ready") },
         launchUrl = { url -> launchUrl(Uri.parse(url)) },
+        scannerLauncher = scannerLauncher,
         onClose = onClose,
     )
 
@@ -118,12 +120,13 @@ class MainActivityComposeNavigator(
 fun MainActivityComposeHost(
     navigator: MainActivityComposeNavigator,
     hostDi: DI,
-    startViewWrapper: StartViewWrapper,
+    startViewState: StartViewState,
     appState: AppStore.State,
     pageConfigState: PageConfigState,
     emitter: SharedFlowEmitter,
     messageDialogState: MessageDialogState,
     bottomSheetState: BottomSheetState,
+    androidPlayerViews: AndroidPlayerViews? = null,
     onBackClick: () -> Unit,
     initialDeepLink: Uri? = null,
     onInitialDeepLinkConsumed: () -> Unit = {},
@@ -133,26 +136,27 @@ fun MainActivityComposeHost(
     val appBarState = remember { AppBarState() }
     val pageConfig = pageConfigState.collectConfigAsState().value
     val bottomSheetPage by bottomSheetState.page.collectAsState()
-    val orientation = startViewWrapper.orientation
-    val showPlayer = startViewWrapper.showPlayer
-    val allowDrawerOpenGesture = bottomSheetPage == null && !startViewWrapper.fullScreenPlayer
-    val portraitPlayerLayoutState = startViewWrapper.portraitPlayerLayoutState
-    val floatingPlayerLayoutState = startViewWrapper.floatingPlayerLayoutState
+    val playerState = startViewState.playerState
+    val orientation = playerState.orientation
+    val showPlayer = playerState.showPlayer
+    val allowDrawerOpenGesture = bottomSheetPage == null && !playerState.fullScreenPlayer
+    val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
+    val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
     val playerLayoutState = remember(
         showPlayer,
-        startViewWrapper.fullScreenPlayer,
+        playerState.fullScreenPlayer,
         orientation,
         portraitPlayerLayoutState,
         floatingPlayerLayoutState,
-        startViewWrapper.playerVideoRatio,
+        playerState.playerVideoRatio,
     ) {
         ComposeScaffoldPlayerLayoutState(
             showPlayer = showPlayer,
-            fullScreenPlayer = startViewWrapper.fullScreenPlayer,
+            fullScreenPlayer = playerState.fullScreenPlayer,
             orientation = orientation,
             portraitState = portraitPlayerLayoutState,
             floatingState = floatingPlayerLayoutState,
-            playerVideoRatio = startViewWrapper.playerVideoRatio,
+            playerVideoRatio = playerState.playerVideoRatio,
         )
     }
     LaunchedEffect(navController) {
@@ -175,7 +179,7 @@ fun MainActivityComposeHost(
         appBarState.canBack = pageConfig.menu?.checkable != true
         appBarState.isNavigationMenu = pageConfig.menu?.checkable == true
         appBarState.checkedKey = pageConfig.menu?.takeIf { it.checkable }?.checkedKey
-        appBarState.orientation = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        appBarState.orientation = if (orientation == ORIENTATION_LANDSCAPE) {
             cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Horizontal
         } else {
             cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Vertical
@@ -187,18 +191,18 @@ fun MainActivityComposeHost(
     LaunchedEffect(onBackClick) {
         appBarState.setOnBackClickListener(onBackClick)
         appBarState.setOnMenuClickListener {
-            startViewWrapper.openDrawer()
+            startViewState.openDrawer()
         }
         appBarState.setOnMenuItemClickListener {
             pageConfigState.onMenuItemClick(it.toPropInfo())
         }
     }
-    LaunchedEffect(startViewWrapper, pageConfigState) {
+    LaunchedEffect(startViewState, pageConfigState) {
         pageConfigState.openSearch = {
             val searchConfig = pageConfigState.currentConfig.search
             val keyword = searchConfig?.keyword ?: ""
             val mode = if (searchConfig?.name.isNullOrBlank()) 0 else 1
-            startViewWrapper.openSearchDialog(keyword, mode, false)
+            startViewState.openSearchDialog(keyword, mode, false)
         }
     }
 
@@ -224,31 +228,30 @@ fun MainActivityComposeHost(
                     }
                 ) {
                     ComposeScaffold(
-                        startViewWrapper = startViewWrapper,
+                        startViewState = startViewState,
+                        androidPlayerViews = androidPlayerViews,
                         appBarState = appBarState,
                         allowDrawerOpenGesture = allowDrawerOpenGesture,
                         drawerContent = {
                             StartViewContent(
-                                startTopHeight = startViewWrapper.touchStart.dp,
-                                navigateTo = startViewWrapper.navigateTo,
-                                navigateUrl = startViewWrapper.navigateUrl,
+                                startTopHeight = startViewState.touchStart.dp,
                                 openSearch = {
-                                    startViewWrapper.closeDrawer()
-                                    startViewWrapper.openSearchDialog("", 0, true)
+                                    startViewState.closeDrawer()
+                                    startViewState.openSearchDialog("", 0, true)
                                 },
-                                openScanner = startViewWrapper.openScanner,
+                                closeDrawer = { startViewState.closeDrawer() },
                             )
                         }
                     ) {
                         MyNavHost(navController, HomePage)
                     }
                     SearchOverlay(
-                        visible = startViewWrapper.showSearchDialog,
-                        searchAnimation = startViewWrapper.searchAnimation,
-                        initKeyword = startViewWrapper.searchInitKeyword,
-                        initMode = startViewWrapper.searchInitMode,
-                        pageSearchMethod = startViewWrapper.pageSearchMethod,
-                        onDismissRequest = startViewWrapper::closeSearchDialog,
+                        visible = startViewState.showSearchDialog,
+                        searchAnimation = startViewState.searchAnimation,
+                        initKeyword = startViewState.searchInitKeyword,
+                        initMode = startViewState.searchInitMode,
+                        pageSearchMethod = startViewState.pageSearchMethod,
+                        onDismissRequest = startViewState::closeSearchDialog,
                     )
                     if (bottomSheetPage != null) {
                         MyBottomSheet(
@@ -294,6 +297,7 @@ fun MyBottomSheet(
         PageNavigation(
             navHostController = { bottomSheetNav },
             launchUrl = parentPageNavigation::launchWebBrowser,
+            scannerLauncher = parentPageNavigation::openScanner,
             onClose = onClose,
         )
     }
