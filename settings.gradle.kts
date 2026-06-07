@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "bilimiao"
 include(":app")
+include(":desktop-app")
 include(":bilimiao-comm", ":bilimiao-cover", ":bilimiao-download", "bilimiao-appwidget", "bilimiao-compose")
 include(":DanmakuFlameMaster")
 include(":benchmark")
