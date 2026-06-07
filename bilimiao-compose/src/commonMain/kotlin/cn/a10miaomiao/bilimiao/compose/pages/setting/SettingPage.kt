@@ -27,7 +27,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfo
 import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorage
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
-import cn.a10miaomiao.bilimiao.compose.components.preference.glidePreference
+import cn.a10miaomiao.bilimiao.compose.components.preference.imageCachePreference
 import cn.a10miaomiao.bilimiao.compose.pages.filter.FilterSettingPage
 import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
@@ -237,8 +237,8 @@ private fun SettingPageContent(
                 },
                 defaultValue = true,
             )
-            glidePreference(
-                key = "glide_image_cache",
+            imageCachePreference(
+                key = "image_cache",
             )
 
             preference(
