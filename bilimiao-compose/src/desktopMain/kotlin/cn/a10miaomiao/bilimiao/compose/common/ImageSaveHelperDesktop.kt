@@ -1,7 +1,17 @@
 package cn.a10miaomiao.bilimiao.compose.common
 
+import coil3.Image
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.File
+
+actual fun imageToBytes(image: Image): ByteArray {
+    // Desktop fallback: not used directly, fetchImageBytes is used instead
+    return ByteArray(0)
+}
 
 actual fun saveImageBytes(fileName: String, bytes: ByteArray): Boolean {
     return try {
@@ -25,4 +35,18 @@ actual fun saveImageBytes(fileName: String, bytes: ByteArray): Boolean {
 
 actual fun getImageFileName(url: String): String {
     return url.split("/").last().takeIf { it.isNotEmpty() } ?: "image.png"
+}
+
+actual suspend fun fetchOriginalImageBytes(url: String): ByteArray? {
+    return withContext(Dispatchers.IO) {
+        try {
+            val client = OkHttpClient()
+            val request = Request.Builder().url(url).build()
+            val response = client.newCall(request).execute()
+            response.body?.bytes()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 }

@@ -40,7 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.common.fetchImageBytes
+import cn.a10miaomiao.bilimiao.compose.common.fetchOriginalImageBytes
 import cn.a10miaomiao.bilimiao.compose.common.getImageFileName
 import cn.a10miaomiao.bilimiao.compose.common.saveImageBytes
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
@@ -74,9 +74,9 @@ private class MyImagePreviewerController(
         isDownloading.value = true
         coroutineScope.launch(Dispatchers.Default) {
             try {
-                val bytes = fetchImageBytes(imageUrl)
-                if (bytes != null) {
-                    val fileName = getImageFileName(imageUrl)
+                val fileName = getImageFileName(imageUrl)
+                val bytes = fetchOriginalImageBytes(imageUrl)
+                if (bytes != null && bytes.isNotEmpty()) {
                     saveImageBytes(fileName, bytes)
                 } else {
                     GlobalToaster.show("原图下载失败")
