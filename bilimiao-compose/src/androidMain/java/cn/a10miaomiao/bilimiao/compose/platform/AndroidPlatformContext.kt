@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import cn.a10miaomiao.bilimiao.cover.CoverActivity
 
 class AndroidPlatformContext(
     private val context: Context,
@@ -33,5 +34,9 @@ class AndroidPlatformContext(
             putExtra(Intent.EXTRA_TEXT, text)
         }
         context.startActivity(Intent.createChooser(intent, "分享"))
+    }
+
+    override fun openCoverImage(aid: String) {
+        CoverActivity.launch(context, aid)
     }
 }

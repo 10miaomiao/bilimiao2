@@ -1,0 +1,128 @@
+kotlin version: 2.3.0
+error message: java.lang.RuntimeException: Exception while generating code for:
+CONSTRUCTOR visibility:public returnType:bilibili.app.mine.v1.SubTitleWithStat [primary]
+  VALUE_PARAMETER kind:Regular name:icon index:0 type:kotlin.collections.List<kotlin.String>
+    EXPRESSION_BODY
+      ERROR_EXPR 'Default Stub' type=kotlin.collections.List<kotlin.String>
+  VALUE_PARAMETER kind:Regular name:text index:1 type:kotlin.String
+    EXPRESSION_BODY
+      ERROR_EXPR 'Default Stub' type=kotlin.String
+  VALUE_PARAMETER kind:Regular name:unknownFields index:2 type:kotlin.collections.Map<kotlin.Int, pbandk.UnknownField>
+    EXPRESSION_BODY
+      ERROR_EXPR 'Default Stub' type=kotlin.collections.Map<kotlin.Int, pbandk.UnknownField>
+  BLOCK_BODY
+    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> () [primary] declared in kotlin.Any'
+    BLOCK type=kotlin.Unit origin=null
+      SET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:icon type:kotlin.collections.List<kotlin.String> visibility:private [final]' type=kotlin.Unit origin=INITIALIZE_FIELD
+        receiver: GET_VAR '<this>: bilibili.app.mine.v1.SubTitleWithStat declared in bilibili.app.mine.v1.SubTitleWithStat' type=bilibili.app.mine.v1.SubTitleWithStat origin=null
+        value: GET_VAR 'icon: kotlin.collections.List<kotlin.String> declared in bilibili.app.mine.v1.SubTitleWithStat.<init>' type=kotlin.collections.List<kotlin.String> origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      SET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:text type:kotlin.String visibility:private [final]' type=kotlin.Unit origin=INITIALIZE_FIELD
+        receiver: GET_VAR '<this>: bilibili.app.mine.v1.SubTitleWithStat declared in bilibili.app.mine.v1.SubTitleWithStat' type=bilibili.app.mine.v1.SubTitleWithStat origin=null
+        value: GET_VAR 'text: kotlin.String declared in bilibili.app.mine.v1.SubTitleWithStat.<init>' type=kotlin.String origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      SET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:unknownFields type:kotlin.collections.Map<kotlin.Int, pbandk.UnknownField> visibility:private [final]' type=kotlin.Unit origin=INITIALIZE_FIELD
+        receiver: GET_VAR '<this>: bilibili.app.mine.v1.SubTitleWithStat declared in bilibili.app.mine.v1.SubTitleWithStat' type=bilibili.app.mine.v1.SubTitleWithStat origin=null
+        value: GET_VAR 'unknownFields: kotlin.collections.Map<kotlin.Int, pbandk.UnknownField> declared in bilibili.app.mine.v1.SubTitleWithStat.<init>' type=kotlin.collections.Map<kotlin.Int, pbandk.UnknownField> origin=INITIALIZE_PROPERTY_FROM_PARAMETER
+      SET_FIELD 'FIELD PROPERTY_DELEGATE name:protoSize$delegate type:kotlin.Lazy<kotlin.Int> visibility:private [final] declared in bilibili.app.mine.v1.SubTitleWithStat' type=kotlin.Unit origin=INITIALIZE_FIELD
+        receiver: GET_VAR '<this>: bilibili.app.mine.v1.SubTitleWithStat declared in bilibili.app.mine.v1.SubTitleWithStat' type=bilibili.app.mine.v1.SubTitleWithStat origin=null
+        value: CALL 'public final fun lazy <T> (initializer: kotlin.Function0<T of kotlin.LazyKt.lazy>): kotlin.Lazy<T of kotlin.LazyKt.lazy> declared in kotlin.LazyKt' type=kotlin.Lazy<kotlin.Int> origin=null
+          TYPE_ARG T: kotlin.Int
+          ARG initializer: BLOCK type=kotlin.Function0<kotlin.Int> origin=LAMBDA
+            COMPOSITE type=kotlin.Unit origin=null
+            CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=kotlin.Function0<kotlin.Int> origin=null
+              TYPE_ARG T: kotlin.Function0<kotlin.Int>
+              ARG dynamicCall: CALL 'public final fun invoke (p0: bilibili.app.mine.v1.SubTitleWithStat): kotlin.Function0<kotlin.Int> declared in kotlin.jvm.internal.invokeDynamic' type=kotlin.Function0<kotlin.Int> origin=null
+                ARG p0: GET_VAR '<this>: bilibili.app.mine.v1.SubTitleWithStat declared in bilibili.app.mine.v1.SubTitleWithStat' type=bilibili.app.mine.v1.SubTitleWithStat origin=null
+              ARG bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                ARG tag: CONST Int type=kotlin.Int value=6
+                ARG owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+                ARG name: CONST String type=kotlin.String value="metafactory"
+                ARG descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+                ARG isInterface: CONST Boolean type=kotlin.Boolean value=false
+              ARG bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+                CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                  ARG method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): R of kotlin.Function0 [operator] declared in kotlin.Function0' type=kotlin.Any
+                RAW_FUNCTION_REFERENCE 'private final fun protoSize_delegate$lambda$0 (this$0: bilibili.app.mine.v1.SubTitleWithStat): kotlin.Int declared in bilibili.app.mine.v1.SubTitleWithStat' type=kotlin.Any
+                CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                  ARG method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): kotlin.Int? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:56)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate$default(FunctionCodegen.kt:49)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethodNode(ClassCodegen.kt:428)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:445)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:168)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.generateFile(JvmIrCodegenFactory.kt:467)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.invokeCodegen(JvmIrCodegenFactory.kt:433)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.runCodegen$cli(KotlinToJVMBytecodeCompiler.kt:409)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:89)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:27)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:102)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:22)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:53)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:109)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:68)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:51)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:42)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:89)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:359)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:178)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:40)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.doCompile(IncrementalCompilerRunner.kt:504)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileImpl(IncrementalCompilerRunner.kt:418)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:301)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
+	at jdk.internal.reflect.GeneratedMethodAccessor12.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(UnicastServerRef.java:360)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:200)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:197)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:712)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Transport.java:196)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(TCPTransport.java:587)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(TCPTransport.java:828)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(TCPTransport.java:705)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(TCPTransport.java:704)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
+	at java.base/java.util.Arrays.copyOfRange(Arrays.java:3822)
+	at java.base/java.lang.StringLatin1.newString(StringLatin1.java:769)
+	at java.base/java.lang.StringBuilder.toString(StringBuilder.java:453)
+	at org.jetbrains.kotlin.ir.util.IrUtilsKt.getFqNameWhenAvailable(IrUtils.kt:272)
+	at org.jetbrains.kotlin.ir.types.IrTypeSystemContext$DefaultImpls.getClassFqNameUnsafe(IrTypeSystemContext.kt:515)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrTypeSystemContext.getClassFqNameUnsafe(JvmIrTypeSystemContext.kt:20)
+	at org.jetbrains.kotlin.backend.jvm.mapping.IrTypeCheckerContextForTypeMapping.getClassFqNameUnsafe(IrTypeMapper.kt)
+	at org.jetbrains.kotlin.load.kotlin.TypeSignatureMappingKt.mapBuiltInType(typeSignatureMapping.kt:53)
+	at org.jetbrains.kotlin.types.AbstractTypeMapper.mapType(AbstractTypeMapper.kt:73)
+	at org.jetbrains.kotlin.types.AbstractTypeMapper.mapType(AbstractTypeMapper.kt:53)
+	at org.jetbrains.kotlin.backend.jvm.mapping.IrTypeMapper.mapType(IrTypeMapper.kt:154)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen$typeMapper$1.mapType(ClassCodegen.kt:99)
+	at org.jetbrains.kotlin.backend.jvm.mapping.IrTypeMapper.mapType$default(IrTypeMapper.kt:149)
+	at org.jetbrains.kotlin.backend.jvm.mapping.IrTypeMappingKt.mapClass(IrTypeMapping.kt:40)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitDelegatingConstructorCall(ExpressionCodegen.kt:623)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitDelegatingConstructorCall(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrDelegatingConstructorCall.accept(IrDelegatingConstructorCall.kt:21)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:489)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:494)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlockBody.accept(IrBlockBody.kt:20)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.generate(ExpressionCodegen.kt:231)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.doGenerate(FunctionCodegen.kt:132)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:53)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate$default(FunctionCodegen.kt:49)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethodNode(ClassCodegen.kt:428)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:445)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:168)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.generateFile(JvmIrCodegenFactory.kt:467)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.invokeCodegen(JvmIrCodegenFactory.kt:433)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.runCodegen$cli(KotlinToJVMBytecodeCompiler.kt:409)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:89)
+
+

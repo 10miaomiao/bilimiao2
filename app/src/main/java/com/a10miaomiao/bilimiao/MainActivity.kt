@@ -63,6 +63,16 @@ import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.scanner.BilimiaoScanner
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
+import cn.a10miaomiao.bilimiao.compose.common.auth.GeetestVerifier
+import cn.a10miaomiao.bilimiao.compose.common.auth.GeetestVerifierAndroid
+import cn.a10miaomiao.bilimiao.compose.common.proxy.ProxyRepository
+import cn.a10miaomiao.bilimiao.compose.common.proxy.ProxyRepositoryAndroid
+import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfo
+import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfoAndroid
+import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorage
+import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorageAndroid
+import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
+import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManagerAndroid
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
@@ -90,6 +100,11 @@ class MainActivity : AppCompatActivity(), DIAware {
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
         bindSingleton { biliGeetestUtil }
+        bindSingleton<GeetestVerifier> { GeetestVerifierAndroid(biliGeetestUtil) }
+        bindSingleton<ProxyRepository> { ProxyRepositoryAndroid(this@MainActivity) }
+        bindSingleton<AppInfo> { AppInfoAndroid(this@MainActivity) }
+        bindSingleton<FileStorage> { FileStorageAndroid(this@MainActivity) }
+        bindSingleton<DownloadManager> { DownloadManagerAndroid(this@MainActivity) }
     }
 
     private val store by lazy { Store(this, di) }

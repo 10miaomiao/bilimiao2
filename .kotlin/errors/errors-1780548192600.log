@@ -1,0 +1,141 @@
+kotlin version: 2.3.0
+error message: org.jetbrains.kotlin.codegen.CompilationException: Back-end (JVM) Internal error: Couldn't transform method node:
+<init> (IIJLbilibili/dynamic/gateway/VipLabel;IILjava/lang/String;Ljava/util/Map;)V:
+    // annotable parameter count: 8 (visible)
+    // annotable parameter count: 8 (invisible)
+    @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 3
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 6
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 7
+   L0
+    ALOAD 8
+    LDC "nicknameColor"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 9
+    LDC "unknownFields"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L1
+    LINENUMBER 13432 L1
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+   L2
+    LINENUMBER 13434 L2
+    ALOAD 0
+    ILOAD 1
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.type : I
+   L3
+    LINENUMBER 13435 L3
+    ALOAD 0
+    ILOAD 2
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.status : I
+   L4
+    LINENUMBER 13436 L4
+    ALOAD 0
+    LLOAD 3
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.dueDate : J
+   L5
+    LINENUMBER 13437 L5
+    ALOAD 0
+    ALOAD 5
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.label : Lbilibili/dynamic/gateway/VipLabel;
+   L6
+    LINENUMBER 13438 L6
+    ALOAD 0
+    ILOAD 6
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.themeType : I
+   L7
+    LINENUMBER 13439 L7
+    ALOAD 0
+    ILOAD 7
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.avatarSubscript : I
+   L8
+    LINENUMBER 13440 L8
+    ALOAD 0
+    ALOAD 8
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.nicknameColor : Ljava/lang/String;
+   L9
+    LINENUMBER 13441 L9
+    ALOAD 0
+    ALOAD 9
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.unknownFields : Ljava/util/Map;
+   L10
+    LINENUMBER 13445 L10
+    ALOAD 0
+    ALOAD 0
+    INVOKEDYNAMIC invoke(Lbilibili/dynamic/gateway/VipInfo;)Lkotlin/jvm/functions/Function0; [
+      // handle kind 0x6 : INVOKESTATIC
+      java/lang/invoke/LambdaMetafactory.metafactory(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+      // arguments:
+      ()Ljava/lang/Object;, 
+      // handle kind 0x6 : INVOKESTATIC
+      bilibili/dynamic/gateway/VipInfo.protoSize_delegate$lambda$0(Lbilibili/dynamic/gateway/VipInfo;)I, 
+      ()Ljava/lang/Integer;
+    ]
+    INVOKESTATIC kotlin/LazyKt.lazy (Lkotlin/jvm/functions/Function0;)Lkotlin/Lazy;
+    PUTFIELD bilibili/dynamic/gateway/VipInfo.protoSize$delegate : Lkotlin/Lazy;
+   L11
+    LINENUMBER 13433 L11
+    RETURN
+   L12
+    LOCALVARIABLE this Lbilibili/dynamic/gateway/VipInfo; L0 L12 0
+    LOCALVARIABLE type I L0 L12 1
+    LOCALVARIABLE status I L0 L12 2
+    LOCALVARIABLE dueDate J L0 L12 3
+    LOCALVARIABLE label Lbilibili/dynamic/gateway/VipLabel; L0 L12 5
+    LOCALVARIABLE themeType I L0 L12 6
+    LOCALVARIABLE avatarSubscript I L0 L12 7
+    LOCALVARIABLE nicknameColor Ljava/lang/String; L0 L12 8
+    LOCALVARIABLE unknownFields Ljava/util/Map; L0 L12 9
+    MAXSTACK = 3
+    MAXLOCALS = 10
+
+File is unknown
+The root cause java.lang.OutOfMemoryError was thrown at: unknown
+	at org.jetbrains.kotlin.codegen.TransformationMethodVisitor.visitEnd(TransformationMethodVisitor.kt:89)
+	at org.jetbrains.org.objectweb.asm.MethodVisitor.visitEnd(MethodVisitor.java:796)
+	at org.jetbrains.org.objectweb.asm.tree.MethodNode.accept(MethodNode.java:770)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:476)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:168)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.generateFile(JvmIrCodegenFactory.kt:467)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.invokeCodegen(JvmIrCodegenFactory.kt:433)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.runCodegen$cli(KotlinToJVMBytecodeCompiler.kt:409)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:89)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:27)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:102)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:22)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:53)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:109)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:68)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:51)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:42)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:89)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:359)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:178)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:40)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.doCompile(IncrementalCompilerRunner.kt:504)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileImpl(IncrementalCompilerRunner.kt:418)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:301)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
+	at jdk.internal.reflect.GeneratedMethodAccessor12.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(UnicastServerRef.java:360)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:200)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:197)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:712)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Transport.java:196)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(TCPTransport.java:587)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(TCPTransport.java:828)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(TCPTransport.java:705)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(TCPTransport.java:704)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
+
+

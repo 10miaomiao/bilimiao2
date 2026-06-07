@@ -31,6 +31,7 @@ import com.dokar.sonner.Toaster
 import com.dokar.sonner.rememberToasterState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.IntOffset
@@ -40,6 +41,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.platform.AndroidPlatformContext
+import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
@@ -199,7 +202,10 @@ fun MainActivityComposeHost(
         }
     }
 
+    val context = LocalContext.current
+    val platformContext = remember { AndroidPlatformContext(context) }
     CompositionLocalProvider(
+        LocalPlatformContext provides platformContext,
         LocalPageConfigState provides pageConfigState,
         LocalPageNavigation provides navigator.pageNavigation,
         LocalEmitter provides emitter,

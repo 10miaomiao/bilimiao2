@@ -1,0 +1,4 @@
+kotlin version: 2.3.0
+error message: java.lang.OutOfMemoryError: GC overhead limit exceeded
+
+

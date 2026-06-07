@@ -1,0 +1,876 @@
+kotlin version: 2.3.0
+error message: java.lang.RuntimeException: Exception while generating code for:
+FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+  BLOCK_BODY
+    SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Unit origin=INITIALIZE_FIELD
+      value: CONSTRUCTOR_CALL 'public constructor <init> ($constructor_marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+        ARG $constructor_marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+    SET_FIELD 'FIELD COMPANION_PROPERTY_BACKING_FIELD name:defaultInstance$delegate type:kotlin.Lazy<bilibili.app.view.v1.ExposePlayerCardReq> visibility:private [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Unit origin=INITIALIZE_FIELD
+      value: CALL 'public final fun lazy <T> (initializer: kotlin.Function0<T of kotlin.LazyKt.lazy>): kotlin.Lazy<T of kotlin.LazyKt.lazy> declared in kotlin.LazyKt' type=kotlin.Lazy<bilibili.app.view.v1.ExposePlayerCardReq> origin=null
+        TYPE_ARG T: bilibili.app.view.v1.ExposePlayerCardReq
+        ARG initializer: BLOCK type=kotlin.Function0<bilibili.app.view.v1.ExposePlayerCardReq> origin=LAMBDA
+          COMPOSITE type=kotlin.Unit origin=null
+          CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=kotlin.Function0<bilibili.app.view.v1.ExposePlayerCardReq> origin=null
+            TYPE_ARG T: kotlin.Function0<bilibili.app.view.v1.ExposePlayerCardReq>
+            ARG dynamicCall: CALL 'public final fun invoke (): kotlin.Function0<bilibili.app.view.v1.ExposePlayerCardReq> declared in kotlin.jvm.internal.invokeDynamic' type=kotlin.Function0<bilibili.app.view.v1.ExposePlayerCardReq> origin=null
+            ARG bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              ARG tag: CONST Int type=kotlin.Int value=6
+              ARG owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+              ARG name: CONST String type=kotlin.String value="metafactory"
+              ARG descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+              ARG isInterface: CONST Boolean type=kotlin.Boolean value=false
+            ARG bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+              CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                ARG method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): R of kotlin.Function0 [operator] declared in kotlin.Function0' type=kotlin.Any
+              RAW_FUNCTION_REFERENCE 'private final fun defaultInstance_delegate$lambda$0 (): bilibili.app.view.v1.ExposePlayerCardReq declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Any
+              CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                ARG method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): bilibili.app.view.v1.ExposePlayerCardReq [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+    SET_FIELD 'FIELD COMPANION_PROPERTY_BACKING_FIELD name:descriptor type:pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> visibility:private [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Unit origin=INITIALIZE_FIELD
+      value: CONSTRUCTOR_CALL 'public constructor <init> (fullName: kotlin.String, messageClass: kotlin.reflect.KClass<T of pbandk.MessageDescriptor>, messageCompanion: pbandk.Message.Companion<T of pbandk.MessageDescriptor>, fields: kotlin.collections.Collection<pbandk.FieldDescriptor<T of pbandk.MessageDescriptor, *>>) [primary] declared in pbandk.MessageDescriptor' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=null
+        TYPE_ARG (of class) T: bilibili.app.view.v1.ExposePlayerCardReq
+        ARG fullName: CONST String type=kotlin.String value="bilibili.app.view.v1.ExposePlayerCardReq"
+        ARG messageClass: CLASS_REFERENCE 'CLASS CLASS name:ExposePlayerCardReq modality:FINAL visibility:public [data] superTypes:[pbandk.Message]' type=kotlin.reflect.KClass<bilibili.app.view.v1.ExposePlayerCardReq>
+        ARG messageCompanion: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+        ARG fields: CALL 'public final fun buildList <E> (capacity: kotlin.Int, builderAction: @[ExtensionFunctionType] kotlin.Function1<kotlin.collections.MutableList<E of kotlin.collections.CollectionsKt.buildList>, kotlin.Unit>): kotlin.collections.List<E of kotlin.collections.CollectionsKt.buildList> [inline] declared in kotlin.collections.CollectionsKt' type=kotlin.collections.List<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+          TYPE_ARG E: pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>
+          ARG capacity: CONST Int type=kotlin.Int value=4
+          ARG builderAction: RICH_FUNCTION_REFERENCE type=@[ExtensionFunctionType] kotlin.Function1<kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>>, kotlin.Unit> origin=INLINE_LAMBDA reflectionTarget='null'
+            overriddenFunctionSymbol: public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 [operator] declared in kotlin.Function1
+            invoke: FUN INLINE_LAMBDA name:descriptor$lambda$0 visibility:private modality:FINAL returnType:kotlin.Unit
+              VALUE_PARAMETER BOUND_RECEIVER_PARAMETER kind:Regular name:$this$buildList index:0 type:kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>>
+              BLOCK_BODY
+                VAR name:$i$a$-buildList-ExposePlayerCardReq$Companion$descriptor$1 type:kotlin.Int [val]
+                  CONST Int type=kotlin.Int value=0
+                COMPOSITE type=kotlin.Unit origin=null
+                  CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+                    ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+                    ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, bilibili.app.view.v1.PlayerCardType> origin=ARGUMENTS_REORDERING_FOR_CALL
+                      VAR IR_TEMPORARY_VARIABLE name:tmp0_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+                        BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                                  ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="descriptor"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                              EXPRESSION_BODY
+                                CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                                    GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                                      receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                          CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+                      VAR IR_TEMPORARY_VARIABLE name:tmp1_type type:pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> [val]
+                        CONSTRUCTOR_CALL 'public constructor <init> (enumCompanion: pbandk.Message.Enum.Companion<T of pbandk.FieldDescriptor.Type.Enum>, hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Enum' type=pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> origin=DEFAULT_DISPATCH_CALL
+                          TYPE_ARG (of class) T: bilibili.app.view.v1.PlayerCardType
+                          ARG enumCompanion: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.PlayerCardType.Companion visibility:public [final,static] declared in bilibili.app.view.v1.PlayerCardType' type=bilibili.app.view.v1.PlayerCardType.Companion origin=null
+                          ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                            CONST Boolean type=kotlin.Boolean value=false
+                          ARG $mask0: CONST Int type=kotlin.Int value=2
+                          ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                      CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, bilibili.app.view.v1.PlayerCardType> origin=DEFAULT_DISPATCH_CALL
+                        TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+                        TYPE_ARG (of class) T: bilibili.app.view.v1.PlayerCardType
+                        ARG messageDescriptor: GET_VAR 'val tmp0_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+                        ARG name: CONST String type=kotlin.String value="card_type"
+                        ARG number: CONST Int type=kotlin.Int value=1
+                        ARG type: GET_VAR 'val tmp1_type: pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> origin=null
+                        ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="cardType"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-cardType> (): bilibili.app.view.v1.PlayerCardType declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, bilibili.app.view.v1.PlayerCardType>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                              EXPRESSION_BODY
+                                CALL 'public final fun <get-cardType> (): bilibili.app.view.v1.PlayerCardType declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.PlayerCardType origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                                    GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                            FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                            FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                              BLOCK_BODY
+                                SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                                  value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                        ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                          CONST Boolean type=kotlin.Boolean value=false
+                        ARG jsonName: CONST String type=kotlin.String value="cardType"
+                        ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+                          CONST Null type=pbandk.wkt.FieldOptions? value=null
+                        ARG $mask0: CONST Int type=kotlin.Int value=160
+                        ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                  COMPOSITE type=kotlin.Unit origin=null
+                COMPOSITE type=kotlin.Unit origin=null
+                  CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+                    ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+                    ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=ARGUMENTS_REORDERING_FOR_CALL
+                      VAR IR_TEMPORARY_VARIABLE name:tmp2_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+                        BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                                  ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="descriptor"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                              EXPRESSION_BODY
+                                CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                                    GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                                      receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                          CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+                      VAR IR_TEMPORARY_VARIABLE name:tmp3_type type:pbandk.FieldDescriptor.Type.Primitive.Int64 [val]
+                        CONSTRUCTOR_CALL 'public constructor <init> (hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Primitive.Int64' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=DEFAULT_DISPATCH_CALL
+                          ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                            CONST Boolean type=kotlin.Boolean value=false
+                          ARG $mask0: CONST Int type=kotlin.Int value=1
+                          ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                      CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=DEFAULT_DISPATCH_CALL
+                        TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+                        TYPE_ARG (of class) T: kotlin.Long
+                        ARG messageDescriptor: GET_VAR 'val tmp2_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+                        ARG name: CONST String type=kotlin.String value="aid"
+                        ARG number: CONST Int type=kotlin.Int value=2
+                        ARG type: GET_VAR 'val tmp3_type: pbandk.FieldDescriptor.Type.Primitive.Int64 [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=null
+                        ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="aid"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-aid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                              EXPRESSION_BODY
+                                CALL 'public final fun <get-aid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Long origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                                    GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                            FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                            FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                              BLOCK_BODY
+                                SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                                  value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                        ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                          CONST Boolean type=kotlin.Boolean value=false
+                        ARG jsonName: CONST String type=kotlin.String value="aid"
+                        ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+                          CONST Null type=pbandk.wkt.FieldOptions? value=null
+                        ARG $mask0: CONST Int type=kotlin.Int value=160
+                        ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                  COMPOSITE type=kotlin.Unit origin=null
+                COMPOSITE type=kotlin.Unit origin=null
+                  CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+                    ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+                    ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=ARGUMENTS_REORDERING_FOR_CALL
+                      VAR IR_TEMPORARY_VARIABLE name:tmp4_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+                        BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                                  ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="descriptor"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                              EXPRESSION_BODY
+                                CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                                    GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                                      receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                          CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+                      VAR IR_TEMPORARY_VARIABLE name:tmp5_type type:pbandk.FieldDescriptor.Type.Primitive.Int64 [val]
+                        CONSTRUCTOR_CALL 'public constructor <init> (hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Primitive.Int64' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=DEFAULT_DISPATCH_CALL
+                          ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                            CONST Boolean type=kotlin.Boolean value=false
+                          ARG $mask0: CONST Int type=kotlin.Int value=1
+                          ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                      CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=DEFAULT_DISPATCH_CALL
+                        TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+                        TYPE_ARG (of class) T: kotlin.Long
+                        ARG messageDescriptor: GET_VAR 'val tmp4_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+                        ARG name: CONST String type=kotlin.String value="cid"
+                        ARG number: CONST Int type=kotlin.Int value=3
+                        ARG type: GET_VAR 'val tmp5_type: pbandk.FieldDescriptor.Type.Primitive.Int64 [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=null
+                        ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="cid"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-cid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                              EXPRESSION_BODY
+                                CALL 'public final fun <get-cid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Long origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                                    GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                            FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                            FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                              BLOCK_BODY
+                                SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                                  value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                        ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                          CONST Boolean type=kotlin.Boolean value=false
+                        ARG jsonName: CONST String type=kotlin.String value="cid"
+                        ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+                          CONST Null type=pbandk.wkt.FieldOptions? value=null
+                        ARG $mask0: CONST Int type=kotlin.Int value=160
+                        ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                  COMPOSITE type=kotlin.Unit origin=null
+                COMPOSITE type=kotlin.Unit origin=null
+                  CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+                    ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+                    ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.String> origin=ARGUMENTS_REORDERING_FOR_CALL
+                      VAR IR_TEMPORARY_VARIABLE name:tmp6_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+                        BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                                  ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="descriptor"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                              EXPRESSION_BODY
+                                CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                                    GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                                      receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              overridden:
+                                public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                          CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                            ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+                      VAR IR_TEMPORARY_VARIABLE name:tmp7_type type:pbandk.FieldDescriptor.Type.Primitive.String [val]
+                        CONSTRUCTOR_CALL 'public constructor <init> (hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Primitive.String' type=pbandk.FieldDescriptor.Type.Primitive.String origin=DEFAULT_DISPATCH_CALL
+                          ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                            CONST Boolean type=kotlin.Boolean value=false
+                          ARG $mask0: CONST Int type=kotlin.Int value=1
+                          ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                      CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.String> origin=DEFAULT_DISPATCH_CALL
+                        TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+                        TYPE_ARG (of class) T: kotlin.String
+                        ARG messageDescriptor: GET_VAR 'val tmp6_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+                        ARG name: CONST String type=kotlin.String value="spmid"
+                        ARG number: CONST Int type=kotlin.Int value=4
+                        ARG type: GET_VAR 'val tmp7_type: pbandk.FieldDescriptor.Type.Primitive.String [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Primitive.String origin=null
+                        ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                            thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                            CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                              BLOCK_BODY
+                                DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                                  ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                                    ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                                  ARG name: CONST String type=kotlin.String value="spmid"
+                                  ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                                    ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-spmid> (): kotlin.String declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.String>
+                                  ARG flags: CONST Int type=kotlin.Int value=0
+                                BLOCK type=kotlin.Unit origin=null
+                            FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                              EXPRESSION_BODY
+                                CALL 'public final fun <get-spmid> (): kotlin.String declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.String origin=GET_PROPERTY
+                                  ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                                    GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                            FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                              VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                              VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                              overridden:
+                                public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                            FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                            FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                              BLOCK_BODY
+                                SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                                  value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                          GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                        ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                          CONST Boolean type=kotlin.Boolean value=false
+                        ARG jsonName: CONST String type=kotlin.String value="spmid"
+                        ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+                          CONST Null type=pbandk.wkt.FieldOptions? value=null
+                        ARG $mask0: CONST Int type=kotlin.Int value=160
+                        ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+                  COMPOSITE type=kotlin.Unit origin=null
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:56)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate$default(FunctionCodegen.kt:49)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethodNode(ClassCodegen.kt:428)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:445)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:172)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.generateFile(JvmIrCodegenFactory.kt:467)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.invokeCodegen(JvmIrCodegenFactory.kt:433)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.runCodegen$cli(KotlinToJVMBytecodeCompiler.kt:409)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:89)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:27)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:102)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:22)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:53)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:109)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:68)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:51)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:42)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:89)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:359)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:178)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:40)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.doCompile(IncrementalCompilerRunner.kt:504)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileImpl(IncrementalCompilerRunner.kt:418)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:301)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(UnicastServerRef.java:360)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:200)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:197)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:712)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Transport.java:196)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(TCPTransport.java:587)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(TCPTransport.java:828)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(TCPTransport.java:705)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(TCPTransport.java:704)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.lang.RuntimeException: Exception while generating code for:
+FUN INLINE_LAMBDA name:descriptor$lambda$0 visibility:private modality:FINAL returnType:kotlin.Unit
+  VALUE_PARAMETER BOUND_RECEIVER_PARAMETER kind:Regular name:$this$buildList index:0 type:kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>>
+  BLOCK_BODY
+    VAR name:$i$a$-buildList-ExposePlayerCardReq$Companion$descriptor$1 type:kotlin.Int [val]
+      CONST Int type=kotlin.Int value=0
+    COMPOSITE type=kotlin.Unit origin=null
+      CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+        ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+        ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, bilibili.app.view.v1.PlayerCardType> origin=ARGUMENTS_REORDERING_FOR_CALL
+          VAR IR_TEMPORARY_VARIABLE name:tmp0_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+            BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                      ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="descriptor"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                  EXPRESSION_BODY
+                    CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                        GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                          receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+              CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+          VAR IR_TEMPORARY_VARIABLE name:tmp1_type type:pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> [val]
+            CONSTRUCTOR_CALL 'public constructor <init> (enumCompanion: pbandk.Message.Enum.Companion<T of pbandk.FieldDescriptor.Type.Enum>, hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Enum' type=pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> origin=DEFAULT_DISPATCH_CALL
+              TYPE_ARG (of class) T: bilibili.app.view.v1.PlayerCardType
+              ARG enumCompanion: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.PlayerCardType.Companion visibility:public [final,static] declared in bilibili.app.view.v1.PlayerCardType' type=bilibili.app.view.v1.PlayerCardType.Companion origin=null
+              ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                CONST Boolean type=kotlin.Boolean value=false
+              ARG $mask0: CONST Int type=kotlin.Int value=2
+              ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+          CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, bilibili.app.view.v1.PlayerCardType> origin=DEFAULT_DISPATCH_CALL
+            TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+            TYPE_ARG (of class) T: bilibili.app.view.v1.PlayerCardType
+            ARG messageDescriptor: GET_VAR 'val tmp0_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+            ARG name: CONST String type=kotlin.String value="card_type"
+            ARG number: CONST Int type=kotlin.Int value=1
+            ARG type: GET_VAR 'val tmp1_type: pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Enum<bilibili.app.view.v1.PlayerCardType> origin=null
+            ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="cardType"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-cardType> (): bilibili.app.view.v1.PlayerCardType declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, bilibili.app.view.v1.PlayerCardType>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                  EXPRESSION_BODY
+                    CALL 'public final fun <get-cardType> (): bilibili.app.view.v1.PlayerCardType declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.PlayerCardType origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                        GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                  BLOCK_BODY
+                    SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                      value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+            ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+              CONST Boolean type=kotlin.Boolean value=false
+            ARG jsonName: CONST String type=kotlin.String value="cardType"
+            ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+              CONST Null type=pbandk.wkt.FieldOptions? value=null
+            ARG $mask0: CONST Int type=kotlin.Int value=160
+            ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+      COMPOSITE type=kotlin.Unit origin=null
+    COMPOSITE type=kotlin.Unit origin=null
+      CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+        ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+        ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=ARGUMENTS_REORDERING_FOR_CALL
+          VAR IR_TEMPORARY_VARIABLE name:tmp2_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+            BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                      ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="descriptor"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                  EXPRESSION_BODY
+                    CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                        GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                          receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+              CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+          VAR IR_TEMPORARY_VARIABLE name:tmp3_type type:pbandk.FieldDescriptor.Type.Primitive.Int64 [val]
+            CONSTRUCTOR_CALL 'public constructor <init> (hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Primitive.Int64' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=DEFAULT_DISPATCH_CALL
+              ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                CONST Boolean type=kotlin.Boolean value=false
+              ARG $mask0: CONST Int type=kotlin.Int value=1
+              ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+          CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=DEFAULT_DISPATCH_CALL
+            TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+            TYPE_ARG (of class) T: kotlin.Long
+            ARG messageDescriptor: GET_VAR 'val tmp2_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+            ARG name: CONST String type=kotlin.String value="aid"
+            ARG number: CONST Int type=kotlin.Int value=2
+            ARG type: GET_VAR 'val tmp3_type: pbandk.FieldDescriptor.Type.Primitive.Int64 [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=null
+            ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="aid"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-aid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                  EXPRESSION_BODY
+                    CALL 'public final fun <get-aid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Long origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                        GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                  BLOCK_BODY
+                    SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                      value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+            ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+              CONST Boolean type=kotlin.Boolean value=false
+            ARG jsonName: CONST String type=kotlin.String value="aid"
+            ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+              CONST Null type=pbandk.wkt.FieldOptions? value=null
+            ARG $mask0: CONST Int type=kotlin.Int value=160
+            ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+      COMPOSITE type=kotlin.Unit origin=null
+    COMPOSITE type=kotlin.Unit origin=null
+      CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+        ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+        ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=ARGUMENTS_REORDERING_FOR_CALL
+          VAR IR_TEMPORARY_VARIABLE name:tmp4_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+            BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                      ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="descriptor"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                  EXPRESSION_BODY
+                    CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                        GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                          receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+              CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+          VAR IR_TEMPORARY_VARIABLE name:tmp5_type type:pbandk.FieldDescriptor.Type.Primitive.Int64 [val]
+            CONSTRUCTOR_CALL 'public constructor <init> (hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Primitive.Int64' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=DEFAULT_DISPATCH_CALL
+              ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                CONST Boolean type=kotlin.Boolean value=false
+              ARG $mask0: CONST Int type=kotlin.Int value=1
+              ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+          CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long> origin=DEFAULT_DISPATCH_CALL
+            TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+            TYPE_ARG (of class) T: kotlin.Long
+            ARG messageDescriptor: GET_VAR 'val tmp4_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+            ARG name: CONST String type=kotlin.String value="cid"
+            ARG number: CONST Int type=kotlin.Int value=3
+            ARG type: GET_VAR 'val tmp5_type: pbandk.FieldDescriptor.Type.Primitive.Int64 [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Primitive.Int64 origin=null
+            ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="cid"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-cid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.Long>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                  EXPRESSION_BODY
+                    CALL 'public final fun <get-cid> (): kotlin.Long declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.Long origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                        GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                  BLOCK_BODY
+                    SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                      value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+            ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+              CONST Boolean type=kotlin.Boolean value=false
+            ARG jsonName: CONST String type=kotlin.String value="cid"
+            ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+              CONST Null type=pbandk.wkt.FieldOptions? value=null
+            ARG $mask0: CONST Int type=kotlin.Int value=160
+            ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+      COMPOSITE type=kotlin.Unit origin=null
+    COMPOSITE type=kotlin.Unit origin=null
+      CALL 'public abstract fun add (element: E of kotlin.collections.MutableList): kotlin.Boolean declared in kotlin.collections.MutableList' type=kotlin.Boolean origin=null
+        ARG <this>: GET_VAR '$this$buildList: kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.collections.MutableList<pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, *>> origin=null
+        ARG element: BLOCK type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.String> origin=ARGUMENTS_REORDERING_FOR_CALL
+          VAR IR_TEMPORARY_VARIABLE name:tmp6_messageDescriptor type:kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val]
+            BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference0Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  VALUE_PARAMETER kind:Regular name:receiver index:0 type:kotlin.Any?
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (receiver: kotlin.Any?, owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference0Impl'
+                      ARG receiver: GET_VAR 'receiver: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.<init>' type=kotlin.Any? origin=null
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="descriptor"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public abstract fun get (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+                  EXPRESSION_BODY
+                    CALL 'public open fun <get-descriptor> (): pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> declared in bilibili.app.view.v1.ExposePlayerCardReq.Companion' type=pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq> origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq.Companion
+                        GET_FIELD 'FIELD name:receiver type:kotlin.Any? visibility:protected declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Any? origin=null
+                          receiver: GET_VAR '<this>: bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  overridden:
+                    public final fun invoke (): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference0Impl
+              CONSTRUCTOR_CALL 'public/*package*/ constructor <init> (receiver: kotlin.Any?) [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+                ARG receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:bilibili.app.view.v1.ExposePlayerCardReq.Companion visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq' type=bilibili.app.view.v1.ExposePlayerCardReq.Companion origin=null
+          VAR IR_TEMPORARY_VARIABLE name:tmp7_type type:pbandk.FieldDescriptor.Type.Primitive.String [val]
+            CONSTRUCTOR_CALL 'public constructor <init> (hasPresence: kotlin.Boolean, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor.Type.Primitive.String' type=pbandk.FieldDescriptor.Type.Primitive.String origin=DEFAULT_DISPATCH_CALL
+              ARG hasPresence: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                CONST Boolean type=kotlin.Boolean value=false
+              ARG $mask0: CONST Int type=kotlin.Int value=1
+              ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+          CONSTRUCTOR_CALL 'public constructor <init> (messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<M of pbandk.FieldDescriptor>>, name: kotlin.String, number: kotlin.Int, type: pbandk.FieldDescriptor.Type, value: kotlin.reflect.KProperty1<M of pbandk.FieldDescriptor, T of pbandk.FieldDescriptor>, oneofMember: kotlin.Boolean, jsonName: kotlin.String?, options: pbandk.wkt.FieldOptions?, $mask0: kotlin.Int, $marker: kotlin.jvm.internal.DefaultConstructorMarker?) declared in pbandk.FieldDescriptor' type=pbandk.FieldDescriptor<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.String> origin=DEFAULT_DISPATCH_CALL
+            TYPE_ARG (of class) M: bilibili.app.view.v1.ExposePlayerCardReq
+            TYPE_ARG (of class) T: kotlin.String
+            ARG messageDescriptor: GET_VAR 'val tmp6_messageDescriptor: kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=kotlin.reflect.KProperty0<pbandk.MessageDescriptor<bilibili.app.view.v1.ExposePlayerCardReq>> origin=null
+            ARG name: CONST String type=kotlin.String value="spmid"
+            ARG number: CONST Int type=kotlin.Int value=4
+            ARG type: GET_VAR 'val tmp7_type: pbandk.FieldDescriptor.Type.Primitive.String [val] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0' type=pbandk.FieldDescriptor.Type.Primitive.String origin=null
+            ARG value: BLOCK type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              CLASS GENERATED_PROPERTY_REFERENCE CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.jvm.internal.PropertyReference1Impl]
+                thisReceiver: VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                CONSTRUCTOR GENERATED_MEMBER_IN_CALLABLE_REFERENCE visibility:public/*package*/ returnType:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> [primary]
+                  BLOCK_BODY
+                    DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (owner: java.lang.Class<*>, name: kotlin.String, signature: kotlin.String, flags: kotlin.Int) declared in kotlin.jvm.internal.PropertyReference1Impl'
+                      ARG owner: CALL 'public final fun <get-java> ($receiver: kotlin.reflect.KClass<*>): java.lang.Class<*> declared in kotlin.jvm.JvmClassMappingKt' type=java.lang.Class<*> origin=GET_PROPERTY
+                        ARG $receiver: CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB INTERFACE name:KClass modality:ABSTRACT visibility:public superTypes:[kotlin.reflect.KDeclarationContainer; kotlin.reflect.KAnnotatedElement; kotlin.reflect.KClassifier]' type=kotlin.reflect.KClass<*>
+                      ARG name: CONST String type=kotlin.String value="spmid"
+                      ARG signature: CALL 'public final fun <signature-string> (v: kotlin.Any?): kotlin.String declared in kotlin.jvm.internal' type=kotlin.String origin=null
+                        ARG v: RAW_FUNCTION_REFERENCE 'public final fun <get-spmid> (): kotlin.String declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.reflect.KProperty1<bilibili.app.view.v1.ExposePlayerCardReq, kotlin.String>
+                      ARG flags: CONST Int type=kotlin.Int value=0
+                    BLOCK type=kotlin.Unit origin=null
+                FUN GENERATED_MEMBER_IN_CALLABLE_REFERENCE name:get visibility:public modality:OPEN returnType:kotlin.Any?
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public abstract fun get (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                  EXPRESSION_BODY
+                    CALL 'public final fun <get-spmid> (): kotlin.String declared in bilibili.app.view.v1.ExposePlayerCardReq' type=kotlin.String origin=GET_PROPERTY
+                      ARG <this>: TYPE_OP type=bilibili.app.view.v1.ExposePlayerCardReq origin=IMPLICIT_CAST typeOperand=bilibili.app.view.v1.ExposePlayerCardReq
+                        GET_VAR 'receiver0: kotlin.Any? declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>.get' type=kotlin.Any? origin=null
+                FUN FAKE_OVERRIDE name:invoke visibility:public modality:FINAL returnType:kotlin.Any? [fake_override]
+                  VALUE_PARAMETER INSTANCE_RECEIVER kind:DispatchReceiver name:<this> index:0 type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>
+                  VALUE_PARAMETER kind:Regular name:receiver0 index:1 type:kotlin.Any?
+                  overridden:
+                    public final fun invoke (receiver0: kotlin.Any?): kotlin.Any? declared in kotlin.jvm.internal.PropertyReference1Impl
+                FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static]
+                FUN CLASS_STATIC_INITIALIZER name:<clinit> visibility:public/*package*/ modality:FINAL returnType:kotlin.Unit
+                  BLOCK_BODY
+                    SET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=kotlin.Unit origin=INITIALIZE_FIELD
+                      value: CONSTRUCTOR_CALL 'public/*package*/ constructor <init> () [primary] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+              GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> visibility:public [final,static] declared in bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided>' type=bilibili.app.view.v1.ExposePlayerCardReq.<clinit>.descriptor$lambda$0.<no name provided> origin=null
+            ARG oneofMember: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+              CONST Boolean type=kotlin.Boolean value=false
+            ARG jsonName: CONST String type=kotlin.String value="spmid"
+            ARG options: COMPOSITE type=pbandk.wkt.FieldOptions? origin=DEFAULT_VALUE
+              CONST Null type=pbandk.wkt.FieldOptions? value=null
+            ARG $mask0: CONST Int type=kotlin.Int value=160
+            ARG $marker: CONST Null type=kotlin.jvm.internal.DefaultConstructorMarker? value=null
+      COMPOSITE type=kotlin.Unit origin=null
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:56)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrSourceCompilerForInline.generateLambdaBody(IrSourceCompilerForInline.kt:72)
+	at org.jetbrains.kotlin.codegen.inline.ExpressionLambda.generateLambdaBody(LambdaInfo.kt:75)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrInlineCodegen.genValueAndPut(IrInlineCodegen.kt:121)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall$handleParameter(ExpressionCodegen.kt:526)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:539)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrCall.accept(IrCall.kt:24)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.gen(ExpressionCodegen.kt:212)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.generateConstructorArguments(ExpressionCodegen.kt:672)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitConstructorCall(ExpressionCodegen.kt:661)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitConstructorCall(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrConstructorCall.accept(IrConstructorCall.kt:27)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitFieldAccess(ExpressionCodegen.kt:784)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitFieldAccess(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitor.visitSetField(IrVisitor.kt:215)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitSetField(ExpressionCodegen.kt:818)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitSetField(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrSetField.accept(IrSetField.kt:21)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:489)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:494)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlockBody.accept(IrBlockBody.kt:20)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.generate(ExpressionCodegen.kt:231)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.doGenerate(FunctionCodegen.kt:132)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:53)
+	... 46 more
+Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
+	at org.jetbrains.kotlin.codegen.optimization.OptimizationClassBuilder.newMethod(OptimizationClassBuilder.kt:38)
+	at org.jetbrains.kotlin.codegen.DelegatingClassBuilder.newMethod(DelegatingClassBuilder.java:54)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:450)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:168)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitClass(ExpressionCodegen.kt:912)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitClass(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.declarations.IrClass.accept(IrClass.kt:72)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:489)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:503)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitor.visitBlock(IrVisitor.kt:122)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:427)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlock.accept(IrBlock.kt:18)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitVariable(ExpressionCodegen.kt:685)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitVariable(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.declarations.IrVariable.accept(IrVariable.kt:36)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:489)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:503)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.visitors.IrVisitor.visitBlock(IrVisitor.kt:122)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:427)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlock.accept(IrBlock.kt:18)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.gen(ExpressionCodegen.kt:212)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrCallGenerator.genValueAndPut(IrCallGenerator.kt:48)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall$handleParameter(ExpressionCodegen.kt:526)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:539)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrCall.accept(IrCall.kt:24)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:489)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:503)
+
+

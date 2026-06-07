@@ -100,8 +100,20 @@ class BilimiaoPageRoute (
         // auth
         composable<LoginPage>()
         composable<QrCodeLoginPage>()
-        composable<TelVerifyPage>()
-        composable<H5LoginPage>()
+        composable<TelVerifyPage>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "bilimiao://tel-verify?code={code}&requestId={requestId}&source={source}"
+                }
+            )
+        )
+        composable<H5LoginPage>(
+            deepLinks = listOf(
+                navDeepLink<H5LoginPage>(
+                    basePath = "bilimiao://h5login"
+                )
+            )
+        )
         composable<SMSLoginPage>()
 
         // video

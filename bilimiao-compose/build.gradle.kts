@@ -75,6 +75,7 @@ kotlin {
                 implementation(libs.androidx.room.runtime)
 
                 implementation(project(":bilimiao-download"))
+                implementation(project(":DanmakuFlameMaster"))
                 implementation(project(":bilimiao-cover"))
             }
         }
