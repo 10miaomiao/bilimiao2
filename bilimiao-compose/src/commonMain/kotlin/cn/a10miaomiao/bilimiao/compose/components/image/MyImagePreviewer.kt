@@ -1,11 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.components.image
 
-import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
-import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,12 +25,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,27 +39,28 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.fetchImageBytes
+import cn.a10miaomiao.bilimiao.compose.common.getImageFileName
+import cn.a10miaomiao.bilimiao.compose.common.saveImageBytes
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.defaultPreviewBackground
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerState
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.TransformLayerScope
-import com.a10miaomiao.bilimiao.comm.utils.ImageSaveUtil
-import com.bumptech.glide.Glide
+import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
+import cn.a10miaomiao.bilimiao.compose.platform.PlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.AsyncImagePainter
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
-import org.kodein.di.compose.rememberInstance
-import java.io.File
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private class MyImagePreviewerController(
-    val activity: Activity,
+    val coroutineScope: CoroutineScope,
+    val platformContext: PlatformContext,
     val imagePreviewerState: ImagePreviewerState,
 ) {
-
     val isDownloading = mutableStateOf(false)
 
     private fun getCurrentImageUrl(): String {
@@ -76,70 +71,29 @@ private class MyImagePreviewerController(
 
     fun saveImageFile() {
         val imageUrl = getCurrentImageUrl()
-        val target = object : CustomTarget<File>() {
-            override fun onResourceReady(
-                resource: File,
-                transition: Transition<in File>?
-            ) {
-                if (isDownloading.value) {
-                    ImageSaveUtil.saveImage(
-                        activity,
-                        ImageSaveUtil.getFileName(imageUrl),
-                        resource,
-                    )
-                    isDownloading.value = false
+        isDownloading.value = true
+        coroutineScope.launch(Dispatchers.Default) {
+            try {
+                val bytes = fetchImageBytes(imageUrl)
+                if (bytes != null) {
+                    val fileName = getImageFileName(imageUrl)
+                    saveImageBytes(fileName, bytes)
+                } else {
+                    GlobalToaster.show("原图下载失败")
                 }
-            }
-
-            override fun onLoadCleared(placeholder: Drawable?) {
+            } catch (e: Exception) {
+                e.printStackTrace()
                 GlobalToaster.show("原图下载失败")
+            } finally {
                 isDownloading.value = false
             }
         }
-        Glide.with(activity)
-            .asFile()
-            .load(imageUrl)
-            .into(target)
-        isDownloading.value = true
     }
 
     fun copyImageUrl() {
         val imageUrl = getCurrentImageUrl()
-        val clipboardManager = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clipData = ClipData.newPlainText("imageUrl", imageUrl)
-        clipboardManager.setPrimaryClip(clipData)
+        platformContext.copyToClipboard(imageUrl)
         GlobalToaster.show("图片链接已复制到剪切板")
-    }
-
-    fun shareImage() {
-        val imageUrl = getCurrentImageUrl()
-        val target = object : CustomTarget<File>() {
-            override fun onResourceReady(
-                resource: File,
-                transition: Transition<in File>?
-            ) {
-                if (isDownloading.value) {
-                    val uri = ImageSaveUtil.getImageUri(activity, resource)
-                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "image/*"
-                        putExtra(Intent.EXTRA_STREAM, uri)
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                    activity.startActivity(Intent.createChooser(shareIntent, "分享图片"))
-                    isDownloading.value = false
-                }
-            }
-
-            override fun onLoadCleared(placeholder: Drawable?) {
-                GlobalToaster.show("图片加载失败")
-                isDownloading.value = false
-            }
-        }
-        Glide.with(activity)
-            .asFile()
-            .load(imageUrl)
-            .into(target)
-        isDownloading.value = true
     }
 
     fun cancelDownloading() {
@@ -152,13 +106,12 @@ fun MyImagePreviewer(
     imagePreviewerState: ImagePreviewerState,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
-    val activity: Activity by rememberInstance()
+    val coroutineScope = rememberCoroutineScope()
+    val platformContext = LocalPlatformContext.current
     val controller = remember(imagePreviewerState) {
-        MyImagePreviewerController(activity, imagePreviewerState)
+        MyImagePreviewerController(coroutineScope, platformContext, imagePreviewerState)
     }
     var showMoreMenu by remember { mutableStateOf(false) }
-
-    val windowInsets = WindowInsets.safeDrawing
 
     ImagePreviewer(
         contentPadding = contentPadding,
@@ -173,7 +126,6 @@ fun MyImagePreviewer(
             ) {
                 if (painter.state is AsyncImagePainter.State.Success) {
                     painterState.value = painter
-                    // 设置原图已下载标志
                     imagePreviewerState.onImageLoaded(page)
                 }
             }
@@ -209,7 +161,7 @@ fun MyImagePreviewer(
                             contentDescription = "保存图片",
                             onClick = controller::saveImageFile,
                         )
-                        Box() {
+                        Box {
                             CapsuleIconButton(
                                 icon = Icons.Default.MoreVert,
                                 contentDescription = "更多",
@@ -232,19 +184,6 @@ fun MyImagePreviewer(
                                         )
                                     },
                                 )
-//                                DropdownMenuItem(
-//                                    text = { Text("分享图片") },
-//                                    onClick = {
-//                                        showMoreMenu = false
-//                                        controller.shareImage()
-//                                    },
-//                                    leadingIcon = {
-//                                        Icon(
-//                                            Icons.Default.Share,
-//                                            contentDescription = null,
-//                                        )
-//                                    },
-//                                )
                             }
                         }
                     }
@@ -288,4 +227,3 @@ private fun CapsuleIconButton(
         )
     }
 }
-
