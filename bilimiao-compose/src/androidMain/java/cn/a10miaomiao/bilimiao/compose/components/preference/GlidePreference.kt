@@ -14,20 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
-import me.zhanghai.compose.preference.Preference
-
-inline fun LazyListScope.glidePreference(
-    key: String,
-    modifier: Modifier = Modifier.fillMaxWidth()
-) {
-    item(key = key, contentType = "GlidePreference") {
-        GlidePreference(modifier = modifier)
-    }
-}
+import cn.a10miaomiao.bilimiao.compose.common.preference.Preference
 
 @Composable
-fun GlidePreference(
-    modifier: Modifier = Modifier,
+actual fun GlidePreference(
+    modifier: Modifier,
 ) {
     val context = LocalContext.current
     var cacheSize by remember {

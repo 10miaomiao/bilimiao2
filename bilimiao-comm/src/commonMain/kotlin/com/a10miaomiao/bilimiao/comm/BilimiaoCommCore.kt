@@ -53,6 +53,7 @@ class BilimiaoCommCore {
             val miaoED = getMiaoEncryptDecrypt()
             val secretKey = AESUtil.getKey(key)
             val file = File(authFilePath)
+            if (!file.exists()) return null
             val cipher = file.readBytes()
             val jsonByteArray = miaoED.decrypt(AESUtil.decrypt(cipher, secretKey))
             val jsonStr = String(jsonByteArray)

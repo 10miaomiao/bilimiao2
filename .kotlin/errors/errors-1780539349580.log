@@ -1,0 +1,427 @@
+kotlin version: 2.3.0
+error message: org.jetbrains.kotlin.codegen.CompilationException: Back-end (JVM) Internal error: Couldn't transform method node:
+<clinit> ()V:
+   L0
+    NEW bilibili/app/view/v1/Interaction$Companion
+    DUP
+    ACONST_NULL
+    INVOKESPECIAL bilibili/app/view/v1/Interaction$Companion.<init> (Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+    PUTSTATIC bilibili/app/view/v1/Interaction.Companion : Lbilibili/app/view/v1/Interaction$Companion;
+   L1
+    LINENUMBER 5005 L1
+    INVOKEDYNAMIC invoke()Lkotlin/jvm/functions/Function0; [
+      // handle kind 0x6 : INVOKESTATIC
+      java/lang/invoke/LambdaMetafactory.metafactory(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+      // arguments:
+      ()Ljava/lang/Object;, 
+      // handle kind 0x6 : INVOKESTATIC
+      bilibili/app/view/v1/Interaction.defaultInstance_delegate$lambda$0()Lbilibili/app/view/v1/Interaction;, 
+      ()Lbilibili/app/view/v1/Interaction;
+    ]
+    INVOKESTATIC kotlin/LazyKt.lazy (Lkotlin/jvm/functions/Function0;)Lkotlin/Lazy;
+    PUTSTATIC bilibili/app/view/v1/Interaction.defaultInstance$delegate : Lkotlin/Lazy;
+   L2
+    LINENUMBER 5008 L2
+    NEW pbandk/MessageDescriptor
+    DUP
+   L3
+    LINENUMBER 5009 L3
+    LDC "bilibili.app.view.v1.Interaction"
+    LDC Lbilibili/app/view/v1/Interaction;.class
+    INVOKESTATIC kotlin/jvm/internal/Reflection.getOrCreateKotlinClass (Ljava/lang/Class;)Lkotlin/reflect/KClass;
+   L4
+    LINENUMBER 5011 L4
+    GETSTATIC bilibili/app/view/v1/Interaction.Companion : Lbilibili/app/view/v1/Interaction$Companion;
+    CHECKCAST pbandk/Message$Companion
+   L5
+    LINENUMBER 5012 L5
+    ICONST_5
+    ISTORE 0
+    NOP
+   L6
+    ILOAD 0
+    INVOKESTATIC kotlin/collections/CollectionsKt.createListBuilder (I)Ljava/util/List;
+    ASTORE 1
+    ALOAD 1
+    CHECKCAST java/util/List
+    ASTORE 2
+    ASTORE 10
+    ASTORE 9
+    ASTORE 8
+    ASTORE 7
+    ASTORE 6
+   L7
+    ICONST_0
+    ISTORE 3
+   L8
+    LINENUMBER 5013 L8
+    ALOAD 2
+   L9
+    LINENUMBER 5015 L9
+    NEW bilibili/app/view/v1/Interaction$Companion$descriptor$1$1
+    DUP
+    GETSTATIC bilibili/app/view/v1/Interaction.Companion : Lbilibili/app/view/v1/Interaction$Companion;
+    INVOKESPECIAL bilibili/app/view/v1/Interaction$Companion$descriptor$1$1.<init> (Ljava/lang/Object;)V
+    CHECKCAST kotlin/reflect/KProperty0
+    ASTORE 4
+   L10
+    LINENUMBER 5018 L10
+    NEW pbandk/FieldDescriptor$Type$Message
+    DUP
+    GETSTATIC bilibili/app/view/v1/Node.Companion : Lbilibili/app/view/v1/Node$Companion;
+    CHECKCAST pbandk/Message$Companion
+    ACONST_NULL
+    ICONST_2
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor$Type$Message.<init> (Lpbandk/Message$Companion;Lpbandk/MessageEncoding;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    ASTORE 5
+   L11
+    LINENUMBER 5014 L11
+    NEW pbandk/FieldDescriptor
+    DUP
+   L12
+    LINENUMBER 5015 L12
+    ALOAD 4
+   L13
+    LINENUMBER 5016 L13
+    LDC "history_node"
+   L14
+    LINENUMBER 5017 L14
+    ICONST_1
+   L15
+    LINENUMBER 5018 L15
+    ALOAD 5
+    CHECKCAST pbandk/FieldDescriptor$Type
+   L16
+    LINENUMBER 5020 L16
+    GETSTATIC bilibili/app/view/v1/Interaction$Companion$descriptor$1$2.INSTANCE : Lbilibili/app/view/v1/Interaction$Companion$descriptor$1$2;
+    CHECKCAST kotlin/reflect/KProperty1
+   L17
+    LINENUMBER 5014 L17
+    ICONST_0
+   L18
+    LINENUMBER 5019 L18
+    LDC "historyNode"
+   L19
+    LINENUMBER 5014 L19
+    ACONST_NULL
+    SIPUSH 160
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor.<init> (Lkotlin/reflect/KProperty0;Ljava/lang/String;ILpbandk/FieldDescriptor$Type;Lkotlin/reflect/KProperty1;ZLjava/lang/String;Lpbandk/wkt/FieldOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+   L20
+    LINENUMBER 5013 L20
+    INVOKEINTERFACE java/util/List.add (Ljava/lang/Object;)Z (itf)
+    POP
+   L21
+    LINENUMBER 5023 L21
+    ALOAD 2
+   L22
+    LINENUMBER 5025 L22
+    NEW bilibili/app/view/v1/Interaction$Companion$descriptor$1$3
+    DUP
+    GETSTATIC bilibili/app/view/v1/Interaction.Companion : Lbilibili/app/view/v1/Interaction$Companion;
+    INVOKESPECIAL bilibili/app/view/v1/Interaction$Companion$descriptor$1$3.<init> (Ljava/lang/Object;)V
+    CHECKCAST kotlin/reflect/KProperty0
+    ASTORE 4
+   L23
+    LINENUMBER 5028 L23
+    NEW pbandk/FieldDescriptor$Type$Primitive$Int64
+    DUP
+    ICONST_0
+    ICONST_1
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor$Type$Primitive$Int64.<init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    ASTORE 5
+   L24
+    LINENUMBER 5024 L24
+    NEW pbandk/FieldDescriptor
+    DUP
+   L25
+    LINENUMBER 5025 L25
+    ALOAD 4
+   L26
+    LINENUMBER 5026 L26
+    LDC "graph_version"
+   L27
+    LINENUMBER 5027 L27
+    ICONST_2
+   L28
+    LINENUMBER 5028 L28
+    ALOAD 5
+    CHECKCAST pbandk/FieldDescriptor$Type
+   L29
+    LINENUMBER 5030 L29
+    GETSTATIC bilibili/app/view/v1/Interaction$Companion$descriptor$1$4.INSTANCE : Lbilibili/app/view/v1/Interaction$Companion$descriptor$1$4;
+    CHECKCAST kotlin/reflect/KProperty1
+   L30
+    LINENUMBER 5024 L30
+    ICONST_0
+   L31
+    LINENUMBER 5029 L31
+    LDC "graphVersion"
+   L32
+    LINENUMBER 5024 L32
+    ACONST_NULL
+    SIPUSH 160
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor.<init> (Lkotlin/reflect/KProperty0;Ljava/lang/String;ILpbandk/FieldDescriptor$Type;Lkotlin/reflect/KProperty1;ZLjava/lang/String;Lpbandk/wkt/FieldOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+   L33
+    LINENUMBER 5023 L33
+    INVOKEINTERFACE java/util/List.add (Ljava/lang/Object;)Z (itf)
+    POP
+   L34
+    LINENUMBER 5033 L34
+    ALOAD 2
+   L35
+    LINENUMBER 5035 L35
+    NEW bilibili/app/view/v1/Interaction$Companion$descriptor$1$5
+    DUP
+    GETSTATIC bilibili/app/view/v1/Interaction.Companion : Lbilibili/app/view/v1/Interaction$Companion;
+    INVOKESPECIAL bilibili/app/view/v1/Interaction$Companion$descriptor$1$5.<init> (Ljava/lang/Object;)V
+    CHECKCAST kotlin/reflect/KProperty0
+    ASTORE 4
+   L36
+    LINENUMBER 5038 L36
+    NEW pbandk/FieldDescriptor$Type$Primitive$String
+    DUP
+    ICONST_0
+    ICONST_1
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor$Type$Primitive$String.<init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    ASTORE 5
+   L37
+    LINENUMBER 5034 L37
+    NEW pbandk/FieldDescriptor
+    DUP
+   L38
+    LINENUMBER 5035 L38
+    ALOAD 4
+   L39
+    LINENUMBER 5036 L39
+    LDC "msg"
+   L40
+    LINENUMBER 5037 L40
+    ICONST_3
+   L41
+    LINENUMBER 5038 L41
+    ALOAD 5
+    CHECKCAST pbandk/FieldDescriptor$Type
+   L42
+    LINENUMBER 5040 L42
+    GETSTATIC bilibili/app/view/v1/Interaction$Companion$descriptor$1$6.INSTANCE : Lbilibili/app/view/v1/Interaction$Companion$descriptor$1$6;
+    CHECKCAST kotlin/reflect/KProperty1
+   L43
+    LINENUMBER 5034 L43
+    ICONST_0
+   L44
+    LINENUMBER 5039 L44
+    LDC "msg"
+   L45
+    LINENUMBER 5034 L45
+    ACONST_NULL
+    SIPUSH 160
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor.<init> (Lkotlin/reflect/KProperty0;Ljava/lang/String;ILpbandk/FieldDescriptor$Type;Lkotlin/reflect/KProperty1;ZLjava/lang/String;Lpbandk/wkt/FieldOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+   L46
+    LINENUMBER 5033 L46
+    INVOKEINTERFACE java/util/List.add (Ljava/lang/Object;)Z (itf)
+    POP
+   L47
+    LINENUMBER 5043 L47
+    ALOAD 2
+   L48
+    LINENUMBER 5045 L48
+    NEW bilibili/app/view/v1/Interaction$Companion$descriptor$1$7
+    DUP
+    GETSTATIC bilibili/app/view/v1/Interaction.Companion : Lbilibili/app/view/v1/Interaction$Companion;
+    INVOKESPECIAL bilibili/app/view/v1/Interaction$Companion$descriptor$1$7.<init> (Ljava/lang/Object;)V
+    CHECKCAST kotlin/reflect/KProperty0
+    ASTORE 4
+   L49
+    LINENUMBER 5048 L49
+    NEW pbandk/FieldDescriptor$Type$Primitive$String
+    DUP
+    ICONST_0
+    ICONST_1
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor$Type$Primitive$String.<init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    ASTORE 5
+   L50
+    LINENUMBER 5044 L50
+    NEW pbandk/FieldDescriptor
+    DUP
+   L51
+    LINENUMBER 5045 L51
+    ALOAD 4
+   L52
+    LINENUMBER 5046 L52
+    LDC "evaluation"
+   L53
+    LINENUMBER 5047 L53
+    ICONST_4
+   L54
+    LINENUMBER 5048 L54
+    ALOAD 5
+    CHECKCAST pbandk/FieldDescriptor$Type
+   L55
+    LINENUMBER 5050 L55
+    GETSTATIC bilibili/app/view/v1/Interaction$Companion$descriptor$1$8.INSTANCE : Lbilibili/app/view/v1/Interaction$Companion$descriptor$1$8;
+    CHECKCAST kotlin/reflect/KProperty1
+   L56
+    LINENUMBER 5044 L56
+    ICONST_0
+   L57
+    LINENUMBER 5049 L57
+    LDC "evaluation"
+   L58
+    LINENUMBER 5044 L58
+    ACONST_NULL
+    SIPUSH 160
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor.<init> (Lkotlin/reflect/KProperty0;Ljava/lang/String;ILpbandk/FieldDescriptor$Type;Lkotlin/reflect/KProperty1;ZLjava/lang/String;Lpbandk/wkt/FieldOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+   L59
+    LINENUMBER 5043 L59
+    INVOKEINTERFACE java/util/List.add (Ljava/lang/Object;)Z (itf)
+    POP
+   L60
+    LINENUMBER 5053 L60
+    ALOAD 2
+   L61
+    LINENUMBER 5055 L61
+    NEW bilibili/app/view/v1/Interaction$Companion$descriptor$1$9
+    DUP
+    GETSTATIC bilibili/app/view/v1/Interaction.Companion : Lbilibili/app/view/v1/Interaction$Companion;
+    INVOKESPECIAL bilibili/app/view/v1/Interaction$Companion$descriptor$1$9.<init> (Ljava/lang/Object;)V
+    CHECKCAST kotlin/reflect/KProperty0
+    ASTORE 4
+   L62
+    LINENUMBER 5058 L62
+    NEW pbandk/FieldDescriptor$Type$Primitive$Int64
+    DUP
+    ICONST_0
+    ICONST_1
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor$Type$Primitive$Int64.<init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    ASTORE 5
+   L63
+    LINENUMBER 5054 L63
+    NEW pbandk/FieldDescriptor
+    DUP
+   L64
+    LINENUMBER 5055 L64
+    ALOAD 4
+   L65
+    LINENUMBER 5056 L65
+    LDC "mark"
+   L66
+    LINENUMBER 5057 L66
+    ICONST_5
+   L67
+    LINENUMBER 5058 L67
+    ALOAD 5
+    CHECKCAST pbandk/FieldDescriptor$Type
+   L68
+    LINENUMBER 5060 L68
+    GETSTATIC bilibili/app/view/v1/Interaction$Companion$descriptor$1$10.INSTANCE : Lbilibili/app/view/v1/Interaction$Companion$descriptor$1$10;
+    CHECKCAST kotlin/reflect/KProperty1
+   L69
+    LINENUMBER 5054 L69
+    ICONST_0
+   L70
+    LINENUMBER 5059 L70
+    LDC "mark"
+   L71
+    LINENUMBER 5054 L71
+    ACONST_NULL
+    SIPUSH 160
+    ACONST_NULL
+    INVOKESPECIAL pbandk/FieldDescriptor.<init> (Lkotlin/reflect/KProperty0;Ljava/lang/String;ILpbandk/FieldDescriptor$Type;Lkotlin/reflect/KProperty1;ZLjava/lang/String;Lpbandk/wkt/FieldOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+   L72
+    LINENUMBER 5053 L72
+    INVOKEINTERFACE java/util/List.add (Ljava/lang/Object;)Z (itf)
+    POP
+   L73
+    LINENUMBER 5063 L73
+    NOP
+    GOTO L74
+   L74
+    GETSTATIC kotlin/Unit.INSTANCE : Lkotlin/Unit;
+    ASTORE 11
+    ALOAD 6
+    ALOAD 7
+    ALOAD 8
+    ALOAD 9
+    ALOAD 10
+    ALOAD 11
+   L75
+    LINENUMBER 5012 L75
+    POP
+    ALOAD 1
+    INVOKESTATIC kotlin/collections/CollectionsKt.build (Ljava/util/List;)Ljava/util/List;
+    NOP
+    GOTO L76
+   L76
+    CHECKCAST java/util/Collection
+   L77
+    LINENUMBER 5008 L77
+    INVOKESPECIAL pbandk/MessageDescriptor.<init> (Ljava/lang/String;Lkotlin/reflect/KClass;Lpbandk/Message$Companion;Ljava/util/Collection;)V
+    PUTSTATIC bilibili/app/view/v1/Interaction.descriptor : Lpbandk/MessageDescriptor;
+    RETURN
+   L78
+    LOCALVARIABLE $i$a$-buildList-Interaction$Companion$descriptor$1 I L8 L74 3
+    LOCALVARIABLE $this$descriptor_u24lambda_u240 Ljava/util/List; L7 L74 2
+    MAXSTACK = 18
+    MAXLOCALS = 12
+
+File is unknown
+The root cause java.lang.OutOfMemoryError was thrown at: unknown
+	at org.jetbrains.kotlin.codegen.TransformationMethodVisitor.visitEnd(TransformationMethodVisitor.kt:89)
+	at org.jetbrains.org.objectweb.asm.MethodVisitor.visitEnd(MethodVisitor.java:796)
+	at org.jetbrains.org.objectweb.asm.tree.MethodNode.accept(MethodNode.java:770)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:476)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:172)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.generateFile(JvmIrCodegenFactory.kt:467)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.invokeCodegen(JvmIrCodegenFactory.kt:433)
+	at org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.runCodegen$cli(KotlinToJVMBytecodeCompiler.kt:409)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:89)
+	at org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelinePhase.executePhase(JvmBackendPipelinePhase.kt:27)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:68)
+	at org.jetbrains.kotlin.cli.pipeline.PipelinePhase.phaseBody(PipelinePhase.kt:58)
+	at org.jetbrains.kotlin.config.phaser.NamedCompilerPhase.invoke(CompilerPhase.kt:102)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:22)
+	at org.jetbrains.kotlin.config.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:53)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.runPhasedPipeline(AbstractCliPipeline.kt:109)
+	at org.jetbrains.kotlin.cli.pipeline.AbstractCliPipeline.execute(AbstractCliPipeline.kt:68)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:51)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecutePhased(K2JVMCompiler.kt:42)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:89)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.exec(CLICompiler.kt:359)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:178)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunnerBase.runCompiler(IncrementalJvmCompilerRunnerBase.kt:40)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.doCompile(IncrementalCompilerRunner.kt:504)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileImpl(IncrementalCompilerRunner.kt:418)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:301)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(UnicastServerRef.java:360)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:200)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Transport.java:197)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:712)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Transport.java:196)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(TCPTransport.java:587)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(TCPTransport.java:828)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(TCPTransport.java:705)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:399)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(TCPTransport.java:704)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.lang.OutOfMemoryError: GC overhead limit exceeded
+
+
