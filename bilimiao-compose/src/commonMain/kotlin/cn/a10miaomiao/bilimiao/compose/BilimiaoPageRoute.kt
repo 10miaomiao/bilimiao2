@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose
 
-import ReplyDetailListPage
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -25,6 +24,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
 import cn.a10miaomiao.bilimiao.compose.pages.community.MainReplyListPage
+import cn.a10miaomiao.bilimiao.compose.pages.community.ReplyDetailListPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
@@ -83,11 +83,7 @@ class BilimiaoPageRoute (
 
         // home
         composable<HomePage>()
-//        builder.composable<HomePage> {
-//            val page = it.toRoute<HomePage>()
-//            page.Content()
-//        }
-        
+
         // search
         composable<SearchResultPage>(
             deepLinks = listOf(
@@ -278,9 +274,7 @@ class BilimiaoPageRoute (
         composable<UserMedialistPage>()
 
         //community
-        composable<MainReplyListPage>(
-
-        )
+        composable<MainReplyListPage>()
         composable<ReplyDetailListPage>(
             deepLinks = listOf(
                 navDeepLink {
@@ -313,46 +307,41 @@ class BilimiaoPageRoute (
 
     fun defaultEnterTransition(
         scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): @JvmSuppressWildcards EnterTransition? {
+    ): EnterTransition? {
         return materialFadeThroughIn(initialScale = 0.85f)
     }
 
     fun defaultExitTransition(
         scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): @JvmSuppressWildcards ExitTransition? {
+    ): ExitTransition? {
         return materialFadeThroughOut()
     }
 
     fun defaultPopEnterTransition(
         scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): @JvmSuppressWildcards EnterTransition? {
+    ): EnterTransition? {
         return materialFadeThroughIn(initialScale = 1.15f)
     }
 
     fun defaultPopExitTransition(
         scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): @JvmSuppressWildcards ExitTransition? {
+    ): ExitTransition? {
         return materialFadeThroughOut()
     }
 
     inline fun <reified T: ComposePage> composable(
-        typeMap: Map<KType, @JvmSuppressWildcards NavType<*>> = emptyMap(),
+        typeMap: Map<KType, NavType<*>> = emptyMap(),
         deepLinks: List<NavDeepLink> = emptyList(),
         noinline enterTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-            EnterTransition?)? = ::defaultEnterTransition,
+        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = ::defaultEnterTransition,
         noinline exitTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-            ExitTransition?)? = ::defaultExitTransition,
+        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = ::defaultExitTransition,
         noinline popEnterTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-            EnterTransition?)? = ::defaultPopEnterTransition,
+        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = ::defaultPopEnterTransition,
         noinline popExitTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-            ExitTransition?)? = ::defaultPopExitTransition,
+        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = ::defaultPopExitTransition,
         noinline sizeTransform:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-            SizeTransform?)? = null,
+        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> SizeTransform?)? = null,
     ) {
         builder.composable<T>(
             typeMap = typeMap,
