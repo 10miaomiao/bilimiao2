@@ -43,6 +43,7 @@ import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
@@ -160,7 +161,7 @@ private class HomeRecommendContentViewModel(
         if (item.goto == "av" || item.goto == "vertical_av") {
             pageNavigation.navigateToVideoInfo(item.param)
         } else if (item.goto == "bangumi") {
-            pageNavigation.navigateByUri("bilimiao://bangumi/?epId=${item.param}")
+            pageNavigation.navigate(BangumiDetailPage(epId = item.param))
         } else if (!BilibiliNavigation.navigationTo(pageNavigation, item.uri)){
             BilibiliNavigation.navigationToWeb(pageNavigation, item.uri)
         }

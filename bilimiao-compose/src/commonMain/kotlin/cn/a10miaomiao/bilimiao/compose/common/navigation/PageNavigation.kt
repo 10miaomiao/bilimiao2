@@ -7,6 +7,7 @@ import androidx.navigation.Navigator
 import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 /**
@@ -75,7 +76,9 @@ class PageNavigation(
     }
 
     override fun navigateToVideoInfo(id: String) {
-        navigateByUriInternal("bilimiao://video/$id")
+        navigate(VideoDetailPage(
+            id = id
+        ))
     }
 
     override fun launchWebBrowser(url: String) {

@@ -9,6 +9,7 @@ import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.apis.UserApi
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
@@ -156,7 +157,7 @@ class UserSpaceViewModel(
     }
 
     fun toFans() {
-        pageNavigation.navigateByUri("bilimiao://web?url=https://space.bilibili.com/h5/follow?type=fans&mid=$vmid")
+        pageNavigation.navigate(WebPage(url = "https://space.bilibili.com/h5/follow?type=fans&mid=$vmid"))
     }
 
     fun toFollow() {

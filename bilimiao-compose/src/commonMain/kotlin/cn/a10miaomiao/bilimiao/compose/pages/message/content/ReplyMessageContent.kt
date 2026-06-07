@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
+import cn.a10miaomiao.bilimiao.compose.pages.community.ReplyDetailListPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -106,7 +108,7 @@ private class ReplyMessageContentModel(
 
     fun toUserPage(item: ReplyMessageInfo) {
         val mid = item.user.mid
-        pageNavigation.navigateByUri("bilibili://space/$mid")
+        pageNavigation.navigate(UserSpacePage(id = mid.toString()))
     }
 
     fun toDetailPage(item: ReplyMessageInfo, isDetail: Boolean) {
@@ -121,9 +123,9 @@ private class ReplyMessageContentModel(
                 enterUrl= videoPageUrl
             }
             if (isDetail) {
-                pageNavigation.navigateByUri("bilimiao://comment/rootId.toString()?enterUrl=enterUrl")
+                pageNavigation.navigate(ReplyDetailListPage(id = rootId.toString(), enterUrl = enterUrl))
             } else {
-                pageNavigation.navigateByUri("bilimiao://comment/sourceId.toString()?enterUrl=enterUrl")
+                pageNavigation.navigate(ReplyDetailListPage(id = sourceId.toString(), enterUrl = enterUrl))
             }
         } else if (type == "album") {
 //            // 动态
@@ -139,7 +141,7 @@ private class ReplyMessageContentModel(
                 pageNavigation.navigateToVideoInfo(aid.toString())
             } else {
                 val videoPageUrl = "bilimiao://video/$aid"
-                pageNavigation.navigateByUri("bilimiao://comment/sourceId.toString()?enterUrl=videoPageUrl")
+                pageNavigation.navigate(ReplyDetailListPage(id = sourceId.toString(), enterUrl = videoPageUrl))
             }
         } else {
             BilibiliNavigation.navigationTo(pageNavigation, item.item.uri)

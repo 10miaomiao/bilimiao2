@@ -152,8 +152,12 @@ private class LoginPageViewModel(
                                             && params.containsKey("request_id")
                                             && params.containsKey("source")
                                         ) {
-                                            pageNavigation.navigateByUri(
-                                                "bilimiao://tel-verify?code=${params["tmp_token"]}&requestId=${params["request_id"]}&source=${params["source"]}"
+                                            pageNavigation.navigate(
+                                                TelVerifyPage(
+                                                    code = params["tmp_token"] ?: "",
+                                                    requestId = params["request_id"] ?: "",
+                                                    source = params["source"] ?: ""
+                                                )
                                             )
                                         } else {
                                             pageNavigation.launchWebBrowser(loginInfo.url)
@@ -254,7 +258,7 @@ private class LoginPageViewModel(
     }
 
     fun toH5LoginPage() {
-        pageNavigation.navigateByUri("bilimiao://h5login")
+        pageNavigation.navigate(H5LoginPage())
     }
 
     fun toQrLogin() {
