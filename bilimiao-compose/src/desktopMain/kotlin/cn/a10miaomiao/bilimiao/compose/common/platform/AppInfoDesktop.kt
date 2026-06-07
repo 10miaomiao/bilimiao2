@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 
 class AppInfoDesktop : AppInfo {
 
-    override val versionName: String = "0.0.0-desktop"
-    override val versionCode: Long = 0L
+    override val versionName: String = "2.5.0-desktop"
+    override val versionCode: Long = 100L
 
     @Composable
     override fun AppIcon(modifier: Modifier) {
