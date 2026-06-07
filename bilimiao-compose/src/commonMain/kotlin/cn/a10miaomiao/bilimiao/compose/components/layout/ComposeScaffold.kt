@@ -60,9 +60,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import android.view.View
-import cn.a10miaomiao.bilimiao.compose.AndroidPlayerViews
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
 import cn.a10miaomiao.bilimiao.compose.PlayerState
@@ -75,7 +72,6 @@ import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
-import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -95,7 +91,7 @@ private enum class ComposeDrawerValue {
 @Composable
 fun ComposeScaffold(
     startViewState: StartViewState,
-    androidPlayerViews: AndroidPlayerViews? = null,
+    playerContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     appBarState: AppBarState? = null,
     allowDrawerOpenGesture: Boolean = true,
@@ -317,13 +313,6 @@ fun ComposeScaffold(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-//                                .then(
-//                                    if (appBarNestedScrollConnection != null) {
-//                                        Modifier.nestedScroll(appBarNestedScrollConnection)
-//                                    } else {
-//                                        Modifier
-//                                    }
-//                                )
                                 .background(MaterialTheme.colorScheme.background)
                         ) {
                             content()
@@ -392,7 +381,7 @@ fun ComposeScaffold(
                     subcompose("player") {
                         PlayerLayer(
                             playerState = playerState,
-                            playerView = androidPlayerViews?.playerView,
+                            playerContent = playerContent,
                             baseBounds = layoutResult.playerBounds!!,
                             portraitTopInset = rawWindowInsets.top,
                             safeDrawingInsets = rawWindowInsets,
@@ -646,7 +635,7 @@ private fun contentConstraints(rootConstraints: Constraints, bounds: Rect): Cons
 @Composable
 internal fun PlayerLayer(
     playerState: PlayerState,
-    playerView: View?,
+    playerContent: (@Composable () -> Unit)?,
     baseBounds: Rect,
     portraitTopInset: Dp,
     safeDrawingInsets: ContentInsets = ContentInsets(),
@@ -656,7 +645,7 @@ internal fun PlayerLayer(
     val orientation = playerState.orientation
     val density = LocalDensity.current
 
-    if (playerView == null) {
+    if (playerContent == null) {
         return
     }
 
@@ -893,11 +882,6 @@ internal fun PlayerLayer(
             )
             .then(modifier)
     ) {
-        AndroidView(
-            factory = { playerView },
-            onReset = { _ ->
-            },
-            modifier = Modifier.fillMaxSize()
-        )
+        playerContent()
     }
 }
