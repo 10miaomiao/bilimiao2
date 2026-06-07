@@ -47,7 +47,7 @@ object BilibiliNavigation {
     }
 
     fun navigationTo(
-        pageNavigation: PageNavigation,
+        pageNavigation: PageNavigator,
         url: String,
     ): Boolean {
         miaoLogger() debug url
@@ -92,7 +92,7 @@ object BilibiliNavigation {
     }
 
     fun navigationToWeb(
-        pageNavigation: PageNavigation,
+        pageNavigation: PageNavigator,
         url: String,
     ) {
         val fullUrl = if ("://" in url) url else "http://$url"

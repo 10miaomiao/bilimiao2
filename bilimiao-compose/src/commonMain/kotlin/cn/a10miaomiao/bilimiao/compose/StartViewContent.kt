@@ -126,6 +126,8 @@ import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
+import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -148,10 +150,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
 fun StartViewContent(
     modifier: Modifier = Modifier,
     startTopHeight: Dp = 200.dp,
-    navigateTo: (ComposePage) -> Unit,
-    navigateUrl: (String) -> Unit,
     openSearch: () -> Unit,
-    openScanner: (callback: (String) -> Unit) -> Boolean,
+    closeDrawer: () -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     StartIndexList(
@@ -159,9 +159,7 @@ fun StartViewContent(
         listState = listState,
         startTopHeight = startTopHeight,
         openSearch = openSearch,
-        openScanner = openScanner,
-        navigateTo = navigateTo,
-        navigateUrl = navigateUrl,
+        closeDrawer = closeDrawer,
     )
 }
 
@@ -171,15 +169,14 @@ private fun StartIndexList(
     listState: LazyListState = rememberLazyListState(),
     startTopHeight: Dp = 200.dp,
     openSearch: () -> Unit,
-    openScanner: (onResult: (String) -> Unit) -> Boolean,
-    navigateTo: (ComposePage) -> Unit,
-    navigateUrl: (String) -> Unit,
+    closeDrawer: () -> Unit = {},
 ) {
     val userStore by rememberInstance<UserStore>()
     val userState by userStore.stateFlow.collectAsState()
     val playerStore by rememberInstance<PlayerStore>()
     val playerState by playerStore.stateFlow.collectAsState()
     val playerDelegate by rememberInstance<BasePlayerDelegate>()
+    val pageNavigation = localPageNavigation()
 
     var showScannerDownloadDialog by remember { mutableStateOf(false) }
     var showScannerResultTips by remember { mutableStateOf("") }
@@ -223,25 +220,28 @@ private fun StartIndexList(
                     cover = playerState.cover,
                     onClick = {
                         if (playerState.type === "video") {
-                            navigateTo(
+                            pageNavigation.navigate(
                                 VideoDetailPage(
                                     id = playerState.aid,
                                 )
                             )
                         } else if (playerState.type === "bangumi") {
-                            navigateTo(
+                            pageNavigation.navigate(
                                 BangumiDetailPage(
                                     id = playerState.sid,
                                     epId = playerState.epid,
                                 )
                             )
                         }
+                        closeDrawer()
                     },
                     onLyricClick = {
-                        navigateTo(LyricPage())
+                        pageNavigation.navigate(LyricPage())
+                        closeDrawer()
                     },
                     onPlayListClick = {
-                        navigateTo(PlayListPage())
+                        pageNavigation.navigate(PlayListPage())
+                        closeDrawer()
                     },
                     onCloseClick = playerDelegate::closePlayer,
                 )
@@ -254,31 +254,36 @@ private fun StartIndexList(
                 onUserClick = {
                     val userInfo = userState.info
                     if (userInfo != null) {
-                        navigateTo(UserSpacePage(
+                        pageNavigation.navigate(UserSpacePage(
                             id = userInfo.mid.toString(),
                         ))
                     } else {
-                        navigateTo(LoginPage())
+                        pageNavigation.navigate(LoginPage())
                     }
+                    closeDrawer()
                 },
                 onUserDynamicClick = {
                     val userInfo = userState.info
                     if (userInfo != null) {
-                        navigateTo(UserSpacePage(
+                        pageNavigation.navigate(UserSpacePage(
                             id = userInfo.mid.toString(),
                         ))
                     }
+                    closeDrawer()
                 },
                 onUserFollowerClick = {
-                    navigateTo(WebPage(
+                    pageNavigation.navigate(WebPage(
                         url = "https://space.bilibili.com/h5/follow?type=fans",
                     ))
+                    closeDrawer()
                 },
                 onUserFollowingClick = {
-                    navigateTo(MyFollowPage())
+                    pageNavigation.navigate(MyFollowPage())
+                    closeDrawer()
                 },
                 onMessageClick = {
-                    navigateTo(MessagePage())
+                    pageNavigation.navigate(MessagePage())
+                    closeDrawer()
                 }
             )
         }
@@ -288,12 +293,12 @@ private fun StartIndexList(
                     openSearch()
                 },
                 onScannerClick = {
-                    openScanner { result ->
+                    pageNavigation.openScanner { result ->
                         if (result.startsWith("https://")
                             || result.startsWith("http://")
                             || result.startsWith("bilimiao:")
                             || result.startsWith("bilibili://")) {
-                            navigateUrl(result)
+                            BilibiliNavigation.navigationTo(pageNavigation,result)
                         } else {
                             showScannerResultTips = result
                         }
@@ -301,6 +306,8 @@ private fun StartIndexList(
                         if (!it) {
                             // 打开失败
                             showScannerDownloadDialog = true
+                        } else {
+                            closeDrawer()
                         }
                     }
                 },
@@ -309,16 +316,21 @@ private fun StartIndexList(
         item {
             StartLibraryCard(
                 userId = userState.info?.mid,
-                navigateTo = navigateTo,
+                navigateTo = {
+                    pageNavigation.navigate(it)
+                    closeDrawer()
+                },
             )
         }
         item {
             StartFooterCard(
                 onDownloadClick = {
-                    navigateTo(DownloadListPage())
+                    pageNavigation.navigate(DownloadListPage())
+                    closeDrawer()
                 },
                 onSettingClick = {
-                    navigateTo(SettingPage())
+                    pageNavigation.navigate(SettingPage())
+                    closeDrawer()
                 },
             )
         }
@@ -335,7 +347,7 @@ private fun StartIndexList(
                 Row() {
                     TextButton(
                         onClick = {
-                            navigateUrl("https://github.com/10miaomiao/bilimiao_scanner/releases")
+                            BilibiliNavigation.navigationTo(pageNavigation,"https://github.com/10miaomiao/bilimiao_scanner/releases")
                             showScannerDownloadDialog = false
                         },
                     ) {
@@ -343,7 +355,7 @@ private fun StartIndexList(
                     }
                     TextButton(
                         onClick = {
-                            navigateUrl("https://gitee.com/10miaomiao/bilimiao_scanner/releases")
+                            BilibiliNavigation.navigationTo(pageNavigation,"https://gitee.com/10miaomiao/bilimiao_scanner/releases")
                             showScannerDownloadDialog = false
                         },
                     ) {
@@ -372,12 +384,13 @@ private fun StartIndexList(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        navigateTo(
+                        pageNavigation.navigate(
                             SearchResultPage(
                                 keyword = showScannerResultTips,
                             )
                         )
                         showScannerResultTips = ""
+                        closeDrawer()
                     },
                 ) {
                     Text("前往搜索")

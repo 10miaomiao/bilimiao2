@@ -38,11 +38,12 @@ import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import cn.a10miaomiao.bilimiao.compose.AndroidPlayerViews
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeNavigator
 import cn.a10miaomiao.bilimiao.compose.PlayerFloatingLayoutState
 import cn.a10miaomiao.bilimiao.compose.PlayerPortraitLayoutState
-import cn.a10miaomiao.bilimiao.compose.StartViewWrapper
+import cn.a10miaomiao.bilimiao.compose.StartViewState
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
@@ -94,7 +95,8 @@ class MainActivity : AppCompatActivity(), DIAware {
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
         store.loadStoreModules(this)
-        bindSingleton { startViewWrapper }
+        bindSingleton { startViewState }
+        bindSingleton<AndroidPlayerViews> { androidPlayerViews }
         bindSingleton { basePlayerDelegate }
         bindSingleton { themeDelegate }
         bindSingleton { statusBarHelper }
@@ -120,6 +122,13 @@ class MainActivity : AppCompatActivity(), DIAware {
     private val emitter = SharedFlowEmitter()
     private val composeNavigator = MainActivityComposeNavigator(
         launchUrl = ::launchWebBrowser,
+        scannerLauncher = { callback ->
+            BilimiaoScanner.openScanner(
+                this,
+                themeDelegate.themeColor.toInt(),
+                callback,
+            )
+        },
     )
     private var appBarBackgroundColor by mutableStateOf(ComposeColor.Unspecified)
     private val composeHostBridge = object : ComposeHostBridge {
@@ -173,14 +182,10 @@ class MainActivity : AppCompatActivity(), DIAware {
         }
     }
 
-    private val startViewWrapper by lazy {
-        StartViewWrapper(
-            this,
-            this::startMenuNavigate,
-            this::startMenuNavigateUrl,
-            this::startMenuDismissRequest,
-            this::startMenuOpenScanner,
-            playerHostState::updateFloatingPlayerLayoutState,
+    private val androidPlayerViews = AndroidPlayerViews()
+    private val startViewState by lazy {
+        StartViewState(
+            onFloatingPlayerLayoutStateChanged = playerHostState::updateFloatingPlayerLayoutState,
         )
     }
     private val basePlayerDelegate: PlayerDelegate2 by lazy {
@@ -275,12 +280,13 @@ class MainActivity : AppCompatActivity(), DIAware {
                 MainActivityComposeHost(
                     navigator = composeNavigator,
                     hostDi = composeHostDi,
-                    startViewWrapper = startViewWrapper,
+                    startViewState = startViewState,
                     appState = appState,
                     pageConfigState = pageConfigState,
                     emitter = emitter,
                     messageDialogState = messageDialogState,
                     bottomSheetState = bottomSheetState,
+                    androidPlayerViews = androidPlayerViews,
                     onBackClick = ::handleActivityBackPressed,
                     initialDeepLink = pendingDeepLink,
                     onInitialDeepLinkConsumed = {
@@ -340,13 +346,13 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     private fun setupPlayerViewInWrapper() {
-        startViewWrapper.playerView = playerLayout
-        startViewWrapper.setShowPlayer(playerHostState.showPlayer)
-        startViewWrapper.setOrientation(playerHostState.orientation)
-        startViewWrapper.setFullScreenPlayer(playerHostState.fullScreenPlayer)
-        startViewWrapper.setPortraitPlayerLayoutState(playerHostState.portraitLayoutState)
-        startViewWrapper.setFloatingPlayerLayoutState(playerHostState.floatingLayoutState)
-        startViewWrapper.setPlayerVideoRatio(playerHostState.playerVideoRatio)
+        androidPlayerViews.playerView = playerLayout
+        startViewState.playerState.setShowPlayer(playerHostState.showPlayer)
+        startViewState.playerState.setOrientation(playerHostState.orientation)
+        startViewState.playerState.setFullScreenPlayer(playerHostState.fullScreenPlayer)
+        startViewState.playerState.setPortraitPlayerLayoutState(playerHostState.portraitLayoutState)
+        startViewState.playerState.setFloatingPlayerLayoutState(playerHostState.floatingLayoutState)
+        startViewState.playerState.setPlayerVideoRatio(playerHostState.playerVideoRatio)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -365,7 +371,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         }
         pageConfig = config
         val searchConfig = config.search
-        startViewWrapper.setPageSearchMethod(
+        startViewState.setPageSearchMethod(
             if (searchConfig?.name.isNullOrBlank()) {
                 null
             } else {
@@ -393,37 +399,12 @@ class MainActivity : AppCompatActivity(), DIAware {
         composeNavigator.goBackHome()
     }
 
-    private fun startMenuNavigate(page: ComposePage) {
-        startViewWrapper.closeDrawer()
-        composeNavigator.navigate(page)
-    }
-
-    private fun startMenuNavigateUrl(url: String) {
-        startViewWrapper.closeDrawer()
-        val uri = Uri.parse(url)
-        if (!composeNavigator.navigateByUri(uri)) {
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
-        }
-    }
-
-    private fun startMenuDismissRequest() {
-        startViewWrapper.closeDrawer()
-    }
 
     fun openSearchDialog() {
         val searchConfig = pageConfig?.search
         val keyword = searchConfig?.keyword ?: ""
         val mode = if (searchConfig?.name.isNullOrBlank()) 0 else 1
-        startViewWrapper.openSearchDialog(keyword, mode, false)
-    }
-
-    private fun startMenuOpenScanner(callback: (result: String) -> Unit): Boolean {
-        startViewWrapper.closeDrawer()
-        return BilimiaoScanner.openScanner(
-            this,
-            themeDelegate.themeColor.toInt(),
-            callback,
-        )
+        startViewState.openSearchDialog(keyword, mode, false)
     }
 
     fun setWindowInsetsAndroidL() {
@@ -609,12 +590,12 @@ class MainActivity : AppCompatActivity(), DIAware {
         if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
             return
         }
-        if (startViewWrapper.showSearchDialog) {
-            startViewWrapper.closeSearchDialog()
+        if (startViewState.showSearchDialog) {
+            startViewState.closeSearchDialog()
             return
         }
-        if (startViewWrapper.isDrawerOpen()) {
-            startViewWrapper.closeDrawer()
+        if (startViewState.isDrawerOpen()) {
+            startViewState.closeDrawer()
             return
         }
         super.onBackPressed()
@@ -662,10 +643,12 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     private inner class DirectComposePlayerHostState : PlayerHostState {
+        private val ps get() = startViewState.playerState
+
         override var showPlayer: Boolean = false
             set(value) {
                 field = value
-                startViewWrapper.setShowPlayer(value)
+                ps.setShowPlayer(value)
                 updateStatusBarStyle()
                 findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
             }
@@ -673,7 +656,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         override var fullScreenPlayer: Boolean = false
             set(value) {
                 field = value
-                startViewWrapper.setFullScreenPlayer(value)
+                ps.setFullScreenPlayer(value)
                 updateStatusBarStyle()
                 findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
             }
@@ -681,7 +664,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         override var orientation: Int = resources.configuration.orientation
             set(value) {
                 field = value
-                startViewWrapper.setOrientation(value)
+                ps.setOrientation(value)
                 updateStatusBarStyle()
             }
 
@@ -711,7 +694,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         var playerVideoRatio: Float = 16f / 9f
             set(value) {
                 field = value
-                startViewWrapper.setPlayerVideoRatio(value)
+                ps.setPlayerVideoRatio(value)
                 updateSmallModePlayerMaxHeight()
             }
 
@@ -765,17 +748,17 @@ class MainActivity : AppCompatActivity(), DIAware {
         }
 
         private fun syncPortraitPlayerLayoutState() {
-            if (startViewWrapper.portraitPlayerLayoutState == portraitLayoutState) {
+            if (ps.portraitPlayerLayoutState == portraitLayoutState) {
                 return
             }
-            startViewWrapper.setPortraitPlayerLayoutState(portraitLayoutState)
+            ps.setPortraitPlayerLayoutState(portraitLayoutState)
         }
 
         private fun syncFloatingPlayerLayoutState() {
-            if (startViewWrapper.floatingPlayerLayoutState == floatingPlayerLayoutState) {
+            if (ps.floatingPlayerLayoutState == floatingPlayerLayoutState) {
                 return
             }
-            startViewWrapper.setFloatingPlayerLayoutState(floatingPlayerLayoutState)
+            ps.setFloatingPlayerLayoutState(floatingPlayerLayoutState)
         }
     }
 

@@ -12,31 +12,6 @@ import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import kotlin.math.min
 
-internal enum class PlayerDisplayMode {
-    Hidden,
-    EmbeddedPortrait,
-    FloatingLandscape,
-    Fullscreen,
-}
-
-internal data class ComposeScaffoldPlayerLayoutState(
-    val showPlayer: Boolean,
-    val fullScreenPlayer: Boolean,
-    val orientation: Int,
-    val portraitState: PlayerPortraitLayoutState,
-    val floatingState: PlayerFloatingLayoutState,
-    val playerVideoRatio: Float,
-) {
-    val displayMode: PlayerDisplayMode
-        get() = when {
-            !showPlayer -> PlayerDisplayMode.Hidden
-            fullScreenPlayer -> PlayerDisplayMode.Fullscreen
-            orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
-            orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
-            else -> PlayerDisplayMode.Hidden
-        }
-}
-
 internal data class ComposeScaffoldGeometryResult(
     val contentBounds: Rect,
     val appBarVerticalBounds: Rect?,
