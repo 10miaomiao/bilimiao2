@@ -1,7 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.components.start
 
-import android.app.Activity
 import cn.a10miaomiao.bilimiao.compose.common.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,8 +42,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,7 +60,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
 import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -83,12 +80,10 @@ fun SearchInputInline(
     pageSearchMethod: PageSearchMethod?,
     onDismissRequest: () -> Unit,
 ) {
-    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val isCompact = windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
+    val isCompact = isCompactWindow()
 
     val viewModel: SearchInputViewModel = diViewModel { SearchInputViewModel(it) }
     val pageNavigation: PageNavigation by rememberInstance()
-    val activity: Activity by rememberInstance()
 
     var text by remember {
         mutableStateOf(

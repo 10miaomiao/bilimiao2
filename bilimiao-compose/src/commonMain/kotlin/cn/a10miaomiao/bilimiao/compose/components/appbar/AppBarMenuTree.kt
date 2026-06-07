@@ -45,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -332,10 +331,7 @@ private fun SharedRootMenuPopup(
     }
 
     val density = LocalDensity.current
-    val configuration = LocalConfiguration.current
     val safePadding = WindowInsets.safeDrawing.asPaddingValues()
-    val screenWidthPx = with(density) { configuration.screenWidthDp.dp.roundToPx() }
-    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.roundToPx() }
     val safeTopPx = with(density) { safePadding.calculateTopPadding().roundToPx() }
     val safeBottomPx = with(density) { safePadding.calculateBottomPadding().roundToPx() }
     val safeLeftPx = with(density) { safePadding.calculateLeftPadding(LayoutDirection.Ltr).roundToPx() }
@@ -345,11 +341,8 @@ private fun SharedRootMenuPopup(
         RootPopupPlacement.RightOfAppBar -> AppBarConfig.MenuWidth
     }
     var popupHeightPx by remember(popupRootPath, popupParentPath, placement) { mutableIntStateOf(0) }
+    var screenHeightPx by remember(popupRootPath, popupParentPath, placement) { mutableIntStateOf(Int.MAX_VALUE) }
 
-    val maxHeightPx = when (placement) {
-        RootPopupPlacement.AboveAppBar -> max(activeAnchor.y - safeTopPx, 0)
-        RootPopupPlacement.RightOfAppBar -> max(screenHeightPx - safeTopPx - safeBottomPx, 0)
-    }
     val popupPositionProvider = remember(
         placement,
         activeAnchor,
@@ -357,8 +350,6 @@ private fun SharedRootMenuPopup(
         safeBottomPx,
         safeLeftPx,
         safeRightPx,
-        screenWidthPx,
-        screenHeightPx,
     ) {
         object : PopupPositionProvider {
             override fun calculatePosition(
@@ -367,6 +358,7 @@ private fun SharedRootMenuPopup(
                 layoutDirection: LayoutDirection,
                 popupContentSize: androidx.compose.ui.unit.IntSize,
             ): IntOffset {
+                screenHeightPx = windowSize.height
                 val actualPopupWidth = popupContentSize.width
                 val actualPopupHeight = popupContentSize.height
                 return when (placement) {
@@ -391,6 +383,11 @@ private fun SharedRootMenuPopup(
                 }
             }
         }
+    }
+
+    val maxHeightPx = when (placement) {
+        RootPopupPlacement.AboveAppBar -> max(activeAnchor.y - safeTopPx, 0)
+        RootPopupPlacement.RightOfAppBar -> max(screenHeightPx - safeTopPx - safeBottomPx, 0)
     }
 
     val popupTransformOrigin = remember(placement) {
