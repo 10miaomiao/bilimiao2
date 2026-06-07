@@ -31,6 +31,8 @@ import com.a10miaomiao.bilimiao.comm.platform.JvmCookieProvider
 import com.a10miaomiao.bilimiao.comm.platform.JvmDeviceInfoProvider
 import com.a10miaomiao.bilimiao.comm.platform.JvmPlatformContext
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopPlayerDelegate
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.DesktopSettingsProvider
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -70,6 +72,7 @@ fun main() {
         bindSingleton<AppInfo> { AppInfoDesktop() }
         bindSingleton<FileStorage> { FileStorageDesktop() }
         bindSingleton<DownloadManager> { DownloadManagerDesktop() }
+        bindSingleton<BasePlayerDelegate> { DesktopPlayerDelegate() }
 
         // Store bindings (lazy singletons - created on first access)
         bindSingleton { AppStore(di) }
