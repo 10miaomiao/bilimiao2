@@ -1,3 +1,4 @@
+package cn.a10miaomiao.bilimiao.compose.pages.community
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
