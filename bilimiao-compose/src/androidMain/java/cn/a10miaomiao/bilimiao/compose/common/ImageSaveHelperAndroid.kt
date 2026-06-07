@@ -3,30 +3,16 @@ package cn.a10miaomiao.bilimiao.compose.common
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import coil3.Image
 import coil3.ImageLoader
 import coil3.request.ImageRequest
-import coil3.request.SuccessResult
-import coil3.toBitmap
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-
-actual fun imageToBytes(image: Image): ByteArray {
-    val bitmap = image.toBitmap()
-    val stream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-    return stream.toByteArray()
-}
 
 actual fun saveImageBytes(fileName: String, bytes: ByteArray): Boolean {
     val context = PlatformProviders.context.platformContext as Context
@@ -50,21 +36,17 @@ actual fun getImageFileName(url: String): String {
 }
 
 actual suspend fun fetchOriginalImageBytes(url: String): ByteArray? {
-    return withContext(Dispatchers.IO) {
-        try {
-            val context = PlatformProviders.context.platformContext as Context
-            val loader = ImageLoader(context)
-            val request = ImageRequest.Builder(context)
-                .data(url)
-                .build()
-            val result = loader.execute(request)
-            if (result is SuccessResult) {
-                imageToBytes(result.image)
-            } else null
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+    val context = PlatformProviders.context.platformContext as Context
+    val loader = ImageLoader(context)
+    val request = ImageRequest.Builder(context)
+        .data(url)
+        .build()
+    // Execute to ensure image is in disk cache
+    loader.execute(request)
+    // Read raw bytes from disk cache
+    val snapshot = loader.diskCache?.openSnapshot(url)
+    return snapshot?.use { entry ->
+        entry.data.toFile().readBytes()
     }
 }
 
