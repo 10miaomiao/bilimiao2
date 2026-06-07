@@ -50,6 +50,8 @@ import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestInfo
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchInputViewModel.SuggestType
 import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import org.kodein.di.compose.rememberInstance
@@ -116,8 +118,8 @@ fun SearchInputDialog(
                         modifier = Modifier
                             .clickable {
                                 when (item.type) {
-                                    SuggestType.AV -> pageNavigation.navigateByUri("bilimiao://video/${item.value}")
-                                    SuggestType.SS -> pageNavigation.navigateByUri("bilimiao://bangumi/${item.value}")
+                                    SuggestType.AV -> pageNavigation.navigate(VideoDetailPage(id = item.value))
+                                    SuggestType.SS -> pageNavigation.navigate(BangumiDetailPage(id = item.value))
                                     else -> startSearch(item.value)
                                 }
                             },

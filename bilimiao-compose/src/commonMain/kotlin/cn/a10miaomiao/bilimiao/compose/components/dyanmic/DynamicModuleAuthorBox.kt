@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
 
@@ -32,9 +33,7 @@ fun DynamicModuleAuthorBox(
     val pageNavigation = localPageNavigation()
     fun jumpToUser() {
         if (isJumpToUser) {
-            pageNavigation.navigateByUri(
-                "bilibili://space/${authorData.mid}"
-            )
+            pageNavigation.navigate(UserSpacePage(id = authorData.mid.toString()))
         }
     }
     DynamicModuleAuthorBox(

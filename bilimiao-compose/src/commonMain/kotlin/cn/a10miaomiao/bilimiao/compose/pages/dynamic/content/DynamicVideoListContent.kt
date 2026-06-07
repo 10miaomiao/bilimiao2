@@ -36,6 +36,8 @@ import cn.a10miaomiao.bilimiao.compose.components.video.MiniVideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicVideoContentInfo
 import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicVideoInfo
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
@@ -177,7 +179,7 @@ class DynamicVideoListContentViewModel(
                 pageNavigation.navigateToVideoInfo(item.dynamicContent.id)
             }
             bilibili.app.dynamic.v2.ModuleDynamicType.MDL_DYN_PGC.value -> {
-                pageNavigation.navigateByUri("bilimiao://bangumi/item.dynamicContent.id")
+                pageNavigation.navigate(BangumiDetailPage(id = item.dynamicContent.id))
             }
             else -> {
                 GlobalToaster.show("未知跳转类型")
@@ -186,7 +188,7 @@ class DynamicVideoListContentViewModel(
     }
 
     fun toUserSpace(mid: String) {
-        pageNavigation.navigateByUri("bilibili://space/mid")
+        pageNavigation.navigate(UserSpacePage(id = mid))
     }
 }
 

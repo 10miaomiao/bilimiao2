@@ -42,6 +42,7 @@ import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.bangumi.BangumiItemBox
 import cn.a10miaomiao.bilimiao.compose.components.list.ListStateBox
 import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
 
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
@@ -146,7 +147,7 @@ class TypeBangumiContentViewModel(
     }
 
     fun toDetailPage(item: MyBangumiInfo) {
-        pageNavigation.navigateByUri("bilimiao://bangumi/${item.season_id}")
+        pageNavigation.navigate(BangumiDetailPage(id = item.season_id))
     }
 
     fun changeFollowStatus(

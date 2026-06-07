@@ -2,6 +2,8 @@ package cn.a10miaomiao.bilimiao.compose.components.start
 
 import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -294,10 +296,10 @@ fun SearchInputInline(
                                     onClick = {
                                         when (item.type) {
                                             SearchInputViewModel.SuggestType.AV -> {
-                                                pageNavigation.navigateByUri("bilimiao://video/${item.value}")
+                                                pageNavigation.navigate(VideoDetailPage(id = item.value))
                                             }
                                             SearchInputViewModel.SuggestType.SS -> {
-                                                pageNavigation.navigateByUri("bilimiao://video/${item.value}")
+                                                pageNavigation.navigate(BangumiDetailPage(id = item.value))
                                             }
                                             else -> {
                                                 startSearch(item.value)

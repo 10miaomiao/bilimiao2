@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
+import cn.a10miaomiao.bilimiao.compose.pages.community.ReplyDetailListPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -106,7 +108,7 @@ private class LikeMessageContentModel(
 
     fun toUserPage(item: LikeMessageInfo) {
         val mid = item.users[0].mid
-        pageNavigation.navigateByUri("bilibili://space/$mid")
+        pageNavigation.navigate(UserSpacePage(id = mid.toString()))
     }
 
     fun toDetailPage(item: LikeMessageInfo) {
@@ -119,7 +121,7 @@ private class LikeMessageContentModel(
                 val bvID = item.item.uri.substring(31, item.item.uri.length)
                 enterUrl = "bilimiao://video/${bvID}"
             }
-            pageNavigation.navigateByUri("bilimiao://comment/id.toString()?enterUrl=enterUrl")
+            pageNavigation.navigate(ReplyDetailListPage(id = id.toString(), enterUrl = enterUrl))
         } else if (type == "album") {
             // 动态
         } else if (type == "danmu") {
