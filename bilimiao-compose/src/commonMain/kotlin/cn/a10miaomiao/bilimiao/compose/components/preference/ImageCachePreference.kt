@@ -11,19 +11,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import com.a10miaomiao.bilimiao.comm.utils.GlideCacheUtil
-import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
+import cn.a10miaomiao.bilimiao.compose.common.clearImageCache
+import cn.a10miaomiao.bilimiao.compose.common.getImageCacheSize
 import cn.a10miaomiao.bilimiao.compose.common.preference.Preference
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
+
+inline fun LazyListScope.imageCachePreference(
+    key: String,
+    modifier: Modifier = Modifier.fillMaxWidth()
+) {
+    item(key = key, contentType = "ImageCachePreference") {
+        ImageCachePreference(modifier = modifier)
+    }
+}
 
 @Composable
-actual fun GlidePreference(
-    modifier: Modifier,
+fun ImageCachePreference(
+    modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     var cacheSize by remember {
-        val cache = GlideCacheUtil.getCacheSize(context)
-        mutableStateOf(cache)
+        mutableStateOf(getImageCacheSize())
     }
     var showDialog by remember {
         mutableStateOf(false)
@@ -57,7 +64,7 @@ actual fun GlidePreference(
                 TextButton(
                     onClick = {
                         showDialog = false
-                        GlideCacheUtil.clearImageAllCache(context)
+                        clearImageCache()
                         GlobalToaster.show("清理完成，已清理$cacheSize")
                         cacheSize = "0Byte"
                     }
