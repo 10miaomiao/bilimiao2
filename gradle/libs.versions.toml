@@ -43,6 +43,7 @@ composePreference = "1.1.1"
 reorderable = "2.5.1"
 # mediamp
 mediamp = "0.0.23"
+jna = "5.13.0"
 # test
 junit = "4.14-SNAPSHOT"
 junitVersion = "1.3.0"
@@ -130,6 +131,9 @@ mediamp-compose = { module = "org.openani.mediamp:mediamp-compose", version.ref 
 mediamp-vlc = { module = "org.openani.mediamp:mediamp-vlc", version.ref = "mediamp" }
 mediamp-vlc-compose = { module = "org.openani.mediamp:mediamp-vlc-compose", version.ref = "mediamp" }
 mediamp-vlc-loader = { module = "org.openani.mediamp:mediamp-vlc-loader", version.ref = "mediamp" }
+# jna
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 
 # test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
