@@ -1,11 +1,26 @@
+package app.bilimiao.desktop
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import app.bilimiao.desktop.window.HandleWindowsWindowProc
+import app.bilimiao.desktop.window.WindowFrame
+import app.bilimiao.desktop.window.WindowsWindowUtils
+import app.bilimiao.desktop.window.rememberLayoutHitTestOwner
 import cn.a10miaomiao.bilimiao.compose.MainComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainComposeNavigator
 import cn.a10miaomiao.bilimiao.compose.StartViewState
@@ -34,8 +49,6 @@ import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopPlayerDelegate
 import cn.a10miaomiao.bilimiao.compose.components.player.DesktopPlayerContainer
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxSize
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.DesktopSettingsProvider
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -47,15 +60,15 @@ import com.a10miaomiao.bilimiao.comm.store.TimeSettingStore
 import com.a10miaomiao.bilimiao.comm.store.UserLibraryStore
 import com.a10miaomiao.bilimiao.comm.store.UserStateProvider
 import com.a10miaomiao.bilimiao.comm.store.UserStore
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
-import org.kodein.di.singleton
 import java.io.File
 
 fun main() {
-    // Set VLC library path - try bundled first, then system VLC
+    // Set VLC library path
     val bundledVlcDir = File(System.getProperty("user.dir"), "desktop-app/appResources/windows-x64/vlc")
     val systemVlcDir = File("C:/Program Files/VideoLAN/VLC")
     val vlcDir = if (bundledVlcDir.exists()) bundledVlcDir else systemVlcDir
@@ -64,18 +77,16 @@ fun main() {
         System.setProperty("VLC_PLUGIN_PATH", File(vlcDir, "plugins").absolutePath)
     }
 
-    // Initialize platform providers (bilimiao-comm)
+    // Initialize platform providers
     PlatformProviders.context = JvmPlatformContext()
     PlatformProviders.cookieProvider = JvmCookieProvider()
     PlatformProviders.deviceInfo = JvmDeviceInfoProvider()
     PlatformProviders.base64 = JvmBase64Provider()
 
-    // Initialize core
     BilimiaoCommCore().onCreate()
 
-    // Create DI container with all bindings (stores are lazy singletons)
+    // Create DI container
     val di = DI.lazy {
-        // Platform bindings
         bindSingleton<SettingsProvider> {
             DesktopSettingsProvider(File(PlatformProviders.context.filesDir, "settings.properties"))
         }
@@ -85,8 +96,6 @@ fun main() {
         bindSingleton<FileStorage> { FileStorageDesktop() }
         bindSingleton<DownloadManager> { DownloadManagerDesktop() }
         bindSingleton<BasePlayerDelegate> { DesktopPlayerDelegate(instance(), instance()) }
-
-        // Store bindings (lazy singletons - created on first access)
         bindSingleton { AppStore(di) }
         bindSingleton { PlayListStore(di) }
         bindSingleton { PlayerStore(di) }
@@ -105,9 +114,9 @@ fun main() {
         val playerDelegate: BasePlayerDelegate by instance()
     }
     val playerDelegate = storeHolderForPlayer.playerDelegate as DesktopPlayerDelegate
-    val mediampPlayer = playerDelegate.createPlayer()
+    playerDelegate.createPlayer()
 
-    // Initialize stores via DIAware holder
+    // Initialize stores
     val storeHolder = object : DIAware {
         override val di = di
         val appStore: AppStore by instance()
@@ -135,59 +144,106 @@ fun main() {
             position = WindowPosition(Alignment.Center),
         )
 
+        @OptIn(ExperimentalComposeUiApi::class)
         Window(
             onCloseRequest = ::exitApplication,
             title = "bilimiao",
             state = windowState,
         ) {
+            val composeWindow = this.window
+            val windowHandle = remember { composeWindow.windowHandle }
+
+            val desktopWindow = remember {
+                DesktopWindowState(
+                    windowHandle = windowHandle,
+                    windowState = windowState,
+                )
+            }
+
+            val layoutHitTestOwner = rememberLayoutHitTestOwner()
+            LaunchedEffect(layoutHitTestOwner) {
+                desktopWindow.layoutHitTestOwner = layoutHitTestOwner
+            }
+
+            // Handle Windows window proc
+            HandleWindowsWindowProc(desktopWindow, this)
+
+            // Setup borderless window (DWM shadow)
+            LaunchedEffect(Unit) {
+                WindowsWindowUtils.instance.setupBorderlessWindow(windowHandle)
+            }
+
             val platformContext = DesktopPlatformContext()
             val startViewState = StartViewState()
-            // 设置播放器显示/隐藏回调
             playerDelegate.onShowPlayerChanged = { show ->
                 startViewState.playerState.setShowPlayer(show)
             }
-            val pageConfigState = PageConfigState()
-            val emitter = SharedFlowEmitter()
-            val messageDialogState = MessageDialogState()
-            val bottomSheetState = BottomSheetState()
-            val composeNavigator = MainComposeNavigator(
-                launchUrl = { url -> platformContext.openUrl(url) },
-            )
+            val scope = rememberCoroutineScope()
 
-            val hostDi = DI {
-                extend(di)
-                bindSingleton { messageDialogState }
-                bindSingleton { emitter }
-                bindSingleton { composeNavigator.pageNavigation }
-                bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator> {
-                    composeNavigator.pageNavigation
-                }
-                bindSingleton { bottomSheetState }
-            }
+            CompositionLocalProvider(LocalDesktopWindow provides desktopWindow) {
+                WindowFrame(
+                    desktopWindow = desktopWindow,
+                    windowState = windowState,
+                    onCloseRequest = ::exitApplication,
+                ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+                            val pageConfigState = PageConfigState()
+                            val emitter = SharedFlowEmitter()
+                            val messageDialogState = MessageDialogState()
+                            val bottomSheetState = BottomSheetState()
+                            val composeNavigator = MainComposeNavigator(
+                                launchUrl = { url -> platformContext.openUrl(url) },
+                            )
 
-            val appState by storeHolder.appStore.stateFlow.collectAsState()
+                            val hostDi = DI {
+                                extend(di)
+                                bindSingleton { messageDialogState }
+                                bindSingleton { emitter }
+                                bindSingleton { composeNavigator.pageNavigation }
+                                bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator> {
+                                    composeNavigator.pageNavigation
+                                }
+                                bindSingleton { bottomSheetState }
+                            }
 
-            MainComposeHost(
-                navigator = composeNavigator,
-                hostDi = hostDi,
-                startViewState = startViewState,
-                appState = appState,
-                pageConfigState = pageConfigState,
-                emitter = emitter,
-                messageDialogState = messageDialogState,
-                bottomSheetState = bottomSheetState,
-                platformContext = platformContext,
-                playerContent = {
-                    DesktopPlayerContainer(
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                },
-                onBackClick = {
-                    if (composeNavigator.canPopBackStack()) {
-                        composeNavigator.popBackStack()
+                            val appState by storeHolder.appStore.stateFlow.collectAsState()
+
+                            MainComposeHost(
+                                navigator = composeNavigator,
+                                hostDi = hostDi,
+                                startViewState = startViewState,
+                                appState = appState,
+                                pageConfigState = pageConfigState,
+                                emitter = emitter,
+                                messageDialogState = messageDialogState,
+                                bottomSheetState = bottomSheetState,
+                                platformContext = platformContext,
+                                playerContent = {
+                                    DesktopPlayerContainer(
+                                        modifier = Modifier.fillMaxSize(),
+                                        isFullscreen = desktopWindow.isUndecoratedFullscreen,
+                                        onFullscreenToggle = {
+                                            val newFullscreen = !desktopWindow.isUndecoratedFullscreen
+                                            startViewState.playerState.setFullScreenPlayer(newFullscreen)
+                                            scope.launch {
+                                                WindowsWindowUtils.instance.setUndecoratedFullscreen(
+                                                    desktopWindow, windowState, newFullscreen
+                                                )
+                                            }
+                                        },
+                                    )
+                                },
+                                onBackClick = {
+                                    if (composeNavigator.canPopBackStack()) {
+                                        composeNavigator.popBackStack()
+                                    }
+                                },
+                            )
+                        }
                     }
-                },
-            )
+                }
+            }
         }
     }
 }
