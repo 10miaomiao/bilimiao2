@@ -26,6 +26,14 @@ kotlin {
                 // mediamp
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.vlc.loader)
+
+                // jna (for window border handling)
+                implementation(libs.jna)
+                implementation(libs.jna.platform)
+
+                // compose material3 (for title bar)
+                implementation(compose.material3)
+                implementation(compose.materialIconsExtended)
             }
         }
     }
@@ -33,7 +41,7 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "app.bilimiao.desktop.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
