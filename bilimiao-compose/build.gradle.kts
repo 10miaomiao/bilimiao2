@@ -83,6 +83,12 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.common)
                 implementation(libs.kotlinx.coroutines.core)
+
+                // mediamp
+                implementation(libs.mediamp.api)
+                implementation(libs.mediamp.compose)
+                implementation(libs.mediamp.vlc)
+                implementation(libs.mediamp.vlc.compose)
             }
         }
     }

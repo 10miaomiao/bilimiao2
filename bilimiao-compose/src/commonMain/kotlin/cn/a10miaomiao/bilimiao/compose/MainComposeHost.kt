@@ -1,6 +1,8 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
+import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
+import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -134,7 +136,7 @@ fun MainComposeHost(
     val pageConfig = pageConfigState.collectConfigAsState().value
     val bottomSheetPage by bottomSheetState.page.collectAsState()
     val playerState = startViewState.playerState
-    val orientation = playerState.orientation
+    val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val showPlayer = playerState.showPlayer
     val allowDrawerOpenGesture = bottomSheetPage == null && !playerState.fullScreenPlayer
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState

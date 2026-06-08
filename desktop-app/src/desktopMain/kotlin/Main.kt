@@ -33,6 +33,9 @@ import com.a10miaomiao.bilimiao.comm.platform.JvmPlatformContext
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopPlayerDelegate
+import cn.a10miaomiao.bilimiao.compose.components.player.DesktopPlayerContainer
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.DesktopSettingsProvider
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -52,6 +55,15 @@ import org.kodein.di.singleton
 import java.io.File
 
 fun main() {
+    // Set VLC library path - try bundled first, then system VLC
+    val bundledVlcDir = File(System.getProperty("user.dir"), "desktop-app/appResources/windows-x64/vlc")
+    val systemVlcDir = File("C:/Program Files/VideoLAN/VLC")
+    val vlcDir = if (bundledVlcDir.exists()) bundledVlcDir else systemVlcDir
+    if (vlcDir.exists()) {
+        System.setProperty("jna.library.path", vlcDir.absolutePath)
+        System.setProperty("VLC_PLUGIN_PATH", File(vlcDir, "plugins").absolutePath)
+    }
+
     // Initialize platform providers (bilimiao-comm)
     PlatformProviders.context = JvmPlatformContext()
     PlatformProviders.cookieProvider = JvmCookieProvider()
@@ -72,7 +84,7 @@ fun main() {
         bindSingleton<AppInfo> { AppInfoDesktop() }
         bindSingleton<FileStorage> { FileStorageDesktop() }
         bindSingleton<DownloadManager> { DownloadManagerDesktop() }
-        bindSingleton<BasePlayerDelegate> { DesktopPlayerDelegate() }
+        bindSingleton<BasePlayerDelegate> { DesktopPlayerDelegate(instance(), instance()) }
 
         // Store bindings (lazy singletons - created on first access)
         bindSingleton { AppStore(di) }
@@ -86,6 +98,14 @@ fun main() {
         bindSingleton { FilterStore(di) }
         bindSingleton { RegionStore(di) }
     }
+
+    // Create player instance
+    val storeHolderForPlayer = object : DIAware {
+        override val di = di
+        val playerDelegate: BasePlayerDelegate by instance()
+    }
+    val playerDelegate = storeHolderForPlayer.playerDelegate as DesktopPlayerDelegate
+    val mediampPlayer = playerDelegate.createPlayer()
 
     // Initialize stores via DIAware holder
     val storeHolder = object : DIAware {
@@ -122,6 +142,10 @@ fun main() {
         ) {
             val platformContext = DesktopPlatformContext()
             val startViewState = StartViewState()
+            // 设置播放器显示/隐藏回调
+            playerDelegate.onShowPlayerChanged = { show ->
+                startViewState.playerState.setShowPlayer(show)
+            }
             val pageConfigState = PageConfigState()
             val emitter = SharedFlowEmitter()
             val messageDialogState = MessageDialogState()
@@ -153,7 +177,11 @@ fun main() {
                 messageDialogState = messageDialogState,
                 bottomSheetState = bottomSheetState,
                 platformContext = platformContext,
-                playerContent = null,
+                playerContent = {
+                    DesktopPlayerContainer(
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                },
                 onBackClick = {
                     if (composeNavigator.canPopBackStack()) {
                         composeNavigator.popBackStack()
