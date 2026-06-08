@@ -11,7 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopPlayerDelegate
 import org.kodein.di.compose.rememberInstance
@@ -19,6 +21,8 @@ import org.kodein.di.compose.rememberInstance
 @Composable
 fun DesktopPlayerContainer(
     modifier: Modifier = Modifier,
+    isFullscreen: Boolean = false,
+    onFullscreenToggle: () -> Unit = {},
 ) {
     val basePlayerDelegate by rememberInstance<BasePlayerDelegate>()
     val playerDelegate = basePlayerDelegate as DesktopPlayerDelegate
@@ -39,13 +43,18 @@ fun DesktopPlayerContainer(
                 modifier = Modifier.fillMaxSize(),
             )
 
-            // 顶栏控制器
-            Row(
+            // 顶栏渐变背景 + 关闭按钮
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(48.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Black.copy(alpha = 0.6f), Color.Transparent)
+                        )
+                    )
                     .align(Alignment.TopStart),
             ) {
-                // 关闭按钮
                 IconButton(onClick = { playerDelegate.closePlayer() }) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -62,24 +71,35 @@ fun DesktopPlayerContainer(
                 )
             }
 
-            // 底部控制栏
-            DesktopPlayerControls(
-                isPlaying = isPlaying,
-                currentPosition = currentPosition,
-                duration = duration,
-                playbackSpeed = 1.0f,
-                onPlayPause = {
-                    if (isPlaying) {
-                        playerDelegate.pause()
-                    } else {
-                        playerDelegate.resume()
-                    }
-                },
-                onSeek = { playerDelegate.seekTo(it) },
-                onSpeedChange = { playerDelegate.setPlaybackSpeed(it) },
-                onFullscreen = { /* TODO: 全屏逻辑 */ },
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
+            // 底部渐变背景 + 控制栏
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
+                        )
+                    )
+                    .align(Alignment.BottomCenter),
+            ) {
+                DesktopPlayerControls(
+                    isPlaying = isPlaying,
+                    currentPosition = currentPosition,
+                    duration = duration,
+                    playbackSpeed = 1.0f,
+                    isFullscreen = isFullscreen,
+                    onPlayPause = {
+                        if (isPlaying) {
+                            playerDelegate.pause()
+                        } else {
+                            playerDelegate.resume()
+                        }
+                    },
+                    onSeek = { playerDelegate.seekTo(it) },
+                    onSpeedChange = { playerDelegate.setPlaybackSpeed(it) },
+                    onFullscreen = onFullscreenToggle,
+                )
+            }
         }
 
         // 错误信息
