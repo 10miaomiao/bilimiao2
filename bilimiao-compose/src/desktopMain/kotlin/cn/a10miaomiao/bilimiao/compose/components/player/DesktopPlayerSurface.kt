@@ -1,0 +1,14 @@
+package cn.a10miaomiao.bilimiao.compose.components.player
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import org.openani.mediamp.MediampPlayer
+import org.openani.mediamp.compose.MediampPlayerSurface
+
+@Composable
+fun DesktopPlayerSurface(
+    player: MediampPlayer,
+    modifier: Modifier = Modifier,
+) {
+    MediampPlayerSurface(player, modifier)
+}

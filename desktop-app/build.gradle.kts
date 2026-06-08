@@ -22,6 +22,10 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
                 implementation(libs.kotlinx.serialization.json)
+
+                // mediamp
+                implementation(libs.mediamp.api)
+                implementation(libs.mediamp.vlc.loader)
             }
         }
     }
@@ -35,6 +39,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "bilimiao"
             packageVersion = "2.5.0"
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("appResources"))
         }
     }
 }

@@ -55,6 +55,11 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.androidx.sqlite.bundled)
+
+                // mediamp
+                implementation(libs.mediamp.api)
+                implementation(libs.mediamp.vlc)
+                implementation(libs.mediamp.vlc.loader)
             }
         }
     }

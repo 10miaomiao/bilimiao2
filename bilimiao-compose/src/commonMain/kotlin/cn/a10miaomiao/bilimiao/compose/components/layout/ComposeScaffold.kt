@@ -66,6 +66,7 @@ import cn.a10miaomiao.bilimiao.compose.PlayerState
 import cn.a10miaomiao.bilimiao.compose.StartViewState
 
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
@@ -101,7 +102,7 @@ fun ComposeScaffold(
     val playerState = startViewState.playerState
     val showPlayer = playerState.showPlayer
     val fullScreenPlayer = playerState.fullScreenPlayer
-    val orientation = playerState.orientation
+    val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
     val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
     val playerVideoRatio = playerState.playerVideoRatio
@@ -642,7 +643,7 @@ internal fun PlayerLayer(
     viewportWidth: Dp = 0.dp,
     viewportHeight: Dp = 0.dp,
 ) {
-    val orientation = playerState.orientation
+    val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val density = LocalDensity.current
 
     if (playerContent == null) {
