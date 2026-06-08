@@ -94,8 +94,11 @@ fun FrameWindowScope.WindowsWindowFrame(
             LocalTitleBarInsets provides frameState.titleBarInsets,
             LocalCaptionButtonInsets provides frameState.captionButtonsInsets,
             LocalTitleBarThemeController provides frameState.titleBarThemeController,
-            content = content,
-        )
+        ) {
+            Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(frameState.titleBarInsets)) {
+                content()
+            }
+        }
 
         val titleBarInteractionSource = remember(desktopWindow.isUndecoratedFullscreen) { MutableInteractionSource() }
         val titleBarHovered by titleBarInteractionSource.collectIsHoveredAsState()
