@@ -34,6 +34,7 @@ fun DanmakuOverlay(
     currentPosition: Long,
     isPlaying: Boolean,
     danmakuParser: BaseDanmakuParser?,
+    visible: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val engine = remember { mutableStateOf<DanmakuEngine?>(null) }
@@ -108,7 +109,7 @@ fun DanmakuOverlay(
 
     // 绘制弹幕到 Compose Canvas
     val currentDisplayer = displayer.value
-    if (currentDisplayer != null) {
+    if (currentDisplayer != null && visible) {
         Canvas(modifier = modifier) {
             // 触发重组
             renderTick.value
