@@ -173,8 +173,8 @@ fun main() {
                 WindowsWindowUtils.instance.setupBorderlessWindow(windowHandle)
             }
 
-            val platformContext = DesktopPlatformContext()
-            val startViewState = StartViewState()
+            val platformContext = remember { DesktopPlatformContext() }
+            val startViewState = remember { StartViewState() }
             playerDelegate.onShowPlayerChanged = { show ->
                 startViewState.playerState.setShowPlayer(show)
             }
@@ -188,23 +188,27 @@ fun main() {
                 ) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Box(modifier = Modifier.weight(1f).fillMaxSize()) {
-                            val pageConfigState = PageConfigState()
-                            val emitter = SharedFlowEmitter()
-                            val messageDialogState = MessageDialogState()
-                            val bottomSheetState = BottomSheetState()
-                            val composeNavigator = MainComposeNavigator(
-                                launchUrl = { url -> platformContext.openUrl(url) },
-                            )
+                            val pageConfigState = remember { PageConfigState() }
+                            val emitter = remember { SharedFlowEmitter() }
+                            val messageDialogState = remember { MessageDialogState() }
+                            val bottomSheetState = remember { BottomSheetState() }
+                            val composeNavigator = remember {
+                                MainComposeNavigator(
+                                    launchUrl = { url -> platformContext.openUrl(url) },
+                                )
+                            }
 
-                            val hostDi = DI {
-                                extend(di)
-                                bindSingleton { messageDialogState }
-                                bindSingleton { emitter }
-                                bindSingleton { composeNavigator.pageNavigation }
-                                bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator> {
-                                    composeNavigator.pageNavigation
+                            val hostDi = remember {
+                                DI {
+                                    extend(di)
+                                    bindSingleton { messageDialogState }
+                                    bindSingleton { emitter }
+                                    bindSingleton { composeNavigator.pageNavigation }
+                                    bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator> {
+                                        composeNavigator.pageNavigation
+                                    }
+                                    bindSingleton { bottomSheetState }
                                 }
-                                bindSingleton { bottomSheetState }
                             }
 
                             val appState by storeHolder.appStore.stateFlow.collectAsState()
