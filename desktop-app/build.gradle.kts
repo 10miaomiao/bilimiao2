@@ -32,6 +32,7 @@ kotlin {
                 implementation(libs.jna.platform)
 
                 // compose material3 (for title bar)
+                implementation(compose.ui)
                 implementation(compose.material3)
                 implementation(compose.materialIconsExtended)
             }

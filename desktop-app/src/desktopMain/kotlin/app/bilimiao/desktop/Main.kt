@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalPlatformWindowInsets
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
@@ -180,7 +181,9 @@ fun main() {
             }
             val scope = rememberCoroutineScope()
 
-            CompositionLocalProvider(LocalDesktopWindow provides desktopWindow) {
+            CompositionLocalProvider(
+                LocalDesktopWindow provides desktopWindow,
+            ) {
                 WindowFrame(
                     desktopWindow = desktopWindow,
                     windowState = windowState,
