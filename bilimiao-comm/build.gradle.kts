@@ -60,6 +60,9 @@ kotlin {
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.vlc)
                 implementation(libs.mediamp.vlc.loader)
+
+                // 弹幕引擎
+                implementation(project(":danmaku-engine"))
             }
         }
     }

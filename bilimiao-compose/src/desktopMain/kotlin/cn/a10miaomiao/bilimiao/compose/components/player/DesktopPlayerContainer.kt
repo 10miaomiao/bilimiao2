@@ -32,6 +32,7 @@ fun DesktopPlayerContainer(
     val duration by playerDelegate.duration.collectAsState()
     val isLoading by playerDelegate.isLoading.collectAsState()
     val errorMessage by playerDelegate.errorMessage.collectAsState()
+    val danmakuParser by playerDelegate.danmakuParser.collectAsState()
 
     Box(
         modifier = modifier.background(Color.Black)
@@ -40,6 +41,14 @@ fun DesktopPlayerContainer(
             // 视频画面
             DesktopPlayerSurface(
                 player = p,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            // 弹幕覆盖层
+            DanmakuOverlay(
+                currentPosition = currentPosition,
+                isPlaying = isPlaying,
+                danmakuParser = danmakuParser,
                 modifier = Modifier.fillMaxSize(),
             )
 
