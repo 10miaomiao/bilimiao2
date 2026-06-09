@@ -99,7 +99,7 @@ class DateModel() {
      * 计算时间间隔
      */
     fun getGapCount(date: DateModel): Int {
-        return (date.toLocalDate().toEpochDays() - toLocalDate().toEpochDays())
+        return (date.toLocalDate().toEpochDays() - toLocalDate().toEpochDays()).toInt()
     }
 
     fun set(newDate: DateModel) {
