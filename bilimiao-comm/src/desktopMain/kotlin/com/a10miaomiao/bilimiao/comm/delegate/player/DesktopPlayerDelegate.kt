@@ -1,9 +1,14 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import cn.a10miaomiao.bilimiao.danmaku.parser.BaseDanmakuParser
+import cn.a10miaomiao.bilimiao.danmaku.parser.BiliDanmakuParser
+import cn.a10miaomiao.bilimiao.danmaku.parser.IDataSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
+import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
+import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +49,9 @@ class DesktopPlayerDelegate(
     private val _currentSource = MutableStateFlow<BasePlayerSource?>(null)
     val currentSource: StateFlow<BasePlayerSource?> = _currentSource
 
+    private val _danmakuParser = MutableStateFlow<BaseDanmakuParser?>(null)
+    val danmakuParser: StateFlow<BaseDanmakuParser?> = _danmakuParser
+
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var progressJob: Job? = null
 
@@ -76,6 +84,26 @@ class DesktopPlayerDelegate(
             _isLoading.value = true
             _errorMessage.value = null
             try {
+                // 获取弹幕数据
+                launch(Dispatchers.IO) {
+                    try {
+                        val res = BiliApiService.playerAPI.getDanmakuList(source.id).awaitCall()
+                        val body = res.body
+                        if (body != null) {
+                            val xmlBytes = CompressionTools.decompressXML(body.bytes())
+                            val dataSource = object : IDataSource<ByteArray> {
+                                override fun data() = xmlBytes
+                                override fun release() {}
+                            }
+                            val parser = BiliDanmakuParser()
+                            parser.load(dataSource)
+                            _danmakuParser.value = parser
+                        }
+                    } catch (e: Exception) {
+                        // 弹幕加载失败不影响播放
+                        _danmakuParser.value = null
+                    }
+                }
                 // 获取播放地址，fnval 使用默认值 0
                 val sourceInfo = source.getPlayerUrl(
                     source.defaultPlayerSource.quality,
@@ -170,6 +198,8 @@ class DesktopPlayerDelegate(
             player.stopPlayback()
         }
         _currentSource.value = null
+        _danmakuParser.value?.release()
+        _danmakuParser.value = null
         _currentPosition.value = 0L
         _duration.value = 0L
         _isPlaying.value = false
