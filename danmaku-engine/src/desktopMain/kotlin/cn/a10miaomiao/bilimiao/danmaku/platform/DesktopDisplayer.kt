@@ -33,8 +33,11 @@ class DesktopDisplayer(
     private var _fakeBoldText: Boolean = false
     private var _typeface: DanmakuTypeface? = null
 
-    private var _image: BufferedImage? = null
-    private var _g2d: Graphics2D? = null
+    // 双缓冲：front 供 UI 读取，back 供渲染线程写入
+    private var _frontImage: BufferedImage? = null
+    private var _backImage: BufferedImage? = null
+    private var _frontG2d: Graphics2D? = null
+    private var _backG2d: Graphics2D? = null
 
     private val _paint = DesktopPaint()
 
@@ -52,36 +55,42 @@ class DesktopDisplayer(
     override val allMarginTop: Int get() = _allMarginTop
 
     /**
-     * 获取当前渲染图像
+     * 获取当前渲染图像（front buffer，供 UI 线程读取）
      */
-    fun getImage(): BufferedImage? = _image
+    fun getImage(): BufferedImage? = _frontImage
 
     /**
      * 创建绘图表面
      */
-    private fun createSurface() {
-        if (_width <= 0 || _height <= 0) return
-        _image = BufferedImage(_width, _height, BufferedImage.TYPE_INT_ARGB)
-        _g2d = _image!!.createGraphics().apply {
+    private fun createGraphics(image: BufferedImage): Graphics2D {
+        return image.createGraphics().apply {
             setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
             setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
             setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
         }
     }
 
+    private fun createSurface() {
+        if (_width <= 0 || _height <= 0) return
+        _frontImage = BufferedImage(_width, _height, BufferedImage.TYPE_INT_ARGB)
+        _backImage = BufferedImage(_width, _height, BufferedImage.TYPE_INT_ARGB)
+        _frontG2d = createGraphics(_frontImage!!)
+        _backG2d = createGraphics(_backImage!!)
+    }
+
     /**
-     * 清除画布
+     * 清除画布（back buffer）
      */
     fun clearCanvas() {
-        val g2d = _g2d ?: return
-        val image = _image ?: return
+        val g2d = _backG2d ?: return
+        val image = _backImage ?: return
         g2d.composite = java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.CLEAR)
         g2d.fillRect(0, 0, image.width, image.height)
         g2d.composite = java.awt.AlphaComposite.SrcOver
     }
 
     override fun draw(danmaku: BaseDanmaku): Int {
-        val g2d = _g2d ?: return IRenderer.NOTHING_RENDERING
+        val g2d = _backG2d ?: return IRenderer.NOTHING_RENDERING
 
         var left = danmaku.getLeft()
         var top = danmaku.getTop()
@@ -132,6 +141,20 @@ class DesktopDisplayer(
         return IRenderer.NOTHING_RENDERING
     }
 
+    /**
+     * 交换前后缓冲区，使渲染结果对 UI 线程可见
+     */
+    fun swapBuffers() {
+        synchronized(this) {
+            val tmpImage = _frontImage
+            val tmpG2d = _frontG2d
+            _frontImage = _backImage
+            _frontG2d = _backG2d
+            _backImage = tmpImage
+            _backG2d = tmpG2d
+        }
+    }
+
     override fun recycle(danmaku: BaseDanmaku) {
         // Desktop 端无需特殊回收
     }
@@ -174,6 +197,8 @@ class DesktopDisplayer(
             _width = width
             _height = height
             createSurface()
+            // 通知工厂视口尺寸变更，重新计算弹幕时长
+            mContext.mDanmakuFactory.notifyDispSizeChanged(mContext)
         }
     }
 

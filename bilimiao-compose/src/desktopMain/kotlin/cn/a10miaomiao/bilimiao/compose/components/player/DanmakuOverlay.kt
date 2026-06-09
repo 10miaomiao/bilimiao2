@@ -66,13 +66,19 @@ fun DanmakuOverlay(
     }
 
     // 同步播放位置
+    var lastSyncPosition by remember { mutableStateOf(0L) }
     LaunchedEffect(currentPosition, isPlaying) {
         val eng = engine.value ?: return@LaunchedEffect
         if (isPlaying) {
             if (eng.isStop()) {
                 eng.resume()
             }
-            eng.seekTo(currentPosition)
+            // 仅在跳转（位置差>2秒）时调用seekTo，正常播放由引擎内部syncTimer跟踪
+            val delta = kotlin.math.abs(currentPosition - lastSyncPosition)
+            if (delta > 2000 || lastSyncPosition == 0L) {
+                eng.seekTo(currentPosition)
+            }
+            lastSyncPosition = currentPosition
         } else {
             eng.pause()
         }
@@ -86,6 +92,7 @@ fun DanmakuOverlay(
             while (isActive) {
                 disp.clearCanvas()
                 eng.draw(disp)
+                disp.swapBuffers() // 交换前后缓冲区，避免闪烁
                 renderTick.value++
                 kotlinx.coroutines.delay(16) // ~60fps
             }
