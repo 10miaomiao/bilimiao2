@@ -10,10 +10,7 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.FullscreenExit
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,9 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 
 @Composable
 fun DesktopPlayerControls(
@@ -32,10 +31,17 @@ fun DesktopPlayerControls(
     duration: Long,
     playbackSpeed: Float,
     isFullscreen: Boolean = false,
+    danmakuVisible: Boolean = true,
+    volume: Int = 100,
+    qualityList: List<PlayerSourceInfo.AcceptInfo> = emptyList(),
+    currentQuality: Int = 0,
     onPlayPause: () -> Unit,
     onSeek: (Long) -> Unit,
     onSpeedChange: (Float) -> Unit,
     onFullscreen: () -> Unit,
+    onDanmakuToggle: () -> Unit = {},
+    onVolumeChange: (Int) -> Unit = {},
+    onQualityChange: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var isSeeking by remember { mutableStateOf(false) }
@@ -48,7 +54,7 @@ fun DesktopPlayerControls(
     Column(
         modifier = modifier.fillMaxWidth(),
     ) {
-        // 进度条（独立一行，更醒目）
+        // 进度条
         VideoSeekBar(
             progress = progress,
             onSeekStart = { isSeeking = true },
@@ -69,7 +75,7 @@ fun DesktopPlayerControls(
                 .padding(start = 4.dp, end = 8.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // 播放/暂停按钮
+            // 播放/暂停
             IconButton(onClick = onPlayPause) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -78,7 +84,7 @@ fun DesktopPlayerControls(
                 )
             }
 
-            // 当前时间 / 总时长
+            // 时间
             Text(
                 text = "${formatTime(currentPosition)} / ${formatTime(duration)}",
                 style = MaterialTheme.typography.bodySmall,
@@ -87,13 +93,37 @@ fun DesktopPlayerControls(
 
             Spacer(Modifier.weight(1f))
 
+            // 清晰度选择
+            if (qualityList.size > 1) {
+                QualitySelector(
+                    qualityList = qualityList,
+                    currentQuality = currentQuality,
+                    onQualityChange = onQualityChange,
+                )
+            }
+
             // 倍速选择
             SpeedSelector(
                 currentSpeed = playbackSpeed,
                 onSpeedChange = onSpeedChange,
             )
 
-            // 全屏按钮
+            // 弹幕开关
+            IconButton(onClick = onDanmakuToggle) {
+                Icon(
+                    imageVector = if (danmakuVisible) Icons.Default.ChatBubble else Icons.Default.ChatBubbleOutline,
+                    contentDescription = if (danmakuVisible) "关闭弹幕" else "开启弹幕",
+                    tint = if (danmakuVisible) Color.White else Color.White.copy(alpha = 0.5f),
+                )
+            }
+
+            // 音量控制
+            VolumeControl(
+                volume = volume,
+                onVolumeChange = onVolumeChange,
+            )
+
+            // 全屏
             IconButton(onClick = onFullscreen) {
                 Icon(
                     imageVector = if (isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
@@ -101,6 +131,83 @@ fun DesktopPlayerControls(
                     tint = Color.White,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun QualitySelector(
+    qualityList: List<PlayerSourceInfo.AcceptInfo>,
+    currentQuality: Int,
+    onQualityChange: (Int) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val currentLabel = qualityList.firstOrNull { it.quality == currentQuality }?.description ?: "${currentQuality}P"
+
+    Box {
+        TextButton(onClick = { expanded = true }) {
+            Text(currentLabel, color = Color.White, style = MaterialTheme.typography.bodySmall)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            qualityList.forEach { info ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            info.description,
+                            color = if (info.quality == currentQuality) MaterialTheme.colorScheme.primary else Color.Unspecified,
+                        )
+                    },
+                    onClick = {
+                        onQualityChange(info.quality)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VolumeControl(
+    volume: Int,
+    onVolumeChange: (Int) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var previousVolume by remember { mutableStateOf(volume) }
+
+    Box {
+        IconButton(onClick = {
+            if (volume > 0) {
+                previousVolume = volume
+                onVolumeChange(0)
+            } else {
+                onVolumeChange(previousVolume.coerceAtLeast(50))
+            }
+        }) {
+            Icon(
+                imageVector = when {
+                    volume == 0 -> Icons.Default.VolumeOff
+                    volume < 50 -> Icons.Default.VolumeDown
+                    else -> Icons.Default.VolumeUp
+                },
+                contentDescription = "音量",
+                tint = Color.White,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            Slider(
+                value = volume.toFloat(),
+                onValueChange = { onVolumeChange(it.toInt()) },
+                valueRange = 0f..100f,
+                modifier = Modifier.width(120.dp).padding(horizontal = 8.dp),
+            )
         }
     }
 }
@@ -164,7 +271,6 @@ private fun VideoSeekBar(
             val centerY = size.height / 2
             val barWidth = size.width
 
-            // 背景轨道
             drawLine(
                 color = inactiveColor,
                 start = Offset(thumbRadiusPx, centerY),
@@ -172,7 +278,6 @@ private fun VideoSeekBar(
                 strokeWidth = trackHeight.toPx(),
                 cap = StrokeCap.Round,
             )
-            // 已播放进度
             val trackLeft = thumbRadiusPx
             val trackRight = barWidth - thumbRadiusPx
             val trackWidth = trackRight - trackLeft
@@ -183,7 +288,6 @@ private fun VideoSeekBar(
                 strokeWidth = trackHeight.toPx(),
                 cap = StrokeCap.Round,
             )
-            // 拖拽圆点
             if (thumbRadiusPx > 0f) {
                 drawCircle(
                     color = activeColor,
@@ -205,16 +309,24 @@ private fun SpeedSelector(
 
     Box {
         TextButton(onClick = { expanded = true }) {
-            Text("${currentSpeed}x")
+            Text(
+                "${currentSpeed}x",
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
-
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
             speeds.forEach { speed ->
                 DropdownMenuItem(
-                    text = { Text("${speed}x") },
+                    text = {
+                        Text(
+                            "${speed}x",
+                            color = if (speed == currentSpeed) MaterialTheme.colorScheme.primary else Color.Unspecified,
+                        )
+                    },
                     onClick = {
                         onSpeedChange(speed)
                         expanded = false

@@ -1,8 +1,5 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
-import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
-import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
-
 actual fun createBangumiPlayerSource(
     sid: String,
     epid: String,
@@ -14,7 +11,7 @@ actual fun createBangumiPlayerSource(
     ownerName: String,
     episodes: List<BangumiEpisodeInfo>,
 ): BasePlayerSource {
-    return BangumiPlayerSourceDesktop(
+    val source = BangumiPlayerSource(
         sid = sid,
         epid = epid,
         aid = aid,
@@ -24,28 +21,21 @@ actual fun createBangumiPlayerSource(
         ownerId = ownerId,
         ownerName = ownerName,
     )
-}
-
-private class BangumiPlayerSourceDesktop(
-    val sid: String,
-    val epid: String,
-    val aid: String,
-    override val id: String,
-    override val title: String,
-    override val coverUrl: String,
-    override val ownerId: String,
-    override val ownerName: String,
-) : BasePlayerSource() {
-    override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
-        return defaultPlayerSource
-    }
-
-    override fun getSourceIds(): PlayerSourceIds {
-        return PlayerSourceIds(
-            cid = id,
-            sid = sid,
-            epid = epid,
-            aid = aid,
+    source.episodes = episodes.map {
+        BangumiPlayerSource.EpisodeInfo(
+            epid = it.epid,
+            aid = it.aid,
+            cid = it.cid,
+            cover = it.cover,
+            index = it.index,
+            index_title = it.index_title,
+            badge = it.badge,
+            badge_info = BangumiPlayerSource.EpisodeBadgeInfo(
+                text = it.badge_info.text,
+                bg_color = it.badge_info.bg_color,
+                bg_color_night = it.badge_info.bg_color_night,
+            ),
         )
     }
+    return source
 }
