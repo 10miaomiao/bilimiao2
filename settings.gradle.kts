@@ -14,6 +14,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
         maven("https://maven.aliyun.com/repository/public")
@@ -28,3 +29,7 @@ include(":DanmakuFlameMaster")
 include(":danmaku-engine")
 include(":benchmark")
 include(":grpc-generator")
+
+// Use forked mediamp with desktop MPV render support
+// Published to local Maven via: cd mediamp && ./gradlew publishToMavenLocal
+

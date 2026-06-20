@@ -10,5 +10,6 @@ fun DesktopPlayerSurface(
     player: MediampPlayer,
     modifier: Modifier = Modifier,
 ) {
+    println("[GPU] DesktopPlayerSurface called, player=${player::class.qualifiedName}")
     MediampPlayerSurface(player, modifier)
 }

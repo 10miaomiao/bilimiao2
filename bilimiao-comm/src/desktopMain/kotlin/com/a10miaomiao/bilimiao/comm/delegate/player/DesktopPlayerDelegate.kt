@@ -16,9 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.features.PlaybackSpeed
+import org.openani.mediamp.mpv.MPVHandle
+import org.openani.mediamp.mpv.MpvMediampPlayer
+import org.openani.mediamp.mpv.MpvMediampPlayerFactory
 import org.openani.mediamp.playUri
-import org.openani.mediamp.vlc.VlcMediampPlayer
-import org.openani.mediamp.vlc.loader.MediampVlcLoader
 import java.io.File
 
 class DesktopPlayerDelegate(
@@ -87,14 +88,16 @@ class DesktopPlayerDelegate(
     private var progressJob: Job? = null
 
     fun createPlayer(): MediampPlayer {
-        val appResourcesDir = java.io.File(System.getProperty("user.dir"), "desktop-app/appResources/windows-x64")
-        if (appResourcesDir.exists()) {
-            MediampVlcLoader.enableTestDiscovery(appResourcesDir)
-        }
-        VlcMediampPlayer.prepareLibraries()
-        val player = VlcMediampPlayer(Dispatchers.Main)
+        initMpvNativeLibraries()
+        val player = MpvMediampPlayer(Unit, Dispatchers.Main)
         _mediampPlayer = player
         return player
+    }
+
+    private fun initMpvNativeLibraries() {
+        // Native libraries are extracted automatically by mediamp-native-loader
+        // from the classpath (mediamp-mpv-runtime-windows-x64 JAR)
+        MPVHandle.useDefaultRuntimeLibraryDirectory()
     }
 
     override fun openPlayer(source: BasePlayerSource) {
@@ -150,20 +153,29 @@ class DesktopPlayerDelegate(
                 val resolved = resolvePlaybackUrl(sourceInfo.url)
                 _loadingMessage.value = "正在启动播放..."
 
+                // 将 HTTP 请求头传递给 MPV 播放器（必须在 playUri/loadfile 之前设置）
+                if (player is MpvMediampPlayer) {
+                    val ua = sourceInfo.header["User-Agent"]
+                        ?: "Mozilla/5.0 BiliDroid/1.41.0 (bbcallen@gmail.com)"
+                    player.impl.setPropertyString("user-agent", ua)
+                    val headerArray = sourceInfo.header.entries
+                        .filter { it.key != "User-Agent" }
+                        .map { "${it.key}: ${it.value}" }
+                        .toTypedArray()
+                    if (headerArray.isNotEmpty()) {
+                        player.impl.setPropertyStringList("http-header-fields", headerArray)
+                    }
+                    println("[BiliMiao] Set HTTP headers: ${sourceInfo.header}")
+                }
+
                 when (resolved.format) {
                     PlaybackFormat.MERGING -> {
-                        // 音视频分离：使用 vlcj input-slave 合并音频流
-                        if (player is VlcMediampPlayer) {
-                            player.player.media().play(
-                                resolved.videoUrl,
-                                *buildList {
-                                    add("input-slave=${resolved.audioUrl}")
-                                    sourceInfo.header["User-Agent"]?.let { add("http-user-agent=$it") }
-                                    sourceInfo.header["Referer"]?.let { add("http-referrer=$it") }
-                                }.toTypedArray(),
-                            )
-                        } else {
-                            player.playUri(resolved.videoUrl)
+                        // 音视频分离：先加载视频，再用 audio-add 添加外部音频轨道
+                        // audio-add 添加的轨道在 stop 时会被自动清理，不会残留
+                        player.playUri(resolved.videoUrl)
+                        if (player is MpvMediampPlayer && resolved.audioUrl != null) {
+                            player.impl.command("audio-add", resolved.audioUrl, "select")
+                            println("[BiliMiao] Added external audio: ${resolved.audioUrl}")
                         }
                     }
                     PlaybackFormat.SEGMENTED -> {
@@ -190,6 +202,10 @@ class DesktopPlayerDelegate(
                     }
                 }
 
+                // playUri 只设置媒体数据（状态变为 READY），需要调用 resume 开始播放
+                println("[BiliMiao] About to call resume(), state=${player.getCurrentPlaybackState()}")
+                player.resume()
+                println("[BiliMiao] resume() called, state=${player.getCurrentPlaybackState()}")
                 _isPlaying.value = true
 
                 // 播放历史恢复
@@ -407,8 +423,8 @@ class DesktopPlayerDelegate(
         _volume.value = clamped
         try {
             val player = _mediampPlayer
-            if (player is VlcMediampPlayer) {
-                player.player.audio().setVolume(clamped)
+            if (player is MpvMediampPlayer) {
+                player.impl.setPropertyInt("volume", clamped)
             }
         } catch (_: Exception) {}
     }
