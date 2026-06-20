@@ -25,7 +25,10 @@ kotlin {
 
                 // mediamp
                 implementation(libs.mediamp.api)
-                implementation(libs.mediamp.vlc.loader)
+                implementation(libs.mediamp.mpv)
+                implementation(libs.mediamp.native.loader)
+                // native DLLs for current platform
+                runtimeOnly("org.openani.mediamp:mediamp-mpv-runtime-windows-x64:${libs.versions.mediamp.get()}")
 
                 // jna (for window border handling)
                 implementation(libs.jna)

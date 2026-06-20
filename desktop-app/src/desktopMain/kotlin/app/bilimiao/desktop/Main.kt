@@ -69,14 +69,9 @@ import org.kodein.di.instance
 import java.io.File
 
 fun main() {
-    // Set VLC library path
-    val bundledVlcDir = File(System.getProperty("user.dir"), "desktop-app/appResources/windows-x64/vlc")
-    val systemVlcDir = File("C:/Program Files/VideoLAN/VLC")
-    val vlcDir = if (bundledVlcDir.exists()) bundledVlcDir else systemVlcDir
-    if (vlcDir.exists()) {
-        System.setProperty("jna.library.path", vlcDir.absolutePath)
-        System.setProperty("VLC_PLUGIN_PATH", File(vlcDir, "plugins").absolutePath)
-    }
+
+    // MPV native libraries are loaded automatically by mediamp-native-loader
+    // from the classpath (included in mediamp-mpv JAR)
 
     // Initialize platform providers
     PlatformProviders.context = JvmPlatformContext()
