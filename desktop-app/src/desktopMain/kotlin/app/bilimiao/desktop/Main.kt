@@ -89,7 +89,7 @@ fun main() {
         bindSingleton<GeetestVerifier> { GeetestVerifierDesktop() }
         bindSingleton<ProxyRepository> { ProxyRepositoryDesktop() }
         bindSingleton<AppInfo> { AppInfoDesktop() }
-        bindSingleton<FileStorage> { FileStorageDesktop() }
+        bindSingleton<FileStorage> { FileStorageDesktop(PlatformProviders.context.filesDir) }
         bindSingleton<DownloadManager> { DownloadManagerDesktop() }
         bindSingleton<BasePlayerDelegate> { DesktopPlayerDelegate(instance(), instance()) }
         bindSingleton { AppStore(di) }

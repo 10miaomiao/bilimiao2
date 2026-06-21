@@ -1,22 +1,47 @@
 package cn.a10miaomiao.bilimiao.compose.common.platform
 
-class FileStorageDesktop : FileStorage {
+import java.io.File
+import java.io.IOException
+
+class FileStorageDesktop(private val filesDir: File) : FileStorage {
+
+    init {
+        filesDir.mkdirs()
+    }
 
     override fun readText(fileName: String): String? {
-        println("FileStorage.readText is not supported on Desktop: $fileName")
-        return null
+        return try {
+            val file = File(filesDir, fileName)
+            if (file.exists()) file.readText() else null
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
     }
 
     override fun writeText(fileName: String, content: String) {
-        println("FileStorage.writeText is not supported on Desktop: $fileName")
+        try {
+            File(filesDir, fileName).writeText(content)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     override fun readBytes(fileName: String): ByteArray? {
-        println("FileStorage.readBytes is not supported on Desktop: $fileName")
-        return null
+        return try {
+            val file = File(filesDir, fileName)
+            if (file.exists()) file.readBytes() else null
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
     }
 
     override fun writeBytes(fileName: String, content: ByteArray) {
-        println("FileStorage.writeBytes is not supported on Desktop: $fileName")
+        try {
+            File(filesDir, fileName).writeBytes(content)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 }

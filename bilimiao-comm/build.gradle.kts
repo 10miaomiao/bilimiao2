@@ -56,6 +56,10 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.androidx.sqlite.bundled)
 
+                // jna (for Windows AppData folder resolution)
+                implementation(libs.jna)
+                implementation(libs.jna.platform)
+
                 // mediamp
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.mpv)
