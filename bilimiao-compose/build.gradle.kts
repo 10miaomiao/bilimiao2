@@ -84,6 +84,9 @@ kotlin {
                 implementation(compose.desktop.common)
                 implementation(libs.kotlinx.coroutines.core)
 
+                // qrose (二维码生成)
+                implementation(libs.qrose)
+
                 // mediamp
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.compose)
