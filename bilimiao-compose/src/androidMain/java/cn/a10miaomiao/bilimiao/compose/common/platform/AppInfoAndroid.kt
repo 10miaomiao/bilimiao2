@@ -26,6 +26,8 @@ class AppInfoAndroid(
         packageInfo.versionCode.toString()
     }
 
+    override val appId: Int = 1
+
     override val versionCode: Long = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         packageInfo.longVersionCode
     } else {

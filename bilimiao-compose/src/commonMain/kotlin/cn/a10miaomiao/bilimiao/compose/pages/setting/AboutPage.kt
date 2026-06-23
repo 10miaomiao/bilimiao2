@@ -167,7 +167,7 @@ private class AboutPageViewModel(
     fun checkUpdate() = viewModelScope.launch(Dispatchers.IO) {
         try {
             versionState.value = AppVersionState.Checking
-            val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$versionCode"
+            val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$versionCode&aid=${appInfo.appId}"
             val res = MiaoHttp.request(url).call().json<MiaoAdInfo>()
             if (res.code == 0) {
                 val versionInfo = res.data.version

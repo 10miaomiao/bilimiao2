@@ -210,7 +210,7 @@ private class HomePageViewModel(
                 return Json.decodeFromString<MiaoAdInfo>(jsonStr)
             }
         }
-        val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$version"
+        val url = "https://bilimiao.10miaomiao.cn/miao/init?v=$version&aid=${appInfo.appId}"
         val res = MiaoHttp.request(url).awaitCall().json<MiaoAdInfo>()
         val cacheJsonStr = Json.encodeToString(res)
         fileStorage.writeText("miao_init_request_date", curDate)
