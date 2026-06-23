@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.painter.Painter
 interface AppInfo {
     val versionName: String
     val versionCode: Long
+    val appId: Int
 
     @Composable
     fun AppIcon(modifier: Modifier = Modifier)
