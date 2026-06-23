@@ -92,6 +92,9 @@ kotlin {
                 implementation(libs.mediamp.compose)
                 implementation(libs.mediamp.mpv)
 
+                // webviewko (极验验证码)
+                implementation("com.github.winterreisender:webviewko-jvm:0.6.0")
+
                 // 弹幕引擎
                 implementation(project(":danmaku-engine"))
             }

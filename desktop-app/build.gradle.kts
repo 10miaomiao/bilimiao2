@@ -1,5 +1,10 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
+import java.io.File
+
+val appVersionName = "2.5.0"
+val appVersionCode = 118
+
 plugins {
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.jetbrains.kotlin.multiplatform)
@@ -7,11 +12,31 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
+val generateBuildConfig by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/buildconfig")
+    outputs.dir(outputDir)
+    doLast {
+        val dir = outputDir.get().asFile
+        dir.mkdirs()
+        File(dir, "BuildConfig.kt").writeText(
+            """
+            package app.bilimiao.desktop
+
+            object BuildConfig {
+                const val VERSION_NAME = "$appVersionName"
+                const val VERSION_CODE = ${appVersionCode}L
+            }
+            """.trimIndent()
+        )
+    }
+}
+
 kotlin {
     jvm("desktop")
 
     sourceSets {
         val desktopMain by getting {
+            kotlin.srcDir(generateBuildConfig)
             dependencies {
                 implementation(project(":bilimiao-comm"))
                 implementation(project(":bilimiao-compose"))
@@ -34,6 +59,12 @@ kotlin {
                 implementation(libs.jna)
                 implementation(libs.jna.platform)
 
+                // exclude macOS Skiko from dependencies (we only target Windows)
+                configurations.all {
+                    exclude(group = "org.jetbrains.skiko", module = "skiko-awt-runtime-macos-arm64")
+                    exclude(group = "org.jetbrains.skiko", module = "skiko-awt-runtime-macos-x64")
+                }
+
                 // compose material3 (for title bar)
                 implementation(compose.ui)
                 implementation(compose.material3)
@@ -50,8 +81,17 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "bilimiao"
-            packageVersion = "2.5.0"
+            packageVersion = appVersionName
+            description = "哔哩喵~ 哔哩哔哩第三方客户端"
+            vendor = "10miaomiao"
             appResourcesRootDir.set(project.layout.projectDirectory.dir("appResources"))
+            modules(
+                "java.base",
+                "java.desktop"
+            )
+            windows {
+                iconFile.set(project.file("src/icon/bilimiao.ico"))
+            }
         }
     }
 }
