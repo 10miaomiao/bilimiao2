@@ -13,6 +13,10 @@ class JvmBase64Provider : Base64Provider {
     }
 
     override fun decode(str: String, flags: Int): ByteArray {
-        return Base64.getDecoder().decode(str)
+        return if (flags and Base64Provider.NO_WRAP != 0) {
+            Base64.getMimeDecoder().decode(str)
+        } else {
+            Base64.getDecoder().decode(str)
+        }
     }
 }

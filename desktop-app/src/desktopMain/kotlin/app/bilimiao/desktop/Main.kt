@@ -14,10 +14,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalPlatformWindowInsets
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import org.jetbrains.skia.Image
 import app.bilimiao.desktop.window.HandleWindowsWindowProc
 import app.bilimiao.desktop.window.WindowFrame
 import app.bilimiao.desktop.window.WindowsWindowUtils
@@ -34,7 +37,6 @@ import cn.a10miaomiao.bilimiao.compose.common.auth.GeetestVerifierDesktop
 import cn.a10miaomiao.bilimiao.compose.common.proxy.ProxyRepository
 import cn.a10miaomiao.bilimiao.compose.common.proxy.ProxyRepositoryDesktop
 import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfo
-import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfoDesktop
 import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorage
 import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorageDesktop
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
@@ -69,6 +71,11 @@ import org.kodein.di.instance
 import java.io.File
 
 fun main() {
+    val appIcon = BitmapPainter(
+        Image.makeFromEncoded(
+            object {}.javaClass.getResourceAsStream("/bilimiao.ico")!!.readAllBytes()
+        ).toComposeImageBitmap()
+    )
 
     // MPV native libraries are loaded automatically by mediamp-native-loader
     // from the classpath (included in mediamp-mpv JAR)
@@ -145,9 +152,13 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "bilimiao",
             state = windowState,
+            icon = appIcon,
         ) {
             val composeWindow = this.window
             val windowHandle = remember { composeWindow.windowHandle }
+            LaunchedEffect(windowHandle) {
+                GeetestVerifierDesktop.mainWindowHandle = windowHandle
+            }
 
             val desktopWindow = remember {
                 DesktopWindowState(
