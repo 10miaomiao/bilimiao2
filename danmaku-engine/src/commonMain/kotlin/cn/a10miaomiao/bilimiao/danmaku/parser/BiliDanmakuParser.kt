@@ -69,12 +69,7 @@ class BiliDanmakuParser : BaseDanmakuParser() {
                                 danmaku.setTime(time)
                                 danmaku.textSize = textSize * (mDispDensity - 0.6f)
                                 danmaku.textColor = color
-                                // 根据颜色明度选择阴影色：深色文字用白色阴影，浅色文字用黑色阴影
-                                danmaku.textShadowColor = if (isColorDark(color)) {
-                                    COLOR_WHITE
-                                } else {
-                                    COLOR_BLACK
-                                }
+                                danmaku.textShadowColor = COLOR_BLACK
                                 danmaku.userHash = userHash
                                 danmaku.index = index++
                                 currentItem = danmaku

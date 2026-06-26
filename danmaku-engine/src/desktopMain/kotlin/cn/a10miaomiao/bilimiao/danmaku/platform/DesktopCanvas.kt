@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.danmaku.platform
 
 import java.awt.Graphics2D
 import java.awt.RenderingHints
+import java.awt.font.TextLayout
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 
@@ -16,12 +17,24 @@ class DesktopCanvas(private val g2d: Graphics2D, override val width: Int, overri
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
     }
 
     override fun drawText(text: String, x: Float, y: Float, paint: DanmakuPaint) {
         val dp = paint as DesktopPaint
         dp.applyToGraphics(g2d)
-        g2d.drawString(text, x, y)
+        if (dp.style == PaintStyle.STROKE) {
+            // STROKE 模式：通过 TextLayout 获取文字轮廓路径，再用 g2d.draw() 描边
+            val layout = TextLayout(text, dp.font, g2d.fontRenderContext)
+            val outline = layout.getOutline(null)
+            val oldTransform = g2d.transform
+            g2d.translate(x.toDouble(), y.toDouble())
+            g2d.draw(outline)
+            g2d.transform = oldTransform
+        } else {
+            g2d.drawString(text, x, y)
+        }
     }
 
     override fun drawBitmap(bitmap: DanmakuBitmap, left: Float, top: Float, paint: DanmakuPaint?) {
