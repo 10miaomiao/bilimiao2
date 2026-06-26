@@ -95,6 +95,13 @@ class DanmakuEngine(
     /** 启用非阻塞模式（由外部驱动渲染，不自行循环） */
     var nonBlockModeEnable: Boolean = false
 
+    /** 外部播放器位置（毫秒），由 UI 线程写入，渲染线程读取 */
+    @Volatile
+    var externalPlayerPosition: Long = -1L
+
+    /** 上次同步的播放器位置，用于检测位置是否真正变化 */
+    private var lastSyncedPosition: Long = -1L
+
     // endregion
 
     // region 依赖
@@ -255,7 +262,9 @@ class DanmakuEngine(
         notifyRendering()
         mInSeekingAction = false
         drawTask?.onPlayStateChanged(IDrawTask.PLAY_STATE_PLAYING)
-        startRenderLoop()
+        if (!nonBlockModeEnable) {
+            startRenderLoop()
+        }
     }
 
     /**
@@ -285,7 +294,7 @@ class DanmakuEngine(
         drawTask?.seek(ms)
         pausedPosition = ms
         mInSeekingAction = false
-        if (!quitFlag) {
+        if (!quitFlag && !nonBlockModeEnable) {
             startRenderLoop()
         }
     }
@@ -358,7 +367,9 @@ class DanmakuEngine(
                 mRenderingState.reset()
                 mDrawTimes.clear()
                 task.onPlayStateChanged(IDrawTask.PLAY_STATE_PLAYING)
-                startRenderLoop()
+                if (!nonBlockModeEnable) {
+                    startRenderLoop()
+                }
             }
         }
         if (quitFlag) {
@@ -488,6 +499,61 @@ class DanmakuEngine(
     }
 
     /**
+     * 同步计时器并绘制弹幕（外部渲染循环专用）
+     *
+     * 当播放器位置真正变化时（~1秒一次），直接对齐引擎计时器，避免 seekTo 清除弹幕。
+     * 两次同步之间使用 wall clock 平滑推进。
+     *
+     * @param canvas 画布
+     * @return 渲染状态
+     */
+    fun drawWithSync(canvas: IDisplayer): RenderingState? {
+        if (!mInSeekingAction && !mInSyncAction) {
+            mInSyncAction = true
+
+            // 播放器位置变化时直接对齐计时器（不 seekTo，不清除弹幕状态）
+            val extPos = externalPlayerPosition
+            if (extPos >= 0 && extPos != lastSyncedPosition) {
+                lastSyncedPosition = extPos
+                val syncDelta = extPos - timer.currMillisecond
+                if (kotlin.math.abs(syncDelta) > 16) {
+                    timer.update(extPos)
+                    mTimeBase = PlatformClock.uptimeMillis() - extPos
+                    mRemainingTime = 0
+                    mLastDeltaTime = 0
+                    synchronized(mDrawTimes) { mDrawTimes.clear() }
+                }
+            }
+
+            // wall clock 平滑推进
+            val time = PlatformClock.uptimeMillis() - mTimeBase
+            var gapTime = time - timer.currMillisecond
+            val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
+            val d: Long
+            if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME) {
+                d = gapTime
+                gapTime = 0
+                synchronized(mDrawTimes) { mDrawTimes.clear() }
+            } else {
+                var dd = averageTime + gapTime / FRAME_UPDATE_RATE
+                dd = maxOf(FRAME_UPDATE_RATE, dd)
+                dd = minOf(CORDON_TIME, dd)
+                val a = dd - mLastDeltaTime
+                if (a > 3 && a < 8 && mLastDeltaTime >= FRAME_UPDATE_RATE && mLastDeltaTime <= CORDON_TIME) {
+                    dd = mLastDeltaTime
+                }
+                gapTime -= dd
+                mLastDeltaTime = dd
+                d = dd
+            }
+            mRemainingTime = gapTime
+            timer.add(d)
+            mInSyncAction = false
+        }
+        return draw(canvas)
+    }
+
+    /**
      * 获取当前时间
      */
     fun getCurrentTime(): Long {
@@ -596,10 +662,11 @@ class DanmakuEngine(
             mCallback?.updateTimer(timer)
         } else {
             var gapTime = time - timer.currMillisecond
-            val averageTime = maxOf(FRAME_UPDATE_RATE, getAverageRenderingTime())
-            if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME || averageTime > CORDON_TIME) {
+            val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
+            if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME) {
                 d = gapTime
                 gapTime = 0
+                synchronized(mDrawTimes) { mDrawTimes.clear() }
             } else {
                 d = averageTime + gapTime / FRAME_UPDATE_RATE
                 d = maxOf(FRAME_UPDATE_RATE, d)

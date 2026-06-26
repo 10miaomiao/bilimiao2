@@ -464,6 +464,7 @@ class DesktopPlayerDelegate(
         segmentDurations = emptyList()
         currentSegmentIndex = 0
         segmentOffsetMs = 0L
+        playerStore.clearPlayerInfo()
         onShowPlayerChanged?.invoke(false)
     }
 
