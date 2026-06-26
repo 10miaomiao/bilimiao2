@@ -39,6 +39,25 @@ class DesktopDisplayer(
     private var _frontG2d: Graphics2D? = null
     private var _backG2d: Graphics2D? = null
 
+    // 同步锁：保护快照引用交换
+    private val _lock = Any()
+    // 延迟创建标记：setSize() 只记录尺寸，由渲染线程在下一帧执行 createSurface()
+    @Volatile private var _pendingWidth: Int = -1
+    @Volatile private var _pendingHeight: Int = -1
+
+    // 三缓冲：彻底隔离渲染线程与 UI 线程
+    // _writeBuffer: 渲染线程写入（UI 线程不读取）
+    // _snapshotBuffer: UI 线程读取（渲染线程不写入）
+    // _spareBuffer: 空闲 buffer，下一帧成为 writeBuffer（被复用，零分配）
+    private var _writeBuffer: IntArray? = null
+    @Volatile private var _snapshotBuffer: IntArray? = null
+    private var _spareBuffer: IntArray? = null
+    @Volatile private var _snapshotWidth: Int = 0
+    @Volatile private var _snapshotHeight: Int = 0
+
+    // 缓存的 canvas，避免每条弹幕创建一个 DesktopCanvas
+    private var _cachedCanvas: DesktopCanvas? = null
+
     private val _paint = DesktopPaint()
 
     override val width: Int get() = _width
@@ -55,9 +74,109 @@ class DesktopDisplayer(
     override val allMarginTop: Int get() = _allMarginTop
 
     /**
-     * 获取当前渲染图像（front buffer，供 UI 线程读取）
+     * 将当前 back buffer 的已绘制内容复制到快照
+     * 由渲染线程在每帧绘制完成后、swapBuffers 之前调用
+     *
+     * 真正的三缓冲：
+     * 1. 渲染线程写入 _writeBuffer（UI 线程不读取）
+     * 2. 原子交换 _writeBuffer ↔ _snapshotBuffer
+     * 3. 旧 snapshot 成为下一帧的 _spareBuffer（被复用，零分配）
      */
-    fun getImage(): BufferedImage? = _frontImage
+    fun snapshotPixels() {
+        val src = _backImage ?: return
+        val srcData = (src.raster.dataBuffer as java.awt.image.DataBufferInt).data
+        // 渲染线程写入 writeBuffer
+        var wb = _writeBuffer
+        if (wb == null || wb.size != srcData.size) {
+            wb = IntArray(srcData.size)
+            _writeBuffer = wb
+        }
+        System.arraycopy(srcData, 0, wb, 0, srcData.size)
+        // 原子交换：writeBuffer 成为 snapshot，旧 snapshot 成为 spare
+        synchronized(_lock) {
+            _spareBuffer = _snapshotBuffer
+            _snapshotBuffer = wb
+            _writeBuffer = _spareBuffer // spare 成为下一帧的 writeBuffer
+            _snapshotWidth = src.width
+            _snapshotHeight = src.height
+        }
+    }
+
+    /**
+     * 获取渲染图像的像素快照引用
+     *
+     * 三缓冲保证安全：返回的 IntArray 在下一帧 snapshotPixels() 写入 _writeBuffer 时不会被修改，
+     * 因为 _writeBuffer 是独立的 buffer（spare 或新分配的）。
+     */
+    fun getImagePixels(): IntArray? = _snapshotBuffer
+
+    /** 快照宽度 */
+    val snapshotWidth: Int get() = _snapshotWidth
+
+    /** 快照高度 */
+    val snapshotHeight: Int get() = _snapshotHeight
+
+    // 直接渲染模式的缓存资源
+    private var _renderImage: BufferedImage? = null
+    private var _renderG2d: Graphics2D? = null
+    private var _renderW: Int = 0
+    private var _renderH: Int = 0
+
+    /**
+     * 在主线程直接渲染弹幕（带缓存，尺寸不变时复用 BufferedImage 和 Graphics2D）
+     */
+    fun renderDanmaku(engine: cn.a10miaomiao.bilimiao.danmaku.task.DanmakuEngine, w: Int, h: Int) {
+        if (w <= 0 || h <= 0) return
+
+        // 尺寸变化时重建缓存
+        if (w != _renderW || h != _renderH) {
+            _renderG2d?.dispose()
+            _renderImage = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+            _renderG2d = _renderImage!!.createGraphics().apply {
+                setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+                setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+                setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+            }
+            _renderW = w
+            _renderH = h
+            // 同步尺寸到 displayer 内部状态
+            _width = w
+            _height = h
+            _cachedCanvas = null
+            mContext.mDanmakuFactory.notifyDispSizeChanged(mContext)
+        }
+
+        val image = _renderImage ?: return
+        val g2d = _renderG2d ?: return
+
+        // 清除画布
+        g2d.composite = java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.CLEAR)
+        g2d.fillRect(0, 0, w, h)
+        g2d.composite = java.awt.AlphaComposite.SrcOver
+
+        // 设置 Graphics2D 并渲染
+        _backG2d = g2d
+        _backImage = image
+        _cachedCanvas = null
+        engine.drawWithSync(this)
+    }
+
+    /**
+     * 获取最近一次渲染的像素数据
+     */
+    fun getRenderPixels(): IntArray? {
+        val image = _renderImage ?: return null
+        return (image.raster.dataBuffer as java.awt.image.DataBufferInt).data
+    }
+
+    /**
+     * 设置当前帧的 Graphics2D 和 image（直接渲染模式使用）
+     */
+    fun setGraphics(g2d: Graphics2D, image: BufferedImage) {
+        _backG2d = g2d
+        _backImage = image
+        _cachedCanvas = null
+    }
 
     /**
      * 创建绘图表面
@@ -72,10 +191,37 @@ class DesktopDisplayer(
 
     private fun createSurface() {
         if (_width <= 0 || _height <= 0) return
+        // TYPE_INT_ARGB 的 int 值在小端(x86)内存中字节序为 B,G,R,A，与 Skia BGRA_8888 一致
         _frontImage = BufferedImage(_width, _height, BufferedImage.TYPE_INT_ARGB)
         _backImage = BufferedImage(_width, _height, BufferedImage.TYPE_INT_ARGB)
         _frontG2d = createGraphics(_frontImage!!)
         _backG2d = createGraphics(_backImage!!)
+        _cachedCanvas = null // 重置缓存的 canvas
+        // 不清空快照缓冲区：snapshotPixels() 会在尺寸变化时自动重新分配
+        // 避免 _snapshotBuffer = null 导致 UI 线程读到 null 像素显示空白帧
+    }
+
+    /**
+     * 应用延迟的尺寸变更（由渲染线程在每帧开始时调用）
+     * 返回 true 表示发生了尺寸变更
+     */
+    fun applyPendingSize(): Boolean {
+        val pw: Int
+        val ph: Int
+        synchronized(_lock) {
+            pw = _pendingWidth
+            ph = _pendingHeight
+            if (pw < 0 || ph < 0) return false
+            _pendingWidth = -1
+            _pendingHeight = -1
+        }
+        // 在渲染线程安全地重建表面
+        _width = pw
+        _height = ph
+        createSurface()
+        _cachedCanvas = null // Graphics2D 已变，重置缓存
+        mContext.mDanmakuFactory.notifyDispSizeChanged(mContext)
+        return true
     }
 
     /**
@@ -128,7 +274,7 @@ class DesktopDisplayer(
         // 绘制
         val cacheStuffer = mContext.mCacheStuffer
         if (cacheStuffer != null) {
-            val canvas = DesktopCanvas(g2d, _width, _height)
+            val canvas = _cachedCanvas ?: DesktopCanvas(g2d, _width, _height).also { _cachedCanvas = it }
             val cacheDrawn = cacheStuffer.drawCache(danmaku, canvas, left, top, paint)
             if (cacheDrawn) {
                 return IRenderer.CACHE_RENDERING
@@ -142,10 +288,10 @@ class DesktopDisplayer(
     }
 
     /**
-     * 交换前后缓冲区，使渲染结果对 UI 线程可见
+     * 交换前后缓冲区
      */
     fun swapBuffers() {
-        synchronized(this) {
+        synchronized(_lock) {
             val tmpImage = _frontImage
             val tmpG2d = _frontG2d
             _frontImage = _backImage
@@ -193,12 +339,12 @@ class DesktopDisplayer(
     }
 
     override fun setSize(width: Int, height: Int) {
-        if (_width != width || _height != height) {
-            _width = width
-            _height = height
-            createSurface()
-            // 通知工厂视口尺寸变更，重新计算弹幕时长
-            mContext.mDanmakuFactory.notifyDispSizeChanged(mContext)
+        // 避免浮点精度抖动导致每帧重建：同时检查 _width/_height 和 _pendingWidth/_pendingHeight
+        if ((_width != width || _height != height) && (_pendingWidth != width || _pendingHeight != height)) {
+            synchronized(_lock) {
+                _pendingWidth = width
+                _pendingHeight = height
+            }
         }
     }
 
