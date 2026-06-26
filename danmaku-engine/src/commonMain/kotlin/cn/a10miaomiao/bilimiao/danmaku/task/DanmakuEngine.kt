@@ -102,6 +102,9 @@ class DanmakuEngine(
     /** 上次同步的播放器位置，用于检测位置是否真正变化 */
     private var lastSyncedPosition: Long = -1L
 
+    /** 上次播放器位置对应的 wall clock，用于插值估算实时位置 */
+    private var lastSyncedWallTime: Long = 0L
+
     // endregion
 
     // region 依赖
@@ -511,22 +514,25 @@ class DanmakuEngine(
         if (!mInSeekingAction && !mInSyncAction) {
             mInSyncAction = true
 
+            val now = PlatformClock.uptimeMillis()
+
             // 播放器位置变化时直接对齐计时器（不 seekTo，不清除弹幕状态）
             val extPos = externalPlayerPosition
             if (extPos >= 0 && extPos != lastSyncedPosition) {
-                lastSyncedPosition = extPos
                 val syncDelta = extPos - timer.currMillisecond
                 if (kotlin.math.abs(syncDelta) > 16) {
                     timer.update(extPos)
-                    mTimeBase = PlatformClock.uptimeMillis() - extPos
+                    mTimeBase = now - extPos
                     mRemainingTime = 0
                     mLastDeltaTime = 0
                     synchronized(mDrawTimes) { mDrawTimes.clear() }
                 }
+                lastSyncedPosition = extPos
+                lastSyncedWallTime = now
             }
 
             // wall clock 平滑推进
-            val time = PlatformClock.uptimeMillis() - mTimeBase
+            val time = now - mTimeBase
             var gapTime = time - timer.currMillisecond
             val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
             val d: Long
@@ -548,6 +554,17 @@ class DanmakuEngine(
             }
             mRemainingTime = gapTime
             timer.add(d)
+
+            // Clamp: 计时器不超过播放器插值位置，防止 snap 时弹幕后退
+            // 插值 = 上次同步位置 + 距上次同步的 wall clock 间隔
+            if (lastSyncedPosition >= 0 && lastSyncedWallTime > 0) {
+                val estimatedPlayerPos = lastSyncedPosition + (now - lastSyncedWallTime)
+                if (timer.currMillisecond > estimatedPlayerPos) {
+                    timer.update(estimatedPlayerPos)
+                    mRemainingTime = 0
+                }
+            }
+
             mInSyncAction = false
         }
         return draw(canvas)
