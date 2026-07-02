@@ -308,7 +308,7 @@ class DesktopPlayerDelegate(
         progressJob?.cancel()
         progressJob = coroutineScope.launch {
             while (isActive) {
-                delay(1000)
+                delay(200) // 200ms 更新一次，减少弹幕 wall clock 推进累积误差
                 _mediampPlayer?.let { player ->
                     val pos = player.currentPositionMillis.value
                     _currentPosition.value = segmentOffsetMs + pos
