@@ -21,9 +21,31 @@ class DesktopDisplayer(
 
     private var _width: Int = 0
     private var _height: Int = 0
+
+    /**
+     * 实际 UI 缩放密度（Compose density），绘制阶段用于逻辑像素→物理像素缩放。
+     *
+     * 桌面端此值反映系统 UI 缩放（100% = 1.0，150% = 1.5，200% = 2.0），
+     * 而非安卓的真实物理屏幕密度（通常 1.5~3.0）。
+     */
     private var _density: Float = 1f
     private var _densityDpi: Int = 96
     private var _scaledDensity: Float = 1f
+
+    /**
+     * 解析器可见密度的下限。
+     *
+     * B站弹幕 XML 字号（如 25）在 [BiliDanmakuParser] 中通过 (density - 0.6f) 缩放，
+     * 该启发式针对安卓手机真实屏幕密度（通常 1.5~3.0）调校。桌面端 Compose 的 density
+     * 直接反映系统 UI 缩放，100% 时为 1.0，代入后 (1.0 - 0.6) = 0.4 会让基础字号被压到 40%，
+     * 叠加绘制阶段再次乘以 density，最终像素尺寸过小。
+     *
+     * 此处令 [density] getter 返回 max(_density, _minParserDensity)，保证 (density - 0.6)
+     * 不低于 0.9（等效 240dpi 安卓设备的基础字号）；density ≥ 1.5（150% 缩放及以上）不受影响，
+     * 保持原有渲染效果。绘制阶段仍使用原始 [_density]，DPI 缩放线性生效。
+     */
+    private val _minParserDensity: Float = 1.5f
+
     private var _slopPixel: Int = 6
     private var _strokeWidth: Float = 0f
     private var _margin: Int = 0
@@ -62,7 +84,12 @@ class DesktopDisplayer(
 
     override val width: Int get() = _width
     override val height: Int get() = _height
-    override val density: Float get() = _density
+
+    /**
+     * 解析器与部分引擎逻辑可见的密度。返回原始 [_density] 与 [_minParserDensity] 的较大者，
+     * 避免低 DPI 下 (density - 0.6) 字号缩放过小（见 [_minParserDensity] 说明）。
+     */
+    override val density: Float get() = maxOf(_density, _minParserDensity)
     override val densityDpi: Int get() = _densityDpi
     override val scaledDensity: Float get() = _scaledDensity
     override val slopPixel: Int get() = _slopPixel
