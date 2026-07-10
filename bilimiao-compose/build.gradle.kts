@@ -89,7 +89,6 @@ kotlin {
 
                 // mediamp
                 implementation(libs.mediamp.api)
-                implementation(libs.mediamp.compose)
                 implementation(libs.mediamp.mpv)
 
                 // webviewko (极验验证码)

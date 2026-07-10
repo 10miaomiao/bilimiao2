@@ -63,7 +63,6 @@ kotlin {
                 // mediamp
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.mpv)
-                implementation(libs.mediamp.native.loader)
 
                 // 弹幕引擎
                 implementation(project(":danmaku-engine"))
