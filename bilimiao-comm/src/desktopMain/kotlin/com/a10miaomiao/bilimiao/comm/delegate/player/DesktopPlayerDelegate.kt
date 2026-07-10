@@ -18,7 +18,7 @@ import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.features.PlaybackSpeed
 import org.openani.mediamp.mpv.MPVHandle
 import org.openani.mediamp.mpv.MpvMediampPlayer
-import org.openani.mediamp.mpv.MpvMediampPlayerFactory
+import org.openani.mediamp.source.UriMediaData
 import org.openani.mediamp.playUri
 import java.io.File
 
@@ -83,6 +83,7 @@ class DesktopPlayerDelegate(
     private var segmentDurations = listOf<Long>()
     private var currentSegmentIndex = 0
     private var segmentOffsetMs = 0L // 当前段之前的累计时长
+    private var segmentHeaders: Map<String, String> = emptyMap()
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var progressJob: Job? = null
@@ -153,43 +154,33 @@ class DesktopPlayerDelegate(
                 val resolved = resolvePlaybackUrl(sourceInfo.url)
                 _loadingMessage.value = "正在启动播放..."
 
-                // 将 HTTP 请求头传递给 MPV 播放器（必须在 playUri/loadfile 之前设置）
-                if (player is MpvMediampPlayer) {
-                    val ua = sourceInfo.header["User-Agent"]
-                        ?: "Mozilla/5.0 BiliDroid/1.41.0 (bbcallen@gmail.com)"
-                    player.impl.setPropertyString("user-agent", ua)
-                    val headerArray = sourceInfo.header.entries
-                        .filter { it.key != "User-Agent" }
-                        .map { "${it.key}: ${it.value}" }
-                        .toTypedArray()
-                    if (headerArray.isNotEmpty()) {
-                        player.impl.setPropertyStringList("http-header-fields", headerArray)
-                    }
-                    println("[BiliMiao] Set HTTP headers: ${sourceInfo.header}")
-                }
+                // 构建 HTTP 请求头，通过 UriMediaData 传递给 mediamp
+                val headers = sourceInfo.header
+                println("[BiliMiao] HTTP headers: $headers")
 
                 when (resolved.format) {
                     PlaybackFormat.MERGING -> {
-                        // 音视频分离：先加载视频，再用 audio-add 添加外部音频轨道
-                        // audio-add 添加的轨道在 stop 时会被自动清理，不会残留
-                        player.playUri(resolved.videoUrl)
+                        // 音视频分离：通过 mpv audio-files 选项在 loadfile 时一并加载外部音频
+                        // audio-files 在 setMediaData 设置 headers 后、resume 调用 loadfile 前生效
+                        player.setMediaData(UriMediaData(resolved.videoUrl, headers))
                         if (player is MpvMediampPlayer && resolved.audioUrl != null) {
-                            player.impl.command("audio-add", resolved.audioUrl, "select")
-                            println("[BiliMiao] Added external audio: ${resolved.audioUrl}")
+                            (player.impl as MPVHandle).setPropertyString("audio-files", resolved.audioUrl)
+                            println("[BiliMiao] Set external audio: ${resolved.audioUrl}")
                         }
                     }
                     PlaybackFormat.SEGMENTED -> {
                         // 分段视频：播放第一段
                         segmentUrls = resolved.segmentUrls
                         segmentDurations = resolved.segmentDurations
+                        segmentHeaders = headers
                         currentSegmentIndex = 0
                         segmentOffsetMs = 0L
                         if (segmentUrls.isNotEmpty()) {
-                            player.playUri(segmentUrls.first())
+                            player.setMediaData(UriMediaData(segmentUrls.first(), headers))
                         }
                     }
                     PlaybackFormat.SINGLE -> {
-                        player.playUri(resolved.videoUrl)
+                        player.setMediaData(UriMediaData(resolved.videoUrl, headers))
                     }
                     PlaybackFormat.TEMP_MPD -> {
                         // [dash-mpd] 格式：将 MPD XML 写入临时文件播放
@@ -197,7 +188,7 @@ class DesktopPlayerDelegate(
                         if (mpdFile != null) {
                             player.playUri(mpdFile.absolutePath)
                         } else {
-                            player.playUri(resolved.videoUrl)
+                            player.setMediaData(UriMediaData(resolved.videoUrl, headers))
                         }
                     }
                 }
@@ -354,7 +345,7 @@ class DesktopPlayerDelegate(
                 }
             }
             segmentOffsetMs += actualDuration
-            player.playUri(segmentUrls[currentSegmentIndex])
+            player.setMediaData(UriMediaData(segmentUrls[currentSegmentIndex], segmentHeaders))
         }
     }
 
@@ -383,7 +374,7 @@ class DesktopPlayerDelegate(
                         if (i != currentSegmentIndex) {
                             currentSegmentIndex = i
                             segmentOffsetMs = accumulated
-                            coroutineScope.launch { player.playUri(segmentUrls[i]) }
+                            coroutineScope.launch { player.setMediaData(UriMediaData(segmentUrls[i], segmentHeaders)) }
                         }
                         player.seekTo(positionMs - accumulated)
                         _currentPosition.value = positionMs
@@ -424,7 +415,7 @@ class DesktopPlayerDelegate(
         try {
             val player = _mediampPlayer
             if (player is MpvMediampPlayer) {
-                player.impl.setPropertyInt("volume", clamped)
+                (player.impl as MPVHandle).setPropertyInt("volume", clamped)
             }
         } catch (_: Exception) {}
     }

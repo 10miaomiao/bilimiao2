@@ -51,7 +51,6 @@ kotlin {
                 // mediamp
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.mpv)
-                implementation(libs.mediamp.native.loader)
                 // native DLLs for current platform
                 runtimeOnly("org.openani.mediamp:mediamp-mpv-runtime-windows-x64:${libs.versions.mediamp.get()}")
 
@@ -82,7 +81,7 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "bilimiao"
             packageVersion = appVersionName
-            description = "哔哩喵~ 哔哩哔哩第三方客户端"
+            description = "bilimiao"
             vendor = "10miaomiao"
             appResourcesRootDir.set(project.layout.projectDirectory.dir("appResources"))
             modules(
