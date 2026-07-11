@@ -516,22 +516,25 @@ class DanmakuEngine(
 
             val now = PlatformClock.uptimeMillis()
 
-            // 播放器位置变化时直接对齐计时器（不 seekTo，不清除弹幕状态）
+            // 播放器位置同步：仅在偏差超过 2 秒时才硬对齐（相当于 seek）
+            // 这是原始 DanmakuFlameMaster 的策略——平时完全靠 wall clock 推进，
+            // 不做小偏差对齐，避免周期性跳跃。
             val extPos = externalPlayerPosition
             if (extPos >= 0 && extPos != lastSyncedPosition) {
+                lastSyncedPosition = extPos
+                lastSyncedWallTime = now
                 val syncDelta = extPos - timer.currMillisecond
-                if (kotlin.math.abs(syncDelta) > 16) {
+                if (kotlin.math.abs(syncDelta) > 2000) {
+                    // 大偏差：播放器 seek 或缓冲跳转，直接对齐
                     timer.update(extPos)
                     mTimeBase = now - extPos
                     mRemainingTime = 0
                     mLastDeltaTime = 0
                     synchronized(mDrawTimes) { mDrawTimes.clear() }
                 }
-                lastSyncedPosition = extPos
-                lastSyncedWallTime = now
             }
 
-            // wall clock 平滑推进
+            // wall clock 平滑推进（与原始 syncTimer 逻辑一致）
             val time = now - mTimeBase
             var gapTime = time - timer.currMillisecond
             val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
@@ -554,16 +557,6 @@ class DanmakuEngine(
             }
             mRemainingTime = gapTime
             timer.add(d)
-
-            // Clamp: 计时器不超过播放器插值位置，防止 snap 时弹幕后退
-            // 插值 = 上次同步位置 + 距上次同步的 wall clock 间隔
-            if (lastSyncedPosition >= 0 && lastSyncedWallTime > 0) {
-                val estimatedPlayerPos = lastSyncedPosition + (now - lastSyncedWallTime)
-                if (timer.currMillisecond > estimatedPlayerPos) {
-                    timer.update(estimatedPlayerPos)
-                    mRemainingTime = 0
-                }
-            }
 
             mInSyncAction = false
         }
