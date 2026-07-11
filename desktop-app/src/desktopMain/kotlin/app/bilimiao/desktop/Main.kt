@@ -73,7 +73,7 @@ import java.io.File
 fun main() {
     val appIcon = BitmapPainter(
         Image.makeFromEncoded(
-            object {}.javaClass.getResourceAsStream("/bilimiao.ico")!!.readAllBytes()
+            object {}.javaClass.getResourceAsStream("/bilimiao.png")!!.readAllBytes()
         ).toComposeImageBitmap()
     )
 
