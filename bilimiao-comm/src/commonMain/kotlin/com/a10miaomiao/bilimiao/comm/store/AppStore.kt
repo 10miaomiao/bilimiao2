@@ -67,6 +67,7 @@ class AppStore(override val di: DI) :
     }
 
     fun setDarkMode(mode: Int) {
+        setState { theme = (theme ?: ThemeSettingState(color = 0xFFFB7299.toInt())).copy(darkMode = mode) }
         viewModelScope.launch {
             appDataStore.edit {
                 it[SettingPreferences.ThemeDarkMode] = mode
@@ -74,8 +75,8 @@ class AppStore(override val di: DI) :
         }
         setDarkMode(mode)
     }
-
     fun setThemeColor(color: Long, type: Int) {
+        setState { theme = (theme ?: ThemeSettingState(color = color.toInt())).copy(color = color.toInt(), type = type) }
         viewModelScope.launch {
             appDataStore.edit {
                 it[SettingPreferences.ThemeColor] = color
@@ -85,6 +86,7 @@ class AppStore(override val di: DI) :
     }
 
     fun setAppBarType(type: Int) {
+        setState { theme = (theme ?: ThemeSettingState(color = 0xFFFB7299.toInt())).copy(appBarType = type) }
         viewModelScope.launch {
             appDataStore.edit {
                 it[SettingPreferences.ThemeAppBarType] = type
