@@ -73,7 +73,7 @@ class AppStore(override val di: DI) :
                 it[SettingPreferences.ThemeDarkMode] = mode
             }
         }
-        setDarkMode(mode)
+        com.a10miaomiao.bilimiao.comm.platform.setDarkMode(mode)
     }
     fun setThemeColor(color: Long, type: Int) {
         setState { theme = (theme ?: ThemeSettingState(color = color.toInt())).copy(color = color.toInt(), type = type) }
