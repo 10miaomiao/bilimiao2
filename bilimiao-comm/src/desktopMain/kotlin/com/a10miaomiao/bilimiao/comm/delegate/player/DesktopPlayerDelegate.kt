@@ -51,6 +51,9 @@ class DesktopPlayerDelegate(
     private val _currentPosition = MutableStateFlow(0L)
     val currentPosition: StateFlow<Long> = _currentPosition
 
+    private val _playbackSpeed = MutableStateFlow(1.0f)
+    val playbackSpeed: StateFlow<Float> = _playbackSpeed
+
     private val _duration = MutableStateFlow(0L)
     val duration: StateFlow<Long> = _duration
 
@@ -389,6 +392,7 @@ class DesktopPlayerDelegate(
     }
 
     fun setPlaybackSpeed(speed: Float) {
+        _playbackSpeed.value = speed
         _mediampPlayer?.let { player ->
             player.features[PlaybackSpeed]?.set(speed)
         }
