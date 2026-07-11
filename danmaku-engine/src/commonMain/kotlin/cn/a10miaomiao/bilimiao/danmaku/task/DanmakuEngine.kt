@@ -99,9 +99,8 @@ class DanmakuEngine(
     @Volatile
     var externalPlayerPosition: Long = -1L
 
-    /** 播放倍速（1.0 = 正常速度），影响 wall clock 推进 timer 的速率 */
-    @Volatile
-    var playbackSpeed: Float = 1.0f
+    /** 推断的播放倍速，由播放器位置变化自动计算，无需外部设置 */
+    private var inferredPlaybackSpeed: Float = 1.0f
 
     /** 上次同步的播放器位置，用于检测位置是否真正变化 */
     private var lastSyncedPosition: Long = -1L
@@ -263,7 +262,7 @@ class DanmakuEngine(
         }
         mRenderingState.reset()
         mDrawTimes.clear()
-        mTimeBase = PlatformClock.uptimeMillis() - (pausedPosition / playbackSpeed).toLong()
+        mTimeBase = PlatformClock.uptimeMillis() - (pausedPosition / inferredPlaybackSpeed).toLong()
         timer.update(pausedPosition)
         drawTask?.start()
         notifyRendering()
@@ -295,7 +294,7 @@ class DanmakuEngine(
         mDesireSeekingTime = ms
         stopRenderLoop()
         val deltaMs = ms - timer.currMillisecond
-        mTimeBase -= (deltaMs / playbackSpeed).toLong()
+        mTimeBase -= (deltaMs / inferredPlaybackSpeed).toLong()
         timer.update(ms)
         mContext?.mGlobalFlagValues?.updateMeasureFlag()
         drawTask?.seek(ms)
@@ -522,24 +521,38 @@ class DanmakuEngine(
 
             // 暂停状态：不推进 timer，但仍绘制当前帧（显示静态弹幕）
             if (!quitFlag) {
-                // 播放器位置同步：仅在偏差超过 2 秒时才硬对齐（相当于 seek）
+                // 播放器位置同步
                 val extPos = externalPlayerPosition
                 if (extPos >= 0 && extPos != lastSyncedPosition) {
+                    if (lastSyncedPosition >= 0 && lastSyncedWallTime > 0) {
+                        val posDelta = extPos - lastSyncedPosition
+                        val wallDelta = now - lastSyncedWallTime
+                        // 推断实际播放倍速：播放器位置增量 / wall clock 增量
+                        if (wallDelta > 0 && posDelta > 0) {
+                            val inferredSpeed = posDelta.toFloat() / wallDelta.toFloat()
+                            // 平滑倍速推断，避免单次抖动
+                            inferredPlaybackSpeed = inferredPlaybackSpeed * 0.7f + inferredSpeed * 0.3f
+                            // 限制在合理范围
+                            if (inferredPlaybackSpeed < 0.1f) inferredPlaybackSpeed = 0.1f
+                            if (inferredPlaybackSpeed > 16f) inferredPlaybackSpeed = 16f
+                        }
+                    }
                     lastSyncedPosition = extPos
                     lastSyncedWallTime = now
+
                     val syncDelta = extPos - timer.currMillisecond
                     if (kotlin.math.abs(syncDelta) > 2000) {
+                        // 大偏差：播放器 seek 或缓冲跳转，直接对齐
                         timer.update(extPos)
-                        mTimeBase = now - (extPos / playbackSpeed).toLong()
+                        mTimeBase = now - (extPos / inferredPlaybackSpeed).toLong()
                         mRemainingTime = 0
                         mLastDeltaTime = 0
                         synchronized(mDrawTimes) { mDrawTimes.clear() }
                     }
                 }
 
-                // wall clock 平滑推进，按倍速缩放
-                // mTimeBase 以"弹幕时间"为单位，wall clock 乘以倍速得到弹幕时间推进量
-                val time = ((now - mTimeBase) * playbackSpeed).toLong()
+                // wall clock 平滑推进，按推断倍速缩放
+                val time = ((now - mTimeBase) * inferredPlaybackSpeed).toLong()
                 var gapTime = time - timer.currMillisecond
                 val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
                 val d: Long
