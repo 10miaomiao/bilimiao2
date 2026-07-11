@@ -25,6 +25,7 @@ import cn.a10miaomiao.bilimiao.danmaku.task.DanmakuEngine
 fun DanmakuOverlay(
     currentPosition: Long,
     isPlaying: Boolean,
+    playbackSpeed: Float = 1.0f,
     danmakuParser: BaseDanmakuParser?,
     visible: Boolean = true,
     modifier: Modifier = Modifier,
@@ -59,9 +60,10 @@ fun DanmakuOverlay(
         engine.value = eng
     }
 
-    // 同步播放位置
-    LaunchedEffect(currentPosition, isPlaying) {
+    // 同步播放位置、倍速和暂停状态
+    LaunchedEffect(currentPosition, isPlaying, playbackSpeed) {
         val eng = engine.value ?: return@LaunchedEffect
+        eng.playbackSpeed = playbackSpeed
         if (isPlaying) {
             if (eng.isStop()) {
                 eng.resume()

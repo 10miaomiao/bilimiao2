@@ -37,6 +37,7 @@ fun DesktopPlayerContainer(
     val player = playerDelegate.mediampPlayer
     val isPlaying by playerDelegate.isPlayingState.collectAsState()
     val currentPosition by playerDelegate.currentPosition.collectAsState()
+    val playbackSpeed by playerDelegate.playbackSpeed.collectAsState()
     val duration by playerDelegate.duration.collectAsState()
     val isLoading by playerDelegate.isLoading.collectAsState()
     val loadingMessage by playerDelegate.loadingMessage.collectAsState()
@@ -181,6 +182,7 @@ fun DesktopPlayerContainer(
             DanmakuOverlay(
                 currentPosition = currentPosition,
                 isPlaying = isPlaying,
+                playbackSpeed = playbackSpeed,
                 danmakuParser = danmakuParser,
                 visible = danmakuVisible,
                 modifier = Modifier.fillMaxSize(),
