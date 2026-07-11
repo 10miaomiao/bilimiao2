@@ -99,6 +99,10 @@ class DanmakuEngine(
     @Volatile
     var externalPlayerPosition: Long = -1L
 
+    /** 播放倍速（1.0 = 正常速度），影响 wall clock 推进 timer 的速率 */
+    @Volatile
+    var playbackSpeed: Float = 1.0f
+
     /** 上次同步的播放器位置，用于检测位置是否真正变化 */
     private var lastSyncedPosition: Long = -1L
 
@@ -259,7 +263,7 @@ class DanmakuEngine(
         }
         mRenderingState.reset()
         mDrawTimes.clear()
-        mTimeBase = PlatformClock.uptimeMillis() - pausedPosition
+        mTimeBase = PlatformClock.uptimeMillis() - (pausedPosition / playbackSpeed).toLong()
         timer.update(pausedPosition)
         drawTask?.start()
         notifyRendering()
@@ -291,7 +295,7 @@ class DanmakuEngine(
         mDesireSeekingTime = ms
         stopRenderLoop()
         val deltaMs = ms - timer.currMillisecond
-        mTimeBase -= deltaMs
+        mTimeBase -= (deltaMs / playbackSpeed).toLong()
         timer.update(ms)
         mContext?.mGlobalFlagValues?.updateMeasureFlag()
         drawTask?.seek(ms)
@@ -516,47 +520,48 @@ class DanmakuEngine(
 
             val now = PlatformClock.uptimeMillis()
 
-            // 播放器位置同步：仅在偏差超过 2 秒时才硬对齐（相当于 seek）
-            // 这是原始 DanmakuFlameMaster 的策略——平时完全靠 wall clock 推进，
-            // 不做小偏差对齐，避免周期性跳跃。
-            val extPos = externalPlayerPosition
-            if (extPos >= 0 && extPos != lastSyncedPosition) {
-                lastSyncedPosition = extPos
-                lastSyncedWallTime = now
-                val syncDelta = extPos - timer.currMillisecond
-                if (kotlin.math.abs(syncDelta) > 2000) {
-                    // 大偏差：播放器 seek 或缓冲跳转，直接对齐
-                    timer.update(extPos)
-                    mTimeBase = now - extPos
-                    mRemainingTime = 0
-                    mLastDeltaTime = 0
-                    synchronized(mDrawTimes) { mDrawTimes.clear() }
+            // 暂停状态：不推进 timer，但仍绘制当前帧（显示静态弹幕）
+            if (!quitFlag) {
+                // 播放器位置同步：仅在偏差超过 2 秒时才硬对齐（相当于 seek）
+                val extPos = externalPlayerPosition
+                if (extPos >= 0 && extPos != lastSyncedPosition) {
+                    lastSyncedPosition = extPos
+                    lastSyncedWallTime = now
+                    val syncDelta = extPos - timer.currMillisecond
+                    if (kotlin.math.abs(syncDelta) > 2000) {
+                        timer.update(extPos)
+                        mTimeBase = now - (extPos / playbackSpeed).toLong()
+                        mRemainingTime = 0
+                        mLastDeltaTime = 0
+                        synchronized(mDrawTimes) { mDrawTimes.clear() }
+                    }
                 }
-            }
 
-            // wall clock 平滑推进（与原始 syncTimer 逻辑一致）
-            val time = now - mTimeBase
-            var gapTime = time - timer.currMillisecond
-            val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
-            val d: Long
-            if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME) {
-                d = gapTime
-                gapTime = 0
-                synchronized(mDrawTimes) { mDrawTimes.clear() }
-            } else {
-                var dd = averageTime + gapTime / FRAME_UPDATE_RATE
-                dd = maxOf(FRAME_UPDATE_RATE, dd)
-                dd = minOf(CORDON_TIME, dd)
-                val a = dd - mLastDeltaTime
-                if (a > 3 && a < 8 && mLastDeltaTime >= FRAME_UPDATE_RATE && mLastDeltaTime <= CORDON_TIME) {
-                    dd = mLastDeltaTime
+                // wall clock 平滑推进，按倍速缩放
+                // mTimeBase 以"弹幕时间"为单位，wall clock 乘以倍速得到弹幕时间推进量
+                val time = ((now - mTimeBase) * playbackSpeed).toLong()
+                var gapTime = time - timer.currMillisecond
+                val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
+                val d: Long
+                if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME) {
+                    d = gapTime
+                    gapTime = 0
+                    synchronized(mDrawTimes) { mDrawTimes.clear() }
+                } else {
+                    var dd = averageTime + gapTime / FRAME_UPDATE_RATE
+                    dd = maxOf(FRAME_UPDATE_RATE, dd)
+                    dd = minOf(CORDON_TIME, dd)
+                    val a = dd - mLastDeltaTime
+                    if (a > 3 && a < 8 && mLastDeltaTime >= FRAME_UPDATE_RATE && mLastDeltaTime <= CORDON_TIME) {
+                        dd = mLastDeltaTime
+                    }
+                    gapTime -= dd
+                    mLastDeltaTime = dd
+                    d = dd
                 }
-                gapTime -= dd
-                mLastDeltaTime = dd
-                d = dd
+                mRemainingTime = gapTime
+                timer.add(d)
             }
-            mRemainingTime = gapTime
-            timer.add(d)
 
             mInSyncAction = false
         }
