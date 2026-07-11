@@ -102,9 +102,13 @@ fun DanmakuOverlay(
 
             drawIntoCanvas { canvas ->
                 val skiaCanvas = canvas.nativeCanvas
+                // clip 到 Canvas 区域，防止弹幕溢出到其他 UI 区域
+                skiaCanvas.save()
+                skiaCanvas.clipRect(org.jetbrains.skia.Rect.makeWH(size.width, size.height))
                 currentDisplayer.setCanvas(skiaCanvas)
                 currentEngine.drawWithSync(currentDisplayer)
                 currentDisplayer.setCanvas(null)
+                skiaCanvas.restore()
             }
         }
     }
