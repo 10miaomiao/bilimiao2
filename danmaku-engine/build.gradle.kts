@@ -26,6 +26,8 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
+                // Skia: compileOnly, 运行时由 bilimiao-compose (compose.desktop.common) 提供
+                compileOnly("org.jetbrains.skiko:skiko-awt:0.8.18")
             }
         }
     }
