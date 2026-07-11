@@ -47,6 +47,7 @@ fun DesktopPlayerContainer(
     val volume by playerDelegate.volume.collectAsState()
     val playerSourceInfo by playerDelegate.playerSourceInfo.collectAsState()
     val currentQuality by playerDelegate.currentQuality.collectAsState()
+    val playbackSpeed by playerDelegate.playbackSpeed.collectAsState()
 
     val focusRequester = remember { FocusRequester() }
 
@@ -325,7 +326,7 @@ fun DesktopPlayerContainer(
                         isPlaying = isPlaying,
                         currentPosition = currentPosition,
                         duration = duration,
-                        playbackSpeed = 1.0f,
+                        playbackSpeed = playbackSpeed,
                         isFullscreen = isFullscreen,
                         danmakuVisible = danmakuVisible,
                         volume = volume,
