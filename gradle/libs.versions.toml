@@ -41,6 +41,12 @@ coil = "3.1.0"
 qrose = "1.0.1"
 composePreference = "1.1.1"
 reorderable = "2.5.1"
+# svg to compose
+svgToCompose = "0.11.0"
+kotlinpoet = "1.9.0"
+androidToolsSdkCommon = "31.6.0"
+xpp3 = "1.1.6"
+guava = "23.0"
 # mediamp
 mediamp = "0.1.14"
 jna = "5.13.0"
@@ -132,6 +138,14 @@ mediamp-native-loader = { module = "org.openani.mediamp:mediamp-native-loader", 
 # jna
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+
+# svg-to-compose (code generator, not a runtime dependency)
+svg-to-compose = { module = "com.github.DevSrSouza:svg-to-compose", version.ref = "svgToCompose" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+android-tools-sdk-common = { module = "com.android.tools:sdk-common", version.ref = "androidToolsSdkCommon" }
+android-tools-common = { module = "com.android.tools:common", version.ref = "androidToolsSdkCommon" }
+xpp3 = { module = "org.ogce:xpp3", version.ref = "xpp3" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
 # test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
