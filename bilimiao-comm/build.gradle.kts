@@ -31,7 +31,7 @@ kotlin {
                 implementation(libs.kmp.lifecycle.viewmodel.compose)
                 implementation(libs.sonner)
                 api(libs.androidx.datastore.preferences)
-                implementation(libs.androidx.room.runtime)
+                api(libs.androidx.room.runtime)
             }
         }
         androidMain {
