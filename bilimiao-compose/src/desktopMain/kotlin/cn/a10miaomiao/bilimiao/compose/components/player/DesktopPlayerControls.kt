@@ -22,6 +22,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.Player
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.player.Danmakuoff
+import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.player.Danmakuon
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 
 @Composable
@@ -111,7 +115,8 @@ fun DesktopPlayerControls(
             // 弹幕开关
             IconButton(onClick = onDanmakuToggle) {
                 Icon(
-                    imageVector = if (danmakuVisible) Icons.Default.ChatBubble else Icons.Default.ChatBubbleOutline,
+                    modifier = Modifier.size(24.dp),
+                    imageVector = if (danmakuVisible) BilimiaoIcons.Player.Danmakuoff else BilimiaoIcons.Player.Danmakuon,
                     contentDescription = if (danmakuVisible) "关闭弹幕" else "开启弹幕",
                     tint = if (danmakuVisible) Color.White else Color.White.copy(alpha = 0.5f),
                 )
