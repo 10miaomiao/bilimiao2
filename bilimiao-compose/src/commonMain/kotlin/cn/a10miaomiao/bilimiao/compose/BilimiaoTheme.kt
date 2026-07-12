@@ -21,15 +21,20 @@ fun BilimiaoTheme(
 }
 
 @Composable
-fun appColorScheme(
-    themeState: AppStore.ThemeSettingState
-): ColorScheme {
-    val themeColor = Color(themeState.color)
-    val isDarkTheme = when(themeState.darkMode) {
+fun isAppDarkTheme(themeState: AppStore.ThemeSettingState): Boolean {
+    return when (themeState.darkMode) {
         0 -> isSystemInDarkTheme()
         1 -> false
         else -> true
     }
+}
+
+@Composable
+fun appColorScheme(
+    themeState: AppStore.ThemeSettingState
+): ColorScheme {
+    val themeColor = Color(themeState.color)
+    val isDarkTheme = isAppDarkTheme(themeState)
     val colorScheme = rememberDynamicColorScheme(
         themeColor,
         isDarkTheme,
