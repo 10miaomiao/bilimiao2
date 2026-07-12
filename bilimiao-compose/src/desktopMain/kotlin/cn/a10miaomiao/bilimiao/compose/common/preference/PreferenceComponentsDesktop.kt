@@ -17,6 +17,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
@@ -44,7 +45,10 @@ actual fun ProvidePreferenceLocals(
     flow: MutableStateFlow<cn.a10miaomiao.bilimiao.compose.common.preference.Preferences>?,
     content: @Composable () -> Unit
 ) {
-    CompositionLocalProvider(LocalPreferenceFlow provides flow) {
+    CompositionLocalProvider(
+        LocalPreferenceFlow provides flow,
+        LocalContentColor provides MaterialTheme.colorScheme.onSurface,
+    ) {
         content()
     }
 }
