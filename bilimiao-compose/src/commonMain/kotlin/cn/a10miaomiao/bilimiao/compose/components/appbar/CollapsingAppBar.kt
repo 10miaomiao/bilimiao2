@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -135,7 +136,6 @@ fun CollapsingAppBar(
         label = "offsetY",
     )
 
-    val contentColor = LocalContentColor.current
 
     Column(
         modifier = modifier
@@ -146,42 +146,47 @@ fun CollapsingAppBar(
                 .fillMaxWidth()
                 .offset { IntOffset(0, -offsetY.roundToInt()) }
         ) {
-            Column {
-                // 标题区域（滚动时淡出）
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(AppBarConfig.TitleHeight)
-                        .alpha(titleAlpha),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (!title.isNullOrEmpty()) {
-                        Text(
-                            text = title.replace("\n", " "),
-                            color = contentColor.copy(alpha = 0.45f),
-                            fontSize = AppBarConfig.TitleTextSize.value.sp,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-
-                // 菜单行
-                CollapsingAppBarMenuRow(
-                    canBack = canBack,
-                    menus = menus,
-                    isNavigationMenu = isNavigationMenu,
-                    checkedKey = checkedKey,
-                    onBackClick = {
-                        if (state.isCollapsed) {
-                            state.expand(scope)
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            ) {
+                Column {
+                    // 标题区域（滚动时淡出）
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(AppBarConfig.TitleHeight)
+                            .alpha(titleAlpha),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (!title.isNullOrEmpty()) {
+                            Text(
+                                text = title.replace("\n", " "),
+                                color = LocalContentColor.current.copy(alpha = 0.45f),
+                                fontSize = AppBarConfig.TitleTextSize.value.sp,
+                                textAlign = TextAlign.Center,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
-                        onBackClick()
-                    },
-                    onMenuClick = onMenuClick,
-                    onMenuItemClick = onMenuItemClick,
-                )
+                    }
+
+                    // 菜单行
+                    CollapsingAppBarMenuRow(
+                        canBack = canBack,
+                        menus = menus,
+                        isNavigationMenu = isNavigationMenu,
+                        checkedKey = checkedKey,
+                        onBackClick = {
+                            if (state.isCollapsed) {
+                                state.expand(scope)
+                            }
+                            onBackClick()
+                        },
+                        onMenuClick = onMenuClick,
+                        onMenuItemClick = onMenuItemClick,
+                    )
+                }
             }
 
             // 底部渐变遮罩

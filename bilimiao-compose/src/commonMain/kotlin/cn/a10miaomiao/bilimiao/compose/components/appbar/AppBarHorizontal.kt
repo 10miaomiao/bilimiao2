@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.components.appbar
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +21,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -75,82 +75,85 @@ fun AppBarHorizontal(
     onExchangeClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val contentColor = LocalContentColor.current
     val safePadding = WindowInsets.safeDrawing.only(
         WindowInsetsSides.Vertical + WindowInsetsSides.Left
     ).asPaddingValues()
-    Column(
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = modifier
             .fillMaxHeight()
             .width(AppBarConfig.MenuWidth)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(safePadding),
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // 返回/菜单按钮
-        NavigationIcon(
-            icon = if (showBack) AppBarNavigationIcon.Back else AppBarNavigationIcon.Menu,
-            onClick = if (showBack) onBackClick else onMenuClick,
-            modifier = Modifier.width(AppBarConfig.MenuWidth),
-        )
-
-        if (showPointer) {
-            AppBarHorizontalIconButton(
-                icon = Icons.Default.Tune,
-                contentDescription = "指针",
-                rotation = if (pointerOrientation) 0f else 180f,
-                onClick = onPointerClick,
+        Column(
+            modifier = Modifier.padding(safePadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // 返回/菜单按钮
+            NavigationIcon(
+                icon = if (showBack) AppBarNavigationIcon.Back else AppBarNavigationIcon.Menu,
+                onClick = if (showBack) onBackClick else onMenuClick,
+                modifier = Modifier.width(AppBarConfig.MenuWidth),
             )
-        }
 
-        if (showExchange) {
-            AppBarHorizontalIconButton(
-                icon = Icons.Default.SwapVert,
-                contentDescription = "交换",
-                onClick = onExchangeClick,
-            )
-        }
-
-        // 标题
-        if (!title.isNullOrEmpty()) {
-            Text(
-                modifier = Modifier.padding(
-                    bottom = AppBarConfig.NavigationPadding,
-                ),
-                text = title,
-                color = contentColor,
-                fontSize = AppBarConfig.TitleTextSize.value.sp,
-                lineHeight = AppBarConfig.TitleTextSize.value.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-
-        if (isNavigationMenu) {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(
-                    items = menus,
-                    key = { it.key },
-                ) { menuItem ->
-                    AppBarNavigationItem(
-                        data = menuItem,
-                        checked = checkedKey == menuItem.key,
-                        onClick = onMenuItemClick,
-                        modifier = Modifier.animateItem(),
-                    )
-                }
+            if (showPointer) {
+                AppBarHorizontalIconButton(
+                    icon = Icons.Default.Tune,
+                    contentDescription = "指针",
+                    rotation = if (pointerOrientation) 0f else 180f,
+                    onClick = onPointerClick,
+                )
             }
-        } else {
-            HorizontalAppBarMenus(
-                menus = menus,
-                isNavigationMenu = isNavigationMenu,
-                checkedKey = checkedKey,
-                appBarState = appBarState,
-                onMenuItemClick = onMenuItemClick,
-            )
+
+            if (showExchange) {
+                AppBarHorizontalIconButton(
+                    icon = Icons.Default.SwapVert,
+                    contentDescription = "交换",
+                    onClick = onExchangeClick,
+                )
+            }
+
+            // 标题
+            if (!title.isNullOrEmpty()) {
+                Text(
+                    modifier = Modifier.padding(
+                        bottom = AppBarConfig.NavigationPadding,
+                    ),
+                    text = title,
+                    color = LocalContentColor.current,
+                    fontSize = AppBarConfig.TitleTextSize.value.sp,
+                    lineHeight = AppBarConfig.TitleTextSize.value.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            if (isNavigationMenu) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(
+                        items = menus,
+                        key = { it.key },
+                    ) { menuItem ->
+                        AppBarNavigationItem(
+                            data = menuItem,
+                            checked = checkedKey == menuItem.key,
+                            onClick = onMenuItemClick,
+                            modifier = Modifier.animateItem(),
+                        )
+                    }
+                }
+            } else {
+                HorizontalAppBarMenus(
+                    menus = menus,
+                    isNavigationMenu = isNavigationMenu,
+                    checkedKey = checkedKey,
+                    appBarState = appBarState,
+                    onMenuItemClick = onMenuItemClick,
+                )
+            }
         }
     }
 }

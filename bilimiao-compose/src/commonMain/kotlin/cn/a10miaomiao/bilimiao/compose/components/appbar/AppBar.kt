@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -26,6 +25,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -87,44 +87,47 @@ fun AppBar(
     val safePadding = WindowInsets.safeDrawing.only(
         WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
     ).asPaddingValues()
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f))
-            .padding(safePadding)
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier.fillMaxWidth()
     ) {
-        // 标题区域
-        AppBarTitle(
-            title = title,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(AppBarConfig.TitleHeight)
-        )
+        Column(
+            modifier = Modifier.padding(safePadding)
+        ) {
+            // 标题区域
+            AppBarTitle(
+                title = title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(AppBarConfig.TitleHeight)
+            )
 
-        // 菜单区域
-        AppBarMenuRow(
-            canBack = canBack,
-            showPointer = showPointer,
-            pointerOrientation = pointerOrientation,
-            showExchange = showExchange,
-            menus = menus,
-            isNavigationMenu = isNavigationMenu,
-            checkedKey = checkedKey,
-            menuExpanded = menuExpanded,
-            appBarState = appBarState,
-            onBackClick = onBackClick,
-            onMenuClick = onMenuClick,
-            onMenuItemClick = onMenuItemClick,
-            onPointerClick = onPointerClick,
-            onExchangeClick = onExchangeClick,
-        )
+            // 菜单区域
+            AppBarMenuRow(
+                canBack = canBack,
+                showPointer = showPointer,
+                pointerOrientation = pointerOrientation,
+                showExchange = showExchange,
+                menus = menus,
+                isNavigationMenu = isNavigationMenu,
+                checkedKey = checkedKey,
+                menuExpanded = menuExpanded,
+                appBarState = appBarState,
+                onBackClick = onBackClick,
+                onMenuClick = onMenuClick,
+                onMenuItemClick = onMenuItemClick,
+                onPointerClick = onPointerClick,
+                onExchangeClick = onExchangeClick,
+            )
 
-//        // 分割线
-//        HorizontalDivider(
-//            modifier = Modifier.fillMaxWidth(),
-//            thickness = AppBarConfig.DividerHeight,
-//            color = MaterialTheme.colorScheme.outlineVariant,
-//        )
+            //        // 分割线
+            //        HorizontalDivider(
+            //            modifier = Modifier.fillMaxWidth(),
+            //            thickness = AppBarConfig.DividerHeight,
+            //            color = MaterialTheme.colorScheme.outlineVariant,
+            //        )
+        }
     }
 }
 
