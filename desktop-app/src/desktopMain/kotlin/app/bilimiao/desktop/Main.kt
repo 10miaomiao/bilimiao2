@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,9 +26,11 @@ import app.bilimiao.desktop.window.HandleWindowsWindowProc
 import app.bilimiao.desktop.window.WindowFrame
 import app.bilimiao.desktop.window.WindowsWindowUtils
 import app.bilimiao.desktop.window.rememberLayoutHitTestOwner
+import app.bilimiao.desktop.window.LocalTitleBarThemeController
 import cn.a10miaomiao.bilimiao.compose.MainComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainComposeNavigator
 import cn.a10miaomiao.bilimiao.compose.StartViewState
+import cn.a10miaomiao.bilimiao.compose.isAppDarkTheme
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
@@ -222,6 +225,20 @@ fun main() {
 
                             val appState by storeHolder.appStore.stateFlow.collectAsState()
 
+                            val titleBarThemeController = LocalTitleBarThemeController.current
+                            val themeState = appState.theme
+                            val titleBarThemeOwner = remember { Any() }
+                            if (themeState != null) {
+                                val isDark = isAppDarkTheme(themeState)
+                                LaunchedEffect(titleBarThemeController, isDark) {
+                                    titleBarThemeController?.requestTheme(titleBarThemeOwner, isDark)
+                                }
+                            }
+                            DisposableEffect(titleBarThemeController) {
+                                onDispose {
+                                    titleBarThemeController?.removeTheme(titleBarThemeOwner)
+                                }
+                            }
                             MainComposeHost(
                                 navigator = composeNavigator,
                                 hostDi = hostDi,
