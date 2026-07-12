@@ -99,8 +99,9 @@ class DanmakuEngine(
     @Volatile
     var externalPlayerPosition: Long = -1L
 
-    /** 推断的播放倍速，由播放器位置变化自动计算，无需外部设置 */
-    private var inferredPlaybackSpeed: Float = 1.0f
+    /** 最近一次推断的播放倍速（不平滑，直接用最近一次的值） */
+    private var lastInferredSpeed: Float = 1.0f
+
 
     /** 上次同步的播放器位置，用于检测位置是否真正变化 */
     private var lastSyncedPosition: Long = -1L
@@ -262,8 +263,11 @@ class DanmakuEngine(
         }
         mRenderingState.reset()
         mDrawTimes.clear()
-        mTimeBase = PlatformClock.uptimeMillis() - (pausedPosition / inferredPlaybackSpeed).toLong()
+        mTimeBase = PlatformClock.uptimeMillis() - pausedPosition
         timer.update(pausedPosition)
+        lastSyncedPosition = -1
+        lastSyncedWallTime = 0
+        lastInferredSpeed = 1.0f
         drawTask?.start()
         notifyRendering()
         mInSeekingAction = false
@@ -291,10 +295,9 @@ class DanmakuEngine(
      */
     fun seekTo(ms: Long) {
         mInSeekingAction = true
-        mDesireSeekingTime = ms
         stopRenderLoop()
         val deltaMs = ms - timer.currMillisecond
-        mTimeBase -= (deltaMs / inferredPlaybackSpeed).toLong()
+        mTimeBase -= deltaMs
         timer.update(ms)
         mContext?.mGlobalFlagValues?.updateMeasureFlag()
         drawTask?.seek(ms)
@@ -528,13 +531,10 @@ class DanmakuEngine(
                         val posDelta = extPos - lastSyncedPosition
                         val wallDelta = now - lastSyncedWallTime
                         // 推断实际播放倍速：播放器位置增量 / wall clock 增量
-                        if (wallDelta > 0 && posDelta > 0) {
-                            val inferredSpeed = posDelta.toFloat() / wallDelta.toFloat()
-                            // 平滑倍速推断，避免单次抖动
-                            inferredPlaybackSpeed = inferredPlaybackSpeed * 0.7f + inferredSpeed * 0.3f
-                            // 限制在合理范围
-                            if (inferredPlaybackSpeed < 0.1f) inferredPlaybackSpeed = 0.1f
-                            if (inferredPlaybackSpeed > 16f) inferredPlaybackSpeed = 16f
+                        if (wallDelta > 0 && posDelta >= 0) {
+                            lastInferredSpeed = posDelta.toFloat() / wallDelta.toFloat()
+                            if (lastInferredSpeed < 0.1f) lastInferredSpeed = 0.1f
+                            if (lastInferredSpeed > 16f) lastInferredSpeed = 16f
                         }
                     }
                     lastSyncedPosition = extPos
@@ -544,16 +544,24 @@ class DanmakuEngine(
                     if (kotlin.math.abs(syncDelta) > 2000) {
                         // 大偏差：播放器 seek 或缓冲跳转，直接对齐
                         timer.update(extPos)
-                        mTimeBase = now - (extPos / inferredPlaybackSpeed).toLong()
+                        mTimeBase = now
                         mRemainingTime = 0
                         mLastDeltaTime = 0
                         synchronized(mDrawTimes) { mDrawTimes.clear() }
                     }
                 }
 
-                // wall clock 平滑推进，按推断倍速缩放
-                val time = ((now - mTimeBase) * inferredPlaybackSpeed).toLong()
-                var gapTime = time - timer.currMillisecond
+                // 计算目标弹幕时间：
+                // 以最近一次播放器位置为锚点，用 wall clock 和推断倍速线性插值
+                // targetTime = extPos + (now - lastSyncedWallTime) * speed
+                val targetTime = if (lastSyncedPosition >= 0 && lastSyncedWallTime > 0) {
+                    lastSyncedPosition + ((now - lastSyncedWallTime) * lastInferredSpeed).toLong()
+                } else {
+                    now - mTimeBase
+                }
+
+                // DFM 原始平滑逻辑：逐步逼近 targetTime
+                var gapTime = targetTime - timer.currMillisecond
                 val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
                 val d: Long
                 if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME) {
