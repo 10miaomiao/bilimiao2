@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfo
 import org.jetbrains.skia.Image
-import javax.imageio.ImageIO
 
 class AppInfoDesktop : AppInfo {
 
@@ -27,14 +26,16 @@ class AppInfoDesktop : AppInfo {
     @Composable
     override fun AppIcon(modifier: Modifier) {
         val painter = remember {
-            val awtImage = ImageIO.read(javaClass.getResourceAsStream("/ic_launcher.png"))
-            val bytes = java.io.ByteArrayOutputStream().also { ImageIO.write(awtImage, "png", it) }.toByteArray()
-            BitmapPainter(Image.makeFromEncoded(bytes).toComposeImageBitmap())
+            val bytes = javaClass.getResourceAsStream("/bilimiao.png")
+                ?.use { it.readAllBytes() }
+            bytes?.let { BitmapPainter(Image.makeFromEncoded(it).toComposeImageBitmap()) }
         }
-        Image(
-            painter = painter,
-            contentDescription = "app icon",
-            modifier = modifier,
-        )
+        if (painter != null) {
+            Image(
+                painter = painter,
+                contentDescription = "app icon",
+                modifier = modifier,
+            )
+        }
     }
 }
