@@ -59,7 +59,6 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerViews
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import com.a10miaomiao.bilimiao.comm.mypage.MyPageConfigInfo
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.scanner.BilimiaoScanner
 import com.a10miaomiao.bilimiao.comm.utils.BiliGeetestUtil
@@ -166,7 +165,6 @@ class MainActivity : AppCompatActivity(), DIAware {
             bindSingleton { bottomSheetState }
         }
     }
-    private var pageConfig: MyPageConfigInfo? = null
     private var pendingDeepLink: Uri? = null
     private var lastExitBackPressedTime = 0L
 
@@ -253,17 +251,6 @@ class MainActivity : AppCompatActivity(), DIAware {
                         else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     }
                 }
-            }
-        }
-        lifecycleScope.launch {
-            pageConfigState.collectConfig {
-                setMyPageConfig(
-                    MyPageConfigInfo(
-                        title = it.title,
-                        menu = it.menu,
-                        search = it.search,
-                    )
-                )
             }
         }
     }
@@ -365,31 +352,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         }
     }
 
-    private fun setMyPageConfig(config: MyPageConfigInfo) {
-        if (config.title.isBlank()) {
-            return
-        }
-        pageConfig = config
-        val searchConfig = config.search
-        startViewState.setPageSearchMethod(
-            if (searchConfig?.name.isNullOrBlank()) {
-                null
-            } else {
-                object : cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod {
-                    override val name: String
-                        get() = searchConfig?.name ?: ""
 
-                    override fun onSearch(keyword: String) {
-                        searchSelfPage(keyword)
-                    }
-                }
-            }
-        )
-    }
-
-    fun searchSelfPage(keyword: String) {
-        pageConfigState.onSearchSelfPage(keyword)
-    }
 
     fun openBottomSheet(page: ComposePage) {
         bottomSheetState.open(page)
@@ -399,13 +362,6 @@ class MainActivity : AppCompatActivity(), DIAware {
         composeNavigator.goBackHome()
     }
 
-
-    fun openSearchDialog() {
-        val searchConfig = pageConfig?.search
-        val keyword = searchConfig?.keyword ?: ""
-        val mode = if (searchConfig?.name.isNullOrBlank()) 0 else 1
-        startViewState.openSearchDialog(keyword, mode, false)
-    }
 
     fun setWindowInsetsAndroidL() {
         val rectangle = Rect()
