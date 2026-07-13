@@ -16,7 +16,7 @@ kotlin {
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
     androidTarget {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
     jvm("desktop")
@@ -51,6 +51,8 @@ kotlin {
                 implementation(libs.compose.navigation)
                 implementation(libs.compose.material.icons.extended.kmp)
                 implementation(libs.androidx.datastore.preferences)
+                implementation(libs.compose.preference)
+                implementation("org.jetbrains.compose.material3.adaptive:adaptive:1.3.0-beta02")
 
                 implementation(project(":bilimiao-comm"))
             }
@@ -67,14 +69,11 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.android)
                 implementation(libs.activity.compose)
                 implementation(libs.compose.material.icons.extended)
-                implementation(libs.compose.material3.window.size)
-                implementation(libs.compose.material3.adaptive)
 
                 implementation(libs.accompanist.drawablepainter)
                 implementation(libs.glide)
                 implementation(libs.glide.compose)
                 implementation(libs.qrose)
-                implementation(libs.compose.preference)
 
                 implementation(libs.kodein.di)
                 implementation(libs.kodein.di.compose)
@@ -130,8 +129,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     buildFeatures {

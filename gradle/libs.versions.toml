@@ -39,7 +39,7 @@ activityCompose = "1.9.0"
 glideCompose = "1.0.0-beta01"
 coil = "3.1.0"
 qrose = "1.0.1"
-composePreference = "1.1.1"
+composePreference = "2.2.0"
 reorderable = "2.5.1"
 # svg to compose
 svgToCompose = "0.11.0"
@@ -84,8 +84,6 @@ compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 compose-material-icons-extended-kmp = { group = "org.jetbrains.compose.material", name = "material-icons-extended", version = "1.7.3" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-compose-material3-window-size = { group = "androidx.compose.material3", name = "material3-window-size-class" }
-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive-android" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -129,7 +127,7 @@ glide-compose = { group = "com.github.bumptech.glide", name = "compose", version
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 qrose = { group = "io.github.alexzhirkevich", name = "qrose", version.ref = "qrose" }
-compose-preference = { group = "me.zhanghai.compose.preference", name = "library", version.ref = "composePreference" }
+compose-preference = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "composePreference" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
 # mediamp
 mediamp-api = { module = "org.openani.mediamp:mediamp-api", version.ref = "mediamp" }
