@@ -26,6 +26,9 @@ import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.BiliDownloadEntryInfo
+import cn.a10miaomiao.bilimiao.compose.common.platform.Platform
+import cn.a10miaomiao.bilimiao.compose.common.platform.PlatformInfo
+import cn.a10miaomiao.bilimiao.compose.common.platform.platformInfo
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResponseResult
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -189,6 +192,10 @@ internal class DownloadBangumiCreatePageViewModel(
     }
 
     fun startDownload() {
+        if (platformInfo.platform == Platform.DESKTOP) {
+            GlobalToaster.show("桌面端暂不支持下载视频")
+            return
+        }
         if (_seasonDetail == null) {
             GlobalToaster.show("番剧信息未加载")
             return

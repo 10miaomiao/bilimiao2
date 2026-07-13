@@ -45,6 +45,8 @@ import bilibili.app.archive.v1.Page
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.BiliDownloadEntryInfo
+import cn.a10miaomiao.bilimiao.compose.common.platform.Platform
+import cn.a10miaomiao.bilimiao.compose.common.platform.platformInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
@@ -156,6 +158,10 @@ class VideoDownloadDialogState(
     }
 
     fun startDownload() {
+        if (platformInfo.platform == Platform.DESKTOP) {
+            showSnackbar("桌面端暂不支持下载视频")
+            return
+        }
         if (quality == 0) {
             showSnackbar("请选择画质")
             return

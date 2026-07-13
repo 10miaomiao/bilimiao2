@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.common.download
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.CurrentDownloadInfo
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

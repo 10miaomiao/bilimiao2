@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 
 @Composable
 fun AutoSheetDialog(
@@ -18,7 +19,11 @@ fun AutoSheetDialog(
     onPreDismiss: (() -> Boolean)? = null,
     content: @Composable () -> Unit
 ) {
-    val direction = DirectionState.BOTTOM
+    val direction = if (isCompactWindow()) {
+        DirectionState.BOTTOM
+    } else {
+        DirectionState.NONE
+    }
 
     AnyPopDialog(
         onDismiss = onDismiss,
@@ -28,7 +33,16 @@ fun AutoSheetDialog(
                 modifier = Modifier
                     .widthIn(max = 600.dp)
                     .safeDrawingPadding()
-                    .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
+                    .let { modifier ->
+                        if (direction == DirectionState.NONE) {
+                            modifier
+                                .padding(horizontal = 10.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                        } else {
+                            modifier
+                                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
+                        }
+                    }
                     .then(modifier),
             ) {
                 content()

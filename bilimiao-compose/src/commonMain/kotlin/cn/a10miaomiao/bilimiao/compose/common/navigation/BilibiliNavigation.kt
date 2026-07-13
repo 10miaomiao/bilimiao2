@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.common.navigation
 
+import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 
@@ -106,7 +107,7 @@ object BilibiliNavigation {
             || "bilibili.tv" in host
             || "b23.tv" in host
             || "b23.snm0516.aisee.tv" in host) {
-            pageNavigation.navigateByUri("bilimiao://web?url=$url")
+            pageNavigation.navigate(WebPage(fullUrl))
         } else {
             pageNavigation.launchWebBrowser(fullUrl)
         }
