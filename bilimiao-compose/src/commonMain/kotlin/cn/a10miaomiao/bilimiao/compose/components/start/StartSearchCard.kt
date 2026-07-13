@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
+import cn.a10miaomiao.bilimiao.compose.common.platform.Platform
+import cn.a10miaomiao.bilimiao.compose.common.platform.platformInfo
 
 @Composable
 fun StartSearchCard(
@@ -55,15 +57,17 @@ fun StartSearchCard(
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Icon(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(40.dp)
-                    .clickable(onClick = onScannerClick),
-                imageVector = Icons.Filled.CameraAlt,
-                tint = MaterialTheme.colorScheme.onSurface,
-                contentDescription = null
-            )
+            if (platformInfo.platform == Platform.ANDROID) {
+                Icon(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(40.dp)
+                        .clickable(onClick = onScannerClick),
+                    imageVector = Icons.Filled.CameraAlt,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    contentDescription = null
+                )
+            }
         }
     }
 }
