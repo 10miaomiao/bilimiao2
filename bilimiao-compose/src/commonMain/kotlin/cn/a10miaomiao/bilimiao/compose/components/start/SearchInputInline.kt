@@ -87,7 +87,7 @@ fun SearchInputInline(
     val viewModel: SearchInputViewModel = diViewModel { SearchInputViewModel(it) }
     val pageNavigation: PageNavigation by rememberInstance()
 
-    var text by remember {
+    var text by remember(initKeyword) {
         mutableStateOf(
             TextFieldValue(
                 text = initKeyword,
@@ -95,7 +95,7 @@ fun SearchInputInline(
             )
         )
     }
-    var mode by remember { mutableStateOf(initMode) }
+    var mode by remember(initMode) { mutableStateOf(initMode) }
     val focusRequester = remember { FocusRequester() }
     var isEditingHistory by remember { mutableStateOf(false) }
 
@@ -191,8 +191,8 @@ fun SearchInputInline(
                     modifier = Modifier
                         .fillMaxWidth(),
                     isCompact = false,
-                    text = text.text,
-                    onTextChange = { text = TextFieldValue(it, TextRange(it.length)) },
+                    text = text,
+                    onTextChange = { text = it },
                     onSearch = ::startSearch,
                     focusRequester = focusRequester,
                     mode = mode,
@@ -319,8 +319,8 @@ fun SearchInputInline(
                     modifier = Modifier
                         .fillMaxWidth(),
                     isCompact = true,
-                    text = text.text,
-                    onTextChange = { text = TextFieldValue(it, TextRange(it.length)) },
+                    text = text,
+                    onTextChange = { text = it },
                     onSearch = ::startSearch,
                     focusRequester = focusRequester,
                     mode = mode,
@@ -356,8 +356,8 @@ fun SearchInputInline(
 private fun SearchTextField(
     modifier: Modifier = Modifier,
     isCompact: Boolean,
-    text: String,
-    onTextChange: (String) -> Unit,
+    text: TextFieldValue,
+    onTextChange: (TextFieldValue) -> Unit,
     onSearch: (String) -> Unit,
     focusRequester: FocusRequester,
     mode: Int,
@@ -402,10 +402,10 @@ private fun SearchTextField(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            if (text.isNotEmpty()) {
+                            if (text.text.isNotEmpty()) {
                                 IconButton(
                                     modifier = Modifier.size(24.dp),
-                                    onClick = { onTextChange("") },
+                                    onClick = { onTextChange(TextFieldValue()) },
                                 ) {
                                     Icon(
                                         Icons.Default.Close,
@@ -416,8 +416,8 @@ private fun SearchTextField(
                                 }
                             }
                             TextButton(
-                                onClick = { onSearch(text) },
-                                enabled = text.isNotEmpty()
+                                onClick = { onSearch(text.text) },
+                                enabled = text.text.isNotEmpty()
                             ) {
                                 Text("搜索")
                             }
@@ -425,7 +425,7 @@ private fun SearchTextField(
                     },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(
-                        onSearch = { onSearch(text) }
+                        onSearch = { onSearch(text.text) }
                     ),
                     shape = MaterialTheme.shapes.large,
                     colors = TextFieldDefaults.colors(

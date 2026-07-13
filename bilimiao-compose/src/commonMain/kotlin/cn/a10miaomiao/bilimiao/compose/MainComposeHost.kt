@@ -186,6 +186,21 @@ fun MainComposeHost(
         appBarState.syncExpandedMenusWith(menus)
         appBarState.showBar()
         appBarState.showMenu()
+        // 同步 pageSearchMethod，使搜索弹窗的"站内搜索"模式可用
+        val searchConfig = pageConfig.search
+        startViewState.setPageSearchMethod(
+            if (searchConfig?.name.isNullOrBlank()) {
+                null
+            } else {
+                object : cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod {
+                    override val name: String
+                        get() = searchConfig?.name ?: ""
+                    override fun onSearch(keyword: String) {
+                        pageConfigState.onSearchSelfPage(keyword)
+                    }
+                }
+            }
+        )
     }
     LaunchedEffect(onBackClick) {
         appBarState.setOnBackClickListener(onBackClick)
