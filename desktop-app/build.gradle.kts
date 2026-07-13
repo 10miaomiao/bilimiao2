@@ -86,7 +86,8 @@ compose.desktop {
             appResourcesRootDir.set(project.layout.projectDirectory.dir("appResources"))
             modules(
                 "java.base",
-                "java.desktop"
+                "java.desktop",
+                "jdk.unsupported",
             )
             windows {
                 iconFile.set(project.file("src/icon/bilimiao.ico"))
