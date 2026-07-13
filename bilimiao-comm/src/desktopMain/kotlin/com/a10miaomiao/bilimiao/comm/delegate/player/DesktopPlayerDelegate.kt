@@ -5,6 +5,10 @@ import cn.a10miaomiao.bilimiao.danmaku.parser.BiliDanmakuParser
 import cn.a10miaomiao.bilimiao.danmaku.parser.IDataSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
+import com.a10miaomiao.bilimiao.comm.entity.player.toVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
@@ -314,6 +318,7 @@ class DesktopPlayerDelegate(
                         } else if (!_isCompleted.value) {
                             _isCompleted.value = true
                             _isPlaying.value = false
+                        onAutoCompletion()
                             return@let
                         }
                     }
@@ -335,6 +340,49 @@ class DesktopPlayerDelegate(
                     source.historyReport(_currentPosition.value / 1000)
                 }
             }
+        }
+    }
+
+    /**
+     * 播放完成后的自动播放逻辑（对齐安卓版 PlayerController.onAutoCompletion）
+     */
+    private fun onAutoCompletion() {
+        val source = _currentSource.value ?: return
+        coroutineScope.launch {
+            val (order, orderRandom) = SettingPreferences.mapPreferences {
+                val order = it[SettingPreferences.PlayerOrder] ?: SettingConstants.PLAYER_ORDER_DEFAULT
+                val orderRandom = it[SettingPreferences.PlayerOrderRandom] ?: false
+                order to orderRandom
+            }
+            val isLoop = order and SettingConstants.PLAYER_ORDER_LOOP != 0
+            val nextPlayerSourceInfo = source.next()
+            if (nextPlayerSourceInfo is VideoPlayerSource
+                && order and SettingConstants.PLAYER_ORDER_NEXT_P != 0
+            ) {
+                // 自动播放下一P
+                openPlayer(nextPlayerSourceInfo)
+                return@launch
+            } else if (nextPlayerSourceInfo is BangumiPlayerSource
+                && order and SettingConstants.PLAYER_ORDER_NEXT_EPISODE != 0
+            ) {
+                // 自动播放下一集
+                openPlayer(nextPlayerSourceInfo)
+                return@launch
+            }
+            if (order and SettingConstants.PLAYER_ORDER_NEXT_VIDEO != 0) {
+                // 自动下一个视频
+                val nextVideo = playerStore.nextVideo(orderRandom, isLoop)
+                if (nextVideo != null) {
+                    openPlayer(nextVideo.toVideoPlayerSource())
+                    return@launch
+                }
+            }
+            if (isLoop) {
+                // 单个视频循环
+                source.isLoop = true
+                openPlayer(source)
+            }
+            // 否则保持 _isCompleted = true 状态，显示播放完成覆盖层
         }
     }
 
