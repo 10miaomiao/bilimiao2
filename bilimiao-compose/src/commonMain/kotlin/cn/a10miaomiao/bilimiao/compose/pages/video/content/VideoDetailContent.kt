@@ -60,6 +60,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
+import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerAnchorBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoCoverBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.components.VideoInfoBox
@@ -188,24 +189,26 @@ fun VideoDetailContent(
             span = { GridItemSpan(maxLineSpan) }
         ) {
             Column {
-                AnimatedVisibility(
-                    visible = showCover,
-                ) {
-                    VideoCoverBox(
+                if (showCover) {
+                    PlayerAnchorBox(
+                        aid = arcData.aid.toString(),
                         modifier = Modifier
                             .aspectRatio(16f / 9f)
                             .padding(10.dp),
-                        aid = arcData.aid,
-                        title = arcData.title,
-                        pic = arcData.pic,
-                        duration = arcData.duration,
-                        progress = videoHistory?.progress ?: 0L,
-                        progressTitle = videoHistory?.cid?.let { cid ->
-                            videoPages.find { it.cid == cid }?.part
-                        } ?: "",
-                        onClick = viewModel::playVideo,
-                        onLongClick = viewModel::openCoverActivity
-                    )
+                    ) {
+                        VideoCoverBox(
+                            aid = arcData.aid,
+                            title = arcData.title,
+                            pic = arcData.pic,
+                            duration = arcData.duration,
+                            progress = videoHistory?.progress ?: 0L,
+                            progressTitle = videoHistory?.cid?.let { cid ->
+                                videoPages.find { it.cid == cid }?.part
+                            } ?: "",
+                            onClick = viewModel::playVideo,
+                            onLongClick = viewModel::openCoverActivity
+                        )
+                    }
                 }
                 VideoUpperBox(
                     author = arcData.author,

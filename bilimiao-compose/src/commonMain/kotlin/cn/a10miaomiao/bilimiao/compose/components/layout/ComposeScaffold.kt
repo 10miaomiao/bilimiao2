@@ -66,6 +66,7 @@ import cn.a10miaomiao.bilimiao.compose.PlayerState
 import cn.a10miaomiao.bilimiao.compose.StartViewState
 
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
@@ -106,6 +107,7 @@ fun ComposeScaffold(
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
     val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
     val playerVideoRatio = playerState.playerVideoRatio
+    val anchorBounds = playerState.anchorBounds
     val drawerState = startViewState.drawerState
 
     val appBarNestedScrollConnection = remember(appBarState, orientation) {
@@ -159,6 +161,7 @@ fun ComposeScaffold(
         portraitPlayerLayoutState,
         floatingPlayerLayoutState,
         playerVideoRatio,
+        anchorBounds,
     ) {
         ComposeScaffoldPlayerLayoutState(
             showPlayer = showPlayer,
@@ -167,6 +170,7 @@ fun ComposeScaffold(
             portraitState = portraitPlayerLayoutState,
             floatingState = floatingPlayerLayoutState,
             playerVideoRatio = playerVideoRatio,
+            anchorBounds = anchorBounds,
         )
     }
     val drawerController = rememberComposeDrawerController(
@@ -310,6 +314,7 @@ fun ComposeScaffold(
                 val contentPlaceable = subcompose("content") {
                     CompositionLocalProvider(
                         LocalContentInsets provides layoutResult.contentInsets,
+                        LocalPlayerState provides playerState,
                     ) {
                         Box(
                             modifier = Modifier
@@ -660,6 +665,7 @@ internal fun PlayerLayer(
     val displayMode = when {
         !playerState.showPlayer -> PlayerDisplayMode.Hidden
         playerState.fullScreenPlayer -> PlayerDisplayMode.Fullscreen
+        playerState.anchorBounds != null -> PlayerDisplayMode.AnchorOverlay
         orientation == ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
         orientation == ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
         else -> PlayerDisplayMode.Hidden
@@ -735,6 +741,7 @@ internal fun PlayerLayer(
             PlayerDisplayMode.Hidden,
             PlayerDisplayMode.Fullscreen,
             PlayerDisplayMode.EmbeddedPortrait,
+            PlayerDisplayMode.AnchorOverlay,
             -> {
                 currentWidth = defaultWidth
                 currentHeight = defaultHeight
@@ -754,7 +761,7 @@ internal fun PlayerLayer(
                     )
                     offsetX = clampedX
                     offsetY = clampedY
-                    if (with(density) { clampedX.toPx() } != floatingState.offsetXPx || with(density) { clampedY.toPx() } != floatingState.offsetYPx) {
+                    if (with(density) { clampedX.toPx() } != floatingState.offsetXPx || with(density) { clampedY.toPx() } != floatingState.offsetXPx) {
                         playerState.updateFloatingPlayerLayoutState(
                             floatingState.copy(
                                 offsetXPx = with(density) { clampedX.toPx() },
@@ -876,6 +883,10 @@ internal fun PlayerLayer(
                     Modifier
                         .background(Color.Black)
                         .padding(top = portraitTopInset)
+                        .size(currentWidth, currentHeight)
+                } else if (displayMode == PlayerDisplayMode.AnchorOverlay) {
+                    Modifier
+                        .background(Color.Black)
                         .size(currentWidth, currentHeight)
                 } else {
                     Modifier.size(currentWidth, currentHeight)

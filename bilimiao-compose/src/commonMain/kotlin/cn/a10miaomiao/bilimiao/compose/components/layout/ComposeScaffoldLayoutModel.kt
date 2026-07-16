@@ -195,6 +195,7 @@ private fun Density.calculatePlayerBounds(
             right = viewportWidth.roundToPx().toFloat(),
             bottom = viewportHeight.roundToPx().toFloat(),
         )
+        PlayerDisplayMode.AnchorOverlay -> playerState.anchorBounds
         PlayerDisplayMode.EmbeddedPortrait -> {
             val maxHeightByRatio = viewportWidth.value / playerState.playerVideoRatio
             val maxHeight = min(maxHeightByRatio, viewportHeight.value / 2f).dp
