@@ -148,6 +148,7 @@ fun MainComposeHost(
         portraitPlayerLayoutState,
         floatingPlayerLayoutState,
         playerState.playerVideoRatio,
+        playerState.anchorBounds,
     ) {
         ComposeScaffoldPlayerLayoutState(
             showPlayer = showPlayer,
@@ -156,6 +157,7 @@ fun MainComposeHost(
             portraitState = portraitPlayerLayoutState,
             floatingState = floatingPlayerLayoutState,
             playerVideoRatio = playerState.playerVideoRatio,
+            anchorBounds = playerState.anchorBounds,
         )
     }
     LaunchedEffect(navController) {

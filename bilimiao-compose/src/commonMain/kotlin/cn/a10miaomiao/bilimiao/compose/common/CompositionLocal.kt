@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import cn.a10miaomiao.bilimiao.compose.PlayerState
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 
@@ -23,3 +24,10 @@ internal val LocalEmitter = staticCompositionLocalOf<SharedFlowEmitter> {
 
 @Composable
 fun localEmitter() = LocalEmitter.current
+
+internal val LocalPlayerState = staticCompositionLocalOf<PlayerState> {
+    noLocalProvidedFor("PlayerState")
+}
+
+@Composable
+fun localPlayerState() = LocalPlayerState.current

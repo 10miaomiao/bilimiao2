@@ -73,6 +73,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.layout.DataDrivenNavigator
 import cn.a10miaomiao.bilimiao.compose.components.layout.DoubleColumnAutofitLayout
+import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerAnchorBox
 import cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable.rememberChainScrollableLayoutState
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliFailBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
@@ -92,7 +93,6 @@ import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
-import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -100,7 +100,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
@@ -170,8 +169,6 @@ private fun VideoDetailPageContent(
     detailData: ViewReply,
     arcData: Arc,
 ) {
-    val playerStore by rememberInstance<PlayerStore>()
-    val playerState by playerStore.stateFlow.collectAsState()
 
     val mainReplyViewModel = diViewModel(
         key = "main-reply-${arcData.aid}"
@@ -185,14 +182,9 @@ private fun VideoDetailPageContent(
 
     val videoPages = detailData.pages
 
-    val isShowCover = playerState.aid != arcData.aid.toString()
     val headerCoverHeight = 200.dp
-    val headerHeight = remember(isShowCover, windowInsets.topDp) {
-        if (isShowCover) {
-            windowInsets.topDp.dp + headerCoverHeight
-        } else {
-            windowInsets.topDp.dp
-        }
+    val headerHeight = remember(windowInsets.topDp) {
+        windowInsets.topDp.dp + headerCoverHeight
     }
 
     val scope = rememberCoroutineScope()
@@ -228,12 +220,14 @@ private fun VideoDetailPageContent(
                         Modifier.height(windowInsets.topDp.dp)
                     )
                     val videoHistory = detailData.history
-                    AnimatedVisibility(isShowCover) {
+                    PlayerAnchorBox(
+                        aid = arcData.aid.toString(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(headerCoverHeight)
+                            .padding(8.dp),
+                    ) {
                         VideoCoverBox(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(headerCoverHeight)
-                                .padding(8.dp),
                             aid = arcData.aid,
                             title = arcData.title,
                             pic = arcData.pic,
@@ -254,7 +248,7 @@ private fun VideoDetailPageContent(
                 VideoDetailContent(
                     viewModel = viewModel,
                     innerPadding = innerPadding,
-                    showCover = isShowCover,
+                    showCover = true,
                     detailData = detailData,
                     arcData = arcData,
                     isActive = true,

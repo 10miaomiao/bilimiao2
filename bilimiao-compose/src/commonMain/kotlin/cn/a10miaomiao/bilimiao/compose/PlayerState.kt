@@ -1,7 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import androidx.compose.runtime.mutableStateOf
-
+import androidx.compose.ui.geometry.Rect
 data class PlayerPortraitLayoutState(
     val minHeightPx: Int = 0,
     val currentHeightPx: Int = 0,
@@ -40,6 +40,9 @@ class PlayerState(
     private val _playerVideoRatio = mutableStateOf(16f / 9f)
     val playerVideoRatio get() = _playerVideoRatio.value
 
+    private val _anchorBounds = mutableStateOf<Rect?>(null)
+    val anchorBounds get() = _anchorBounds.value
+
     fun setShowPlayer(value: Boolean) {
         _showPlayer.value = value
     }
@@ -67,6 +70,10 @@ class PlayerState(
 
     fun setPlayerVideoRatio(ratio: Float) {
         _playerVideoRatio.value = ratio
+    }
+
+    fun setAnchorBounds(bounds: Rect?) {
+        _anchorBounds.value = bounds
     }
 
 }
