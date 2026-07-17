@@ -1,0 +1,48 @@
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:99:35 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:106:13 Unresolved reference 'DesktopPlatformWindowInsets'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:232:40 Argument type mismatch: actual type is 'Float', but 'Offset' was expected.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:232:43 Too many arguments for 'fun contains(offset: Offset): Boolean'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:233:40 Argument type mismatch: actual type is 'Float', but 'Offset' was expected.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:233:43 Too many arguments for 'fun contains(offset: Offset): Boolean'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:234:40 Argument type mismatch: actual type is 'Float', but 'Offset' was expected.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:234:43 Too many arguments for 'fun contains(offset: Offset): Boolean'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:323:51 Unresolved reference 'BackToWindow'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:324:49 Unresolved reference 'Restore'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:325:43 Unresolved reference 'Maximize'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:332:38 Unresolved reference 'Close'.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:498:47 Syntax error: Expecting ';' after the last enum entry or '}' to close enum class body.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:500:27 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:505:5 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:505:58 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:511:17 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:512:40 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:513:20 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:514:19 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:515:21 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:516:22 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:519:30 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:520:17 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:520:26 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:520:37 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:521:30 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:522:17 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:522:26 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:522:37 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:523:30 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:524:46 Unstable API for use only between compose-ui modules sharing the same exact version, subject to change without notice in major, minor, or patch releases.
+e: file:///D:/AndroidStudioProjects/bilimiao2/desktop-app/src/desktopMain/kotlin/app/bilimiao/desktop/window/WindowsWindowFrame.kt:530:2 Syntax error: Expecting '}' to close enum class body.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':desktop-app:compileKotlinDesktop' (registered in build file 'desktop-app\build.gradle.kts').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 46s
