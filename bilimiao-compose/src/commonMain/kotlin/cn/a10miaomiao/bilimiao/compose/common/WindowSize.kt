@@ -2,7 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.common
 
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
-import androidx.window.core.layout.WindowWidthSizeClass
+import androidx.window.core.layout.WindowSizeClass
 
 /**
  * 判断当前窗口宽度是否属于 Compact 等级（< 600dp）。
@@ -12,5 +12,5 @@ import androidx.window.core.layout.WindowWidthSizeClass
 @Composable
 fun isCompactWindow(): Boolean {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    return windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
+    return !windowSizeClass.isWidthAtLeastBreakpoint(600)
 }

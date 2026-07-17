@@ -1,8 +1,8 @@
 
 plugins {
     id("com.android.library")
-    id("kotlin-android")
-    id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.parcelize")
 }
 
 android {
@@ -10,7 +10,6 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 32
 
         version = "1.0"
 
