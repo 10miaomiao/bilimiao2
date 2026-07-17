@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.MutableWindowInsets
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,7 +45,6 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
@@ -54,7 +52,6 @@ import androidx.compose.ui.text.platform.FontLoadResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.FrameWindowScope
@@ -96,21 +93,16 @@ fun FrameWindowScope.WindowsWindowFrame(
         }
 
         val density = LocalDensity.current
-        val layoutDirection = LocalLayoutDirection.current
         val titleBarHeightPx = frameState.titleBarInsets.getTop(density)
-        val safeDrawing = WindowInsets.safeDrawing
-        val safeTop = safeDrawing.getTop(density)
-        val safeBottom = safeDrawing.getBottom(density)
-        val safeLeft = safeDrawing.getLeft(density, layoutDirection)
-        val safeRight = safeDrawing.getRight(density, layoutDirection)
-        val platformWindowInsets = remember(titleBarHeightPx, safeTop, safeBottom, safeLeft, safeRight) {
-            DesktopPlatformWindowInsets(safeLeft, safeTop, safeRight, safeBottom, titleBarHeightPx)
+        val platformWindowInsets = androidx.compose.ui.platform.LocalPlatformWindowInsets.current
+        val desktopWindowInsets = remember(platformWindowInsets, titleBarHeightPx) {
+            DesktopPlatformWindowInsets(platformWindowInsets, titleBarHeightPx)
         }
         CompositionLocalProvider(
             LocalTitleBarInsets provides frameState.titleBarInsets,
             LocalCaptionButtonInsets provides frameState.captionButtonsInsets,
             LocalTitleBarThemeController provides frameState.titleBarThemeController,
-            androidx.compose.ui.platform.LocalPlatformWindowInsets provides platformWindowInsets,
+            androidx.compose.ui.platform.LocalPlatformWindowInsets provides desktopWindowInsets,
         ) {
             content()
         }
@@ -501,33 +493,20 @@ private fun Rect.contains(x: Float, y: Float): Boolean = x >= left && x < right 
 
 @OptIn(InternalComposeUiApi::class)
 private class DesktopPlatformWindowInsets(
-    private val safeLeft: Int,
-    private val safeTop: Int,
-    private val safeRight: Int,
-    private val safeBottom: Int,
+    private val delegate: androidx.compose.ui.platform.PlatformWindowInsets,
     private val titleBarHeightPx: Int,
-) : androidx.compose.ui.platform.PlatformWindowInsets {
-    override val systemBars: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(
-            left = safeLeft,
-            top = safeTop + titleBarHeightPx,
-            right = safeRight,
-            bottom = safeBottom,
+) : androidx.compose.ui.platform.PlatformWindowInsets by delegate {
+
+    private fun androidx.compose.ui.platform.PlatformInsets.withTitleBar()
+        = androidx.compose.ui.platform.PlatformInsets(
+            left = left,
+            top = top + titleBarHeightPx,
+            right = right,
+            bottom = bottom,
         )
+
     override val statusBars: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = safeLeft, top = safeTop + titleBarHeightPx, right = safeRight, bottom = 0)
-    override val navigationBars: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = 0, top = 0, right = 0, bottom = safeBottom)
-    override val ime: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = 0, top = 0, right = 0, bottom = 0)
-    override val systemGestures: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = 0, top = 0, right = 0, bottom = 0)
-    override val displayCutout: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = 0, top = 0, right = 0, bottom = 0)
-    override val waterfall: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = 0, top = 0, right = 0, bottom = 0)
-    override val tappableElement: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = 0, top = 0, right = 0, bottom = 0)
-    override val mandatorySystemGestures: androidx.compose.ui.platform.PlatformInsets
-        get() = androidx.compose.ui.platform.PlatformInsets(left = 0, top = 0, right = 0, bottom = 0)
+        get() = delegate.statusBars.withTitleBar()
+    override val systemBars: androidx.compose.ui.platform.PlatformInsets
+        get() = delegate.systemBars.withTitleBar()
 }
