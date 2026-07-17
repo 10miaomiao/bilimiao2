@@ -507,6 +507,13 @@ private class DesktopPlatformWindowInsets(
     private val safeBottom: Int,
     private val titleBarHeightPx: Int,
 ) : androidx.compose.ui.platform.PlatformWindowInsets {
+    override val systemBars: androidx.compose.ui.platform.PlatformInsets
+        get() = androidx.compose.ui.platform.PlatformInsets(
+            left = safeLeft,
+            top = safeTop + titleBarHeightPx,
+            right = safeRight,
+            bottom = safeBottom,
+        )
     override val statusBars: androidx.compose.ui.platform.PlatformInsets
         get() = androidx.compose.ui.platform.PlatformInsets(left = safeLeft, top = safeTop + titleBarHeightPx, right = safeRight, bottom = 0)
     override val navigationBars: androidx.compose.ui.platform.PlatformInsets
