@@ -4,7 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.skiaCanvas
 import androidx.compose.ui.platform.LocalDensity
 import cn.a10miaomiao.bilimiao.danmaku.cache.SimpleTextCacheStuffer
 import cn.a10miaomiao.bilimiao.danmaku.context.DanmakuContext
@@ -102,7 +102,7 @@ fun DanmakuOverlay(
             currentDisplayer.setSize(w, h)
 
             drawIntoCanvas { canvas ->
-                val skiaCanvas = canvas.nativeCanvas
+                val skiaCanvas = canvas.skiaCanvas
                 // clip 到 Canvas 区域，防止弹幕溢出到其他 UI 区域
                 skiaCanvas.save()
                 skiaCanvas.clipRect(org.jetbrains.skia.Rect.makeWH(size.width, size.height))

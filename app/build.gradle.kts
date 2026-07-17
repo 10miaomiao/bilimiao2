@@ -4,8 +4,8 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.jetbrains.kotlin.compose)
     alias(libs.plugins.jetbrains.kotlin.serialization)
-    kotlin("plugin.compose")
 }
 
 android {
@@ -19,7 +19,7 @@ android {
         versionCode = 118
         versionName = "2.5.0 alpha"
 
-        flavorDimensions("default")
+        flavorDimensions += listOf("default")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -71,12 +71,12 @@ android {
 
     productFlavors {
         create("full") {
-            dimension = flavorDimensionList[0]
+            dimension = "default"
             val channelName = project.properties["channel"] ?: "Unknown"
             manifestPlaceholders["channel"] = channelName
         }
         create("foss") {
-            dimension = flavorDimensionList[0]
+            dimension = "default"
             manifestPlaceholders["channel"] = "FOSS"
         }
     }
@@ -91,6 +91,8 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
+        resValues = true
     }
 
     lint {

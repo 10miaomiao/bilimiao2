@@ -52,7 +52,7 @@ kotlin {
                 implementation(libs.compose.material.icons.extended.kmp)
                 implementation(libs.androidx.datastore.preferences)
                 implementation(libs.compose.preference)
-                implementation("org.jetbrains.compose.material3.adaptive:adaptive:1.3.0-beta02")
+                implementation("org.jetbrains.compose.material3.adaptive:adaptive:1.2.0")
 
                 implementation(project(":bilimiao-comm"))
             }
