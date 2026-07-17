@@ -46,6 +46,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.platform.PlatformInsets
+import androidx.compose.ui.platform.PlatformWindowInsets
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.FontLoadResult
@@ -92,25 +94,7 @@ fun FrameWindowScope.WindowsWindowFrame(
         LaunchedEffect(desktopWindow.isUndecoratedFullscreen) {
             frameState.isTitleBarVisible = !desktopWindow.isUndecoratedFullscreen
         }
-
-        val density = LocalDensity.current
-        val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
-        val platformWindowInsets = androidx.compose.ui.platform.LocalPlatformWindowInsets.current
-        val desktopWindowInsets = remember(
-            platformWindowInsets,
-            frameState.titleBarInsets,
-            frameState.captionButtonsInsets,
-            density,
-            layoutDirection,
-        ) {
-            DesktopPlatformWindowInsets(
-                platformWindowInsets,
-                frameState.titleBarInsets,
-                frameState.captionButtonsInsets,
-                density,
-                layoutDirection,
-            )
-        }
+        val desktopWindowInsets = rememberDesktopPlatformWindowInsets(frameState)
         CompositionLocalProvider(
             LocalTitleBarInsets provides frameState.titleBarInsets,
             LocalCaptionButtonInsets provides frameState.captionButtonsInsets,
@@ -503,6 +487,31 @@ private enum class CaptionButtonIcon(
 }
 
 private fun Rect.contains(x: Float, y: Float): Boolean = x >= left && x < right && y >= top && y < bottom
+
+@OptIn(InternalComposeUiApi::class)
+@Composable
+private fun rememberDesktopPlatformWindowInsets(
+    frameState: WindowsWindowFrameState,
+): DesktopPlatformWindowInsets {
+    val density = LocalDensity.current
+    val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
+    val platformWindowInsets = androidx.compose.ui.platform.LocalPlatformWindowInsets.current
+    return remember(
+        platformWindowInsets,
+        frameState.titleBarInsets,
+        frameState.captionButtonsInsets,
+        density,
+        layoutDirection,
+    ) {
+        DesktopPlatformWindowInsets(
+            platformWindowInsets,
+            frameState.titleBarInsets,
+            frameState.captionButtonsInsets,
+            density,
+            layoutDirection,
+        )
+    }
+}
 
 @OptIn(InternalComposeUiApi::class)
 private class DesktopPlatformWindowInsets(
