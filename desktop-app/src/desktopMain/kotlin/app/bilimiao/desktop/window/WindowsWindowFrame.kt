@@ -52,6 +52,7 @@ import androidx.compose.ui.text.platform.FontLoadResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.FrameWindowScope
@@ -94,12 +95,21 @@ fun FrameWindowScope.WindowsWindowFrame(
 
         val density = LocalDensity.current
         val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
-        val titleBarHeightPx = frameState.titleBarInsets.getTop(density)
-        val captionBarWidthPx = frameState.captionButtonsInsets.getRight(density, layoutDirection)
-        val captionBarHeightPx = frameState.captionButtonsInsets.getTop(density)
         val platformWindowInsets = androidx.compose.ui.platform.LocalPlatformWindowInsets.current
-        val desktopWindowInsets = remember(platformWindowInsets, titleBarHeightPx, captionBarWidthPx, captionBarHeightPx) {
-            DesktopPlatformWindowInsets(platformWindowInsets, titleBarHeightPx, captionBarWidthPx, captionBarHeightPx)
+        val desktopWindowInsets = remember(
+            platformWindowInsets,
+            frameState.titleBarInsets,
+            frameState.captionButtonsInsets,
+            density,
+            layoutDirection,
+        ) {
+            DesktopPlatformWindowInsets(
+                platformWindowInsets,
+                frameState.titleBarInsets,
+                frameState.captionButtonsInsets,
+                density,
+                layoutDirection,
+            )
         }
         CompositionLocalProvider(
             LocalTitleBarInsets provides frameState.titleBarInsets,
@@ -497,10 +507,15 @@ private fun Rect.contains(x: Float, y: Float): Boolean = x >= left && x < right 
 @OptIn(InternalComposeUiApi::class)
 private class DesktopPlatformWindowInsets(
     private val delegate: androidx.compose.ui.platform.PlatformWindowInsets,
-    private val titleBarHeightPx: Int,
-    private val captionBarWidthPx: Int,
-    private val captionBarHeightPx: Int,
+    private val titleBarInsets: WindowInsets,
+    private val captionButtonsInsets: WindowInsets,
+    private val density: Density,
+    private val layoutDirection: LayoutDirection,
 ) : androidx.compose.ui.platform.PlatformWindowInsets by delegate {
+
+    private val titleBarHeightPx get() = titleBarInsets.getTop(density)
+    private val captionBarWidthPx get() = captionButtonsInsets.getRight(density, layoutDirection)
+    private val captionBarHeightPx get() = captionButtonsInsets.getTop(density)
 
     private fun androidx.compose.ui.platform.PlatformInsets.withTitleBar()
         = androidx.compose.ui.platform.PlatformInsets(
