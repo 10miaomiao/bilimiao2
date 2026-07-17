@@ -93,10 +93,13 @@ fun FrameWindowScope.WindowsWindowFrame(
         }
 
         val density = LocalDensity.current
+        val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
         val titleBarHeightPx = frameState.titleBarInsets.getTop(density)
+        val captionBarWidthPx = frameState.captionButtonsInsets.getRight(density, layoutDirection)
+        val captionBarHeightPx = frameState.captionButtonsInsets.getTop(density)
         val platformWindowInsets = androidx.compose.ui.platform.LocalPlatformWindowInsets.current
-        val desktopWindowInsets = remember(platformWindowInsets, titleBarHeightPx) {
-            DesktopPlatformWindowInsets(platformWindowInsets, titleBarHeightPx)
+        val desktopWindowInsets = remember(platformWindowInsets, titleBarHeightPx, captionBarWidthPx, captionBarHeightPx) {
+            DesktopPlatformWindowInsets(platformWindowInsets, titleBarHeightPx, captionBarWidthPx, captionBarHeightPx)
         }
         CompositionLocalProvider(
             LocalTitleBarInsets provides frameState.titleBarInsets,
@@ -495,6 +498,8 @@ private fun Rect.contains(x: Float, y: Float): Boolean = x >= left && x < right 
 private class DesktopPlatformWindowInsets(
     private val delegate: androidx.compose.ui.platform.PlatformWindowInsets,
     private val titleBarHeightPx: Int,
+    private val captionBarWidthPx: Int,
+    private val captionBarHeightPx: Int,
 ) : androidx.compose.ui.platform.PlatformWindowInsets by delegate {
 
     private fun androidx.compose.ui.platform.PlatformInsets.withTitleBar()
@@ -509,4 +514,11 @@ private class DesktopPlatformWindowInsets(
         get() = delegate.statusBars.withTitleBar()
     override val systemBars: androidx.compose.ui.platform.PlatformInsets
         get() = delegate.systemBars.withTitleBar()
+    override val captionBar: androidx.compose.ui.platform.PlatformInsets
+        get() = androidx.compose.ui.platform.PlatformInsets(
+            left = 0,
+            top = captionBarHeightPx,
+            right = captionBarWidthPx,
+            bottom = 0,
+        )
 }
