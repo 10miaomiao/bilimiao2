@@ -24,7 +24,7 @@ import org.kodein.di.instance
 import kotlinx.serialization.Serializable
 
 @Serializable
-class TestPage : ComposePage() {
+class TestPage : ComposePage {
 
     @Composable
     override fun Content() {

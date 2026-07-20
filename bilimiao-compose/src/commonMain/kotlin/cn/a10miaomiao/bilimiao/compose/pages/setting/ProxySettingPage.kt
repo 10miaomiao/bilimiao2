@@ -28,7 +28,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class ProxySettingPage : ComposePage() {
+class ProxySettingPage : ComposePage {
 
     @Composable
     override fun Content() {

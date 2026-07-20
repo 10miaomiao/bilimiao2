@@ -13,7 +13,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class BlankPage : ComposePage() {
+class BlankPage : ComposePage {
 
     @Composable
     override fun Content() {

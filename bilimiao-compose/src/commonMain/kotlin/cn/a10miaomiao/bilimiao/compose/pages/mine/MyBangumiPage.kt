@@ -43,7 +43,7 @@ import org.kodein.di.instance
 @Serializable
 class MyBangumiPage(
     val type: String = "bangumi",
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

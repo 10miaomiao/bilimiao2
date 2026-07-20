@@ -1,73 +1,42 @@
 package cn.a10miaomiao.bilimiao.compose.common.navigation
 
-import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.Navigator
-import androidx.navigation.navOptions
+import androidx.navigation3.runtime.NavKey
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
-import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 
 /**
- * 平台相关的 deep link 导航实现
+ * 平台相关的 deep link 解析：把 URI 转成 [ComposePage]（NavKey）并加入 backstack。
+ * 返回 false 表示 URI 无法解析。
  */
-internal expect fun navigateDeepLink(navHostController: NavHostController, deepLink: String): Boolean
+internal expect fun navigateDeepLink(backStack: BottomBarBackStack, deepLink: String): Boolean
 
 class PageNavigation(
-    private val navHostController: () -> NavHostController,
+    private val bottomBar: BottomBarBackStack,
     private val launchUrl: (url: String) -> Unit,
     private val scannerLauncher: (callback: (result: String) -> Unit) -> Boolean = { false },
     private val onClose: () -> Unit = {},
 ) : PageNavigator {
 
-    val hostController get() = navHostController()
-
     private fun navigateByUriInternal(deepLink: String): Boolean {
-        return navigateDeepLink(hostController, deepLink).also {
+        return navigateDeepLink(bottomBar, deepLink).also {
             if (!it) miaoLogger() debug "[NotFoundPage]:deepLink=$deepLink"
         }
     }
 
     override fun <T : ComposePage> navigate(route: T) {
-        navigate(route, null, null)
-    }
-
-    fun <T : ComposePage> navigate(
-        route: T,
-        navOptions: NavOptions? = null,
-        navigatorExtras: Navigator.Extras? = null
-    ) {
-        hostController.navigate(route, navOptions, navigatorExtras)
-    }
-
-    fun <T : ComposePage> navigate(
-        route: T,
-        builder: NavOptionsBuilder.() -> Unit
-    ) {
-        navigate(route, navOptions(builder))
+        bottomBar.navigate(route as NavKey)
     }
 
     override fun canPopBackStack(): Boolean {
-        return hostController.previousBackStackEntry != null
+        return bottomBar.canPop()
     }
 
     override fun popBackStack(): Boolean {
-        return hostController.popBackStack().also {
+        return bottomBar.pop().also {
             if (!it) {
                 onClose()
             }
-        }
-    }
-
-    override fun <T : ComposePage> popBackStack(
-        route: T,
-        inclusive: Boolean,
-        saveState: Boolean
-    ) {
-        if(!hostController.popBackStack(route, inclusive, saveState)) {
-            onClose()
         }
     }
 

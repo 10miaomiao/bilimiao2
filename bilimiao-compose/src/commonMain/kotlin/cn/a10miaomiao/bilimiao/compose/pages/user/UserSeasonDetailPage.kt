@@ -3,7 +3,6 @@ package cn.a10miaomiao.bilimiao.compose.pages.user
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserSeasonDetailContent
@@ -18,7 +17,7 @@ import org.kodein.di.instance
 data class UserSeasonDetailPage(
     private val id: String,
     private val title: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

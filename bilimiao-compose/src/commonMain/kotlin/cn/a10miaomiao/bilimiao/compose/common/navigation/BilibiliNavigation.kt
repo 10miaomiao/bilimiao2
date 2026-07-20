@@ -1,6 +1,25 @@
 package cn.a10miaomiao.bilimiao.compose.common.navigation
 
+import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicDetailPage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicOpusPage
+import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.HistoryPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.WatchLaterPage
+import cn.a10miaomiao.bilimiao.compose.pages.rank.RankPage
+import cn.a10miaomiao.bilimiao.compose.pages.search.SearchResultPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouritePage
+import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
+import cn.a10miaomiao.bilimiao.compose.pages.community.ReplyDetailListPage
+import cn.a10miaomiao.bilimiao.compose.pages.auth.H5LoginPage
+import cn.a10miaomiao.bilimiao.compose.pages.auth.TelVerifyPage
+import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadListPage
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 
@@ -47,48 +66,51 @@ object BilibiliNavigation {
         return SimpleUri(scheme, host, path, queryParams)
     }
 
+    /**
+     * 将 URI 解析为 [ComposePage]（NavKey）。无法识别返回 null。
+     * 统一 bilimiao:// 与 bilibili:// 两种 scheme 的解析。
+     */
+    fun resolveUri(url: String): ComposePage? {
+        miaoLogger() debug url
+        // 1. 优先用 Nav3 声明式 UriDeepLinkMatcher 解析简单 pattern
+        BilimiaoDeepLinks.match(url)?.let { return it as ComposePage }
+
+        // 2. fallback: 复杂正则规则（BV/av/ss/ep/md 号、space.bilibili.com 等）
+        val uri = parseUrl(url)
+        if (uri.scheme == "http" || uri.scheme == "https") {
+            Regex("BV([a-zA-Z0-9]{5,})").find(url)?.let {
+                return VideoDetailPage(id = "BV${it.groupValues[1]}")
+            }
+            Regex("ss(\\d+)").find(url)?.let {
+                return BangumiDetailPage(id = it.groupValues[1])
+            }
+            Regex("ep(\\d+)").find(url)?.let {
+                return BangumiDetailPage(epId = it.groupValues[1])
+            }
+            Regex("md(\\d+)").find(url)?.let {
+                return BangumiDetailPage(mediaId = it.groupValues[1])
+            }
+        }
+        if (uri.host == "space.bilibili.com") {
+            val mid = uri.path?.replace("/", "") ?: ""
+            if (isNumeric(mid)) return UserSpacePage(mid)
+        }
+        if (uri.queryParameterNames.contains("avid")) {
+            return VideoDetailPage(id = uri.getQueryParameter("avid")!!)
+        }
+        return null
+    }
+
+
     fun navigationTo(
         pageNavigation: PageNavigator,
         url: String,
     ): Boolean {
-        miaoLogger() debug url
-        val uri = parseUrl(url)
-        if (uri.scheme == "http" || uri.scheme == "https") {
-            // BV号 → 视频
-            Regex("BV([a-zA-Z0-9]{5,})").find(url)?.let {
-                pageNavigation.navigateToVideoInfo("BV${it.groupValues[1]}")
-                return true
-            }
-            // ss号 → 番剧
-            Regex("ss(\\d+)").find(url)?.let {
-                pageNavigation.navigateByUri("bilimiao://bangumi/${it.groupValues[1]}")
-                return true
-            }
-            // ep号 → 番剧
-            Regex("ep(\\d+)").find(url)?.let {
-                pageNavigation.navigateByUri("bilimiao://bangumi/?epId=${it.groupValues[1]}")
-                return true
-            }
-            // md号 → 番剧
-            Regex("md(\\d+)").find(url)?.let {
-                pageNavigation.navigateByUri("bilimiao://bangumi/?mediaId=${it.groupValues[1]}")
-                return true
-            }
-        }
-        // 空间 → 用户主页
-        if (uri.host == "space.bilibili.com") {
-            val path = uri.path?.replace("/", "") ?: ""
-            val mid = if (isNumeric(path)) path else ""
-            pageNavigation.navigateByUri("bilibili://space/$mid")
+        val page = resolveUri(url)
+        if (page != null) {
+            pageNavigation.navigate(page)
             return true
         }
-        // avid → 视频
-        if (uri.queryParameterNames.contains("avid")) {
-            val aid = uri.getQueryParameter("avid")!!
-            pageNavigation.navigateToVideoInfo(aid)
-            return true
-        }
-
         return pageNavigation.navigateByUri(url)
     }
 

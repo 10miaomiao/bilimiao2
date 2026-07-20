@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -75,7 +74,7 @@ import org.kodein.di.instance
 import kotlin.coroutines.coroutineContext
 
 @Serializable
-class LyricPage :ComposePage(){
+class LyricPage : ComposePage {
 
     @Composable
     override fun Content() {

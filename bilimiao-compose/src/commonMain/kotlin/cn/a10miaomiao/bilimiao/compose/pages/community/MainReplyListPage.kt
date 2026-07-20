@@ -39,7 +39,7 @@ class MainReplyListPage(
     val oid: String,
     val type: Int,
     val enterUrl: String = "",
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

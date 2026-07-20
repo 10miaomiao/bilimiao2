@@ -18,7 +18,6 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
@@ -53,7 +52,7 @@ import org.kodein.di.instance
 @Serializable
 class DownloadBangumiCreatePage(
     private val id: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

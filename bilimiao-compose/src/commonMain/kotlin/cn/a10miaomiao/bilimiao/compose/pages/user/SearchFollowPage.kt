@@ -41,7 +41,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class SearchFollowPage : ComposePage() {
+class SearchFollowPage : ComposePage {
 
     @Composable
     override fun Content() {

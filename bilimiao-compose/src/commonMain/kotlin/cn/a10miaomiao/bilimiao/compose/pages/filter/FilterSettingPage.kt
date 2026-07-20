@@ -35,7 +35,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 
 @Serializable
-class FilterSettingPage : ComposePage() {
+class FilterSettingPage : ComposePage {
 
     @Composable
     override fun Content() {

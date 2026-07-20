@@ -45,8 +45,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.navOptions
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
@@ -99,7 +97,7 @@ import java.util.Calendar
 import java.util.GregorianCalendar
 
 @Serializable
-object HomePage : ComposePage() {
+object HomePage : ComposePage {
 
     @Composable
     override fun Content() {
@@ -271,14 +269,7 @@ private class HomePageViewModel(
     fun menuItemClick(item: MenuItemPropInfo) {
         when (item.key) {
             MenuKeys.dynamic -> {
-                val nav = pageNavigation.hostController
-                nav.navigate(DynamicPage(), navOptions {
-                    popUpTo(nav.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                })
+                pageNavigation.navigate(DynamicPage())
             }
         }
     }

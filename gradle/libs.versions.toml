@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.0"
+agp = "9.1.1"
 kotlin = "2.3.10"
 composeMultiplatform = "1.11.1"
 # jetpack
@@ -7,7 +7,10 @@ core = "1.13.1"
 appcompat = "1.6.1"
 material = "1.12.0"
 lifecycle = "2.8.3"
-navigation = "2.9.0-beta03"
+# Nav3 (AndroidX runtime + JetBrains CMP UI fork for desktop support)
+navigation3 = "1.2.0-alpha04"
+navigation3UiJb = "1.2.0-alpha02"
+lifecycleViewmodelNav3 = "2.11.0"
 composeBom = "2026.04.01"
 datastore = "1.1.1"
 media3 = "1.5.0"
@@ -85,7 +88,9 @@ compose-material-icons-extended = { group = "androidx.compose.material", name = 
 compose-material-icons-extended-kmp = { group = "org.jetbrains.compose.material", name = "material-icons-extended", version = "1.7.3" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+navigation3-ui-jb = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3UiJb" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 # kotlin libraries
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }

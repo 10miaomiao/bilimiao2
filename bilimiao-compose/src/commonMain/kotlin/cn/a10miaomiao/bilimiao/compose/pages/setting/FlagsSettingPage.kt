@@ -16,7 +16,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import kotlinx.serialization.Serializable
 
 @Serializable
-class FlagsSettingPage : ComposePage() {
+class FlagsSettingPage : ComposePage {
 
     @Composable
     override fun Content() {

@@ -39,7 +39,7 @@ import org.kodein.di.instance
 
 
 @Serializable
-class RankPage : ComposePage() {
+class RankPage : ComposePage {
 
     @Composable
     override fun Content() {

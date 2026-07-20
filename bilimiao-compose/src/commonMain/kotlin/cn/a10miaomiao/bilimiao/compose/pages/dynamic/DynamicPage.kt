@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
-class DynamicPage : ComposePage() {
+class DynamicPage : ComposePage {
 
     @Composable
     override fun Content() {

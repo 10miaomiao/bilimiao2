@@ -83,7 +83,7 @@ import kotlin.math.roundToInt
 @Serializable
 data class UserSpacePage(
     val id: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

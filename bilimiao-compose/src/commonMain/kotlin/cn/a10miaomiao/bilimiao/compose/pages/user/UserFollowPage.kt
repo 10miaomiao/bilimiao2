@@ -49,7 +49,7 @@ import org.kodein.di.instance
 @Serializable
 class UserFollowPage(
     private val id: String
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

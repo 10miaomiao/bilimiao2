@@ -31,7 +31,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 
 @Serializable
-class HomeSettingPage : ComposePage() {
+class HomeSettingPage : ComposePage {
 
     @Composable
     override fun Content() {

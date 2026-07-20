@@ -41,7 +41,7 @@ import org.kodein.di.instance
 @Serializable
 class WebPage(
     val url: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {
