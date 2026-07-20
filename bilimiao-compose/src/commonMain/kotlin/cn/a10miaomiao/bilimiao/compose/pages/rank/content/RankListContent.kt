@@ -21,7 +21,6 @@ import androidx.lifecycle.viewModelScope
 import bilibili.app.show.v1.RankAllResultReq
 import bilibili.app.show.v1.RankGRPC
 import bilibili.app.show.v1.RankRegionResultReq
-import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets

@@ -33,7 +33,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class SelectProxyServerPage : ComposePage() {
+class SelectProxyServerPage : ComposePage {
 
     @Composable
     override fun Content() {

@@ -64,7 +64,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.compose.subDI
 
 @Serializable
-class MyFollowPage() : ComposePage() {
+class MyFollowPage() : ComposePage {
 
     @Composable
     override fun Content() {

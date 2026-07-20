@@ -1,8 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.pages.dynamic
 
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.navOptions
 import bilibili.app.dynamic.v2.UpListItem
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
@@ -31,14 +29,7 @@ class DynamicViewModel(
     val selectedUpper: StateFlow<UpListItem?> get() = _selectedUpper
 
     fun toHomePage() {
-        val nav = pageNavigation.hostController
-        nav.navigate(HomePage, navOptions {
-            popUpTo(nav.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        })
+        pageNavigation.navigate(HomePage)
     }
 
     fun menuItemClick(item: MenuItemPropInfo) {

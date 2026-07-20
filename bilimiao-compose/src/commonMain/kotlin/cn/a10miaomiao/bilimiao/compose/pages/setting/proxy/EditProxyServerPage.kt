@@ -34,7 +34,7 @@ import org.kodein.di.instance
 @Serializable
 class EditProxyServerPage(
     private val index: Int = 0,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

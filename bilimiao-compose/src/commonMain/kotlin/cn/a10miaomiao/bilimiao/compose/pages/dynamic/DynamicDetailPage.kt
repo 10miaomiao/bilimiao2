@@ -30,8 +30,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavOptions
 import bilibili.app.archive.middleware.v1.PlayerArgs
 import bilibili.app.dynamic.v2.DynDetailReq
 import bilibili.app.dynamic.v2.DynamicGRPC
@@ -44,7 +42,6 @@ import bilibili.app.dynamic.v2.Paragraph
 import bilibili.app.dynamic.v2.PicParagraph
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
-import cn.a10miaomiao.bilimiao.compose.common.defaultNavOptions
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -74,7 +71,7 @@ import org.kodein.di.instance
 @Serializable
 data class DynamicDetailPage(
     private val id: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

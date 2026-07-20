@@ -1,18 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.SizeTransform
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDeepLink
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
-import androidx.navigation.toRoute
-import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
-import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughOut
+import androidx.navigation3.runtime.EntryProviderScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.pages.BlankPage
 import cn.a10miaomiao.bilimiao.compose.pages.TestPage
@@ -37,6 +25,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.lyric.LyricPage
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.HistoryPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyBangumiPage
+import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.mine.WatchLaterPage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
@@ -56,8 +45,6 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.SelectProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeRegionDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingPage
-import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
-import cn.a10miaomiao.bilimiao.compose.pages.setting.ThemeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.SearchFollowPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserBangumiPage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserFavouriteDetailPage
@@ -71,289 +58,112 @@ import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpaceSearchPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import cn.a10miaomiao.bilimiao.compose.pages.web.WebPage
-import kotlin.reflect.KType
+import cn.a10miaomiao.bilimiao.compose.pages.setting.ThemeSettingPage
+import androidx.navigation3.runtime.NavKey
 
-class BilimiaoPageRoute (
-    val builder: NavGraphBuilder
-) {
+/**
+ * 所有页面的 NavEntry 注册表。
+ * 在 entryProvider { } DSL 中调用 entries(this) 注册全部页面。
+ * 深链接解析在 BilibiliNavigation 中独立实现，此处不声明 navDeepLink。
+ */
+object BilimiaoPageRoute {
 
-    fun initRoute() {
-        composable<BlankPage>()
-        composable<TestPage>()
+    fun entries(scope: EntryProviderScope<NavKey>) {
+        // 通用
+        scope.entry<BlankPage> { it.Content() }
+        scope.entry<TestPage> { it.Content() }
 
         // home
-        composable<HomePage>()
+        scope.entry<HomePage> { it.Content() }
 
         // search
-        composable<SearchResultPage>(
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "bilibili://search/?keyword={keyword}"
-                }
-            )
-        )
+        scope.entry<SearchResultPage> { it.Content() }
 
         // auth
-        composable<LoginPage>()
-        composable<QrCodeLoginPage>()
-        composable<TelVerifyPage>(
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "bilimiao://tel-verify?code={code}&requestId={requestId}&source={source}"
-                }
-            )
-        )
-        composable<H5LoginPage>(
-            deepLinks = listOf(
-                navDeepLink<H5LoginPage>(
-                    basePath = "bilimiao://h5login"
-                )
-            )
-        )
-        composable<SMSLoginPage>()
+        scope.entry<LoginPage> { it.Content() }
+        scope.entry<QrCodeLoginPage> { it.Content() }
+        scope.entry<TelVerifyPage> { it.Content() }
+        scope.entry<H5LoginPage> { it.Content() }
+        scope.entry<SMSLoginPage> { it.Content() }
 
         // video
-        composable<VideoDetailPage>(
-            deepLinks = listOf(
-                navDeepLink<VideoDetailPage>(
-                    basePath = "bilimiao://video"
-                ),
-                navDeepLink<VideoDetailPage>(
-                    basePath = "bilibili://video"
-                )
-            )
-        )
-        composable<VideoPagesPage>()
+        scope.entry<VideoDetailPage> { it.Content() }
+        scope.entry<VideoPagesPage> { it.Content() }
 
         // bangumi
-        composable<BangumiDetailPage>(
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "bilimiao://bangumi/{id}"
-                },
-                navDeepLink {
-                    uriPattern = "https://www.bilibili.com/bangumi/play/ss{id}/"
-                }
-            )
-        )
-        composable<BangumiEpisodesPage>()
+        scope.entry<BangumiDetailPage> { it.Content() }
+        scope.entry<BangumiEpisodesPage> { it.Content() }
 
         // dynamic
-        composable<DynamicPage>()
-        composable<DynamicDetailPage>(
-            deepLinks = listOf(
-                navDeepLink<DynamicDetailPage>(
-                    basePath = "bilibili://following/detail"
-                )
-            )
-        )
-        composable<DynamicOpusPage>(
-            deepLinks = listOf(
-                navDeepLink<DynamicOpusPage>(
-                    basePath = "bilibili://opus/detail"
-                )
-            )
-        )
+        scope.entry<DynamicPage> { it.Content() }
+        scope.entry<DynamicDetailPage> { it.Content() }
+        scope.entry<DynamicOpusPage> { it.Content() }
 
         // rank
-        composable<RankPage>(
-            deepLinks = listOf(
-                navDeepLink<RankPage>(
-                    basePath = "bilibili://rank"
-                )
-            )
-        )
+        scope.entry<RankPage> { it.Content() }
 
         // download
-        composable<DownloadListPage>(
-            deepLinks = listOf(
-                navDeepLink<DownloadListPage>(
-                    basePath = "bilimiao://download"
-                )
-            )
-        )
-        composable<DownloadDetailPage>()
-        composable<DownloadBangumiCreatePage>()
+        scope.entry<DownloadListPage> { it.Content() }
+        scope.entry<DownloadDetailPage> { it.Content() }
+        scope.entry<DownloadBangumiCreatePage> { it.Content() }
 
         // filter
-        composable<FilterSettingPage>()
+        scope.entry<FilterSettingPage> { it.Content() }
 
         // message
-        composable<MessagePage>()
+        scope.entry<MessagePage> { it.Content() }
 
         // player
-        composable<SendDanmakuPage>()
+        scope.entry<SendDanmakuPage> { it.Content() }
 
         // playlist
-        composable<PlayListPage>()
+        scope.entry<PlayListPage> { it.Content() }
 
         // setting
-        composable<SettingPage>(
-            deepLinks = listOf(
-                navDeepLink<SettingPage>(
-                    basePath = "bilimiao://setting"
-                )
-            )
-        )
-        composable<HomeSettingPage>()
-        composable<ThemeSettingPage>()
-        composable<VideoSettingPage>()
-        composable<AutoStopTimerPage>()
-        composable<DanmakuSettingPage>()
-        composable<DanmakuDisplaySettingPage>()
-        composable<FlagsSettingPage>()
-        composable<ProxySettingPage>()
-        composable<AddProxyServerPage>()
-        composable<EditProxyServerPage>()
-        composable<SelectProxyServerPage>()
-        composable<AboutPage>()
+        scope.entry<SettingPage> { it.Content() }
+        scope.entry<HomeSettingPage> { it.Content() }
+        scope.entry<ThemeSettingPage> { it.Content() }
+        scope.entry<VideoSettingPage> { it.Content() }
+        scope.entry<AutoStopTimerPage> { it.Content() }
+        scope.entry<DanmakuSettingPage> { it.Content() }
+        scope.entry<DanmakuDisplaySettingPage> { it.Content() }
+        scope.entry<FlagsSettingPage> { it.Content() }
+        scope.entry<ProxySettingPage> { it.Content() }
+        scope.entry<AddProxyServerPage> { it.Content() }
+        scope.entry<EditProxyServerPage> { it.Content() }
+        scope.entry<SelectProxyServerPage> { it.Content() }
+        scope.entry<AboutPage> { it.Content() }
 
         // time
-        composable<TimeSettingPage>()
-        composable<TimeRegionDetailPage>()
+        scope.entry<TimeSettingPage> { it.Content() }
+        scope.entry<TimeRegionDetailPage> { it.Content() }
 
         // mine
-        composable<MyBangumiPage>(
-            deepLinks = listOf(
-                navDeepLink<MyBangumiPage>(
-                    basePath = "bilimiao://mine/bangumi"
-                )
-            )
-        )
-        composable<MyFollowPage>(
-            deepLinks = listOf(
-                navDeepLink<MyFollowPage>(
-                    basePath = "bilimiao://mine/follow"
-                )
-            )
-        )
-        composable<HistoryPage>(
-            deepLinks = listOf(
-                navDeepLink<HistoryPage>(
-                    basePath = "bilimiao://mine/history"
-                )
-            )
-        )
-        composable<WatchLaterPage>(
-            deepLinks = listOf(
-                navDeepLink<WatchLaterPage>(
-                    basePath = "bilimiao://mine/watchlater"
-                )
-            )
-        )
+        scope.entry<MyBangumiPage> { it.Content() }
+        scope.entry<MyFollowPage> { it.Content() }
+        scope.entry<HistoryPage> { it.Content() }
+        scope.entry<WatchLaterPage> { it.Content() }
 
         // user
-        composable<UserSpacePage>(
-            deepLinks = listOf(
-                navDeepLink<UserSpacePage>(
-                    basePath = "bilimiao://user"
-                ),
-                navDeepLink<UserSpacePage>(
-                    basePath = "bilibili://author"
-                ),
-                navDeepLink<UserSpacePage>(
-                    basePath = "bilibili://space"
-                )
-            )
-        )
-        composable<UserSpaceSearchPage>()
-        composable<UserFollowPage>()
-        composable<SearchFollowPage>()
-        composable<UserBangumiPage>()
-        composable<SearchFollowPage>()
-        composable<UserLikeArchivePage>()
-        composable<UserFavouritePage>(
-            deepLinks = listOf(
-                navDeepLink<UserFavouritePage>(
-                    basePath = "bilimiao://user/favourite"
-                )
-            )
-        )
-        composable<UserFavouriteDetailPage>()
-        composable<UserSeasonDetailPage>()
-        composable<UserMedialistPage>()
+        scope.entry<UserSpacePage> { it.Content() }
+        scope.entry<UserSpaceSearchPage> { it.Content() }
+        scope.entry<UserFollowPage> { it.Content() }
+        scope.entry<SearchFollowPage> { it.Content() }
+        scope.entry<UserBangumiPage> { it.Content() }
+        scope.entry<UserLikeArchivePage> { it.Content() }
+        scope.entry<UserFavouritePage> { it.Content() }
+        scope.entry<UserFavouriteDetailPage> { it.Content() }
+        scope.entry<UserSeasonDetailPage> { it.Content() }
+        scope.entry<UserMedialistPage> { it.Content() }
 
-        //community
-        composable<MainReplyListPage>()
-        composable<ReplyDetailListPage>(
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "bilimiao://comment/{id}?enterUrl={enterUrl}"
-                }
-            )
-        )
+        // community
+        scope.entry<MainReplyListPage> { it.Content() }
+        scope.entry<ReplyDetailListPage> { it.Content() }
 
-        //lyric
-        composable<LyricPage>(
-            deepLinks = listOf(
-                navDeepLink<LyricPage>(
-                    basePath = "bilimiao://lyric"
-                )
-            )
-        )
+        // lyric
+        scope.entry<LyricPage> { it.Content() }
 
         // web
-        composable<WebPage>(
-            deepLinks = listOf(
-                navDeepLink<WebPage>(
-                    basePath = "bilimiao://web"
-                ),
-                navDeepLink {
-                    uriPattern = "bilibili://forward?-Btarget={url}"
-                }
-            )
-        )
-    }
-
-    fun defaultEnterTransition(
-        scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): EnterTransition? {
-        return materialFadeThroughIn(initialScale = 0.85f)
-    }
-
-    fun defaultExitTransition(
-        scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): ExitTransition? {
-        return materialFadeThroughOut()
-    }
-
-    fun defaultPopEnterTransition(
-        scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): EnterTransition? {
-        return materialFadeThroughIn(initialScale = 1.15f)
-    }
-
-    fun defaultPopExitTransition(
-        scope: AnimatedContentTransitionScope<NavBackStackEntry>
-    ): ExitTransition? {
-        return materialFadeThroughOut()
-    }
-
-    inline fun <reified T: ComposePage> composable(
-        typeMap: Map<KType, NavType<*>> = emptyMap(),
-        deepLinks: List<NavDeepLink> = emptyList(),
-        noinline enterTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = ::defaultEnterTransition,
-        noinline exitTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = ::defaultExitTransition,
-        noinline popEnterTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = ::defaultPopEnterTransition,
-        noinline popExitTransition:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = ::defaultPopExitTransition,
-        noinline sizeTransform:
-        (AnimatedContentTransitionScope<NavBackStackEntry>.() -> SizeTransform?)? = null,
-    ) {
-        builder.composable<T>(
-            typeMap = typeMap,
-            deepLinks = deepLinks,
-            enterTransition = enterTransition,
-            exitTransition = exitTransition,
-            popEnterTransition = popEnterTransition,
-            popExitTransition = popExitTransition,
-            sizeTransform = sizeTransform,
-        ) { backStackEntry ->
-            val page = backStackEntry.toRoute<T>()
-            page.Content()
-        }
+        scope.entry<WebPage> { it.Content() }
     }
 }

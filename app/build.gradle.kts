@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.a10miaomiao.bilimiao"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.a10miaomiao.bilimiao"

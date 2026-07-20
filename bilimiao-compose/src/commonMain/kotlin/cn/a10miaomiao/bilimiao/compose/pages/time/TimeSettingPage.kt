@@ -28,7 +28,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class TimeSettingPage : ComposePage() {
+class TimeSettingPage : ComposePage {
 
     @Composable
     override fun Content() {

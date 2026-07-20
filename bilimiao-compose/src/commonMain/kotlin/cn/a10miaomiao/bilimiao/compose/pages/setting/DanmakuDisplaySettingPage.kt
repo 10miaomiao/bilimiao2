@@ -36,7 +36,7 @@ import org.kodein.di.DIAware
 @Serializable
 data class DanmakuDisplaySettingPage(
     val name: String = "default"
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

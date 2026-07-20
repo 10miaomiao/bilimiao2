@@ -62,7 +62,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 @Serializable
-class LoginPage : ComposePage() {
+class LoginPage : ComposePage {
 
     @Composable
     override fun Content() {

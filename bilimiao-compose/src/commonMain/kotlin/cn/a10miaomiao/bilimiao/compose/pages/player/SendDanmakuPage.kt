@@ -54,7 +54,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class SendDanmakuPage : ComposePage() {
+class SendDanmakuPage : ComposePage {
 
     @Composable
     override fun Content() {

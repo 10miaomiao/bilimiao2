@@ -85,7 +85,7 @@ import org.kodein.di.instance
 data class BangumiEpisodesPage(
     val sid: String,
     val title: String,
-): ComposePage() {
+): ComposePage {
 
     @Composable
     override fun Content() {

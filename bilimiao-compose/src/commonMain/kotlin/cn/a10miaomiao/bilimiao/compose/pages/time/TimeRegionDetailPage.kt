@@ -55,7 +55,7 @@ data class TimeRegionDetailPage(
     private val childIds: List<Int>,
     private val childNames: List<String>,
     private val initialIndex: Int,
-): ComposePage() {
+): ComposePage {
 
     @Composable
     override fun Content() {

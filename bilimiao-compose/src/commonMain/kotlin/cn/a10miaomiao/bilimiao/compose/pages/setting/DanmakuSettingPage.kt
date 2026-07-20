@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -34,7 +33,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class DanmakuSettingPage : ComposePage() {
+class DanmakuSettingPage : ComposePage {
 
     @Composable
     override fun Content() {

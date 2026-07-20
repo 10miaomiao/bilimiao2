@@ -2,7 +2,6 @@ package cn.a10miaomiao.bilimiao.compose.pages.user
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavBackStackEntry
 import bilibili.polymer.app.search.v1.Item
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.pages.user.content.UserFavouriteDetailContent
@@ -13,7 +12,7 @@ data class UserFavouriteDetailPage(
     private val id: String,
     private val title : String,
     private val keyword: String = "",
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

@@ -59,7 +59,7 @@ import org.kodein.di.instance
 
 
 @Serializable
-class AboutPage : ComposePage() {
+class AboutPage : ComposePage {
 
     @Composable
     override fun Content() {

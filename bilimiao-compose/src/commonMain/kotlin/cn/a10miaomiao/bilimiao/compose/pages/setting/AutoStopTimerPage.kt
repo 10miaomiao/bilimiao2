@@ -34,7 +34,7 @@ import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
 
 @Serializable
-class AutoStopTimerPage : ComposePage() {
+class AutoStopTimerPage : ComposePage {
 
     @Composable
     override fun Content() {

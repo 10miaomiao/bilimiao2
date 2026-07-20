@@ -84,7 +84,7 @@ import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 @Serializable
-class SMSLoginPage : ComposePage() {
+class SMSLoginPage : ComposePage {
 
     @Composable
     override fun Content() {

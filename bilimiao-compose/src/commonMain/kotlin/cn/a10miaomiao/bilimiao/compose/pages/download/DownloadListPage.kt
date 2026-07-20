@@ -35,7 +35,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class DownloadListPage : ComposePage() {
+class DownloadListPage : ComposePage {
 
     @Composable
     override fun Content() {

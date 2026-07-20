@@ -52,7 +52,7 @@ import org.kodein.di.instance
 @Serializable
 class H5LoginPage(
     val url: String = "https://passport.bilibili.com/h5-app/passport/login",
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

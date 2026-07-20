@@ -84,7 +84,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class WatchLaterPage : ComposePage() {
+class WatchLaterPage : ComposePage {
 
     @Composable
     override fun Content() {

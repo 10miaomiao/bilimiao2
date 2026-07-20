@@ -50,7 +50,7 @@ import org.kodein.di.instance
 class UserSpaceSearchPage(
     val id: String,
     val keyword: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

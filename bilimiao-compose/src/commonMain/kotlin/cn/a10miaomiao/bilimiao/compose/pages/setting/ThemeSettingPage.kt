@@ -41,7 +41,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class ThemeSettingPage : ComposePage() {
+class ThemeSettingPage : ComposePage {
 
     @Composable
     override fun Content() {

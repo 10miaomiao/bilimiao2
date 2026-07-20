@@ -4,6 +4,10 @@ import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
+import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThrough
+import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
+import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,11 +38,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
+import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
+import cn.a10miaomiao.bilimiao.compose.pages.dynamic.DynamicPage
 import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import cn.a10miaomiao.bilimiao.compose.platform.PlatformContext
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
@@ -46,11 +55,14 @@ import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.bottomSheetContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomBarBackStack
+import cn.a10miaomiao.bilimiao.compose.common.navigation.decorateEntries
+import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.rememberBottomBarBackStack
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffoldPlayerLayoutState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
-import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import cn.a10miaomiao.bilimiao.compose.components.appbar.LocalAppBarState
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
@@ -60,26 +72,30 @@ import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffold
 import cn.a10miaomiao.bilimiao.compose.components.start.SearchOverlay
-import cn.a10miaomiao.bilimiao.compose.pages.home.HomePage
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
+import org.kodein.di.compose.subDI
 import org.kodein.di.compose.withDI
 
 class MainComposeNavigator(
-    private val launchUrl: (String) -> Unit,
-    private val scannerLauncher: (callback: (result: String) -> Unit) -> Boolean = { false },
-    private val onClose: () -> Unit = {},
+    internal val launchUrl: (String) -> Unit,
+    internal val scannerLauncher: (callback: (result: String) -> Unit) -> Boolean = { false },
+    internal val onClose: () -> Unit = {},
+    val topLevelRoutes: Set<NavKey> = setOf<NavKey>(HomePage, DynamicPage()),
+    val startRoute: NavKey = HomePage,
 ) {
-    private var navController: NavHostController? = null
+    private var bottomBar: BottomBarBackStack? = null
 
-    val pageNavigation = PageNavigation(
-        navHostController = { navController ?: error("Compose NavHost is not ready") },
-        launchUrl = { url -> launchUrl(url) },
-        scannerLauncher = scannerLauncher,
-        onClose = onClose,
-    )
+    /**
+     * PageNavigation 实例。在 MainComposeHost 组合期间通过 attach() 设置，
+     * 保证 LocalPageNavigation provides 时已就绪（避免 by lazy 在 attach 前被访问）。
+     */
+    private var pageNavigationImpl: PageNavigation? = null
+
+    val pageNavigation: PageNavigation
+        get() = pageNavigationImpl ?: error("PageNavigation not attached; MainComposeHost must compose first")
 
     val uriHandler = object : UriHandler {
         override fun openUri(uri: String) {
@@ -89,8 +105,9 @@ class MainComposeNavigator(
         }
     }
 
-    internal fun attach(navController: NavHostController) {
-        this.navController = navController
+    internal fun attach(bottomBar: BottomBarBackStack, pageNavigation: PageNavigation) {
+        this.bottomBar = bottomBar
+        this.pageNavigationImpl = pageNavigation
     }
 
     fun navigateByUri(deepLink: String): Boolean {
@@ -110,7 +127,10 @@ class MainComposeNavigator(
     }
 
     fun goBackHome() {
-        navController?.popBackStack(HomePage, false)
+        val bb = bottomBar ?: return
+        if (bb.topLevelRoute != startRoute) {
+            bb.topLevelRoute = startRoute
+        }
     }
 }
 
@@ -131,7 +151,22 @@ fun MainComposeHost(
     onInitialDeepLinkConsumed: () -> Unit = {},
     onReady: () -> Unit = {},
 ) {
-    val navController = rememberNavController()
+    val bottomBar = rememberBottomBarBackStack(
+        startRoute = navigator.startRoute,
+        topLevelRoutes = navigator.topLevelRoutes,
+    )
+    val pageNavigation = remember(bottomBar) {
+        PageNavigation(
+            bottomBar = bottomBar,
+            launchUrl = { url -> navigator.launchUrl(url) },
+            scannerLauncher = navigator.scannerLauncher,
+            onClose = navigator.onClose,
+        )
+    }
+    LaunchedEffect(bottomBar, pageNavigation) {
+        navigator.attach(bottomBar, pageNavigation)
+        onReady()
+    }
     val appBarState = remember { AppBarState() }
     val pageConfig = pageConfigState.collectConfigAsState().value
     val bottomSheetPage by bottomSheetState.page.collectAsState()
@@ -160,11 +195,7 @@ fun MainComposeHost(
             anchorBounds = playerState.anchorBounds,
         )
     }
-    LaunchedEffect(navController) {
-        navigator.attach(navController)
-        onReady()
-    }
-    LaunchedEffect(initialDeepLink, navController) {
+    LaunchedEffect(initialDeepLink, bottomBar) {
         initialDeepLink?.let {
             if (navigator.navigateByUri(it)) {
                 onInitialDeepLinkConsumed()
@@ -188,7 +219,6 @@ fun MainComposeHost(
         appBarState.syncExpandedMenusWith(menus)
         appBarState.showBar()
         appBarState.showMenu()
-        // 同步 pageSearchMethod，使搜索弹窗的"站内搜索"模式可用
         val searchConfig = pageConfig.search
         startViewState.setPageSearchMethod(
             if (searchConfig?.name.isNullOrBlank()) {
@@ -225,7 +255,7 @@ fun MainComposeHost(
     CompositionLocalProvider(
         LocalPlatformContext provides platformContext,
         LocalPageConfigState provides pageConfigState,
-        LocalPageNavigation provides navigator.pageNavigation,
+        LocalPageNavigation provides pageNavigation,
         LocalEmitter provides emitter,
         LocalUriHandler provides navigator.uriHandler,
         LocalAppBarState provides appBarState,
@@ -257,7 +287,7 @@ fun MainComposeHost(
                             )
                         }
                     ) {
-                        MyNavHost(navController, HomePage)
+                        MyNavHost(bottomBar)
                     }
                     SearchOverlay(
                         visible = startViewState.showSearchDialog,
@@ -287,16 +317,24 @@ fun MainComposeHost(
 
 @Composable
 fun MyNavHost(
-    navController: NavHostController,
-    startRoute: Any,
+    bottomBar: BottomBarBackStack,
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = startRoute,
-    ) {
-        BilimiaoPageRoute(this)
-            .initRoute()
+    val entryProvider = entryProvider {
+        BilimiaoPageRoute.entries(this)
     }
+    val entries = bottomBar.decorateEntries(entryProvider)
+    NavDisplay(
+        entries = entries,
+        onBack = { bottomBar.pop() },
+        transitionSpec = {
+            // 前进导航：淡出当前 + 淡入新页面（含缩放）
+            materialFadeThrough()
+        },
+        popTransitionSpec = {
+            // 返回导航：反向（旧页面淡入，当前淡出）
+            materialFadeThroughIn() togetherWith materialFadeThroughOut()
+        },
+    )
 }
 
 @Composable
@@ -305,23 +343,13 @@ fun MyBottomSheet(
     onClose: () -> Unit,
 ) {
     val parentPageNavigation by rememberInstance<PageNavigation>()
-    val bottomSheetNav = rememberNavController()
-    val pageNavigation = remember {
-        PageNavigation(
-            navHostController = { bottomSheetNav },
-            launchUrl = parentPageNavigation::launchWebBrowser,
-            scannerLauncher = parentPageNavigation::openScanner,
-            onClose = onClose,
-        )
-    }
-    val pageConfigState = remember {
-        PageConfigState()
-    }
-    org.kodein.di.compose.subDI(
+    // BottomSheet 独立 backstack，简化：复用父级 PageNavigation
+    // （sheet 内部页面调用 navigate 会进入主 backstack，行为与旧版略有差异，后续可优化）
+    val pageNavigation = parentPageNavigation
+    val pageConfigState = remember { PageConfigState() }
+    subDI(
         diBuilder = {
-            bindSingleton(
-                overrides = true
-            ) { pageNavigation }
+            bindSingleton(overrides = true) { pageNavigation }
             bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator>(
                 overrides = true
             ) { pageNavigation }
@@ -337,11 +365,11 @@ fun MyBottomSheet(
                     .background(MaterialTheme.colorScheme.surface)
                     .heightIn(max = 500.dp),
                 content = {
-                    MyNavHost(bottomSheetNav, page)
+                    page.Content()
                     MyBottomSheetTitleBar(pageConfigState, onClose)
                 },
                 onDismiss = onClose,
-                onPreDismiss = bottomSheetNav::popBackStack,
+                onPreDismiss = { pageNavigation.popBackStack() },
             )
         }
     }
@@ -396,6 +424,5 @@ fun MyBottomSheetTitleBar(
                 text = title.replace("\n", " "),
             )
         }
-
     }
 }

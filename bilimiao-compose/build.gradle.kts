@@ -48,7 +48,9 @@ kotlin {
                 implementation(libs.sonner)
                 implementation(libs.coil.compose)
                 implementation(libs.coil.network.okhttp)
-                implementation(libs.compose.navigation)
+                implementation(libs.androidx.navigation3.runtime)
+                implementation(libs.navigation3.ui.jb)
+                implementation(libs.androidx.lifecycle.viewmodel.navigation3)
                 implementation(libs.compose.material.icons.extended.kmp)
                 implementation(libs.androidx.datastore.preferences)
                 implementation(libs.compose.preference)
@@ -108,7 +110,7 @@ kotlin {
 }
 
 android {
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 21

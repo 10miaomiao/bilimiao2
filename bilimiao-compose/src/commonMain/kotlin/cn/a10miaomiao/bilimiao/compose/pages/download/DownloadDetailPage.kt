@@ -33,7 +33,7 @@ import org.kodein.di.instance
 @Serializable
 data class DownloadDetailPage(
     private val path: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

@@ -105,7 +105,7 @@ import org.kodein.di.instance
 @Serializable
 class VideoDetailPage(
     val id: String,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

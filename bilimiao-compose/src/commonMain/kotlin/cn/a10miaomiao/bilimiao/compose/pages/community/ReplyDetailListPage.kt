@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
 import bilibili.app.view.v1.ViewReply
 import bilibili.main.community.reply.v1.ReplyGRPC
 import bilibili.main.community.reply.v1.ReplyInfo
@@ -57,7 +56,7 @@ import org.kodein.di.instance
 class ReplyDetailListPage(
     val id: String,
     val enterUrl: String = "", // 评论来源,
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

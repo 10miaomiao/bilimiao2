@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.foundation.pagerTabIndicatorOffset
@@ -62,7 +61,7 @@ import kotlinx.serialization.Serializable
 data class UserFavouritePage(
     private val mid: String,
     val type: String = "created", // created, collected
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {

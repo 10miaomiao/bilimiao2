@@ -55,7 +55,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 
 @Serializable
-class QrCodeLoginPage : ComposePage() {
+class QrCodeLoginPage : ComposePage {
 
     @Composable
     override fun Content() {

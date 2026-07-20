@@ -42,7 +42,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavBackStackEntry
 import bilimiao.bilimiao_compose.generated.resources.Res
 import bilimiao.bilimiao_compose.generated.resources.bili_fail_placeholder_img_tv
 import bilimiao.bilimiao_compose.generated.resources.bili_default_placeholder_img_tv
@@ -90,7 +89,7 @@ data class UserMedialistPage(
     private val bizId : String = "",
     private val bizType: String = "",
     private val bizTitle: String = "",
-) : ComposePage() {
+) : ComposePage {
 
     @Composable
     override fun Content() {
