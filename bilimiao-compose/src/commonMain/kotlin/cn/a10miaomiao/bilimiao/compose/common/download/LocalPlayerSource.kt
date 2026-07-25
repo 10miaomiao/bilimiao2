@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose.common.download
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.BiliDownloadMediaFileInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
+import com.a10miaomiao.bilimiao.comm.delegate.player.LocalDanmakuSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
@@ -14,7 +15,7 @@ open class LocalPlayerSource(
     override val id: String,
     override val title: String,
     override val coverUrl: String,
-): BasePlayerSource() {
+): BasePlayerSource(), LocalDanmakuSource {
 
     override val ownerId: String
         get() = ""
@@ -52,7 +53,7 @@ open class LocalPlayerSource(
                 videoDir, "0" + "." + mediaInfo.format
             )
             if (videoFile.exists()) {
-                val url = videoFile.toURI().toString()
+                val url = videoFile.toFileUri()
                 return PlayerSourceInfo().also {
                     it.url = url
                     it.quality = 0
@@ -66,9 +67,9 @@ open class LocalPlayerSource(
             val mediaInfo = MiaoJson.fromJson<BiliDownloadMediaFileInfo.Type2>(videoIndexJson)
             val videoFile = File(videoDir, "video.m4s")
             val audioFile = File(videoDir, "audio.m4s")
-            val url = videoFile.toURI().toString()
+            val url = videoFile.toFileUri()
             if (audioFile.exists()) {
-                val audioUrl = audioFile.toURI().toString()
+                val audioUrl = audioFile.toFileUri()
                 val mergingUrl = "[local-merging]\n$url\n$audioUrl"
                 return PlayerSourceInfo().also {
                     it.height = mediaInfo.video[0].height
@@ -102,9 +103,32 @@ open class LocalPlayerSource(
 
     override suspend fun getSubtitles(): List<SubtitleSourceInfo> = emptyList()
 
+    override suspend fun getLocalDanmakuXmlBytes(): ByteArray? {
+        val danmakuFile = File(entryDirPath, "danmaku.xml")
+        if (!danmakuFile.exists()) return null
+        return runCatching { danmakuFile.readBytes() }.getOrNull()
+    }
+
     private fun getEntryFileInfo(): BiliDownloadEntryInfo {
         val entryJsonFile = File(entryDirPath, "entry.json")
         return MiaoJson.fromJson(entryJsonFile.readText())
+    }
+}
+
+/**
+ * 将 [File] 转为 mpv 可识别的 file URI。
+ *
+ * Windows 上 [File.toURI] 返回 `file:/C:/...`（单斜杠），
+ * 而 mpv 期望标准的 `file:///C:/...`（三斜杠）。
+ * 此函数统一补全为三斜杠格式，跨平台安全。
+ */
+private fun File.toFileUri(): String {
+    val uri = toURI().toString()
+    // file:/C:/... → file:///C:/...
+    return if (uri.startsWith("file:/") && !uri.startsWith("file://")) {
+        "file:///" + uri.removePrefix("file:/")
+    } else {
+        uri
     }
 }
 

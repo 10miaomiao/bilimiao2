@@ -104,6 +104,7 @@ kotlin {
 
                 // 弹幕引擎
                 implementation(project(":danmaku-engine"))
+                implementation(project(":bilimiao-download"))
             }
         }
     }

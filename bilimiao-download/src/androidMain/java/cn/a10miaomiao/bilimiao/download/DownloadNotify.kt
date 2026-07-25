@@ -7,12 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
-import okhttp3.internal.notify
 
-class DownloadNotify(val context: Context) {
+class DownloadNotify(val context: Context) : DownloadNotifier {
     val ACTION_CMD = "cn.a10miaomiao.bilimiao.download.DownloadNotify"
     val notificationID = 10000
     val channelId = "cn.a10miaomiao.bilimiao.download.DownloadNotify.control"
@@ -36,7 +34,7 @@ class DownloadNotify(val context: Context) {
         }
     }
 
-    fun notifyData(info: CurrentDownloadInfo) {
+    override fun notifyData(info: CurrentDownloadInfo) {
         if (builder.taskId == info.taskId) {
             builder.setContentText(info.statusText)
             builder.setProgress(info.size.toInt(), info.progress.toInt(), false)
@@ -50,7 +48,7 @@ class DownloadNotify(val context: Context) {
         manager.notify(notificationID, notification)
     }
 
-    fun showCompletedStatusNotify(info: CurrentDownloadInfo) {
+    override fun showCompletedStatusNotify(info: CurrentDownloadInfo) {
         manager.notify(
             notificationID + info.taskId.toInt(),
             NotificationCompat.Builder(context, channelId).apply {
@@ -65,7 +63,7 @@ class DownloadNotify(val context: Context) {
         )
     }
 
-    fun showErrorStatusNotify(info: CurrentDownloadInfo) {
+    override fun showErrorStatusNotify(info: CurrentDownloadInfo) {
         manager.notify(
             notificationID + info.taskId.toInt(),
             NotificationCompat.Builder(context, channelId).apply {
@@ -80,7 +78,7 @@ class DownloadNotify(val context: Context) {
         )
     }
 
-    fun cancel() {
+    override fun cancel() {
         manager.cancel(notificationID)
     }
 

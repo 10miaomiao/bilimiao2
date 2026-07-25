@@ -129,26 +129,38 @@ class DesktopPlayerDelegate(
             currentSegmentIndex = 0
             segmentOffsetMs = 0L
             try {
-                // 获取弹幕数据
-                _loadingMessage.value = "正在加载弹幕..."
-                launch(Dispatchers.IO) {
-                    try {
+            // 获取弹幕数据：本地下载文件优先读取 danmaku.xml，否则走网络接口
+            _loadingMessage.value = "正在加载弹幕..."
+            launch(Dispatchers.IO) {
+                try {
+                    val xmlBytes = (source as? LocalDanmakuSource)?.getLocalDanmakuXmlBytes()
+                    if (xmlBytes != null) {
+                        val dataSource = object : IDataSource<ByteArray> {
+                            override fun data() = xmlBytes
+                            override fun release() {}
+                        }
+                        val parser = BiliDanmakuParser()
+                        parser.load(dataSource)
+                        _danmakuParser.value = parser
+                    } else {
+                        // 本地源无弹幕或非本地源：回退到网络接口
                         val res = BiliApiService.playerAPI.getDanmakuList(source.id).awaitCall()
                         val body = res.body
                         if (body != null) {
-                            val xmlBytes = CompressionTools.decompressXML(body.bytes())
+                            val netBytes = CompressionTools.decompressXML(body.bytes())
                             val dataSource = object : IDataSource<ByteArray> {
-                                override fun data() = xmlBytes
+                                override fun data() = netBytes
                                 override fun release() {}
                             }
                             val parser = BiliDanmakuParser()
                             parser.load(dataSource)
                             _danmakuParser.value = parser
                         }
-                    } catch (e: Exception) {
-                        _danmakuParser.value = null
                     }
+                } catch (e: Exception) {
+                    _danmakuParser.value = null
                 }
+            }
 
                 // 获取播放地址
                 _loadingMessage.value = "正在获取播放地址..."
@@ -242,8 +254,9 @@ class DesktopPlayerDelegate(
     private fun resolvePlaybackUrl(url: String): ResolvedPlayback {
         val trimmed = url.trim()
         return when {
-            trimmed.startsWith("[merging]") -> {
-                val urls = trimmed.removePrefix("[merging]")
+            trimmed.startsWith("[merging]") || trimmed.startsWith("[local-merging]") -> {
+                val prefix = if (trimmed.startsWith("[local-merging]")) "[local-merging]" else "[merging]"
+                val urls = trimmed.removePrefix(prefix)
                     .lines()
                     .map { it.trim() }
                     .filter { it.isNotBlank() }
