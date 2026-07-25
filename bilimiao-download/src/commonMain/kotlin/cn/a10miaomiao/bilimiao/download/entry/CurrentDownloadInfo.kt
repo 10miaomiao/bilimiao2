@@ -1,6 +1,6 @@
 package cn.a10miaomiao.bilimiao.download.entry
 
-import java.text.DecimalFormat
+import kotlin.math.floor
 
 data class CurrentDownloadInfo(
     val taskId: Long,
@@ -20,8 +20,8 @@ data class CurrentDownloadInfo(
         STATUS_FAIL_DANMAKU -> "获取弹幕失败"
         STATUS_FAIL_PLAYURL -> "获取播放地址失败"
         STATUS_DOWNLOADING -> {
-            val fnum = DecimalFormat("##0.00")
-            "正在下载 ${fnum.format(progress * 1.0 / size * 100.0)}%"
+            val percent = if (size > 0) progress * 100.0 / size else 0.0
+            "正在下载 ${percent.format(2)}%"
         }
         STATUS_AUDIO_DOWNLOADING -> {
             "正在下载音频"
@@ -49,4 +49,18 @@ data class CurrentDownloadInfo(
         const val STATUS_WAIT = 0
     }
 
+}
+
+private fun Double.format(decimals: Int): String {
+    val factor = buildString { append("1"); repeat(decimals) { append("0") } }.toDouble()
+    val rounded = floor(this * factor + 0.5) / factor
+    val str = rounded.toString()
+    val dotIndex = str.indexOf('.')
+    return if (dotIndex < 0) {
+        str + "." + "0".repeat(decimals)
+    } else {
+        val decimalsPresent = str.length - dotIndex - 1
+        if (decimalsPresent >= decimals) str.substring(0, dotIndex + decimals + 1)
+        else str + "0".repeat(decimals - decimalsPresent)
+    }
 }

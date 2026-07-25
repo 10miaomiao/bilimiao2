@@ -1,9 +1,5 @@
 package cn.a10miaomiao.bilimiao.download
 
-import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.os.IBinder
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryAndPathInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadEntryInfo
 import cn.a10miaomiao.bilimiao.download.entry.BiliDownloadMediaFileInfo
@@ -11,39 +7,29 @@ import cn.a10miaomiao.bilimiao.download.entry.CurrentDownloadInfo
 import com.a10miaomiao.bilimiao.comm.miao.MiaoJson
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.serialization.encodeToString
-import java.io.*
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.launch
+import java.io.File
 
-class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
-    companion object {
-        private const val TAG = "DownloadService"
-        private val channel = Channel<DownloadService>()
-        private var _instance: DownloadService? = null
+/**
+ * 下载服务基类（平台无关）。
+ *
+ * - Android：由 [DownloadService] 继承，挂载到 Service 生命周期并附加系统通知。
+ * - 桌面端：由 [DownloadServiceDesktop] 继承，使用普通协程作用域与桌面通知器。
+ *
+ * 平台差异通过 [notifier] 与 [downloadPathProvider] 注入。
+ */
+abstract class BaseDownloadService(
+    val scope: CoroutineScope,
+) : DownloadManager.Callback {
 
-        val instance get() = _instance
+    /** 平台提供的下载状态通知器（系统通知/桌面通知）。 */
+    protected abstract val notifier: DownloadNotifier
 
-        suspend fun getService(context: Context): DownloadService{
-            _instance?.let { return it }
-            startService(context)
-            return channel.receive().also {
-                _instance = it
-            }
-        }
+    /** 平台提供的下载根目录。 */
+    protected abstract val downloadPathProvider: DownloadPathProvider
 
-        fun startService(context: Context) {
-            val intent = Intent(context, DownloadService::class.java)
-            context.startService(intent)
-        }
-    }
-
-    private var job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
-    private val downloadNotify by lazy { DownloadNotify(this) }
     private var downloadManager: DownloadManager? = null
     private var audioDownloadManager: DownloadManager? = null
     private var currentTaskId = 1L
@@ -55,17 +41,14 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
 
         override fun onTaskComplete(info: CurrentDownloadInfo) {
             if (downloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_COMPLETED) {
-                downloadNotify.showCompletedStatusNotify(info)
+                notifier.showCompletedStatusNotify(info)
                 completeDownload()
             }
         }
 
         override fun onTaskError(info: CurrentDownloadInfo, error: Throwable) {
-            if (downloadManager?.downloadInfo?.status == CurrentDownloadInfo.STATUS_COMPLETED) {
-
-            }
+            // 主视频流已完成时不重置状态
         }
-
     }
 
     var downloadList = mutableListOf<BiliDownloadEntryAndPathInfo>()
@@ -79,51 +62,49 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
     private var curMediaFile: File? = null
     private var curMediaFileInfo: BiliDownloadMediaFileInfo? = null
 
-
-    override fun onCreate() {
-        super.onCreate()
-        job = Job()
-        launch {
+    /**
+     * 服务初始化入口，由子类在其生命周期/启动时调用一次。
+     */
+    fun initialize() {
+        scope.launch {
             readDownloadList()
-            channel.send(this@DownloadService)
         }
-        launch {
+        scope.launch {
             curDownload.collect { info ->
                 if (info == null) {
-                    downloadNotify.cancel()
+                    notifier.cancel()
                 } else {
-                    downloadNotify.notifyData(info)
+                    notifier.notifyData(info)
                 }
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-        _instance = null
-    }
-
-    private fun readDownloadList() {
+    fun readDownloadList() {
         val downloadDir = File(getDownloadPath())
+        if (!downloadDir.exists()) {
+            downloadDir.mkdir()
+        }
         val list = mutableListOf<BiliDownloadEntryAndPathInfo>()
         downloadDir.listFiles()
-            .filter { it.isDirectory }
-            .forEach {
+            ?.filter { it.isDirectory }
+            ?.forEach {
                 list.addAll(readDownloadDirectory(it))
             }
         downloadList = list.reversed().toMutableList()
+        // 通知 UI 列表已更新
+        downloadListVersion.value++
     }
 
-    fun readDownloadDirectory(dir: File): List<BiliDownloadEntryAndPathInfo>{
+    fun readDownloadDirectory(dir: File): List<BiliDownloadEntryAndPathInfo> {
         if (!dir.exists() || !dir.isDirectory) {
             return emptyList()
         }
         return dir.listFiles()
-            .filter { pageDir -> pageDir.isDirectory }
-            .map { File(it.path, "entry.json") }
-            .filter { it.exists() }
-            .map {
+            ?.filter { pageDir -> pageDir.isDirectory }
+            ?.map { File(it.path, "entry.json") }
+            ?.filter { it.exists() }
+            ?.map {
                 val entryJson = it.readText()
                 val entry = MiaoJson.fromJson<BiliDownloadEntryInfo>(entryJson)
                 BiliDownloadEntryAndPathInfo(
@@ -131,7 +112,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                     entryDirPath = it.parent,
                     pageDirPath = it.parentFile.parent
                 )
-            }
+            } ?: emptyList()
     }
 
     /**
@@ -179,17 +160,13 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         }
         if (biliDownInfo != null) {
             startDownload(biliDownInfo)
-        } else {
-//            val entryFile = File(entryDirPath, "entry.json")
-//            if (entryFile.exists()) {
-//
-//            }
         }
     }
+
     /**
      * 开始任务
      */
-    fun startDownload(biliDownInfo: BiliDownloadEntryAndPathInfo) = launch {
+    fun startDownload(biliDownInfo: BiliDownloadEntryAndPathInfo) = scope.launch {
         // 取消当前任务
         downloadManager?.cancel()
         audioDownloadManager?.cancel()
@@ -225,7 +202,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                 }.awaitCall()
                 val xmlBytes = CompressionTools.decompressXML(res.body!!.bytes())
                 danmakuXMLFile.writeBytes(xmlBytes)
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 curDownload.value = currentDownloadInfo.copy(
                     status = CurrentDownloadInfo.STATUS_FAIL_DANMAKU,
                 )
@@ -266,10 +243,10 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
 
             curMediaFile = mediaJsonFile
             curMediaFileInfo = mediaFileInfo
-            when(mediaFileInfo) {
+            when (mediaFileInfo) {
                 is BiliDownloadMediaFileInfo.Type1 -> {
                     // TODO: 多视频文件下载
-                    downloadManager = DownloadManager(this, currentDownloadInfo.copy(
+                    downloadManager = DownloadManager(scope, currentDownloadInfo.copy(
                         url = mediaFileInfo.segment_list[0].url,
                         header = httpHeader,
                         size = mediaFileInfo.segment_list[0].bytes,
@@ -280,7 +257,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                     curDownload.value = currentDownloadInfo
                 }
                 is BiliDownloadMediaFileInfo.Type2 -> {
-                    downloadManager = DownloadManager(this, currentDownloadInfo.copy(
+                    downloadManager = DownloadManager(scope, currentDownloadInfo.copy(
                         url = mediaFileInfo.video[0].base_url,
                         header = httpHeader,
                         size = entry.total_bytes,
@@ -290,7 +267,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                     downloadManager?.start(File(videoDir, "video.m4s"))
                     val audio = mediaFileInfo.audio
                     if (audio != null && audio.isNotEmpty()) {
-                        audioDownloadManager = DownloadManager(this, CurrentDownloadInfo(
+                        audioDownloadManager = DownloadManager(scope, CurrentDownloadInfo(
                             taskId = currentDownloadInfo.taskId,
                             parentDirPath = currentDownloadInfo.parentDirPath,
                             parentId = currentDownloadInfo.parentId,
@@ -343,7 +320,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
     /**
      * 结束当前任务
      */
-    fun stopDownload () {
+    fun stopDownload() {
         curDownload.value?.let { cur ->
             val entryAndPathInfo = downloadList.find {
                 cur.id == it.entry.key
@@ -368,7 +345,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
     /**
      * 删除当前任务
      */
-    fun deleteDownload (
+    fun deleteDownload(
         pageDirPath: String,
         entryDirPath: String,
     ) {
@@ -388,7 +365,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             if (entryDir.exists()) {
                 entryDir.deleteRecursively()
             }
-            if (downloadDir.listFiles().size === 0) {
+            if (downloadDir.listFiles()?.size == 0) {
                 downloadDir.delete()
             }
         }
@@ -431,10 +408,6 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
                 nextDownload()
             }
         }
-    }
-
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
     }
 
     override fun onTaskRunning(info: CurrentDownloadInfo) {
@@ -480,7 +453,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
             }
             CurrentDownloadInfo.STATUS_COMPLETED, null -> {
                 // 完成下载
-                downloadNotify.showCompletedStatusNotify(info)
+                notifier.showCompletedStatusNotify(info)
                 completeDownload()
             }
         }
@@ -491,7 +464,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         curDownload.value = info.copy(
             status = CurrentDownloadInfo.STATUS_FAIL_DOWNLOAD
         )
-        downloadNotify.showErrorStatusNotify(info)
+        notifier.showErrorStatusNotify(info)
         val entryAndPathInfo = downloadList.find {
             info.id == it.entry.key
         }
@@ -516,13 +489,7 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         entryJsonFile.writeText(entryJsonStr)
     }
 
-    fun getDownloadPath(): String {
-        var file = File(getExternalFilesDir(null), "../download")
-        if (!file.exists()) {
-            file.mkdir()
-        }
-        return file.canonicalPath
-    }
+    fun getDownloadPath(): String = downloadPathProvider.downloadPath
 
     private fun getDownloadFileDir(biliEntry: BiliDownloadEntryInfo): File {
         var dirName = ""
@@ -548,5 +515,39 @@ class DownloadService: Service(), CoroutineScope, DownloadManager.Callback {
         }
         return pageDir
     }
+}
 
+/**
+ * 下载目录提供者。
+ *
+ * Android：使用应用专属存储下的 `download` 子目录。
+ * 桌面端：使用平台数据目录下的 `download` 子目录。
+ */
+interface DownloadPathProvider {
+    val downloadPath: String
+}
+
+/**
+ * 下载状态通知器抽象，由平台实现（系统通知 / 桌面通知）。
+ */
+interface DownloadNotifier {
+    /** 更新进行中任务的状态。 */
+    fun notifyData(info: CurrentDownloadInfo)
+    /** 显示下载完成通知。 */
+    fun showCompletedStatusNotify(info: CurrentDownloadInfo)
+    /** 显示下载出错通知。 */
+    fun showErrorStatusNotify(info: CurrentDownloadInfo)
+    /** 取消进行中任务的显示。 */
+    fun cancel()
+}
+
+/**
+ * 无操作的通知器，桌面端可作为默认实现，
+ * 状态仍可通过 [BaseDownloadService.curDownload] StateFlow 获取。
+ */
+object NoopDownloadNotifier : DownloadNotifier {
+    override fun notifyData(info: CurrentDownloadInfo) {}
+    override fun showCompletedStatusNotify(info: CurrentDownloadInfo) {}
+    override fun showErrorStatusNotify(info: CurrentDownloadInfo) {}
+    override fun cancel() {}
 }
