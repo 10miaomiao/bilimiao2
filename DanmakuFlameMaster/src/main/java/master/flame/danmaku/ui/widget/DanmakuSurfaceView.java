@@ -170,6 +170,10 @@ public class DanmakuSurfaceView extends SurfaceView implements IDanmakuView, IDa
     public void release() {
         stop();
         if(mDrawTimes!= null) mDrawTimes.clear();
+        // 移除 SurfaceHolder 回调以防止内存泄漏
+        if (mSurfaceHolder != null) {
+            mSurfaceHolder.removeCallback(this);
+        }
     }
 
     @Override
