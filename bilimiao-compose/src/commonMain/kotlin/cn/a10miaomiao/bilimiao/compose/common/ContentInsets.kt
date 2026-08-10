@@ -59,10 +59,10 @@ fun ContentInsets.toPaddingValues(
 ): PaddingValues {
     return remember(this, left, right, top, bottom) {
         PaddingValues.Absolute(
-            left = left ?: this.left,
-            right = right ?: this.right,
-            top = top ?: this.top,
-            bottom = bottom ?: this.bottom,
+            left = max(left ?: this.left, 0.dp),
+            right = max(right ?: this.right, 0.dp),
+            top = max(top ?: this.top, 0.dp),
+            bottom = max(bottom ?: this.bottom, 0.dp),
         )
     }
 }
