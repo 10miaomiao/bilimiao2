@@ -152,7 +152,9 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
-    implementation(libs.gsy.video.player)
+    // mediamp (统一播放器抽象层，安卓端用 ExoPlayer 后端)
+    implementation(libs.mediamp.api)
+    implementation(libs.mediamp.exoplayer)
 
     implementation(libs.okhttp3)
     implementation(libs.pbandk.runtime)
@@ -164,8 +166,8 @@ dependencies {
     implementation(project(":bilimiao-download"))
     implementation(project(":bilimiao-cover"))
     implementation(project(":bilimiao-compose"))
-    // 弹幕引擎
-    implementation(project(":DanmakuFlameMaster"))
+    // 弹幕引擎已通过 bilimiao-compose/bilimiao-comm 传递依赖 (KMP danmaku-engine)
+    // DanmakuFlameMaster 已移除，统一使用 KMP danmaku-engine
 
     // 闭源库：百度统计、极验验证
     "fullImplementation"(libs.baidu.mobstat.sdk)

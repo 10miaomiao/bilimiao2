@@ -192,11 +192,11 @@ fun VideoDetailContent(
                 if (showCover) {
                     PlayerAnchorBox(
                         aid = arcData.aid.toString(),
-                        modifier = Modifier
-                            .aspectRatio(16f / 9f)
-                            .padding(10.dp),
                     ) {
                         VideoCoverBox(
+                            modifier = Modifier
+                                .aspectRatio(16f / 9f)
+                                .padding(10.dp),
                             aid = arcData.aid,
                             title = arcData.title,
                             pic = arcData.pic,

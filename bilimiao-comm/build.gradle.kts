@@ -32,6 +32,8 @@ kotlin {
                 implementation(libs.sonner)
                 api(libs.androidx.datastore.preferences)
                 api(libs.androidx.room.runtime)
+                // KMP 弹幕引擎 (commonMain 的 BasePlayerSource 需要 BiliDanmakuParser)
+                implementation(project(":danmaku-engine"))
             }
         }
         androidMain {
@@ -42,13 +44,15 @@ kotlin {
                 implementation(libs.material)
                 implementation(libs.androidx.browser)
 
-                implementation(libs.androidx.compose.bom)
-                implementation(libs.compose.ui)
-
                 implementation(libs.kodein.di)
                 implementation(libs.glide)
-
-                implementation(project(":DanmakuFlameMaster"))
+                // mediamp (安卓端使用 ExoPlayer 后端)
+                implementation(libs.mediamp.api)
+                implementation(libs.mediamp.exoplayer)
+                // media3 (ExoPlayerMediampPlayer 底层依赖，需显式声明用于 MergingMediaSource 等 API)
+                implementation(libs.androidx.media3.exoplayer)
+                implementation(libs.androidx.media3.datasource)
+                // DanmakuFlameMaster 已移除
             }
         }
         val desktopMain by getting {

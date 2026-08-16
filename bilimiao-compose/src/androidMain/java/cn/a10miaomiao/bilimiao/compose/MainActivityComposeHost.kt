@@ -1,12 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose
 
 import android.net.Uri
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import cn.a10miaomiao.bilimiao.compose.platform.AndroidPlatformContext
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
@@ -50,14 +47,13 @@ fun MainActivityComposeHost(
     emitter: SharedFlowEmitter,
     messageDialogState: MessageDialogState,
     bottomSheetState: BottomSheetState,
-    androidPlayerViews: AndroidPlayerViews? = null,
+    platformContext: AndroidPlatformContext,
+    playerContent: (@Composable () -> Unit)? = null,
     onBackClick: () -> Unit,
     initialDeepLink: Uri? = null,
     onInitialDeepLinkConsumed: () -> Unit = {},
     onReady: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val platformContext = remember { AndroidPlatformContext(context) }
     MainComposeHost(
         navigator = navigator.delegate,
         hostDi = hostDi,
@@ -68,14 +64,7 @@ fun MainActivityComposeHost(
         messageDialogState = messageDialogState,
         bottomSheetState = bottomSheetState,
         platformContext = platformContext,
-        playerContent = androidPlayerViews?.playerView?.let { view ->
-            {
-                AndroidView(
-                    factory = { view },
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        },
+        playerContent = playerContent,
         onBackClick = onBackClick,
         initialDeepLink = initialDeepLink?.toString(),
         onInitialDeepLinkConsumed = onInitialDeepLinkConsumed,

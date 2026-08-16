@@ -26,7 +26,7 @@ rootProject.name = "bilimiao"
 include(":app")
 include(":desktop-app")
 include(":bilimiao-comm", ":bilimiao-cover", ":bilimiao-download", "bilimiao-appwidget", "bilimiao-compose")
-include(":DanmakuFlameMaster")
+// include(":DanmakuFlameMaster") // 已移除：统一使用 KMP danmaku-engine
 include(":danmaku-engine")
 include(":benchmark")
 include(":grpc-generator")

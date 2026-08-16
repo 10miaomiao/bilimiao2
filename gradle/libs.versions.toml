@@ -13,7 +13,7 @@ navigation3UiJb = "1.2.0-alpha02"
 lifecycleViewmodelNav3 = "2.11.0"
 composeBom = "2026.04.01"
 datastore = "1.1.1"
-media3 = "1.5.0"
+media3 = "1.9.0"
 browser = "1.7.0"
 profileinstaller = "1.3.1"
 # kotlin libraries
@@ -28,7 +28,7 @@ pbandk = "0.16.0"
 # database
 room = "2.7.0"
 ksp = "2.3.10"
-gsyVideoPlayer = "v10.0.0"
+gsyVideoPlayer = "v10.0.0" # 已移除：统一使用 mediamp
 accompanist = "0.35.0-alpha"
 materialKolor = "2.0.2"
 microgSafeParcel = "1.7.1"
@@ -77,6 +77,7 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 androidx-media3-decoder = { group = "androidx.media3", name = "media3-decoder", version.ref = "media3" }
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 androidx-media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3" }
+androidx-media3-datasource = { group = "androidx.media3", name = "media3-datasource", version.ref = "media3" }
 androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 # compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -116,7 +117,6 @@ glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "gl
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
 # ui components
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-gsy-video-player = { group = "com.github.CarGuo.GSYVideoPlayer", name = "gsyvideoplayer-java", version.ref = "gsyVideoPlayer" }
 mojito = { group = "com.github.mikaelzero.mojito", name = "mojito", version.ref = "mojito" }
 mojito-sketch = { group = "com.github.mikaelzero.mojito", name = "SketchImageViewLoader", version.ref = "mojito" }
 mojito-glide = { group = "com.github.mikaelzero.mojito", name = "GlideImageLoader", version.ref = "mojito" }
@@ -137,6 +137,7 @@ reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.r
 # mediamp
 mediamp-api = { module = "org.openani.mediamp:mediamp-api", version.ref = "mediamp" }
 mediamp-mpv = { module = "org.openani.mediamp:mediamp-mpv", version.ref = "mediamp" }
+mediamp-exoplayer = { module = "org.openani.mediamp:mediamp-exoplayer", version.ref = "mediamp" }
 mediamp-native-loader = { module = "org.openani.mediamp:mediamp-native-loader", version.ref = "mediamp" }
 # jna
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
