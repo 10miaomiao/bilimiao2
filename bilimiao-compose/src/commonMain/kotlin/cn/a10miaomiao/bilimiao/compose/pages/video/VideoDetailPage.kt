@@ -225,9 +225,10 @@ private fun VideoDetailPageContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(headerCoverHeight)
-                            .padding(8.dp),
                     ) {
                         VideoCoverBox(
+                            modifier = Modifier
+                                .padding(8.dp),
                             aid = arcData.aid,
                             title = arcData.title,
                             pic = arcData.pic,

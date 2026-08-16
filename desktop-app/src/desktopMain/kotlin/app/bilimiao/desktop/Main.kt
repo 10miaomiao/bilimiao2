@@ -53,8 +53,8 @@ import com.a10miaomiao.bilimiao.comm.platform.JvmDeviceInfoProvider
 import com.a10miaomiao.bilimiao.comm.platform.JvmPlatformContext
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
-import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopPlayerDelegate
-import cn.a10miaomiao.bilimiao.compose.components.player.DesktopPlayerContainer
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
+import cn.a10miaomiao.bilimiao.compose.components.player.BiliVideoScaffold
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.DesktopSettingsProvider
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -101,7 +101,7 @@ fun main() {
         bindSingleton<AppInfo> { AppInfoDesktop() }
         bindSingleton<FileStorage> { FileStorageDesktop(PlatformProviders.context.filesDir) }
         bindSingleton<DownloadManager> { DownloadManagerDesktop() }
-        bindSingleton<BasePlayerDelegate> { DesktopPlayerDelegate(instance(), instance()) }
+        bindSingleton<BasePlayerDelegate> { PlayerDelegateImpl(instance(), instance()) }
         bindSingleton { AppStore(di) }
         bindSingleton { PlayListStore(di) }
         bindSingleton { PlayerStore(di) }
@@ -119,7 +119,7 @@ fun main() {
         override val di = di
         val playerDelegate: BasePlayerDelegate by instance()
     }
-    val playerDelegate = storeHolderForPlayer.playerDelegate as DesktopPlayerDelegate
+    val playerDelegate = storeHolderForPlayer.playerDelegate as PlayerDelegateImpl
     playerDelegate.createPlayer()
 
     // Initialize stores
@@ -250,18 +250,19 @@ fun main() {
                                 bottomSheetState = bottomSheetState,
                                 platformContext = platformContext,
                                 playerContent = {
-                                    DesktopPlayerContainer(
+                                    // 观察全屏状态变化，同步到桌面窗口
+                                    val isFullscreen by playerDelegate.fullscreenController.isFullscreen.collectAsState()
+                                    LaunchedEffect(isFullscreen) {
+                                        startViewState.playerState.setFullScreenPlayer(isFullscreen)
+                                        WindowsWindowUtils.instance.setUndecoratedFullscreen(
+                                            desktopWindow, windowState, isFullscreen
+                                        )
+                                    }
+                                    BiliVideoScaffold(
+                                        delegate = playerDelegate,
                                         modifier = Modifier.fillMaxSize(),
-                                        isFullscreen = desktopWindow.isUndecoratedFullscreen,
-                                        onFullscreenToggle = {
-                                            val newFullscreen = !desktopWindow.isUndecoratedFullscreen
-                                            startViewState.playerState.setFullScreenPlayer(newFullscreen)
-                                            scope.launch {
-                                                WindowsWindowUtils.instance.setUndecoratedFullscreen(
-                                                    desktopWindow, windowState, newFullscreen
-                                                )
-                                            }
-                                        },
+                                        onBack = { playerDelegate.closePlayer() },
+                                        onToggleFullscreen = { playerDelegate.fullscreenController.toggleFullscreen() },
                                     )
                                 },
                                 onBackClick = {

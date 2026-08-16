@@ -10,3 +10,4 @@
 .cxx
 local.properties
 app/signing.properties
+.kotlin/

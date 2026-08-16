@@ -24,21 +24,23 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
-import androidx.compose.ui.platform.ComposeView
 import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabColorSchemeParams
-import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.compose.ui.platform.ComposeView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import cn.a10miaomiao.bilimiao.compose.AndroidPlayerViews
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeNavigator
 import cn.a10miaomiao.bilimiao.compose.PlayerFloatingLayoutState
@@ -49,6 +51,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
+import cn.a10miaomiao.bilimiao.compose.components.player.BiliVideoScaffold
 import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
 import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -56,8 +59,8 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegate2
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerViews
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
+import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerHostState
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.scanner.BilimiaoScanner
@@ -73,11 +76,10 @@ import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorage
 import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorageAndroid
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManagerAndroid
+import cn.a10miaomiao.bilimiao.compose.platform.AndroidPlatformContext as ComposePlatformContext
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
-import com.a10miaomiao.bilimiao.widget.player.DanmakuVideoPlayer
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerHostState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.materialkolor.hct.Hct
 import kotlinx.coroutines.Dispatchers
@@ -87,6 +89,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
+import org.kodein.di.instance
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 
 class MainActivity : AppCompatActivity(), DIAware {
@@ -95,8 +98,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         bindSingleton { this@MainActivity }
         store.loadStoreModules(this)
         bindSingleton { startViewState }
-        bindSingleton<AndroidPlayerViews> { androidPlayerViews }
-        bindSingleton { basePlayerDelegate }
+        bindSingleton<BasePlayerDelegate> { basePlayerDelegate }
         bindSingleton { themeDelegate }
         bindSingleton { statusBarHelper }
         bindSingleton { supportHelper }
@@ -168,26 +170,27 @@ class MainActivity : AppCompatActivity(), DIAware {
     private var pendingDeepLink: Uri? = null
     private var lastExitBackPressedTime = 0L
 
-    private lateinit var playerLayout: FrameLayout
-    private lateinit var videoPlayerView: DanmakuVideoPlayer
-
-    private val playerViews = object : PlayerViews {
-        override val videoPlayer: DanmakuVideoPlayer
-            get() = videoPlayerView
-
-        override fun <T : View> findViewById(id: Int): T {
-            return playerLayout.findViewById(id)!!
-        }
-    }
-
-    private val androidPlayerViews = AndroidPlayerViews()
     private val startViewState by lazy {
         StartViewState(
             onFloatingPlayerLayoutStateChanged = playerHostState::updateFloatingPlayerLayoutState,
         )
     }
-    private val basePlayerDelegate: PlayerDelegate2 by lazy {
-        PlayerDelegate2(this, playerViews, playerHostState, di)
+    private val basePlayerDelegate: PlayerDelegateImpl by lazy {
+        // 初始化平台 Provider（ExoPlayerMediampPlayer 需要 AndroidPlatformContext）
+        com.a10miaomiao.bilimiao.comm.platform.PlatformProviders.context = com.a10miaomiao.bilimiao.comm.platform.AndroidPlatformContext(application as android.app.Application)
+        val playerStore: com.a10miaomiao.bilimiao.comm.store.PlayerStore by di.instance()
+        val playListStore: com.a10miaomiao.bilimiao.comm.store.PlayListStore by di.instance()
+        val appStore: com.a10miaomiao.bilimiao.comm.store.AppStore by di.instance()
+        PlayerDelegateImpl(
+            playerStore = playerStore,
+            playListStore = playListStore,
+            isLockScreenOrientationPortraitProvider = { appStore.state.isLockScreenOrientationPortrait },
+        ).also {
+            it.createPlayer()
+            it.onShowPlayerChanged = { show ->
+                startViewState.playerState.setShowPlayer(show)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -195,6 +198,8 @@ class MainActivity : AppCompatActivity(), DIAware {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         }
         super.onCreate(savedInstanceState)
+        // 设置 ActivityHolder 供 FullscreenController 调用 requestedOrientation
+        com.a10miaomiao.bilimiao.comm.delegate.player.ActivityHolder.set(this)
         themeDelegate.onCreate(savedInstanceState)
 
         BilimiaoStatService.setAuthorizedState(this, false)
@@ -256,14 +261,13 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     private fun initRootView(savedInstanceState: Bundle?) {
-        createPlayerViews()
-        setupPlayerViewInWrapper()
         basePlayerDelegate.onCreate()
         playerHostState.showPlayer = basePlayerDelegate.isPlaying()
 
         val rootComposeView = ComposeView(this).apply {
             setContent {
                 val appState = store.appStore.stateFlow.collectAsState().value
+                val platformContext = remember { ComposePlatformContext(this@MainActivity) }
                 MainActivityComposeHost(
                     navigator = composeNavigator,
                     hostDi = composeHostDi,
@@ -273,7 +277,15 @@ class MainActivity : AppCompatActivity(), DIAware {
                     emitter = emitter,
                     messageDialogState = messageDialogState,
                     bottomSheetState = bottomSheetState,
-                    androidPlayerViews = androidPlayerViews,
+                    platformContext = platformContext,
+                    playerContent = {
+                        BiliVideoScaffold(
+                            delegate = basePlayerDelegate,
+                            modifier = Modifier.fillMaxSize(),
+                            onBack = { basePlayerDelegate.closePlayer() },
+                            onToggleFullscreen = { basePlayerDelegate.fullscreenController.toggleFullscreen() },
+                        )
+                    },
                     onBackClick = ::handleActivityBackPressed,
                     initialDeepLink = pendingDeepLink,
                     onInitialDeepLinkConsumed = {
@@ -303,43 +315,6 @@ class MainActivity : AppCompatActivity(), DIAware {
             }
         }
         updateStatusBarStyle()
-    }
-
-    private fun createPlayerViews() {
-        videoPlayerView = PlayerViewKeeper.keepPlayerView?.apply {
-            try {
-                (parent as? ViewGroup)?.removeAllViews()
-                val contextField = View::class.java.getDeclaredField("mContext")
-                contextField.isAccessible = true
-                if (contextField.get(this) is Context) {
-                    contextField.set(this, this@MainActivity)
-                }
-            } catch (_: Exception) {
-            }
-        } ?: layoutInflater.inflate(R.layout.include_palyer2, null, false) as DanmakuVideoPlayer
-        PlayerViewKeeper.keepPlayerView = videoPlayerView
-
-        playerLayout = FrameLayout(this).apply {
-            setBackgroundColor(Color.BLACK)
-            addView(videoPlayerView, FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-            ))
-            addView(layoutInflater.inflate(R.layout.include_completion_box, this, false))
-            addView(layoutInflater.inflate(R.layout.include_error_message_box, this, false))
-            addView(layoutInflater.inflate(R.layout.include_area_limit_box, this, false))
-            addView(layoutInflater.inflate(R.layout.include_player_loading, this, false))
-        }
-    }
-
-    private fun setupPlayerViewInWrapper() {
-        androidPlayerViews.playerView = playerLayout
-        startViewState.playerState.setShowPlayer(playerHostState.showPlayer)
-        startViewState.playerState.setOrientation(playerHostState.orientation)
-        startViewState.playerState.setFullScreenPlayer(playerHostState.fullScreenPlayer)
-        startViewState.playerState.setPortraitPlayerLayoutState(playerHostState.portraitLayoutState)
-        startViewState.playerState.setFloatingPlayerLayoutState(playerHostState.floatingLayoutState)
-        startViewState.playerState.setPlayerVideoRatio(playerHostState.playerVideoRatio)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -394,7 +369,8 @@ class MainActivity : AppCompatActivity(), DIAware {
         bottom: Int,
         displayCutout: DisplayCutout?
     ) {
-        basePlayerDelegate.setWindowInsets(left, top, right, bottom, displayCutout)
+        // PlayerDelegateImpl.setWindowInsets 为空实现（Compose VideoScaffold 自行处理 insets）
+        basePlayerDelegate.setWindowInsets(left, top, right, bottom)
         updateStatusBarStyle()
     }
 
@@ -435,22 +411,22 @@ class MainActivity : AppCompatActivity(), DIAware {
         when (keyCode) {
             KeyEvent.KEYCODE_SPACE -> {
                 if (playerHostState.showPlayer) {
-                    if (videoPlayerView.isInPlayingState) {
-                        videoPlayerView.onVideoPause()
+                    if (basePlayerDelegate.isPlaying()) {
+                        basePlayerDelegate.pause()
                     } else {
-                        videoPlayerView.onVideoResume()
+                        basePlayerDelegate.resume()
                     }
                     return true
                 }
             }
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 if (playerHostState.showPlayer) {
-                    videoPlayerView.seekTo(videoPlayerView.currentPosition - 5000)
+                    basePlayerDelegate.seekTo(basePlayerDelegate.currentPosition() - 5000)
                 }
             }
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (playerHostState.showPlayer) {
-                    videoPlayerView.seekTo(videoPlayerView.currentPosition + 5000)
+                    basePlayerDelegate.seekTo(basePlayerDelegate.currentPosition() + 5000)
                 }
             }
             KeyEvent.KEYCODE_ESCAPE -> {
@@ -526,14 +502,17 @@ class MainActivity : AppCompatActivity(), DIAware {
         newConfig: Configuration
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
-        basePlayerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        basePlayerDelegate.onPictureInPictureModeChanged(isInPictureInPictureMode)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         playerHostState.orientation = newConfig.orientation
         playerHostState.updateSmallModePlayerMaxHeight()
-        basePlayerDelegate.onConfigurationChanged(newConfig)
+        basePlayerDelegate.onConfigurationChanged(newConfig.orientation)
+        basePlayerDelegate.fullscreenController.onOrientationChanged(newConfig.orientation)
+        // 同步全屏状态到 playerHostState（用于状态栏控制）
+        playerHostState.fullScreenPlayer = basePlayerDelegate.fullscreenController.isFullscreen.value
         updateStatusBarStyle()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             setWindowInsetsAndroidL()
@@ -647,21 +626,21 @@ class MainActivity : AppCompatActivity(), DIAware {
                 )
                 syncFloatingPlayerLayoutState()
             }
-        var playerVideoRatio: Float = 16f / 9f
+        override var playerVideoRatio: Float = 16f / 9f
             set(value) {
                 field = value
                 ps.setPlayerVideoRatio(value)
                 updateSmallModePlayerMaxHeight()
             }
 
-        val portraitLayoutState: PlayerPortraitLayoutState
+        override val portraitLayoutState: PlayerPortraitLayoutState
             get() = PlayerPortraitLayoutState(
                 minHeightPx = smallModePlayerMinHeight,
                 currentHeightPx = portraitCurrentHeightPx,
                 maxHeightPx = smallModePlayerMaxHeight,
             )
 
-        val floatingLayoutState: PlayerFloatingLayoutState
+        override val floatingLayoutState: PlayerFloatingLayoutState
             get() = floatingPlayerLayoutState
 
         var smallModePlayerCurrentHeight: Int
@@ -685,7 +664,7 @@ class MainActivity : AppCompatActivity(), DIAware {
         override fun holdUpPlayer() {
         }
 
-        fun updateSmallModePlayerMaxHeight() {
+        override fun updateSmallModePlayerMaxHeight() {
             val metrics = resources.displayMetrics
             val maxHeightByRatio = (metrics.widthPixels / playerVideoRatio).toInt()
             smallModePlayerMaxHeight = minOf(maxHeightByRatio, metrics.heightPixels / 2)
@@ -695,7 +674,7 @@ class MainActivity : AppCompatActivity(), DIAware {
             syncPortraitPlayerLayoutState()
         }
 
-        fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
+        override fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
             floatingPlayerLayoutState = state.copy(
                 defaultWidthPx = state.defaultWidthPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultWidthPx,
                 defaultHeightPx = state.defaultHeightPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultHeightPx,
@@ -716,9 +695,5 @@ class MainActivity : AppCompatActivity(), DIAware {
             }
             ps.setFloatingPlayerLayoutState(floatingPlayerLayoutState)
         }
-    }
-
-    private object PlayerViewKeeper {
-        var keepPlayerView: DanmakuVideoPlayer? = null
     }
 }

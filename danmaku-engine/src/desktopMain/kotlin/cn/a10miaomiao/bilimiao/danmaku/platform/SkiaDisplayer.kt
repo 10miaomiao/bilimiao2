@@ -96,7 +96,7 @@ class SkiaDisplayer(
 
         // 设置画笔
         val paint = _paint
-        val textSize = danmaku.textSize * _density * _scaleTextSizeFactor
+        val textSize = danmaku.textSize * _scaleTextSizeFactor
         paint.textSize = textSize
         paint.color = danmaku.textColor
         if (_fakeBoldText) paint.isFakeBoldText = true
@@ -139,7 +139,7 @@ class SkiaDisplayer(
 
     override fun measure(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {
         val paint = _paint
-        val textSize = danmaku.textSize * _density * _scaleTextSizeFactor
+        val textSize = danmaku.textSize * _scaleTextSizeFactor
         paint.textSize = textSize
         if (_fakeBoldText) paint.isFakeBoldText = true
         _typeface?.let { paint.setTypeface(it) }

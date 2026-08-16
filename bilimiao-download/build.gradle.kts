@@ -30,7 +30,7 @@ kotlin {
                 implementation(libs.androidx.appcompat)
                 implementation(libs.material)
                 implementation(libs.kotlinx.coroutines.android)
-                implementation(project(":DanmakuFlameMaster"))
+                // DanmakuFlameMaster 已移除：统一使用 KMP danmaku-engine (通过 bilimiao-comm 传递)
             }
         }
         val desktopMain by getting {
@@ -77,3 +77,4 @@ android {
         srcDir("src/androidMain/java")
     }
 }
+

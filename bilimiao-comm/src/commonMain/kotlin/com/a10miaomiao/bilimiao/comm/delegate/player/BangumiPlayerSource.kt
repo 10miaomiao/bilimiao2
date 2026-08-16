@@ -302,6 +302,17 @@ open class BangumiPlayerSource(
         return null
     }
 
+    /**
+     * 番剧弹幕获取：保留"答辩"内容拦截逻辑 (sid="26257")
+     */
+    override suspend fun getDanmakuParser(): cn.a10miaomiao.bilimiao.danmaku.parser.BaseDanmakuParser? {
+        if (sid == "26257") {
+            // 答辩就不要看了
+            throw DabianException()
+        }
+        return super.getDanmakuParser()
+    }
+
     data class EpisodeInfo(
         val epid: String,
         val aid: String,

@@ -894,6 +894,8 @@ internal fun PlayerLayer(
             )
             .then(modifier)
     ) {
-        playerContent()
+        CompositionLocalProvider(LocalPlayerState provides playerState) {
+            playerContent()
+        }
     }
 }

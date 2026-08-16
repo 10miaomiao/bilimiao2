@@ -81,10 +81,15 @@ kotlin {
                 implementation(libs.kodein.di.compose)
 
                 implementation(libs.androidx.room.runtime)
-
                 implementation(project(":bilimiao-download"))
-                implementation(project(":DanmakuFlameMaster"))
                 implementation(project(":bilimiao-cover"))
+                // mediamp (安卓端使用 ExoPlayer 后端)
+                implementation(libs.mediamp.api)
+                implementation(libs.mediamp.exoplayer)
+                // media3-ui (ExoPlayerMediampPlayerSurface 需要 PlayerView)
+                implementation(libs.androidx.media3.ui)
+                // 弹幕引擎 (KMP，与桌面端共用)
+                implementation(project(":danmaku-engine"))
             }
         }
         val desktopMain by getting {
