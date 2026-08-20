@@ -56,3 +56,28 @@ expect fun setPlayerVolume(player: MediampPlayer, volume: Int)
  * @param request 屏幕方向请求
  */
 expect fun setRequestedOrientation(request: ScreenOrientationRequest)
+
+/**
+ * 设置全屏播放时的系统栏（状态栏/导航栏）显示状态（平台特定）
+ *
+ * - 安卓：通过 `WindowInsetsControllerCompat` 控制状态栏/导航栏的显示，并将状态栏前景色设为白色
+ * - 桌面：no-op（桌面端由窗口系统管理系统栏）
+ *
+ * 由全屏播放器调用：控制器隐藏时状态栏/导航栏均隐藏（沉浸式全屏），
+ * 控制器激活显示时仅显示状态栏（导航栏保持隐藏），且状态栏图标为白色。
+ *
+ * @param statusBarVisible 是否显示状态栏
+ * @param navigationBarVisible 是否显示导航栏
+ */
+expect fun setPlayerFullscreenSystemBars(
+    statusBarVisible: Boolean,
+    navigationBarVisible: Boolean,
+)
+
+/**
+ * 恢复系统栏为默认状态（平台特定）
+ *
+ * 退出全屏或播放器组件卸载时调用，恢复显示系统栏。
+ * 状态栏前景色由应用层（MainActivity）恢复。
+ */
+expect fun restorePlayerSystemBars()

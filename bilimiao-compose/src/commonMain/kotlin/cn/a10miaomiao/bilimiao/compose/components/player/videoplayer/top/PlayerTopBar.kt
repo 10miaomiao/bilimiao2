@@ -2,13 +2,16 @@
 
 package cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -17,53 +20,59 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
 
 /**
  * 播放器顶部导航栏.
  *
+ * @param modifier
  * @param title 标题内容
- * @param actions 右侧操作区
- * @param color 文字和图标的颜色
- * @param navigationIcon 自定义导航图标, 为 null 时使用默认的 ArrowBack + [onBack]
- * @param onBack 返回按钮回调, 替代 animeko 的 LocalBackDispatcher
+ * @param isFullscreen 是否全屏
+ * @param onExitFullscreen 退出全屏回调
+ * @param onClose 关闭播放回调
  */
 @Composable
 fun PlayerTopBar(
     modifier: Modifier = Modifier,
-    title: @Composable (() -> Unit)? = null,
-    actions: @Composable (RowScope.() -> Unit) = {},
-    navigationIcon: (@Composable () -> Unit)? = null,
-    onBack: () -> Unit = {}
+    title: String = "",
+    isFullscreen: Boolean = false,
+    onExitFullscreen: () -> Unit = {},
+    onClose: () -> Unit = {},
 ) {
-    TopAppBar(
-        title = {
-            if (title != null) {
-                title()
-            }
-        },
+    val contentColor = LocalContentColor.current
+    Row(
         modifier = modifier
             .fillMaxWidth(),
-        navigationIcon = {
-            if (navigationIcon != null) {
-                navigationIcon()
-            } else {
-                IconButton(
-                    onClick = { onBack() },
-                ) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, "返回")
-                }
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isFullscreen) {
+            IconButton(onClick = onExitFullscreen) {
+                Icon(
+                    Icons.AutoMirrored.Rounded.ArrowBack,
+                    "退出全屏",
+                    tint = contentColor,
+                )
             }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-        ),
-        actions = {
-            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
-                actions()
+        } else {
+            IconButton(onClick = onClose) {
+                Icon(
+                    Icons.Rounded.Close,
+                    "关闭播放",
+                    tint = contentColor,
+                )
             }
-        },
-        windowInsets = WindowInsets(0),
-    )
+        }
+        Text(
+            text = title,
+            color = contentColor,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }

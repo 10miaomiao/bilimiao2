@@ -1,11 +1,11 @@
 package com.a10miaomiao.bilimiao.comm.delegate.helper
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.view.View
 import android.view.WindowManager
-import androidx.appcompat.app.AppCompatDelegate
 
 class StatusBarHelper(
     val activity: Activity,
@@ -48,10 +48,20 @@ class StatusBarHelper(
         if (!isShowNavigation) {
             uiFlags = uiFlags or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
-        if (isLightStatusBar && AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
+        // 根据当前实际生效的主题判断深色模式（跟随系统时 configuration.uiMode 反映系统状态），
+        // 深色主题下状态栏前景色固定为白色
+        if (isLightStatusBar && !isSystemInDark()) {
             uiFlags = uiFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
         activity.window.decorView.systemUiVisibility = uiFlags
+    }
+
+    /**
+     * 当前是否处于深色主题（与 ThemeDelegate.isSystemInDark 一致）
+     */
+    private fun isSystemInDark (): Boolean {
+        val uiMode = activity.resources.configuration.uiMode
+        return (uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
     }
 
     fun getStatusBarHeight (): Int {
