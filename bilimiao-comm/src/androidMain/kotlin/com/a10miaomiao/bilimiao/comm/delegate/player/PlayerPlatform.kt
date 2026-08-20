@@ -1,6 +1,9 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.Context
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.source.UriMediaData
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
@@ -71,6 +74,54 @@ actual fun setRequestedOrientation(request: ScreenOrientationRequest) {
             ScreenOrientationRequest.REVERSE_LANDSCAPE -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
         activity.requestedOrientation = orientation
+    } catch (_: Exception) {}
+}
+
+/**
+ * 安卓端 actual：全屏播放时控制系统栏（状态栏/导航栏）的显示
+ *
+ * 通过 [WindowInsetsControllerCompat] 分别控制状态栏/导航栏（兼容 minSdk 21）。
+ * 全屏时状态栏前景色固定为白色（视频画面为深色背景），
+ * 隐藏时使用 `BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE`，允许用户从屏幕边缘滑动临时唤出系统栏。
+ */
+actual fun setPlayerFullscreenSystemBars(
+    statusBarVisible: Boolean,
+    navigationBarVisible: Boolean,
+) {
+    try {
+        val activity = ActivityHolder.get() ?: return
+        val window = activity.window
+        val decorView = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decorView)
+        if (statusBarVisible) {
+            controller.show(WindowInsetsCompat.Type.statusBars())
+        } else {
+            controller.hide(WindowInsetsCompat.Type.statusBars())
+        }
+        if (navigationBarVisible) {
+            controller.show(WindowInsetsCompat.Type.navigationBars())
+        } else {
+            controller.hide(WindowInsetsCompat.Type.navigationBars())
+        }
+        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        // 全屏时状态栏前景色为白色（isAppearanceLightStatusBars = false）
+        controller.isAppearanceLightStatusBars = false
+    } catch (_: Exception) {}
+}
+
+/**
+ * 安卓端 actual：恢复系统栏为默认状态
+ *
+ * 仅负责恢复系统栏显示；状态栏前景色由 MainActivity 在退出全屏时
+ * 通过 StatusBarHelper 恢复。
+ */
+actual fun restorePlayerSystemBars() {
+    try {
+        val activity = ActivityHolder.get() ?: return
+        val window = activity.window
+        val decorView = window.decorView
+        val controller = WindowCompat.getInsetsController(window, decorView)
+        controller.show(WindowInsetsCompat.Type.systemBars())
     } catch (_: Exception) {}
 }
 

@@ -188,7 +188,6 @@ fun VideoScaffold(
                                     ) {
                                         topBar()
                                     }
-                                    Spacer(Modifier.height(16.dp))
                                 }
 
                                 Box(

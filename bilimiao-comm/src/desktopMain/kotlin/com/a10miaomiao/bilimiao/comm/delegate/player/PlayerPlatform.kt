@@ -52,3 +52,20 @@ actual fun setPlayerVolume(player: MediampPlayer, volume: Int) {
 actual fun setRequestedOrientation(request: ScreenOrientationRequest) {
     // no-op: 桌面端通过 WindowsWindowUtils.setUndecoratedFullscreen 处理全屏
 }
+
+/**
+ * 桌面端 actual：no-op（桌面端无系统状态栏/导航条概念）
+ */
+actual fun setPlayerFullscreenSystemBars(
+    statusBarVisible: Boolean,
+    navigationBarVisible: Boolean,
+) {
+    // no-op
+}
+
+/**
+ * 桌面端 actual：no-op（桌面端无系统状态栏/导航条概念）
+ */
+actual fun restorePlayerSystemBars() {
+    // no-op
+}

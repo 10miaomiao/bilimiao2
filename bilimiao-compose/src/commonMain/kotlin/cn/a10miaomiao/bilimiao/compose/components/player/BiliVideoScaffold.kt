@@ -9,8 +9,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
@@ -19,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +52,8 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerT
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoLoadingIndicator
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
+import com.a10miaomiao.bilimiao.comm.delegate.player.restorePlayerSystemBars
+import com.a10miaomiao.bilimiao.comm.delegate.player.setPlayerFullscreenSystemBars
 import org.openani.mediamp.MediampPlayer
 
 /**
@@ -113,7 +119,7 @@ fun BiliVideoScaffold(
     // 悬浮横屏模式关闭手势操作
     val gesturesEnabled = displayMode != PlayerDisplayMode.FloatingLandscape
     val contentWindowInsets = if (isFullscreen) {
-        WindowInsets.safeContent
+        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
     } else {
         WindowInsets(0.dp)
     }
@@ -121,6 +127,27 @@ fun BiliVideoScaffold(
     val controllerState = rememberVideoControllerState()
     var isLocked by remember { mutableStateOf(false) }
     val indicatorState = rememberGestureIndicatorState()
+
+    // 全屏播放时控制系统栏（状态栏/导航条）显示：
+    // - 控制器隐藏时，状态栏/导航栏均隐藏，实现沉浸式全屏
+    // - 控制器激活显示时，仅显示状态栏（导航栏保持隐藏），且状态栏前景色为白色
+    // - 退出全屏或组件卸载时，恢复系统栏
+    val controllerVisibility = controllerState.visibility
+    DisposableEffect(isFullscreen, isLocked, controllerVisibility) {
+        val controllerActive = !isLocked &&
+            (controllerVisibility.topBar || controllerVisibility.bottomBar)
+        if (isFullscreen) {
+            setPlayerFullscreenSystemBars(
+                statusBarVisible = controllerActive,
+                navigationBarVisible = false,
+            )
+        } else {
+            restorePlayerSystemBars()
+        }
+        onDispose {
+            restorePlayerSystemBars()
+        }
+    }
 
     player?.let { p ->
         val progressSliderState = remember(player) {
@@ -143,36 +170,11 @@ fun BiliVideoScaffold(
             gestureLocked = isLocked,
             contentWindowInsets = contentWindowInsets,
             topBar = {
-                val contentColor = LocalContentColor.current
                 PlayerTopBar(
-                    navigationIcon = {
-                        // 全屏: ArrowBack 退出全屏; 非全屏: Close 关闭播放
-                        if (displayMode == PlayerDisplayMode.Fullscreen) {
-                            IconButton(onClick = onExitFullscreen) {
-                                Icon(
-                                    Icons.AutoMirrored.Rounded.ArrowBack,
-                                    "退出全屏",
-                                    tint = contentColor,
-                                )
-                            }
-                        } else {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    Icons.Rounded.Close,
-                                    "关闭播放",
-                                    tint = contentColor,
-                                )
-                            }
-                        }
-                    },
-                    title = {
-                        Text(
-                            currentSource?.title ?: "",
-                            color = contentColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                    title = currentSource?.title ?: "",
+                    isFullscreen = displayMode == PlayerDisplayMode.Fullscreen,
+                    onExitFullscreen = onExitFullscreen,
+                    onClose = onBack,
                 )
             },
             video = {

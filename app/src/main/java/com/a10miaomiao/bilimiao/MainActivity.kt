@@ -258,6 +258,12 @@ class MainActivity : AppCompatActivity(), DIAware {
                 }
             }
         }
+        // 全屏播放时系统栏由播放器接管；退出全屏时恢复状态栏前景色（由 updateStatusBarStyle 处理）
+        lifecycleScope.launch {
+            basePlayerDelegate.fullscreenController.isFullscreen.collect {
+                updateStatusBarStyle()
+            }
+        }
     }
 
     private fun initRootView(savedInstanceState: Bundle?) {
@@ -375,6 +381,10 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     private fun updateStatusBarStyle() {
+        // 全屏播放时系统栏由播放器接管（状态栏前景色白色、导航栏隐藏等），此处跳过避免覆盖
+        if (basePlayerDelegate.fullscreenController.isFullscreen.value) {
+            return
+        }
         statusBarHelper.isLightStatusBar =
             !playerHostState.showPlayer || (playerHostState.orientation == PlayerHostState.HORIZONTAL && !playerHostState.fullScreenPlayer)
     }
