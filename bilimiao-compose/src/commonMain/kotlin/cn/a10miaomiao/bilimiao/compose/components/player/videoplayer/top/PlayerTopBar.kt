@@ -35,6 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
  * @param isFullscreen 是否全屏
  * @param onExitFullscreen 退出全屏回调
  * @param onClose 关闭播放回调
+ * @param actions 顶栏右侧操作区（如画中画、更多菜单）
  */
 @Composable
 fun PlayerTopBar(
@@ -43,6 +44,7 @@ fun PlayerTopBar(
     isFullscreen: Boolean = false,
     onExitFullscreen: () -> Unit = {},
     onClose: () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     val contentColor = LocalContentColor.current
     Row(
@@ -73,6 +75,8 @@ fun PlayerTopBar(
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
         )
+        actions()
     }
 }

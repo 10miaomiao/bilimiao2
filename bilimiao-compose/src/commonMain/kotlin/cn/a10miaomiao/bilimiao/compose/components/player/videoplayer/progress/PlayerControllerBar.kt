@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -40,6 +42,8 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.Subtitles
 import androidx.compose.material.icons.rounded.SubtitlesOff
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -93,6 +97,8 @@ import androidx.compose.ui.window.PopupProperties
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.keepLayoutWhenHidden
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlayerControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlaybackSpeedControllerState
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import kotlin.math.roundToInt
 
 const val TAG_SELECT_EPISODE_ICON_BUTTON = "SelectEpisodeIconButton"
@@ -103,6 +109,10 @@ const val TAG_SPEED_SWITCHER_VALUE_INDICATOR = "SpeedSwitcherValueIndicator"
 const val TAG_DANMAKU_ICON_BUTTON = "DanmakuIconButton"
 const val TAG_VIDEO_ASPECT_RATIO_SELECTOR_TEXT_BUTTON = "VideoAspectRatioTextButton"
 const val TAG_VIDEO_ASPECT_RATIO_SELECTOR_DROPDOWN_MENU = "VideoAspectRatioDropdownMenu"
+const val TAG_QUALITY_SELECTOR_TEXT_BUTTON = "QualitySelectorTextButton"
+const val TAG_QUALITY_SELECTOR_DROPDOWN_MENU = "QualitySelectorDropdownMenu"
+const val TAG_SUBTITLE_SWITCHER_TEXT_BUTTON = "SubtitleSwitcherTextButton"
+const val TAG_SUBTITLE_SWITCHER_DROPDOWN_MENU = "SubtitleSwitcherDropdownMenu"
 
 /**
  * 视频宽高比控制器的简化状态.
@@ -390,6 +400,43 @@ object PlayerControllerDefaults {
     }
 
     /**
+     * 弹幕发送入口（样式参考 animeko 的 DummyDanmakuEditor）
+     *
+     * 圆角描边胶囊样式，点击打开发送弹幕页面。
+     * 使用白色系配色，适配黑色视频背景。
+     */
+    @Composable
+    fun DanmakuSendEntry(
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        val shape = MaterialTheme.shapes.medium
+        Row(
+            Modifier
+                .widthIn(max = 160.dp)
+                .fillMaxWidth()
+                .height(36.dp)
+                .clip(shape)
+                .clickable(onClick = onClick)
+                .border(1.dp, Color.White.copy(alpha = 0.5f), shape)
+                .padding(horizontal = 12.dp)
+                .then(modifier),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CompositionLocalProvider(
+                LocalContentColor provides Color.White.copy(alpha = 0.85f),
+            ) {
+                Text(
+                    "发送弹幕",
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Icon(Icons.AutoMirrored.Rounded.Send, null)
+            }
+        }
+    }
+
+    /**
      * 视频内弹幕输入框的颜色配置.
      * slightlyWeaken -> alpha 0.7f, stronglyWeaken -> alpha 0.3f
      */
@@ -641,6 +688,166 @@ object PlayerControllerDefaults {
                         },
                         valueRange = speedRange,
                         modifier = Modifier.testTag(TAG_SPEED_SWITCHER_SLIDER),
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * 倍速菜单（对照原安卓版 SpeedPopupMenu）
+     *
+     * 入口按钮显示当前倍速，点击弹出预设倍速值菜单（设置中的 PlayerSpeedValues）。
+     */
+    @Composable
+    fun SpeedSelector(
+        currentSpeed: Float,
+        options: List<Float>,
+        onValueChange: (Float) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        if (options.isEmpty()) return
+        OptionsSwitcher(
+            value = currentSpeed,
+            onValueChange = onValueChange,
+            optionsProvider = { options },
+            renderValue = { Text(formatSpeedValue(it)) },
+            renderValueExposed = {
+                Text(
+                    if (currentSpeed == 1.0f) "倍速" else formatSpeedValue(currentSpeed),
+                    maxLines = 1,
+                )
+            },
+            modifier,
+        )
+    }
+
+    /**
+     * CC 字幕选择（参照 animeko 的 SubtitleSwitcher）
+     *
+     * 菜单第一项为"关闭"，后续为可用字幕列表；无可用字幕时不显示。
+     */
+    @Composable
+    fun SubtitleSwitcher(
+        currentSubtitle: SubtitleSourceInfo?,
+        options: List<SubtitleSourceInfo?>,
+        onValueChange: (SubtitleSourceInfo?) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        if (options.size <= 1) return // 只有 null（关闭）一项时无需显示
+        OptionsSwitcher(
+            value = currentSubtitle,
+            onValueChange = onValueChange,
+            optionsProvider = { options },
+            renderValue = {
+                if (it == null) {
+                    Text("关闭")
+                } else {
+                    Text(it.lan_doc, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            },
+            renderValueExposed = {
+                val label = currentSubtitle?.lan_doc ?: "字幕"
+                Text(
+                    label,
+                    Modifier.widthIn(max = 64.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            modifier,
+            // PlatformPopupProperties -> PopupProperties
+            properties = PopupProperties(
+                clippingEnabled = false,
+            ),
+            textButtonTestTag = TAG_SUBTITLE_SWITCHER_TEXT_BUTTON,
+            dropdownMenuTestTag = TAG_SUBTITLE_SWITCHER_DROPDOWN_MENU,
+        )
+    }
+
+    /**
+     * 清晰度切换（对照原安卓版 QualityPopupMenu）
+     *
+     * 点击弹出清晰度菜单，当前清晰度带选中标记；
+     * 需要登录/大会员的清晰度置灰禁用（由 [isOptionEnabled] 控制）。
+     */
+    @Composable
+    fun QualitySwitcher(
+        currentQuality: Int,
+        options: List<PlayerSourceInfo.AcceptInfo>,
+        onValueChange: (Int) -> Unit,
+        isOptionEnabled: (PlayerSourceInfo.AcceptInfo) -> Boolean = { true },
+        modifier: Modifier = Modifier,
+    ) {
+        if (options.isEmpty()) return
+        var expanded by rememberSaveable { mutableStateOf(false) }
+        Box(modifier, contentAlignment = Alignment.Center) {
+            val currentDescription = options.find { it.quality == currentQuality }?.description
+                ?: options.lastOrNull()?.description
+                ?: ""
+            TextButton(
+                onClick = { expanded = true },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = LocalContentColor.current,
+                ),
+                modifier = Modifier.testTag(TAG_QUALITY_SELECTOR_TEXT_BUTTON),
+            ) {
+                Text(
+                    currentDescription,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.testTag(TAG_QUALITY_SELECTOR_DROPDOWN_MENU),
+            ) {
+                options.forEach { option ->
+                    val selected = option.quality == currentQuality
+                    val enabled = isOptionEnabled(option)
+                    DropdownMenuItem(
+                        text = {
+                            val color = when {
+                                selected -> MaterialTheme.colorScheme.primary
+                                !enabled -> LocalContentColor.current.copy(alpha = 0.38f)
+                                else -> LocalContentColor.current
+                            }
+                            CompositionLocalProvider(LocalContentColor provides color) {
+                                Text(option.description)
+                            }
+                        },
+                        leadingIcon = when {
+                            selected -> {
+                                {
+                                    Icon(
+                                        Icons.Rounded.Check,
+                                        "已选择",
+                                        Modifier.size(18.dp),
+                                    )
+                                }
+                            }
+
+                            !enabled -> {
+                                {
+                                    Icon(
+                                        Icons.Rounded.Lock,
+                                        "不可用",
+                                        Modifier.size(18.dp),
+                                    )
+                                }
+                            }
+
+                            else -> null
+                        },
+                        onClick = {
+                            if (enabled) {
+                                expanded = false
+                                onValueChange(option.quality)
+                            }
+                        },
+                        enabled = enabled,
                     )
                 }
             }
