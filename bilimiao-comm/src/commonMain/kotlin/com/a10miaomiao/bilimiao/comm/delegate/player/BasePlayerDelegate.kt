@@ -98,6 +98,16 @@ interface BasePlayerDelegate : com.a10miaomiao.bilimiao.comm.delegate.BaseDelega
     val playbackSpeed: kotlinx.coroutines.flow.StateFlow<Float>
 
     /**
+     * 可用字幕列表
+     */
+    val subtitleList: kotlinx.coroutines.flow.StateFlow<List<com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo>>
+
+    /**
+     * 当前选中的字幕（null 表示关闭字幕）
+     */
+    val currentSubtitle: kotlinx.coroutines.flow.StateFlow<com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo?>
+
+    /**
      * 创建平台特定的 MediampPlayer 实例
      */
     fun createPlayer(): MediampPlayer
@@ -136,6 +146,11 @@ interface BasePlayerDelegate : com.a10miaomiao.bilimiao.comm.delegate.BaseDelega
      * 切换清晰度
      */
     fun changeQuality(newQuality: Int)
+
+    /**
+     * 切换字幕（null 表示关闭字幕）
+     */
+    fun setSubtitle(subtitle: com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo?)
 
     /**
      * 切换弹幕显示

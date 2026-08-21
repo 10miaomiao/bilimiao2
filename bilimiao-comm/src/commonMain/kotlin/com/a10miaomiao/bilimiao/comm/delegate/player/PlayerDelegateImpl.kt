@@ -13,6 +13,7 @@ import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -108,6 +109,13 @@ class PlayerDelegateImpl(
     private val _currentQuality = MutableStateFlow(64)
     override val currentQuality: StateFlow<Int> = _currentQuality
 
+    // 字幕状态
+    private val _subtitleList = MutableStateFlow<List<SubtitleSourceInfo>>(emptyList())
+    override val subtitleList: StateFlow<List<SubtitleSourceInfo>> = _subtitleList
+
+    private val _currentSubtitle = MutableStateFlow<SubtitleSourceInfo?>(null)
+    override val currentSubtitle: StateFlow<SubtitleSourceInfo?> = _currentSubtitle
+
     // 分段播放状态
     private var segmentUrls = listOf<String>()
     private var segmentDurations = listOf<Long>()
@@ -153,6 +161,18 @@ class PlayerDelegateImpl(
                     _danmakuParser.value = parser
                 } catch (e: Exception) {
                     _danmakuParser.value = null
+                }
+            }
+
+            // 获取 CC 字幕列表并设置默认字幕
+            launch(Dispatchers.IO) {
+                try {
+                    val subtitles = source.getSubtitles()
+                    _subtitleList.value = subtitles
+                    _currentSubtitle.value = selectDefaultSubtitle(subtitles)
+                } catch (e: Exception) {
+                    _subtitleList.value = emptyList()
+                    _currentSubtitle.value = null
                 }
             }
 
@@ -462,6 +482,32 @@ class PlayerDelegateImpl(
         _danmakuVisible.value = !_danmakuVisible.value
     }
 
+    override fun setSubtitle(subtitle: SubtitleSourceInfo?) {
+        _currentSubtitle.value = subtitle
+        // TODO: 字幕渲染需接入播放管线。安卓 ExoPlayer 可通过 UriMediaData.extraFiles
+        // 挂载外部字幕（参考 animeko SubtitleSwitcher），桌面 mpv（mediamp 0.1.14）
+        // 尚未支持 extraFiles，后续随播放管线升级再接入实际字幕绘制。
+    }
+
+    /**
+     * 根据设置选择默认字幕
+     *
+     * 对齐原安卓版 PlayerController.getDefaultSubtitle 的逻辑：
+     * - PlayerSubtitleShow 关闭时不显示字幕
+     * - 默认优先选择非 AI 字幕（ai_status == 0），开启 AI 字幕时允许 AI 字幕
+     */
+    private suspend fun selectDefaultSubtitle(
+        list: List<SubtitleSourceInfo>,
+    ): SubtitleSourceInfo? {
+        if (list.isEmpty()) return null
+        val (showSubtitle, showAiSubtitle) = SettingPreferences.mapPreferences {
+            (it[SettingPreferences.PlayerSubtitleShow] ?: true) to
+                (it[SettingPreferences.PlayerAiSubtitleShow] ?: false)
+        }
+        if (!showSubtitle) return null
+        return list.find { showAiSubtitle || it.ai_status == 0 }
+    }
+
     override fun setVolume(newVolume: Int) {
         val clamped = newVolume.coerceIn(0, 100)
         _volume.value = clamped
@@ -501,6 +547,8 @@ class PlayerDelegateImpl(
         _isCompleted.value = false
         _errorMessage.value = null
         _playerSourceInfo.value = null
+        _subtitleList.value = emptyList()
+        _currentSubtitle.value = null
         segmentUrls = emptyList()
         segmentDurations = emptyList()
         currentSegmentIndex = 0
