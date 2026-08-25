@@ -8,28 +8,40 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,6 +56,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.Ges
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.LockableVideoGestureHost
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.NoOpLevelController
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberGestureIndicatorState
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberPlayerFastSkipState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSwipeSeekerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.MediaProgressIndicatorText
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.MediaProgressSliderDefaults
@@ -62,6 +75,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.restorePlayerSystemBars
 import com.a10miaomiao.bilimiao.comm.delegate.player.setPlayerFullscreenSystemBars
@@ -102,6 +116,11 @@ private const val MAX_QUALITY_NOT_LOGIN = 48
  */
 private const val MAX_QUALITY_NOT_VIP = 80
 
+/**
+ * 长按画面快进倍速（2 倍速，松手恢复原倍速）
+ */
+private const val FAST_FORWARD_SPEED = 2.0f
+
 @Composable
 fun BiliVideoScaffold(
     delegate: BasePlayerDelegate,
@@ -112,23 +131,27 @@ fun BiliVideoScaffold(
 ) {
     val playerDelegate = delegate as PlayerDelegateImpl
     val player: MediampPlayer? = playerDelegate.mediampPlayer
-    val isPlaying by playerDelegate.isPlayingState.collectAsState()
+    // 播放状态（低频，见 PlaybackState）与播放源状态（见 PlayerSourceState）分别订阅；
+    // 当前播放位置高频更新，独立 StateFlow 订阅（by delegate 保证进度条闭包读取最新值）
+    val playbackState by playerDelegate.playbackState.collectAsState()
+    val sourceState by playerDelegate.sourceState.collectAsState()
     val currentPosition by playerDelegate.currentPosition.collectAsState()
-    val duration by playerDelegate.duration.collectAsState()
-    val isLoading by playerDelegate.isLoading.collectAsState()
-    val loadingMessage by playerDelegate.loadingMessage.collectAsState()
-    val errorMessage by playerDelegate.errorMessage.collectAsState()
-    val isCompleted by playerDelegate.isCompleted.collectAsState()
-    val danmakuVisible by playerDelegate.danmakuVisible.collectAsState()
-    val danmakuParser by playerDelegate.danmakuParser.collectAsState()
-    val volume by playerDelegate.volume.collectAsState()
-    val currentSource by playerDelegate.currentSource.collectAsState()
-    val playerSourceInfo by playerDelegate.playerSourceInfo.collectAsState()
-    val currentQuality by playerDelegate.currentQuality.collectAsState()
-    val playbackSpeed by playerDelegate.playbackSpeed.collectAsState()
-    val isFullscreen by playerDelegate.fullscreenController.isFullscreen.collectAsState()
-    val subtitleList by playerDelegate.subtitleList.collectAsState()
-    val currentSubtitle by playerDelegate.currentSubtitle.collectAsState()
+    val status = playbackState.status
+    val isPlaying = status == PlaybackStatus.Playing
+    val isLoading = status == PlaybackStatus.Loading
+    val isCompleted = status == PlaybackStatus.Completed
+    val duration = playbackState.duration
+    val loadingMessage = playbackState.loadingMessage
+    val errorMessage = playbackState.errorMessage
+    val danmakuVisible = playbackState.danmakuVisible
+    val volume = playbackState.volume
+    val playbackSpeed = playbackState.playbackSpeed
+    val currentSource = sourceState.currentSource
+    val playbackInfo = sourceState.playbackInfo
+    val currentQuality = sourceState.currentQuality
+    val danmakuParser = sourceState.danmakuParser
+    val subtitleList = sourceState.subtitleList
+    val currentSubtitle = sourceState.currentSubtitle
 
     // 播放器控制依赖的服务（通过 Kodein 注入）
     val userStore: UserStore by rememberInstance()
@@ -148,11 +171,13 @@ fun BiliVideoScaffold(
 
     // 与 ComposeScaffoldPlayerLayoutState.displayMode 同步: 两者均基于同一 PlayerState 字段 + isCompactWindow() 推导
     val playerState = LocalPlayerState.current
+    // 全屏状态统一由 PlayerState 提供（数据源为 FullscreenController.isFullscreen）
+    val isFullscreen by playerState.fullScreenPlayer.collectAsState()
     // ComposeScaffold 中 orientation = if (isCompactWindow()) PORTRAIT else LANDSCAPE
     val scaffoldOrientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val displayMode = when {
         !playerState.showPlayer -> PlayerDisplayMode.Hidden
-        playerState.fullScreenPlayer -> PlayerDisplayMode.Fullscreen
+        isFullscreen -> PlayerDisplayMode.Fullscreen
         playerState.anchorBounds != null -> PlayerDisplayMode.AnchorOverlay
         scaffoldOrientation == ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
         scaffoldOrientation == ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
@@ -192,15 +217,35 @@ fun BiliVideoScaffold(
     }
 
     player?.let { p ->
+        // duration 为低频合并状态（普通 val），remember(player) 闭包会捕获创建时的值快照，
+        // 用 rememberUpdatedState 保持闭包读取最新值（进度条总时长）
+        val currentDuration by rememberUpdatedState(duration)
         val progressSliderState = remember(player) {
             PlayerProgressSliderState(
                 currentPositionMillis = { currentPosition },
-                totalDurationMillis = { duration },
+                totalDurationMillis = { currentDuration },
                 chapters = { emptyList() },
                 onPreview = { pos -> playerDelegate.seekTo(pos) },
                 onPreviewFinished = { pos -> playerDelegate.seekTo(pos) },
             )
         }
+
+        // 长按画面 2 倍速快进状态（手势宿主与悬浮提示共用）
+        var speedBeforeFastSkip by remember { mutableFloatStateOf(playbackSpeed) }
+        var fastForwarding by remember { mutableStateOf(false) }
+        val fastSkipState = rememberPlayerFastSkipState(
+            gestureIndicatorState = indicatorState,
+            onStart = {
+                speedBeforeFastSkip = playbackSpeed
+                playerDelegate.setPlaybackSpeed(FAST_FORWARD_SPEED)
+                fastForwarding = true
+            },
+            onStop = {
+                playerDelegate.setPlaybackSpeed(speedBeforeFastSkip)
+                fastForwarding = false
+            },
+            fastForwardSpeed = FAST_FORWARD_SPEED,
+        )
 
         val enter = fadeIn()
         val exit = fadeOut()
@@ -222,7 +267,7 @@ fun BiliVideoScaffold(
                         if (isPictureInPictureSupported()) {
                             IconButton(
                                 onClick = {
-                                    val info = playerSourceInfo
+                                    val info = playbackInfo
                                     val width = info?.width ?: 16
                                     val height = info?.height ?: 9
                                     if (!enterPictureInPictureMode(width, height)) {
@@ -292,10 +337,36 @@ fun BiliVideoScaffold(
                         onExitFullscreen = onExitFullscreen,
                         onToggleDanmaku = { playerDelegate.toggleDanmaku() },
                         gestureIndicatorState = indicatorState,
+                        fastSkipState = fastSkipState,
                     )
                 }
             },
             floatingMessage = {
+                // 长按倍速浮窗：样式对齐旧版（半透明黑圆角底 + 快进图标 + 白色文字），位置居中偏上
+                if (fastForwarding) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color.Black.copy(alpha = 0.6f),
+                        modifier = Modifier.offset(y = (-60).dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                Icons.Rounded.FastForward,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp),
+                            )
+                            Spacer(Modifier.width(5.dp))
+                            Text(
+                                "倍速播放中",
+                                color = Color.White,
+                            )
+                        }
+                    }
+                }
                 if (isLoading) {
                     VideoLoadingIndicator(
                         showProgress = true,
@@ -358,7 +429,7 @@ fun BiliVideoScaffold(
                             // 清晰度切换（需要登录/大会员的清晰度置灰）
                             PlayerControllerDefaults.QualitySwitcher(
                                 currentQuality = currentQuality,
-                                options = playerSourceInfo?.acceptList ?: emptyList(),
+                                options = playbackInfo?.acceptList ?: emptyList(),
                                 onValueChange = { quality -> playerDelegate.changeQuality(quality) },
                                 isOptionEnabled = { accept ->
                                     when {
@@ -402,10 +473,10 @@ fun BiliVideoScaffold(
                 )
             },
             floatingBottomEnd = {
-                PlayerControllerDefaults.FullscreenIcon(
-                    isFullscreen = isFullscreen,
-                    onClickFullscreen = onToggleFullscreen,
-                )
+//                PlayerControllerDefaults.FullscreenIcon(
+//                    isFullscreen = isFullscreen,
+//                    onClickFullscreen = onToggleFullscreen,
+//                )
             },
             gestureLock = {
                 cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureLock(

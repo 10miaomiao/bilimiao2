@@ -11,8 +11,11 @@ import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +25,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
@@ -66,55 +71,17 @@ class PlayerDelegateImpl(
     private var quality = 64 // 默认 720P
     private var fnval = 4048 // DASH 格式
 
-    // 播放状态
-    private val _isLoading = MutableStateFlow(false)
-    override val isLoading: StateFlow<Boolean> = _isLoading
+    // 播放状态（低频稳定状态，见 PlaybackState）
+    private val _playbackState = MutableStateFlow(PlaybackState())
+    override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
-    private val _loadingMessage = MutableStateFlow("")
-    override val loadingMessage: StateFlow<String> = _loadingMessage
+    // 播放源状态（当前播放内容，见 PlayerSourceState）
+    private val _sourceState = MutableStateFlow(PlayerSourceState())
+    override val sourceState: StateFlow<PlayerSourceState> = _sourceState.asStateFlow()
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    override val errorMessage: StateFlow<String?> = _errorMessage
-
+    // 当前播放位置（高频，约 200ms 更新一次，独立 StateFlow 避免触发无关重组）
     private val _currentPosition = MutableStateFlow(0L)
-    override val currentPosition: StateFlow<Long> = _currentPosition
-
-    private val _playbackSpeed = MutableStateFlow(1.0f)
-    override val playbackSpeed: StateFlow<Float> = _playbackSpeed
-
-    private val _duration = MutableStateFlow(0L)
-    override val duration: StateFlow<Long> = _duration
-
-    private val _isPlaying = MutableStateFlow(false)
-    override val isPlayingState: StateFlow<Boolean> = _isPlaying
-
-    private val _isCompleted = MutableStateFlow(false)
-    override val isCompleted: StateFlow<Boolean> = _isCompleted
-
-    private val _currentSource = MutableStateFlow<BasePlayerSource?>(null)
-    override val currentSource: StateFlow<BasePlayerSource?> = _currentSource
-
-    private val _danmakuParser = MutableStateFlow<BaseDanmakuParser?>(null)
-    override val danmakuParser: StateFlow<BaseDanmakuParser?> = _danmakuParser
-
-    private val _danmakuVisible = MutableStateFlow(true)
-    override val danmakuVisible: StateFlow<Boolean> = _danmakuVisible
-
-    private val _volume = MutableStateFlow(100)
-    override val volume: StateFlow<Int> = _volume
-
-    private val _playerSourceInfo = MutableStateFlow<PlayerSourceInfo?>(null)
-    override val playerSourceInfo: StateFlow<PlayerSourceInfo?> = _playerSourceInfo
-
-    private val _currentQuality = MutableStateFlow(64)
-    override val currentQuality: StateFlow<Int> = _currentQuality
-
-    // 字幕状态
-    private val _subtitleList = MutableStateFlow<List<SubtitleSourceInfo>>(emptyList())
-    override val subtitleList: StateFlow<List<SubtitleSourceInfo>> = _subtitleList
-
-    private val _currentSubtitle = MutableStateFlow<SubtitleSourceInfo?>(null)
-    override val currentSubtitle: StateFlow<SubtitleSourceInfo?> = _currentSubtitle
+    override val currentPosition: StateFlow<Long> = _currentPosition.asStateFlow()
 
     // 分段播放状态
     private var segmentUrls = listOf<String>()
@@ -131,7 +98,7 @@ class PlayerDelegateImpl(
     }
 
     override fun openPlayer(source: BasePlayerSource) {
-        _currentSource.value = source
+        _sourceState.update { it.copy(currentSource = source) }
         playerStore.setPlayerSource(source)
         onShowPlayerChanged?.invoke(true)
         loadAndPlay(source)
@@ -145,22 +112,25 @@ class PlayerDelegateImpl(
         progressJob?.cancel()
         player.stopPlayback()
         coroutineScope.launch {
-            _isLoading.value = true
-            _errorMessage.value = null
-            _isCompleted.value = false
+            _playbackState.update {
+                it.copy(
+                    status = PlaybackStatus.Loading,
+                    errorMessage = null,
+                    loadingMessage = "正在加载弹幕...",
+                )
+            }
             segmentUrls = emptyList()
             segmentDurations = emptyList()
             currentSegmentIndex = 0
             segmentOffsetMs = 0L
             try {
             // 获取弹幕数据：本地下载文件优先读取 danmaku.xml，否则走网络接口
-            _loadingMessage.value = "正在加载弹幕..."
             launch(Dispatchers.IO) {
                 try {
                     val parser = loadDanmakuParser(source)
-                    _danmakuParser.value = parser
+                    _sourceState.update { it.copy(danmakuParser = parser) }
                 } catch (e: Exception) {
-                    _danmakuParser.value = null
+                    _sourceState.update { it.copy(danmakuParser = null) }
                 }
             }
 
@@ -168,25 +138,36 @@ class PlayerDelegateImpl(
             launch(Dispatchers.IO) {
                 try {
                     val subtitles = source.getSubtitles()
-                    _subtitleList.value = subtitles
-                    _currentSubtitle.value = selectDefaultSubtitle(subtitles)
+                    _sourceState.update {
+                        it.copy(
+                            subtitleList = subtitles,
+                            currentSubtitle = selectDefaultSubtitle(subtitles),
+                        )
+                    }
                 } catch (e: Exception) {
-                    _subtitleList.value = emptyList()
-                    _currentSubtitle.value = null
+                    _sourceState.update { it.copy(subtitleList = emptyList(), currentSubtitle = null) }
                 }
             }
 
                 // 获取播放地址
-                _loadingMessage.value = "正在获取播放地址..."
+                _playbackState.update { it.copy(loadingMessage = "正在获取播放地址...") }
                 val sourceInfo = source.getPlayerUrl(quality, fnval)
-                _playerSourceInfo.value = sourceInfo
-                fullscreenController.playerSourceInfo = sourceInfo
-                _currentQuality.value = sourceInfo.quality
-                _duration.value = sourceInfo.duration
+                fullscreenController.playbackInfo = sourceInfo
+                _sourceState.update {
+                    it.copy(
+                        playbackInfo = sourceInfo,
+                        currentQuality = sourceInfo.quality,
+                    )
+                }
+                _playbackState.update {
+                    it.copy(
+                        duration = sourceInfo.duration,
+                        loadingMessage = "正在启动播放...",
+                    )
+                }
 
                 // 解析 URL 格式
                 val resolved = resolvePlaybackUrl(sourceInfo.url)
-                _loadingMessage.value = "正在启动播放..."
 
                 val headers = sourceInfo.header
 
@@ -223,7 +204,7 @@ class PlayerDelegateImpl(
 
                 // playUri 只设置媒体数据（状态变为 READY），需要调用 resume 开始播放
                 player.resume()
-                _isPlaying.value = true
+                _playbackState.update { it.copy(status = PlaybackStatus.Playing) }
 
                 // 播放历史恢复
                 if (sourceInfo.lastPlayCid == source.id
@@ -239,10 +220,14 @@ class PlayerDelegateImpl(
                 startProgressTracking(source)
             } catch (e: Exception) {
                 e.printStackTrace()
-                _errorMessage.value = e.message ?: "播放失败"
+                _playbackState.update {
+                    it.copy(
+                        status = PlaybackStatus.Error,
+                        errorMessage = e.message ?: "播放失败",
+                    )
+                }
             } finally {
-                _isLoading.value = false
-                _loadingMessage.value = ""
+                _playbackState.update { it.copy(loadingMessage = "") }
             }
         }
     }
@@ -330,15 +315,17 @@ class PlayerDelegateImpl(
                 delay(200) // 200ms 更新一次，减少弹幕 wall clock 推进累积误差
                 _mediampPlayer?.let { player ->
                     val pos = player.currentPositionMillis.value
-                    _currentPosition.value = segmentOffsetMs + pos
+                    val position = segmentOffsetMs + pos
+                    _currentPosition.value = position
 
                     // 检测播放完成
-                    if (_duration.value > 0 && _currentPosition.value >= _duration.value - 1000) {
+                    if (_playbackState.value.duration > 0
+                        && position >= _playbackState.value.duration - 1000
+                    ) {
                         if (segmentUrls.isNotEmpty() && currentSegmentIndex < segmentUrls.size - 1) {
                             loadNextSegment(player)
-                        } else if (!_isCompleted.value) {
-                            _isCompleted.value = true
-                            _isPlaying.value = false
+                        } else if (_playbackState.value.status != PlaybackStatus.Completed) {
+                            _playbackState.update { it.copy(status = PlaybackStatus.Completed) }
                             onAutoCompletion()
                             return@let
                         }
@@ -347,7 +334,7 @@ class PlayerDelegateImpl(
                     // 检测分段结束
                     if (segmentUrls.isNotEmpty()
                         && currentSegmentIndex < segmentUrls.size - 1
-                        && !_isCompleted.value
+                        && _playbackState.value.status != PlaybackStatus.Completed
                     ) {
                         val segmentDuration = segmentDurations.getOrNull(currentSegmentIndex) ?: 0L
                         if (segmentDuration > 0 && pos >= segmentDuration - 500) {
@@ -357,8 +344,9 @@ class PlayerDelegateImpl(
                 }
 
                 // 每5秒上报历史记录
-                if (_currentPosition.value % 5000 < 1000) {
-                    source.historyReport(_currentPosition.value / 1000)
+                val position = _currentPosition.value
+                if (position % 5000 < 1000) {
+                    source.historyReport(position / 1000)
                 }
             }
         }
@@ -368,7 +356,7 @@ class PlayerDelegateImpl(
      * 播放完成后的自动播放逻辑（对齐原安卓版 PlayerController.onAutoCompletion）
      */
     private fun onAutoCompletion() {
-        val source = _currentSource.value ?: return
+        val source = _sourceState.value.currentSource ?: return
         coroutineScope.launch {
             val (order, orderRandom) = SettingPreferences.mapPreferences {
                 val order = it[SettingPreferences.PlayerOrder] ?: SettingConstants.PLAYER_ORDER_DEFAULT
@@ -403,7 +391,7 @@ class PlayerDelegateImpl(
                 source.isLoop = true
                 openPlayer(source)
             }
-            // 否则保持 _isCompleted = true 状态，显示播放完成覆盖层
+            // 否则保持 status = Completed 状态，显示播放完成覆盖层
         }
     }
 
@@ -424,15 +412,14 @@ class PlayerDelegateImpl(
     override fun pause() {
         _mediampPlayer?.let { player ->
             player.pause()
-            _isPlaying.value = false
+            _playbackState.update { it.copy(status = PlaybackStatus.Paused) }
         }
     }
 
     override fun resume() {
         _mediampPlayer?.let { player ->
             player.resume()
-            _isPlaying.value = true
-            _isCompleted.value = false
+            _playbackState.update { it.copy(status = PlaybackStatus.Playing) }
         }
     }
 
@@ -441,7 +428,8 @@ class PlayerDelegateImpl(
             if (segmentUrls.isNotEmpty()) {
                 var accumulated = 0L
                 for (i in segmentUrls.indices) {
-                    val segDur = segmentDurations.getOrNull(i)?.takeIf { it > 0 } ?: _duration.value / segmentUrls.size
+                    val segDur = segmentDurations.getOrNull(i)?.takeIf { it > 0 }
+                        ?: _playbackState.value.duration / segmentUrls.size
                     if (positionMs < accumulated + segDur) {
                         if (i != currentSegmentIndex) {
                             currentSegmentIndex = i
@@ -461,14 +449,14 @@ class PlayerDelegateImpl(
     }
 
     override fun setPlaybackSpeed(speed: Float) {
-        _playbackSpeed.value = speed
+        _playbackState.update { it.copy(playbackSpeed = speed) }
         _mediampPlayer?.let { player ->
             player.features[PlaybackSpeed]?.set(speed)
         }
     }
 
     override fun changeQuality(newQuality: Int) {
-        val source = _currentSource.value ?: return
+        val source = _sourceState.value.currentSource ?: return
         quality = newQuality
         val savedPosition = _currentPosition.value
         loadAndPlay(source)
@@ -479,11 +467,11 @@ class PlayerDelegateImpl(
     }
 
     override fun toggleDanmaku() {
-        _danmakuVisible.value = !_danmakuVisible.value
+        _playbackState.update { it.copy(danmakuVisible = !it.danmakuVisible) }
     }
 
     override fun setSubtitle(subtitle: SubtitleSourceInfo?) {
-        _currentSubtitle.value = subtitle
+        _sourceState.update { it.copy(currentSubtitle = subtitle) }
         // TODO: 字幕渲染需接入播放管线。安卓 ExoPlayer 可通过 UriMediaData.extraFiles
         // 挂载外部字幕（参考 animeko SubtitleSwitcher），桌面 mpv（mediamp 0.1.14）
         // 尚未支持 extraFiles，后续随播放管线升级再接入实际字幕绘制。
@@ -510,26 +498,25 @@ class PlayerDelegateImpl(
 
     override fun setVolume(newVolume: Int) {
         val clamped = newVolume.coerceIn(0, 100)
-        _volume.value = clamped
+        _playbackState.update { it.copy(volume = clamped) }
         _mediampPlayer?.let { player ->
             setPlayerVolume(player, clamped)
         }
     }
 
     override fun replay() {
-        _isCompleted.value = false
         seekTo(0)
         resume()
     }
 
     override fun playNext() {
-        val source = _currentSource.value ?: return
+        val source = _sourceState.value.currentSource ?: return
         val next = source.next() ?: return
         openPlayer(next)
     }
 
     override fun retry() {
-        val source = _currentSource.value ?: return
+        val source = _sourceState.value.currentSource ?: return
         loadAndPlay(source)
     }
 
@@ -538,17 +525,25 @@ class PlayerDelegateImpl(
         _mediampPlayer?.let { player ->
             player.stopPlayback()
         }
-        _currentSource.value = null
-        _danmakuParser.value?.release()
-        _danmakuParser.value = null
+        _sourceState.value.danmakuParser?.release()
+        _playbackState.update {
+            it.copy(
+                status = PlaybackStatus.Idle,
+                duration = 0L,
+                errorMessage = null,
+                loadingMessage = "",
+            )
+        }
+        _sourceState.update {
+            it.copy(
+                currentSource = null,
+                playbackInfo = null,
+                danmakuParser = null,
+                subtitleList = emptyList(),
+                currentSubtitle = null,
+            )
+        }
         _currentPosition.value = 0L
-        _duration.value = 0L
-        _isPlaying.value = false
-        _isCompleted.value = false
-        _errorMessage.value = null
-        _playerSourceInfo.value = null
-        _subtitleList.value = emptyList()
-        _currentSubtitle.value = null
         segmentUrls = emptyList()
         segmentDurations = emptyList()
         currentSegmentIndex = 0
@@ -560,14 +555,14 @@ class PlayerDelegateImpl(
 
     override fun currentPosition(): Long = _currentPosition.value
 
-    override fun isPlaying(): Boolean = _isPlaying.value
+    override fun isPlaying(): Boolean = _playbackState.value.status == PlaybackStatus.Playing
 
-    override fun isPause(): Boolean = !_isPlaying.value
+    override fun isPause(): Boolean = _playbackState.value.status == PlaybackStatus.Paused
 
-    override fun isOpened(): Boolean = _currentSource.value != null
+    override fun isOpened(): Boolean = _sourceState.value.currentSource != null
 
     override fun getSourceIds(): PlayerSourceIds {
-        return _currentSource.value?.getSourceIds() ?: PlayerSourceIds()
+        return _sourceState.value.currentSource?.getSourceIds() ?: PlayerSourceIds()
     }
 
     // BaseDelegate 生命周期方法

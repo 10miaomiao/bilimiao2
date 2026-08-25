@@ -173,12 +173,13 @@ fun MainComposeHost(
     val playerState = startViewState.playerState
     val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val showPlayer = playerState.showPlayer
-    val allowDrawerOpenGesture = bottomSheetPage == null && !playerState.fullScreenPlayer
+    val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
+    val allowDrawerOpenGesture = bottomSheetPage == null && !fullScreenPlayer
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
     val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
     val playerLayoutState = remember(
         showPlayer,
-        playerState.fullScreenPlayer,
+        fullScreenPlayer,
         orientation,
         portraitPlayerLayoutState,
         floatingPlayerLayoutState,
@@ -187,7 +188,7 @@ fun MainComposeHost(
     ) {
         ComposeScaffoldPlayerLayoutState(
             showPlayer = showPlayer,
-            fullScreenPlayer = playerState.fullScreenPlayer,
+            fullScreenPlayer = fullScreenPlayer,
             orientation = orientation,
             portraitState = portraitPlayerLayoutState,
             floatingState = floatingPlayerLayoutState,
