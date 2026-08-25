@@ -8,8 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,18 +17,13 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -40,17 +34,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
+import cn.a10miaomiao.bilimiao.compose.common.HapticFeedbackType
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
+import cn.a10miaomiao.bilimiao.compose.common.rememberHapticFeedback
 import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.FastForwardIndicator
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoScaffold
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.LockableVideoGestureHost
@@ -231,6 +228,7 @@ fun BiliVideoScaffold(
         }
 
         // 长按画面 2 倍速快进状态（手势宿主与悬浮提示共用）
+        val hapticFeedback = rememberHapticFeedback()
         var speedBeforeFastSkip by remember { mutableFloatStateOf(playbackSpeed) }
         var fastForwarding by remember { mutableStateOf(false) }
         val fastSkipState = rememberPlayerFastSkipState(
@@ -239,6 +237,8 @@ fun BiliVideoScaffold(
                 speedBeforeFastSkip = playbackSpeed
                 playerDelegate.setPlaybackSpeed(FAST_FORWARD_SPEED)
                 fastForwarding = true
+                // 长按触发震动反馈（对齐旧版 performHapticFeedback(LONG_PRESS)）
+                hapticFeedback.perform(HapticFeedbackType.LONG_PRESS)
             },
             onStop = {
                 playerDelegate.setPlaybackSpeed(speedBeforeFastSkip)
@@ -342,45 +342,34 @@ fun BiliVideoScaffold(
                 }
             },
             floatingMessage = {
-                // 长按倍速浮窗：样式对齐旧版（半透明黑圆角底 + 快进图标 + 白色文字），位置居中偏上
+                // 长按倍速浮窗（样式对齐旧版），居中偏上
                 if (fastForwarding) {
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color.Black.copy(alpha = 0.6f),
-                        modifier = Modifier.offset(y = (-60).dp),
+                    Box(
+                        Modifier.align(Alignment.TopCenter)
+                            .padding(top = 40.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                Icons.Rounded.FastForward,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp),
-                            )
-                            Spacer(Modifier.width(5.dp))
-                            Text(
-                                "倍速播放中",
-                                color = Color.White,
-                            )
-                        }
+                        FastForwardIndicator(
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
                     }
                 }
                 if (isLoading) {
                     VideoLoadingIndicator(
+                        modifier = Modifier.align(Alignment.Center),
                         showProgress = true,
                         text = { androidx.compose.material3.Text(loadingMessage) },
                     )
                 }
                 errorMessage?.let { msg ->
                     VideoLoadingIndicator(
+                        modifier = Modifier.align(Alignment.Center),
                         showProgress = false,
                         text = { androidx.compose.material3.Text(msg) },
                     )
                 }
                 if (isCompleted) {
                     VideoLoadingIndicator(
+                        modifier = Modifier.align(Alignment.Center),
                         showProgress = false,
                         text = { androidx.compose.material3.Text("播放完成") },
                     )
