@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -102,7 +103,7 @@ fun ComposeScaffold(
 ) {
     val playerState = startViewState.playerState
     val showPlayer = playerState.showPlayer
-    val fullScreenPlayer = playerState.fullScreenPlayer
+    val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
     val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
     val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
@@ -650,6 +651,7 @@ internal fun PlayerLayer(
 ) {
     val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val density = LocalDensity.current
+    val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
 
     if (playerContent == null) {
         return
@@ -664,7 +666,7 @@ internal fun PlayerLayer(
 
     val displayMode = when {
         !playerState.showPlayer -> PlayerDisplayMode.Hidden
-        playerState.fullScreenPlayer -> PlayerDisplayMode.Fullscreen
+        fullScreenPlayer -> PlayerDisplayMode.Fullscreen
         playerState.anchorBounds != null -> PlayerDisplayMode.AnchorOverlay
         orientation == ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
         orientation == ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape

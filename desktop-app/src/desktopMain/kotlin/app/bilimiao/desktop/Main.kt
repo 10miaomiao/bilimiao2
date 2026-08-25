@@ -184,7 +184,11 @@ fun main() {
             }
 
             val platformContext = remember { DesktopPlatformContext() }
-            val startViewState = remember { StartViewState() }
+            val startViewState = remember {
+                StartViewState(
+                    fullScreenPlayer = playerDelegate.fullscreenController.isFullscreen,
+                )
+            }
             playerDelegate.onShowPlayerChanged = { show ->
                 startViewState.playerState.setShowPlayer(show)
             }
@@ -251,9 +255,8 @@ fun main() {
                                 platformContext = platformContext,
                                 playerContent = {
                                     // 观察全屏状态变化，同步到桌面窗口
-                                    val isFullscreen by playerDelegate.fullscreenController.isFullscreen.collectAsState()
+                                    val isFullscreen by startViewState.playerState.fullScreenPlayer.collectAsState()
                                     LaunchedEffect(isFullscreen) {
-                                        startViewState.playerState.setFullScreenPlayer(isFullscreen)
                                         WindowsWindowUtils.instance.setUndecoratedFullscreen(
                                             desktopWindow, windowState, isFullscreen
                                         )

@@ -96,8 +96,8 @@ class FullscreenController(
     /** 是否由自动全屏触发（用于自动切回小屏判断） */
     private var canAutoCloseFullscreen = false
 
-    /** 当前播放源信息（用于判断视频比例） */
-    var playerSourceInfo: PlayerSourceInfo? = null
+    /** 当前播放解析信息（用于判断视频比例，由 PlayerDelegateImpl 在加载完成后设置） */
+    var playbackInfo: PlayerSourceInfo? = null
 
     /** 当前屏幕方向（来自平台配置变化） */
     var orientation: Int = ORIENTATION_PORTRAIT
@@ -234,7 +234,7 @@ class FullscreenController(
             FullscreenMode.UNSPECIFIED -> getAppSettingScreenOrientation()
             FullscreenMode.AUTO -> {
                 // 跟随视频：竖向视频时为不指定方向，横向视频时为横向全屏(自动旋转)
-                val screenProportion = playerSourceInfo?.screenProportion ?: 1f
+                val screenProportion = playbackInfo?.screenProportion ?: 1f
                 if (screenProportion < 1f) {
                     getAppSettingScreenOrientation()
                 } else {

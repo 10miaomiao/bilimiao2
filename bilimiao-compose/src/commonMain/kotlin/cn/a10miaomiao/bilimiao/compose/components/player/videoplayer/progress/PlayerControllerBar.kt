@@ -99,6 +99,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlayerContr
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlaybackSpeedControllerState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import kotlin.math.roundToInt
 
 const val TAG_SELECT_EPISODE_ICON_BUTTON = "SelectEpisodeIconButton"
@@ -735,18 +736,16 @@ object PlayerControllerDefaults {
         modifier: Modifier = Modifier,
     ) {
         if (options.size <= 1) return // 只有 null（关闭）一项时无需显示
-        OptionsSwitcher(
-            value = currentSubtitle,
-            onValueChange = onValueChange,
-            optionsProvider = { options },
-            renderValue = {
-                if (it == null) {
-                    Text("关闭")
-                } else {
-                    Text(it.lan_doc, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-            },
-            renderValueExposed = {
+        // 自实现（与 QualitySwitcher 同构），避免 OptionsSwitcher 的 Popup 行为差异
+        var expanded by rememberSaveable { mutableStateOf(false) }
+        Box(modifier, contentAlignment = Alignment.Center) {
+            TextButton(
+                onClick = { expanded = true },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = LocalContentColor.current,
+                ),
+                modifier = Modifier.testTag(TAG_SUBTITLE_SWITCHER_TEXT_BUTTON),
+            ) {
                 val label = currentSubtitle?.lan_doc ?: "字幕"
                 Text(
                     label,
@@ -754,15 +753,42 @@ object PlayerControllerDefaults {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-            },
-            modifier,
-            // PlatformPopupProperties -> PopupProperties
-            properties = PopupProperties(
-                clippingEnabled = false,
-            ),
-            textButtonTestTag = TAG_SUBTITLE_SWITCHER_TEXT_BUTTON,
-            dropdownMenuTestTag = TAG_SUBTITLE_SWITCHER_DROPDOWN_MENU,
-        )
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.testTag(TAG_SUBTITLE_SWITCHER_DROPDOWN_MENU),
+            ) {
+                options.forEach { option ->
+                    val selected = option == currentSubtitle
+                    DropdownMenuItem(
+                        text = {
+                            val color = if (selected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                LocalContentColor.current
+                            }
+                            CompositionLocalProvider(LocalContentColor provides color) {
+                                if (option == null) {
+                                    Text("关闭")
+                                } else {
+                                    Text(
+                                        option.lan_doc,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                            }
+                        },
+                        onClick = {
+                            expanded = false
+                            onValueChange(option)
+                        },
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -872,6 +898,7 @@ object PlayerControllerDefaults {
             modifier,
             // PlatformPopupProperties -> PopupProperties
             properties = PopupProperties(
+                focusable = true,
                 clippingEnabled = false,
             ),
             textButtonTestTag = TAG_VIDEO_ASPECT_RATIO_SELECTOR_TEXT_BUTTON,
@@ -892,7 +919,8 @@ object PlayerControllerDefaults {
         renderValueExposed: @Composable (T) -> Unit = renderValue,
         modifier: Modifier = Modifier,
         enabled: Boolean = true,
-        properties: PopupProperties = PopupProperties(),
+        // 与 material3 DropdownMenu 默认一致（focusable = true），避免覆盖后菜单无法弹出
+        properties: PopupProperties = PopupProperties(focusable = true),
         textButtonTestTag: String = "textButton",
         dropdownMenuTestTag: String = "dropDownMenu",
         onExpandedChanged: (expanded: Boolean) -> Unit = {},

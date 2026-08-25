@@ -43,8 +43,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeNavigator
-import cn.a10miaomiao.bilimiao.compose.PlayerFloatingLayoutState
-import cn.a10miaomiao.bilimiao.compose.PlayerPortraitLayoutState
+import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.StartViewState
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -60,7 +59,6 @@ import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
-import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerHostState
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
 import com.a10miaomiao.bilimiao.comm.navigation.openBottomSheet
 import com.a10miaomiao.bilimiao.comm.scanner.BilimiaoScanner
@@ -116,7 +114,6 @@ class MainActivity : AppCompatActivity(), DIAware {
     private val supportHelper by lazy { SupportHelper(this) }
     private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
 
-    private val playerHostState by lazy { DirectComposePlayerHostState() }
     private val messageDialogState = cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState()
     private val bottomSheetState = BottomSheetState()
     private val pageConfigState = PageConfigState()
@@ -172,7 +169,7 @@ class MainActivity : AppCompatActivity(), DIAware {
 
     private val startViewState by lazy {
         StartViewState(
-            onFloatingPlayerLayoutStateChanged = playerHostState::updateFloatingPlayerLayoutState,
+            fullScreenPlayer = basePlayerDelegate.fullscreenController.isFullscreen,
         )
     }
     private val basePlayerDelegate: PlayerDelegateImpl by lazy {
@@ -189,6 +186,8 @@ class MainActivity : AppCompatActivity(), DIAware {
             it.createPlayer()
             it.onShowPlayerChanged = { show ->
                 startViewState.playerState.setShowPlayer(show)
+                updateStatusBarStyle()
+                findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
             }
         }
     }
@@ -250,7 +249,7 @@ class MainActivity : AppCompatActivity(), DIAware {
             store.appStore.stateFlow.mapNotNull {
                 it.isLockScreenOrientationPortrait
             }.flowOn(Dispatchers.Main).collect {
-                if (!playerHostState.fullScreenPlayer) {
+                if (!basePlayerDelegate.fullscreenController.isFullscreen.value) {
                     requestedOrientation = when (it) {
                         true -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                         else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -268,7 +267,8 @@ class MainActivity : AppCompatActivity(), DIAware {
 
     private fun initRootView(savedInstanceState: Bundle?) {
         basePlayerDelegate.onCreate()
-        playerHostState.showPlayer = basePlayerDelegate.isPlaying()
+        startViewState.playerState.setShowPlayer(basePlayerDelegate.isPlaying())
+        updateSmallModePlayerMaxHeight()
 
         val rootComposeView = ComposeView(this).apply {
             setContent {
@@ -386,7 +386,9 @@ class MainActivity : AppCompatActivity(), DIAware {
             return
         }
         statusBarHelper.isLightStatusBar =
-            !playerHostState.showPlayer || (playerHostState.orientation == PlayerHostState.HORIZONTAL && !playerHostState.fullScreenPlayer)
+            !startViewState.playerState.showPlayer ||
+                (startViewState.playerState.orientation == ORIENTATION_LANDSCAPE &&
+                    !basePlayerDelegate.fullscreenController.isFullscreen.value)
     }
 
     override fun onResume() {
@@ -418,9 +420,10 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        val showPlayer = startViewState.playerState.showPlayer
         when (keyCode) {
             KeyEvent.KEYCODE_SPACE -> {
-                if (playerHostState.showPlayer) {
+                if (showPlayer) {
                     if (basePlayerDelegate.isPlaying()) {
                         basePlayerDelegate.pause()
                     } else {
@@ -430,17 +433,17 @@ class MainActivity : AppCompatActivity(), DIAware {
                 }
             }
             KeyEvent.KEYCODE_DPAD_LEFT -> {
-                if (playerHostState.showPlayer) {
+                if (showPlayer) {
                     basePlayerDelegate.seekTo(basePlayerDelegate.currentPosition() - 5000)
                 }
             }
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (playerHostState.showPlayer) {
+                if (showPlayer) {
                     basePlayerDelegate.seekTo(basePlayerDelegate.currentPosition() + 5000)
                 }
             }
             KeyEvent.KEYCODE_ESCAPE -> {
-                if (playerHostState.showPlayer) {
+                if (showPlayer) {
                     basePlayerDelegate.onBackPressed()
                 }
             }
@@ -517,12 +520,10 @@ class MainActivity : AppCompatActivity(), DIAware {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        playerHostState.orientation = newConfig.orientation
-        playerHostState.updateSmallModePlayerMaxHeight()
+        startViewState.playerState.setOrientation(newConfig.orientation)
+        updateSmallModePlayerMaxHeight()
         basePlayerDelegate.onConfigurationChanged(newConfig.orientation)
         basePlayerDelegate.fullscreenController.onOrientationChanged(newConfig.orientation)
-        // 同步全屏状态到 playerHostState（用于状态栏控制）
-        playerHostState.fullScreenPlayer = basePlayerDelegate.fullscreenController.isFullscreen.value
         updateStatusBarStyle()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             setWindowInsetsAndroidL()
@@ -532,7 +533,7 @@ class MainActivity : AppCompatActivity(), DIAware {
     }
 
     override fun onBackPressed() {
-        if (playerHostState.fullScreenPlayer && basePlayerDelegate.onBackPressed()) {
+        if (basePlayerDelegate.fullscreenController.isFullscreen.value && basePlayerDelegate.onBackPressed()) {
             return
         }
         if (startViewState.showSearchDialog) {
@@ -587,123 +588,21 @@ class MainActivity : AppCompatActivity(), DIAware {
         intent.launchUrl(this, uri)
     }
 
-    private inner class DirectComposePlayerHostState : PlayerHostState {
-        private val ps get() = startViewState.playerState
-
-        override var showPlayer: Boolean = false
-            set(value) {
-                field = value
-                ps.setShowPlayer(value)
-                updateStatusBarStyle()
-                findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
-            }
-
-        override var fullScreenPlayer: Boolean = false
-            set(value) {
-                field = value
-                ps.setFullScreenPlayer(value)
-                updateStatusBarStyle()
-                findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
-            }
-
-        override var orientation: Int = resources.configuration.orientation
-            set(value) {
-                field = value
-                ps.setOrientation(value)
-                updateStatusBarStyle()
-            }
-
-        val smallModePlayerMinHeight: Int = (200 * resources.displayMetrics.density).toInt()
-        private var portraitCurrentHeightPx: Int = smallModePlayerMinHeight
-            set(value) {
-                field = value
-                syncPortraitPlayerLayoutState()
-            }
-        override var smallModePlayerMaxHeight: Int = smallModePlayerMinHeight
-            set(value) {
-                field = value
-                syncPortraitPlayerLayoutState()
-            }
-        private var floatingPlayerLayoutState = PlayerFloatingLayoutState()
-        var playerSmallShowArea: Int = 480
-            set(value) {
-                field = value
-                val widthPx = value * resources.displayMetrics.density
-                val heightPx = widthPx / (16f / 9f)
-                floatingPlayerLayoutState = floatingPlayerLayoutState.copy(
-                    defaultWidthPx = widthPx,
-                    defaultHeightPx = heightPx,
-                )
-                syncFloatingPlayerLayoutState()
-            }
-        override var playerVideoRatio: Float = 16f / 9f
-            set(value) {
-                field = value
-                ps.setPlayerVideoRatio(value)
-                updateSmallModePlayerMaxHeight()
-            }
-
-        override val portraitLayoutState: PlayerPortraitLayoutState
-            get() = PlayerPortraitLayoutState(
-                minHeightPx = smallModePlayerMinHeight,
-                currentHeightPx = portraitCurrentHeightPx,
-                maxHeightPx = smallModePlayerMaxHeight,
-            )
-
-        override val floatingLayoutState: PlayerFloatingLayoutState
-            get() = floatingPlayerLayoutState
-
-        var smallModePlayerCurrentHeight: Int
-            get() = portraitCurrentHeightPx
-            set(value) {
-                portraitCurrentHeightPx = value
-            }
-
-        override fun animatePlayerHeight(target: Int) {
-            if (orientation != PlayerHostState.VERTICAL || portraitCurrentHeightPx == target) {
-                return
-            }
-            val animator = android.animation.ValueAnimator.ofInt(portraitCurrentHeightPx, target)
-            animator.duration = 200
-            animator.addUpdateListener {
-                smallModePlayerCurrentHeight = it.animatedValue as Int
-            }
-            animator.start()
-        }
-
-        override fun holdUpPlayer() {
-        }
-
-        override fun updateSmallModePlayerMaxHeight() {
-            val metrics = resources.displayMetrics
-            val maxHeightByRatio = (metrics.widthPixels / playerVideoRatio).toInt()
-            smallModePlayerMaxHeight = minOf(maxHeightByRatio, metrics.heightPixels / 2)
-            if (portraitCurrentHeightPx > smallModePlayerMaxHeight) {
-                portraitCurrentHeightPx = smallModePlayerMaxHeight
-            }
-            syncPortraitPlayerLayoutState()
-        }
-
-        override fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
-            floatingPlayerLayoutState = state.copy(
-                defaultWidthPx = state.defaultWidthPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultWidthPx,
-                defaultHeightPx = state.defaultHeightPx.takeIf { it > 0f } ?: floatingPlayerLayoutState.defaultHeightPx,
-            )
-            syncFloatingPlayerLayoutState()
-        }
-
-        private fun syncPortraitPlayerLayoutState() {
-            if (ps.portraitPlayerLayoutState == portraitLayoutState) {
-                return
-            }
-            ps.setPortraitPlayerLayoutState(portraitLayoutState)
-        }
-
-        private fun syncFloatingPlayerLayoutState() {
-            if (ps.floatingPlayerLayoutState == floatingPlayerLayoutState) {
-                return
-            }
-            ps.setFloatingPlayerLayoutState(floatingPlayerLayoutState)
-        }
+    /**
+     * 更新竖屏小窗播放器高度（受屏幕尺寸与视频比例限制）
+     *
+     * 由配置变化 / 视频比例变化时调用，写入 [PlayerState.setSmallModePlayerHeight]。
+     */
+    private fun updateSmallModePlayerMaxHeight() {
+        val metrics = resources.displayMetrics
+        val playerState = startViewState.playerState
+        val minHeightPx = (200 * metrics.density).toInt()
+        val maxHeightPx = minOf(
+            (metrics.widthPixels / playerState.playerVideoRatio).toInt(),
+            metrics.heightPixels / 2,
+        ).coerceAtLeast(minHeightPx)
+        val currentHeightPx = playerState.portraitPlayerLayoutState.currentHeightPx
+            .coerceIn(minHeightPx, maxHeightPx)
+        playerState.setSmallModePlayerHeight(minHeightPx, currentHeightPx, maxHeightPx)
     }
 }

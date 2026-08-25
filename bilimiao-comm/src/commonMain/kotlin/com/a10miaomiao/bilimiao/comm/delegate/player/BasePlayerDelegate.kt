@@ -1,8 +1,8 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
-import cn.a10miaomiao.bilimiao.danmaku.parser.BaseDanmakuParser
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
-import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import org.openani.mediamp.MediampPlayer
 
@@ -28,84 +28,19 @@ interface BasePlayerDelegate : com.a10miaomiao.bilimiao.comm.delegate.BaseDelega
     var onShowPlayerChanged: ((Boolean) -> Unit)?
 
     /**
-     * 当前播放状态
+     * 播放状态（低频稳定状态，见 [PlaybackState]）
      */
-    val isPlayingState: kotlinx.coroutines.flow.StateFlow<Boolean>
+    val playbackState: kotlinx.coroutines.flow.StateFlow<PlaybackState>
 
     /**
-     * 当前播放位置（毫秒）
+     * 播放源状态（当前播放内容，见 [PlayerSourceState]）
+     */
+    val sourceState: kotlinx.coroutines.flow.StateFlow<PlayerSourceState>
+
+    /**
+     * 当前播放位置（毫秒），高频更新（约 200ms 一次），独立 StateFlow 避免触发无关重组
      */
     val currentPosition: kotlinx.coroutines.flow.StateFlow<Long>
-
-    /**
-     * 总时长（毫秒）
-     */
-    val duration: kotlinx.coroutines.flow.StateFlow<Long>
-
-    /**
-     * 是否正在加载
-     */
-    val isLoading: kotlinx.coroutines.flow.StateFlow<Boolean>
-
-    /**
-     * 加载提示文本
-     */
-    val loadingMessage: kotlinx.coroutines.flow.StateFlow<String>
-
-    /**
-     * 错误信息（null 表示无错误）
-     */
-    val errorMessage: kotlinx.coroutines.flow.StateFlow<String?>
-
-    /**
-     * 是否播放完成
-     */
-    val isCompleted: kotlinx.coroutines.flow.StateFlow<Boolean>
-
-    /**
-     * 当前播放源
-     */
-    val currentSource: kotlinx.coroutines.flow.StateFlow<BasePlayerSource?>
-
-    /**
-     * 弹幕解析器
-     */
-    val danmakuParser: kotlinx.coroutines.flow.StateFlow<BaseDanmakuParser?>
-
-    /**
-     * 弹幕是否可见
-     */
-    val danmakuVisible: kotlinx.coroutines.flow.StateFlow<Boolean>
-
-    /**
-     * 音量 (0-100)
-     */
-    val volume: kotlinx.coroutines.flow.StateFlow<Int>
-
-    /**
-     * 播放源信息
-     */
-    val playerSourceInfo: kotlinx.coroutines.flow.StateFlow<PlayerSourceInfo?>
-
-    /**
-     * 当前清晰度
-     */
-    val currentQuality: kotlinx.coroutines.flow.StateFlow<Int>
-
-    /**
-     * 播放倍速
-     */
-    val playbackSpeed: kotlinx.coroutines.flow.StateFlow<Float>
-
-    /**
-     * 可用字幕列表
-     */
-    val subtitleList: kotlinx.coroutines.flow.StateFlow<List<com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo>>
-
-    /**
-     * 当前选中的字幕（null 表示关闭字幕）
-     */
-    val currentSubtitle: kotlinx.coroutines.flow.StateFlow<com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo?>
 
     /**
      * 创建平台特定的 MediampPlayer 实例
