@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.delegate.theme
 
+import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
@@ -8,8 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
@@ -31,7 +30,7 @@ import org.kodein.di.DIAware
 
 
 class ThemeDelegate(
-    private var activity: AppCompatActivity,
+    private var activity: Activity,
     override val di: DI,
 ) : DIAware {
 

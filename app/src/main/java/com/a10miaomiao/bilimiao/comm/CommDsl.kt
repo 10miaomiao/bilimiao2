@@ -3,8 +3,8 @@ package com.a10miaomiao.bilimiao.comm
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -43,7 +43,7 @@ inline fun <reified VM : ViewModel> Fragment.diViewModel(
     di: DI,
 ): Lazy<VM> = diViewModel(VM::class, di)
 
-fun <VM : ViewModel> FragmentActivity.diViewModel(
+fun <VM : ViewModel> ComponentActivity.diViewModel(
     vmClass: KClass<VM>,
     di: DI,
 ): Lazy<VM> {
@@ -57,7 +57,7 @@ fun <VM : ViewModel> FragmentActivity.diViewModel(
     })
 }
 
-inline fun <reified VM : ViewModel> FragmentActivity.diViewModel(
+inline fun <reified VM : ViewModel> ComponentActivity.diViewModel(
     di: DI,
 ): Lazy<VM> = diViewModel(VM::class, di)
 

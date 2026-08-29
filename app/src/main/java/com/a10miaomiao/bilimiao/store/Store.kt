@@ -1,7 +1,7 @@
 package com.a10miaomiao.bilimiao.store
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import com.a10miaomiao.bilimiao.comm.diViewModel
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
@@ -20,7 +20,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 
 class Store (
-        private val activity: AppCompatActivity,
+        private val activity: ComponentActivity,
         override val di: DI,
 ): DIAware {
 
