@@ -25,11 +25,13 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlin.math.roundToInt
+import kotlin.math.sign
 
 
 @Composable
@@ -40,11 +42,14 @@ fun rememberSwipeSeekerState(
 ): SwipeSeekerState {
     val onSeekState by rememberUpdatedState(onSeek)
     val density = LocalDensity.current
-    return remember(swipeSeekerConfig, screenWidthPx, density) {
+    // draggable 识别手势时会先扣除一次 touch slop, 这里把该值传入状态用于补偿位移
+    val touchSlopPx = LocalViewConfiguration.current.touchSlop
+    return remember(swipeSeekerConfig, screenWidthPx, density, touchSlopPx) {
         SwipeSeekerState(
             screenWidthPx,
             swipeSeekerConfig,
             density,
+            touchSlopPx,
         ) { onSeekState(it) }
     }
 }
@@ -122,6 +127,12 @@ class SwipeSeekerState internal constructor(
     private val screenWidthPx: Int,
     private val swipeSeekerConfig: SwipeSeekerConfig,
     density: Density,
+    /**
+     * touch slop (px). [androidx.compose.foundation.gestures.draggable] 识别拖动手势时
+     * 会先扣除一次 touch slop 再上报位移, 计算秒数时需要补回, 否则快进/快退会始终
+     * 落后于手指实际位置.
+     */
+    private val touchSlopPx: Float,
     /**
      * 当一次滑动结束时的回调. `offsetSeconds` 为本次快进的秒数
      */
@@ -208,7 +219,10 @@ class SwipeSeekerState internal constructor(
         if (seekDelta.isNaN()) {
             0
         } else {
-            val percentage = seekDelta / screenWidthPx
+            // draggable 上报的累计位移不含手势识别时扣除的 touch slop, 补回后秒数与
+            // 手指相对按下点的位移严格对应, 避免快进/快退看起来"不跟手".
+            val compensated = seekDelta + touchSlopPx * seekDelta.sign
+            val percentage = compensated / screenWidthPx
             (percentage * swipeSeekerConfig.maxDragSeconds).roundToInt()
         }
     }
