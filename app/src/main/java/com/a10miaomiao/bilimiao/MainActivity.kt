@@ -24,6 +24,8 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,8 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color as ComposeColor
-import androidx.compose.ui.platform.ComposeView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityCompat
@@ -48,6 +48,7 @@ import cn.a10miaomiao.bilimiao.compose.StartViewState
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.ComposeHostBridge
+import cn.a10miaomiao.bilimiao.compose.common.WindowSizeState
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.components.player.BiliVideoScaffold
@@ -56,7 +57,6 @@ import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
-import com.a10miaomiao.bilimiao.comm.delegate.helper.SupportHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -90,7 +90,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 
-class MainActivity : AppCompatActivity(), DIAware {
+class MainActivity : ComponentActivity(), DIAware {
 
     override val di: DI = DI.lazy {
         bindSingleton { this@MainActivity }
@@ -99,7 +99,6 @@ class MainActivity : AppCompatActivity(), DIAware {
         bindSingleton<BasePlayerDelegate> { basePlayerDelegate }
         bindSingleton { themeDelegate }
         bindSingleton { statusBarHelper }
-        bindSingleton { supportHelper }
         bindSingleton { biliGeetestUtil }
         bindSingleton<GeetestVerifier> { GeetestVerifierAndroid(biliGeetestUtil) }
         bindSingleton<ProxyRepository> { ProxyRepositoryAndroid(this@MainActivity) }
@@ -111,7 +110,6 @@ class MainActivity : AppCompatActivity(), DIAware {
     private val store by lazy { Store(this, di) }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
     private val statusBarHelper by lazy { StatusBarHelper(this) }
-    private val supportHelper by lazy { SupportHelper(this) }
     private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
 
     private val messageDialogState = cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState()
@@ -270,44 +268,41 @@ class MainActivity : AppCompatActivity(), DIAware {
         startViewState.playerState.setShowPlayer(basePlayerDelegate.isPlaying())
         updateSmallModePlayerMaxHeight()
 
-        val rootComposeView = ComposeView(this).apply {
-            setContent {
-                val appState = store.appStore.stateFlow.collectAsState().value
-                val platformContext = remember { ComposePlatformContext(this@MainActivity) }
-                MainActivityComposeHost(
-                    navigator = composeNavigator,
-                    hostDi = composeHostDi,
-                    startViewState = startViewState,
-                    appState = appState,
-                    pageConfigState = pageConfigState,
-                    emitter = emitter,
-                    messageDialogState = messageDialogState,
-                    bottomSheetState = bottomSheetState,
-                    platformContext = platformContext,
-                    playerContent = {
-                        BiliVideoScaffold(
-                            delegate = basePlayerDelegate,
-                            modifier = Modifier.fillMaxSize(),
-                            onBack = { basePlayerDelegate.closePlayer() },
-                            onToggleFullscreen = { basePlayerDelegate.fullscreenController.toggleFullscreen() },
-                        )
-                    },
-                    onBackClick = ::handleActivityBackPressed,
-                    initialDeepLink = pendingDeepLink,
-                    onInitialDeepLinkConsumed = {
-                        pendingDeepLink = null
-                    },
-                    onReady = {
-                        pendingDeepLink?.let {
-                            if (composeNavigator.navigateByUri(it)) {
-                                pendingDeepLink = null
-                            }
+        setContent {
+            val appState = store.appStore.stateFlow.collectAsState().value
+            val platformContext = remember { ComposePlatformContext(this@MainActivity) }
+            MainActivityComposeHost(
+                navigator = composeNavigator,
+                hostDi = composeHostDi,
+                startViewState = startViewState,
+                appState = appState,
+                pageConfigState = pageConfigState,
+                emitter = emitter,
+                messageDialogState = messageDialogState,
+                bottomSheetState = bottomSheetState,
+                platformContext = platformContext,
+                playerContent = {
+                    BiliVideoScaffold(
+                        delegate = basePlayerDelegate,
+                        modifier = Modifier.fillMaxSize(),
+                        onBack = { basePlayerDelegate.closePlayer() },
+                        onToggleFullscreen = { basePlayerDelegate.fullscreenController.toggleFullscreen() },
+                    )
+                },
+                onBackClick = ::handleActivityBackPressed,
+                initialDeepLink = pendingDeepLink,
+                onInitialDeepLinkConsumed = {
+                    pendingDeepLink = null
+                },
+                onReady = {
+                    pendingDeepLink?.let {
+                        if (composeNavigator.navigateByUri(it)) {
+                            pendingDeepLink = null
                         }
-                    },
-                )
-            }
+                    }
+                },
+            )
         }
-        setContentView(rootComposeView)
 
         findViewById<View>(android.R.id.content).post {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -318,6 +313,16 @@ class MainActivity : AppCompatActivity(), DIAware {
                 }
             } else {
                 setWindowInsetsAndroidL()
+            }
+            // 窗口尺寸兜底事件源：规避 API 32~33「尺寸类配置变化不派发到 View」的系统 bug
+            // （该 bug 会导致 LocalWindowInfo.containerSize 不刷新），用 onLayoutChange 直接
+            // 把真实窗口宽度写入 WindowSizeState，驱动 isCompactWindow() 实时更新。
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2
+                || Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU) {
+                val contentView = findViewById<View>(android.R.id.content)
+                contentView.addOnLayoutChangeListener { _, left, _, right, _, _, _, _, _ ->
+                    WindowSizeState.widthPx.value = right - left
+                }
             }
         }
         updateStatusBarStyle()
