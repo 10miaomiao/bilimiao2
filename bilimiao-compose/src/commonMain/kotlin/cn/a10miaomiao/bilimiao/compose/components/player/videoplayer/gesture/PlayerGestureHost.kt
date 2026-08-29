@@ -70,7 +70,17 @@ private class SwipeSeekInteraction(
     private val seekerState: SwipeSeekerState,
     private val progressSliderState: PlayerProgressSliderState,
 ) {
+    /**
+     * 本次滑动开始时的播放位置 (毫秒), 作为预览与最终 seek 的基准点.
+     *
+     * 不能直接用 [PlayerProgressSliderState.currentPositionMillis] 作基准: 拖动期间
+     * 预览回调 (onPreview) 会不断 seek 播放器, 推进 currentPosition; 若在此基础上再
+     * 叠加 deltaSeconds, 偏移会被重复累加, 导致预览进度与实际跳转远离手指位置 (不跟手).
+     */
+    private var startPositionMillis = 0L
+
     fun onStarted() {
+        startPositionMillis = progressSliderState.currentPositionMillis
         if (controllerState.visibility.bottomBar) {
             controllerState.setRequestInlineProgressSlider(this)
         } else {
@@ -93,10 +103,11 @@ private class SwipeSeekInteraction(
         }
         if (progressSliderState.totalDurationMillis == 0L) return
 
-        val previewPositionMillis =
-            progressSliderState.currentPositionMillis + seekerState.deltaSeconds.times(1000)
+        // 以手势起点 + 当前偏移计算目标位置, 与手指当前位移严格对应; 越界时钳制到 [0, 总时长]
+        val previewPositionMillis = (startPositionMillis + seekerState.deltaSeconds.times(1000))
+            .coerceIn(0L, progressSliderState.totalDurationMillis)
         val offsetRatio = previewPositionMillis.toFloat() / progressSliderState.totalDurationMillis
-        progressSliderState.previewPositionRatio(offsetRatio.coerceIn(0f, 1f))
+        progressSliderState.previewPositionRatio(offsetRatio)
     }
 
     fun onStopped(cancelled: Boolean) {

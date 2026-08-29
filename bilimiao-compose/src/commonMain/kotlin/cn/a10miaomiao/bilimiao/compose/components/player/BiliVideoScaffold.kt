@@ -319,7 +319,10 @@ fun BiliVideoScaffold(
                 if (gesturesEnabled) {
                     val swipeSeekerState = rememberSwipeSeekerState(
                         screenWidthPx = constraints.maxWidth,
-                        onSeek = { offsetSeconds -> p.skip(offsetSeconds * 1000L) },
+                        // 最终 seek 由 SwipeSeekInteraction 经 finishPreview() 以
+                        // "手势起点 + 偏移" 的绝对位置提交. 这里不能再用相对 skip:
+                        // 拖动期间预览已经 seek 过播放器, 再相对 skip 会二次叠加偏移.
+                        onSeek = { _ -> },
                     )
                     LockableVideoGestureHost(
                         controllerState = controllerState,
