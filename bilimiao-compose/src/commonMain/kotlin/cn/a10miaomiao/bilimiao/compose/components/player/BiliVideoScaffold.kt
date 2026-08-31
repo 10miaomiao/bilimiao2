@@ -64,6 +64,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberVid
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMoreActionsButton
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerTopBar
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoLoadingIndicator
+import cn.a10miaomiao.bilimiao.compose.components.status.BiliAnimTV
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
@@ -136,9 +137,9 @@ fun BiliVideoScaffold(
     val status = playbackState.status
     val isPlaying = status == PlaybackStatus.Playing
     val isLoading = status == PlaybackStatus.Loading
+    val isBuffering = status == PlaybackStatus.Buffering
     val isCompleted = status == PlaybackStatus.Completed
     val duration = playbackState.duration
-    val loadingMessage = playbackState.loadingMessage
     val errorMessage = playbackState.errorMessage
     val danmakuVisible = playbackState.danmakuVisible
     val volume = playbackState.volume
@@ -356,11 +357,11 @@ fun BiliVideoScaffold(
                         )
                     }
                 }
-                if (isLoading) {
-                    VideoLoadingIndicator(
+                // 滑动/拖动预览期间（手指未离开）不显示加载动画：
+                // 预览会持续 seek 播放器触发缓冲（Buffering），此时显示 loading 会干扰手势操作
+                if ((isLoading || isBuffering) && !progressSliderState.isPreviewing) {
+                    BiliAnimTV(
                         modifier = Modifier.align(Alignment.Center),
-                        showProgress = true,
-                        text = { androidx.compose.material3.Text(loadingMessage) },
                     )
                 }
                 errorMessage?.let { msg ->

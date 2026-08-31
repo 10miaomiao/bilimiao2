@@ -373,6 +373,8 @@ class DanmakuEngine(
                 pausedPosition = position
                 mTimeBase = PlatformClock.uptimeMillis() - pausedPosition
                 timer.update(pausedPosition)
+                lastSyncedPosition = -1
+                lastSyncedWallTime = 0
                 mRenderingState.reset()
                 mDrawTimes.clear()
                 task.onPlayStateChanged(IDrawTask.PLAY_STATE_PLAYING)

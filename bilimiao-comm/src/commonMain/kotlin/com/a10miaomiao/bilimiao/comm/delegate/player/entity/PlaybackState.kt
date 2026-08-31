@@ -10,6 +10,9 @@ enum class PlaybackStatus {
     /** 加载中 */
     Loading,
 
+    /** 缓冲中（播放位置长时间停滞，如网络卡顿 / seek 等待数据） */
+    Buffering,
+
     /** 播放中 */
     Playing,
 

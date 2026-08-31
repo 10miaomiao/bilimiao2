@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.openani.mediamp.MediampPlayer
+import org.openani.mediamp.PlaybackState as MediampPlaybackState
 import org.openani.mediamp.features.PlaybackSpeed
 import org.openani.mediamp.source.UriMediaData
 import org.openani.mediamp.playUri
@@ -60,6 +61,9 @@ class PlayerDelegateImpl(
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var progressJob: Job? = null
+
+    /** 播放器原生状态订阅协程（mediamp playbackState → PlaybackStatus） */
+    private var playbackStateJob: Job? = null
 
     /** 全屏与屏幕方向控制器 */
     val fullscreenController = FullscreenController(
@@ -94,6 +98,7 @@ class PlayerDelegateImpl(
     override fun createPlayer(): MediampPlayer {
         val player = createMediampPlayer()
         _mediampPlayer = player
+        observePlaybackState(player)
         return player
     }
 
@@ -108,6 +113,8 @@ class PlayerDelegateImpl(
 
     private fun loadAndPlay(source: BasePlayerSource) {
         val player = _mediampPlayer ?: return
+        // 确保播放器状态订阅存在（closePlayer 后重新打开时需重新订阅）
+        observePlaybackState(player)
         // 先停止之前的播放
         progressJob?.cancel()
         player.stopPlayback()
@@ -203,8 +210,8 @@ class PlayerDelegateImpl(
                 }
 
                 // playUri 只设置媒体数据（状态变为 READY），需要调用 resume 开始播放
+                // 后续 Playing/Paused/Buffering 状态由 observePlaybackState 订阅播放器状态驱动
                 player.resume()
-                _playbackState.update { it.copy(status = PlaybackStatus.Playing) }
 
                 // 播放历史恢复
                 if (sourceInfo.lastPlayCid == source.id
@@ -305,6 +312,42 @@ class PlayerDelegateImpl(
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        }
+    }
+
+    /**
+     * 订阅播放器原生状态，驱动业务播放状态（PlaybackStatus）
+     *
+     * mediamp 状态机直接上报缓冲等状态（ExoPlayer 的 STATE_BUFFERING、mpv 的 paused-for-cache），
+     * 相比原先基于播放位置停滞的轮询推断：零延迟、零误判。
+     *
+     * 以下状态不在此映射，由业务层控制：
+     * - READY / CREATED / DESTROYED：属于业务加载流程（Loading），由 loadAndPlay 维护
+     * - FINISHED：由进度轮询的完成检测统一处理（含分段切换与自动连播逻辑）
+     */
+    private fun observePlaybackState(player: MediampPlayer) {
+        playbackStateJob?.cancel()
+        playbackStateJob = coroutineScope.launch {
+            player.playbackState.collect { state ->
+                when (state) {
+                    MediampPlaybackState.PLAYING -> setPlaybackStatus(PlaybackStatus.Playing)
+                    MediampPlaybackState.PAUSED -> setPlaybackStatus(PlaybackStatus.Paused)
+                    MediampPlaybackState.PAUSED_BUFFERING -> setPlaybackStatus(PlaybackStatus.Buffering)
+                    MediampPlaybackState.ERROR -> _playbackState.update {
+                        it.copy(
+                            status = PlaybackStatus.Error,
+                            errorMessage = it.errorMessage ?: "播放出错",
+                        )
+                    }
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    private fun setPlaybackStatus(status: PlaybackStatus) {
+        if (_playbackState.value.status != status) {
+            _playbackState.update { it.copy(status = status) }
         }
     }
 
@@ -412,14 +455,14 @@ class PlayerDelegateImpl(
     override fun pause() {
         _mediampPlayer?.let { player ->
             player.pause()
-            _playbackState.update { it.copy(status = PlaybackStatus.Paused) }
+            // 状态由 observePlaybackState 订阅播放器实际状态驱动
         }
     }
 
     override fun resume() {
         _mediampPlayer?.let { player ->
             player.resume()
-            _playbackState.update { it.copy(status = PlaybackStatus.Playing) }
+            // 状态由 observePlaybackState 订阅播放器实际状态驱动
         }
     }
 
@@ -522,6 +565,7 @@ class PlayerDelegateImpl(
 
     override fun closePlayer() {
         progressJob?.cancel()
+        playbackStateJob?.cancel()
         _mediampPlayer?.let { player ->
             player.stopPlayback()
         }
