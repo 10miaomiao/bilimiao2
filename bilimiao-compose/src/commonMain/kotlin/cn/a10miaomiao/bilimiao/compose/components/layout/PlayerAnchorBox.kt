@@ -1,5 +1,6 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -42,27 +44,27 @@ fun PlayerAnchorBox(
 
     val isPlayingThisVideo = playerStoreState.aid == aid && playerState.showPlayer
 
-    Box(
-        modifier = modifier.onGloballyPositioned { coordinates ->
-            if (isPlayingThisVideo) {
-                val position = coordinates.positionInRoot()
-                val size = coordinates.size
-                playerState.setAnchorBounds(
-                    Rect(
-                        left = position.x,
-                        top = position.y,
-                        right = position.x + size.width,
-                        bottom = position.y + size.height,
-                    )
-                )
-            }
-        }
-    ) {
-        // 当播放器覆盖到此位置时，隐藏封面内容
-        AnimatedVisibility(
-            visible = !isPlayingThisVideo,
-            enter = fadeIn(),
-            exit = fadeOut(),
+    // 当播放器覆盖到此位置时，隐藏封面内容
+    AnimatedContent(
+        targetState = isPlayingThisVideo
+    ) { target ->
+        Box(
+            modifier = modifier
+                .alpha(if (target) 0f else 1f)
+                .onGloballyPositioned { coordinates ->
+                    if (isPlayingThisVideo) {
+                        val position = coordinates.positionInRoot()
+                        val size = coordinates.size
+                        playerState.setAnchorBounds(
+                            Rect(
+                                left = position.x,
+                                top = position.y,
+                                right = position.x + size.width,
+                                bottom = position.y + size.height,
+                            )
+                        )
+                    }
+                }
         ) {
             content()
         }
