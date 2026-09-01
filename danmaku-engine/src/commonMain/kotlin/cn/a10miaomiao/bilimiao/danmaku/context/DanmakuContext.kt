@@ -580,6 +580,7 @@ class DanmakuContext {
     fun setCacheStuffer(cacheStuffer: BaseCacheStuffer?, cacheStufferAdapter: CacheStufferProxy?): DanmakuContext {
         this.mCacheStuffer = cacheStuffer
         if (this.mCacheStuffer != null) {
+            this.mCacheStuffer!!.setContext(this)
             this.mCacheStuffer!!.setProxy(cacheStufferAdapter)
         }
         return this

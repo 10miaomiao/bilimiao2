@@ -258,6 +258,10 @@ class SimpleTextCacheStuffer : BaseCacheStuffer() {
         // 特殊弹幕在工作线程绘制时设置完全不透明
         if (fromWorkerThread && danmaku is SpecialDanmaku) {
             paint.alpha = 255
+        } else if (danmaku !is SpecialDanmaku) {
+            // 重新应用全局透明度：paint.color 赋值（如 Android Paint.setColor）会覆盖 alpha 通道，
+            // 导致 Displayer 设置的透明度失效，这里以弹幕上下文的透明度为准
+            mContext?.let { paint.alpha = it.transparency }
         }
         val text = lineText ?: danmaku.text?.toString() ?: return
         canvas.drawText(text, left, top, paint)
@@ -373,6 +377,8 @@ class SimpleTextCacheStuffer : BaseCacheStuffer() {
             // 绘制描边/阴影层
             paint.style = PaintStyle.STROKE
             paint.color = danmaku.textShadowColor
+            // 描边同样应用全局透明度（paint.color 会覆盖 alpha）
+            mContext?.let { paint.alpha = it.transparency }
             paint.strokeWidth = DEFAULT_STROKE_WIDTH
             drawStroke(danmaku, lineText, canvas, left, top, paint)
         }

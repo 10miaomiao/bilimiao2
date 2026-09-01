@@ -27,7 +27,7 @@ private class ZHPrefsAdapter(
 }
 
 private class ZHMutablePrefsAdapter(
-    private val common: MutablePreferences,
+    internal val common: MutablePreferences,
 ) : me.zhanghai.compose.preference.MutablePreferences {
     override fun <T> get(key: String): T? = common.get(key)
     override fun asMap(): Map<String, Any> = common.asMap()
@@ -40,6 +40,11 @@ private class ZHMutablePrefsAdapter(
 /**
  * 将本项目的 [MutableStateFlow]<[Preferences]> 转换为库的
  * [MutableStateFlow]<[me.zhanghai.compose.preference.Preferences]>。
+ *
+ * 桥接层需要双向同步：
+ * - commonFlow -> zhFlow：DataStore 持久化后的值回显给设置组件
+ * - zhFlow -> commonFlow：设置组件写入的新值（[ZHMutablePrefsAdapter]）回传，
+ *   使 [DataStorePreferenceFlow] 的写入收集器能捕获并持久化到 DataStore
  */
 @Composable
 private fun rememberZHPrefsFlow(
@@ -53,6 +58,13 @@ private fun rememberZHPrefsFlow(
     LaunchedEffect(commonFlow) {
         commonFlow.collect {
             zhFlow.value = ZHPrefsAdapter(it)
+        }
+    }
+    LaunchedEffect(zhFlow) {
+        zhFlow.collect { zhPrefs ->
+            // 仅处理库组件写入产生的可变更对象，避免把 DataStore 回显的不可变快照再写回
+            val mutable = zhPrefs as? ZHMutablePrefsAdapter ?: return@collect
+            commonFlow.value = mutable.common
         }
     }
     return zhFlow

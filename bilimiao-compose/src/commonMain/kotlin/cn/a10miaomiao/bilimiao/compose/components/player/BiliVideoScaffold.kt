@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
+import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.HapticFeedbackType
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
@@ -154,6 +155,7 @@ fun BiliVideoScaffold(
     // 播放器控制依赖的服务（通过 Kodein 注入）
     val userStore: UserStore by rememberInstance()
     val pageNavigator: PageNavigator by rememberInstance()
+    val bottomSheetState: BottomSheetState by rememberInstance()
 
     // 倍速菜单预设值（设置中的 PlayerSpeedValues，默认 0.5x/1.0x/2.0x）
     var speedOptions by remember {
@@ -285,16 +287,17 @@ fun BiliVideoScaffold(
                         }
                         PlayerMoreActionsButton(
                             onVideoSetting = {
-                                pageNavigator.navigate(VideoSettingPage())
+                                // 以 bottom sheet 弹出播放设置（对齐旧版行为）
+                                bottomSheetState.open(VideoSettingPage())
                             },
                             onDanmakuSetting = {
-                                // 直接打开当前播放模式的弹幕显示设置（对齐原安卓版行为）
+                                // 以 bottom sheet 弹出当前播放模式的弹幕显示设置（对齐旧版行为）
                                 val modeName = if (isFullscreen) {
                                     SettingPreferences.DanmakuFullMode.name
                                 } else {
                                     SettingPreferences.DanmakuSmallMode.name
                                 }
-                                pageNavigator.navigate(DanmakuDisplaySettingPage(modeName))
+                                bottomSheetState.open(DanmakuDisplaySettingPage(modeName))
                             },
                         )
                     },
@@ -311,6 +314,12 @@ fun BiliVideoScaffold(
                     currentPosition = currentPosition,
                     isPlaying = isPlaying,
                     danmakuParser = danmakuParser,
+                    // 按当前播放模式读取对应的弹幕显示设置
+                    modeName = if (isFullscreen) {
+                        SettingPreferences.DanmakuFullMode.name
+                    } else {
+                        SettingPreferences.DanmakuSmallMode.name
+                    },
                     visible = danmakuVisible,
                     modifier = Modifier.fillMaxSize(),
                 )

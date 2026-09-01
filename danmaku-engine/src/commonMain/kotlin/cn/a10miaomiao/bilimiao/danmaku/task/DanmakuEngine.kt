@@ -238,6 +238,11 @@ class DanmakuEngine(
         task.setParser(parser)
         task.prepare()
         drawTask = task
+        // 注册配置变更回调。
+        // 注意：task.prepare() 内部触发的 prepared -> start -> resume() 中
+        // drawTask 尚未赋值（为 null），因此这里必须显式调用 task.start() 注册回调，
+        // 否则 setMaximumLines 等配置变化的 notify 无法到达 DrawTask（如最大行数过滤失效）。
+        task.start()
     }
 
     fun isPrepared(): Boolean = mReady

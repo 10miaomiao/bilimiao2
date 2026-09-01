@@ -30,6 +30,11 @@ kotlin {
                 compileOnly("org.jetbrains.skiko:skiko-awt:0.8.18")
             }
         }
+        val desktopTest by getting {
+            dependencies {
+                implementation("junit:junit:4.13.2")
+            }
+        }
     }
 }
 
