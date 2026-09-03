@@ -19,7 +19,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.proxy.ProxyRepository
 import cn.a10miaomiao.bilimiao.compose.pages.setting.components.ProxyServerCard
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -48,7 +48,7 @@ internal class SelectProxyServerPageViewModel(
 ) : ViewModel(), DIAware {
 
     val proxyRepository by instance<ProxyRepository>()
-    private val pageNavigation by instance<PageNavigation>()
+    private val pageNavigation by instance<PageNavigator>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())

@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.pages.home
 
-import cn.a10miaomiao.bilimiao.compose.common.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -328,11 +327,6 @@ private fun HomePageContent(
     PageListener(
         configId = pageConfigId,
         onMenuItemClick = viewModel::menuItemClick,
-    )
-    BackHandler(
-        onBack = {
-            // Handled by system back
-        },
     )
 
     val scope = rememberCoroutineScope()

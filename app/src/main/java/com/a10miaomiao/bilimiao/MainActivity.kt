@@ -25,6 +25,7 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.annotation.RequiresApi
@@ -164,6 +165,18 @@ class MainActivity : ComponentActivity(), DIAware {
     }
     private var pendingDeepLink: Uri? = null
     private var lastExitBackPressedTime = 0L
+    private var lastExitPlayerBackPressedTime = 0L
+
+    /**
+     * 全局返回兜底回调：注册于 [onBackPressedDispatcher]，优先级低于页面级 BackHandler。
+     * 系统返回时若页面级 BackHandler（评论面板、编辑模式等局部返回）未消费，
+     * 由这里处理页面导航（直至首页）与两次返回退出逻辑。
+     */
+    private val globalBackCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            handleGlobalBackNavigation()
+        }
+    }
 
     private val startViewState by lazy {
         StartViewState(
@@ -218,6 +231,9 @@ class MainActivity : ComponentActivity(), DIAware {
 
         store.onCreate(savedInstanceState)
         pendingDeepLink = intent.data
+        // 全局返回兜底：页面级 BackHandler 之后执行（先注册优先级最低），
+        // 处理页面导航与两次返回退出；无局部拦截时不会直接 finish。
+        onBackPressedDispatcher.addCallback(this, globalBackCallback)
         initRootView(savedInstanceState)
 
         lifecycleScope.launch {
@@ -538,37 +554,93 @@ class MainActivity : ComponentActivity(), DIAware {
     }
 
     override fun onBackPressed() {
-        if (basePlayerDelegate.fullscreenController.isFullscreen.value && basePlayerDelegate.onBackPressed()) {
-            return
-        }
-        if (startViewState.showSearchDialog) {
-            startViewState.closeSearchDialog()
-            return
-        }
-        if (startViewState.isDrawerOpen()) {
-            startViewState.closeDrawer()
-            return
-        }
+        // 全局返回优先级：
+        // 1. BottomSheet 内部导航（直至最后一个页面关闭 BottomSheet）
+        // 2. 退出全屏播放器
+        // 3. 搜索对话框 / 抽屉
+        // 4. 页面级局部返回（页面 BackHandler）→ 无局部拦截时由 globalBackCallback 兜底导航/退出
+        if (dispatchOverlayBackPressed()) return
         super.onBackPressed()
     }
 
+    /**
+     * 处理覆盖层（BottomSheet / 全屏播放器 / 搜索 / 抽屉）的返回。
+     * @return 是否已处理（true 表示返回被消费，无需继续向下分发）
+     */
+    private fun dispatchOverlayBackPressed(): Boolean {
+        // 1. BottomSheet 打开：先处理内部页面导航操作，直至最后一个页面关闭 BottomSheet
+        if (bottomSheetState.page.value != null) {
+            if (!bottomSheetState.popInnerPage()) {
+                bottomSheetState.close()
+            }
+            return true
+        }
+        // 2. 全屏播放：退出全屏（播放器保持小窗播放，不关闭播放器）
+        if (basePlayerDelegate.fullscreenController.isFullscreen.value) {
+            basePlayerDelegate.fullscreenController.smallScreen()
+            return true
+        }
+        // 3. 搜索对话框 / 抽屉（Compose 覆盖层）
+        if (startViewState.showSearchDialog) {
+            startViewState.closeSearchDialog()
+            return true
+        }
+        if (startViewState.isDrawerOpen()) {
+            startViewState.closeDrawer()
+            return true
+        }
+        return false
+    }
+
     private fun handleActivityBackPressed() {
+        // app bar 返回按钮：与系统返回使用同一全局返回优先级
+        if (dispatchOverlayBackPressed()) return
+        // 不经过系统返回分发（无页面 BackHandler），直接执行全局导航/退出逻辑
+        handleGlobalBackNavigation()
+    }
+
+    /**
+     * 全局导航兜底：页面导航直至首页，随后按播放状态进入两次返回退出机制。
+     */
+    private fun handleGlobalBackNavigation() {
+        // 4. 处理 PageNavigation 的导航，直至首页
         if (composeNavigator.canPopBackStack()) {
             composeNavigator.popBackStack()
+            return
+        }
+        // 5. 首页：正在播放（播放器打开中，含暂停/缓冲）→ 两次返回退出播放；
+        //    未在播放 → 两次返回退出 bilimiao
+        if (basePlayerDelegate.isOpened()) {
+            handleExitPlayerBackPressed()
         } else {
-            handleRootBackPressed()
+            handleExitAppBackPressed()
         }
     }
 
-    private fun handleRootBackPressed() {
-        if (!basePlayerDelegate.onBackPressed()) {
-            val now = System.currentTimeMillis()
-            if (now - lastExitBackPressedTime > 2000) {
-                GlobalToaster.show("再按一次退出bilimiao")
-                lastExitBackPressedTime = now
-            } else {
-                finish()
-            }
+    /**
+     * 两次返回退出播放：第一次提示，第二次关闭播放器。
+     */
+    private fun handleExitPlayerBackPressed() {
+        val now = System.currentTimeMillis()
+        if (now - lastExitPlayerBackPressedTime > 2000) {
+            GlobalToaster.show("再按一次退出播放")
+            lastExitPlayerBackPressedTime = now
+        } else {
+            lastExitPlayerBackPressedTime = 0
+            basePlayerDelegate.closePlayer()
+        }
+    }
+
+    /**
+     * 两次返回退出 bilimiao：第一次提示，第二次退出应用。
+     */
+    private fun handleExitAppBackPressed() {
+        val now = System.currentTimeMillis()
+        if (now - lastExitBackPressedTime > 2000) {
+            GlobalToaster.show("再按一次退出bilimiao")
+            lastExitBackPressedTime = now
+        } else {
+            finish()
         }
     }
 

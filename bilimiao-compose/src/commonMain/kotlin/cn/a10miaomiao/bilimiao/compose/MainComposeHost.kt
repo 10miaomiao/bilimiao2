@@ -59,6 +59,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomBarBackStack
 import cn.a10miaomiao.bilimiao.compose.common.navigation.decorateEntries
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.SheetPageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.navigation.rememberBottomBarBackStack
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffoldPlayerLayoutState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
@@ -300,7 +301,7 @@ fun MainComposeHost(
                     )
                     if (bottomSheetPage != null) {
                         MyBottomSheet(
-                            page = bottomSheetPage!!,
+                            bottomSheetState = bottomSheetState,
                             onClose = bottomSheetState::close,
                         )
                     }
@@ -340,37 +341,52 @@ fun MyNavHost(
 
 @Composable
 fun MyBottomSheet(
-    page: ComposePage,
+    bottomSheetState: BottomSheetState,
     onClose: () -> Unit,
 ) {
     val parentPageNavigation by rememberInstance<PageNavigation>()
-    // BottomSheet 独立 backstack，简化：复用父级 PageNavigation
-    // （sheet 内部页面调用 navigate 会进入主 backstack，行为与旧版略有差异，后续可优化）
-    val pageNavigation = parentPageNavigation
+    // BottomSheet 使用独立导航栈：内部页面导航（navigate/popBackStack）全部作用于
+    // BottomSheetState 内部栈，与主 backstack 互不影响，返回时先处理内部页面，
+    // 直至最后一个内部页面关闭后再关闭整个 BottomSheet。
+    val sheetPageNavigator = remember(bottomSheetState, parentPageNavigation) {
+        SheetPageNavigator(bottomSheetState, parentPageNavigation)
+    }
+    val page by bottomSheetState.page.collectAsState()
+    val innerPages by bottomSheetState.innerPages.collectAsState()
+    val currentPage = innerPages.lastOrNull() ?: page
     val pageConfigState = remember { PageConfigState() }
     subDI(
         diBuilder = {
-            bindSingleton(overrides = true) { pageNavigation }
             bindSingleton<cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator>(
                 overrides = true
-            ) { pageNavigation }
+            ) { sheetPageNavigator }
         }
     ) {
         CompositionLocalProvider(
             LocalContentInsets provides bottomSheetContentInsets(),
             LocalPageConfigState provides pageConfigState,
-            LocalPageNavigation provides pageNavigation,
+            LocalPageNavigation provides sheetPageNavigator,
         ) {
             AutoSheetDialog(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
                     .heightIn(max = 500.dp),
                 content = {
-                    page.Content()
+                    if (currentPage != null) {
+                        currentPage.Content()
+                    }
                     MyBottomSheetTitleBar(pageConfigState, onClose)
                 },
                 onDismiss = onClose,
-                onPreDismiss = { pageNavigation.popBackStack() },
+                onPreDismiss = {
+                    // 先处理 sheet 内部页面导航，直至最后一个页面关闭 BottomSheet
+                    if (bottomSheetState.hasInnerPage) {
+                        bottomSheetState.popInnerPage()
+                        true
+                    } else {
+                        false
+                    }
+                },
             )
         }
     }

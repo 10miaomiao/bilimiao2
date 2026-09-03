@@ -19,7 +19,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.customSetsPreference
 import cn.a10miaomiao.bilimiao.compose.components.preference.multiSelectIntPreference
@@ -53,7 +53,7 @@ private class VideoSettingPageViewModel(
     override val di: DI,
 ) : ViewModel(), DIAware {
 
-    private val pageNavigation by instance<PageNavigation>()
+    private val pageNavigation by instance<PageNavigator>()
 
     private val fnvalSelection = mapOf(
         SettingConstants.PLAYER_FNVAL_DASH to AnnotatedString("dash(支持4K)"),

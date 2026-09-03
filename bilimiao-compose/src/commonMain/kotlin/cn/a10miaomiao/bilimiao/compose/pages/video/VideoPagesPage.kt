@@ -47,7 +47,7 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliFailBox
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliLoadingBox
@@ -89,7 +89,7 @@ private class VideoPagesPageViewModel(
     val aid: String,
 ) : ViewModel(), DIAware {
 
-    private val pageNavigation by instance<PageNavigation>()
+    private val pageNavigation by instance<PageNavigator>()
     private val playerStore by instance<PlayerStore>()
     private val basePlayerDelegate by instance<BasePlayerDelegate>()
 
