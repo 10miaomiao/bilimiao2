@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -151,6 +152,7 @@ fun BiliVideoScaffold(
     val danmakuParser = sourceState.danmakuParser
     val subtitleList = sourceState.subtitleList
     val currentSubtitle = sourceState.currentSubtitle
+    val subtitleItems = sourceState.subtitleItems
 
     // 播放器控制依赖的服务（通过 Kodein 注入）
     val userStore: UserStore by rememberInstance()
@@ -322,6 +324,14 @@ fun BiliVideoScaffold(
                     },
                     visible = danmakuVisible,
                     modifier = Modifier.fillMaxSize(),
+                )
+            },
+            // CC 字幕层：位于视频底部、控制栏上方，按播放位置绘制当前字幕
+            subtitle = {
+                SubtitleOverlay(
+                    subtitleItems = subtitleItems,
+                    currentPosition = currentPosition,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             },
             gestureHost = {

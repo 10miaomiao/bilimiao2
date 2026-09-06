@@ -4,20 +4,26 @@ import cn.a10miaomiao.bilimiao.danmaku.parser.BaseDanmakuParser
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
+import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.toVideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
+import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
+import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceState
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleItem
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState as MediampPlaybackState
 import org.openani.mediamp.features.PlaybackSpeed
@@ -61,6 +68,12 @@ class PlayerDelegateImpl(
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var progressJob: Job? = null
+
+    /** 字幕内容加载任务（下载字幕 JSON 并解析） */
+    private var subtitleLoadJob: Job? = null
+
+    /** 字幕加载请求序号，用于丢弃过期请求（快速切换字幕/切换视频时防止旧结果写回） */
+    private var subtitleRequestId = 0
 
     /** 播放器原生状态订阅协程（mediamp playbackState → PlaybackStatus） */
     private var playbackStateJob: Job? = null
@@ -111,12 +124,18 @@ class PlayerDelegateImpl(
         fullscreenController.checkIsPlayerDefaultFull()
     }
 
-    private fun loadAndPlay(source: BasePlayerSource) {
+    private fun loadAndPlay(source: BasePlayerSource, reloadSubtitle: Boolean = true) {
         val player = _mediampPlayer ?: return
         // 确保播放器状态订阅存在（closePlayer 后重新打开时需重新订阅）
         observePlaybackState(player)
         // 先停止之前的播放
         progressJob?.cancel()
+        // 取消并失效旧的字幕加载任务：切换视频时旧任务不能把字幕内容写回；
+        // 切换清晰度等场景（reloadSubtitle = false）保留当前字幕不重新加载
+        if (reloadSubtitle) {
+            subtitleLoadJob?.cancel()
+            subtitleRequestId++
+        }
         player.stopPlayback()
         coroutineScope.launch {
             _playbackState.update {
@@ -141,18 +160,35 @@ class PlayerDelegateImpl(
                 }
             }
 
-            // 获取 CC 字幕列表并设置默认字幕
-            launch(Dispatchers.IO) {
-                try {
-                    val subtitles = source.getSubtitles()
-                    _sourceState.update {
-                        it.copy(
-                            subtitleList = subtitles,
-                            currentSubtitle = selectDefaultSubtitle(subtitles),
-                        )
+            // 获取 CC 字幕列表并设置默认字幕（切换清晰度时保留当前字幕，不重新加载）
+            if (reloadSubtitle) {
+                launch(Dispatchers.IO) {
+                    try {
+                        val subtitles = source.getSubtitles()
+                        val defaultSubtitle = selectDefaultSubtitle(subtitles)
+                        // 状态更新与字幕内容加载统一回主线程，避免与 UI 的 setSubtitle 并发
+                        withContext(Dispatchers.Main) {
+                            _sourceState.update {
+                                it.copy(
+                                    subtitleList = subtitles,
+                                    currentSubtitle = defaultSubtitle,
+                                    subtitleItems = emptyList(),
+                                )
+                            }
+                            // 自动加载默认字幕内容
+                            if (defaultSubtitle != null) {
+                                loadSubtitleContent(defaultSubtitle)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        _sourceState.update {
+                            it.copy(
+                                subtitleList = emptyList(),
+                                currentSubtitle = null,
+                                subtitleItems = emptyList(),
+                            )
+                        }
                     }
-                } catch (e: Exception) {
-                    _sourceState.update { it.copy(subtitleList = emptyList(), currentSubtitle = null) }
                 }
             }
 
@@ -502,7 +538,8 @@ class PlayerDelegateImpl(
         val source = _sourceState.value.currentSource ?: return
         quality = newQuality
         val savedPosition = _currentPosition.value
-        loadAndPlay(source)
+        // 切换清晰度时保留当前字幕（列表/选中/内容），避免字幕闪烁与重复下载
+        loadAndPlay(source, reloadSubtitle = false)
         coroutineScope.launch {
             delay(500)
             seekTo(savedPosition)
@@ -514,10 +551,57 @@ class PlayerDelegateImpl(
     }
 
     override fun setSubtitle(subtitle: SubtitleSourceInfo?) {
-        _sourceState.update { it.copy(currentSubtitle = subtitle) }
-        // TODO: 字幕渲染需接入播放管线。安卓 ExoPlayer 可通过 UriMediaData.extraFiles
-        // 挂载外部字幕（参考 animeko SubtitleSwitcher），桌面 mpv（mediamp 0.1.14）
-        // 尚未支持 extraFiles，后续随播放管线升级再接入实际字幕绘制。
+        _sourceState.update {
+            it.copy(
+                currentSubtitle = subtitle,
+                subtitleItems = emptyList(),
+            )
+        }
+        // 下载并解析所选字幕的内容（null 表示关闭字幕，同时清空内容）
+        loadSubtitleContent(subtitle)
+    }
+
+    /**
+     * 加载字幕内容（对齐原安卓版 PlayerDelegate2.loadSubtitleData 的逻辑）
+     *
+     * 通过 [subtitleUrl][SubtitleSourceInfo.subtitle_url] 下载 B 站字幕 JSON 并解析为
+     * 毫秒时间轴的字幕行（[SubtitleItem]），供 UI 层按播放位置绘制。
+     * B 站字幕为私有 JSON 格式，mediamp/ExoPlayer 无法直接解析，故采用自绘方案。
+     *
+     * 使用 [subtitleRequestId] 校验：快速切换字幕或切换视频时，旧请求完成后的
+     * 写入会被丢弃，避免旧视频/旧字幕内容污染当前状态。
+     */
+    private fun loadSubtitleContent(subtitle: SubtitleSourceInfo?) {
+        subtitleLoadJob?.cancel()
+        val requestId = ++subtitleRequestId
+        if (subtitle == null || subtitle.subtitle_url.isBlank()) {
+            _sourceState.update { it.copy(subtitleItems = emptyList()) }
+            return
+        }
+        subtitleLoadJob = coroutineScope.launch(Dispatchers.IO) {
+            try {
+                val res = MiaoHttp.request {
+                    url = UrlUtil.autoHttps(subtitle.subtitle_url)
+                }.awaitCall().json<SubtitleJsonInfo>()
+                val items = res.body.map {
+                    SubtitleItem(
+                        from = (it.from * 1000).toLong(),
+                        to = (it.to * 1000).toLong(),
+                        content = it.content,
+                    )
+                }
+                if (requestId == subtitleRequestId) {
+                    _sourceState.update { it.copy(subtitleItems = items) }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                if (requestId == subtitleRequestId) {
+                    _sourceState.update { it.copy(subtitleItems = emptyList()) }
+                }
+            }
+        }
     }
 
     /**
@@ -566,6 +650,9 @@ class PlayerDelegateImpl(
     override fun closePlayer() {
         progressJob?.cancel()
         playbackStateJob?.cancel()
+        // 取消字幕加载任务并使其失效，防止完成后把字幕内容写回
+        subtitleLoadJob?.cancel()
+        subtitleRequestId++
         _mediampPlayer?.let { player ->
             player.stopPlayback()
         }
@@ -585,6 +672,7 @@ class PlayerDelegateImpl(
                 danmakuParser = null,
                 subtitleList = emptyList(),
                 currentSubtitle = null,
+                subtitleItems = emptyList(),
             )
         }
         _currentPosition.value = 0L

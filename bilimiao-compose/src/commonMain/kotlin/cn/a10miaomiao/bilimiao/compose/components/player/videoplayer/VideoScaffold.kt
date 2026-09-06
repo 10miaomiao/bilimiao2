@@ -3,8 +3,11 @@
 package cn.a10miaomiao.bilimiao.compose.components.player.videoplayer
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Arrangement
@@ -34,12 +37,20 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 
 /**
  * 视频播放器框架, 可以自定义组合控制器等部分.
@@ -49,6 +60,7 @@ import androidx.compose.ui.unit.dp
  * - 悬浮消息: [floatingMessage], 例如正在缓冲
  * - 控制器: [topBar], [rhsBar] 和 [bottomBar]
  * - 手势: [gestureHost]
+ * - 字幕: [subtitle]
  * - 弹幕: [danmakuHost]
  * - 视频: [video]
  * - 右侧侧边栏: [rhsSheet]
@@ -77,6 +89,12 @@ fun VideoScaffold(
      */
     video: @Composable BoxScope.() -> Unit = {},
     danmakuHost: @Composable BoxScope.() -> Unit = {},
+    /**
+     * CC 字幕层，为独立叠加层（位于弹幕与手势之间），不参与控制器布局。
+     * 底部边距由底部控制区（底栏/进度条）的实际占用高度驱动，控制器显示时字幕
+     * 自动避让到底栏上方，隐藏时画面底部留出边距。
+     */
+    subtitle: @Composable BoxScope.() -> Unit = {},
     gestureHost: @Composable BoxWithConstraintsScope.() -> Unit = {},
     floatingMessage: @Composable BoxScope.() -> Unit = {},
     rhsButtons: @Composable ColumnScope.() -> Unit = {},
@@ -94,6 +112,12 @@ fun VideoScaffold(
     val controllerVisibility = controllerState.visibility
         .withGestureLocked(gestureLocked)
         .withExpanded(expanded)
+
+    // 底部控制区（底栏 / 独立进度条）实际占用的高度（dp），由底部控制区的布局实时上报。
+    // 字幕作为独立层（弹幕与手势之间），根据该高度决定底部边距：
+    // 控制器显示时避让到底栏上方，隐藏时画面底部留白，展开/收起动画过程中逐帧平滑跟随。
+    val density = LocalDensity.current
+    var bottomControlsHeightDp by remember { mutableStateOf(0.dp) }
 
     // 使用标准的 fadeIn/fadeOut 替换 AniMotionScheme 的动画
     val enterTransition = fadeIn()
@@ -129,6 +153,24 @@ fun VideoScaffold(
                         .fillMaxWidth(),
                 ) {
                     danmakuHost()
+                }
+
+                // 字幕：独立层（弹幕之上、手势之下），不参与控制器的布局
+                // 底部边距由底部控制区实际高度驱动：
+                // - 控制器显示时贴到底栏上方，无多余间距；
+                // - 控制器隐藏时画面底部留出边距避免贴边（动画过渡）。
+                // 字幕在弹幕之上绘制，弹幕不会盖住字幕。
+                val subtitleBottomMargin by animateDpAsState(
+                    targetValue = max(bottomControlsHeightDp, SUBTITLE_BOTTOM_MARGIN),
+                    label = "subtitleBottomMargin",
+                )
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .padding(bottom = subtitleBottomMargin),
+                    contentAlignment = Alignment.BottomCenter,
+                ) {
+                    subtitle()
                 }
 
                 // 控制手势
@@ -208,7 +250,14 @@ fun VideoScaffold(
 
                         Box(Modifier.weight(1f, fill = true).fillMaxWidth())
 
-                        Column {
+                        Column(
+                            // 上报底部控制区（底栏 + 独立进度条）实际占用高度，驱动字幕层避让
+                            Modifier.onSizeChanged { size ->
+                                val densityValue: Float = density.density
+                                val heightDp: Dp = (size.height.toFloat() / densityValue).dp
+                                bottomControlsHeightDp = heightDp
+                            }
+                        ) {
                             // 底部控制栏: 播放/暂停, 进度条, 切换全屏
                             AnimatedVisibility(
                                 visible = controllerVisibility.bottomBar,
@@ -387,3 +436,8 @@ private fun ControllerVisibility.withExpanded(isExpanded: Boolean): ControllerVi
         this
     }
 }
+
+/**
+ * 控制器隐藏（画面底部无底栏/进度条占用）时，字幕距画面底部的间距（避免字幕贴边）
+ */
+private val SUBTITLE_BOTTOM_MARGIN = 12.dp
