@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
@@ -97,7 +99,7 @@ import kotlin.math.roundToInt
  *
  * - 全屏模式 ([PlayerDisplayMode.Fullscreen]): 顶栏导航图标为 ArrowBack, 点击退出全屏而非关闭播放.
  * - 非全屏模式: 顶栏导航图标为 Close, 点击关闭播放.
- * - 悬浮横屏模式 ([PlayerDisplayMode.FloatingLandscape]): 关闭手势操作.
+ * - 悬浮横屏模式 ([PlayerDisplayMode.FloatingLandscape]): 完整手势关闭，仅保留单击切换控制器显隐.
  * - 非全屏模式: 控制器布局忽略窗口安全边距.
  *
  * 替代旧的 `VideoScaffold.kt`（已被删除）。
@@ -186,7 +188,7 @@ fun BiliVideoScaffold(
         scaffoldOrientation == ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
         else -> PlayerDisplayMode.Hidden
     }
-    // 悬浮横屏模式关闭手势操作
+    // 悬浮横屏模式关闭完整手势操作（拖动/缩放由外层悬浮窗口处理），仅保留单击切换控制器
     val gesturesEnabled = displayMode != PlayerDisplayMode.FloatingLandscape
     val contentWindowInsets = if (isFullscreen) {
         WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
@@ -342,7 +344,9 @@ fun BiliVideoScaffold(
                 )
             },
             gestureHost = {
-                // 悬浮横屏模式关闭手势操作
+                // 悬浮横屏模式关闭完整手势操作（拖动/缩放由外层悬浮窗口处理），
+                // 但仍保留“单击切换控制器显隐”：外层拖动手势只消费位移超过阈值的事件，
+                // 纯单击不拦截，事件能到达这里。
                 if (gesturesEnabled) {
                     val swipeSeekerState = rememberSwipeSeekerState(
                         screenWidthPx = constraints.maxWidth,
@@ -368,6 +372,18 @@ fun BiliVideoScaffold(
                         onToggleDanmaku = { playerDelegate.toggleDanmaku() },
                         gestureIndicatorState = indicatorState,
                         fastSkipState = fastSkipState,
+                    )
+                } else {
+                    // 单击切换控制器显隐；detectTapGestures 超过触摸滑动阈值或事件被
+                    // 外层拖动消费后会自动取消，不影响窗口拖动/缩放手势
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .pointerInput(controllerState) {
+                                detectTapGestures(
+                                    onTap = { controllerState.toggleFullVisible() },
+                                )
+                            }
                     )
                 }
             },
