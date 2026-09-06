@@ -52,8 +52,9 @@ import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.FastForwardIndicator
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoScaffold
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.LevelController
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.LockableVideoGestureHost
-import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.NoOpLevelController
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberBrightnessLevelController
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberGestureIndicatorState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberPlayerFastSkipState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSwipeSeekerState
@@ -83,6 +84,7 @@ import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import org.kodein.di.compose.rememberInstance
 import org.openani.mediamp.MediampPlayer
+import kotlin.math.roundToInt
 
 /**
  * bilimiao 视频播放器容器
@@ -144,7 +146,6 @@ fun BiliVideoScaffold(
     val duration = playbackState.duration
     val errorMessage = playbackState.errorMessage
     val danmakuVisible = playbackState.danmakuVisible
-    val volume = playbackState.volume
     val playbackSpeed = playbackState.playbackSpeed
     val currentSource = sourceState.currentSource
     val playbackInfo = sourceState.playbackInfo
@@ -255,6 +256,12 @@ fun BiliVideoScaffold(
         val enter = fadeIn()
         val exit = fadeOut()
 
+        // 音量/亮度手势控制器:
+        // - 音量 = 播放器自身音量 (PlayerDelegate.setVolume, 安卓/桌面共用 0-100 的音量状态)
+        // - 亮度 = 平台窗口亮度 (安卓生效; 桌面不支持逐窗口亮度, 为 no-op)
+        val audioController = remember(playerDelegate) { PlayerVolumeLevelController(playerDelegate) }
+        val brightnessController = rememberBrightnessLevelController()
+
         VideoScaffold(
             expanded = isFullscreen,
             modifier = modifier,
@@ -350,8 +357,8 @@ fun BiliVideoScaffold(
                         progressSliderState = progressSliderState,
                         locked = isLocked,
                         enableSwipeToSeek = duration > 0,
-                        audioController = NoOpLevelController,
-                        brightnessController = NoOpLevelController,
+                        audioController = audioController,
+                        brightnessController = brightnessController,
                         playbackSpeedControllerState = null,
                         onTogglePauseResume = {
                             if (isPlaying) playerDelegate.pause() else playerDelegate.resume()
@@ -497,5 +504,26 @@ fun BiliVideoScaffold(
                 )
             },
         )
+    }
+}
+
+/**
+ * 基于 [PlayerDelegateImpl] 音量的 [LevelController] 实现.
+ *
+ * 将手势的 0..1 归一化等级映射到播放器的 0-100 音量,
+ * 与底栏音量、音量键等共用同一音量状态, 保证安卓/桌面行为一致.
+ */
+private class PlayerVolumeLevelController(
+    private val delegate: PlayerDelegateImpl,
+) : LevelController {
+    override val range: ClosedRange<Float> = 0f..1f
+
+    override val level: Float
+        get() = delegate.playbackState.value.volume / 100f
+
+    override val levelStep: Float get() = 0.01f
+
+    override fun setLevel(level: Float) {
+        delegate.setVolume((level.coerceIn(range.start, range.endInclusive) * 100).roundToInt())
     }
 }

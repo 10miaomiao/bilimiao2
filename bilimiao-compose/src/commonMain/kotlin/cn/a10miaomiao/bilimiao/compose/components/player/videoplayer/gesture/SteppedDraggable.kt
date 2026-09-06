@@ -52,11 +52,16 @@ private class SteppedDraggableStateImpl(
             offset.y
         }
         currentOffset = startOffset
+        // 重置步进回调基准: lastCallbackOffset 描述的是"本次拖动"从起点算起的累计偏移,
+        // 若跨手势保留, 下一次同向拖动会先出现死区 (越过上次累计量才触发),
+        // 甚至首次回调方向判断错误 (拖动起点附近的偏移必然小于上次的累计值, 被误判为反方向).
+        lastCallbackOffset = 0f
     }
 
     override fun onDragStopped(velocity: Float) {
         startOffset = Float.NaN
         currentOffset = 0f
+        lastCallbackOffset = 0f
     }
 
     override fun dispatchRawDelta(delta: Float) {
