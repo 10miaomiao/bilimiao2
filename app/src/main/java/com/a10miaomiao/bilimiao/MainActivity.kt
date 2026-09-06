@@ -181,6 +181,7 @@ class MainActivity : ComponentActivity(), DIAware {
     private val startViewState by lazy {
         StartViewState(
             fullScreenPlayer = basePlayerDelegate.fullscreenController.isFullscreen,
+            scope = lifecycleScope,
         )
     }
     private val basePlayerDelegate: PlayerDelegateImpl by lazy {

@@ -184,15 +184,16 @@ fun main() {
             }
 
             val platformContext = remember { DesktopPlatformContext() }
+            val scope = rememberCoroutineScope()
             val startViewState = remember {
                 StartViewState(
                     fullScreenPlayer = playerDelegate.fullscreenController.isFullscreen,
+                    scope = scope,
                 )
             }
             playerDelegate.onShowPlayerChanged = { show ->
                 startViewState.playerState.setShowPlayer(show)
             }
-            val scope = rememberCoroutineScope()
 
             CompositionLocalProvider(
                 LocalDesktopWindow provides desktopWindow,

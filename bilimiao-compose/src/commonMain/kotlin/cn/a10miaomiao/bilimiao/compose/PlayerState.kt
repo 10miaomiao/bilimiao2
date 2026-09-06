@@ -2,8 +2,16 @@ package cn.a10miaomiao.bilimiao.compose
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Rect
+import androidx.datastore.preferences.core.edit
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 data class PlayerPortraitLayoutState(
     val minHeightPx: Int = 0,
@@ -31,12 +39,21 @@ data class PlayerFloatingLayoutState(
  *   [kotlinx.coroutines.flow.StateFlow] 观察，不再维护副本状态。
  * - 小屏播放器高度（[portraitPlayerLayoutState]）：由平台层（安卓）根据屏幕尺寸
  *   通过 [setSmallModePlayerHeight] 更新，桌面端使用默认值。
+ * - 自由悬浮窗口几何（[floatingPlayerLayoutState]）：随拖动/缩放实时更新，
+ *   并通过 [appDataStore] 持久化，下次启动时恢复位置与大小。
  *
  * @param fullScreenPlayer 全屏状态流
+ * @param scope 持久化读写使用的协程作用域（入口点注入）
  */
 class PlayerState(
     fullScreenPlayer: StateFlow<Boolean> = MutableStateFlow(false),
+    private val scope: CoroutineScope,
 ) {
+
+    /** 浮窗几何持久化防抖间隔 */
+    private companion object {
+        const val FLOATING_LAYOUT_SAVE_DEBOUNCE_MILLIS = 800L
+    }
 
     /** 全屏状态（唯一数据源，由入口点注入） */
     val fullScreenPlayer: StateFlow<Boolean> = fullScreenPlayer
@@ -58,6 +75,64 @@ class PlayerState(
 
     private val _anchorBounds = mutableStateOf<Rect?>(null)
     val anchorBounds get() = _anchorBounds.value
+
+    private var floatingSaveJob: Job? = null
+
+    init {
+        // 启动时异步恢复上次保存的浮窗几何；若用户已先完成浮窗初始化则跳过
+        scope.launch {
+            restoreFloatingPlayerLayout()
+        }
+    }
+
+    /**
+     * 从 [appDataStore] 恢复自由悬浮窗口的大小与位置。
+     *
+     * 仅在浮窗尚未初始化（[PlayerFloatingLayoutState.initialized] 为 false）时生效，
+     * 避免覆盖当前会话中用户已拖动的状态。
+     */
+    private suspend fun restoreFloatingPlayerLayout() {
+        if (_floatingPlayerLayoutState.value.initialized) {
+            return
+        }
+        val preferences = appDataStore.data.first()
+        val width = preferences[SettingPreferences.PlayerFloatingWidthPx] ?: return
+        val height = preferences[SettingPreferences.PlayerFloatingHeightPx] ?: return
+        if (width <= 0f || height <= 0f) {
+            return
+        }
+        val offsetX = preferences[SettingPreferences.PlayerFloatingOffsetXPx] ?: 0f
+        val offsetY = preferences[SettingPreferences.PlayerFloatingOffsetYPx] ?: 0f
+        _floatingPlayerLayoutState.value = PlayerFloatingLayoutState(
+            defaultWidthPx = width,
+            defaultHeightPx = height,
+            widthPx = width,
+            heightPx = height,
+            offsetXPx = offsetX,
+            offsetYPx = offsetY,
+            initialized = true,
+        )
+    }
+
+    /**
+     * 防抖保存自由悬浮窗口几何到 [appDataStore]。
+     *
+     * 拖动/缩放期间 [updateFloatingPlayerLayoutState] 被高频调用，这里延迟落盘，
+     * 手势结束后仅写入一次最终状态。
+     */
+    private fun scheduleFloatingLayoutSave() {
+        floatingSaveJob?.cancel()
+        floatingSaveJob = scope.launch {
+            delay(FLOATING_LAYOUT_SAVE_DEBOUNCE_MILLIS)
+            val state = _floatingPlayerLayoutState.value
+            appDataStore.edit { prefs ->
+                prefs[SettingPreferences.PlayerFloatingWidthPx] = state.widthPx
+                prefs[SettingPreferences.PlayerFloatingHeightPx] = state.heightPx
+                prefs[SettingPreferences.PlayerFloatingOffsetXPx] = state.offsetXPx
+                prefs[SettingPreferences.PlayerFloatingOffsetYPx] = state.offsetYPx
+            }
+        }
+    }
 
     fun setShowPlayer(value: Boolean) {
         _showPlayer.value = value
@@ -90,7 +165,7 @@ class PlayerState(
      * 更新悬浮播放器布局状态
      *
      * 保留已有默认尺寸（[PlayerFloatingLayoutState.defaultWidthPx]/[PlayerFloatingLayoutState.defaultHeightPx]），
-     * 避免后续更新把默认值覆盖为 0。
+     * 避免后续更新把默认值覆盖为 0。更新后触发防抖持久化。
      */
     fun updateFloatingPlayerLayoutState(state: PlayerFloatingLayoutState) {
         val prev = _floatingPlayerLayoutState.value
@@ -99,6 +174,7 @@ class PlayerState(
             defaultHeightPx = state.defaultHeightPx.takeIf { it > 0f } ?: prev.defaultHeightPx,
         )
         _floatingPlayerLayoutState.value = merged
+        scheduleFloatingLayoutSave()
     }
 
     fun setPlayerVideoRatio(ratio: Float) {

@@ -101,6 +101,11 @@ object SettingPreferences {
     val PlayerHoldShowArea = intPreferencesKey("player_hold_show_area")
     val PlayerSmallDraggable = booleanPreferencesKey("player_small_draggable")
     val PlayerAutoStopDuration = intPreferencesKey("player_auto_stop_duration")
+    // 自由悬浮播放窗口的几何状态（px，按设备密度存储，恢复时由布局再 clamp）
+    val PlayerFloatingWidthPx = floatPreferencesKey("player_floating_width_px")
+    val PlayerFloatingHeightPx = floatPreferencesKey("player_floating_height_px")
+    val PlayerFloatingOffsetXPx = floatPreferencesKey("player_floating_offset_x_px")
+    val PlayerFloatingOffsetYPx = floatPreferencesKey("player_floating_offset_y_px")
 
     /**
      * Danmaku

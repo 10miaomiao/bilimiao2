@@ -3,6 +3,7 @@ package cn.a10miaomiao.bilimiao.compose
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import cn.a10miaomiao.bilimiao.compose.base.PageSearchMethod
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.max
@@ -10,9 +11,10 @@ import kotlin.math.min
 
 class StartViewState(
     fullScreenPlayer: StateFlow<Boolean> = MutableStateFlow(false),
+    scope: CoroutineScope,
 ) {
 
-    val playerState = PlayerState(fullScreenPlayer)
+    val playerState = PlayerState(fullScreenPlayer, scope)
 
     private val _drawerState = mutableStateOf(DRAWER_STATE_COLLAPSED)
     val drawerState get() = _drawerState.value
