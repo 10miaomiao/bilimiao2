@@ -418,8 +418,10 @@ fun ComposeScaffold(
                     layoutResult.appBarVerticalBounds?.let { rect ->
                         verticalAppBarPlaceable?.placeRelative(rect.left.toInt(), rect.top.toInt())
                     }
-                    layoutResult.playerBounds?.let { rect ->
-                        playerPlaceable?.placeRelative(rect.left.toInt(), rect.top.toInt())
+                    // 播放器始终铺满 viewport 测量并放在 (0, 0)，
+                    // 实际位置/尺寸由 PlayerLayer 内部动画 offset 控制，模式切换时可平滑滑行
+                    layoutResult.playerBounds?.let {
+                        playerPlaceable?.placeRelative(0, 0)
                     }
                 }
             }
@@ -674,6 +676,9 @@ internal fun PlayerLayer(
     }
     val screenWidth = viewportWidth
     val screenHeight = viewportHeight
+    // 上次生效的显示模式：仅当模式真正切换时才播放几何滑行动画；
+    // 初次组合或同模式内几何变化（窗口尺寸、封面位移等）直接落位，避免误动画
+    var lastDisplayMode by remember { mutableStateOf(displayMode) }
 
     fun clampFloatingOffset(
         ox: Dp,
@@ -736,60 +741,155 @@ internal fun PlayerLayer(
         updateFloatingState()
     }
 
+    /**
+     * 将播放器矩形（左上角 + 尺寸）平滑动画到目标值。
+     *
+     * 所有显示模式共用同一套几何状态（offsetX/offsetY/currentWidth/currentHeight），
+     * 因此模式切换时能实现跨位置的滑行过渡（锚点区域 → 悬浮窗、悬浮窗 → 全屏等）。
+     */
+    suspend fun animatePlayerRectTo(
+        targetLeft: Dp,
+        targetTop: Dp,
+        targetWidth: Dp,
+        targetHeight: Dp,
+    ) {
+        if (offsetX == targetLeft && offsetY == targetTop &&
+            currentWidth == targetWidth && currentHeight == targetHeight
+        ) {
+            return
+        }
+        val animationSpec = tween<Float>(
+            durationMillis = 350,
+            easing = CubicBezierEasing(0.2f, 0f, 0f, 1f),
+        )
+        coroutineScope {
+            launch {
+                animate(
+                    initialValue = with(density) { offsetX.toPx() },
+                    targetValue = with(density) { targetLeft.toPx() },
+                    animationSpec = animationSpec,
+                ) { value, _ ->
+                    offsetX = with(density) { value.toDp() }
+                }
+            }
+            launch {
+                animate(
+                    initialValue = with(density) { offsetY.toPx() },
+                    targetValue = with(density) { targetTop.toPx() },
+                    animationSpec = animationSpec,
+                ) { value, _ ->
+                    offsetY = with(density) { value.toDp() }
+                }
+            }
+            launch {
+                animate(
+                    initialValue = with(density) { currentWidth.toPx() },
+                    targetValue = with(density) { targetWidth.toPx() },
+                    animationSpec = animationSpec,
+                ) { value, _ ->
+                    currentWidth = with(density) { value.toDp() }
+                }
+            }
+            launch {
+                animate(
+                    initialValue = with(density) { currentHeight.toPx() },
+                    targetValue = with(density) { targetHeight.toPx() },
+                    animationSpec = animationSpec,
+                ) { value, _ ->
+                    currentHeight = with(density) { value.toDp() }
+                }
+            }
+        }
+    }
+
     LaunchedEffect(baseBounds, displayMode, playerState.portraitPlayerLayoutState, if (isDragging) null else playerState.floatingPlayerLayoutState) {
+        // 拖动手势直接驱动几何状态，自动动画退避，避免互相覆盖
+        if (isDragging) {
+            return@LaunchedEffect
+        }
+        // 仅当显示模式真正切换时才播放滑行动画
+        val modeChanged = lastDisplayMode != displayMode
+        lastDisplayMode = displayMode
+
         val defaultWidth = with(density) { baseBounds.width.toDp() }
         val defaultHeight = with(density) { baseBounds.height.toDp() }
+
         when (displayMode) {
             PlayerDisplayMode.Hidden,
             PlayerDisplayMode.Fullscreen,
             PlayerDisplayMode.EmbeddedPortrait,
             PlayerDisplayMode.AnchorOverlay,
             -> {
-                currentWidth = defaultWidth
-                currentHeight = defaultHeight
-                offsetX = 0.dp
-                offsetY = 0.dp
+                val targetLeft = with(density) { baseBounds.left.toDp() }
+                val targetTop = with(density) { baseBounds.top.toDp() }
+                if (modeChanged) {
+                    // 模式切换：从旧模式矩形滑行到新模式目标矩形（如封面锚点 → 悬浮窗 / 全屏）
+                    animatePlayerRectTo(targetLeft, targetTop, defaultWidth, defaultHeight)
+                } else {
+                    currentWidth = defaultWidth
+                    currentHeight = defaultHeight
+                    offsetX = targetLeft
+                    offsetY = targetTop
+                }
             }
             PlayerDisplayMode.FloatingLandscape -> {
                 val floatingState = playerState.floatingPlayerLayoutState
                 if (floatingState.initialized) {
-                    currentWidth = with(density) { floatingState.widthPx.toDp() }
-                    currentHeight = with(density) { floatingState.heightPx.toDp() }
-                    val (clampedX, clampedY) = clampFloatingOffset(
+                    val targetWidth = with(density) { floatingState.widthPx.toDp() }
+                    val targetHeight = with(density) { floatingState.heightPx.toDp() }
+                    val (targetLeft, targetTop) = clampFloatingOffset(
                         with(density) { floatingState.offsetXPx.toDp() },
                         with(density) { floatingState.offsetYPx.toDp() },
-                        currentWidth,
-                        currentHeight,
+                        targetWidth,
+                        targetHeight,
                     )
-                    offsetX = clampedX
-                    offsetY = clampedY
-                    if (with(density) { clampedX.toPx() } != floatingState.offsetXPx || with(density) { clampedY.toPx() } != floatingState.offsetXPx) {
+                    // 越界时把修正后的位置同步回状态，避免下次切回时漂移
+                    if (with(density) { targetLeft.toPx() } != floatingState.offsetXPx ||
+                        with(density) { targetTop.toPx() } != floatingState.offsetYPx
+                    ) {
                         playerState.updateFloatingPlayerLayoutState(
                             floatingState.copy(
-                                offsetXPx = with(density) { clampedX.toPx() },
-                                offsetYPx = with(density) { clampedY.toPx() },
+                                offsetXPx = with(density) { targetLeft.toPx() },
+                                offsetYPx = with(density) { targetTop.toPx() },
                             )
                         )
                     }
+                    if (modeChanged) {
+                        animatePlayerRectTo(targetLeft, targetTop, targetWidth, targetHeight)
+                        // 动画结束后把最终几何持久化到浮窗状态
+                        updateFloatingState()
+                    } else {
+                        currentWidth = targetWidth
+                        currentHeight = targetHeight
+                        offsetX = targetLeft
+                        offsetY = targetTop
+                    }
                 } else {
-                    currentWidth = defaultWidth
-                    currentHeight = defaultHeight
-                    val (initX, initY) = clampFloatingOffset(
-                        screenWidth - currentWidth,
+                    val targetWidth = defaultWidth
+                    val targetHeight = defaultHeight
+                    val (targetLeft, targetTop) = clampFloatingOffset(
+                        screenWidth - targetWidth,
                         0.dp,
-                        currentWidth,
-                        currentHeight,
+                        targetWidth,
+                        targetHeight,
                     )
-                    offsetX = initX
-                    offsetY = initY
+                    if (modeChanged) {
+                        animatePlayerRectTo(targetLeft, targetTop, targetWidth, targetHeight)
+                    } else {
+                        currentWidth = targetWidth
+                        currentHeight = targetHeight
+                        offsetX = targetLeft
+                        offsetY = targetTop
+                    }
+                    // 记录默认/当前几何，浮窗状态持久化
                     playerState.updateFloatingPlayerLayoutState(
                         floatingState.copy(
-                            defaultWidthPx = with(density) { currentWidth.toPx() },
-                            defaultHeightPx = with(density) { currentHeight.toPx() },
-                            widthPx = with(density) { currentWidth.toPx() },
-                            heightPx = with(density) { currentHeight.toPx() },
-                            offsetXPx = with(density) { offsetX.toPx() },
-                            offsetYPx = with(density) { offsetY.toPx() },
+                            defaultWidthPx = with(density) { targetWidth.toPx() },
+                            defaultHeightPx = with(density) { targetHeight.toPx() },
+                            widthPx = with(density) { targetWidth.toPx() },
+                            heightPx = with(density) { targetHeight.toPx() },
+                            offsetXPx = with(density) { targetLeft.toPx() },
+                            offsetYPx = with(density) { targetTop.toPx() },
                             initialized = true,
                         )
                     )
@@ -799,9 +899,9 @@ internal fun PlayerLayer(
     }
 
     val modifier = if (displayMode == PlayerDisplayMode.FloatingLandscape) {
+        // 位置与尺寸已统一由外层 root Box 的 offset/size 承担（所有模式一致，可做切换动画），
+        // 这里只挂悬浮窗的拖动/缩放手势
         Modifier
-            .offset(x = offsetX, y = offsetY)
-            .size(currentWidth, currentHeight)
             .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
@@ -878,6 +978,9 @@ internal fun PlayerLayer(
 
     Box(
         modifier = Modifier
+            // 播放器在 Scaffold 中的最终位置（所有模式统一由动画 offset 承担，
+            // 使模式切换时可以平滑滑行；layout 层已把本层固定在 (0, 0)）
+            .offset { IntOffset(offsetX.roundToPx(), offsetY.roundToPx()) }
             .then(
                 if (baseBounds.width == Float.POSITIVE_INFINITY || baseBounds.height == Float.POSITIVE_INFINITY) {
                     Modifier.fillMaxSize()
