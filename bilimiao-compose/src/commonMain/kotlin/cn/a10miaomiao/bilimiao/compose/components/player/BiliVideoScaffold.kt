@@ -51,6 +51,7 @@ import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.rememberHapticFeedback
 import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
+import cn.a10miaomiao.bilimiao.compose.components.layout.calculatePlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.FastForwardIndicator
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoScaffold
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState
@@ -73,6 +74,7 @@ import cn.a10miaomiao.bilimiao.compose.components.status.BiliAnimTV
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
+import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
@@ -80,8 +82,6 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
-import com.a10miaomiao.bilimiao.comm.delegate.player.restorePlayerSystemBars
-import com.a10miaomiao.bilimiao.comm.delegate.player.setPlayerFullscreenSystemBars
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import org.kodein.di.compose.rememberInstance
@@ -174,20 +174,18 @@ fun BiliVideoScaffold(
         }
     }
 
-    // 与 ComposeScaffoldPlayerLayoutState.displayMode 同步: 两者均基于同一 PlayerState 字段 + isCompactWindow() 推导
+    // 与 ComposeScaffold/PlayerLayer 共用 calculatePlayerDisplayMode 统一判定显示模式
     val playerState = LocalPlayerState.current
     // 全屏状态统一由 PlayerState 提供（数据源为 FullscreenController.isFullscreen）
     val isFullscreen by playerState.fullScreenPlayer.collectAsState()
     // ComposeScaffold 中 orientation = if (isCompactWindow()) PORTRAIT else LANDSCAPE
     val scaffoldOrientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
-    val displayMode = when {
-        !playerState.showPlayer -> PlayerDisplayMode.Hidden
-        isFullscreen -> PlayerDisplayMode.Fullscreen
-        playerState.anchorBounds != null -> PlayerDisplayMode.AnchorOverlay
-        scaffoldOrientation == ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
-        scaffoldOrientation == ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
-        else -> PlayerDisplayMode.Hidden
-    }
+    val displayMode = calculatePlayerDisplayMode(
+        showPlayer = playerState.showPlayer,
+        fullScreenPlayer = isFullscreen,
+        anchorBounds = playerState.anchorBounds,
+        orientation = scaffoldOrientation,
+    )
     // 悬浮横屏模式关闭完整手势操作（拖动/缩放由外层悬浮窗口处理），仅保留单击切换控制器
     val gesturesEnabled = displayMode != PlayerDisplayMode.FloatingLandscape
     val contentWindowInsets = if (isFullscreen) {
@@ -200,24 +198,27 @@ fun BiliVideoScaffold(
     var isLocked by remember { mutableStateOf(false) }
     val indicatorState = rememberGestureIndicatorState()
 
-    // 全屏播放时控制系统栏（状态栏/导航条）显示：
+    // 全屏播放时控制系统栏（状态栏/导航条）的显示与隐藏：
     // - 控制器隐藏时，状态栏/导航栏均隐藏，实现沉浸式全屏
-    // - 控制器激活显示时，仅显示状态栏（导航栏保持隐藏），且状态栏前景色为白色
+    // - 控制器激活显示时，仅显示状态栏（导航栏保持隐藏）
     // - 退出全屏或组件卸载时，恢复系统栏
+    // 系统栏显隐与状态栏前景色统一经 LocalSystemBarsController（SystemBarsController）
+    // 操作同一平台实现；前景色由 ComposeScaffold 依据播放器模式/深色主题控制，此处不触碰。
+    val systemBarsController = LocalSystemBarsController.current
     val controllerVisibility = controllerState.visibility
     DisposableEffect(isFullscreen, isLocked, controllerVisibility) {
         val controllerActive = !isLocked &&
             (controllerVisibility.topBar || controllerVisibility.bottomBar)
         if (isFullscreen) {
-            setPlayerFullscreenSystemBars(
+            systemBarsController.setSystemBarsVisible(
                 statusBarVisible = controllerActive,
                 navigationBarVisible = false,
             )
         } else {
-            restorePlayerSystemBars()
+            systemBarsController.restoreSystemBars()
         }
         onDispose {
-            restorePlayerSystemBars()
+            systemBarsController.restoreSystemBars()
         }
     }
 

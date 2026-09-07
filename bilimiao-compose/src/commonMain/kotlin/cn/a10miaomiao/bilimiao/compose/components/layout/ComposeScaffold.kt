@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
+import cn.a10miaomiao.bilimiao.compose.LocalAppDarkTheme
 import cn.a10miaomiao.bilimiao.compose.PlayerState
 import cn.a10miaomiao.bilimiao.compose.StartViewState
 
@@ -75,6 +76,7 @@ import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
+import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -110,6 +112,27 @@ fun ComposeScaffold(
     val playerVideoRatio = playerState.playerVideoRatio
     val anchorBounds = playerState.anchorBounds
     val drawerState = startViewState.drawerState
+
+    // 播放器显示模式（唯一判定源，与 ComposeScaffoldPlayerLayoutState/PlayerLayer 共用，
+    // 见 calculatePlayerDisplayMode）
+    val playerDisplayMode = calculatePlayerDisplayMode(
+        showPlayer = showPlayer,
+        fullScreenPlayer = fullScreenPlayer,
+        anchorBounds = anchorBounds,
+        orientation = orientation,
+    )
+    // 状态栏前景色统一由本组件控制，平台实现经 LocalSystemBarsController 注入；
+    // 全屏播放器（BiliVideoScaffold）只经由同一控制器控制系统栏显隐，不触碰前景色：
+    // - 深色模式：始终白色图标；
+    // - 浅色模式：仅 EmbeddedPortrait / Fullscreen（播放器画面为深色底）为白色图标，其余黑色图标。
+    val systemBarsController = LocalSystemBarsController.current
+    val isDarkTheme = LocalAppDarkTheme.current
+    LaunchedEffect(playerDisplayMode, isDarkTheme) {
+        val lightIcons = !isDarkTheme &&
+            playerDisplayMode != PlayerDisplayMode.EmbeddedPortrait &&
+            playerDisplayMode != PlayerDisplayMode.Fullscreen
+        systemBarsController.setLightStatusBar(lightIcons)
+    }
 
     val appBarNestedScrollConnection = remember(appBarState, orientation) {
         if (appBarState == null) {
@@ -388,6 +411,7 @@ fun ComposeScaffold(
                     subcompose("player") {
                         PlayerLayer(
                             playerState = playerState,
+                            displayMode = playerDisplayMode,
                             playerContent = playerContent,
                             baseBounds = layoutResult.playerBounds!!,
                             portraitTopInset = rawWindowInsets.top,
@@ -644,6 +668,7 @@ private fun contentConstraints(rootConstraints: Constraints, bounds: Rect): Cons
 @Composable
 internal fun PlayerLayer(
     playerState: PlayerState,
+    displayMode: PlayerDisplayMode,
     playerContent: (@Composable () -> Unit)?,
     baseBounds: Rect,
     portraitTopInset: Dp,
@@ -651,9 +676,7 @@ internal fun PlayerLayer(
     viewportWidth: Dp = 0.dp,
     viewportHeight: Dp = 0.dp,
 ) {
-    val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val density = LocalDensity.current
-    val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
 
     if (playerContent == null) {
         return
@@ -666,14 +689,6 @@ internal fun PlayerLayer(
     var offsetY by remember { mutableStateOf(0.dp) }
     var isDragging by remember { mutableStateOf(false) }
 
-    val displayMode = when {
-        !playerState.showPlayer -> PlayerDisplayMode.Hidden
-        fullScreenPlayer -> PlayerDisplayMode.Fullscreen
-        playerState.anchorBounds != null -> PlayerDisplayMode.AnchorOverlay
-        orientation == ORIENTATION_PORTRAIT -> PlayerDisplayMode.EmbeddedPortrait
-        orientation == ORIENTATION_LANDSCAPE -> PlayerDisplayMode.FloatingLandscape
-        else -> PlayerDisplayMode.Hidden
-    }
     val screenWidth = viewportWidth
     val screenHeight = viewportHeight
     // 上次生效的显示模式：仅当模式真正切换时才播放几何滑行动画；

@@ -44,7 +44,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeNavigator
-import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.StartViewState
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
@@ -57,7 +56,6 @@ import com.a10miaomiao.bilimiao.comm.BiliGeetestUtilImpl
 import com.a10miaomiao.bilimiao.comm.BilimiaoStatService
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
-import com.a10miaomiao.bilimiao.comm.delegate.helper.StatusBarHelper
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
@@ -99,7 +97,6 @@ class MainActivity : ComponentActivity(), DIAware {
         bindSingleton { startViewState }
         bindSingleton<BasePlayerDelegate> { basePlayerDelegate }
         bindSingleton { themeDelegate }
-        bindSingleton { statusBarHelper }
         bindSingleton { biliGeetestUtil }
         bindSingleton<GeetestVerifier> { GeetestVerifierAndroid(biliGeetestUtil) }
         bindSingleton<ProxyRepository> { ProxyRepositoryAndroid(this@MainActivity) }
@@ -110,7 +107,6 @@ class MainActivity : ComponentActivity(), DIAware {
 
     private val store by lazy { Store(this, di) }
     private val themeDelegate by lazy { ThemeDelegate(this, di) }
-    private val statusBarHelper by lazy { StatusBarHelper(this) }
     private val biliGeetestUtil: BiliGeetestUtil by lazy { BiliGeetestUtilImpl(this, lifecycle) }
 
     private val messageDialogState = cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState()
@@ -198,7 +194,6 @@ class MainActivity : ComponentActivity(), DIAware {
             it.createPlayer()
             it.onShowPlayerChanged = { show ->
                 startViewState.playerState.setShowPlayer(show)
-                updateStatusBarStyle()
                 findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
             }
         }
@@ -272,12 +267,6 @@ class MainActivity : ComponentActivity(), DIAware {
                 }
             }
         }
-        // 全屏播放时系统栏由播放器接管；退出全屏时恢复状态栏前景色（由 updateStatusBarStyle 处理）
-        lifecycleScope.launch {
-            basePlayerDelegate.fullscreenController.isFullscreen.collect {
-                updateStatusBarStyle()
-            }
-        }
     }
 
     private fun initRootView(savedInstanceState: Bundle?) {
@@ -342,7 +331,6 @@ class MainActivity : ComponentActivity(), DIAware {
                 }
             }
         }
-        updateStatusBarStyle()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -371,10 +359,16 @@ class MainActivity : ComponentActivity(), DIAware {
         val displayMetrics = DisplayMetrics()
         window.decorView.getWindowVisibleDisplayFrame(rectangle)
         windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-        val top = statusBarHelper.getStatusBarHeight()
+        val top = getStatusBarHeight()
         val bottom = displayMetrics.heightPixels - rectangle.bottom - rectangle.top
         val right = displayMetrics.widthPixels - rectangle.right
         setWindowInsets(0, top, right, bottom, null)
+    }
+
+    /** 获取状态栏高度（px），用于 Android L 窗口 inset 兜底计算 */
+    private fun getStatusBarHeight(): Int {
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
     }
 
     fun setWindowInsets(insets: WindowInsets) {
@@ -399,18 +393,6 @@ class MainActivity : ComponentActivity(), DIAware {
     ) {
         // PlayerDelegateImpl.setWindowInsets 为空实现（Compose VideoScaffold 自行处理 insets）
         basePlayerDelegate.setWindowInsets(left, top, right, bottom)
-        updateStatusBarStyle()
-    }
-
-    private fun updateStatusBarStyle() {
-        // 全屏播放时系统栏由播放器接管（状态栏前景色白色、导航栏隐藏等），此处跳过避免覆盖
-        if (basePlayerDelegate.fullscreenController.isFullscreen.value) {
-            return
-        }
-        statusBarHelper.isLightStatusBar =
-            !startViewState.playerState.showPlayer ||
-                (startViewState.playerState.orientation == ORIENTATION_LANDSCAPE &&
-                    !basePlayerDelegate.fullscreenController.isFullscreen.value)
     }
 
     override fun onResume() {
@@ -546,7 +528,6 @@ class MainActivity : ComponentActivity(), DIAware {
         updateSmallModePlayerMaxHeight()
         basePlayerDelegate.onConfigurationChanged(newConfig.orientation)
         basePlayerDelegate.fullscreenController.onOrientationChanged(newConfig.orientation)
-        updateStatusBarStyle()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             setWindowInsetsAndroidL()
         } else {
