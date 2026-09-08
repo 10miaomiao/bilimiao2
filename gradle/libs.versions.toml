@@ -1,17 +1,17 @@
 [versions]
 agp = "9.1.1"
-kotlin = "2.3.10"
-composeMultiplatform = "1.11.1"
+kotlin = "2.3.20"
+composeMultiplatform = "1.12.0"
 # jetpack
 core = "1.13.1"
 appcompat = "1.6.1"
 material = "1.12.0"
-lifecycle = "2.8.3"
+lifecycle = "2.11.0"
 # Nav3 (AndroidX runtime + JetBrains CMP UI fork for desktop support)
 navigation3 = "1.2.0-alpha04"
 navigation3UiJb = "1.2.0-alpha02"
 lifecycleViewmodelNav3 = "2.11.0"
-composeBom = "2026.04.01"
+composeBom = "2026.08.00"
 datastore = "1.1.1"
 media3 = "1.9.0"
 browser = "1.7.0"
@@ -27,23 +27,22 @@ glide = "4.13.2"
 pbandk = "0.16.0"
 # database
 room = "2.7.0"
-ksp = "2.3.10"
+ksp = "2.3.11"
 gsyVideoPlayer = "v10.0.0" # 已移除：统一使用 mediamp
-accompanist = "0.35.0-alpha"
-materialKolor = "2.0.2"
+accompanist = "0.37.3"
+materialKolor = "2.1.1"
 microgSafeParcel = "1.7.1"
 
 # ui components
 constraintlayout = "2.1.4"
 mojito = "1.8.7"
 # compose additional
-sonner = "0.3.9"
-activityCompose = "1.9.0"
-glideCompose = "1.0.0-beta01"
-coil = "3.5.0"
-qrose = "1.0.1"
+sonner = "0.4.0"
+activityCompose = "1.13.0"
+coil = "3.6.2"
+qrose = "1.2.0"
 composePreference = "2.2.0"
-reorderable = "2.5.1"
+reorderable = "3.1.0"
 # svg to compose
 svgToCompose = "0.11.0"
 kotlinpoet = "1.9.0"
@@ -51,7 +50,7 @@ androidToolsSdkCommon = "31.6.0"
 xpp3 = "1.1.6"
 guava = "23.0"
 # mediamp
-mediamp = "0.1.14"
+mediamp = "0.4.0"
 jna = "5.13.0"
 # test
 junit = "4.14-SNAPSHOT"
@@ -128,7 +127,6 @@ baidu-mobstat-sdk = { group = "com.baidu.mobstat", name = "mtj-sdk", version = "
 geetest-sensebot = { group = "com.geetest.sensebot", name = "sensebot", version = "4.3.8.1" }
 # compose additional
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
-glide-compose = { group = "com.github.bumptech.glide", name = "compose", version.ref = "glideCompose" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 qrose = { group = "io.github.alexzhirkevich", name = "qrose", version.ref = "qrose" }
@@ -171,4 +169,3 @@ jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serializati
 jetbrains-kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 google-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-

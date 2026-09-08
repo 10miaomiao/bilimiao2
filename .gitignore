@@ -11,3 +11,5 @@
 local.properties
 app/signing.properties
 .kotlin/
+.bitfun/
+.dsh/

@@ -15,7 +15,9 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenLocal()
+        maven("https://maven.aliyun.com/repository/google")
         google()
+        maven("https://maven.aliyun.com/repository/central")
         mavenCentral()
         maven("https://maven.aliyun.com/repository/public")
         maven("https://jitpack.io")
