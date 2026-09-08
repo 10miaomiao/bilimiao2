@@ -1,6 +1,8 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 kotlin {
@@ -16,6 +18,11 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
+
+                // Compose 弹幕引擎：提供 @Composable 渲染组件（DanmakuCanvas）
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.ui)
             }
         }
         androidMain {
@@ -26,8 +33,9 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
-                // Skia: compileOnly, 运行时由 bilimiao-compose (compose.desktop.common) 提供
-                compileOnly("org.jetbrains.skiko:skiko-awt:0.8.18")
+                // Compose 桌面依赖：提供 org.jetbrains.skia API
+                // （原 compileOnly skiko-awt 移除，版本随 compose.desktop.common 统一）
+                implementation(compose.desktop.common)
             }
         }
         val desktopTest by getting {

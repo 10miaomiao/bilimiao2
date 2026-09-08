@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -18,7 +19,7 @@ import cn.a10miaomiao.bilimiao.danmaku.model.IDisplayer
 import cn.a10miaomiao.bilimiao.danmaku.parser.BaseDanmakuParser
 import cn.a10miaomiao.bilimiao.danmaku.platform.createPlatformDisplayer
 import cn.a10miaomiao.bilimiao.danmaku.task.DanmakuEngine
-import androidx.compose.runtime.rememberCoroutineScope
+import cn.a10miaomiao.bilimiao.danmaku.ui.DanmakuCanvas
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 
@@ -160,7 +161,7 @@ fun DanmakuOverlay(
     val currentEngine = engine.value
     val currentDisplayer = displayer.value
     if (currentEngine != null && currentDisplayer != null && visible && settingsVisible) {
-        PlatformDanmakuCanvas(
+        DanmakuCanvas(
             engine = currentEngine,
             displayer = currentDisplayer,
             frameTick = frameTick,
