@@ -5,6 +5,8 @@ import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -43,6 +45,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -93,6 +96,7 @@ import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
+import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -100,7 +104,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.compose.rememberInstance
 import org.kodein.di.instance
+import kotlin.getValue
 
 @Serializable
 class VideoDetailPage(
@@ -181,11 +187,22 @@ private fun VideoDetailPageContent(
     }
 
     val videoPages = detailData.pages
-
-    val headerCoverHeight = 200.dp
-    val headerHeight = remember(windowInsets.topDp) {
-        windowInsets.topDp.dp + headerCoverHeight
+    val playerStore by rememberInstance<PlayerStore>()
+    val playerStoreState by playerStore.stateFlow.collectAsState()
+    val isShowCover by remember(arcData.aid) {
+        derivedStateOf {
+            playerStoreState.aid != arcData.aid.toString()
+        }
     }
+    val headerCoverHeight = 200.dp
+    val headerHeight by animateDpAsState(
+        targetValue = if (isShowCover) {
+            windowInsets.topDp.dp + headerCoverHeight
+        } else {
+            windowInsets.topDp.dp
+        },
+        label = "headerHeight"
+    )
 
     val scope = rememberCoroutineScope()
     val chainScrollableLayoutState = rememberChainScrollableLayoutState(
@@ -220,14 +237,11 @@ private fun VideoDetailPageContent(
                         Modifier.height(windowInsets.topDp.dp)
                     )
                     val videoHistory = detailData.history
-                    PlayerAnchorBox(
-                        aid = arcData.aid.toString(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(headerCoverHeight)
-                    ) {
+                    AnimatedVisibility(isShowCover) {
                         VideoCoverBox(
                             modifier = Modifier
+                                .fillMaxWidth()
+                                .height(headerCoverHeight)
                                 .padding(8.dp),
                             aid = arcData.aid,
                             title = arcData.title,

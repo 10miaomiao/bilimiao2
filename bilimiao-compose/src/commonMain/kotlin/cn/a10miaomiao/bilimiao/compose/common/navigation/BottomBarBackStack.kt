@@ -70,7 +70,10 @@ class BottomBarBackStack(
 
     /**
      * 导航到任意 key：若是 top-level 则切 Tab，否则 push 到当前栈。
-     * 含 launchSingleTop 语义：目标已是栈顶则跳过。
+     *
+     * 仅对“同一个实例”去重，避免同一对象被重复压栈。
+     * 不能用类型（key::class）做单顶去重：同类型但参数不同的页面是不同目的地
+     * （如视频详情页推荐列表跳转到另一个视频详情），若按类型去重会导致无法跳转。
      */
     fun navigate(key: NavKey) {
         // 用 key::class 比较，兼容 class（非 object）的 top-level 路由
@@ -79,7 +82,7 @@ class BottomBarBackStack(
             topLevelRoute = topLevelKey
         } else {
             val cur = current
-            if (cur.lastOrNull()?.takeIf { it::class == key::class } == null) {
+            if (cur.lastOrNull() !== key) {
                 cur.add(key)
             }
         }

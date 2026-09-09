@@ -34,12 +34,13 @@ class BottomSheetState {
 
     /**
      * sheet 内部导航：将页面压入内部栈。
-     * 与主导航保持一致的单顶语义：目标与栈顶同类型时跳过。
+     * 仅对“同一个实例”去重，避免同一对象被重复压栈。
+     * 同类型但参数不同的页面是不同目的地（如合集页跳转到另一个合集），必须正常压栈。
      */
     fun navigate(page: ComposePage) {
         if (_page.value == null) return
         val pages = _innerPages.value
-        if (pages.lastOrNull()?.let { it::class == page::class } != true) {
+        if (pages.lastOrNull() !== page) {
             _innerPages.value = pages + page
         }
     }
