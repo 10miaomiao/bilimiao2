@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.network
 
+import bilibili.grpc.GRPCMethod
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommCore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import okhttp3.*

@@ -1,10 +1,6 @@
-import com.google.protobuf.gradle.*
-import java.nio.file.Paths
-
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
-    id("com.google.protobuf") // proto
     kotlin("plugin.serialization")
     id("com.google.devtools.ksp")
 }
@@ -20,18 +16,18 @@ kotlin {
 
     sourceSets {
         commonMain {
-            kotlin.srcDir("build/generated/source/proto/debug/pbandk")
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.okhttp3)
-                implementation(libs.pbandk.runtime)
                 implementation(libs.kodein.di.core)
                 implementation(libs.kmp.lifecycle.viewmodel.compose)
                 implementation(libs.sonner)
                 api(libs.androidx.datastore.preferences)
                 api(libs.androidx.room.runtime)
+                // bilibili gRPC API（proto 生成代码 + service stub），公共类型需透出给下游模块
+                api(project(":bilimiao-grpc"))
                 // KMP 弹幕引擎 (commonMain 的 BasePlayerSource 需要 BiliDanmakuParser)
                 implementation(project(":danmaku-engine"))
             }
@@ -108,56 +104,7 @@ android {
     namespace = "com.a10miaomiao.bilimiao.comm"
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].proto {
-        srcDir("src/commonMain/proto")
-        include("**/*.proto")
-    }
     sourceSets["main"].java {
         srcDir("src/androidMain/java")
     }
-}
-
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.12.0"  // 相当于proto编译器
-    }
-    plugins {
-        id("pbandk") {
-            artifact = "pro.streem.pbandk:protoc-gen-pbandk-jvm:0.16.0:jvm8@jar"
-        }
-    }
-    generateProtoTasks {
-        val generatorModule = "grpc-generator"
-        val generatorClass = "cn.a10miaomiao.generator.GrpcServiceGenerator"
-        // grpc-generator/build/libs/grpc-generator.jar
-        val generatorJarFile = Paths.get(
-            project(":grpc-generator").layout.buildDirectory.get().asFile.path,
-            "libs",
-            "$generatorModule.jar"
-        ).toFile()
-        all().forEach { task ->
-            task.plugins {
-                id("pbandk") {
-                    if (!generatorJarFile.exists()) {
-                        task.dependsOn(":$generatorModule:jar")
-                    }
-                    option("log=debug")
-                    var jarPath = generatorJarFile.path
-                    jarPath.indexOf(':')
-                        .takeIf { it != -1 }
-                        ?.let {
-                            // option不能传递`:`符号，故windows情况下只能去除盘符
-                            jarPath = jarPath.substring(it + 1, jarPath.length)
-                        }
-                    option("kotlin_service_gen=${jarPath}|$generatorClass")
-                }
-            }
-        }
-    }
-}
-
-// Ensure proto generation runs before desktop compilation
-tasks.matching { it.name == "compileKotlinDesktop" || it.name == "kspKotlinDesktop" }.configureEach {
-    dependsOn("generateDebugProto")
 }

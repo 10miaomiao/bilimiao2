@@ -497,14 +497,16 @@ class PlayListStore(override val di: DI) :
         val from = PlayListFrom.Video(
             aid = aid.toString(),
         )
+        // 跨模块 public API 属性不允许直接智能转换，先取局部变量
+        val owner = author!!
         return PlayListItemInfo(
             aid = aid.toString(),
             cid = firstCid.toString(),
             title = title,
             cover = pic,
             duration = duration.toInt(),
-            ownerId = author!!.mid.toString(),
-            ownerName = author.name,
+            ownerId = owner.mid.toString(),
+            ownerName = owner.name,
             from = from,
             videoPages = viewPages.map {
                 PlayListItemInfo.VideoPageInfo(

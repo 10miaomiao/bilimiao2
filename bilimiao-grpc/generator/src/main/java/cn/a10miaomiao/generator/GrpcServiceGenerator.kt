@@ -33,7 +33,7 @@ class GrpcServiceGenerator : ServiceGenerator {
             code = """
 package ${service.file.kotlinPackageName}
 
-import com.a10miaomiao.bilimiao.comm.network.GRPCMethod
+import bilibili.grpc.GRPCMethod
 
 object ${service.name}GRPC {
 ${methods.joinToString("\n\n")}
