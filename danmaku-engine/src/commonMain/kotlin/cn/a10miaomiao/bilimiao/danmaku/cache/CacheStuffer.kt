@@ -211,6 +211,12 @@ class SimpleTextCacheStuffer : BaseCacheStuffer() {
             danmaku.paintWidth = w
             danmaku.paintHeight = danmaku.lines!!.size * textHeight
         }
+        // 带边框的弹幕（如本地发送的弹幕）需要把边框宽度计入占用尺寸，
+        // 否则文字会溢出边框（对齐 DFM DisplayConfig.setDanmakuPaintWidthAndHeight）
+        if (danmaku.borderColor != 0) {
+            danmaku.paintWidth += 2 * BORDER_WIDTH
+            danmaku.paintHeight += 2 * BORDER_WIDTH
+        }
     }
 
     /**

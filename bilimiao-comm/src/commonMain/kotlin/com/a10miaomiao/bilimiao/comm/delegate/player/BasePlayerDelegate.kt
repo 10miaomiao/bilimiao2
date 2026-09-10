@@ -1,9 +1,11 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.LocalDanmakuInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceState
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
+import kotlinx.coroutines.flow.SharedFlow
 import org.openani.mediamp.MediampPlayer
 
 /**
@@ -41,6 +43,14 @@ interface BasePlayerDelegate : com.a10miaomiao.bilimiao.comm.delegate.BaseDelega
      * 当前播放位置（毫秒），高频更新（约 200ms 一次），独立 StateFlow 避免触发无关重组
      */
     val currentPosition: kotlinx.coroutines.flow.StateFlow<Long>
+
+    /**
+     * 本地发送成功的弹幕（见 [LocalDanmakuInfo]）
+     *
+     * [sendDanmaku] 发送成功后发出，弹幕渲染层订阅后加入弹幕引擎本地回显，
+     * 并以边框区分于其它弹幕。
+     */
+    val localDanmakuFlow: SharedFlow<LocalDanmakuInfo>
 
     /**
      * 创建平台特定的 MediampPlayer 实例

@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -75,6 +76,7 @@ internal class SendDanmakuViewModel(
 ) : ViewModel(), DIAware {
 
     private val pageNavigation by instance<PageNavigator>()
+    private val bottomSheetState by instance<BottomSheetState>()
     private val playerDelegate by instance<BasePlayerDelegate>()
 
     val focusRequester = FocusRequester()
@@ -169,7 +171,12 @@ internal class SendDanmakuViewModel(
                             color,
                             currentPosition
                         )
-                        pageNavigation.popBackStack()
+                        // 关闭发送弹幕的 bottom sheet（以普通页面打开时回退为返回上一页）
+                        if (bottomSheetState.page.value != null) {
+                            bottomSheetState.close()
+                        } else {
+                            pageNavigation.popBackStack()
+                        }
                     } else {
                         GlobalToaster.show(res.message)
                     }

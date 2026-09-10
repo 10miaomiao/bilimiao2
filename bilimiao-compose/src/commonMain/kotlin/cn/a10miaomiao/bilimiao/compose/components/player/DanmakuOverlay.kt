@@ -20,8 +20,25 @@ import cn.a10miaomiao.bilimiao.danmaku.parser.BaseDanmakuParser
 import cn.a10miaomiao.bilimiao.danmaku.platform.createPlatformDisplayer
 import cn.a10miaomiao.bilimiao.danmaku.task.DanmakuEngine
 import cn.a10miaomiao.bilimiao.danmaku.ui.DanmakuCanvas
+import cn.a10miaomiao.bilimiao.danmaku.util.DanmakuUtils
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.LocalDanmakuInfo
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+
+/**
+ * 本地发送弹幕的边框色（白色），用于与其它弹幕区分
+ */
+private const val LOCAL_DANMAKU_BORDER_COLOR = 0xFFFFFFFF.toInt()
+
+/**
+ * 本地发送弹幕的文字描边色（黑色）
+ *
+ * 与解析弹幕保持一致（见 [cn.a10miaomiao.bilimiao.danmaku.parser.BiliDanmakuParser]），
+ * 否则白色文字在浅色画面上看不清。
+ */
+private const val LOCAL_DANMAKU_SHADOW_COLOR = 0xFF000000.toInt()
 
 /**
  * 跨平台弹幕渲染覆盖层
@@ -40,6 +57,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
  * @param currentPosition 当前播放位置（毫秒）
  * @param isPlaying 是否正在播放
  * @param danmakuParser 弹幕解析器
+ * @param localDanmakuFlow 本地发送成功的弹幕（见 [LocalDanmakuInfo]），加入引擎并以边框区分
  * @param modeName 当前播放模式（[SettingPreferences.Danmaku] 的 name），
  *                 用于读取对应模式的弹幕设置（small/full/pip，默认 default）
  * @param visible 弹幕是否可见（播放器按钮开关）
@@ -50,6 +68,7 @@ fun DanmakuOverlay(
     currentPosition: Long,
     isPlaying: Boolean,
     danmakuParser: BaseDanmakuParser?,
+    localDanmakuFlow: Flow<LocalDanmakuInfo> = emptyFlow(),
     modeName: String = "default",
     visible: Boolean = true,
     modifier: Modifier = Modifier,
@@ -82,6 +101,28 @@ fun DanmakuOverlay(
 
         displayer.value = disp
         engine.value = eng
+    }
+
+    // 本地发送成功的弹幕：加入引擎并以边框区分于其它弹幕
+    // （对齐旧版 bbmiao PlayerDelegate2.sendDanmaku）
+    LaunchedEffect(engine.value) {
+        val eng = engine.value ?: return@LaunchedEffect
+        val context = eng.getConfig() ?: return@LaunchedEffect
+        // 字号换算与解析弹幕保持一致（见 BiliDanmakuParser: fontSize * (density - 0.6f)）。
+        // 密度必须取引擎显示器的 density，而不是 Compose 的 LocalDensity：
+        // 桌面端显示器对解析密度设有下限（max(_density, 1.5f)），直接用 LocalDensity 会让字号偏小。
+        val textSizeFactor = context.mDisplayer.density - 0.6f
+        localDanmakuFlow.collect { info ->
+            val item = context.mDanmakuFactory.createDanmaku(info.type, context) ?: return@collect
+            DanmakuUtils.fillText(item, info.text)
+            item.textSize = info.textSize * textSizeFactor
+            item.textColor = info.textColor or 0xFF000000.toInt()
+            // 与解析弹幕一致的黑色描边，保证浅色画面上可读
+            item.textShadowColor = LOCAL_DANMAKU_SHADOW_COLOR
+            item.setTime(info.position)
+            item.borderColor = LOCAL_DANMAKU_BORDER_COLOR
+            eng.addDanmaku(item)
+        }
     }
 
     // 同步播放位置和暂停状态

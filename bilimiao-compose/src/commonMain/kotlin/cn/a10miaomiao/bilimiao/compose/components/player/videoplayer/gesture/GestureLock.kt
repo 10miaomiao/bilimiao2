@@ -49,8 +49,8 @@ fun GestureLock(
     Surface(
         modifier.testTag(TAG_GESTURE_LOCK),
         shape = RoundedCornerShape(16.dp),
-        // 替代原 animeko 的 background.copy(0.05f)
-        color = MaterialTheme.colorScheme.background.copy(alpha = 0.05f),
+        // 半透明黑色底, 保证在亮色画面上也清晰可见
+        color = Color.Black.copy(alpha = 0.3f),
         // 替代原 animeko 的 outline.slightlyWeaken()
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
     ) {

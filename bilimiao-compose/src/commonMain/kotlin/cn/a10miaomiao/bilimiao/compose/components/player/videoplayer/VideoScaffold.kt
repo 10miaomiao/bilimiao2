@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.max
  *
  * - 悬浮消息: [floatingMessage], 例如正在缓冲
  * - 控制器: [topBar], [rhsBar] 和 [bottomBar]
+ * - 左侧悬浮操作区: [leftSideButtons], 垂直居中于画面左缘 (与右侧 [rhsButtons] 对称)
  * - 手势: [gestureHost]
  * - 字幕: [subtitle]
  * - 弹幕: [danmakuHost]
@@ -98,6 +99,11 @@ fun VideoScaffold(
     gestureHost: @Composable BoxWithConstraintsScope.() -> Unit = {},
     floatingMessage: @Composable BoxScope.() -> Unit = {},
     rhsButtons: @Composable ColumnScope.() -> Unit = {},
+    /**
+     * 左侧悬浮操作区, 垂直居中于画面左缘, 与右侧 [rhsButtons]/[gestureLock] 对称.
+     * 控制器隐藏或锁定手势时随之隐藏.
+     */
+    leftSideButtons: @Composable ColumnScope.() -> Unit = {},
     gestureLock: @Composable ColumnScope.() -> Unit = {},
     bottomBar: @Composable RowScope.() -> Unit = {},
     detachedProgressSlider: @Composable () -> Unit = {},
@@ -338,6 +344,26 @@ fun VideoScaffold(
                             horizontalArrangement = Arrangement.End,
                         ) {
                             floatingBottomEnd()
+                        }
+                    }
+                }
+                // 左侧悬浮操作区（与右侧对称, 垂直居中于画面左缘）
+                Column(
+                    Modifier.fillMaxSize().background(Color.Transparent)
+                        .windowInsetsPadding(contentWindowInsets.only(WindowInsetsSides.Start)),
+                ) {
+                    Box(Modifier.weight(1f, fill = true).fillMaxWidth()) {
+                        Column(
+                            Modifier.padding(start = 16.dp).align(Alignment.CenterStart),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            AnimatedVisibility(
+                                visible = controllerVisibility.rhsBar,
+                                enter = enterTransition,
+                                exit = exitTransition,
+                            ) {
+                                leftSideButtons()
+                            }
                         }
                     }
                 }

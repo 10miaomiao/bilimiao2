@@ -15,6 +15,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.LocalDanmakuInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
@@ -29,8 +30,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -99,6 +103,10 @@ class PlayerDelegateImpl(
     // 当前播放位置（高频，约 200ms 更新一次，独立 StateFlow 避免触发无关重组）
     private val _currentPosition = MutableStateFlow(0L)
     override val currentPosition: StateFlow<Long> = _currentPosition.asStateFlow()
+
+    // 本地发送成功的弹幕（供弹幕渲染层本地回显，见 LocalDanmakuInfo）
+    private val _localDanmakuFlow = MutableSharedFlow<LocalDanmakuInfo>(extraBufferCapacity = 8)
+    override val localDanmakuFlow: SharedFlow<LocalDanmakuInfo> = _localDanmakuFlow.asSharedFlow()
 
     // 分段播放状态
     private var segmentUrls = listOf<String>()
@@ -726,7 +734,21 @@ class PlayerDelegateImpl(
         danmakuTextColor: Int,
         danmakuPosition: Long
     ) {
-        // TODO: 实现弹幕发送后的本地显示
+        // 本地回显：派发给弹幕渲染层，由其创建弹幕（带边框）加入弹幕引擎
+        _localDanmakuFlow.tryEmit(
+            LocalDanmakuInfo(
+                type = type,
+                text = danmakuText,
+                textSize = danmakuTextSize,
+                textColor = danmakuTextColor,
+                position = danmakuPosition,
+            )
+        )
+        // 对齐旧版 PlayerDelegate2.sendDanmaku：暂停状态发送后恢复播放，
+        // 否则弹幕引擎计时器不推进，本地回显的弹幕不会显示/移动
+        if (!isPlaying()) {
+            resume()
+        }
     }
 
     override fun setProxy(proxyServer: ProxyServerInfo, uposHost: String) {

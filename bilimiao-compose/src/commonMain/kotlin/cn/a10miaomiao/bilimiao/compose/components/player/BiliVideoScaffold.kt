@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,15 +20,20 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
@@ -48,7 +55,6 @@ import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.HapticFeedbackType
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
-import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.rememberHapticFeedback
 import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.components.layout.calculatePlayerDisplayMode
@@ -125,6 +131,11 @@ private const val MAX_QUALITY_NOT_VIP = 80
  */
 private const val FAST_FORWARD_SPEED = 2.0f
 
+/**
+ * 小屏（非全屏）模式画面左侧弹幕发送按钮的测试标签
+ */
+private const val TAG_SMALL_SCREEN_DANMAKU_SEND_BUTTON = "SmallScreenDanmakuSendButton"
+
 @Composable
 fun BiliVideoScaffold(
     delegate: BasePlayerDelegate,
@@ -159,7 +170,6 @@ fun BiliVideoScaffold(
 
     // 播放器控制依赖的服务（通过 Kodein 注入）
     val userStore: UserStore by rememberInstance()
-    val pageNavigator: PageNavigator by rememberInstance()
     val bottomSheetState: BottomSheetState by rememberInstance()
 
     // 倍速菜单预设值（设置中的 PlayerSpeedValues，默认 0.5x/1.0x/2.0x）
@@ -326,6 +336,8 @@ fun BiliVideoScaffold(
                     currentPosition = currentPosition,
                     isPlaying = isPlaying,
                     danmakuParser = danmakuParser,
+                    // 发送成功的弹幕本地回显（带边框区分其它弹幕）
+                    localDanmakuFlow = playerDelegate.localDanmakuFlow,
                     // 按当前播放模式读取对应的弹幕显示设置
                     modeName = if (isFullscreen) {
                         SettingPreferences.DanmakuFullMode.name
@@ -455,7 +467,7 @@ fun BiliVideoScaffold(
                                     if (isFullscreen && isPlaying) {
                                         playerDelegate.pause()
                                     }
-                                    pageNavigator.navigate(SendDanmakuPage())
+                                    bottomSheetState.open(SendDanmakuPage())
                                 }
                             },
                         )
@@ -514,6 +526,21 @@ fun BiliVideoScaffold(
 //                    onClickFullscreen = onToggleFullscreen,
 //                )
             },
+            leftSideButtons = {
+                // 小屏（非全屏）模式在画面左侧提供弹幕发送入口（与右侧锁定按钮对称）；
+                // 全屏模式已有底部弹幕输入条，此处不重复显示
+                if (!isFullscreen) {
+                    SmallScreenDanmakuSendButton(
+                        onClick = {
+                            if (!userStore.isLogin()) {
+                                GlobalToaster.show("请先登录")
+                            } else {
+                                bottomSheetState.open(SendDanmakuPage())
+                            }
+                        },
+                    )
+                }
+            },
             gestureLock = {
                 cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureLock(
                     isLocked = isLocked,
@@ -521,6 +548,37 @@ fun BiliVideoScaffold(
                 )
             },
         )
+    }
+}
+
+/**
+ * 小屏（非全屏）模式画面左侧的弹幕发送按钮.
+ *
+ * 样式与右侧手势锁定按钮（[GestureLock][cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureLock]）
+ * 保持一致: 半透明黑色圆角 Surface + 描边 + 白色图标.
+ *
+ * @param onClick 点击回调
+ * @param modifier 布局修饰符
+ */
+@Composable
+private fun SmallScreenDanmakuSendButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier.testTag(TAG_SMALL_SCREEN_DANMAKU_SEND_BUTTON).then(modifier),
+        shape = RoundedCornerShape(16.dp),
+        color = Color.Black.copy(alpha = 0.3f),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+    ) {
+        IconButton(onClick) {
+            CompositionLocalProvider(LocalContentColor provides Color.White) {
+                Icon(
+                    Icons.AutoMirrored.Rounded.Send,
+                    contentDescription = "发送弹幕",
+                )
+            }
+        }
     }
 }
 
