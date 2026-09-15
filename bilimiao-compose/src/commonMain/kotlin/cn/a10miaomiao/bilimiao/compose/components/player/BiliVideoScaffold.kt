@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -40,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -74,6 +76,8 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.Pl
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerProgressSliderState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberVideoControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMoreActionsButton
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenType
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenTypeButton
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerTopBar
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoLoadingIndicator
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliAnimTV
@@ -83,6 +87,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
 import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.editPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
@@ -90,8 +95,10 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
+import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
 import org.openani.mediamp.MediampPlayer
+import org.openani.mediamp.features.VideoAspectRatio
 import kotlin.math.roundToInt
 
 /**
@@ -184,6 +191,18 @@ fun BiliVideoScaffold(
         }
     }
 
+    // 画面比例（对齐旧版「画面比例」菜单，选择结果持久化在 PlayerScreenType 偏好项）
+    val scope = rememberCoroutineScope()
+    var screenType by remember { mutableStateOf(PlayerScreenType.Default) }
+    LaunchedEffect(Unit) {
+        // mapPreferences 的接收者是 SettingPreferences 对象，其中的 PlayerScreenType 偏好键
+        // 会遮蔽同名枚举，因此枚举转换放在闭包外进行
+        val savedScreenType = SettingPreferences.mapPreferences {
+            it[SettingPreferences.PlayerScreenType]
+        }
+        screenType = PlayerScreenType.ofValue(savedScreenType ?: PlayerScreenType.Default.value)
+    }
+
     // 与 ComposeScaffold/PlayerLayer 共用 calculatePlayerDisplayMode 统一判定显示模式
     val playerState = LocalPlayerState.current
     // 全屏状态统一由 PlayerState 提供（数据源为 FullscreenController.isFullscreen）
@@ -233,6 +252,12 @@ fun BiliVideoScaffold(
     }
 
     player?.let { p ->
+        // 画面比例：16:9 / 4:3 的画面框尺寸由 video 层布局限制，
+        // 其余模式交由播放器自身的缩放模式决定（适应 / 裁减 / 拉伸）
+        LaunchedEffect(p, screenType) {
+            p.features[VideoAspectRatio]?.setMode(screenType.aspectRatioMode)
+        }
+
         // duration 为低频合并状态（普通 val），remember(player) 闭包会捕获创建时的值快照，
         // 用 rememberUpdatedState 保持闭包读取最新值（进度条总时长）
         val currentDuration by rememberUpdatedState(duration)
@@ -307,6 +332,18 @@ fun BiliVideoScaffold(
                                 )
                             }
                         }
+                        // 画面比例（默认比例 / 16:9 / 4:3 / 全屏裁减 / 全屏拉伸）
+                        PlayerScreenTypeButton(
+                            screenType = screenType,
+                            onValueChange = { type ->
+                                screenType = type
+                                scope.launch {
+                                    SettingPreferences.editPreferences {
+                                        it[SettingPreferences.PlayerScreenType] = type.value
+                                    }
+                                }
+                            },
+                        )
                         PlayerMoreActionsButton(
                             onVideoSetting = {
                                 // 以 bottom sheet 弹出播放设置（对齐旧版行为）
@@ -326,9 +363,17 @@ fun BiliVideoScaffold(
                 )
             },
             video = {
+                // 16:9 / 4:3 时把画面框按目标比例居中（对齐旧版 GSY 的测量逻辑：
+                // 画面框缩到目标比例，画面拉伸填满该框）；其余模式填满整个画面区域，
+                // 由播放器的缩放模式决定画面是适应、裁减还是拉伸。
+                val frameAspectRatio = screenType.frameAspectRatio
                 VideoPlayer(
                     player = p,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = if (frameAspectRatio == null) {
+                        Modifier.fillMaxSize()
+                    } else {
+                        Modifier.align(Alignment.Center).aspectRatio(frameAspectRatio)
+                    },
                 )
             },
             danmakuHost = {
