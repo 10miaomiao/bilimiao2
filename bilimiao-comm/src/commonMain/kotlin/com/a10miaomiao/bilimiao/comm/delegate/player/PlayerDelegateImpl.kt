@@ -108,6 +108,10 @@ class PlayerDelegateImpl(
     private val _localDanmakuFlow = MutableSharedFlow<LocalDanmakuInfo>(extraBufferCapacity = 8)
     override val localDanmakuFlow: SharedFlow<LocalDanmakuInfo> = _localDanmakuFlow.asSharedFlow()
 
+    // 画中画（应用外小窗）状态：由平台层 Activity 回调 onPictureInPictureModeChanged 驱动
+    private val _pictureInPicture = MutableStateFlow(false)
+    override val pictureInPicture: StateFlow<Boolean> = _pictureInPicture.asStateFlow()
+
     // 分段播放状态
     private var segmentUrls = listOf<String>()
     private var segmentDurations = listOf<Long>()
@@ -723,7 +727,9 @@ class PlayerDelegateImpl(
         return false
     }
 
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {}
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        _pictureInPicture.value = isInPictureInPictureMode
+    }
     override fun setWindowInsets(left: Int, top: Int, right: Int, bottom: Int) {}
     override fun onConfigurationChanged(orientation: Int) {}
 

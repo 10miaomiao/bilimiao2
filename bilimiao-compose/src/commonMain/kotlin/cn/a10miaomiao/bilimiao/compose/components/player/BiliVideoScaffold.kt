@@ -113,6 +113,10 @@ import kotlin.math.roundToInt
  * - 全屏模式 ([PlayerDisplayMode.Fullscreen]): 顶栏导航图标为 ArrowBack, 点击退出全屏而非关闭播放.
  * - 非全屏模式: 顶栏导航图标为 Close, 点击关闭播放.
  * - 悬浮横屏模式 ([PlayerDisplayMode.FloatingLandscape]): 完整手势关闭，仅保留单击切换控制器显隐.
+ * - 画中画模式 ([PlayerDisplayMode.PictureInPicture]): 画面铺满整个小窗, 顶栏/底栏/侧边按钮等
+ *   控制器全部隐藏, 弹幕按「画中画」弹幕显示设置渲染, 播放/暂停经系统动作按钮
+ *   (见 [PictureInPicturePlaybackAction]) 操作; 状态由 PlayerState.pictureInPicture
+ *   (平台层注入, 与 ComposeScaffold 共享) 驱动.
  * - 非全屏模式: 控制器布局忽略窗口安全边距.
  *
  * 替代旧的 `VideoScaffold.kt`（已被删除）。
@@ -207,16 +211,32 @@ fun BiliVideoScaffold(
     val playerState = LocalPlayerState.current
     // 全屏状态统一由 PlayerState 提供（数据源为 FullscreenController.isFullscreen）
     val isFullscreen by playerState.fullScreenPlayer.collectAsState()
+    // 画中画（应用外小窗）状态：由平台层（Activity 的 onPictureInPictureModeChanged）注入，
+    // 与 ComposeScaffold 共享同一状态源：宿主布局让出整个窗口，本组件负责小窗内的播放器展示
+    val pictureInPicture by playerState.pictureInPicture.collectAsState()
     // ComposeScaffold 中 orientation = if (isCompactWindow()) PORTRAIT else LANDSCAPE
     val scaffoldOrientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val displayMode = calculatePlayerDisplayMode(
         showPlayer = playerState.showPlayer,
         fullScreenPlayer = isFullscreen,
+        pictureInPicture = pictureInPicture,
         anchorBounds = playerState.anchorBounds,
         orientation = scaffoldOrientation,
     )
-    // 悬浮横屏模式关闭完整手势操作（拖动/缩放由外层悬浮窗口处理），仅保留单击切换控制器
-    val gesturesEnabled = displayMode != PlayerDisplayMode.FloatingLandscape
+    // 当前生效的画中画展示（未展示播放器时本组件不会被组合，与状态源等价）
+    val inPictureInPicture = displayMode == PlayerDisplayMode.PictureInPicture
+    // 画面铺满的布局条件：全屏或画中画窗口（画中画窗口内不做 16:9 限制，铺满整个小窗）
+    val expandedLayout = isFullscreen || inPictureInPicture
+    // 弹幕按当前展示方式读取对应设置（画中画使用独立的「画中画」弹幕显示设置）
+    val danmakuModeName = when (displayMode) {
+        PlayerDisplayMode.PictureInPicture -> SettingPreferences.DanmakuPipMode.name
+        PlayerDisplayMode.Fullscreen -> SettingPreferences.DanmakuFullMode.name
+        else -> SettingPreferences.DanmakuSmallMode.name
+    }
+    // 悬浮横屏模式关闭完整手势操作（拖动/缩放由外层悬浮窗口处理），仅保留单击切换控制器；
+    // 画中画窗口内控制器恒隐藏，任何播放器手势都无意义，同样关闭
+    val gesturesEnabled = displayMode != PlayerDisplayMode.FloatingLandscape &&
+        !inPictureInPicture
     val contentWindowInsets = if (isFullscreen) {
         WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
     } else {
@@ -250,6 +270,16 @@ fun BiliVideoScaffold(
             systemBarsController.restoreSystemBars()
         }
     }
+
+    // 画中画动作按钮（播放/暂停）：画中画窗口内的画面不接收点击，播放控制只能交给系统绘制。
+    // 进入画中画时注册动作按钮点击处理，播放状态变化时同步按钮图标，退出画中画时注销。
+    PictureInPicturePlaybackAction(
+        enabled = inPictureInPicture,
+        isPlaying = isPlaying,
+        onTogglePlayPause = {
+            if (isPlaying) playerDelegate.pause() else playerDelegate.resume()
+        },
+    )
 
     player?.let { p ->
         // 画面比例：16:9 / 4:3 的画面框尺寸由 video 层布局限制，
@@ -301,10 +331,11 @@ fun BiliVideoScaffold(
         val brightnessController = rememberBrightnessLevelController()
 
         VideoScaffold(
-            expanded = isFullscreen,
+            expanded = expandedLayout,
             modifier = modifier,
             controllerState = controllerState,
-            gestureLocked = isLocked,
+            // 画中画窗口内控制器全部隐藏（手势层同步关闭），仅显示画面/弹幕/字幕
+            gestureLocked = isLocked || inPictureInPicture,
             contentWindowInsets = contentWindowInsets,
             topBar = {
                 PlayerTopBar(
@@ -320,7 +351,8 @@ fun BiliVideoScaffold(
                                     val info = playbackInfo
                                     val width = info?.width ?: 16
                                     val height = info?.height ?: 9
-                                    if (!enterPictureInPictureMode(width, height)) {
+                                    // 初始动作按钮按当前播放状态给出「暂停」或「播放」
+                                    if (!enterPictureInPictureMode(width, height, isPlaying)) {
                                         GlobalToaster.show("此设备不支持小窗播放")
                                     }
                                 },
@@ -351,12 +383,7 @@ fun BiliVideoScaffold(
                             },
                             onDanmakuSetting = {
                                 // 以 bottom sheet 弹出当前播放模式的弹幕显示设置（对齐旧版行为）
-                                val modeName = if (isFullscreen) {
-                                    SettingPreferences.DanmakuFullMode.name
-                                } else {
-                                    SettingPreferences.DanmakuSmallMode.name
-                                }
-                                bottomSheetState.open(DanmakuDisplaySettingPage(modeName))
+                                bottomSheetState.open(DanmakuDisplaySettingPage(danmakuModeName))
                             },
                         )
                     },
@@ -384,11 +411,7 @@ fun BiliVideoScaffold(
                     // 发送成功的弹幕本地回显（带边框区分其它弹幕）
                     localDanmakuFlow = playerDelegate.localDanmakuFlow,
                     // 按当前播放模式读取对应的弹幕显示设置
-                    modeName = if (isFullscreen) {
-                        SettingPreferences.DanmakuFullMode.name
-                    } else {
-                        SettingPreferences.DanmakuSmallMode.name
-                    },
+                    modeName = danmakuModeName,
                     visible = danmakuVisible,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -433,13 +456,19 @@ fun BiliVideoScaffold(
                     )
                 } else {
                     // 单击切换控制器显隐；detectTapGestures 超过触摸滑动阈值或事件被
-                    // 外层拖动消费后会自动取消，不影响窗口拖动/缩放手势
+                    // 外层拖动消费后会自动取消，不影响窗口拖动/缩放手势。
+                    // 画中画窗口内控制器不参与展示（见 gestureLocked），此层仅用于拦截触摸，
+                    // 避免点击穿透到小窗下方的应用界面。
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .pointerInput(controllerState) {
+                            .pointerInput(controllerState, inPictureInPicture) {
                                 detectTapGestures(
-                                    onTap = { controllerState.toggleFullVisible() },
+                                    onTap = {
+                                        if (!inPictureInPicture) {
+                                            controllerState.toggleFullVisible()
+                                        }
+                                    },
                                 )
                             }
                     )
@@ -587,10 +616,13 @@ fun BiliVideoScaffold(
                 }
             },
             gestureLock = {
-                cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureLock(
-                    isLocked = isLocked,
-                    onClick = { isLocked = !isLocked },
-                )
+                // 画中画窗口内不显示手势锁定按钮（锁定的其它控制器本就不显示）
+                if (!inPictureInPicture) {
+                    cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureLock(
+                        isLocked = isLocked,
+                        onClick = { isLocked = !isLocked },
+                    )
+                }
             },
         )
     }

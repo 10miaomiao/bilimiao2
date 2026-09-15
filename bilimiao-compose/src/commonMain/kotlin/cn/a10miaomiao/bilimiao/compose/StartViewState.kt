@@ -11,10 +11,11 @@ import kotlin.math.min
 
 class StartViewState(
     fullScreenPlayer: StateFlow<Boolean> = MutableStateFlow(false),
+    pictureInPicture: StateFlow<Boolean> = MutableStateFlow(false),
     scope: CoroutineScope,
 ) {
 
-    val playerState = PlayerState(fullScreenPlayer, scope)
+    val playerState = PlayerState(fullScreenPlayer, pictureInPicture, scope)
 
     private val _drawerState = mutableStateOf(DRAWER_STATE_COLLAPSED)
     val drawerState get() = _drawerState.value

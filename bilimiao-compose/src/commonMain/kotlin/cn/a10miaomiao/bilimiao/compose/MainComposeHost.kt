@@ -175,7 +175,9 @@ fun MainComposeHost(
     val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val showPlayer = playerState.showPlayer
     val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
-    val allowDrawerOpenGesture = bottomSheetPage == null && !fullScreenPlayer
+    val pictureInPicture by playerState.pictureInPicture.collectAsState()
+    // 画中画窗口内不响应抽屉手势：窗口已被播放器铺满，抽屉只会被画在播放器下层而不可见
+    val allowDrawerOpenGesture = bottomSheetPage == null && !fullScreenPlayer && !pictureInPicture
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
     val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
     val playerLayoutState = remember(

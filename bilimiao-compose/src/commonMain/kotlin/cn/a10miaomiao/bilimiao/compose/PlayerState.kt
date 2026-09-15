@@ -37,16 +37,23 @@ data class PlayerFloatingLayoutState(
  *   [com.a10miaomiao.bilimiao.comm.delegate.player.FullscreenController.isFullscreen]，
  *   由入口点（MainActivity / 桌面端 Main.kt）在创建时注入，Compose 层通过
  *   [kotlinx.coroutines.flow.StateFlow] 观察，不再维护副本状态。
+ * - [pictureInPicture] 画中画（应用外小窗）状态：数据源为平台层
+ *   [com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate.pictureInPicture]，
+ *   同样由入口点注入。画中画窗口内只有播放器画面，页面级控件（appbar、内容区）需要让位，
+ *   因此它是 [components.layout.ComposeScaffold]（宿主布局）与
+ *   [components.player.BiliVideoScaffold]（播放器 UI）之间的共享状态。
  * - 小屏播放器高度（[portraitPlayerLayoutState]）：由平台层（安卓）根据屏幕尺寸
  *   通过 [setSmallModePlayerHeight] 更新，桌面端使用默认值。
  * - 自由悬浮窗口几何（[floatingPlayerLayoutState]）：随拖动/缩放实时更新，
  *   并通过 [appDataStore] 持久化，下次启动时恢复位置与大小。
  *
  * @param fullScreenPlayer 全屏状态流
+ * @param pictureInPicture 画中画（应用外小窗）状态流
  * @param scope 持久化读写使用的协程作用域（入口点注入）
  */
 class PlayerState(
     fullScreenPlayer: StateFlow<Boolean> = MutableStateFlow(false),
+    pictureInPicture: StateFlow<Boolean> = MutableStateFlow(false),
     private val scope: CoroutineScope,
 ) {
 
@@ -57,6 +64,9 @@ class PlayerState(
 
     /** 全屏状态（唯一数据源，由入口点注入） */
     val fullScreenPlayer: StateFlow<Boolean> = fullScreenPlayer
+
+    /** 画中画（应用外小窗）状态（唯一数据源，由入口点注入） */
+    val pictureInPicture: StateFlow<Boolean> = pictureInPicture
 
     private val _showPlayer = mutableStateOf(false)
     val showPlayer get() = _showPlayer.value

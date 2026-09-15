@@ -53,6 +53,14 @@ interface BasePlayerDelegate : com.a10miaomiao.bilimiao.comm.delegate.BaseDelega
     val localDanmakuFlow: SharedFlow<LocalDanmakuInfo>
 
     /**
+     * 画中画（应用外小窗）状态
+     *
+     * 数据源为平台层 Activity 的 `onPictureInPictureModeChanged` 回调，
+     * UI 层据此把播放器铺满画中画窗口，并隐藏页面内其它控件（appbar、控制器等）。
+     */
+    val pictureInPicture: kotlinx.coroutines.flow.StateFlow<Boolean>
+
+    /**
      * 创建平台特定的 MediampPlayer 实例
      */
     fun createPlayer(): MediampPlayer

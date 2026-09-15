@@ -106,6 +106,9 @@ fun ComposeScaffold(
     val playerState = startViewState.playerState
     val showPlayer = playerState.showPlayer
     val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
+    // 画中画（应用外小窗）：由平台层注入的状态流，BiliVideoScaffold 内的画中画按钮触发；
+    // 本组件据此让出整个窗口（隐藏 appbar/内容区），交由播放器独占小窗
+    val pictureInPicture by playerState.pictureInPicture.collectAsState()
     val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
     val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
@@ -118,19 +121,22 @@ fun ComposeScaffold(
     val playerDisplayMode = calculatePlayerDisplayMode(
         showPlayer = showPlayer,
         fullScreenPlayer = fullScreenPlayer,
+        pictureInPicture = pictureInPicture,
         anchorBounds = anchorBounds,
         orientation = orientation,
     )
     // 状态栏前景色统一由本组件控制，平台实现经 LocalSystemBarsController 注入；
     // 全屏播放器（BiliVideoScaffold）只经由同一控制器控制系统栏显隐，不触碰前景色：
     // - 深色模式：始终白色图标；
-    // - 浅色模式：仅 EmbeddedPortrait / Fullscreen（播放器画面为深色底）为白色图标，其余黑色图标。
+    // - 浅色模式：仅 EmbeddedPortrait / Fullscreen / PictureInPicture（播放器画面为深色底）
+    //   为白色图标，其余黑色图标。
     val systemBarsController = LocalSystemBarsController.current
     val isDarkTheme = LocalAppDarkTheme.current
     LaunchedEffect(playerDisplayMode, isDarkTheme) {
         val lightIcons = !isDarkTheme &&
             playerDisplayMode != PlayerDisplayMode.EmbeddedPortrait &&
-            playerDisplayMode != PlayerDisplayMode.Fullscreen
+            playerDisplayMode != PlayerDisplayMode.Fullscreen &&
+            playerDisplayMode != PlayerDisplayMode.PictureInPicture
         systemBarsController.setLightStatusBar(lightIcons)
     }
 
@@ -181,6 +187,7 @@ fun ComposeScaffold(
     val playerLayoutState = remember(
         showPlayer,
         fullScreenPlayer,
+        pictureInPicture,
         orientation,
         portraitPlayerLayoutState,
         floatingPlayerLayoutState,
@@ -195,6 +202,7 @@ fun ComposeScaffold(
             floatingState = floatingPlayerLayoutState,
             playerVideoRatio = playerVideoRatio,
             anchorBounds = anchorBounds,
+            pictureInPicture = pictureInPicture,
         )
     }
     val drawerController = rememberComposeDrawerController(
@@ -830,6 +838,14 @@ internal fun PlayerLayer(
         val defaultHeight = with(density) { baseBounds.height.toDp() }
 
         when (displayMode) {
+            // 画中画：小窗由系统瞬时创建/销毁，窗口尺寸同时跳变，几何直接落位。
+            // 若照常播放滑行动画，小窗内会先出现上一个大窗口尺寸的裁切画面
+            PlayerDisplayMode.PictureInPicture -> {
+                currentWidth = defaultWidth
+                currentHeight = defaultHeight
+                offsetX = with(density) { baseBounds.left.toDp() }
+                offsetY = with(density) { baseBounds.top.toDp() }
+            }
             PlayerDisplayMode.Hidden,
             PlayerDisplayMode.Fullscreen,
             PlayerDisplayMode.EmbeddedPortrait,
@@ -1005,6 +1021,11 @@ internal fun PlayerLayer(
                         .padding(top = portraitTopInset)
                         .size(currentWidth, currentHeight)
                 } else if (displayMode == PlayerDisplayMode.AnchorOverlay) {
+                    Modifier
+                        .background(Color.Black)
+                        .size(currentWidth, currentHeight)
+                } else if (displayMode == PlayerDisplayMode.PictureInPicture) {
+                    // 画中画窗口内只有播放器画面：补黑底，避免画面未铺满时透出应用内容
                     Modifier
                         .background(Color.Black)
                         .size(currentWidth, currentHeight)

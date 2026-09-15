@@ -88,9 +88,14 @@ private fun Density.calculateComposeScaffoldGeometry(
 ): ComposeScaffoldGeometryResult {
     val viewportWidthPx = viewportWidth.roundToPx()
     val viewportHeightPx = viewportHeight.roundToPx()
-    val hasHorizontalAppBar = appBarState?.visible == true &&
+    // 画中画：窗口本身就是小窗，appbar 若照常布局会占据小窗下半部分（视频被其挤占），
+    // 因此画中画下不布置 appbar，播放器独占整个窗口
+    val isPictureInPicture = playerState.displayMode == PlayerDisplayMode.PictureInPicture
+    val hasHorizontalAppBar = !isPictureInPicture &&
+        appBarState?.visible == true &&
         appBarState.orientation == AppBarOrientation.Horizontal
-    val hasVerticalAppBar = appBarState?.visible == true &&
+    val hasVerticalAppBar = !isPictureInPicture &&
+        appBarState?.visible == true &&
         appBarState.orientation == AppBarOrientation.Vertical &&
         appBarState.barVisible
 
@@ -189,7 +194,9 @@ private fun Density.calculatePlayerBounds(
 ): Rect? {
     return when (playerState.displayMode) {
         PlayerDisplayMode.Hidden -> null
-        PlayerDisplayMode.Fullscreen -> Rect(
+        PlayerDisplayMode.Fullscreen,
+        PlayerDisplayMode.PictureInPicture,
+        -> Rect(
             left = 0f,
             top = 0f,
             right = viewportWidth.roundToPx().toFloat(),
