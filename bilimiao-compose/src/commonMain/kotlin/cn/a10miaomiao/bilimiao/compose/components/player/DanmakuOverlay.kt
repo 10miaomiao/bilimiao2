@@ -55,7 +55,9 @@ private const val LOCAL_DANMAKU_SHADOW_COLOR = 0xFF000000.toInt()
  * `PlayerController.initDanmakuContext` 行为。
  *
  * @param currentPosition 当前播放位置（毫秒）
- * @param isPlaying 是否正在播放
+ * @param isPlaying 是否正在播放。弹幕引擎由该状态驱动启停：只有视频真正开始播放
+ *                  （缓冲结束）后才推进弹幕时间，缓冲/暂停期间弹幕冻结，
+ *                  避免首次缓冲耗时较长时弹幕先于视频画面播放
  * @param danmakuParser 弹幕解析器
  * @param localDanmakuFlow 本地发送成功的弹幕（见 [LocalDanmakuInfo]），加入引擎并以边框区分
  * @param modeName 当前播放模式（[SettingPreferences.Danmaku] 的 name），
@@ -75,6 +77,10 @@ fun DanmakuOverlay(
 ) {
     val engine = remember { mutableStateOf<DanmakuEngine?>(null) }
     val displayer = remember { mutableStateOf<IDisplayer?>(null) }
+    // 视频是否已真正开始播放（缓冲结束后的首帧）：在此之前不渲染弹幕，
+    // 避免首次缓冲耗时较长时 0ms 附近的弹幕（顶部/底部固定弹幕）先于画面出现。
+    // 弹幕解析器变化（切换视频/分段）时重置。
+    var playbackStarted by remember(danmakuParser) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
 
@@ -92,11 +98,8 @@ fun DanmakuOverlay(
         eng.idleSleep = false
         eng.setConfig(context)
         eng.setParser(parser)
-        eng.setCallback(object : DanmakuEngine.Callback {
-            override fun prepared() {
-                eng.start()
-            }
-        })
+        // 弹幕数据准备完成时不启动引擎（引擎启动时机由播放状态驱动，见下方同步逻辑），
+        // 否则首次缓冲期间引擎内部时钟就开始推进，弹幕会先于视频画面滚动。
         eng.prepare()
 
         displayer.value = disp
@@ -125,15 +128,19 @@ fun DanmakuOverlay(
         }
     }
 
-    // 同步播放位置和暂停状态
-    LaunchedEffect(currentPosition, isPlaying) {
+    // 同步播放位置和播放/暂停状态。
+    // 引擎的启停由播放状态驱动（数据准备完成时不启动，见上方 prepare 注释）：
+    // 首次缓冲期间视频尚未开始播放，此时不启动引擎，弹幕不会先于画面滚动；
+    // 缓冲结束开始播放后启动引擎并按播放位置同步，暂停/缓冲时冻结弹幕。
+    LaunchedEffect(engine.value, isPlaying, currentPosition) {
         val eng = engine.value ?: return@LaunchedEffect
         if (isPlaying) {
+            playbackStarted = true
             if (eng.isStop()) {
                 eng.resume()
             }
             eng.externalPlayerPosition = currentPosition
-        } else {
+        } else if (!eng.isStop()) {
             eng.pause()
         }
     }
@@ -201,7 +208,8 @@ fun DanmakuOverlay(
 
     val currentEngine = engine.value
     val currentDisplayer = displayer.value
-    if (currentEngine != null && currentDisplayer != null && visible && settingsVisible) {
+    // playbackStarted：视频开始播放前不绘制弹幕（引擎停在 0ms，避免首屏弹幕提前出现）
+    if (currentEngine != null && currentDisplayer != null && playbackStarted && visible && settingsVisible) {
         DanmakuCanvas(
             engine = currentEngine,
             displayer = currentDisplayer,
