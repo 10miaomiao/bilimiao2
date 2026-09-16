@@ -50,7 +50,7 @@ import org.openani.mediamp.playUri
  * 跨平台播放器代理实现
  *
  * 安卓端和桌面端共用的播放器核心逻辑，基于 [MediampPlayer] 抽象层。
- * 平台差异由 [createMediampPlayer]、[setMergingMediaData]、[setPlayerVolume] 等
+ * 平台差异由 [createMediampPlayer]、[setExternalAudioTrack]、[setPlayerVolume] 等
  * expect/actual 函数处理。
  *
  * 此类替代原 [DesktopPlayerDelegate] (桌面) 和 [PlayerDelegate2] (安卓, 基于 GSY)，
@@ -228,11 +228,16 @@ class PlayerDelegateImpl(
 
                 when (resolved.format) {
                     PlaybackFormat.MERGING -> {
-                        // 音视频分离：通过平台特定实现处理
+                        // 音视频分离（B站 DASH 主流形态）：先声明外部音频，再加载视频流。
+                        // 顺序不可颠倒（桌面 mpv 的 audio-files 只在 loadfile 时生效），
+                        // 平台差异由 setExternalAudioTrack 封装
                         // (安卓 ExoPlayer 用 MergingMediaSource，桌面 mpv 用 audio-files)
-                        setMergingMediaData(player, resolved.videoUrl, resolved.audioUrl, headers)
+                        setExternalAudioTrack(player, resolved.videoUrl, resolved.audioUrl, headers)
+                        player.setMediaData(UriMediaData(resolved.videoUrl, headers))
                     }
                     PlaybackFormat.SEGMENTED -> {
+                        // 分段视频：音频内含在分段文件中，清除外部音频声明
+                        setExternalAudioTrack(player, resolved.videoUrl, null, headers)
                         // 分段视频：播放第一段
                         segmentUrls = resolved.segmentUrls
                         segmentDurations = resolved.segmentDurations
@@ -244,10 +249,14 @@ class PlayerDelegateImpl(
                         }
                     }
                     PlaybackFormat.SINGLE -> {
+                        // 单流（音视频合一，含本地下载的单文件）：清除外部音频声明
+                        setExternalAudioTrack(player, resolved.videoUrl, null, headers)
                         player.setMediaData(UriMediaData(resolved.videoUrl, headers))
                     }
                     PlaybackFormat.TEMP_MPD -> {
-                        // [dash-mpd] 格式：将 MPD XML 写入临时文件播放
+                        // [dash-mpd] 格式：音频轨已写入 MPD（见 DashSource），无需外部音频声明
+                        setExternalAudioTrack(player, resolved.videoUrl, null, headers)
+                        // 将 MPD XML 写入临时文件播放
                         val mpdFile = createTempMpdFile(resolved.mpdContent!!)
                         if (mpdFile != null) {
                             player.playUri(mpdFile.absolutePath)

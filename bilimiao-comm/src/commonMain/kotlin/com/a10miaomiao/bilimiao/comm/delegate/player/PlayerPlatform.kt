@@ -19,18 +19,24 @@ import org.openani.mediamp.source.UriMediaData
 expect fun createMediampPlayer(): MediampPlayer
 
 /**
- * 设置音视频分离的媒体数据（B站 DASH 格式常见：视频流 + 独立音频流）
+ * 声明当前媒体的外部音频轨（B站 DASH 音视频分离：视频流 + 独立音频流）
  *
- * - 安卓 ExoPlayer：通过 MergingMediaSource 合并，UriMediaData 只承载视频流，
- *   外部音频通过 MediaItem 配置或自定义 MediaSource 注入。
- * - 桌面 mpv：通过 audio-files 属性注入外部音频，videoUrl 通过 UriMediaData 承载。
+ * 必须在加载该媒体（`setMediaData` / `playUri`）之前调用，由平台实现负责把音频轨
+ * 接到接下来加载的媒体上：
+ * - 安卓 ExoPlayer：记录待接入的音频，在 open 时用 `MergingMediaSource` 把视频流与
+ *   音频流合并为一个媒体源（一次 open 完成，不依赖播放状态时机）
+ * - 桌面 mpv：设置 `audio-files` 属性（mpv 在 loadfile 时生效，因此必须先于加载设置）
+ *
+ * [audioUrl] 为 null 表示当前媒体没有独立音频（音视频合一、分段视频、MPD 内含音频等），
+ * 此时必须清除上一次的声明：否则会沿用上一个视频的音频，表现为
+ * 「播放新视频时响的是上一个视频的声音」（桌面 mpv 的 audio-files 属性会跨文件保留）。
  *
  * @param player 目标播放器
- * @param videoUrl 视频流 URL
- * @param audioUrl 音频流 URL（可能为 null，表示音视频合一）
+ * @param videoUrl 即将加载的视频（主媒体）地址，用于把音频与本次加载对应起来
+ * @param audioUrl 音频流 URL，null 表示无独立音频
  * @param headers HTTP 请求头
  */
-expect suspend fun setMergingMediaData(
+expect fun setExternalAudioTrack(
     player: MediampPlayer,
     videoUrl: String,
     audioUrl: String?,

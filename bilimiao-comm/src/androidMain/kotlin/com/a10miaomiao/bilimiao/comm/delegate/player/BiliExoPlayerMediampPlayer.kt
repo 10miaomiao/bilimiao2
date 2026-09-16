@@ -13,22 +13,25 @@ import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState
 import org.openani.mediamp.exoplayer.ExoPlayerMediampPlayer
 import org.openani.mediamp.source.MediaData
+import org.openani.mediamp.source.UriMediaData
 
 /**
  * B站 ExoPlayer 包装器
  *
- * 参考 animeko `LibassExoPlayerMediampPlayer` 的设计：
- * 包装 [ExoPlayerMediampPlayer]，在 mediamp 框架内正确处理 B站 DASH 音视频分离流。
- *
- * mediamp 的 `setMediaData(UriMediaData(videoUrl))` 只能设置单流（视频），
- * 无法注入外部音频流。本类覆盖 `resume`：
- * - 先调 `exoMediampPlayer.resume()` 触发 READY→PLAYING 状态转换，
- *   然后立即用 `exoPlayer.setMediaSource(mergingSource)` 覆盖为合并源。
+ * mediamp 的 `setMediaData(UriMediaData(videoUrl))` 只能设置单流（视频），无法表达
+ * B站 DASH 音视频分离。本类通过 mediamp 的 `mediaSourceInterceptor` 钩子在每次
+ * open 时把独立音频流合并进即将加载的媒体源（[MergingMediaSource]）：
+ * 视频与音频在同一个 open 内一起下发，不存在「先加载视频、再补音频」的时机竞态。
  *
  * 使用方式：
- * 1. `setPendingMediaSource(mergingSource)` 设置待应用的合并源
- * 2. `setMediaData(UriMediaData(videoUrl, headers))` 设置视频流（状态→READY）
- * 3. `resume()` 时自动应用 pendingMediaSource
+ * 1. `setExternalAudioTrack(videoUrl, audioUrl)` 声明即将加载的媒体的外部音频
+ *    （audioUrl 为 null 表示无独立音频，清除上一次的声明）
+ * 2. `setMediaData(UriMediaData(videoUrl, headers))` 加载视频流，音频在 open 时接入
+ *
+ * 注意：不要改回「先单流 open，再在 resume 时覆盖 MediaSource」的写法。
+ * 那依赖 open 完成瞬间的播放状态（mediamp 已废弃 v1 状态枚举的顺序约定），
+ * 状态不满足时会静默丢掉音频（无声），残留的媒体源还会在后续 resume 时
+ * 把旧媒体错配给当前视频。
  *
  * @param context Android Context
  * @param parentCoroutineContext 协程上下文
@@ -36,18 +39,21 @@ import org.openani.mediamp.source.MediaData
 @OptIn(org.openani.mediamp.InternalForInheritanceMediampApi::class)
 class BiliExoPlayerMediampPlayer private constructor(
     private val delegate: ExoPlayerMediampPlayer,
-    context: Context,
+    private val externalAudio: ExternalAudioInterceptor,
 ) : MediampPlayer by delegate {
-
-    private val appContext = context.applicationContext
 
     companion object {
         operator fun invoke(
             context: Context,
             parentCoroutineContext: kotlin.coroutines.CoroutineContext,
         ): BiliExoPlayerMediampPlayer {
-            val delegate = ExoPlayerMediampPlayer(context, parentCoroutineContext)
-            return BiliExoPlayerMediampPlayer(delegate, context)
+            val interceptor = ExternalAudioInterceptor(context.applicationContext)
+            val delegate = ExoPlayerMediampPlayer(
+                context = context,
+                parentCoroutineContext = parentCoroutineContext,
+                mediaSourceInterceptor = { source, data -> interceptor.intercept(source, data) },
+            )
+            return BiliExoPlayerMediampPlayer(delegate, interceptor)
         }
     }
 
@@ -57,47 +63,23 @@ class BiliExoPlayerMediampPlayer private constructor(
     /** 底层 ExoPlayer，用于直接操作 MediaSource */
     internal val exoPlayer: ExoPlayer get() = delegate.impl
 
-    /** 待应用的合并媒体源（含视频+音频），resume 时覆盖 */
-    private var pendingMediaSource: MediaSource? = null
-
     /**
-     * 设置待应用的合并媒体源
+     * 声明接下来要加载的媒体的外部音频轨（B站 DASH 音视频分离）
      *
-     * 在 `setMediaData` 之前调用，设置包含视频和音频的 [MergingMediaSource]。
-     * 当 `resume()` 被调用时，此源会覆盖 mediamp 默认设置的单流 MediaSource。
+     * 必须在 `setMediaData` 之前调用；[audioUrl] 为 null 或空白表示该媒体没有独立音频，
+     * 此时会清除上一次的声明，避免音频错配到当前或下一个视频。
      */
-    fun setPendingMediaSource(
+    fun setExternalAudioTrack(
         videoUrl: String,
-        audioUrl: String,
+        audioUrl: String?,
         headers: Map<String, String>,
     ) {
-        pendingMediaSource = createMergingMediaSource(videoUrl, audioUrl, headers)
-    }
-
-    /**
-     * 恢复播放
-     *
-     * 参考 animeko：先调 mediamp 的 resume（触发状态转换），
-     * 然后立即用合并源覆盖 ExoPlayer 的 MediaSource。
-     */
-    override fun resume() {
-        val mediaSource = pendingMediaSource
-        if (mediaSource == null || delegate.getCurrentPlaybackState() != PlaybackState.READY) {
-            delegate.resume()
-            return
-        }
-
-        pendingMediaSource = null
-        // 先让 mediamp 完成 READY→PLAYING 状态转换
-        delegate.resume()
-        // 然后立即用合并源覆盖（包含视频+音频）
-        exoPlayer.setMediaSource(mediaSource)
-        exoPlayer.prepare()
-        exoPlayer.play()
+        externalAudio.set(videoUrl, audioUrl, headers)
     }
 
     override fun stopPlayback() {
-        pendingMediaSource = null
+        // 停止播放时丢弃未消费的音频声明，避免应用到之后无关的媒体
+        externalAudio.clear()
         delegate.stopPlayback()
     }
 
@@ -107,35 +89,65 @@ class BiliExoPlayerMediampPlayer private constructor(
     }
 
     override fun close() {
-        pendingMediaSource = null
+        externalAudio.clear()
         delegate.close()
+    }
+}
+
+/**
+ * 外部音频（DASH 音视频分离）接入拦截器
+ *
+ * mediamp 在每次 open 时回调 `mediaSourceInterceptor`（视频 MediaSource 已构建、
+ * 尚未交给播放器），此时把音频源合并进去即可让视频与音频在同一次 open 中生效。
+ */
+private class ExternalAudioInterceptor(
+    private val appContext: Context,
+) {
+
+    private data class Spec(
+        val videoUrl: String,
+        val audioUrl: String,
+        val headers: Map<String, String>,
+    )
+
+    /** 待接入的音频声明（由加载协程写入，open 时在播放器线程消费） */
+    @Volatile
+    private var spec: Spec? = null
+
+    fun set(videoUrl: String, audioUrl: String?, headers: Map<String, String>) {
+        spec = if (audioUrl.isNullOrBlank()) null else Spec(videoUrl, audioUrl, headers)
+    }
+
+    fun clear() {
+        spec = null
     }
 
     /**
-     * 创建音视频合并的 MediaSource
+     * 仅对接入地址匹配的媒体合并音频源
      *
-     * 使用 [DefaultMediaSourceFactory] 自动选择合适的 extractor（FragmentedMp4 等），
-     * 能正确解析 B站 DASH 的 .m4s 格式。
+     * 快速切换视频时，旧协程的 open 可能晚于新声明到达；按地址匹配可以避免把
+     * 新视频的音频错配给旧视频（此时旧 open 保持无音频，随即被新视频取代）。
      */
-    private fun createMergingMediaSource(
-        videoUrl: String,
-        audioUrl: String,
-        headers: Map<String, String>,
-    ): MediaSource {
-        val dataSourceFactory: DataSource.Factory = if (videoUrl.startsWith("file://")) {
+    fun intercept(videoSource: MediaSource, data: MediaData): MediaSource {
+        val current = spec ?: return videoSource
+        if ((data as? UriMediaData)?.uri != current.videoUrl) return videoSource
+        // 已消费，避免影响后续其它媒体的 open
+        spec = null
+        return MergingMediaSource(videoSource, createAudioSource(current))
+    }
+
+    private fun createAudioSource(spec: Spec): MediaSource {
+        val dataSourceFactory: DataSource.Factory = if (spec.audioUrl.startsWith("file://")) {
+            // 本地下载的分离音频（[local-merging]）
             DefaultDataSource.Factory(appContext)
         } else {
-            val userAgent = headers["User-Agent"] ?: "Bilibili Freedoooooom/MarkII"
             DefaultHttpDataSource.Factory()
-                .setUserAgent(userAgent)
-                .setDefaultRequestProperties(headers)
+                .setUserAgent(spec.headers["User-Agent"] ?: DEFAULT_USER_AGENT)
+                .setDefaultRequestProperties(spec.headers)
         }
-
-        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
-        val videoMedia = MediaItem.Builder().setUri(videoUrl).build()
-        val audioMedia = MediaItem.Builder().setUri(audioUrl).build()
-        val videoSource = mediaSourceFactory.createMediaSource(videoMedia)
-        val audioSource = mediaSourceFactory.createMediaSource(audioMedia)
-        return MergingMediaSource(videoSource, audioSource)
+        val audioMedia = MediaItem.Builder().setUri(spec.audioUrl).build()
+        return DefaultMediaSourceFactory(dataSourceFactory).createMediaSource(audioMedia)
     }
 }
+
+private const val DEFAULT_USER_AGENT = "Bilibili Freedoooooom/MarkII"

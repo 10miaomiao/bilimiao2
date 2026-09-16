@@ -2,15 +2,15 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.Context
 import org.openani.mediamp.MediampPlayer
-import org.openani.mediamp.source.UriMediaData
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.platform.AndroidPlatformContext
 
 /**
  * 安卓端 actual：创建 BiliExoPlayerMediampPlayer
  *
- * 使用自定义包装器，支持 B站 DASH 音视频分离流（MergingMediaSource）。
- * 参考 animeko LibassExoPlayerMediampPlayer 的 setMediaData/resume 覆盖方案。
+ * 使用自定义包装器，支持 B站 DASH 音视频分离流：包装器通过 mediamp 的
+ * `mediaSourceInterceptor` 在每次 open 时用 [androidx.media3.exoplayer.source.MergingMediaSource]
+ * 合并视频流与外部音频流。
  */
 actual fun createMediampPlayer(): MediampPlayer {
     val context = PlatformProviders.context
@@ -19,28 +19,21 @@ actual fun createMediampPlayer(): MediampPlayer {
 }
 
 /**
- * 安卓端 actual：通过 BiliExoPlayerMediampPlayer 设置音视频分离的媒体数据
+ * 安卓端 actual：声明外部音频轨（B站 DASH 音视频分离）
  *
- * 创建 [MergingMediaData] 传入 [BiliExoPlayerMediampPlayer.setMediaData]，
- * 由包装器在 resume 时用 MergingMediaSource 覆盖 ExoPlayer 的媒体源。
+ * 只做声明，真正的接入由 [BiliExoPlayerMediampPlayer] 在 ExoPlayer open 时以
+ * [androidx.media3.exoplayer.source.MergingMediaSource] 合并（视频 + 音频一次 open）。
  */
-actual suspend fun setMergingMediaData(
+actual fun setExternalAudioTrack(
     player: MediampPlayer,
     videoUrl: String,
     audioUrl: String?,
     headers: Map<String, String>,
 ) {
-    if (audioUrl == null) {
-        // 无独立音频流，按普通单流处理
-        player.setMediaData(UriMediaData(videoUrl, headers))
-        return
-    }
-    // 先设置 pendingMediaSource（含视频+音频），resume 时由包装器应用
-    val biliPlayer = player as BiliExoPlayerMediampPlayer
-    biliPlayer.setPendingMediaSource(videoUrl, audioUrl, headers)
-    // 通过 mediamp 设置视频流（状态→READY），resume 时用合并源覆盖
-    player.setMediaData(UriMediaData(videoUrl, headers))
+    val biliPlayer = player as? BiliExoPlayerMediampPlayer ?: return
+    biliPlayer.setExternalAudioTrack(videoUrl, audioUrl, headers)
 }
+
 /**
  * 安卓端 actual：通过 ExoPlayer.setVolume 设置音量 (0-100 → 0.0-1.0)
  *
