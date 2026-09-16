@@ -3,11 +3,14 @@ package cn.a10miaomiao.bilimiao.compose.common.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 
@@ -109,29 +112,40 @@ fun rememberBottomBarBackStack(
 }
 
 /**
- * 装饰所有在用 Tab 的 backstack 为 [NavEntry] 列表，供 [androidx.navigation3.ui.NavDisplay] 的 entries 重载使用。
+ * 装饰 Tab 的 backstack 为 [NavEntry] 列表，供 [androidx.navigation3.ui.NavDisplay] 的 entries 重载使用。
  *
- * 返回 startRoute + 当前 Tab 的 entries 拼接（若不同），这样切换 Tab 时
- * 旧 Tab 的 NavEntry 仍在列表中，NavDisplay 保留其 composition 状态（ViewModel、rememberSaveable、滚动位置等）。
- * 参考官方 nav3-recipes multiplestacks 的 toDecoratedEntries。
+ * 所有 Tab 的 entries 都一起 remember，只有"在用"的 Tab 交给 NavDisplay 渲染：
+ * 这样切走 Tab 时它的 decorator 状态（ViewModel、rememberSaveable、滚动位置等）不会丢失，
+ * 再次切回时能恢复。参考官方 MultipleBackStackSample。
  */
 @Composable
 fun BottomBarBackStack.decorateEntries(
     entryProvider: (NavKey) -> NavEntry<NavKey>,
 ): List<NavEntry<NavKey>> {
-    val decorators = listOf(rememberSaveableStateHolderNavEntryDecorator<NavKey>())
-    // 所有在用 Tab：startRoute 始终保留，加上当前 Tab（若不同）
+    val entriesByRoute = backStacks.keys.associateWith { route ->
+        // Tab 数量会随 topLevelRoute 变化而变化，用 key 保证每个 Tab 拥有独立的 remember 槽位
+        key(route) {
+            // 每个 backstack 必须使用独立的 decorator 实例：SaveableStateHolder 与
+            // ViewModelStoreProvider 都以 entry.contentKey 为键，共用实例会让不同 Tab 中
+            // contentKey 相同的页面互相顶掉状态。
+            val decorators = listOf<NavEntryDecorator<NavKey>>(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                // 缺少该 decorator 时，页面内 viewModel() 取到的 LocalViewModelStoreOwner
+                // 会回退到宿主，导致同类型但参数不同的页面复用同一个 ViewModel 实例。
+                rememberViewModelStoreNavEntryDecorator(),
+            )
+            rememberDecoratedNavEntries(
+                backStack = backStacks.getValue(route),
+                entryDecorators = decorators,
+                entryProvider = entryProvider,
+            )
+        }
+    }
+    // 在用 Tab：startRoute 始终保留，加上当前 Tab（若不同）
     val inUseRoutes = if (topLevelRoute == startRoute) {
         listOf(startRoute)
     } else {
         listOf(startRoute, topLevelRoute)
     }
-    return inUseRoutes.flatMap { route ->
-        val stack = backStacks.getValue(route)
-        rememberDecoratedNavEntries(
-            backStack = stack,
-            entryDecorators = decorators,
-            entryProvider = entryProvider,
-        )
-    }
+    return inUseRoutes.flatMap { entriesByRoute.getValue(it) }
 }
