@@ -42,6 +42,8 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeHost
 import cn.a10miaomiao.bilimiao.compose.MainActivityComposeNavigator
 import cn.a10miaomiao.bilimiao.compose.StartViewState
@@ -78,6 +80,8 @@ import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.materialkolor.hct.Hct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
@@ -159,6 +163,8 @@ class MainActivity : ComponentActivity(), DIAware {
             bindSingleton { bottomSheetState }
         }
     }
+    /** PlaybackService（通知栏播放器控制器）的 MediaController 连接 */
+    private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var pendingDeepLink: Uri? = null
     private var lastExitBackPressedTime = 0L
     private var lastExitPlayerBackPressedTime = 0L
@@ -272,7 +278,8 @@ class MainActivity : ComponentActivity(), DIAware {
 
     private fun initRootView(savedInstanceState: Bundle?) {
         basePlayerDelegate.onCreate()
-        startViewState.playerState.setShowPlayer(basePlayerDelegate.isPlaying())
+        // 播放会话跨界面存活：重建后只要仍有播放源（含后台播放中）就恢复播放器展示
+        startViewState.playerState.setShowPlayer(basePlayerDelegate.isOpened())
         updateSmallModePlayerMaxHeight()
 
         setContent {
@@ -399,7 +406,35 @@ class MainActivity : ComponentActivity(), DIAware {
     override fun onResume() {
         super.onResume()
         basePlayerDelegate.onResume()
+        startPlaybackService()
         BilimiaoStatService.onResume(this)
+    }
+
+    /**
+     * 启动并绑定 PlaybackService
+     *
+     * PlaybackService 是 MediaSessionService，持有通知栏播放器控制器的 MediaSession。
+     * 播放器（PlayerDelegateImpl 创建的 ExoPlayer）经 MediaSessionBridge 被其接管，
+     * 因此这里只需保证服务已启动（通过 MediaController 绑定），并把它与播放器代理关联
+     * （通知栏的「停止」动作据此关闭播放器）。
+     */
+    private fun startPlaybackService() {
+        val instance = PlaybackService.instance
+        if (instance != null) {
+            instance.setPlayerDelegate(basePlayerDelegate)
+            return
+        }
+        // 绑定进行中则等待回调；已完成但服务已不在（如被系统回收）则重新绑定
+        mediaControllerFuture?.let {
+            if (!it.isDone) return
+            MediaController.releaseFuture(it)
+        }
+        val sessionToken = SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        val future = MediaController.Builder(this, sessionToken).buildAsync()
+        future.addListener({
+            PlaybackService.instance?.setPlayerDelegate(basePlayerDelegate)
+        }, MoreExecutors.directExecutor())
+        mediaControllerFuture = future
     }
 
     override fun onPause() {
@@ -409,6 +444,8 @@ class MainActivity : ComponentActivity(), DIAware {
     }
 
     override fun onDestroy() {
+        mediaControllerFuture?.let { MediaController.releaseFuture(it) }
+        mediaControllerFuture = null
         basePlayerDelegate.onDestroy()
         store.onDestroy()
         super.onDestroy()

@@ -23,25 +23,16 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleItem
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openani.mediamp.MediampPlayer
-import org.openani.mediamp.PlaybackState as MediampPlaybackState
 import org.openani.mediamp.features.PlaybackSpeed
 import org.openani.mediamp.source.UriMediaData
 import org.openani.mediamp.playUri
@@ -64,66 +55,131 @@ class PlayerDelegateImpl(
     isLockScreenOrientationPortraitProvider: () -> Boolean = { false },
 ) : BasePlayerDelegate {
 
-    // 播放器实例
-    private var _mediampPlayer: MediampPlayer? = null
-    override val mediampPlayer: MediampPlayer? get() = _mediampPlayer
+    /**
+     * 播放会话（进程级）
+     *
+     * 播放器实例、播放状态与长期存活的协程都归会话所有，本类只是它的门面：
+     * Activity 重建（切换深色模式、修改屏幕密度、系统回收）只会重建门面，
+     * 正在进行的播放不受影响，也不会产生第二个播放器实例。
+     */
+    private val session = PlayerSession.shared
+
+    // 播放器实例（归会话所有，跨界面存活）
+    private val _mediampPlayer get() = session.mediampPlayer
+    override val mediampPlayer: MediampPlayer? get() = session.mediampPlayer
 
     override var onShowPlayerChanged: ((Boolean) -> Unit)? = null
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var progressJob: Job? = null
+    private val coroutineScope get() = session.coroutineScope
+    private var progressJob: Job?
+        get() = session.progressJob
+        set(value) {
+            session.progressJob = value
+        }
 
     /** 字幕内容加载任务（下载字幕 JSON 并解析） */
-    private var subtitleLoadJob: Job? = null
+    private var subtitleLoadJob: Job?
+        get() = session.subtitleLoadJob
+        set(value) {
+            session.subtitleLoadJob = value
+        }
 
     /** 字幕加载请求序号，用于丢弃过期请求（快速切换字幕/切换视频时防止旧结果写回） */
-    private var subtitleRequestId = 0
+    private var subtitleRequestId: Int
+        get() = session.subtitleRequestId
+        set(value) {
+            session.subtitleRequestId = value
+        }
 
     /** 播放器原生状态订阅协程（mediamp playbackState → PlaybackStatus） */
-    private var playbackStateJob: Job? = null
+    private var playbackStateJob: Job?
+        get() = session.playbackStateJob
+        set(value) {
+            session.playbackStateJob = value
+        }
 
     /** 全屏与屏幕方向控制器 */
     val fullscreenController = FullscreenController(
-        scope = coroutineScope,
+        scope = session.coroutineScope,
         isLockScreenOrientationPortraitProvider = isLockScreenOrientationPortraitProvider,
     )
 
-    // 播放参数
-    private var quality = 64 // 默认 720P
-    private var fnval = 4048 // DASH 格式
+    // 播放参数（清晰度切换需要跨界面保留）
+    private var quality: Int
+        get() = session.quality
+        set(value) {
+            session.quality = value
+        }
+    private var fnval: Int
+        get() = session.fnval
+        set(value) {
+            session.fnval = value
+        }
 
     // 播放状态（低频稳定状态，见 PlaybackState）
-    private val _playbackState = MutableStateFlow(PlaybackState())
-    override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
+    private val _playbackState get() = session.playbackStateFlow
+    override val playbackState: StateFlow<PlaybackState> get() = session.playbackState
 
     // 播放源状态（当前播放内容，见 PlayerSourceState）
-    private val _sourceState = MutableStateFlow(PlayerSourceState())
-    override val sourceState: StateFlow<PlayerSourceState> = _sourceState.asStateFlow()
+    private val _sourceState get() = session.sourceStateFlow
+    override val sourceState: StateFlow<PlayerSourceState> get() = session.sourceState
 
     // 当前播放位置（高频，约 200ms 更新一次，独立 StateFlow 避免触发无关重组）
-    private val _currentPosition = MutableStateFlow(0L)
-    override val currentPosition: StateFlow<Long> = _currentPosition.asStateFlow()
+    private val _currentPosition get() = session.currentPositionFlow
+    override val currentPosition: StateFlow<Long> get() = session.currentPosition
 
     // 本地发送成功的弹幕（供弹幕渲染层本地回显，见 LocalDanmakuInfo）
-    private val _localDanmakuFlow = MutableSharedFlow<LocalDanmakuInfo>(extraBufferCapacity = 8)
-    override val localDanmakuFlow: SharedFlow<LocalDanmakuInfo> = _localDanmakuFlow.asSharedFlow()
+    private val _localDanmakuFlow get() = session.localDanmakuFlowShared
+    override val localDanmakuFlow: SharedFlow<LocalDanmakuInfo> get() = session.localDanmakuFlow
 
     // 画中画（应用外小窗）状态：由平台层 Activity 回调 onPictureInPictureModeChanged 驱动
-    private val _pictureInPicture = MutableStateFlow(false)
-    override val pictureInPicture: StateFlow<Boolean> = _pictureInPicture.asStateFlow()
+    private val _pictureInPicture get() = session.pictureInPictureFlow
+    override val pictureInPicture: StateFlow<Boolean> get() = session.pictureInPicture
 
-    // 分段播放状态
-    private var segmentUrls = listOf<String>()
-    private var segmentDurations = listOf<Long>()
-    private var currentSegmentIndex = 0
-    private var segmentOffsetMs = 0L // 当前段之前的累计时长
-    private var segmentHeaders: Map<String, String> = emptyMap()
+    // 分段播放状态（分段视频播放中需要跨界面保留）
+    private var segmentUrls: List<String>
+        get() = session.segmentUrls
+        set(value) {
+            session.segmentUrls = value
+        }
+    private var segmentDurations: List<Long>
+        get() = session.segmentDurations
+        set(value) {
+            session.segmentDurations = value
+        }
+    private var currentSegmentIndex: Int
+        get() = session.currentSegmentIndex
+        set(value) {
+            session.currentSegmentIndex = value
+        }
+    private var segmentOffsetMs: Long // 当前段之前的累计时长
+        get() = session.segmentOffsetMs
+        set(value) {
+            session.segmentOffsetMs = value
+        }
+    private var segmentHeaders: Map<String, String>
+        get() = session.segmentHeaders
+        set(value) {
+            session.segmentHeaders = value
+        }
+
+    init {
+        // 播放完成后的自动连播需要播放列表 Store，由当前存活的 delegate 提供；
+        // onDestroy 时注销，避免会话长期持有界面作用域的对象
+        session.onPlaybackCompleted = { onAutoCompletion() }
+    }
 
 
     override fun createPlayer(): MediampPlayer {
+        // 会话中已有播放器则直接复用：Activity 重建时不能创建第二个播放器，
+        // 否则旧实例仍在播放且无人释放，会同时发出两路声音
+        session.mediampPlayer?.let { existing ->
+            session.observePlaybackState(existing)
+            return existing
+        }
         val player = createMediampPlayer()
-        _mediampPlayer = player
-        observePlaybackState(player)
+        session.mediampPlayer = player
+        session.observePlaybackState(player)
         return player
     }
 
@@ -139,7 +195,7 @@ class PlayerDelegateImpl(
     private fun loadAndPlay(source: BasePlayerSource, reloadSubtitle: Boolean = true) {
         val player = _mediampPlayer ?: return
         // 确保播放器状态订阅存在（closePlayer 后重新打开时需重新订阅）
-        observePlaybackState(player)
+        session.observePlaybackState(player)
         // 先停止之前的播放
         progressJob?.cancel()
         // 取消并失效旧的字幕加载任务：切换视频时旧任务不能把字幕内容写回；
@@ -226,6 +282,15 @@ class PlayerDelegateImpl(
 
                 val headers = sourceInfo.header
 
+                // 通知栏播放器控制器（安卓）的标题 / UP主 / 封面：
+                // 元数据随本次 open 写入 MediaItem，必须在加载媒体之前设置
+                updateMediaSessionMetadata(
+                    player = player,
+                    title = source.title,
+                    artist = source.ownerName,
+                    artworkUri = source.coverUrl.takeIf { it.isNotBlank() }?.let { UrlUtil.autoHttps(it) },
+                )
+
                 when (resolved.format) {
                     PlaybackFormat.MERGING -> {
                         // 音视频分离（B站 DASH 主流形态）：先声明外部音频，再加载视频流。
@@ -280,8 +345,8 @@ class PlayerDelegateImpl(
                     GlobalToaster.show("自动恢复: ${formatTime(sourceInfo.lastPlayTime)}")
                 }
 
-                // 开始进度跟踪
-                startProgressTracking(source)
+                // 开始进度跟踪（任务归 PlayerSession，界面重建不中断）
+                session.startProgressTracking(source)
             } catch (e: Exception) {
                 e.printStackTrace()
                 _playbackState.update {
@@ -372,85 +437,9 @@ class PlayerDelegateImpl(
         }
     }
 
-    /**
-     * 订阅播放器原生状态，驱动业务播放状态（PlaybackStatus）
-     *
-     * mediamp 状态机直接上报缓冲等状态（ExoPlayer 的 STATE_BUFFERING、mpv 的 paused-for-cache），
-     * 相比原先基于播放位置停滞的轮询推断：零延迟、零误判。
-     *
-     * 以下状态不在此映射，由业务层控制：
-     * - READY / CREATED / DESTROYED：属于业务加载流程（Loading），由 loadAndPlay 维护
-     * - FINISHED：由进度轮询的完成检测统一处理（含分段切换与自动连播逻辑）
-     */
-    private fun observePlaybackState(player: MediampPlayer) {
-        playbackStateJob?.cancel()
-        playbackStateJob = coroutineScope.launch {
-            player.playbackState.collect { state ->
-                when (state) {
-                    MediampPlaybackState.PLAYING -> setPlaybackStatus(PlaybackStatus.Playing)
-                    MediampPlaybackState.PAUSED -> setPlaybackStatus(PlaybackStatus.Paused)
-                    MediampPlaybackState.PAUSED_BUFFERING -> setPlaybackStatus(PlaybackStatus.Buffering)
-                    MediampPlaybackState.ERROR -> _playbackState.update {
-                        it.copy(
-                            status = PlaybackStatus.Error,
-                            errorMessage = it.errorMessage ?: "播放出错",
-                        )
-                    }
-                    else -> Unit
-                }
-            }
-        }
-    }
-
-    private fun setPlaybackStatus(status: PlaybackStatus) {
-        if (_playbackState.value.status != status) {
-            _playbackState.update { it.copy(status = status) }
-        }
-    }
-
-    private fun startProgressTracking(source: BasePlayerSource) {
-        progressJob?.cancel()
-        progressJob = coroutineScope.launch {
-            while (isActive) {
-                delay(200) // 200ms 更新一次，减少弹幕 wall clock 推进累积误差
-                _mediampPlayer?.let { player ->
-                    val pos = player.currentPositionMillis.value
-                    val position = segmentOffsetMs + pos
-                    _currentPosition.value = position
-
-                    // 检测播放完成
-                    if (_playbackState.value.duration > 0
-                        && position >= _playbackState.value.duration - 1000
-                    ) {
-                        if (segmentUrls.isNotEmpty() && currentSegmentIndex < segmentUrls.size - 1) {
-                            loadNextSegment(player)
-                        } else if (_playbackState.value.status != PlaybackStatus.Completed) {
-                            _playbackState.update { it.copy(status = PlaybackStatus.Completed) }
-                            onAutoCompletion()
-                            return@let
-                        }
-                    }
-
-                    // 检测分段结束
-                    if (segmentUrls.isNotEmpty()
-                        && currentSegmentIndex < segmentUrls.size - 1
-                        && _playbackState.value.status != PlaybackStatus.Completed
-                    ) {
-                        val segmentDuration = segmentDurations.getOrNull(currentSegmentIndex) ?: 0L
-                        if (segmentDuration > 0 && pos >= segmentDuration - 500) {
-                            loadNextSegment(player)
-                        }
-                    }
-                }
-
-                // 每5秒上报历史记录
-                val position = _currentPosition.value
-                if (position % 5000 < 1000) {
-                    source.historyReport(position / 1000)
-                }
-            }
-        }
-    }
+    // 播放器状态订阅（observePlaybackState）与进度跟踪（startProgressTracking）已迁移至
+    // PlayerSession：两者都是长期存活的协程，若随本类（界面作用域）销毁而取消，
+    // 后台播放就会出现「有声音，但进度、分段切换、播放完成检测全部停摆」。
 
     /**
      * 播放完成后的自动播放逻辑（对齐原安卓版 PlayerController.onAutoCompletion）
@@ -492,20 +481,6 @@ class PlayerDelegateImpl(
                 openPlayer(source)
             }
             // 否则保持 status = Completed 状态，显示播放完成覆盖层
-        }
-    }
-
-    private suspend fun loadNextSegment(player: MediampPlayer) {
-        currentSegmentIndex++
-        if (currentSegmentIndex in segmentUrls.indices) {
-            val actualDuration = player.currentPositionMillis.value
-            if (segmentDurations[currentSegmentIndex - 1] == 0L) {
-                segmentDurations = segmentDurations.toMutableList().also {
-                    it[currentSegmentIndex - 1] = actualDuration
-                }
-            }
-            segmentOffsetMs += actualDuration
-            player.setMediaData(UriMediaData(segmentUrls[currentSegmentIndex], segmentHeaders))
         }
     }
 
@@ -725,7 +700,10 @@ class PlayerDelegateImpl(
     override fun onStart() {}
     override fun onStop() {}
     override fun onDestroy() {
-        coroutineScope.cancel()
+        // 播放会话（播放器、状态、协程）归 PlayerSession 所有，跨界面重建存活，
+        // 因此这里不取消协程；只注销需要 Store 的回调，避免会话持有已销毁界面的对象
+        session.onPlaybackCompleted = null
+        onShowPlayerChanged = null
     }
 
     override fun onBackPressed(): Boolean {

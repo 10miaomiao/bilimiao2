@@ -35,6 +35,21 @@ actual fun setExternalAudioTrack(
 }
 
 /**
+ * 安卓端 actual：把标题 / UP主 / 封面写入底层 ExoPlayer 的 MediaItem 元数据
+ *
+ * 由 PlaybackService 的 MediaSession 渲染成通知栏播放器控制器的标题与封面。
+ */
+actual fun updateMediaSessionMetadata(
+    player: MediampPlayer,
+    title: String?,
+    artist: String?,
+    artworkUri: String?,
+) {
+    val biliPlayer = player as? BiliExoPlayerMediampPlayer ?: return
+    biliPlayer.setNotificationMetadata(title, artist, artworkUri)
+}
+
+/**
  * 安卓端 actual：通过 ExoPlayer.setVolume 设置音量 (0-100 → 0.0-1.0)
  *
  * ExoPlayerMediampPlayer 不支持 AudioLevelController feature，

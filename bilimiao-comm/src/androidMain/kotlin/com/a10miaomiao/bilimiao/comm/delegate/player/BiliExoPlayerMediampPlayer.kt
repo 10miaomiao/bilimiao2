@@ -1,7 +1,10 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.Context
+import android.net.Uri
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -40,6 +43,7 @@ import org.openani.mediamp.source.UriMediaData
 class BiliExoPlayerMediampPlayer private constructor(
     private val delegate: ExoPlayerMediampPlayer,
     private val externalAudio: ExternalAudioInterceptor,
+    private val notificationMetadata: NotificationMetadataInterceptor,
 ) : MediampPlayer by delegate {
 
     companion object {
@@ -47,14 +51,23 @@ class BiliExoPlayerMediampPlayer private constructor(
             context: Context,
             parentCoroutineContext: kotlin.coroutines.CoroutineContext,
         ): BiliExoPlayerMediampPlayer {
-            val interceptor = ExternalAudioInterceptor(context.applicationContext)
+            val audioInterceptor = ExternalAudioInterceptor(context.applicationContext)
+            val metadataInterceptor = NotificationMetadataInterceptor()
             val delegate = ExoPlayerMediampPlayer(
                 context = context,
                 parentCoroutineContext = parentCoroutineContext,
-                mediaSourceInterceptor = { source, data -> interceptor.intercept(source, data) },
+                mediaSourceInterceptor = { source, data ->
+                    // 先接入外部音频，再附加通知栏元数据（顺序无关，但合并后统一附加更直观）
+                    metadataInterceptor.intercept(audioInterceptor.intercept(source, data))
+                },
             )
-            return BiliExoPlayerMediampPlayer(delegate, interceptor)
+            return BiliExoPlayerMediampPlayer(delegate, audioInterceptor, metadataInterceptor)
         }
+    }
+
+    init {
+        // 交给 PlaybackService 的 MediaSession，由 media3 在播放时生成通知栏播放器控制器
+        MediaSessionBridge.registerPlayer(exoPlayer)
     }
 
     /** 底层 ExoPlayerMediampPlayer 委托实例，供 ExoPlayerMediampPlayerSurface 使用 */
@@ -88,8 +101,20 @@ class BiliExoPlayerMediampPlayer private constructor(
         delegate.seekTo(positionMillis)
     }
 
+    /**
+     * 更新通知栏播放器控制器展示的信息（标题 / UP主 / 封面）
+     *
+     * 必须在加载媒体（`setMediaData`）之前调用，元数据会随本次 open 写入 MediaItem，
+     * 否则通知栏只显示播放地址。
+     */
+    fun setNotificationMetadata(title: String?, artist: String?, artworkUri: String?) {
+        notificationMetadata.set(title, artist, artworkUri)
+    }
+
     override fun close() {
         externalAudio.clear()
+        notificationMetadata.clear()
+        MediaSessionBridge.unregisterPlayer(exoPlayer)
         delegate.close()
     }
 }
@@ -147,6 +172,48 @@ private class ExternalAudioInterceptor(
         }
         val audioMedia = MediaItem.Builder().setUri(spec.audioUrl).build()
         return DefaultMediaSourceFactory(dataSourceFactory).createMediaSource(audioMedia)
+    }
+}
+
+/**
+ * 通知栏元数据接入拦截器
+ *
+ * 通知栏播放器控制器的标题 / UP主 / 封面取自播放器当前 MediaItem 的 [MediaMetadata]，
+ * 而 mediamp 构建 MediaItem 时只设置 uri，因此这里在每次 open 时把业务侧
+ * （[com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl]）设置好的
+ * 元数据写入即将加载的媒体源。
+ */
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
+private class NotificationMetadataInterceptor {
+
+    @Volatile
+    private var mediaMetadata: MediaMetadata? = null
+
+    fun set(title: String?, artist: String?, artworkUri: String?) {
+        mediaMetadata = if (title.isNullOrBlank() && artist.isNullOrBlank() && artworkUri.isNullOrBlank()) {
+            null
+        } else {
+            MediaMetadata.Builder().apply {
+                title?.let { setTitle(it) }
+                artist?.let { setArtist(it) }
+                artworkUri?.let { setArtworkUri(Uri.parse(it)) }
+            }.build()
+        }
+    }
+
+    fun clear() {
+        mediaMetadata = null
+    }
+
+    fun intercept(source: MediaSource): MediaSource {
+        val metadata = mediaMetadata ?: return source
+        // updateMediaItem 是「整体替换」语义，必须以原 MediaItem 为基础派生：
+        // 若传入只带 mediaMetadata 的 MediaItem，localConfiguration（uri）会被置空，
+        // 播放时 ProgressiveMediaSource.getLocalConfiguration() 的 checkNotNull 会抛 NPE。
+        val updatedItem = source.mediaItem.buildUpon().setMediaMetadata(metadata).build()
+        if (!source.canUpdateMediaItem(updatedItem)) return source
+        source.updateMediaItem(updatedItem)
+        return source
     }
 }
 

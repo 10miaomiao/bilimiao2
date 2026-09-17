@@ -44,6 +44,26 @@ expect fun setExternalAudioTrack(
 )
 
 /**
+ * 更新系统「通知栏 / 锁屏」播放控制器展示的信息（仅安卓端有效）
+ *
+ * 安卓端把标题 / UP主 / 封面写入底层 ExoPlayer 的 MediaItem 元数据，由 media3 的
+ * MediaSessionService 渲染通知栏播放器控制器（标题、封面），桌面端为 no-op。
+ *
+ * 必须在加载该媒体（`setMediaData` / `playUri`）之前调用，否则元数据不会随本次 open 生效。
+ *
+ * @param player 目标播放器
+ * @param title 视频标题（为空时通知栏不显示标题）
+ * @param artist UP主名称
+ * @param artworkUri 封面地址
+ */
+expect fun updateMediaSessionMetadata(
+    player: MediampPlayer,
+    title: String?,
+    artist: String?,
+    artworkUri: String?,
+)
+
+/**
  * 设置音量 (0-100)
  *
  * - 安卓 ExoPlayer：通过 AudioLevelController feature

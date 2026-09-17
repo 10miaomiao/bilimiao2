@@ -41,6 +41,17 @@ actual fun setExternalAudioTrack(
 }
 
 /**
+ * 桌面端 actual：no-op（桌面端无系统通知栏播放器控制器）
+ */
+actual fun updateMediaSessionMetadata(
+    player: MediampPlayer,
+    title: String?,
+    artist: String?,
+    artworkUri: String?,
+) {
+}
+
+/**
  * 桌面端 actual：通过 mpv 的 volume 属性设置音量
  */
 actual fun setPlayerVolume(player: MediampPlayer, volume: Int) {
