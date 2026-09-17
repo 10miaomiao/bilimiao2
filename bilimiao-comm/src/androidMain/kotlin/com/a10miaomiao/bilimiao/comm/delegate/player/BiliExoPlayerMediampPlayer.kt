@@ -2,6 +2,8 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.Context
 import android.net.Uri
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
@@ -99,6 +101,20 @@ class BiliExoPlayerMediampPlayer private constructor(
     override fun seekTo(positionMillis: Long) {
         if (delegate.getCurrentPlaybackState() < PlaybackState.READY) return
         delegate.seekTo(positionMillis)
+    }
+
+    /**
+     * 应用「占用音频焦点」开关（对齐旧版 DanmakuVideoPlayer.enabledAudioFocus）
+     *
+     * 通过 media3 的 `handleAudioFocus` 控制音频焦点：
+     * - 开启：播放期间申请音频焦点，其它应用播放 / 来电抢占时自动暂停，焦点恢复后自动续播；
+     * - 关闭：不申请音频焦点，可与其它应用同时出声。
+     *
+     * media3 支持运行时切换（`setAudioAttributes` 会据此立即申请 / 放弃焦点），
+     * 因此设置变更无需重建播放器。
+     */
+    fun setAudioFocusEnabled(enabled: Boolean) {
+        exoPlayer.setAudioAttributes(MEDIA_AUDIO_ATTRIBUTES, enabled)
     }
 
     /**
@@ -218,3 +234,15 @@ private class NotificationMetadataInterceptor {
 }
 
 private const val DEFAULT_USER_AGENT = "Bilibili Freedoooooom/MarkII"
+
+/**
+ * 播放媒体的音频属性（视频场景）。
+ *
+ * media3 要求开启音频焦点处理时 usage 为 [C.USAGE_MEDIA] 或 [C.USAGE_GAME]，
+ * 内容类型声明为影片，使系统 / 蓝牙设备按媒体播放处理，并在抢占音频焦点时按
+ * 「媒体」类别的惯例暂停本应用。
+ */
+private val MEDIA_AUDIO_ATTRIBUTES: AudioAttributes = AudioAttributes.Builder()
+    .setUsage(C.USAGE_MEDIA)
+    .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+    .build()

@@ -1,5 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.LocalDanmakuInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
@@ -108,6 +110,54 @@ class PlayerSession {
      * 的对象，因此后台（界面已销毁）播放完成时不会触发自动连播，但也不会泄漏 Activity。
      */
     var onPlaybackCompleted: (() -> Unit)? = null
+
+    /**
+     * 「后台播放」开关（设置缓存，见 [SettingPreferences.PlayerBackground]）
+     *
+     * [PlayerDelegateImpl.onStart]/[PlayerDelegateImpl.onStop] 是同步回调，无法直接读取
+     * DataStore，因此把开关缓存到会话中由 [observePlayerSettings] 维护：关闭后应用退到
+     * 后台即暂停播放、回到前台再自动续播（对齐旧版 PlayerDelegate2）。
+     */
+    var backgroundPlayEnabled: Boolean = true
+        private set
+
+    /**
+     * 「占用音频焦点」开关（设置缓存，见 [SettingPreferences.PlayerAudioFocus]）
+     *
+     * 开启时播放期间申请音频焦点（被其它应用抢占时暂停、释放后自动续播），
+     * 关闭时不申请焦点、可与其它应用同时出声。
+     */
+    var audioFocusEnabled: Boolean = true
+        private set
+
+    /** 应用是否处于后台（由 [PlayerDelegateImpl.onStart]/[PlayerDelegateImpl.onStop] 维护） */
+    var inBackground: Boolean = false
+
+    /** 是否因「关闭后台播放」而在进入后台时被自动暂停（回到前台时据此恢复） */
+    var pausedByBackground: Boolean = false
+
+    /** 播放设置监听任务（长期存活） */
+    private var settingsJob: Job? = null
+
+    /**
+     * 监听「后台播放 / 占用音频焦点」设置，刷新缓存并同步到播放器
+     *
+     * 幂等：重复调用只保留一个监听协程。音频焦点开关变化时立即应用到当前播放器
+     * （media3 的 `setAudioAttributes(..., handleAudioFocus)` 支持运行时切换，无需重建播放器）。
+     */
+    fun observePlayerSettings() {
+        if (settingsJob?.isActive == true) return
+        settingsJob = coroutineScope.launch {
+            appDataStore.data.collect { preferences ->
+                backgroundPlayEnabled = preferences[SettingPreferences.PlayerBackground] ?: true
+                val audioFocus = preferences[SettingPreferences.PlayerAudioFocus] ?: true
+                if (audioFocus != audioFocusEnabled) {
+                    audioFocusEnabled = audioFocus
+                    mediampPlayer?.let { setPlayerAudioFocusEnabled(it, audioFocus) }
+                }
+            }
+        }
+    }
 
     /**
      * 订阅播放器原生状态，驱动业务播放状态（[PlaybackStatus]）

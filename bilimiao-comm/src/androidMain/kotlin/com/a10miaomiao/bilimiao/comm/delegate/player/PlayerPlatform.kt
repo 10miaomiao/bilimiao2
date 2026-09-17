@@ -64,6 +64,17 @@ actual fun setPlayerVolume(player: MediampPlayer, volume: Int) {
 }
 
 /**
+ * 安卓端 actual：应用「占用音频焦点」开关
+ *
+ * 交由 media3 的 `handleAudioFocus` 处理：开启时播放期间申请音频焦点
+ * （被其它应用抢占时暂停、释放后自动续播），关闭时不申请音频焦点。
+ */
+actual fun setPlayerAudioFocusEnabled(player: MediampPlayer, enabled: Boolean) {
+    val biliPlayer = player as? BiliExoPlayerMediampPlayer ?: return
+    biliPlayer.setAudioFocusEnabled(enabled)
+}
+
+/**
  * 安卓端 actual：通过 Activity.requestedOrientation 设置屏幕方向
  *
  * Activity 引用由 [activityHolder] 提供（在 MainActivity 中初始化）。

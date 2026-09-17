@@ -72,6 +72,19 @@ expect fun updateMediaSessionMetadata(
 expect fun setPlayerVolume(player: MediampPlayer, volume: Int)
 
 /**
+ * 应用「占用音频焦点」开关（对齐旧版 DanmakuVideoPlayer.enabledAudioFocus）
+ *
+ * - 安卓：通过 media3 [androidx.media3.exoplayer.ExoPlayer] 的 `handleAudioFocus` 控制。
+ *   开启时播放期间申请音频焦点，其它应用播放 / 来电抢占时自动暂停、释放后自动续播；
+ *   关闭时不申请音频焦点，可与其它应用同时出声。支持运行时切换。
+ * - 桌面：no-op（桌面端无系统音频焦点概念）
+ *
+ * @param player 目标播放器
+ * @param enabled 是否占用音频焦点
+ */
+expect fun setPlayerAudioFocusEnabled(player: MediampPlayer, enabled: Boolean)
+
+/**
  * 设置屏幕方向（平台特定）
  *
  * - 安卓：调用 `Activity.requestedOrientation`，映射 [ScreenOrientationRequest] 到 `ActivityInfo` 常量

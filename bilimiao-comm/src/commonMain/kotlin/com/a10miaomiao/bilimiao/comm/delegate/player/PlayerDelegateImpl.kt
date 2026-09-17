@@ -172,15 +172,19 @@ class PlayerDelegateImpl(
 
 
     override fun createPlayer(): MediampPlayer {
+        // 监听「后台播放 / 占用音频焦点」设置（幂等），并立即把音频焦点开关同步到播放器
+        session.observePlayerSettings()
         // 会话中已有播放器则直接复用：Activity 重建时不能创建第二个播放器，
         // 否则旧实例仍在播放且无人释放，会同时发出两路声音
         session.mediampPlayer?.let { existing ->
             session.observePlaybackState(existing)
+            setPlayerAudioFocusEnabled(existing, session.audioFocusEnabled)
             return existing
         }
         val player = createMediampPlayer()
         session.mediampPlayer = player
         session.observePlaybackState(player)
+        setPlayerAudioFocusEnabled(player, session.audioFocusEnabled)
         return player
     }
 
@@ -322,10 +326,10 @@ class PlayerDelegateImpl(
                     PlaybackFormat.TEMP_MPD -> {
                         // [dash-mpd] 格式：音频轨已写入 MPD（见 DashSource），无需外部音频声明
                         setExternalAudioTrack(player, resolved.videoUrl, null, headers)
-                        // 将 MPD XML 写入临时文件播放
+                        // 将 MPD XML 写入临时文件播放（playWhenReady=false，起播统一交给下方逻辑）
                         val mpdFile = createTempMpdFile(resolved.mpdContent!!)
                         if (mpdFile != null) {
-                            player.playUri(mpdFile.absolutePath)
+                            player.playUri(mpdFile.absolutePath, playWhenReady = false)
                         } else {
                             player.setMediaData(UriMediaData(resolved.videoUrl, headers))
                         }
@@ -334,7 +338,13 @@ class PlayerDelegateImpl(
 
                 // playUri 只设置媒体数据（状态变为 READY），需要调用 resume 开始播放
                 // 后续 Playing/Paused/Buffering 状态由 observePlaybackState 订阅播放器状态驱动
-                player.resume()
+                // 关闭「后台播放」且当前处于后台时不自动起播，避免在后台响声音；
+                // 此时记为「被后台暂停」，回到前台由 onStart 恢复（对齐旧版 PlayerDelegate2）
+                if (session.inBackground && !session.backgroundPlayEnabled) {
+                    session.pausedByBackground = true
+                } else {
+                    player.resume()
+                }
 
                 // 播放历史恢复
                 if (sourceInfo.lastPlayCid == source.id
@@ -698,6 +708,16 @@ class PlayerDelegateImpl(
 
     override fun isPause(): Boolean = _playbackState.value.status == PlaybackStatus.Paused
 
+    /**
+     * 播放是否处于活跃状态（播放中或缓冲中）
+     *
+     * 用于判断进入后台时是否需要暂停：缓冲中的播放回到后台后仍会继续出声，
+     * 因此与播放中一并视为活跃。
+     */
+    private fun isPlaybackActive(): Boolean =
+        _playbackState.value.status == PlaybackStatus.Playing ||
+            _playbackState.value.status == PlaybackStatus.Buffering
+
     override fun isOpened(): Boolean = _sourceState.value.currentSource != null
 
     override fun getSourceIds(): PlayerSourceIds {
@@ -708,8 +728,26 @@ class PlayerDelegateImpl(
     override fun onCreate() {}
     override fun onResume() {}
     override fun onPause() {}
-    override fun onStart() {}
-    override fun onStop() {}
+
+    override fun onStart() {
+        // 回到前台：恢复因「关闭后台播放」而自动暂停的播放（对齐旧版 PlayerDelegate2.onStart）
+        session.inBackground = false
+        if (session.pausedByBackground) {
+            session.pausedByBackground = false
+            resume()
+        }
+    }
+
+    override fun onStop() {
+        // 关闭「后台播放」时，应用退到后台即暂停播放；开启时保持后台继续播放
+        // （对齐旧版 PlayerDelegate2.onStop）
+        session.inBackground = true
+        if (!session.backgroundPlayEnabled && isPlaybackActive()) {
+            session.pausedByBackground = true
+            pause()
+        }
+    }
+
     override fun onDestroy() {
         // 播放会话（播放器、状态、协程）归 PlayerSession 所有，跨界面重建存活，
         // 因此这里不取消协程；只注销需要 Store 的回调，避免会话持有已销毁界面的对象

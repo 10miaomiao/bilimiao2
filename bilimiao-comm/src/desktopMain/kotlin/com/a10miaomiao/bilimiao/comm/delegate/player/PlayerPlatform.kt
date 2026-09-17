@@ -63,6 +63,12 @@ actual fun setPlayerVolume(player: MediampPlayer, volume: Int) {
 }
 
 /**
+ * 桌面端 actual：no-op（桌面端无系统音频焦点概念，不存在与其它应用互斥的焦点模型）
+ */
+actual fun setPlayerAudioFocusEnabled(player: MediampPlayer, enabled: Boolean) {
+}
+
+/**
  * 桌面端 actual：no-op（桌面端无屏幕方向概念，全屏通过窗口管理处理）
  */
 actual fun setRequestedOrientation(request: ScreenOrientationRequest) {
