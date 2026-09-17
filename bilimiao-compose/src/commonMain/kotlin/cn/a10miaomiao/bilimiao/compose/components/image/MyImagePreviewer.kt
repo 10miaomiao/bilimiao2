@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -124,7 +125,9 @@ fun MyImagePreviewer(
                 model = imageUrl,
                 contentDescription = null,
             ) {
-                if (painter.state is AsyncImagePainter.State.Success) {
+                // Coil3 的 painter.state 是 StateFlow，需要收集后再判断
+                val state by painter.state.collectAsState()
+                if (state is AsyncImagePainter.State.Success) {
                     painterState.value = painter
                     imagePreviewerState.onImageLoaded(page)
                 }
