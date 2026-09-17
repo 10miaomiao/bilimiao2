@@ -113,6 +113,11 @@ fun VideoScaffold(
     centerOverlay: @Composable BoxScope.() -> Unit = {},
     framePreviewOverlay: @Composable BoxScope.() -> Unit = {},
     playerStatsOverlay: @Composable BoxScope.() -> Unit = {},
+    /**
+     * 顶层状态覆盖层（如播放异常 / 播放完成），位于所有控制器之上、铺满整个播放器，
+     * 不应用系统窗口边距。由调用方决定何时显示。
+     */
+    statusOverlay: @Composable BoxScope.() -> Unit = {},
 ) {
     val inlineSliderOnly = controllerState.visibility == ControllerVisibility.InlineSliderOnly
     val controllerVisibility = controllerState.visibility
@@ -433,6 +438,10 @@ fun VideoScaffold(
                 // 右侧 sheet
                 Box(Modifier.matchParentSize().windowInsetsPadding(contentWindowInsets)) {
                     rhsSheet()
+                }
+                // 顶层状态覆盖层（播放异常 / 播放完成）
+                Box(Modifier.matchParentSize()) {
+                    statusOverlay()
                 }
             }
         }

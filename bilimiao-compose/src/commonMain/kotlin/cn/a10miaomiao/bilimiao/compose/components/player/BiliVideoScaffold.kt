@@ -79,7 +79,6 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerM
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenType
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenTypeButton
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerTopBar
-import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoLoadingIndicator
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliAnimTV
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
@@ -169,6 +168,10 @@ fun BiliVideoScaffold(
     val isCompleted = status == PlaybackStatus.Completed
     val duration = playbackState.duration
     val errorMessage = playbackState.errorMessage
+    // 播放异常 / 播放完成覆盖层：异常优先于完成展示
+    val showErrorOverlay = status == PlaybackStatus.Error
+    val showCompletionOverlay = isCompleted && !showErrorOverlay
+    val showStatusOverlay = showErrorOverlay || showCompletionOverlay
     val danmakuVisible = playbackState.danmakuVisible
     val playbackSpeed = playbackState.playbackSpeed
     val currentSource = sourceState.currentSource
@@ -334,8 +337,9 @@ fun BiliVideoScaffold(
             expanded = expandedLayout,
             modifier = modifier,
             controllerState = controllerState,
-            // 画中画窗口内控制器全部隐藏（手势层同步关闭），仅显示画面/弹幕/字幕
-            gestureLocked = isLocked || inPictureInPicture,
+            // 画中画窗口内控制器全部隐藏（手势层同步关闭），仅显示画面/弹幕/字幕；
+            // 播放异常/播放完成覆盖层显示时同样关闭手势，避免手势穿透到覆盖层下方
+            gestureLocked = isLocked || inPictureInPicture || showStatusOverlay,
             contentWindowInsets = contentWindowInsets,
             topBar = {
                 PlayerTopBar(
@@ -493,20 +497,6 @@ fun BiliVideoScaffold(
                         modifier = Modifier.align(Alignment.Center),
                     )
                 }
-                errorMessage?.let { msg ->
-                    VideoLoadingIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        showProgress = false,
-                        text = { androidx.compose.material3.Text(msg) },
-                    )
-                }
-                if (isCompleted) {
-                    VideoLoadingIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        showProgress = false,
-                        text = { androidx.compose.material3.Text("播放完成") },
-                    )
-                }
             },
             bottomBar = {
                 PlayerControllerBar(
@@ -622,6 +612,25 @@ fun BiliVideoScaffold(
                         isLocked = isLocked,
                         onClick = { isLocked = !isLocked },
                     )
+                }
+            },
+            // 顶层覆盖层：播放异常 / 播放完成（画中画窗口内不显示）
+            statusOverlay = {
+                if (showStatusOverlay && !inPictureInPicture) {
+                    if (showErrorOverlay) {
+                        PlayerErrorOverlay(
+                            message = errorMessage ?: "播放出错",
+                            onRetry = { playerDelegate.retry() },
+                            onClose = onBack,
+                            modifier = Modifier.matchParentSize(),
+                        )
+                    } else {
+                        PlayerCompletionOverlay(
+                            onReplay = { playerDelegate.replay() },
+                            onClose = onBack,
+                            modifier = Modifier.matchParentSize(),
+                        )
+                    }
                 }
             },
         )

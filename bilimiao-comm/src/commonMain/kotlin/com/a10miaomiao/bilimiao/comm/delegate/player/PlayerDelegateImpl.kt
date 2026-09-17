@@ -6,6 +6,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import com.a10miaomiao.bilimiao.comm.entity.player.SubtitleJsonInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.toVideoPlayerSource
+import com.a10miaomiao.bilimiao.comm.exception.AreaLimitException
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
@@ -347,6 +348,14 @@ class PlayerDelegateImpl(
 
                 // 开始进度跟踪（任务归 PlayerSession，界面重建不中断）
                 session.startProgressTracking(source)
+            } catch (e: AreaLimitException) {
+                // 区域限制（对齐旧版 PlayerDelegate2.loadPlayerSource 的提示文案）
+                _playbackState.update {
+                    it.copy(
+                        status = PlaybackStatus.Error,
+                        errorMessage = "抱歉您所在地区不可观看！",
+                    )
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _playbackState.update {
@@ -447,6 +456,8 @@ class PlayerDelegateImpl(
     private fun onAutoCompletion() {
         val source = _sourceState.value.currentSource ?: return
         coroutineScope.launch {
+            // 播放结束先上报一次观看进度（对齐旧版 PlayerController.onAutoCompletion）
+            source.historyReport(_currentPosition.value / 1000)
             val (order, orderRandom) = SettingPreferences.mapPreferences {
                 val order = it[SettingPreferences.PlayerOrder] ?: SettingConstants.PLAYER_ORDER_DEFAULT
                 val orderRandom = it[SettingPreferences.PlayerOrderRandom] ?: false
