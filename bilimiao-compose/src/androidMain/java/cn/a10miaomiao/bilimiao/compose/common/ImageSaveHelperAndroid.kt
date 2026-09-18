@@ -1,5 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.common
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -7,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.core.content.FileProvider
 import coil3.ImageLoader
 import coil3.request.ImageRequest
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
@@ -49,6 +52,30 @@ actual suspend fun fetchOriginalImageBytes(url: String): ByteArray? {
         entry.data.toFile().readBytes()
     }
 }
+
+actual suspend fun copyImageToClipboard(fileName: String, bytes: ByteArray): Boolean {
+    val context = PlatformProviders.context.platformContext as Context
+    return try {
+        // 剪切板只接受 URI，先把图片写到缓存目录再通过 FileProvider 暴露出去
+        val dir = File(context.cacheDir, CLIPBOARD_IMAGE_DIR)
+        if (!dir.exists()) dir.mkdirs()
+        val file = File(dir, fileName)
+        file.writeBytes(bytes)
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file,
+        )
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newUri(context.contentResolver, fileName, uri))
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+private const val CLIPBOARD_IMAGE_DIR = "clipboard"
 
 private fun saveImageToAlbumQ(context: Context, fileName: String, bytes: ByteArray) {
     val mimeType = getMimeType(fileName)

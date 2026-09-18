@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.copyImageToClipboard
 import cn.a10miaomiao.bilimiao.compose.common.fetchOriginalImageBytes
 import cn.a10miaomiao.bilimiao.compose.common.getImageFileName
 import cn.a10miaomiao.bilimiao.compose.common.saveImageBytes
@@ -85,6 +87,27 @@ private class MyImagePreviewerController(
             } catch (e: Exception) {
                 e.printStackTrace()
                 GlobalToaster.show("原图下载失败")
+            } finally {
+                isDownloading.value = false
+            }
+        }
+    }
+
+    fun copyImage() {
+        val imageUrl = getCurrentImageUrl()
+        isDownloading.value = true
+        coroutineScope.launch(Dispatchers.Default) {
+            try {
+                val fileName = getImageFileName(imageUrl)
+                val bytes = fetchOriginalImageBytes(imageUrl)
+                if (bytes != null && bytes.isNotEmpty() && copyImageToClipboard(fileName, bytes)) {
+                    GlobalToaster.show("图片已复制到剪切板")
+                } else {
+                    GlobalToaster.show("复制图片失败")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                GlobalToaster.show("复制图片失败")
             } finally {
                 isDownloading.value = false
             }
@@ -174,6 +197,19 @@ fun MyImagePreviewer(
                                 expanded = showMoreMenu,
                                 onDismissRequest = { showMoreMenu = false },
                             ) {
+                                DropdownMenuItem(
+                                    text = { Text("复制图片") },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        controller.copyImage()
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.Image,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                )
                                 DropdownMenuItem(
                                     text = { Text("复制图片链接") },
                                     onClick = {

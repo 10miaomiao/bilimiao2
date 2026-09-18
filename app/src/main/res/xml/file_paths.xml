@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 复制到剪切板的图片缓存目录 -->
+    <cache-path
+        name="clipboard_images"
+        path="clipboard/" />
+</paths>
