@@ -538,8 +538,8 @@ private fun BangumiDetailPageContent(
                 .background(MaterialTheme.colorScheme.surface),
             innerPadding = windowInsets.toPaddingValues(),
             chainScrollableLayoutState = chainScrollableLayoutState,
-            leftMaxWidth = 600.dp,
-            leftMaxHeight = 340.dp,
+            twoColumnMinWidth = 600.dp,
+            topContentHeight = 340.dp,
             leftContent = { _, innerPadding ->
                 Box(
                     modifier = Modifier

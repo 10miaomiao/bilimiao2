@@ -241,8 +241,8 @@ private fun AboutPageContent(
             addBottom = 0.dp,
         ),
         chainScrollableLayoutState = chainScrollableLayoutState,
-        leftMaxWidth = 600.dp,
-        leftMaxHeight = 340.dp,
+        twoColumnMinWidth = 600.dp,
+        topContentHeight = 340.dp,
         leftContent = { _, innerPadding ->
             Column(
                 modifier = Modifier

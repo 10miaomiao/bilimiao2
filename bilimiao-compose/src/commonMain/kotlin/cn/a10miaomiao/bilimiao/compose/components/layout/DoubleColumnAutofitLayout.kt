@@ -22,8 +22,12 @@ import kotlin.math.roundToInt
 fun DoubleColumnAutofitLayout(
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues = PaddingValues(),
-    leftMaxHeight: Dp,
-    leftMaxWidth: Dp,
+    // 双栏展开断点：容器宽度大于该值时使用双栏布局
+    twoColumnMinWidth: Dp,
+    // 单栏布局时上方内容区域的高度
+    topContentHeight: Dp,
+    // 双栏布局时右栏的宽度上限，为 null 时右栏与左栏平分宽度
+    rightColumnMaxWidth: Dp? = null,
     chainScrollableLayoutState: ChainScrollableLayoutState,
     leftContent: @Composable BoxScope.(Orientation, PaddingValues) -> Unit,
     content: @Composable BoxScope.(Orientation, PaddingValues) -> Unit,
@@ -32,7 +36,8 @@ fun DoubleColumnAutofitLayout(
         modifier = modifier
     ) {
         val layoutDirection = LocalLayoutDirection.current
-        if (maxWidth > leftMaxWidth) {
+        if (maxWidth > twoColumnMinWidth) {
+            val containerWidth = maxWidth
             Row() {
                 Box(
                     modifier = Modifier.weight(1f)
@@ -50,7 +55,12 @@ fun DoubleColumnAutofitLayout(
                     )
                 }
                 Box(
-                    modifier = Modifier.weight(1f)
+                    modifier = if (rightColumnMaxWidth != null) {
+                        // 右栏宽度不超过上限，剩余宽度由左栏填充
+                        Modifier.width(minOf(containerWidth / 2, rightColumnMaxWidth))
+                    } else {
+                        Modifier.weight(1f)
+                    }
                 ) {
                     content(
                         Orientation.Horizontal,
@@ -67,14 +77,14 @@ fun DoubleColumnAutofitLayout(
             }
         } else {
             val density = LocalDensity.current
-            val leftMaxHeightPx = remember(density) {
+            val topContentHeightPx = remember(density) {
                 density.run {
-                    leftMaxHeight.roundToPx().toFloat() - chainScrollableLayoutState.minScrollPosition.roundToPx()
+                    topContentHeight.roundToPx().toFloat() - chainScrollableLayoutState.minScrollPosition.roundToPx()
                 }
             }
             val scrollableState = rememberScrollableState { 0f }
             val scrollOffset = chainScrollableLayoutState.getHeightOffset()
-            val alpha = (1f - scrollOffset / leftMaxHeightPx).coerceIn(0f, 1f)
+            val alpha = (1f - scrollOffset / topContentHeightPx).coerceIn(0f, 1f)
             val offsetY = (-scrollOffset).roundToInt()
             ChainScrollableLayout(
                 modifier = modifier,
@@ -82,7 +92,7 @@ fun DoubleColumnAutofitLayout(
             ) { state ->
                 Box(
                     modifier = Modifier
-                        .height(leftMaxHeight)
+                        .height(topContentHeight)
                         .offset { IntOffset(0, offsetY) }
                         .alpha(alpha)
                         .scrollable(scrollableState, Orientation.Vertical),

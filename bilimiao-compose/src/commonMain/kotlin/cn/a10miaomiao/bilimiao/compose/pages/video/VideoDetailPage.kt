@@ -224,8 +224,9 @@ private fun VideoDetailPageContent(
             .background(MaterialTheme.colorScheme.surface),
         innerPadding = windowInsets.toPaddingValues(),
         chainScrollableLayoutState = chainScrollableLayoutState,
-        leftMaxWidth = 600.dp,
-        leftMaxHeight = headerHeight,
+        twoColumnMinWidth = 600.dp,
+        topContentHeight = headerHeight,
+        rightColumnMaxWidth = 400.dp,
         leftContent = { orientation, innerPadding ->
             if (orientation == Orientation.Vertical) {
                 Column(
