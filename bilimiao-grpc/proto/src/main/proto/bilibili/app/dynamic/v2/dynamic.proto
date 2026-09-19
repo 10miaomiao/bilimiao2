@@ -2855,7 +2855,7 @@ message LineParagraph {
 // 
 message LinkNode {
     // 
-    string show_text = 1;
+    WordNode show_text = 1;
     // 
     string link = 2;
     // 
@@ -5807,4 +5807,8 @@ message WordNode {
     Colors color = 3;
     // 
     WordNodeStyle style = 4;
+    // 字形
+    string font_face = 7;
+    // 字重
+    int32 font_weight = 8;
 }

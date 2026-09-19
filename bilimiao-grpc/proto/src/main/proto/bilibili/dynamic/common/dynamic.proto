@@ -752,7 +752,7 @@ message LineParagraph {
 // 
 message LinkNode {
     // 
-    string show_text = 1;
+    WordNode show_text = 1;
     // 
     string link = 2;
     // 

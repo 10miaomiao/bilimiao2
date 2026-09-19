@@ -13,28 +13,11 @@ fun List<TextNode>.toAnnotatedTextNode(): List<AnnotatedTextNode> {
             }
 
             is TextNode.Text.Link -> {
-                var showText = node.value.showText
-                // 第一个通常是换行符(0x0a)，然后第二个是换页符(0x0c)，
-                // 这里直接去除得了，然后是显示文字部分，到(0x11)结束
-                // 后面部分应该是控制格式样式的，现在不考虑，只显示文字
-                // ฅ^•ﻌ•^ฅ
-                var showTextStart = 0
-                var showTextEnd = showText.length
-                var withLineBreak = false
-                if (showText[0].code == 0x0a) {
-                    showTextStart = 1
-                    withLineBreak = true
-                } else if (showText[0].code == 0x0c){
-                    showTextStart = 1
-                }
-                if (showText[1].code == 0x0c) {
-                    showTextStart = 2
-                }
-                if (showTextStart > 0) {
-                    showTextEnd = showText.indexOf(0x11.toChar())
-                }
-                showText = showText.substring(showTextStart, showTextEnd)
-                AnnotatedTextNode.Link(showText, node.value.link, withLineBreak)
+                // show_text 按 WordNode 正确解析后，words 即链接显示文字。
+                // （旧 proto 把 show_text 错配成 string，拿到的是嵌套消息的二进制乱码，
+                // 需要手动剥离控制字符；修正后这里不再有乱码，直接取 words）
+                val link = node.value
+                AnnotatedTextNode.Link(link.showText?.words ?: "", link.link, false)
             }
 
             is TextNode.Text.Emote -> {
