@@ -492,6 +492,7 @@ fun ReplyDetailContent(
                                         if (it.first == sortOrder) {
                                             Icon(
                                                 imageVector = Icons.Filled.Check,
+                                                tint = MaterialTheme.colorScheme.onSurface,
                                                 contentDescription = null,
                                             )
                                         }

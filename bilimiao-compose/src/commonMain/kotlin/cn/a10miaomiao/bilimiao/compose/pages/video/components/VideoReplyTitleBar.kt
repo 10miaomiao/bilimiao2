@@ -62,6 +62,7 @@ fun VideoReplyTitleBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Comment,
                     contentDescription = "发布评论",
+                    tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
             Box {
@@ -73,6 +74,7 @@ fun VideoReplyTitleBar(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Sort,
                         contentDescription = "列表排序",
+                        tint = MaterialTheme.colorScheme.onBackground,
                     )
                 }
                 DropdownMenu(
@@ -94,6 +96,7 @@ fun VideoReplyTitleBar(
                                 if (it.first == sortOrder) {
                                     Icon(
                                         imageVector = Icons.Filled.Check,
+                                        tint = MaterialTheme.colorScheme.onSurface,
                                         contentDescription = null,
                                     )
                                 }
