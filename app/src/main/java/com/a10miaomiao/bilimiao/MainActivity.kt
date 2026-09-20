@@ -71,11 +71,13 @@ import cn.a10miaomiao.bilimiao.compose.common.proxy.ProxyRepository
 import cn.a10miaomiao.bilimiao.compose.common.proxy.ProxyRepositoryAndroid
 import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfo
 import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfoAndroid
+import cn.a10miaomiao.bilimiao.compose.common.platform.DensitySettingLauncher
 import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorage
 import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorageAndroid
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManagerAndroid
 import cn.a10miaomiao.bilimiao.compose.platform.AndroidPlatformContext as ComposePlatformContext
+import com.a10miaomiao.bilimiao.activity.DensitySettingLauncherAndroid
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
 import com.a10miaomiao.bilimiao.store.Store
@@ -107,6 +109,7 @@ class MainActivity : ComponentActivity(), DIAware {
         bindSingleton<AppInfo> { AppInfoAndroid(this@MainActivity) }
         bindSingleton<FileStorage> { FileStorageAndroid(this@MainActivity) }
         bindSingleton<DownloadManager> { DownloadManagerAndroid(this@MainActivity) }
+        bindSingleton<DensitySettingLauncher> { DensitySettingLauncherAndroid(this@MainActivity) }
     }
 
     private val store by lazy { Store(this, di) }

@@ -54,7 +54,7 @@
         </activity>
         <activity
             android:name=".activity.LogViewerActivity"
-            android:label="@string/density_setting"
+            android:label="@string/log_viewer"
             android:theme="@style/Theme.Bilimiao"/>
         <activity
             android:name=".activity.DensitySettingActivity"

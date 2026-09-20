@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.a10miaomiao.bilimiao.activity
 
 import android.content.Context
@@ -5,57 +7,61 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import cn.a10miaomiao.bilimiao.compose.common.platform.DensitySettingLauncher
 import com.a10miaomiao.bilimiao.R
 import com.a10miaomiao.bilimiao.comm.utils.ScreenDpiUtil
-import com.a10miaomiao.bilimiao.config.config
-import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 
 class DensitySettingActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onBackPressedDispatcher.addCallback(this) {
+            handleBack()
+        }
         setContent {
-            DensitySettingScreen(
-                onBack = { onBackPressedDispatcher.onBackPressed() },
-                onConfirm = { dpi, fontScale -> setCustomConfiguration(dpi, fontScale) }
-            )
+            BilimiaoActivityTheme {
+                DensitySettingScreen(
+                    onBack = { onBackPressedDispatcher.onBackPressed() },
+                    onConfirm = { dpi, fontScale -> setCustomConfiguration(dpi, fontScale) }
+                )
+            }
         }
     }
 
-    override fun onBackPressed() {
+    /** 返回时若修改过配置，则重启应用使新配置对整个应用生效 */
+    private fun handleBack() {
         if (isChanged()) {
-            val intent = packageManager.getLaunchIntentForPackage(packageName)!!
-            val componentName = intent.component
+            val componentName = packageManager.getLaunchIntentForPackage(packageName)!!.component
             val mainIntent = Intent.makeRestartActivityTask(componentName)
             startActivity(mainIntent)
             Runtime.getRuntime().exit(0)
@@ -64,25 +70,23 @@ class DensitySettingActivity : ComponentActivity() {
         }
     }
 
-    fun setCustomConfiguration(dpi: Int, fontScale: Float) {
-        if (dpi <= 0 || fontScale <= 0f) {
-            GlobalToaster.show("请输入大于0的整数")
-        }
+    private fun setCustomConfiguration(dpi: Int, fontScale: Float) {
         ScreenDpiUtil.saveCustomConfiguration(dpi, fontScale)
         reStartActivity()
     }
 
     private fun reStartActivity() {
-        val intent = intent
-        intent.putExtra("changed", true)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        startActivity(
+            intent.apply {
+                putExtra(EXTRA_CHANGED, true)
+                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            }
+        )
         finish()
-        overridePendingTransition(0, 0)
-        startActivity(intent)
     }
 
     private fun isChanged(): Boolean {
-        return intent.getBooleanExtra("changed", false)
+        return intent.getBooleanExtra(EXTRA_CHANGED, false)
     }
 
     override fun attachBaseContext(newBase: Context) {
@@ -90,6 +94,20 @@ class DensitySettingActivity : ComponentActivity() {
         ScreenDpiUtil.readCustomConfiguration(configuration)
         val newContext = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(newContext)
+    }
+
+    companion object {
+        private const val EXTRA_CHANGED = "changed"
+    }
+}
+
+/** 应用内 DPI 设置页入口的 Android 实现（在 MainActivity 的 DI 中绑定） */
+class DensitySettingLauncherAndroid(
+    private val context: Context,
+) : DensitySettingLauncher {
+
+    override fun openDensitySetting() {
+        context.startActivity(Intent(context, DensitySettingActivity::class.java))
     }
 }
 
@@ -99,70 +117,91 @@ private fun DensitySettingScreen(
     onConfirm: (Int, Float) -> Unit,
 ) {
     val context = LocalContext.current
-    val bgColor = remember { context.config.windowBackgroundColor }
     val defaultDpi = remember { ScreenDpiUtil.getDefaultDpi() }
     val defaultFontScale = remember { ScreenDpiUtil.getDefaultFontScale() }
-    val currentDpi = remember { context.resources.configuration.densityDpi.toString() }
-    val currentFontScale = remember { context.resources.configuration.fontScale.toString() }
-    val dpiText = remember { mutableStateOf(currentDpi) }
-    val fontScaleText = remember { mutableStateOf(currentFontScale) }
+    val currentDpi = remember { context.resources.configuration.densityDpi }
+    val currentFontScale = remember { context.resources.configuration.fontScale }
+    var dpiText by remember { mutableStateOf(currentDpi.toString()) }
+    var fontScaleText by remember { mutableStateOf(currentFontScale.toString()) }
+    val dpi = dpiText.toIntOrNull()?.takeIf { it > 0 }
+    val fontScale = fontScaleText.toFloatOrNull()?.takeIf { it > 0f }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.density_setting)) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                }
-            }
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(R.string.density_setting))
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                },
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(bgColor))
+                .padding(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 10.dp)
+                .padding(vertical = 16.dp, horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "系统默认DPI：$defaultDpi", fontSize = 14.sp)
-            Text(text = "当前应用内DPI修改：", fontSize = 14.sp)
             OutlinedTextField(
-                value = dpiText.value,
-                onValueChange = { dpiText.value = it },
+                value = dpiText,
+                onValueChange = { dpiText = it.trim() },
                 modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(text = "应用内 DPI")
+                },
+                supportingText = {
+                    Text(
+                        text = if (dpi == null) {
+                            "请输入大于 0 的整数"
+                        } else {
+                            "系统默认 DPI：$defaultDpi"
+                        }
+                    )
+                },
+                isError = dpi == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "系统默认字体缩放：$defaultFontScale", fontSize = 14.sp)
-            Text(text = "当前字体缩放修改：", fontSize = 14.sp)
             OutlinedTextField(
-                value = fontScaleText.value,
-                onValueChange = { fontScaleText.value = it },
+                value = fontScaleText,
+                onValueChange = { fontScaleText = it.trim() },
                 modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(text = "应用内字体缩放")
+                },
+                supportingText = {
+                    Text(
+                        text = if (fontScale == null) {
+                            "请输入大于 0 的数字"
+                        } else {
+                            "系统默认字体缩放：$defaultFontScale"
+                        }
+                    )
+                },
+                isError = fontScale == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
             Button(
                 onClick = {
-                    try {
-                        val dpi = dpiText.value.toInt()
-                        val fontScale = fontScaleText.value.toFloat()
+                    if (dpi != null && fontScale != null) {
                         onConfirm(dpi, fontScale)
-                    } catch (ex: NumberFormatException) {
-                        GlobalToaster.show("请输入整数")
                     }
                 },
+                enabled = dpi != null && fontScale != null,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = "确认修改")
             }
-            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

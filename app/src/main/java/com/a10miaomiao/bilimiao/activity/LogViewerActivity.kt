@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.a10miaomiao.bilimiao.activity
 
 import android.content.ClipData
@@ -7,30 +9,26 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a10miaomiao.bilimiao.R
-import com.a10miaomiao.bilimiao.config.config
 
 class LogViewerActivity : ComponentActivity() {
 
@@ -38,11 +36,13 @@ class LogViewerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val logSummary = intent.getStringExtra("log_summary") ?: ""
         setContent {
-            LogViewerScreen(
-                logSummary = logSummary,
-                onBack = { onBackPressedDispatcher.onBackPressed() },
-                onCopy = { copyLogText(it) }
-            )
+            BilimiaoActivityTheme {
+                LogViewerScreen(
+                    logSummary = logSummary,
+                    onBack = { onBackPressedDispatcher.onBackPressed() },
+                    onCopy = { copyLogText(it) }
+                )
+            }
         }
     }
 
@@ -60,36 +60,37 @@ private fun LogViewerScreen(
     onBack: () -> Unit,
     onCopy: (String) -> Unit,
 ) {
-    val context = LocalContext.current
-    val bgColor = remember { context.config.windowBackgroundColor }
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.log_viewer)) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                }
-            },
-            actions = {
-                IconButton(onClick = { onCopy(logSummary) }) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = null)
-                }
-            }
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = stringResource(R.string.log_viewer))
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onCopy(logSummary) }) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = "复制日志")
+                    }
+                },
+            )
+        }
+    ) { innerPadding ->
         SelectionContainer(
             modifier = Modifier
                 .fillMaxSize()
-                .background(androidx.compose.ui.graphics.Color(bgColor))
+                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = logSummary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(10.dp),
-                fontSize = 14.sp,
+                    .padding(16.dp),
+                style = MaterialTheme.typography.bodySmall,
             )
         }
     }

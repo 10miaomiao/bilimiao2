@@ -25,6 +25,7 @@ import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.platform.AppInfo
+import cn.a10miaomiao.bilimiao.compose.common.platform.DensitySettingLauncher
 import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorage
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
 import cn.a10miaomiao.bilimiao.compose.components.preference.imageCachePreference
@@ -45,6 +46,7 @@ import org.kodein.di.compose.rememberInstance
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
+import org.kodein.di.instanceOrNull
 
 @Serializable
 class SettingPage : ComposePage {
@@ -63,10 +65,14 @@ private class SettingPageViewModel(
     private val appInfo by instance<AppInfo>()
     private val fileStorage by instance<FileStorage>()
     private val pageNavigation by instance<PageNavigation>()
+    /** 应用内 DPI 设置页入口，仅绑定了实现的平台（Android）可用 */
+    private val densitySettingLauncher: DensitySettingLauncher? by instanceOrNull<DensitySettingLauncher>()
 
     val moreSettingList = MutableStateFlow(listOf<MiaoSettingInfo>())
 
     val versionName: String = appInfo.versionName
+
+    val supportsDensitySetting: Boolean get() = densitySettingLauncher != null
 
     init {
         loadMoreSettingList()
@@ -87,6 +93,10 @@ private class SettingPageViewModel(
 
     fun toThemePage() {
         pageNavigation.navigate(ThemeSettingPage())
+    }
+
+    fun toDensitySettingPage() {
+        densitySettingLauncher?.openDensitySetting()
     }
 
     fun toHomeSettingPage() {
@@ -187,6 +197,18 @@ private fun SettingPageContent(
                 },
                 onClick = viewModel::toThemePage,
             )
+            if (viewModel.supportsDensitySetting) {
+                preference(
+                    key = "density_setting",
+                    title = {
+                        Text("应用内 DPI 设置")
+                    },
+                    summary = {
+                        Text("调整界面缩放与字体大小")
+                    },
+                    onClick = viewModel::toDensitySettingPage,
+                )
+            }
             preference(
                 key = "home",
                 title = {
