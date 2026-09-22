@@ -10,7 +10,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
  * - UI 层：ComposeScaffold 依据播放器显示模式/深色主题调用 [setLightStatusBar]；
  *   全屏播放器（BiliVideoScaffold）只调用 [setSystemBarsVisible] / [restoreSystemBars]。
  * - 平台层：Android 端在入口组合中注入实现（[LocalSystemBarsController]）；
- *   桌面端使用默认空实现。
+ *   桌面端在自绘标题栏（Windows 窗口框架）中注入 SystemBarsControllerDesktop，
+ *   把前景色映射为标题栏按钮的配色。
  *
  * 所有操作均须在主线程调用。
  */

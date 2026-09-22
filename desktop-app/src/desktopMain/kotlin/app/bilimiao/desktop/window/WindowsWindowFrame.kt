@@ -62,6 +62,8 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.zIndex
 import app.bilimiao.desktop.DesktopWindowState
+import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
+import cn.a10miaomiao.bilimiao.compose.platform.SystemBarsControllerDesktop
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -95,10 +97,28 @@ fun FrameWindowScope.WindowsWindowFrame(
             frameState.isTitleBarVisible = !desktopWindow.isUndecoratedFullscreen
         }
         val desktopWindowInsets = rememberDesktopPlatformWindowInsets(frameState)
+        // 桌面窗口没有系统状态栏：把 ComposeScaffold 请求的“状态栏前景色”映射为自绘标题栏的配色
+        // （浅色背景 → 深色标题栏前景，深色背景 → 浅色前景）。
+        // 请求值保存在本组件的稳定状态里（不随 frameState 重建丢失），并在标题栏主题控制器变化时
+        // 重新应用，避免一次性的请求失效后标题栏配色一直停留在旧值。
+        val lightStatusBarState = remember { mutableStateOf<Boolean?>(null) }
+        val systemBarsController = remember(lightStatusBarState) {
+            SystemBarsControllerDesktop { light ->
+                lightStatusBarState.value = light
+            }
+        }
+        val titleBarThemeController = frameState.titleBarThemeController
+        val lightStatusBar = lightStatusBarState.value
+        LaunchedEffect(titleBarThemeController, lightStatusBar) {
+            lightStatusBar?.let {
+                titleBarThemeController.requestTheme(frameState, !it)
+            }
+        }
         CompositionLocalProvider(
             LocalTitleBarInsets provides frameState.titleBarInsets,
             LocalCaptionButtonInsets provides frameState.captionButtonsInsets,
             LocalTitleBarThemeController provides frameState.titleBarThemeController,
+            LocalSystemBarsController provides systemBarsController,
             androidx.compose.ui.platform.LocalPlatformWindowInsets provides desktopWindowInsets,
         ) {
             content()
@@ -176,15 +196,25 @@ fun FrameWindowScope.WindowsWindowFrame(
 
 @Composable
 fun rememberWindowsWindowFrameState(desktopWindow: DesktopWindowState): WindowsWindowFrameState {
+    // layoutHitTestOwner 是入口点在首帧之后经 LaunchedEffect 赋值的普通字段（非状态），
+    // 不能参与 remember key：否则窗口状态变化（如进入无边框全屏）触发的重组会重建
+    // frameState，把标题栏主题、显隐、Insets 等状态一并重置。
+    // 这里把 frameState 固定为每个窗口一个实例，owner 变化时同步进状态对象。
+    val state = remember(desktopWindow) { WindowsWindowFrameState(desktopWindow) }
     val layoutHitTestOwner = desktopWindow.layoutHitTestOwner
-    return remember(desktopWindow, layoutHitTestOwner) { WindowsWindowFrameState(desktopWindow, layoutHitTestOwner) }
+    LaunchedEffect(state, layoutHitTestOwner) {
+        state.layoutHitTestOwner = layoutHitTestOwner
+    }
+    return state
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 class WindowsWindowFrameState(
     internal val desktopWindow: DesktopWindowState,
-    private val layoutHitTestOwner: LayoutHitTestOwner?,
 ) {
+    /** Compose 层点击数测试所有者；由 [rememberWindowsWindowFrameState] 在组合后同步 */
+    internal var layoutHitTestOwner: LayoutHitTestOwner? = null
+
     val titleBarThemeController = TitleBarThemeController()
 
     var isTitleBarVisible by mutableStateOf(true)
