@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.openani.mediamp.MediaStatus
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.PlaybackState as MediampPlaybackState
 import org.openani.mediamp.source.UriMediaData
@@ -167,7 +168,8 @@ class PlayerSession {
      *
      * 以下状态不在此映射，由业务层控制：
      * - READY / CREATED / DESTROYED：属于业务加载流程（Loading），由 loadAndPlay 维护
-     * - FINISHED：由进度轮询的完成检测统一处理（含分段切换与自动连播逻辑）
+     * - FINISHED：不在此映射，播放完成由 [startProgressTracking] 读取播放器的
+     *   `MediaStatus.Ended` 处理（结束处理要挂起等待新媒体打开，放这里会阻塞状态订阅）
      */
     fun observePlaybackState(player: MediampPlayer) {
         playbackStateJob?.cancel()
@@ -199,6 +201,7 @@ class PlayerSession {
      * 播放进度跟踪（约 200ms 一次）
      *
      * 负责：播放位置上报、分段视频切换、播放完成检测与通知、播放历史上报。
+     * 播放完成以播放器的结束状态（`MediaStatus.Ended`）为判断依据，不按播放位置推断。
      * 任务归 Session 所有（长期存活），因此界面销毁重建不会中断，后台播放仍能持续上报。
      */
     fun startProgressTracking(source: BasePlayerSource) {
@@ -208,30 +211,21 @@ class PlayerSession {
                 delay(200) // 200ms 更新一次，减少弹幕 wall clock 推进累积误差
                 mediampPlayer?.let { player ->
                     val pos = player.currentPositionMillis.value
-                    val position = segmentOffsetMs + pos
-                    currentPositionFlow.value = position
+                    currentPositionFlow.value = segmentOffsetMs + pos
 
-                    // 检测播放完成
-                    if (playbackStateFlow.value.duration > 0
-                        && position >= playbackStateFlow.value.duration - 1000
-                    ) {
+                    // 检测播放完成：播放器播到自然结束时（mediamp 的 FINISHED，等价于
+                    // ExoPlayer 的 STATE_ENDED；seek 到片尾也算）才处理。直接采样播放器状态
+                    // 而不是「位置 ≥ 时长」：B 站接口声明的时长与媒体真实时长常有 1 秒以上
+                    // 偏差，按位置判断会在真正播完前提前弹出播放完成界面、提前自动连播。
+                    // 无需额外的结束标记：Ended 会一直保持到我们主动切段/重播/seek，采样不会漏，
+                    // 而分段切换是挂起的，放在这里也不需要担心阻塞播放器状态订阅。
+                    if (player.state.value.mediaStatus == MediaStatus.Ended) {
                         if (segmentUrls.isNotEmpty() && currentSegmentIndex < segmentUrls.size - 1) {
+                            // 还有分段：切下一段，整个视频尚未播完
                             loadNextSegment(player)
                         } else if (playbackStateFlow.value.status != PlaybackStatus.Completed) {
                             playbackStateFlow.update { it.copy(status = PlaybackStatus.Completed) }
                             onPlaybackCompleted?.invoke()
-                            return@let
-                        }
-                    }
-
-                    // 检测分段结束
-                    if (segmentUrls.isNotEmpty()
-                        && currentSegmentIndex < segmentUrls.size - 1
-                        && playbackStateFlow.value.status != PlaybackStatus.Completed
-                    ) {
-                        val segmentDuration = segmentDurations.getOrNull(currentSegmentIndex) ?: 0L
-                        if (segmentDuration > 0 && pos >= segmentDuration - 500) {
-                            loadNextSegment(player)
                         }
                     }
                 }
