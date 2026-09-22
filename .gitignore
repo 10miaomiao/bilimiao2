@@ -14,3 +14,4 @@ app/signing.properties
 .kotlin/
 .bitfun/
 .dsh/
+.openbitfun/

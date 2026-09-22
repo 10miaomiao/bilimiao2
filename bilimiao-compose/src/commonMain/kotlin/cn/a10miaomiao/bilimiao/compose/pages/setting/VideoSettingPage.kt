@@ -320,48 +320,48 @@ private fun VideoSettingPageContent(
                 onClick = viewModel::autoStopTimerClick
             )
 
-            preferenceCategory(
-                key = "small",
-                title = {
-                    Text(text = "横屏状态小屏设置")
-                }
-            )
-            switchPreference(
-                key = SettingPreferences.PlayerSmallDraggable.name,
-                title = {
-                    Text(text = "小屏时整个播放器可拖拽")
-                },
-                summary = {
-                    if (it) {
-                        Text(text = "已启用，播放时可拖拽小屏播放器")
-                    } else {
-                        Text(text = "启用后，小屏状态时播放器手势无效")
-                    }
-                },
-                defaultValue = false,
-            )
-            sliderIntPreference(
-                key = SettingPreferences.PlayerSmallShowArea.name,
-                title = {
-                    Text(text = "小屏时播放面积")
-                },
-                valueRange = 150..600,
-                defaultValue = 480,
-                valueText = {
-                    Text(text = it.toString())
-                }
-            )
-            sliderIntPreference(
-                key = SettingPreferences.PlayerHoldShowArea.name,
-                title = {
-                    Text(text = "小屏挂起后播放面积")
-                },
-                valueRange = 100..300,
-                defaultValue = 130,
-                valueText = {
-                    Text(text = it.toString())
-                }
-            )
+//            preferenceCategory(
+//                key = "small",
+//                title = {
+//                    Text(text = "横屏状态小屏设置")
+//                }
+//            )
+//            switchPreference(
+//                key = SettingPreferences.PlayerSmallDraggable.name,
+//                title = {
+//                    Text(text = "小屏时整个播放器可拖拽")
+//                },
+//                summary = {
+//                    if (it) {
+//                        Text(text = "已启用，播放时可拖拽小屏播放器")
+//                    } else {
+//                        Text(text = "启用后，小屏状态时播放器手势无效")
+//                    }
+//                },
+//                defaultValue = false,
+//            )
+//            sliderIntPreference(
+//                key = SettingPreferences.PlayerSmallShowArea.name,
+//                title = {
+//                    Text(text = "小屏时播放面积")
+//                },
+//                valueRange = 150..600,
+//                defaultValue = 480,
+//                valueText = {
+//                    Text(text = it.toString())
+//                }
+//            )
+//            sliderIntPreference(
+//                key = SettingPreferences.PlayerHoldShowArea.name,
+//                title = {
+//                    Text(text = "小屏挂起后播放面积")
+//                },
+//                valueRange = 100..300,
+//                defaultValue = 130,
+//                valueText = {
+//                    Text(text = it.toString())
+//                }
+//            )
 
             preferenceCategory(
                 key = "subtitle",
