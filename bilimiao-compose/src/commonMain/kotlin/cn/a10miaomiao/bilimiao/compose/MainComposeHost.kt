@@ -4,10 +4,8 @@ import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.togetherWith
-import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThrough
-import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughIn
-import cn.a10miaomiao.bilimiao.compose.animation.materialFadeThroughOut
+import cn.a10miaomiao.bilimiao.compose.animation.pageCloseTransition
+import cn.a10miaomiao.bilimiao.compose.animation.pageOpenTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -162,10 +160,15 @@ fun MainComposeHost(
             launchUrl = { url -> navigator.launchUrl(url) },
             scannerLauncher = navigator.scannerLauncher,
             onClose = navigator.onClose,
-        )
+        ).also {
+            // 组合期立即挂载：页面内容位于 ComposeScaffold 的 SubcomposeLayout 子组合中，
+            // 会在同一帧的测量阶段、LaunchedEffect 执行之前组合（页面 ViewModel 也会在此时
+            // 从 DI 取 PageNavigation）。若延后到 LaunchedEffect 挂载，页面 ViewModel 构造
+            // 时会取到未挂载的实例并抛 "PageNavigation not attached"。
+            navigator.attach(bottomBar, pageNavigation = it)
+        }
     }
     LaunchedEffect(bottomBar, pageNavigation) {
-        navigator.attach(bottomBar, pageNavigation)
         onReady()
     }
     val appBarState = remember { AppBarState() }
@@ -331,12 +334,12 @@ fun MyNavHost(
         entries = entries,
         onBack = { bottomBar.pop() },
         transitionSpec = {
-            // 前进导航：淡出当前 + 淡入新页面（含缩放）
-            materialFadeThrough()
+            // 前进导航：新页面由里扩到全屏，旧页面向外扩散消失
+            pageOpenTransition()
         },
         popTransitionSpec = {
-            // 返回导航：反向（旧页面淡入，当前淡出）
-            materialFadeThroughIn() togetherWith materialFadeThroughOut()
+            // 返回导航：上一页由外缩回全屏，当前页向内缩小消失
+            pageCloseTransition()
         },
     )
 }
