@@ -14,12 +14,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // 不要引入 aliyun 镜像：同步延迟 / 缓存不一致会导致依赖解析到错误版本或直接失败
         mavenLocal()
-        maven("https://maven.aliyun.com/repository/google")
         google()
-        maven("https://maven.aliyun.com/repository/central")
         mavenCentral()
-        maven("https://maven.aliyun.com/repository/public")
         maven("https://jitpack.io")
         maven("https://gitlab.com/api/v4/projects/38224197/packages/maven")
     }

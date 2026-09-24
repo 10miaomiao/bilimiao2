@@ -50,7 +50,7 @@ androidToolsSdkCommon = "31.6.0"
 xpp3 = "1.1.6"
 guava = "23.0"
 # mediamp
-mediamp = "0.4.0"
+mediamp = "0.5.0"
 jna = "5.13.0"
 # test
 junit = "4.14-SNAPSHOT"
