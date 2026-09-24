@@ -8,6 +8,10 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
+// 版本号来自根项目（gradle.properties 单一来源），与 desktop-app 保持一致
+val appVersionName = rootProject.extra["bilimiaoVersionName"] as String
+val appVersionCode = rootProject.extra["bilimiaoVersionCode"] as Int
+
 android {
     namespace = "com.a10miaomiao.bilimiao"
     compileSdk = 37
@@ -16,8 +20,8 @@ android {
         applicationId = "com.a10miaomiao.bilimiao"
         minSdk = 24
         targetSdk = 35
-        versionCode = 119
-        versionName = "2.5.1 beta"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         flavorDimensions += listOf("default")
 

@@ -2,9 +2,6 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 import java.io.File
 
-val appVersionName = "2.5.0"
-val appVersionCode = 118
-
 plugins {
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.jetbrains.kotlin.multiplatform)
@@ -12,8 +9,17 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
+// 版本号来自根项目（gradle.properties 单一来源），与 Android 端保持一致
+val appVersionName = rootProject.extra["bilimiaoVersionName"] as String
+val appVersionCode = rootProject.extra["bilimiaoVersionCode"] as Int
+// MSI 的 ProductVersion 必须是纯数字点分格式，不能带 "beta" 这类后缀
+val appPackageVersion = rootProject.extra["bilimiaoPackageVersion"] as String
+
 val generateBuildConfig by tasks.registering {
     val outputDir = layout.buildDirectory.dir("generated/buildconfig")
+    // 必须声明版本号为输入，否则改了版本号 Gradle 会误判 UP-TO-DATE，沿用旧生成的 BuildConfig
+    inputs.property("versionName", appVersionName)
+    inputs.property("versionCode", appVersionCode)
     outputs.dir(outputDir)
     doLast {
         val dir = outputDir.get().asFile
@@ -80,7 +86,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "bilimiao"
-            packageVersion = appVersionName
+            packageVersion = appPackageVersion
             description = "bilimiao"
             vendor = "10miaomiao"
             appResourcesRootDir.set(project.layout.projectDirectory.dir("appResources"))
