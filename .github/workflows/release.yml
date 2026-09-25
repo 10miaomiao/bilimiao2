@@ -1,0 +1,145 @@
+name: Release CI
+
+# 一次 tag 推送产出 Android APK + 桌面端 MSI，发布到同一个 Release。
+#
+# 设计要点：两个构建 job 在各自 runner 上并行跑，只负责产出入库（upload-artifact）；
+# 最后由 release job 等两者都成功后统一下载并一次性创建 Release。
+# 好处是 Release 一旦出现就是完整的，且不存在两个 job 并发创建同一个 Release 的竞态
+# （并发时后到的那个会收到 422 already_exists）；任一构建失败则整个 Release 不会发布。
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "2.*" # Push events to matching 2.*, i.e. 2.0, 2.1.3
+  # 手动触发：只构建并上传产物，不创建 Release（用于验证 CI 配置是否可用）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+
+  # Android 端：ubuntu 上用 Gradle 产出 full / foss 两个 APK
+  android:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        # Gradle 9.5 + AGP 9.1 的 daemon 需要 JDK 21（见 gradle/gradle-daemon-jvm.properties）
+        # 用 21 可以让 Gradle 直接复用该 JDK，避免在 CI 上再下载一份
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+    - name: Generate signing.properties
+      run: |
+        rm -rf 10miaomiao.jks
+        ${{ secrets.BASH_DOWNLOAD_JKS }}
+        echo "KEYSTORE_FILE = ${{github.workspace}}/10miaomiao.jks" > app/signing.properties
+        echo "KEYSTORE_PASSWORD = ${{ secrets.KEYSTORE_PASSWORD }}" >> app/signing.properties
+        echo "KEY_ALIAS = ${{ secrets.KEY_ALIAS }}" >> app/signing.properties
+        echo "KEY_PASSWORD = ${{ secrets.KEY_PASSWORD }}" >> app/signing.properties
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Resolve version from tag
+      # tag 是发布时的版本事实来源：2.5.2 → "2.5.2"；2.5.2-beta → "2.5.2 beta"
+      # versionCode 无法从 tag 推导（是独立的递增序号），仍由 gradle.properties 维护。
+      # 手动触发时不设置该变量，沿用 gradle.properties 里的版本号。
+      if: github.event_name == 'push'
+      run: |
+        tag="${GITHUB_REF_NAME}"
+        case "$tag" in
+          *-*) echo "GRADLE_VERSION_ARGS=-Pbilimiao.versionName=${tag%%-*} -Pbilimiao.versionSuffix=${tag#*-}" >> "$GITHUB_ENV" ;;
+          *)   echo "GRADLE_VERSION_ARGS=-Pbilimiao.versionName=$tag -Pbilimiao.versionSuffix=" >> "$GITHUB_ENV" ;;
+        esac
+    - name: Build with Gradle
+      run: ./gradlew $GRADLE_VERSION_ARGS -Pchannel=Github app:assembleFullRelease app:assembleFossRelease
+    - name: Collect apk
+      run: |
+        mkdir -p release
+        mv app/build/outputs/apk/full/release/app-full-release.apk release/bilimiao-github-${{ github.ref_name }}.apk
+        mv app/build/outputs/apk/foss/release/app-foss-release.apk release/bilimiao-foss-${{ github.ref_name }}.apk
+    - name: Upload apk artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: bilimiao-android-${{ github.ref_name }}
+        path: release/*.apk
+        if-no-files-found: error
+
+  # 桌面端：目前只支持 Windows。desktop-app 依赖 mediamp-mpv-runtime-windows-x64，
+  # 并排除了 macOS 的 Skiko 运行时，因此只能在 Windows runner 上打 MSI。
+  # windows-latest 镜像已自带 WiX Toolset 3.14.1 与 android-37 平台（KMP 模块依赖 AGP）。
+  desktop:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+    - name: Resolve version from tag
+      # 与 android job 同样的规则，保证两端版本号一致
+      if: github.event_name == 'push'
+      run: |
+        $tag = "${{ github.ref_name }}"
+        if ($tag -match '^([^-]+)-(.+)$') {
+          $versionName = $Matches[1]
+          $versionSuffix = $Matches[2]
+        } else {
+          $versionName = $tag
+          $versionSuffix = ''
+        }
+        "BILIMIAO_VERSION_NAME=$versionName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "BILIMIAO_VERSION_SUFFIX=$versionSuffix" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+    - name: Build msi with Gradle
+      run: |
+        # PowerShell 不会对字符串变量做分词，必须用数组 splatting 传多个 -P 参数
+        $gradleArgs = @()
+        if ($env:BILIMIAO_VERSION_NAME) {
+          $gradleArgs += "-Pbilimiao.versionName=$env:BILIMIAO_VERSION_NAME"
+          $gradleArgs += "-Pbilimiao.versionSuffix=$env:BILIMIAO_VERSION_SUFFIX"
+        }
+        .\gradlew.bat @gradleArgs :desktop-app:packageMsi
+    - name: Collect msi
+      run: |
+        $releaseDir = "${{ github.workspace }}\release"
+        New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+        $msi = Get-ChildItem -Path "desktop-app\build\compose\binaries\main\msi\*.msi" | Select-Object -First 1
+        Move-Item -Force -Path $msi.FullName -Destination "$releaseDir\bilimiao-windows-${{ github.ref_name }}.msi"
+    - name: Upload msi artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: bilimiao-desktop-${{ github.ref_name }}
+        path: release/*.msi
+        if-no-files-found: error
+
+  # 发布：等两个构建都成功后才运行，集中下载产物并一次性创建 Release
+  release:
+    needs: [android, desktop]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download build artifacts
+      # 不带 name 表示下载本 run 的全部 artifact；merge-multiple 把它们合并到同一目录
+      uses: actions/download-artifact@v4
+      with:
+        path: release
+        merge-multiple: true
+    - name: List files to be released
+      # 手动触发时也会执行到这里，方便核对产物是否齐全
+      run: ls -lh release
+    - name: Upload binaries to release
+      # 仅 tag 推送时发布 Release，手动触发只做构建验证
+      if: github.event_name == 'push'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: bilimiao ${{ github.ref_name }}
+        body: ""
+        files: release/*
