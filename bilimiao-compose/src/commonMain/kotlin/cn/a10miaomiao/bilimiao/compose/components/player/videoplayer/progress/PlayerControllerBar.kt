@@ -86,11 +86,14 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -1047,7 +1050,9 @@ object PlayerControllerDefaults {
  * @param danmakuEditor 弹幕编辑器
  * @param endActions 右侧操作区 (如 FullscreenIcon)
  * @param expanded 控制栏是否展开.
- * 为 `true` 时, [progressIndicator] 和 [progressSlider] 显示在上方独立行, 底部行包含 [danmakuEditor].
+ * 为 `true` 时, [progressIndicator] 和 [progressSlider] 显示在上方独立行, 底部行包含 [danmakuEditor];
+ * 底部行宽度不足以单行容纳 [startActions], [danmakuEditor] 与 [endActions] 时自动拆成两行
+ * (见 [AdaptiveActionRow]).
  * 为 `false` 时, 整个控制栏只有一行, [danmakuEditor] 被忽略.
  * @param sliderOnly 是否仅保留 [progressSlider] 可见而不替换其组合.
  */
@@ -1091,37 +1096,131 @@ fun PlayerControllerBar(
             }
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(if (expanded) 8.dp else 4.dp),
-        ) {
-            // 播放 / 暂停按钮
+        if (expanded) {
+            AdaptiveActionRow(
+                hidden = sliderOnly,
+                spacing = 8.dp,
+                minEditorWidth = MIN_DANMAKU_EDITOR_WIDTH,
+                startActions = startActions,
+                danmakuEditor = danmakuEditor,
+                endActions = endActions,
+            )
+        } else {
             Row(
-                Modifier.keepLayoutWhenHidden(sliderOnly),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                startActions()
-            }
+                // 播放 / 暂停按钮
+                Row(
+                    Modifier.keepLayoutWhenHidden(sliderOnly),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    startActions()
+                }
 
-            Row(
-                Modifier.weight(1f).keepLayoutWhenHidden(sliderOnly && expanded),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (expanded) {
-                    ProvideTextStyle(MaterialTheme.typography.labelSmall) {
-                        danmakuEditor()
-                    }
-                } else {
+                Row(
+                    Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     progressSlider()
                 }
-            }
 
-            Row(
-                Modifier.keepLayoutWhenHidden(sliderOnly),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                endActions()
+                Row(
+                    Modifier.keepLayoutWhenHidden(sliderOnly),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    endActions()
+                }
             }
+        }
+    }
+}
+
+/**
+ * 弹幕编辑器（[PlayerControllerBar] 的 danmakuEditor）在单行布局中至少保留的宽度.
+ */
+private val MIN_DANMAKU_EDITOR_WIDTH = 160.dp
+
+/**
+ * 自适应操作行的插槽标识, 供 [SubcomposeLayout] 复用子组合.
+ */
+private enum class ActionRowSlot { Start, Editor, End }
+
+/**
+ * 展开态底栏操作区自适应布局.
+ *
+ * 宽度不足以单行容纳 [startActions], [danmakuEditor] 与 [endActions] 时 (典型场景: 全屏窄窗口)
+ * 自动拆成两行:
+ *
+ * - 单行: [startActions] 贴左, [endActions] 贴右, [danmakuEditor] 紧随 [startActions] 之后占据剩余空间;
+ * - 两行: 第一行为 [startActions] 与 [danmakuEditor], 第二行为贴右的 [endActions].
+ *
+ * 布局通过 [SubcomposeLayout] 在测量阶段先取得两端操作区的固有宽度再决定行数, 避免
+ * “先按单行渲染、测量后再回流”造成的闪烁. 由于判定只依赖两端固有宽度与
+ * [minEditorWidth], 与当前行数无关, 因此不会在两行/单行之间反复切换.
+ */
+@Composable
+private fun AdaptiveActionRow(
+    hidden: Boolean,
+    spacing: Dp,
+    minEditorWidth: Dp,
+    startActions: @Composable RowScope.() -> Unit,
+    danmakuEditor: @Composable RowScope.() -> Unit,
+    endActions: @Composable RowScope.() -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SubcomposeLayout(
+        modifier.fillMaxWidth().keepLayoutWhenHidden(hidden),
+    ) { constraints ->
+        val spacingPx = spacing.roundToPx()
+        val availableWidth = constraints.maxWidth
+
+        // 两侧操作区以不受限宽度测量, 得到各自的固有尺寸
+        val startPlaceable = subcompose(ActionRowSlot.Start) {
+            Row(verticalAlignment = Alignment.CenterVertically) { startActions() }
+        }.first().measure(Constraints())
+        val endPlaceable = subcompose(ActionRowSlot.End) {
+            Row(verticalAlignment = Alignment.CenterVertically) { endActions() }
+        }.first().measure(Constraints())
+
+        // 单行放得下的前提: 两端操作区 + 两个间距 + 弹幕编辑器的最小宽度
+        val singleRowWidth =
+            startPlaceable.width + endPlaceable.width + spacingPx * 2 + minEditorWidth.roundToPx()
+        val twoRows = availableWidth < singleRowWidth
+
+        // 弹幕编辑器占据剩余空间, 其自身宽度上限由内容决定 (DanmakuSendEntry 内部限宽 160.dp)
+        val editorMaxWidth = (
+            if (twoRows) {
+                availableWidth - startPlaceable.width - spacingPx
+            } else {
+                availableWidth - startPlaceable.width - endPlaceable.width - spacingPx * 2
+            }
+        ).coerceAtLeast(0)
+        val editorPlaceable = subcompose(ActionRowSlot.Editor) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ProvideTextStyle(MaterialTheme.typography.labelSmall) {
+                    danmakuEditor()
+                }
+            }
+        }.first().measure(Constraints(maxWidth = editorMaxWidth))
+
+        val firstRowHeight = maxOf(startPlaceable.height, editorPlaceable.height)
+        val totalHeight = firstRowHeight + if (twoRows) endPlaceable.height else 0
+
+        layout(availableWidth, totalHeight) {
+            startPlaceable.placeRelative(
+                0,
+                Alignment.CenterVertically.align(startPlaceable.height, firstRowHeight),
+            )
+            editorPlaceable.placeRelative(
+                startPlaceable.width + spacingPx,
+                Alignment.CenterVertically.align(editorPlaceable.height, firstRowHeight),
+            )
+            // 单行时与两端操作区同排, 两行时另起一行, 均贴右
+            val endY = if (twoRows) firstRowHeight else {
+                Alignment.CenterVertically.align(endPlaceable.height, firstRowHeight)
+            }
+            endPlaceable.placeRelative(availableWidth - endPlaceable.width, endY)
         }
     }
 }
