@@ -20,7 +20,7 @@
 ### 关于本项目
 bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在每个时间段的热门视频列表，具体用法详见 [bilimiao时光机使用方法](doc/时光机.md)，后经不断改进，功能不断完善，形成了一款安卓上的[哔哩哔哩](https://www.bilibili.com/)的第三方APP。
 
-本项目使用安卓原生技术开发，后续UI将逐步改用Jetpack Compose。
+本项目已完成 Kotlin 多平台（KMP）改造，界面使用 Compose Multiplatform（Jetpack Compose）编写。
 
 ### 下载及使用
 #### 下载
@@ -41,19 +41,20 @@ bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在
 ### 感谢以下开源项目
 * [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
 * [BiliRoaming](https://github.com/yujincheng08/BiliRoaming)
+* [Jetpack Compose](https://developer.android.com/jetpack/compose)
+* [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform)
 * [Kodein-DI](https://github.com/Kodein-Framework/Kodein-DI)
-* [Splitties](https://github.com/LouisCAD/Splitties)
-* [okhttp](https://github.com/square/okhttp)
-* [glide](https://github.com/bumptech/glide)
-* [BaseRecyclerViewAdapterHelper](https://github.com/CymChad/BaseRecyclerViewAdapterHelper)
-* [ModernAndroidPreferences](https://github.com/Maxr1998/ModernAndroidPreferences)
-* [NumberPickerView](https://github.com/Carbs0126/NumberPickerView)
-* [ShadowLayout](https://github.com/lihangleo2/ShadowLayout)
-* [GSYVideoPlayer](https://github.com/CarGuo/GSYVideoPlayer)
+* [mediamp](https://github.com/open-ani/mediamp)
 * [DanmakuFlameMaster](https://github.com/bilibili/DanmakuFlameMaster)
-* [mojito](https://github.com/mikaelzero/mojito)
-* [DialogX](https://github.com/kongzue/DialogX)
+* [pbandk](https://github.com/streem/pbandk)
+* [Coil](https://github.com/coil-kt/coil)
+* [MaterialKolor](https://github.com/jordond/MaterialKolor)
+* [sonner](https://github.com/dokar3/sonner)
+* [qrose](https://github.com/alexzhirkevich/qrose)
+* [ComposePreference](https://github.com/zhanghai/ComposePreference)
+* [Reorderable](https://github.com/Calvin-LL/Reorderable)
 * [scale](https://github.com/jvziyaoyao/scale)
+* [svg-to-compose](https://github.com/DevSrSouza/svg-to-compose)
 
 
 ### 关于我
