@@ -76,7 +76,13 @@ class AppStore(override val di: DI) :
         com.a10miaomiao.bilimiao.comm.platform.setDarkMode(mode)
     }
     fun setThemeColor(color: Long, type: Int) {
-        setState { theme = (theme ?: ThemeSettingState(color = color.toInt())).copy(color = color.toInt(), type = type) }
+        // Material You 的主题色取自系统主色，其余情况直接使用选中的颜色
+        val themeColor = if (type == SettingConstants.THEME_TYPE_DYNAMIC_COLOR) {
+            getMaterialYouColor()
+        } else {
+            color.toInt()
+        }
+        setState { theme = (theme ?: ThemeSettingState(color = themeColor)).copy(color = themeColor, type = type) }
         viewModelScope.launch {
             appDataStore.edit {
                 it[SettingPreferences.ThemeColor] = color

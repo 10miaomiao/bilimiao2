@@ -34,6 +34,7 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.platform.getMaterialYouColor
+import com.a10miaomiao.bilimiao.comm.platform.isMaterialYouSupported
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import kotlinx.serialization.Serializable
 import org.kodein.di.DI
@@ -72,7 +73,7 @@ private class ThemeSettingPageViewModel(
     val appBarTypeListSize get() = appBarTypeList.size
     val materialYouColor get() = getMaterialYouColor()
 
-    val colorList = listOf<Pair<Long, String>>(
+    private val defaultColorList = listOf<Pair<Long, String>>(
         0xFFFB7299 to "少女粉",
         0xFF2196F3 to "胖次蓝",
         0xFFFDD835 to "咸蛋黄",
@@ -82,8 +83,14 @@ private class ThemeSettingPageViewModel(
         0xFFF44336 to "麻衣红",
         0xFF39C5BB to "初音绿",
         0xFF66CCFF to "天依蓝",
-        0x100000000 to "Material You",
     )
+
+    /** Material You 仅 Android 12+ 支持，其余平台不展示该选项 */
+    val colorList: List<Pair<Long, String>> = if (isMaterialYouSupported) {
+        defaultColorList + (MATERIAL_YOU_COLOR to "Material You")
+    } else {
+        defaultColorList
+    }
 
     val themeState = appStore.stateFlow.stateMap {
         it.theme ?: AppStore.ThemeSettingState(
@@ -106,12 +113,15 @@ private class ThemeSettingPageViewModel(
 
     fun setThemeColor(color: Long) {
         val type = when (color) {
-            0x100000000 -> SettingConstants.THEME_TYPE_DYNAMIC_COLOR
+            MATERIAL_YOU_COLOR -> SettingConstants.THEME_TYPE_DYNAMIC_COLOR
             else -> SettingConstants.THEME_TYPE_DEFAULT
         }
         appStore.setThemeColor(color, type)
     }
 }
+
+/** Material You 动态取色的占位色值（超出 Int 范围，仅用于标记选项） */
+private const val MATERIAL_YOU_COLOR = 0x100000000L
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -227,11 +237,11 @@ private fun ThemeSettingPageContent(
                             onClick = {
                                 viewModel.setThemeColor(color.first)
                             },
-                            baseColor = if (color.first > 0xFFFFFFFF)
+                            baseColor = if (color.first == MATERIAL_YOU_COLOR)
                                 Color(viewModel.materialYouColor)
                             else
                                 Color(color.first),
-                            selected = if (color.first > 0xFFFFFFFF)
+                            selected = if (color.first == MATERIAL_YOU_COLOR)
                                 themeState.type == SettingConstants.THEME_TYPE_DYNAMIC_COLOR
                             else
                                 themeState.color == color.first.toInt(),

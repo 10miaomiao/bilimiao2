@@ -4,7 +4,9 @@ actual fun setDarkMode(mode: Int) {
     // Desktop: 暂不支持深色模式切换
 }
 
+actual val isMaterialYouSupported: Boolean = false
+
 actual fun getMaterialYouColor(): Int {
-    // Desktop: 返回默认主题色 (粉色)
+    // Desktop: 不支持 Material You，返回默认主题色 (粉色)
     return 0xFFFB7299.toInt()
 }
