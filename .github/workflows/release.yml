@@ -97,7 +97,7 @@ jobs:
         }
         "BILIMIAO_VERSION_NAME=$versionName" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         "BILIMIAO_VERSION_SUFFIX=$versionSuffix" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-    - name: Build msi with Gradle
+    - name: Build msi and zip with Gradle
       run: |
         # PowerShell 不会对字符串变量做分词，必须用数组 splatting 传多个 -P 参数
         $gradleArgs = @()
@@ -105,18 +105,37 @@ jobs:
           $gradleArgs += "-Pbilimiao.versionName=$env:BILIMIAO_VERSION_NAME"
           $gradleArgs += "-Pbilimiao.versionSuffix=$env:BILIMIAO_VERSION_SUFFIX"
         }
-        .\gradlew.bat @gradleArgs :desktop-app:packageMsi
-    - name: Collect msi
+        # createDistributable 产出免安装目录（build/compose/binaries/main/app/bilimiao），
+        # 它同时也是 packageMsi 的依赖；这里显式列出，以免将来依赖关系变化时拿不到该目录。
+        .\gradlew.bat @gradleArgs :desktop-app:packageMsi :desktop-app:createDistributable
+    - name: Collect msi and zip
       run: |
         $releaseDir = "${{ github.workspace }}\release"
         New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+
         $msi = Get-ChildItem -Path "desktop-app\build\compose\binaries\main\msi\*.msi" | Select-Object -First 1
         Move-Item -Force -Path $msi.FullName -Destination "$releaseDir\bilimiao-windows-${{ github.ref_name }}.msi"
-    - name: Upload msi artifacts
+
+        # 免安装 zip。Compose Desktop 没有内置 zip target（TargetFormat 只有 Msi/Dmg/Deb 等），
+        # 只能对 createDistributable 的输出目录自己压缩。
+        # includeBaseDirectory=false 让 zip 根目录直接是 bilimiao.exe / app / runtime，解压即用。
+        # 注意输出必须落在 release 目录，不能落在被压缩的目录内部，否则 zip 会把自己套进去。
+        $distDir = "desktop-app\build\compose\binaries\main\app\bilimiao"
+        if (-not (Test-Path $distDir)) { throw "未找到免安装目录：$distDir" }
+        # ZipFile 在 PowerShell 7（CI 默认 shell）已内置，无需加载程序集；
+        # 这行只为兼容 Windows PowerShell 5.1，加载失败不影响 pwsh 7，故静默忽略。
+        Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+        [System.IO.Compression.ZipFile]::CreateFromDirectory(
+          (Resolve-Path $distDir).Path,
+          "$releaseDir\bilimiao-windows-${{ github.ref_name }}.zip",
+          [System.IO.Compression.CompressionLevel]::Optimal,
+          $false
+        )
+    - name: Upload desktop artifacts
       uses: actions/upload-artifact@v4
       with:
         name: bilimiao-desktop-${{ github.ref_name }}
-        path: release/*.msi
+        path: release/*
         if-no-files-found: error
 
   # 发布：等两个构建都成功后才运行，集中下载产物并一次性创建 Release
