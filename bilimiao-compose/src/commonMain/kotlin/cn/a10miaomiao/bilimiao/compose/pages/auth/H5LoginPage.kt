@@ -325,7 +325,9 @@ private fun H5LoginPageContent(
                 javaScriptEnabled = true,
                 domStorageEnabled = true,
                 databaseEnabled = true,
-                allowFileAccess = true,
+                // 只加载 https 的B站 passport 登录页，不需要 file:// 访问；
+                // 已注入 _BiliJsBridge，关闭可避免 file:// 页面触达该桥接
+                allowFileAccess = false,
                 allowContentAccess = true,
                 builtInZoomControls = true,
                 displayZoomControls = false,

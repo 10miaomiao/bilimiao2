@@ -152,6 +152,9 @@ private class WebPageViewModel(
     }
 
     val webViewConfig = WebViewConfig(
+        // startUrl 只会是 http/https（见 BilibiliNavigation.navigationToWeb），
+        // 不需要 file:// 访问；已注入 _BiliJsBridge，关闭可避免 file:// 页面触达该桥接
+        allowFileAccess = false,
         userAgent = run {
             val defaultUA = "Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
             "$defaultUA $userAgent"
