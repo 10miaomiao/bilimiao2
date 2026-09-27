@@ -19,7 +19,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://jitpack.io")
-        maven("https://gitlab.com/api/v4/projects/38224197/packages/maven")
+        maven("https://gitlab.com/api/v4/projects/38224197/packages/maven") // webviewko
     }
 }
 rootProject.name = "bilimiao"
