@@ -10,7 +10,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
-import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import coil3.request.ImageRequest
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
@@ -40,7 +40,7 @@ actual fun getImageFileName(url: String): String {
 
 actual suspend fun fetchOriginalImageBytes(url: String): ByteArray? {
     val context = PlatformProviders.context.platformContext as Context
-    val loader = ImageLoader(context)
+    val loader = SingletonImageLoader.get(context)
     val request = ImageRequest.Builder(context)
         .data(url)
         .build()

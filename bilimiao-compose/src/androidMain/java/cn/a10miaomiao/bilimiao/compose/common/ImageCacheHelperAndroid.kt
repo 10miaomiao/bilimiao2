@@ -1,20 +1,20 @@
 package cn.a10miaomiao.bilimiao.compose.common
 
 import android.content.Context
-import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import java.math.BigDecimal
 
 actual fun getImageCacheSize(): String {
     val context = PlatformProviders.context.platformContext as Context
-    val loader = ImageLoader(context)
+    val loader = SingletonImageLoader.get(context)
     val diskCache = loader.diskCache ?: return "0Byte"
     return formatSize(diskCache.size)
 }
 
 actual fun clearImageCache() {
     val context = PlatformProviders.context.platformContext as Context
-    val loader = ImageLoader(context)
+    val loader = SingletonImageLoader.get(context)
     loader.diskCache?.clear()
     loader.memoryCache?.clear()
 }
