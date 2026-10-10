@@ -92,6 +92,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.setKeepScreenOn
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.launch
@@ -272,6 +273,15 @@ fun BiliVideoScaffold(
         onDispose {
             systemBarsController.restoreSystemBars()
         }
+    }
+
+    // 播放视频时保持屏幕常亮（与是否全屏无关，对齐旧版 PlayerDelegate2/PlayerController：
+    // 播放器打开即置位，暂停 / 播放完成 / 出错后清除，交还系统屏幕超时）。
+    // 加载与缓冲一并视为播放中，避免载入中或卡顿时屏幕熄灭。
+    val keepScreenOn = isPlaying || isBuffering || isLoading
+    DisposableEffect(keepScreenOn) {
+        setKeepScreenOn(keepScreenOn)
+        onDispose { setKeepScreenOn(false) }
     }
 
     // 画中画动作按钮（播放/暂停）：画中画窗口内的画面不接收点击，播放控制只能交给系统绘制。

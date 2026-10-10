@@ -1,6 +1,7 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import android.content.Context
+import android.view.WindowManager
 import org.openani.mediamp.MediampPlayer
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.platform.AndroidPlatformContext
@@ -90,6 +91,24 @@ actual fun setRequestedOrientation(request: ScreenOrientationRequest) {
             ScreenOrientationRequest.REVERSE_LANDSCAPE -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
         activity.requestedOrientation = orientation
+    } catch (_: Exception) {}
+}
+
+/**
+ * 安卓端 actual：通过 Activity 窗口的 FLAG_KEEP_SCREEN_ON 保持屏幕常亮
+ *
+ * Activity 引用由 [ActivityHolder] 提供（在 MainActivity 中初始化）。
+ * 与是否全屏无关：播放时常亮，暂停 / 播放完成 / 关闭播放器后清除，
+ * 交还系统屏幕超时（对齐旧版 PlayerDelegate2.setStateAndUi / closePlayer）。
+ */
+actual fun setKeepScreenOn(enabled: Boolean) {
+    try {
+        val window = ActivityHolder.get()?.window ?: return
+        if (enabled) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     } catch (_: Exception) {}
 }
 

@@ -95,3 +95,17 @@ expect fun setPlayerAudioFocusEnabled(player: MediampPlayer, enabled: Boolean)
  * @param request 屏幕方向请求
  */
 expect fun setRequestedOrientation(request: ScreenOrientationRequest)
+
+/**
+ * 保持屏幕常亮（平台特定）
+ *
+ * - 安卓：对当前 Activity 窗口设置 / 清除 `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON`
+ * - 桌面：no-op（桌面窗口不参与系统屏幕超时）
+ *
+ * 与是否全屏无关：播放器打开且处于播放状态时置位，暂停 / 播放完成 / 出错 /
+ * 关闭播放器后清除，交还系统屏幕超时（对齐旧版 PlayerDelegate2.setStateAndUi）。
+ * 由 UI 层按播放状态调用，见 BiliVideoScaffold。
+ *
+ * @param enabled true 保持屏幕常亮，false 恢复系统屏幕超时
+ */
+expect fun setKeepScreenOn(enabled: Boolean)
