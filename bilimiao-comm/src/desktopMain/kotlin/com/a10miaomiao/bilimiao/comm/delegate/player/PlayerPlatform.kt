@@ -67,16 +67,3 @@ actual fun setPlayerVolume(player: MediampPlayer, volume: Int) {
  */
 actual fun setPlayerAudioFocusEnabled(player: MediampPlayer, enabled: Boolean) {
 }
-
-/**
- * 桌面端 actual：no-op（桌面端无屏幕方向概念，全屏通过窗口管理处理）
- */
-actual fun setRequestedOrientation(request: ScreenOrientationRequest) {
-    // no-op: 桌面端通过 WindowsWindowUtils.setUndecoratedFullscreen 处理全屏
-}
-
-/**
- * 桌面端 actual：no-op（桌面窗口不参与系统屏幕超时，也无对应窗口标志）
- */
-actual fun setKeepScreenOn(enabled: Boolean) {
-}

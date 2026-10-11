@@ -83,6 +83,7 @@ import cn.a10miaomiao.bilimiao.compose.components.status.BiliAnimTV
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
+import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
@@ -92,7 +93,6 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
-import com.a10miaomiao.bilimiao.comm.delegate.player.setKeepScreenOn
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.launch
@@ -115,7 +115,7 @@ import kotlin.math.roundToInt
  * - 悬浮横屏模式 ([PlayerDisplayMode.FloatingLandscape]): 完整手势关闭，仅保留单击切换控制器显隐.
  * - 画中画模式 ([PlayerDisplayMode.PictureInPicture]): 画面铺满整个小窗, 顶栏/底栏/侧边按钮等
  *   控制器全部隐藏, 弹幕按「画中画」弹幕显示设置渲染, 播放/暂停经系统动作按钮
- *   (见 [PictureInPicturePlaybackAction]) 操作; 状态由 PlayerState.pictureInPicture
+ *   (经 PlatformContext 注册的系统动作按钮) 操作; 状态由 PlayerState.pictureInPicture
  *   (平台层注入, 与 ComposeScaffold 共享) 驱动.
  * - 非全屏模式: 控制器布局忽略窗口安全边距.
  *
@@ -275,24 +275,36 @@ fun BiliVideoScaffold(
         }
     }
 
-    // 播放视频时保持屏幕常亮（与是否全屏无关，对齐旧版 PlayerDelegate2/PlayerController：
-    // 播放器打开即置位，暂停 / 播放完成 / 出错后清除，交还系统屏幕超时）。
-    // 加载与缓冲一并视为播放中，避免载入中或卡顿时屏幕熄灭。
-    val keepScreenOn = isPlaying || isBuffering || isLoading
-    DisposableEffect(keepScreenOn) {
-        setKeepScreenOn(keepScreenOn)
-        onDispose { setKeepScreenOn(false) }
+    // 仅在「正在播放」期间保持屏幕常亮（与是否全屏无关），恢复系统屏幕超时：
+    // - Playing / Buffering 置位：Buffering 由 mediamp 的 PAUSED_BUFFERING 映射而来，
+    //   语义是 playWhenReady && isBuffering（用户意图播放、正在等数据），即播放中的卡顿缓冲；
+    //   用户主动暂停永远不会落进这一分支（mediamp 的 PAUSED = !playWhenReady）。
+    // - 暂停 / 播放完成 / 出错 / 加载中一律清除，避免暂停或挂着完成界面时白耗电。
+    // 窗口能力经 compose 层 PlatformContext 取得：安卓端实现由 MainActivity 以自身窗口
+    // 创建并随 Activity 重建更新，无需全局持有 Activity。
+    val platformContext = LocalPlatformContext.current
+    val keepScreenOn = isPlaying || isBuffering
+    DisposableEffect(platformContext, keepScreenOn) {
+        platformContext.setKeepScreenOn(keepScreenOn)
+        onDispose { platformContext.setKeepScreenOn(false) }
     }
 
     // 画中画动作按钮（播放/暂停）：画中画窗口内的画面不接收点击，播放控制只能交给系统绘制。
     // 进入画中画时注册动作按钮点击处理，播放状态变化时同步按钮图标，退出画中画时注销。
-    PictureInPicturePlaybackAction(
-        enabled = inPictureInPicture,
-        isPlaying = isPlaying,
-        onTogglePlayPause = {
-            if (isPlaying) playerDelegate.pause() else playerDelegate.resume()
-        },
-    )
+    // 注册/注销与 PiP 参数同步均走 compose 层 PlatformContext（安卓实现持有当前 Activity 窗口）。
+    val piPTogglePlayPause = rememberUpdatedState<() -> Unit> {
+        if (isPlaying) playerDelegate.pause() else playerDelegate.resume()
+    }
+    LaunchedEffect(platformContext, inPictureInPicture, isPlaying) {
+        if (inPictureInPicture) platformContext.setPictureInPictureActions(isPlaying)
+    }
+    DisposableEffect(platformContext, inPictureInPicture) {
+        if (!inPictureInPicture) return@DisposableEffect onDispose {}
+        val unregister = platformContext.registerPictureInPictureActionReceiver {
+            piPTogglePlayPause.value()
+        }
+        onDispose { unregister() }
+    }
 
     player?.let { p ->
         // 画面比例：16:9 / 4:3 的画面框尺寸由 video 层布局限制，
@@ -359,14 +371,14 @@ fun BiliVideoScaffold(
                     onClose = onBack,
                     actions = {
                         // 画中画（仅安卓 8.0+ 支持，桌面端暂不支持）
-                        if (isPictureInPictureSupported()) {
+                        if (platformContext.isPictureInPictureSupported()) {
                             IconButton(
                                 onClick = {
                                     val info = playbackInfo
                                     val width = info?.width ?: 16
                                     val height = info?.height ?: 9
                                     // 初始动作按钮按当前播放状态给出「暂停」或「播放」
-                                    if (!enterPictureInPictureMode(width, height, isPlaying)) {
+                                    if (!platformContext.enterPictureInPictureMode(width, height, isPlaying)) {
                                         GlobalToaster.show("此设备不支持小窗播放")
                                     }
                                 },

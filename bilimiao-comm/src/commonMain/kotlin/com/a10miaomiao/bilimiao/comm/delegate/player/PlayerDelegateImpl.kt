@@ -54,6 +54,8 @@ class PlayerDelegateImpl(
     private val playerStore: PlayerStore,
     private val playListStore: PlayListStore,
     isLockScreenOrientationPortraitProvider: () -> Boolean = { false },
+    /** 把全屏控制器的方向请求应用到平台窗口（入口注入；桌面默认 no-op） */
+    setRequestedOrientation: (ScreenOrientationRequest) -> Unit = {},
 ) : BasePlayerDelegate {
 
     /**
@@ -103,6 +105,7 @@ class PlayerDelegateImpl(
     val fullscreenController = FullscreenController(
         scope = session.coroutineScope,
         isLockScreenOrientationPortraitProvider = isLockScreenOrientationPortraitProvider,
+        setRequestedOrientation = setRequestedOrientation,
     )
 
     // 播放参数（清晰度切换需要跨界面保留）

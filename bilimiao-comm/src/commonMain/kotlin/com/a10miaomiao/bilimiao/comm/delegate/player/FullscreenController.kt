@@ -42,7 +42,7 @@ enum class FullscreenMode(val value: Int) {
 /**
  * 屏幕方向请求（平台无关）
  *
- * 由 [FullscreenController] 计算后通过 [setRequestedOrientation] (expect/actual) 应用到平台。
+ * 由 [FullscreenController] 计算后通过其构造参数 `setRequestedOrientation` 应用到平台。
  */
 enum class ScreenOrientationRequest {
     /** 不指定方向，跟随系统 */
@@ -67,16 +67,24 @@ enum class ScreenOrientationRequest {
  * 整合原版 `PlayerController` 的全屏切换、屏幕方向设置、自动全屏等逻辑，
  * 移除 GSY/View 依赖，改为通过 [StateFlow] 暴露状态，由 Compose UI 观察。
  *
- * 平台差异通过 [setRequestedOrientation] (expect/actual) 处理：
- * - 安卓：调用 `Activity.requestedOrientation`
- * - 桌面：no-op（桌面端无屏幕方向概念）
+ * 平台差异通过构造参数 [setRequestedOrientation] 注入（不再使用 expect/actual）：
+ * - 安卓：由 MainActivity 传入 compose 层 PlatformContext 的实现，直接作用于当前 Activity 窗口
+ * - 桌面：不传，默认 no-op（桌面端无屏幕方向概念）
  *
  * @param scope 协程作用域
  * @param isLockScreenOrientationPortraitProvider 返回是否锁定竖屏（来自 AppStore）
+ * @param setRequestedOrientation 把方向请求应用到平台窗口
  */
 class FullscreenController(
     private val scope: CoroutineScope,
     private val isLockScreenOrientationPortraitProvider: () -> Boolean,
+    /**
+     * 应用屏幕方向到平台窗口（由入口注入）
+     *
+     * - 安卓：MainActivity 传入 compose 层 PlatformContext 的实现
+     * - 桌面：默认 no-op
+     */
+    private val setRequestedOrientation: (ScreenOrientationRequest) -> Unit = {},
 ) {
     /** 当前是否全屏 */
     private val _isFullscreen = MutableStateFlow(false)

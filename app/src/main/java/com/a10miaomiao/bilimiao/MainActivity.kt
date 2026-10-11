@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color as ComposeColor
@@ -190,6 +189,14 @@ class MainActivity : ComponentActivity(), DIAware {
             scope = lifecycleScope,
         )
     }
+    /**
+     * 平台动作上下文（打开链接 / 剪贴板 / 窗口能力）
+     *
+     * 以本 Activity 作为窗口宿主：屏幕方向、屏幕常亮等窗口能力直接作用于当前窗口，
+     * 随 Activity 重建换新实例；与 [basePlayerDelegate] 注入的是同一个实例。
+     */
+    private val composePlatformContext by lazy { ComposePlatformContext(this) }
+
     private val basePlayerDelegate: PlayerDelegateImpl by lazy {
         // 初始化平台 Provider（ExoPlayerMediampPlayer 需要 AndroidPlatformContext）
         com.a10miaomiao.bilimiao.comm.platform.PlatformProviders.context = com.a10miaomiao.bilimiao.comm.platform.AndroidPlatformContext(application as android.app.Application)
@@ -200,6 +207,8 @@ class MainActivity : ComponentActivity(), DIAware {
             playerStore = playerStore,
             playListStore = playListStore,
             isLockScreenOrientationPortraitProvider = { appStore.state.isLockScreenOrientationPortrait },
+            // 窗口能力统一走 compose 层 PlatformContext（与 UI 共用同一实例）
+            setRequestedOrientation = { composePlatformContext.setRequestedOrientation(it) },
         ).also {
             it.createPlayer()
             it.onShowPlayerChanged = { show ->
@@ -214,8 +223,6 @@ class MainActivity : ComponentActivity(), DIAware {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         }
         super.onCreate(savedInstanceState)
-        // 设置 ActivityHolder 供 FullscreenController 调用 requestedOrientation
-        com.a10miaomiao.bilimiao.comm.delegate.player.ActivityHolder.set(this)
         themeDelegate.onCreate(savedInstanceState)
 
         BilimiaoStatService.setAuthorizedState(this, false)
@@ -287,7 +294,8 @@ class MainActivity : ComponentActivity(), DIAware {
 
         setContent {
             val appState = store.appStore.stateFlow.collectAsState().value
-            val platformContext = remember { ComposePlatformContext(this@MainActivity) }
+            // 与 PlayerDelegate 注入的是同一个 Activity 级实例，无需 remember
+            val platformContext = composePlatformContext
             MainActivityComposeHost(
                 navigator = composeNavigator,
                 hostDi = composeHostDi,
