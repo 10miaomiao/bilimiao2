@@ -89,7 +89,10 @@ fun VideoDetailContent(
     val playerStore by rememberInstance<PlayerStore>()
     val playListStore by rememberInstance<PlayListStore>()
     val playListState by playListStore.stateFlow.collectAsState()
-    val listPosition by playerStore.listPositionFlow.collectAsState()
+    // listPositionFlow 为冷流，需显式提供初值；用 remember 固定，避免每次重组重算
+    val listPosition by playerStore.listPositionFlow.collectAsState(
+        initial = remember { playerStore.getPlayListCurrentPosition() },
+    )
     var isExpandPlayList by remember {
         mutableStateOf(false)
     }

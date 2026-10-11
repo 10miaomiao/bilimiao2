@@ -1,7 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.store
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerSource
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
 import com.a10miaomiao.bilimiao.comm.entity.player.PlayListFrom
@@ -12,10 +11,9 @@ import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -55,31 +53,38 @@ class PlayerStore(override val di: DI) :
 
     private val playListStore: PlayListStore by di.instance()
 
-    val listPositionFlow =
-        stateFlow.combine(playListStore.stateFlow) { playerState, playListState ->
-            getPlayListCurrentPosition(playerState, playListState)
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = getPlayListCurrentPosition(
-                state,
-                playListStore.state
-            )
-        )
-
-    private fun getPlayListCurrentPosition(
+    /** 当前播放项在播放列表中的下标（-1 表示不在列表中），连播逻辑与界面共用的唯一计算实现 */
+    private fun listPositionOf(
         playerState: State,
-        playListState: PlayListStore.State
+        playListState: PlayListStore.State,
     ): Int {
         return if (playerState.aid.isBlank()) {
             -1
         } else {
-            playListState.indexOfAid(state.aid)
+            playListState.indexOfAid(playerState.aid)
         }
     }
 
+    /**
+     * 播放列表当前位置的响应式投影（冷流）。
+     *
+     * 不持有缓存快照，订阅时按当前状态即时计算，因此不存在「无人订阅时读到过期值」的问题。
+     * 界面订阅需自带初值：`collectAsState(initial = getPlayListCurrentPosition())`；
+     * 命令式逻辑（自动连播、播放列表页定位）请直接调用 [getPlayListCurrentPosition]。
+     */
+    val listPositionFlow: Flow<Int> =
+        stateFlow.combine(playListStore.stateFlow) { playerState, playListState ->
+            listPositionOf(playerState, playListState)
+        }
+
+    /**
+     * 当前播放项在播放列表中的下标（-1 表示不在列表中）。
+     *
+     * 直接由当前状态计算，不受任何 Flow 订阅状态影响：从收藏夹等页面直接拉起播放器时
+     * 无人订阅界面，后台/浮层播放结束后的自动连播依然能取到正确下标。
+     */
     fun getPlayListCurrentPosition(): Int {
-        return listPositionFlow.value
+        return listPositionOf(state, playListStore.state)
     }
 
     fun setPlayerSource(source: BasePlayerSource) {
