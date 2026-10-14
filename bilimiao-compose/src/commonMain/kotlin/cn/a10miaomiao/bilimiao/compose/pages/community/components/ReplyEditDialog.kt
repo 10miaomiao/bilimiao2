@@ -77,10 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.AnyPopDialog
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.AnyPopDialogProperties
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.DirectionState
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialogHost
 import cn.a10miaomiao.bilimiao.compose.pages.community.ReplyEditParams
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.ResultInfo
@@ -221,68 +218,67 @@ fun ReplyEditDialog(
     state: ReplyEditDialogState
 ) {
     val showEmojiGrid = remember { mutableStateOf(false) }
-    if (state.visible) {
-        AutoSheetDialog(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(10.dp),
-            content = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
+    AutoSheetDialogHost(
+        visible = state.visible,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(10.dp),
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                ReplyTextField(
+                    state = state,
+                )
+                SnackbarHost(hostState = state.snackbar)
+                ReplyTextToolbar(
+                    modifier = Modifier.padding(top = 5.dp),
+                    visibleEmoji = showEmojiGrid.value,
+                    loading = state.loading,
+                    onEmojiClick = {
+                        showEmojiGrid.value = !showEmojiGrid.value
+                    },
+                    onSendClick = state::sendReply
+                )
+                AnimatedVisibility(
+                    visible = showEmojiGrid.value
                 ) {
-                    ReplyTextField(
-                        state = state,
+                    EmojiGridBox(
+                        modifier = Modifier.padding(top = 5.dp)
+                            .height(emotePanelHeight),
+                        onInputEmoji = {
+                            state.inputEmoji(it)
+                        }
                     )
-                    SnackbarHost(hostState = state.snackbar)
-                    ReplyTextToolbar(
-                        modifier = Modifier.padding(top = 5.dp),
-                        visibleEmoji = showEmojiGrid.value,
-                        loading = state.loading,
-                        onEmojiClick = {
-                            showEmojiGrid.value = !showEmojiGrid.value
-                        },
-                        onSendClick = state::sendReply
-                    )
-                    AnimatedVisibility(
-                        visible = showEmojiGrid.value
-                    ) {
-                        EmojiGridBox(
-                            modifier = Modifier.padding(top = 5.dp)
-                                .height(emotePanelHeight),
-                            onInputEmoji = {
-                                state.inputEmoji(it)
-                            }
-                        )
-                    }
-                }
-                val imeVisible = isImeVisible()
-                val keyboardController = LocalSoftwareKeyboardController.current
-                LaunchedEffect(imeVisible) {
-                    if (showEmojiGrid.value && imeVisible) {
-                        showEmojiGrid.value = false
-                    }
-                }
-                LaunchedEffect(showEmojiGrid.value) {
-                    if (showEmojiGrid.value && imeVisible) {
-                        keyboardController?.hide()
-                    } else if (!showEmojiGrid.value && !imeVisible) {
-                        state.requestFocus()
-                        keyboardController?.show()
-                    }
-                }
-            },
-            onDismiss = state::dismiss,
-            onPreDismiss = {
-                if (showEmojiGrid.value) {
-                    showEmojiGrid.value = false
-                    true
-                } else {
-                    false
                 }
             }
-        )
-    }
+            val imeVisible = isImeVisible()
+            val keyboardController = LocalSoftwareKeyboardController.current
+            LaunchedEffect(imeVisible) {
+                if (showEmojiGrid.value && imeVisible) {
+                    showEmojiGrid.value = false
+                }
+            }
+            LaunchedEffect(showEmojiGrid.value) {
+                if (showEmojiGrid.value && imeVisible) {
+                    keyboardController?.hide()
+                } else if (!showEmojiGrid.value && !imeVisible) {
+                    state.requestFocus()
+                    keyboardController?.show()
+                }
+            }
+        },
+        onDismiss = state::dismiss,
+        onPreDismiss = {
+            if (showEmojiGrid.value) {
+                showEmojiGrid.value = false
+                true
+            } else {
+                false
+            }
+        }
+    )
 }
 
 private val circleButtonSize = 44.dp

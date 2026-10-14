@@ -42,7 +42,7 @@ import cn.a10miaomiao.bilimiao.compose.common.toColorInt
 import androidx.lifecycle.viewModelScope
 import bilibili.app.archive.v1.Arc
 import bilibili.app.archive.v1.Page
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialogHost
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
 import cn.a10miaomiao.bilimiao.compose.common.download.entry.BiliDownloadEntryInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -303,93 +303,92 @@ private fun VideoDownloadItem(
 fun VideoDownloadDialog(
     state: VideoDownloadDialogState,
 ) {
-    if (state.visible) {
-        var expandedQualityMenu by remember {
-            mutableStateOf(false)
-        }
-        AutoSheetDialog(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .heightIn(max = 500.dp),
-            content = {
-                Column(
-                    modifier = Modifier.fillMaxSize()
+    var expandedQualityMenu by remember {
+        mutableStateOf(false)
+    }
+    AutoSheetDialogHost(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .heightIn(max = 500.dp),
+        content = {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = "请选择分P下载",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                )
+                Box(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = "请选择分P下载",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                    LazyColumn(
                         modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth()
-                    )
-                    Box(
-                        modifier = Modifier.weight(1f)
+                            .fillMaxSize()
                     ) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
+                        items(state.list.size, { it }) { index ->
+                            val item = state.list[index]
+                            val isEnabled = !state.downloadedSet.contains(item.cid)
+                            val isChecked = if (isEnabled) {
+                                state.checkedMap.containsKey(item.cid)
+                            } else {
+                                true
+                            }
+                            VideoDownloadItem(
+                                page = item,
+                                enabled = isEnabled,
+                                checked = isChecked,
+                                onCheckedChange = { state.checkedChange(item.cid, index) }
+                            )
+                        }
+                    }
+                    SnackbarHost(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        hostState = state.snackbar,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .padding(5.dp)
+                ) {
+                    Box() {
+                        Button(
+                            modifier = Modifier.padding(end = 5.dp),
+                            onClick = { expandedQualityMenu = true },
                         ) {
-                            items(state.list.size, { it }) { index ->
-                                val item = state.list[index]
-                                val isEnabled = !state.downloadedSet.contains(item.cid)
-                                val isChecked = if (isEnabled) {
-                                    state.checkedMap.containsKey(item.cid)
-                                } else {
-                                    true
-                                }
-                                VideoDownloadItem(
-                                    page = item,
-                                    enabled = isEnabled,
-                                    checked = isChecked,
-                                    onCheckedChange = { state.checkedChange(item.cid, index) }
+                            Text(text = "画质：" + state.description)
+                        }
+                        DropdownMenu(
+                            expanded = expandedQualityMenu,
+                            onDismissRequest = { expandedQualityMenu = false },
+                        ) {
+                            state.qualityList.forEach {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        expandedQualityMenu = false
+                                        state.setQuality(it.first)
+                                    },
+                                    text = {
+                                        Text(text = it.second)
+                                    }
                                 )
                             }
                         }
-                        SnackbarHost(
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                            hostState = state.snackbar,
-                        )
                     }
-                    Row(
-                        modifier = Modifier
-                            .padding(5.dp)
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = state::startDownload,
+                        enabled = state.checkedMap.isNotEmpty(),
                     ) {
-                        Box() {
-                            Button(
-                                modifier = Modifier.padding(end = 5.dp),
-                                onClick = { expandedQualityMenu = true },
-                            ) {
-                                Text(text = "画质：" + state.description)
-                            }
-                            DropdownMenu(
-                                expanded = expandedQualityMenu,
-                                onDismissRequest = { expandedQualityMenu = false },
-                            ) {
-                                state.qualityList.forEach {
-                                    DropdownMenuItem(
-                                        onClick = {
-                                            expandedQualityMenu = false
-                                            state.setQuality(it.first)
-                                        },
-                                        text = {
-                                            Text(text = it.second)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        Button(
-                            modifier = Modifier.weight(1f),
-                            onClick = state::startDownload,
-                            enabled = state.checkedMap.isNotEmpty(),
-                        ) {
-                            Text(text = "开始下载(${state.checkedSize})")
-                        }
+                        Text(text = "开始下载(${state.checkedSize})")
                     }
                 }
-            },
-            onDismiss = state::dismiss
-        )
-    }
+            }
+        },
+        visible = state.visible,
+        onDismiss = state::dismiss
+    )
 }

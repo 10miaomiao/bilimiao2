@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialogHost
 import cn.a10miaomiao.bilimiao.compose.pages.download.DownloadBangumiCreatePageViewModel.QualityInfo
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -168,82 +168,81 @@ fun VideoCoinRadioButton(
 fun VideoCoinDialog(
     state: VideoCoinDialogState
 ) {
-    if (state.visible) {
-        AutoSheetDialog(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .heightIn(max = 400.dp),
-            content = {
-                Column(
-                    modifier = Modifier.fillMaxSize()
+    AutoSheetDialogHost(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .heightIn(max = 400.dp),
+        content = {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = "请选择投币",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                )
+                Box(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = "请选择投币",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth()
-                    )
-                    Box(
-                        modifier = Modifier.weight(1f)
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
+                        VideoCoinRadioButton(
+                            num = 1,
+                            selected = state.coinNum == 1,
+                            onClick = {
+                                state.setCoinNum(1)
+                            }
+                        )
+                        if (state.maxCoinNum > 1) {
+                            Spacer(modifier = Modifier.height(20.dp))
                             VideoCoinRadioButton(
-                                num = 1,
-                                selected = state.coinNum == 1,
+                                num = 2,
+                                selected = state.coinNum == 2,
                                 onClick = {
-                                    state.setCoinNum(1)
+                                    state.setCoinNum(2)
                                 }
                             )
-                            if (state.maxCoinNum > 1) {
-                                Spacer(modifier = Modifier.height(20.dp))
-                                VideoCoinRadioButton(
-                                    num = 2,
-                                    selected = state.coinNum == 2,
-                                    onClick = {
-                                        state.setCoinNum(2)
-                                    }
+                        }
+                    }
+                    SnackbarHost(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        hostState = state.snackbar,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .padding(
+                            vertical = 5.dp,
+                            horizontal = 10.dp
+                        )
+                ) {
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = state::confirmCoin,
+                        enabled = !state.loading
+                    ) {
+                        Row {
+                            if (state.loading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .padding(end = 5.dp),
+                                    strokeWidth = 2.dp,
                                 )
                             }
-                        }
-                        SnackbarHost(
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                            hostState = state.snackbar,
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .padding(
-                                vertical = 5.dp,
-                                horizontal = 10.dp
-                            )
-                    ) {
-                        Button(
-                            modifier = Modifier.weight(1f),
-                            onClick = state::confirmCoin,
-                            enabled = !state.loading
-                        ) {
-                            Row {
-                                if (state.loading) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .padding(end = 5.dp),
-                                        strokeWidth = 2.dp,
-                                    )
-                                }
-                                Text(text = "确定")
-                            }
+                            Text(text = "确定")
                         }
                     }
                 }
-            },
-            onDismiss = state::dismiss
-        )
-    }
+            }
+        },
+        visible = state.visible,
+        onDismiss = state::dismiss
+    )
 }

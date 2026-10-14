@@ -26,7 +26,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.dokar.sonner.Toaster
@@ -64,7 +66,7 @@ import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import cn.a10miaomiao.bilimiao.compose.components.appbar.LocalAppBarState
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialogHost
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialog
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.MessageDialogState
 import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
@@ -304,12 +306,11 @@ fun MainComposeHost(
                         pageSearchMethod = startViewState.pageSearchMethod,
                         onDismissRequest = startViewState::closeSearchDialog,
                     )
-                    if (bottomSheetPage != null) {
-                        MyBottomSheet(
-                            bottomSheetState = bottomSheetState,
-                            onClose = bottomSheetState::close,
-                        )
-                    }
+                    // 弹层自己负责「关闭动画结束后再卸载」，因此这里保持组合
+                    MyBottomSheet(
+                        bottomSheetState = bottomSheetState,
+                        onClose = bottomSheetState::close,
+                    )
                 }
                 MessageDialog(messageDialogState)
                 Toaster(
@@ -359,6 +360,12 @@ fun MyBottomSheet(
     val page by bottomSheetState.page.collectAsState()
     val innerPages by bottomSheetState.innerPages.collectAsState()
     val currentPage = innerPages.lastOrNull() ?: page
+    // 关闭动画期间 page 已被清空，保留最后一次的内容，避免收起时内容突然消失
+    var lastShownPage by remember { mutableStateOf(currentPage) }
+    LaunchedEffect(currentPage) {
+        if (currentPage != null) lastShownPage = currentPage
+    }
+    val contentPage = currentPage ?: lastShownPage
     val pageConfigState = remember { PageConfigState() }
     subDI(
         diBuilder = {
@@ -372,13 +379,14 @@ fun MyBottomSheet(
             LocalPageConfigState provides pageConfigState,
             LocalPageNavigation provides sheetPageNavigator,
         ) {
-            AutoSheetDialog(
+            AutoSheetDialogHost(
+                visible = page != null,
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
                     .heightIn(max = 500.dp),
                 content = {
-                    if (currentPage != null) {
-                        currentPage.Content()
+                    if (contentPage != null) {
+                        contentPage.Content()
                     }
                     MyBottomSheetTitleBar(pageConfigState, onClose)
                 },

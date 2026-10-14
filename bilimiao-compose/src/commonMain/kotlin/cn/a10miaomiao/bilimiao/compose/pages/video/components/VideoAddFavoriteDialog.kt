@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import cn.a10miaomiao.bilimiao.compose.common.toColorInt
 import androidx.lifecycle.viewModelScope
-import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialog
+import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialogHost
 import cn.a10miaomiao.bilimiao.compose.pages.community.ReplyEditParams
 import cn.a10miaomiao.bilimiao.compose.pages.download.EpisodeItem
 import com.a10miaomiao.bilimiao.comm.entity.MessageInfo
@@ -246,106 +246,105 @@ private fun VideoFavoriteItem(
 fun VideoAddFavoriteDialog(
     state: VideoAddFavoriteDialogState,
 ) {
-    if (state.visible) {
-        AutoSheetDialog(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .heightIn(max = 500.dp),
-            content = {
-                Column(
-                    modifier = Modifier.fillMaxSize()
+    AutoSheetDialogHost(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .heightIn(max = 500.dp),
+        content = {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = "请选择收藏夹",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                )
+                Box(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = "请选择收藏夹",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                    LazyColumn(
                         modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth()
-                    )
-                    Box(
-                        modifier = Modifier.weight(1f)
+                            .fillMaxSize()
                     ) {
-                        LazyColumn(
+                        items(state.list, { it.id }) { item ->
+                            val isChecked = if (item.fav_state == 1) {
+                                state.selectedMap[item.id] ?: true
+                            } else {
+                                state.selectedMap[item.id] ?: false
+                            }
+                            VideoFavoriteItem(
+                                title = item.title,
+                                count = item.media_count,
+                                checked = isChecked,
+                                onCheckedChange = { state.checkedChange(item.id, it) }
+                            )
+                        }
+                    }
+                    if (state.list.isEmpty()) {
+                        Row(
                             modifier = Modifier
-                                .fillMaxSize()
+                                .align(Alignment.Center)
+                                .padding(vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
                         ) {
-                            items(state.list, { it.id }) { item ->
-                                val isChecked = if (item.fav_state == 1) {
-                                    state.selectedMap[item.id] ?: true
-                                } else {
-                                    state.selectedMap[item.id] ?: false
-                                }
-                                VideoFavoriteItem(
-                                    title = item.title,
-                                    count = item.media_count,
-                                    checked = isChecked,
-                                    onCheckedChange = { state.checkedChange(item.id, it) }
+                            if (state.listLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 3.dp,
+                                )
+                                Text(
+                                    "加载中",
+                                    modifier = Modifier.padding(start = 5.dp),
+                                    color = MaterialTheme.colorScheme.outline,
+                                    fontSize = 14.sp,
+                                )
+                            } else if (state.listFail.isNotBlank()) {
+                                Text(
+                                    state.listFail,
+                                    modifier = Modifier.padding(start = 5.dp),
+                                    color = MaterialTheme.colorScheme.outline,
+                                    fontSize = 14.sp,
                                 )
                             }
                         }
-                        if (state.list.isEmpty()) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .padding(vertical = 5.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                if (state.listLoading) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(24.dp),
-                                        strokeWidth = 3.dp,
-                                    )
-                                    Text(
-                                        "加载中",
-                                        modifier = Modifier.padding(start = 5.dp),
-                                        color = MaterialTheme.colorScheme.outline,
-                                        fontSize = 14.sp,
-                                    )
-                                } else if (state.listFail.isNotBlank()) {
-                                    Text(
-                                        state.listFail,
-                                        modifier = Modifier.padding(start = 5.dp),
-                                        color = MaterialTheme.colorScheme.outline,
-                                        fontSize = 14.sp,
-                                    )
-                                }
-                            }
-                        }
-                        SnackbarHost(
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                            hostState = state.snackbar,
-                        )
                     }
-                    Row(
-                        modifier = Modifier
-                            .padding(
-                                vertical = 5.dp,
-                                horizontal = 10.dp
-                            )
+                    SnackbarHost(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        hostState = state.snackbar,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .padding(
+                            vertical = 5.dp,
+                            horizontal = 10.dp
+                        )
+                ) {
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = state::confirmFavorite,
+                        enabled = !state.loading
                     ) {
-                        Button(
-                            modifier = Modifier.weight(1f),
-                            onClick = state::confirmFavorite,
-                            enabled = !state.loading
-                        ) {
-                            Row {
-                                if (state.loading) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .padding(end = 5.dp),
-                                        strokeWidth = 2.dp,
-                                    )
-                                }
-                                Text(text = "完成")
+                        Row {
+                            if (state.loading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .padding(end = 5.dp),
+                                    strokeWidth = 2.dp,
+                                )
                             }
+                            Text(text = "完成")
                         }
                     }
                 }
-            },
-            onDismiss = state::dismiss
-        )
-    }
+            }
+        },
+        visible = state.visible,
+        onDismiss = state::dismiss
+    )
 }
