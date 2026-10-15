@@ -10,7 +10,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailPage
  * sheet 内部页面的导航操作（navigate / popBackStack / navigateByUri）全部作用于
  * [BottomSheetState] 的内部导航栈，与主 backstack 相互独立：
  * - navigate：压入 sheet 内部栈
- * - popBackStack：pop sheet 内部栈（返回 false 表示已无内部页，此时应关闭 sheet）
+ * - popBackStack：pop sheet 内部栈；已到 sheet 初始页（无内部页）时直接关闭整个弹层
  * - 浏览器/扫码等平台操作委托给父级 [PageNavigator]
  */
 class SheetPageNavigator(
@@ -31,7 +31,9 @@ class SheetPageNavigator(
             sheetState.popInnerPage()
             true
         } else {
-            false
+            // 已到 sheet 初始页：popBackStack 语义等价于关闭整个弹层，避免调用方"返回无效"
+            sheetState.close()
+            true
         }
     }
 
