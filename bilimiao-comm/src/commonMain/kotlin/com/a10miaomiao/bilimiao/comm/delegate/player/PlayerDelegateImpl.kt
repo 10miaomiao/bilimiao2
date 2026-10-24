@@ -109,17 +109,9 @@ class PlayerDelegateImpl(
         setRequestedOrientation = setRequestedOrientation,
     )
 
-    // 播放参数（清晰度切换需要跨界面保留）
-    private var quality: Int
-        get() = session.quality
-        set(value) {
-            session.quality = value
-        }
-    private var fnval: Int
-        get() = session.fnval
-        set(value) {
-            session.fnval = value
-        }
+    // 播放参数（清晰度切换需要跨界面保留；quality 的写入统一走 session.setQuality 以便持久化）
+    private val quality: Int get() = session.quality
+    private val fnval: Int get() = session.fnval
 
     // 播放状态（低频稳定状态，见 PlaybackState）
     private val _playbackState get() = session.playbackStateFlow
@@ -273,6 +265,8 @@ class PlayerDelegateImpl(
                 _playbackState.update { it.copy(loadingMessage = "正在获取播放地址...") }
                 // 「区域限制」设置里手动指定的代理与 upos 服务器：交给播放源决定实际使用的线路
                 session.ensureUposConfigLoaded()
+                // 读取播放参数：清晰度会话内首次从磁盘恢复，视频格式每次按最新设置
+                session.ensurePlayerConfigLoaded()
                 source.proxyServer = session.proxyServer
                 source.uposHost = session.uposHost
                 val sourceInfo = source.getPlayerUrl(quality, fnval)
@@ -569,7 +563,8 @@ class PlayerDelegateImpl(
 
     override fun changeQuality(newQuality: Int) {
         val source = _sourceState.value.currentSource ?: return
-        quality = newQuality
+        // 记住本次选择并写入磁盘，下次播放沿用（对齐旧版 PlayerDelegate2.changedQuality）
+        session.setQuality(newQuality)
         val savedPosition = _currentPosition.value
         // 切换清晰度时保留当前字幕（列表/选中/内容），避免字幕闪烁与重复下载
         loadAndPlay(source, reloadSubtitle = false)

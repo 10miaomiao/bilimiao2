@@ -98,7 +98,56 @@ class PlayerSession {
 
     // 播放参数（清晰度切换需要跨界面保留）
     var quality = 64 // 默认 720P
+        private set
     var fnval = 4048 // DASH 格式
+        private set
+
+    /** 清晰度是否已确定（已从磁盘恢复或被手动切换，见 [ensurePlayerConfigLoaded]） */
+    private var qualityResolved = false
+
+    /**
+     * 读取播放参数（每次取播放地址前调用）
+     *
+     * 清晰度只在会话内第一次确定：之后以用户本次的选择为准，否则切换清晰度后
+     * 会被磁盘里的旧值覆盖；视频格式是设置项，每次都按最新设置应用。
+     *
+     * 播放会话虽然与进程同寿命，但进程重启后字段是默认值，仍要从磁盘取回，
+     * 否则用户每次重启应用都要重新选清晰度（对齐旧版 `PlayerDelegate2.openPlayer`）。
+     */
+    suspend fun ensurePlayerConfigLoaded() {
+        val saved = try {
+            SettingPreferences.mapPreferences<Pair<Int?, Int?>> {
+                it[SettingPreferences.PlayerQuality] to it[SettingPreferences.PlayerFnval]
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return // 读盘失败：保留当前值，下次打开播放器再试
+        }
+        // 读取期间用户可能已经手动切过清晰度（[setQuality] 会置位 qualityResolved），
+        // 此时不能被磁盘里的旧值覆盖
+        if (!qualityResolved) {
+            saved.first?.let { quality = it }
+            qualityResolved = true
+        }
+        saved.second?.let { fnval = it }
+    }
+
+    /**
+     * 切换清晰度并持久化
+     *
+     * 写入 [SettingPreferences.PlayerQuality]，下次打开播放器（含进程重启）沿用该清晰度。
+     */
+    fun setQuality(newQuality: Int) {
+        quality = newQuality
+        qualityResolved = true
+        coroutineScope.launch {
+            try {
+                SettingPreferences.editPreferences { it[SettingPreferences.PlayerQuality] = newQuality }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     /**
      * 手动指定的区域限制代理服务器
