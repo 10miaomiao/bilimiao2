@@ -16,6 +16,7 @@ import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
+import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.LocalDanmakuInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
@@ -270,6 +271,10 @@ class PlayerDelegateImpl(
 
                 // 获取播放地址
                 _playbackState.update { it.copy(loadingMessage = "正在获取播放地址...") }
+                // 「区域限制」设置里手动指定的代理与 upos 服务器：交给播放源决定实际使用的线路
+                session.ensureUposConfigLoaded()
+                source.proxyServer = session.proxyServer
+                source.uposHost = session.uposHost
                 val sourceInfo = source.getPlayerUrl(quality, fnval)
                 fullscreenController.playbackInfo = sourceInfo
                 _sourceState.update {
@@ -287,6 +292,14 @@ class PlayerDelegateImpl(
 
                 // 解析 URL 格式
                 val resolved = resolvePlaybackUrl(sourceInfo.url)
+                // 验证换源用：这里的 videoUrl / audioUrl 就是交给播放器的最终地址，
+                // 其 host 应与 SmartSourceSelector 日志里「选中线路」的 host 一致
+                miaoLogger().i(
+                    "播放地址已解析",
+                    "format" to resolved.format,
+                    "videoUrl" to resolved.videoUrl,
+                    "audioUrl" to resolved.audioUrl,
+                )
 
                 val headers = sourceInfo.header
 
@@ -797,7 +810,8 @@ class PlayerDelegateImpl(
     }
 
     override fun setProxy(proxyServer: ProxyServerInfo, uposHost: String) {
-        // TODO: 设置代理
+        // 交给会话保存：会话与进程同寿命，且下次播放时会把两者注入播放源
+        session.setProxy(proxyServer, uposHost)
     }
 
     /**

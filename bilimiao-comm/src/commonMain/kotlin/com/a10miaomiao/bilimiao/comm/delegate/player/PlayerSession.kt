@@ -2,10 +2,13 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
+import com.a10miaomiao.bilimiao.comm.datastore.editPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.LocalDanmakuInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackState
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceState
+import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -96,6 +99,63 @@ class PlayerSession {
     // 播放参数（清晰度切换需要跨界面保留）
     var quality = 64 // 默认 720P
     var fnval = 4048 // DASH 格式
+
+    /**
+     * 手动指定的区域限制代理服务器
+     *
+     * 番剧的播放地址走它来请求（见 [BangumiPlayerSource.getProxyPlayerUrl]）。
+     */
+    var proxyServer: ProxyServerInfo? = null
+        private set
+
+    /**
+     * 手动指定的 upos 视频服务器 host（「区域限制」设置）
+     *
+     * 非空时播放源跳过智能换源：用户已经明确选了线路，不该再被自动改掉。
+     */
+    var uposHost: String = ""
+        private set
+
+    /** upos 设置是否已从 DataStore 恢复（幂等，见 [ensureUposConfigLoaded]） */
+    private var uposConfigLoaded = false
+
+    /**
+     * 保存「区域限制」设置页选中的代理服务器与 upos 视频服务器
+     *
+     * 代理服务器只存在会话里（它随设置页的选择立即生效）；upos host 额外写一份
+     * DataStore，让界面重建、进程重启之后还能恢复 —— 安卓端原有的 SharedPreferences
+     * 只存了选项名，桌面端那份实现是空的，都换不回 host。
+     */
+    fun setProxy(proxyServer: ProxyServerInfo, uposHost: String) {
+        this.proxyServer = proxyServer
+        this.uposHost = uposHost
+        uposConfigLoaded = true
+        coroutineScope.launch {
+            try {
+                SettingPreferences.editPreferences { it[SettingPreferences.PlayerUposHost] = uposHost }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    /**
+     * 恢复上次保存的 upos 视频服务器（会话首次播放时读一次）
+     *
+     * 播放会话虽然与进程同寿命，但进程重启后字段是空的，仍要从磁盘取回。
+     */
+    suspend fun ensureUposConfigLoaded() {
+        if (uposConfigLoaded) return
+        uposConfigLoaded = true
+        try {
+            val host = SettingPreferences.mapPreferences { it[SettingPreferences.PlayerUposHost] } ?: ""
+            if (host.isNotBlank()) {
+                uposHost = host
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     // 分段播放状态（分段视频播放中需要跨界面保留）
     var segmentUrls: List<String> = emptyList()

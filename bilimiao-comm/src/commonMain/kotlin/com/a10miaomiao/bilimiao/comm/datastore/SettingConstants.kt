@@ -64,6 +64,15 @@ object SettingConstants {
     // 画中画时显示底部进度条
     const val  PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_PIP = 4
 
+    // 智能换源：关闭
+    const val PLAYER_SMART_SOURCE_OFF = 0
+    // 智能换源：后台测速。起播不等待，用上一次的实测结果决定本次用哪条线路，
+    // 同时后台重测刷新结果供下次使用
+    const val PLAYER_SMART_SOURCE_BACKGROUND = 1
+    // 智能换源：起播前测速。先测完再起播，首次播放多等一点时间
+    const val PLAYER_SMART_SOURCE_BEFORE_PLAY = 2
+    const val PLAYER_SMART_SOURCE_DEFAULT = PLAYER_SMART_SOURCE_BACKGROUND
+
     // 倍速值集合
     val PLAYER_SPEED_SETS = setOf("0.5", "1.0", "2.0")
 

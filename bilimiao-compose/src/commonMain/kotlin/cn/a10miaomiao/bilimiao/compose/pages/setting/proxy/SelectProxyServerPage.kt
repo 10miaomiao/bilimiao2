@@ -54,24 +54,14 @@ internal class SelectProxyServerPageViewModel(
     val serverList = MutableStateFlow(emptyList<ProxyServerInfo>())
     var selectedServerIndex = MutableStateFlow(-1)
 
-    val uposList = listOf(
-        BiliUposInfo("none", "不替换", ""),
-        BiliUposInfo("ali", "ali（阿里云）", "upos-sz-mirrorali.bilivideo.com"),
-        BiliUposInfo("cos", "cos（腾讯云）", "upos-sz-mirrorcos.bilivideo.com"),
-        BiliUposInfo("hw", "hw（华为云）", "upos-sz-mirrorhw.bilivideo.com"),
-        BiliUposInfo("akamai", "akamai（Akamai海外）", "upos-hz-mirrorakam.akamaized.net"),
-        BiliUposInfo("aliov", "aliov（阿里海外）", "upos-sz-mirroraliov.bilivideo.com"),
-        BiliUposInfo("aliov", "cosov（腾讯海外）", "upos-sz-mirrorcosov.bilivideo.com"),
-        BiliUposInfo("tf_hw", "tf_hw（华为）", "upos-tf-all-hw.bilivideo.com"),
-        BiliUposInfo("tf_tx", "tf_tx（腾讯）", "upos-tf-all-tx.bilivideo.com"),
-    )
+    // 与智能换源（SmartSourceSelector）共用同一份线路池，避免两处列表各写一份后走偏
+    val uposList = BiliUposInfo.PRESETS
 
     val selectedUpos = MutableStateFlow(uposList[0])
 
     fun readServerList() {
         serverList.value = proxyRepository.serverList()
-        val uposName = proxyRepository.uposName()
-        uposList.find { it.name == uposName }?.let {
+        BiliUposInfo.findByName(proxyRepository.uposName())?.let {
             selectedUpos.value = it
         }
     }

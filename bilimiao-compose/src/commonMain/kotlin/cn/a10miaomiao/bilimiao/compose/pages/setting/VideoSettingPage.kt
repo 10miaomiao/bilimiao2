@@ -63,6 +63,19 @@ private class VideoSettingPageViewModel(
     fun fnvalSelectionName(value: Int) = fnvalSelection[value] ?: AnnotatedString(value.toString())
     val fnvalSelectionList = fnvalSelection.keys.toList()
 
+    private val smartSourceSelection = mapOf(
+        SettingConstants.PLAYER_SMART_SOURCE_OFF to AnnotatedString("关闭"),
+        SettingConstants.PLAYER_SMART_SOURCE_BACKGROUND to AnnotatedString("开启"),
+        // 「起播前测速」暂不放出入口：它会让每次起播最多多等 2.5 秒，先用后台测速把线路分数攒起来。
+        // 仅隐藏了这里的选项，常量与 SmartSourceSelector 里的逻辑都还在，需要时放开这一行即可。
+        // SettingConstants.PLAYER_SMART_SOURCE_BEFORE_PLAY to AnnotatedString("起播前测速（本次播放要多等一会儿）"),
+    )
+
+    fun smartSourceSelectionName(value: Int) =
+        smartSourceSelection[value] ?: AnnotatedString(value.toString())
+
+    val smartSourceSelectionList = smartSourceSelection.keys.toList()
+
 
     private val fullModeSelection = mapOf(
         SettingConstants.PLAYER_FULL_MODE_AUTO to AnnotatedString("跟随视频"),
@@ -202,6 +215,18 @@ private fun VideoSettingPageContent(
                 defaultValue = SettingConstants.PLAYER_FNVAL_DASH,
                 values = viewModel.fnvalSelectionList,
                 valueToText = viewModel::fnvalSelectionName
+            )
+            listPreference(
+                key = SettingPreferences.PlayerSmartSourceMode.name,
+                title = {
+                    Text("智能换源")
+                },
+                summary = {
+                    Text("实测各条视频线路的速度，优先使用较快的一条")
+                },
+                defaultValue = SettingConstants.PLAYER_SMART_SOURCE_DEFAULT,
+                values = viewModel.smartSourceSelectionList,
+                valueToText = viewModel::smartSourceSelectionName
             )
             preference(
                 key = SettingPreferences.PlayerProxy.name,

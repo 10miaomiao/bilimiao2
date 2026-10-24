@@ -11,6 +11,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.source.SourceUrlSet
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -62,10 +63,23 @@ open class BangumiPlayerSource(
             val dash = res.dash
             if (dash != null) {
                 it.duration = dash.duration * 1000L
-                val dashVideo = dash.video.firstOrNull() ?: throw Exception("未找到可播放的dash视频")
+                // 选取规则与 DashSource.getMDPUrl 内部保持一致：换源要给「实际会播的那条流」
+                // 测速，否则会把另一条 rep 的地址塞进按本条 rep 生成的 MPD
+                val dashVideo = dash.video.firstOrNull { item -> item.id == res.quality }
+                    ?: dash.video.lastOrNull()
+                    ?: throw Exception("未找到可播放的dash视频")
                 it.height = dashVideo.height
                 it.width = dashVideo.width
-                val dashSource = DashSource()
+                val audioDash = dash.audio?.firstOrNull()
+                val resolved = resolveSourceUrls(
+                    video = SourceUrlSet(dashVideo.base_url, dashVideo.backup_url ?: emptyList()),
+                    audio = audioDash?.let { SourceUrlSet(it.base_url, it.backup_url ?: emptyList()) },
+                    headers = it.header,
+                )
+                val dashSource = DashSource(
+                    selectedVideoUrl = resolved.videoUrl,
+                    selectedAudioUrl = resolved.audioUrl,
+                )
                 it.url = dashSource.getMDPUrl(
                     dashData = dash,
                     quality = res.quality
@@ -145,6 +159,11 @@ open class BangumiPlayerSource(
                 } ?: dashAudio.firstOrNull { it.baseUrl.isNotEmpty() }
                 playerSource.height = dash.height
                 playerSource.width = dash.width
+                val resolved = resolveSourceUrls(
+                    video = SourceUrlSet(dash.baseUrl, dash.backupUrl),
+                    audio = audio?.let { SourceUrlSet(it.baseUrl, it.backupUrl) },
+                    headers = playerSource.header,
+                )
                 //  无法获取Segment Base放弃手动生成MDP XML方案
 //                playerSource.url = DashSource().getMDPUrl(
 //                    videoId = videoInfo.quality,
@@ -154,9 +173,9 @@ open class BangumiPlayerSource(
 //                    durationMs = videoInfo.timelength,
 //                )
                 playerSource.url = if (audio == null) {
-                    dash.baseUrl
+                    resolved.videoUrl
                 } else {
-                    "[merging]\n${dash.baseUrl}\n${audio.baseUrl}"
+                    "[merging]\n${resolved.videoUrl}\n${resolved.audioUrl}"
                 }
             }
             is Stream.Content.SegmentVideo -> {
@@ -190,10 +209,23 @@ open class BangumiPlayerSource(
             )
             if (dash != null) {
                 it.duration = dash.duration * 1000L
-                val dashVideo = dash.video.firstOrNull() ?: throw Exception("未找到可播放的dash视频")
+                // 选取规则与 DashSource.getMDPUrl 内部保持一致：换源要给「实际会播的那条流」
+                // 测速，否则会把另一条 rep 的地址塞进按本条 rep 生成的 MPD
+                val dashVideo = dash.video.firstOrNull { item -> item.id == res.quality }
+                    ?: dash.video.lastOrNull()
+                    ?: throw Exception("未找到可播放的dash视频")
                 it.height = dashVideo.height
                 it.width = dashVideo.width
-                val dashSource = DashSource(uposHost)
+                val audioDash = dash.audio?.firstOrNull()
+                val resolved = resolveSourceUrls(
+                    video = SourceUrlSet(dashVideo.base_url, dashVideo.backup_url ?: emptyList()),
+                    audio = audioDash?.let { SourceUrlSet(it.base_url, it.backup_url ?: emptyList()) },
+                    headers = it.header,
+                )
+                val dashSource = DashSource(
+                    selectedVideoUrl = resolved.videoUrl,
+                    selectedAudioUrl = resolved.audioUrl,
+                )
                 it.url = dashSource.getMDPUrl(
                     dashData = dash,
                     quality = res.quality

@@ -87,6 +87,11 @@ object SettingPreferences {
     val PlayerFnval = intPreferencesKey("player_fnval")
     val PlayerBackground = booleanPreferencesKey("player_background")
     val PlayerProxy = stringPreferencesKey("player_proxy")
+    val PlayerSmartSourceMode = intPreferencesKey("player_smart_source_mode")
+    // 各条线路的实测速度分（JSON：{更新时间, {host: Mbps}}），见 SmartSourceSelector
+    val PlayerSourceHostScores = stringPreferencesKey("player_source_host_scores")
+    // 「区域限制」里手动指定的 upos 视频服务器 host
+    val PlayerUposHost = stringPreferencesKey("player_upos_host")
     val PlayerOpenMode = intPreferencesKey("player_open_mode")
     val PlayerOrder = intPreferencesKey("player_order")
     val PlayerOrderRandom = booleanPreferencesKey("player_order_random")

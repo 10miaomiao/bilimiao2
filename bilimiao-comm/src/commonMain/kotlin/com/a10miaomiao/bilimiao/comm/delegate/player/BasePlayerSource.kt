@@ -5,6 +5,9 @@ import cn.a10miaomiao.bilimiao.danmaku.parser.IDataSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.source.ResolvedSourceUrls
+import com.a10miaomiao.bilimiao.comm.delegate.player.source.SmartSourceSelector
+import com.a10miaomiao.bilimiao.comm.delegate.player.source.SourceUrlSet
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
@@ -28,6 +31,22 @@ abstract class BasePlayerSource() : DanmakuProvider {
     var proxyServer: ProxyServerInfo? = null
     var uposHost: String = ""
     var isLoop: Boolean = false // 循环播放
+
+    /**
+     * 决定本次播放实际使用的视频 / 音频地址
+     *
+     * 优先级：手动指定的 upos 服务器（「区域限制」设置）> 智能换源选中的线路 > B 站下发的原地址。
+     * 具体的测速与挑选见 [SmartSourceSelector]。
+     *
+     * @param video 视频流在 playurl 里下发的地址
+     * @param audio 音频流在 playurl 里下发的地址；音视频合一（或已合进 MPD）时传 null
+     * @param headers 播放用的请求头，测速时 CDN 靠它校验 Referer / User-Agent
+     */
+    protected suspend fun resolveSourceUrls(
+        video: SourceUrlSet,
+        audio: SourceUrlSet?,
+        headers: Map<String, String>,
+    ): ResolvedSourceUrls = SmartSourceSelector.resolve(video, audio, headers, uposHost)
 
     /**
      * 默认弹幕获取实现：下载 B站弹幕 XML（gzip 压缩），用 KMP [BiliDanmakuParser] 解析。

@@ -5,6 +5,14 @@ import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 
 class DashSource(
     val uposHost: String = "",
+    /**
+     * 智能换源为本次播放选中的视频 / 音频地址
+     *
+     * 非空时直接用（地址里已带该 host 的正确签名），不再做 upos host 替换 ——
+     * 两者是互相替代的关系，见 SmartSourceSelector。
+     */
+    private val selectedVideoUrl: String? = null,
+    private val selectedAudioUrl: String? = null,
 ) {
 
     private fun codecidToCodecString(codecid: Int): String = when (codecid) {
@@ -33,6 +41,10 @@ class DashSource(
         return UrlUtil.replaceHost(url, uposHost)
     }
 
+    /** 播放地址的来源：智能换源选中的 > 手动指定的 upos 服务器 > B 站原地址 */
+    private fun resolveUrl(url: String, selectedUrl: String?): String =
+        selectedUrl ?: replaceHostToUposHost(url)
+
 
     private fun getMDPUrl(
         video: DashItem,
@@ -58,12 +70,12 @@ class DashSource(
         </AdaptationSet>
         ${
             if (audio != null) {
-                var audioUrl = audio.baseUrl
+                val audioUrl = resolveUrl(audio.baseUrl, selectedAudioUrl)
                 """
                  <AdaptationSet>
                     <ContentComponent contentType="audio" id="2" />
                     <Representation bandwidth="${audio.bandwidth}" codecs="${audio.codecs}" id="${audio.id}" mimeType="${audio.mimeType}" >
-                        <BaseURL>${replaceHostToUposHost(audioUrl).replace("&", "&amp;")}</BaseURL>
+                        <BaseURL>${audioUrl.replace("&", "&amp;")}</BaseURL>
                     </Representation>
                     ${getSegmentBaseXml(audio.segmentBase)}
                 </AdaptationSet>
@@ -75,7 +87,7 @@ class DashSource(
     </Period>
 </MPD>
         """.trimIndent()
-        var url = replaceHostToUposHost(video.baseUrl)
+        val url = resolveUrl(video.baseUrl, selectedVideoUrl)
         return "[dash-mpd]\n" + url + "\n" + mpdStr.replace("\n", "")
     }
 
