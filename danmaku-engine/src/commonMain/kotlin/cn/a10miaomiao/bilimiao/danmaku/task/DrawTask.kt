@@ -32,6 +32,48 @@ open class DrawTask(
     protected var mTaskListener: IDrawTask.TaskListener?
 ) : IDrawTask {
 
+    companion object {
+        /**
+         * 可见窗口相对释放时钟向后多留的余量（毫秒）
+         *
+         * 窗口起点按 `释放时钟 - 弹幕最大存活时间 - 余量` 计算，用于覆盖
+         * 「播放器时钟已走过、但渲染时钟还在飞」的那一段弹幕。
+         */
+        private const val RELEASE_WINDOW_MARGIN = 1000L
+
+        /**
+         * 投喂时向前推的最大时长（毫秒）
+         *
+         * 正常时一批弹幕的墙钟跨度约 200ms（等于播放器位置采样间隔），
+         * 卡顿时可能拉到数秒；截断到一小段，让这批弹幕贴着右边缘依次滑入，
+         * 而不是整体迟到很久才出现。
+         */
+        private const val MAX_FEED_AHEAD = 400L
+
+        /** 窗口回溯放大倍速的上限，避免极端倍速下窗口过大 */
+        private const val MAX_WINDOW_SPEED_FACTOR = 8f
+
+        /** 投喂映射时允许的最小倍速，防止除零或极端放大 */
+        private const val MIN_FEED_SPEED = 0.25f
+    }
+
+    /**
+     * 本次投喂区间的终点（播放器时间轴）= 当前读到的播放器位置
+     *
+     * 播放器位置在这里不承担任何计时职责，只是描述「这次采样覆盖了哪一段」。
+     */
+    override var releaseClock: Long = 0L
+
+    /** 本次投喂区间的起点（播放器时间轴）= 上一次读到的播放器位置 */
+    override var releaseFromClock: Long = 0L
+
+    /**
+     * 播放倍速：渲染时钟不跟倍速走，所以一条弹幕在屏幕上停留期间，
+     * 释放时钟会前进 `duration * 倍速`。窗口回溯量必须按倍速放大，
+     * 否则这些还在飞的弹幕会被挤出窗口、提前消失。
+     */
+    override var speedFactor: Float = 1f
+
     /** 显示器 */
     protected val mDisp: IDisplayer = mContext.mDisplayer
 
@@ -54,9 +96,6 @@ open class DrawTask(
     /** 直播弹幕列表 */
     private val mLiveDanmakus: Danmakus = Danmakus(IDanmakus.ST_BY_LIST)
 
-    /** 同步模式下正在运行的弹幕列表 */
-    private var mRunningDanmakus: IDanmakus? = null
-
     /** 上次屏幕窗口的起始时间 */
     private var mLastBeginMills: Long = 0L
 
@@ -69,23 +108,8 @@ open class DrawTask(
     /** 清除位置保留器标志 */
     protected var clearRetainerFlag: Boolean = false
 
-    /** 渲染起始时间 */
-    private var mStartRenderTime: Long = 0L
-
     /** 准备就绪状态 */
     protected var mReadyState: Boolean = false
-
-    /** 播放状态 */
-    protected var mPlayState: Int = 0
-
-    /** 是否隐藏弹幕 */
-    private var mIsHidden: Boolean = false
-
-    /** 最后一条弹幕 */
-    private var mLastDanmaku: BaseDanmaku? = null
-
-    /** 是否请求渲染（即使隐藏也触发一次绘制） */
-    private var mRequestRender: Boolean = false
 
     /** 配置变更回调 */
     private val mConfigChangedCallback = object : DanmakuContext.ConfigChangedCallback {
@@ -99,12 +123,6 @@ open class DrawTask(
     }
 
     init {
-        // 初始化渲染器回调
-        mRenderer.setOnDanmakuShownListener(object : IRenderer.OnDanmakuShownListener {
-            override fun onDanmakuShown(danmaku: BaseDanmaku) {
-                mTaskListener?.onDanmakuShown(danmaku)
-            }
-        })
         mRenderer.setVerifierEnabled(
             mContext.isPreventOverlappingEnabled() || mContext.isMaxLinesLimited()
         )
@@ -137,7 +155,7 @@ open class DrawTask(
         }
         item.index = list.size()
         var subAdded = true
-        if (mLastBeginMills <= item.getActualTime() && item.getActualTime() <= mLastEndMills) {
+        if (mLastBeginMills <= item.getTime() && item.getTime() <= mLastEndMills) {
             synchronized(danmakus) {
                 subAdded = danmakus.addItem(item)
             }
@@ -152,39 +170,6 @@ open class DrawTask(
             mLastBeginMills = 0L
             mLastEndMills = 0L
         }
-        if (added) {
-            mTaskListener?.onDanmakuAdd(item)
-        }
-        if (mLastDanmaku == null || item.getActualTime() > mLastDanmaku!!.getActualTime()) {
-            mLastDanmaku = item
-        }
-    }
-
-    override fun invalidateDanmaku(item: BaseDanmaku, remeasure: Boolean) {
-        item.requestFlags = item.requestFlags or BaseDanmaku.FLAG_REQUEST_INVALIDATE
-        if (remeasure) {
-            item.paintWidth = -1f
-            item.paintHeight = -1f
-            item.requestFlags = item.requestFlags or BaseDanmaku.FLAG_REQUEST_REMEASURE
-            item.measureResetFlag++
-        }
-    }
-
-    @Synchronized
-    override fun removeAllDanmakus(isClearDanmakusOnScreen: Boolean) {
-        val list = danmakuList ?: return
-        if (list.isEmpty()) return
-        synchronized(list) {
-            if (!isClearDanmakusOnScreen) {
-                val beginMills = mTimer.currMillisecond - mContext.mDanmakuFactory.MAX_DANMAKU_DURATION - 100
-                val endMills = mTimer.currMillisecond + mContext.mDanmakuFactory.MAX_DANMAKU_DURATION
-                val tempDanmakus = list.subnew(beginMills, endMills)
-                if (tempDanmakus != null) {
-                    danmakus = tempDanmakus
-                }
-            }
-            list.clear()
-        }
     }
 
     /**
@@ -192,22 +177,6 @@ open class DrawTask(
      */
     protected open fun onDanmakuRemoved(danmaku: BaseDanmaku) {
         // 子类可覆写
-    }
-
-    @Synchronized
-    override fun removeAllLiveDanmakus() {
-        if (danmakus.isEmpty()) return
-        synchronized(danmakus) {
-            danmakus.forEachSync(object : IDanmakus.DefaultConsumer<BaseDanmaku>() {
-                override fun accept(t: BaseDanmaku): Int {
-                    if (t.isLive) {
-                        onDanmakuRemoved(t)
-                        return ACTION_REMOVE
-                    }
-                    return ACTION_CONTINUE
-                }
-            })
-        }
     }
 
     /**
@@ -223,7 +192,7 @@ open class DrawTask(
             private val startTime = PlatformClock.uptimeMillis()
 
             override fun accept(t: BaseDanmaku): Int {
-                val isTimeout = t.isTimeOut()
+                val isTimeout = t.isRenderTimeOut()
                 if (PlatformClock.uptimeMillis() - startTime > msec) {
                     return ACTION_BREAK
                 }
@@ -238,33 +207,6 @@ open class DrawTask(
         })
     }
 
-    override fun getVisibleDanmakusOnTime(time: Long): IDanmakus {
-        val beginMills = time - mContext.mDanmakuFactory.MAX_DANMAKU_DURATION - 100
-        val endMills = time + mContext.mDanmakuFactory.MAX_DANMAKU_DURATION
-        var subDanmakus: IDanmakus? = null
-        // 避免 ConcurrentModificationException，最多重试 3 次
-        var i = 0
-        while (i++ < 3) {
-            try {
-                subDanmakus = danmakuList?.subnew(beginMills, endMills)
-                break
-            } catch (_: Exception) {
-            }
-        }
-        val visibleDanmakus = Danmakus()
-        if (subDanmakus != null && !subDanmakus.isEmpty()) {
-            subDanmakus.forEachSync(object : IDanmakus.DefaultConsumer<BaseDanmaku>() {
-                override fun accept(t: BaseDanmaku): Int {
-                    if (t.isShown() && !t.isOutside()) {
-                        visibleDanmakus.addItem(t)
-                    }
-                    return ACTION_CONTINUE
-                }
-            })
-        }
-        return visibleDanmakus
-    }
-
     @Synchronized
     override fun draw(displayer: IDisplayer): RenderingState? {
         return drawDanmakus(displayer, mTimer)
@@ -277,30 +219,87 @@ open class DrawTask(
 
     override fun seek(mills: Long) {
         reset()
+        // 重置所有弹幕的出场锚点：seek 后按新位置重新投喂，清除屏幕上仍在飞的旧弹幕
+        resetRenderStartTimes()
+        releaseClock = mills
+        releaseFromClock = mills
         mContext.mGlobalFlagValues.updateVisibleFlag()
-        mContext.mGlobalFlagValues.updateFirstShownFlag()
-        mContext.mGlobalFlagValues.updateSyncOffsetTimeFlag()
-        mContext.mGlobalFlagValues.updatePrepareFlag()
-        mRunningDanmakus = Danmakus(IDanmakus.ST_BY_LIST)
-        mStartRenderTime = if (mills < 1000) 0 else mills
         mRenderingState.reset()
-        mRenderingState.endTime = mStartRenderTime
         mLastBeginMills = 0L
         mLastEndMills = 0L
-
-        if (danmakuList != null) {
-            val last = danmakuList!!.last()
-            if (last != null && !last.isTimeOut()) {
-                mLastDanmaku = last
-            }
-        }
     }
 
-    override fun clearDanmakusOnScreen(currMillis: Long) {
-        reset()
-        mContext.mGlobalFlagValues.updateVisibleFlag()
-        mContext.mGlobalFlagValues.updateFirstShownFlag()
-        mStartRenderTime = currMillis
+    /**
+     * 清除全部弹幕的出场锚点，等待按新位置重新释放
+     */
+    private fun resetRenderStartTimes() {
+        val list = danmakuList ?: return
+        // forEachSync 内部已加锁
+        list.forEachSync(object : IDanmakus.DefaultConsumer<BaseDanmaku>() {
+            override fun accept(t: BaseDanmaku): Int {
+                t.resetRenderStart()
+                return IDanmakus.Consumer.ACTION_CONTINUE
+            }
+        })
+    }
+
+    /**
+     * 把这次采样覆盖的弹幕投喂给弹幕时钟
+     *
+     * 播放器位置在这里只描述「这一次采样覆盖了 `(releaseFromClock, releaseClock]`
+     * 这段播放器时间」。投喂时把整批弹幕**向前推一个采样周期**，再按各自在区间内的
+     * 相对位置错开：
+     *
+     * ```
+     * 出场时刻 = 弹幕时钟 + 本批墙钟跨度 - (区间终点 - 该弹幕时间) / 倍速
+     * ```
+     *
+     * 结果所有弹幕的出场时刻都 `>= 当前弹幕时钟`，也就是**每条弹幕都从屏幕外开始**，
+     * 按真实先后顺序依次滑入画面。若直接用 `弹幕时钟 - 回退量`，采样延迟会让一部分
+     * 弹幕一投喂就已经"飞了一段"，看起来像从屏幕边缘内侧凭空出现。
+     *
+     * 除以倍速是为了把播放器时间差还原成真实墙钟时长——弹幕时钟按墙钟走，
+     * 1x 时两者相同，2x 时 400ms 的视频内容对应 200ms 的墙钟。
+     *
+     * 早于本次区间起点的弹幕（启动/seek 遗留、之前的采样里该出场却没处理的）
+     * 直接丢弃，绝不会因为「迟到」而被补放。
+     *
+     * @param list 当前可见窗口内的弹幕（按时间有序）
+     * @param renderClock 当前弹幕时钟
+     */
+    private fun releaseDanmakus(list: IDanmakus?, renderClock: Long) {
+        if (list == null || list.isEmpty()) return
+        val from = releaseFromClock
+        val to = releaseClock
+        if (to <= from) return
+        // 用真实倍速做映射（慢放时同样需要还原成 200ms 的墙钟跨度），
+        // 不能用窗口回溯那套至少 1 倍的钳制
+        val speed = speedFactor.coerceIn(MIN_FEED_SPEED, MAX_WINDOW_SPEED_FACTOR)
+        // 这一批弹幕覆盖的墙钟跨度，同时作为前置量；卡顿时截断，避免整批弹幕迟到太久
+        val feedSpan = ((to - from).toFloat() / speed).toLong().coerceIn(0L, MAX_FEED_AHEAD)
+        // forEachSync 内部已加锁
+        list.forEachSync(object : IDanmakus.DefaultConsumer<BaseDanmaku>() {
+            override fun accept(t: BaseDanmaku): Int {
+                if (t.renderStartTime != BaseDanmaku.RENDER_START_NONE) {
+                    return IDanmakus.Consumer.ACTION_CONTINUE
+                }
+                val time = t.getTime()
+                if (time > to) {
+                    // 还没到这次采样的区间；列表按时间有序，后面的只会更晚
+                    return IDanmakus.Consumer.ACTION_BREAK
+                }
+                if (time <= from) {
+                    // 早于本次区间：它在之前的采样里就该出场了，不再补放
+                    t.discardRenderStart()
+                } else {
+                    // 回退量上限就是本批跨度，保证 anchor >= renderClock（从屏幕外开始）
+                    val backMs = ((to - time).toFloat() / speed).toLong()
+                        .coerceIn(0L, feedSpan)
+                    t.anchorRenderStart(renderClock + feedSpan - backMs)
+                }
+                return IDanmakus.Consumer.ACTION_CONTINUE
+            }
+        })
     }
 
     override fun start() {
@@ -321,10 +320,6 @@ open class DrawTask(
         mReadyState = true
     }
 
-    override fun onPlayStateChanged(state: Int) {
-        mPlayState = state
-    }
-
     /**
      * 通过解析器加载弹幕数据
      */
@@ -333,16 +328,8 @@ open class DrawTask(
             .setConfig(mContext)
             .setDisplayer(mDisp)
             .setTimer(mTimer)
-            .setListener(object : BaseDanmakuParser.Listener {
-                override fun onDanmakuAdd(danmaku: BaseDanmaku) {
-                    mTaskListener?.onDanmakuAdd(danmaku)
-                }
-            })
             .getDanmakus()
         mContext.mGlobalFlagValues.resetAll()
-        if (danmakuList != null) {
-            mLastDanmaku = danmakuList!!.last()
-        }
     }
 
     override fun setParser(parser: BaseDanmakuParser) {
@@ -354,14 +341,12 @@ open class DrawTask(
      * 核心渲染循环
      *
      * 1. 清除位置保留器（如有标志）
-     * 2. 计算当前时间窗口
-     * 3. 获取屏幕窗口内的弹幕
-     * 4. 先绘制同步模式下的运行弹幕
-     * 5. 绘制屏幕窗口内的弹幕
-     * 6. 返回渲染状态
+     * 2. 按播放器位置算出可见窗口
+     * 3. 把到点的弹幕投喂给弹幕时钟
+     * 4. 绘制屏幕窗口内的弹幕
      *
      * @param disp 显示器
-     * @param timer 计时器
+     * @param timer 弹幕时钟
      * @return 渲染状态，无弹幕数据时返回 null
      */
     protected open fun drawDanmakus(disp: IDisplayer, timer: DanmakuTimer): RenderingState? {
@@ -370,22 +355,23 @@ open class DrawTask(
             clearRetainerFlag = false
         }
         val list = danmakuList ?: return null
-
-        // 隐藏状态且未请求渲染时直接返回
-        if (mIsHidden && !mRequestRender) {
-            return mRenderingState
-        }
-
-        mRequestRender = false
         val renderingState = mRenderingState
 
-        // 计算可见时间窗口
-        val beginMills = timer.currMillisecond - mContext.mDanmakuFactory.MAX_DANMAKU_DURATION - 100
-        val endMills = timer.currMillisecond + mContext.mDanmakuFactory.MAX_DANMAKU_DURATION
+        // 双时钟：窗口按释放时钟（播放器时间轴）计算，决定「哪些弹幕可能该出场」；
+        // 已出场弹幕由渲染时钟独立走完自己的生命周期。
+        val renderClock = timer.currMillisecond
+        val releaseNow = releaseClock
+        val maxDuration = mContext.mDanmakuFactory.MAX_DANMAKU_DURATION
+
+        // 渲染时钟不乘倍速，所以已出场弹幕对应的视频时间点会落后释放时钟
+        // 最多 `maxDuration * 倍速`，回溯源必须按倍速放大才不会把它们挤出窗口
+        val backFactor = speedFactor.coerceIn(1f, MAX_WINDOW_SPEED_FACTOR)
+        val beginMills = releaseNow - (maxDuration * backFactor).toLong() - RELEASE_WINDOW_MARGIN
+        val endMills = releaseNow + maxDuration
 
         // 获取或复用屏幕窗口弹幕列表
         var screenDanmakus = danmakus
-        if (mLastBeginMills > beginMills || timer.currMillisecond > mLastEndMills) {
+        if (mLastBeginMills > beginMills || releaseNow > mLastEndMills) {
             val newSub = list.sub(beginMills, endMills)
             if (newSub != null) {
                 screenDanmakus = newSub
@@ -395,70 +381,24 @@ open class DrawTask(
             mLastEndMills = endMills
         }
 
-        // 开始追踪
-        val runningDanmakus = mRunningDanmakus
-        beginTracing(renderingState, runningDanmakus, screenDanmakus)
+        // 到点的弹幕在此刻被投喂到弹幕时钟
+        releaseDanmakus(screenDanmakus, renderClock)
 
-        // 先绘制同步模式下的运行弹幕
-        if (runningDanmakus != null && !runningDanmakus.isEmpty()) {
-            mRenderingState.isRunningDanmakus = true
-            mRenderer.draw(disp, runningDanmakus, 0L, mRenderingState)
-        }
-
-        // 绘制屏幕窗口内的弹幕
-        mRenderingState.isRunningDanmakus = false
+        beginTracing(renderingState, screenDanmakus)
         if (screenDanmakus != null && !screenDanmakus.isEmpty()) {
-            mRenderer.draw(mDisp, screenDanmakus, mStartRenderTime, renderingState)
-            endTracing(renderingState)
-            if (renderingState.nothingRendered) {
-                if (mLastDanmaku != null && mLastDanmaku!!.isTimeOut()) {
-                    mLastDanmaku = null
-                    mTaskListener?.onDanmakusDrawingFinished()
-                }
-                if (renderingState.beginTime == RenderingState.UNKNOWN_TIME) {
-                    renderingState.beginTime = beginMills
-                }
-                if (renderingState.endTime == RenderingState.UNKNOWN_TIME) {
-                    renderingState.endTime = endMills
-                }
-            }
-            return renderingState
-        } else {
-            renderingState.nothingRendered = true
-            renderingState.beginTime = beginMills
-            renderingState.endTime = endMills
-            return renderingState
+            mRenderer.draw(disp, screenDanmakus, renderingState)
         }
+        endTracing(renderingState)
+        return renderingState
     }
 
     override fun requestClear() {
         mLastBeginMills = 0L
         mLastEndMills = 0L
-        mIsHidden = false
     }
 
     override fun requestClearRetainer() {
         clearRetainerFlag = true
-    }
-
-    override fun requestSync(fromTimeMills: Long, toTimeMills: Long, offsetMills: Long) {
-        // 获取当前屏幕上的运行弹幕
-        val runningDanmakus = mRenderingState.obtainRunningDanmakus()
-        mRunningDanmakus = runningDanmakus
-        // 设置每条弹幕的时间偏移
-        runningDanmakus.forEachSync(object : IDanmakus.DefaultConsumer<BaseDanmaku>() {
-            override fun accept(t: BaseDanmaku): Int {
-                if (t.isOutside()) {
-                    return ACTION_REMOVE
-                }
-                t.setTimeOffset(offsetMills + t.timeOffset)
-                if (t.timeOffset == 0L) {
-                    return ACTION_REMOVE
-                }
-                return ACTION_CONTINUE
-            }
-        })
-        mStartRenderTime = toTimeMills
     }
 
     /**
@@ -469,9 +409,7 @@ open class DrawTask(
         tag: DanmakuContext.DanmakuConfigTag,
         values: Array<out Any?>
     ): Boolean {
-        val handled = handleOnDanmakuConfigChanged(config, tag, values)
-        mTaskListener?.onDanmakuConfigChanged()
-        return handled
+        return handleOnDanmakuConfigChanged(config, tag, values)
     }
 
     /**
@@ -525,44 +463,23 @@ open class DrawTask(
         return handled
     }
 
-    override fun requestHide() {
-        mIsHidden = true
-    }
-
-    override fun requestRender() {
-        mRequestRender = true
-    }
-
     /**
      * 开始渲染追踪
      */
     private fun beginTracing(
         renderingState: RenderingState,
-        runningDanmakus: IDanmakus?,
         screenDanmakus: IDanmakus?
     ) {
         renderingState.reset()
         renderingState.timer.update(PlatformClock.uptimeMillis())
         renderingState.indexInScreen = 0
-        renderingState.totalSizeInScreen =
-            (runningDanmakus?.size() ?: 0) + (screenDanmakus?.size() ?: 0)
+        renderingState.totalSizeInScreen = screenDanmakus?.size() ?: 0
     }
 
     /**
      * 结束渲染追踪
      */
     private fun endTracing(renderingState: RenderingState) {
-        renderingState.nothingRendered = (renderingState.totalDanmakuCount == 0)
-        if (renderingState.nothingRendered) {
-            renderingState.beginTime = RenderingState.UNKNOWN_TIME
-        }
-        val lastDanmaku = renderingState.lastDanmaku
-        renderingState.lastDanmaku = null
-        renderingState.endTime = if (lastDanmaku != null) {
-            lastDanmaku.getActualTime()
-        } else {
-            RenderingState.UNKNOWN_TIME
-        }
         renderingState.consumingTime = renderingState.timer.update(PlatformClock.uptimeMillis())
     }
 }

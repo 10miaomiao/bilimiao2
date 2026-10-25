@@ -27,7 +27,6 @@ class AndroidDisplayer(
     private var _densityDpi: Int = 160
     private var _scaledDensity: Float = 1f
     private var _slopPixel: Int = 6
-    private var _strokeWidth: Float = 0f
     private var _margin: Int = 0
     private var _allMarginTop: Int = 0
     private var _transparency: Int = 255
@@ -49,10 +48,6 @@ class AndroidDisplayer(
     override val densityDpi: Int get() = _densityDpi
     override val scaledDensity: Float get() = _scaledDensity
     override val slopPixel: Int get() = _slopPixel
-    override val strokeWidth: Float get() = _strokeWidth
-    override val isHardwareAccelerated: Boolean get() = true
-    override val maximumCacheWidth: Int get() = _width
-    override val maximumCacheHeight: Int get() = _height
     override val margin: Int get() = _margin
     override val allMarginTop: Int get() = _allMarginTop
 
@@ -66,8 +61,8 @@ class AndroidDisplayer(
         _androidCanvas = canvas
     }
 
-    override fun draw(danmaku: BaseDanmaku): Int {
-        val androidCanvas = _androidCanvas ?: return IRenderer.NOTHING_RENDERING
+    override fun draw(danmaku: BaseDanmaku) {
+        val androidCanvas = _androidCanvas ?: return
 
         var left = danmaku.getLeft()
         var top = danmaku.getTop()
@@ -83,7 +78,7 @@ class AndroidDisplayer(
 
         // 透明弹幕跳过
         if (danmaku.getType() == BaseDanmaku.TYPE_SPECIAL && danmaku.getAlpha() == AlphaValue.TRANSPARENT) {
-            return IRenderer.NOTHING_RENDERING
+            return
         }
 
         // 设置画笔
@@ -99,7 +94,7 @@ class AndroidDisplayer(
         paint.alpha = alpha
 
         if (alpha == AlphaValue.TRANSPARENT) {
-            return IRenderer.NOTHING_RENDERING
+            return
         }
 
         // 获取或创建 canvas 包装器（尺寸变化时重建）
@@ -109,25 +104,11 @@ class AndroidDisplayer(
         canvas.resetCanvas(androidCanvas)
 
         // 绘制
-        val cacheStuffer = mContext.mCacheStuffer
-        if (cacheStuffer != null) {
-            val cacheDrawn = cacheStuffer.drawCache(danmaku, canvas, left, top, paint)
-            if (cacheDrawn) {
-                return IRenderer.CACHE_RENDERING
-            }
-            cacheStuffer.drawDanmaku(danmaku, canvas, left, top, false, paint)
-            return IRenderer.TEXT_RENDERING
-        }
-
-        return IRenderer.NOTHING_RENDERING
+        mContext.mCacheStuffer?.drawDanmaku(danmaku, canvas, left, top, false, paint)
     }
 
     override fun recycle(danmaku: BaseDanmaku) {
         // Android Bitmap 资源由 cacheStuffer 管理
-    }
-
-    override fun prepare(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {
-        mContext.mCacheStuffer?.prepare(danmaku, fromWorkerThread)
     }
 
     override fun measure(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {
@@ -144,7 +125,7 @@ class AndroidDisplayer(
             val text = danmaku.text?.toString() ?: ""
             val textWidth = paint.measureText(text)
             val fm = paint.getFontMetrics()
-            danmaku.paintWidth = textWidth + _strokeWidth * 2
+            danmaku.paintWidth = textWidth
             danmaku.paintHeight = fm.descent - fm.ascent + fm.leading
         }
     }
@@ -165,19 +146,6 @@ class AndroidDisplayer(
             _height = height
             _cachedCanvas = null
             mContext.mDanmakuFactory.notifyDispSizeChanged(mContext)
-        }
-    }
-
-    override fun setDanmakuStyle(style: Int, data: FloatArray?) {
-        when (style) {
-            IDisplayer.DANMAKU_STYLE_SHADOW,
-            IDisplayer.DANMAKU_STYLE_STROKEN,
-            IDisplayer.DANMAKU_STYLE_PROJECTION -> {
-                _strokeWidth = data?.firstOrNull() ?: 0f
-            }
-            else -> {
-                _strokeWidth = 0f
-            }
         }
     }
 

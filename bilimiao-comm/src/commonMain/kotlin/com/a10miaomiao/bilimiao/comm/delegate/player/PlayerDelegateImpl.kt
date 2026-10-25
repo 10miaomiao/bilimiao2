@@ -129,6 +129,10 @@ class PlayerDelegateImpl(
     private val _localDanmakuFlow get() = session.localDanmakuFlowShared
     override val localDanmakuFlow: SharedFlow<LocalDanmakuInfo> get() = session.localDanmakuFlow
 
+    // seek 事件（供弹幕渲染层清屏重建）
+    private val _seekFlow get() = session.seekFlowShared
+    override val seekFlow: SharedFlow<Long> get() = session.seekFlow
+
     // 画中画（应用外小窗）状态：由平台层 Activity 回调 onPictureInPictureModeChanged 驱动
     private val _pictureInPicture get() = session.pictureInPictureFlow
     override val pictureInPicture: StateFlow<Boolean> get() = session.pictureInPicture
@@ -544,6 +548,8 @@ class PlayerDelegateImpl(
                         }
                         player.seekTo(positionMs - accumulated)
                         _currentPosition.value = positionMs
+                        // 显式通知弹幕层清屏重建，不依赖位置跳变推断
+                        _seekFlow.tryEmit(positionMs)
                         return
                     }
                     accumulated += segDur
@@ -551,6 +557,7 @@ class PlayerDelegateImpl(
             }
             player.seekTo(positionMs)
             _currentPosition.value = positionMs
+            _seekFlow.tryEmit(positionMs)
         }
     }
 

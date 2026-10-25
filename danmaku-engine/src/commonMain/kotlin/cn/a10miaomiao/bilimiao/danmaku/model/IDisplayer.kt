@@ -7,36 +7,22 @@ import cn.a10miaomiao.bilimiao.danmaku.platform.DanmakuTypeface
  */
 interface IDisplayer {
 
-    companion object {
-        const val DANMAKU_STYLE_DEFAULT = -1
-        const val DANMAKU_STYLE_NONE = 0
-        const val DANMAKU_STYLE_SHADOW = 1
-        const val DANMAKU_STYLE_STROKEN = 2
-        const val DANMAKU_STYLE_PROJECTION = 3
-    }
-
     val width: Int
     val height: Int
     val density: Float
     val densityDpi: Int
     val scaledDensity: Float
     val slopPixel: Int
-    val strokeWidth: Float
-    val isHardwareAccelerated: Boolean
-    val maximumCacheWidth: Int
-    val maximumCacheHeight: Int
     val margin: Int
     val allMarginTop: Int
 
-    fun draw(danmaku: BaseDanmaku): Int
+    fun draw(danmaku: BaseDanmaku)
     fun recycle(danmaku: BaseDanmaku)
-    fun prepare(danmaku: BaseDanmaku, fromWorkerThread: Boolean)
     fun measure(danmaku: BaseDanmaku, fromWorkerThread: Boolean)
 
     fun resetSlopPixel(factor: Float)
     fun setDensities(density: Float, densityDpi: Int, scaledDensity: Float)
     fun setSize(width: Int, height: Int)
-    fun setDanmakuStyle(style: Int, data: FloatArray?)
     fun setMargin(m: Int)
     fun setAllMarginTop(m: Int)
 

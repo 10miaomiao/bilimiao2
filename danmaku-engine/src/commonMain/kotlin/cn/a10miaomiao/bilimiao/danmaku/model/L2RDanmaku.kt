@@ -8,8 +8,8 @@ class L2RDanmaku(duration: Duration) : R2LDanmaku(duration) {
     override fun layout(displayer: IDisplayer, x: Float, y: Float) {
         if (mTimer != null) {
             val currMS = mTimer!!.currMillisecond
-            val deltaDuration = currMS - getActualTime()
-            if (deltaDuration > 0 && deltaDuration < (duration?.value ?: 0L)) {
+            val elapsed = currMS - getRenderStartTime()
+            if (elapsed > 0 && elapsed < getDuration()) {
                 this.x = getAccurateLeft(displayer, currMS)
                 if (!isShown()) {
                     this.y = y
@@ -37,8 +37,8 @@ class L2RDanmaku(duration: Duration) : R2LDanmaku(duration) {
     }
 
     override fun getAccurateLeft(displayer: IDisplayer, currTime: Long): Float {
-        val elapsedTime = currTime - getActualTime()
-        if (elapsedTime >= (duration?.value ?: 0L)) {
+        val elapsedTime = currTime - getRenderStartTime()
+        if (elapsedTime >= getDuration()) {
             return displayer.width.toFloat()
         }
         return mStepX * elapsedTime - paintWidth

@@ -53,6 +53,16 @@ interface BasePlayerDelegate : com.a10miaomiao.bilimiao.comm.delegate.BaseDelega
     val localDanmakuFlow: SharedFlow<LocalDanmakuInfo>
 
     /**
+     * seek 事件（毫秒）
+     *
+     * [seekTo] 成功后发出。弹幕渲染层订阅后清屏重建。
+     * seek 只由播放器显式通知，弹幕层不做位置跳变推断——播放器位置是 200ms 采样上报的，
+     * 采样延迟、卡顿、切分段都会造成跳变假象，推断必然误判，而误判的代价是
+     * 屏幕上正在飞的弹幕被整体重置。
+     */
+    val seekFlow: SharedFlow<Long>
+
+    /**
      * 画中画（应用外小窗）状态
      *
      * 数据源为平台层 Activity 的 `onPictureInPictureModeChanged` 回调，

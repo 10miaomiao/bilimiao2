@@ -431,9 +431,14 @@ fun BiliVideoScaffold(
             },
             danmakuHost = {
                 DanmakuOverlay(
-                    currentPosition = currentPosition,
+                    // 每帧绘制前直接从播放器取进度：不经过 Compose 状态，避免重组延迟让弹幕迟到
+                    positionProvider = { playerDelegate.currentPosition.value },
                     isPlaying = isPlaying,
                     danmakuParser = danmakuParser,
+                    // 播放器显式通知 seek（拖动进度条、切清晰度恢复、重播），弹幕层不做推断
+                    seekFlow = playerDelegate.seekFlow,
+                    // 倍速只提高弹幕出场密度，弹幕滚动速度与停留时长保持恒定
+                    playbackSpeed = playbackSpeed,
                     // 发送成功的弹幕本地回显（带边框区分其它弹幕）
                     localDanmakuFlow = playerDelegate.localDanmakuFlow,
                     // 按当前播放模式读取对应的弹幕显示设置

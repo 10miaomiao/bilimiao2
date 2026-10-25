@@ -3,47 +3,21 @@ package cn.a10miaomiao.bilimiao.danmaku.cache
 import cn.a10miaomiao.bilimiao.danmaku.context.DanmakuContext
 import cn.a10miaomiao.bilimiao.danmaku.model.BaseDanmaku
 import cn.a10miaomiao.bilimiao.danmaku.model.SpecialDanmaku
-import cn.a10miaomiao.bilimiao.danmaku.platform.DanmakuBitmap
 import cn.a10miaomiao.bilimiao.danmaku.platform.DanmakuCanvas
 import cn.a10miaomiao.bilimiao.danmaku.platform.DanmakuPaint
-import cn.a10miaomiao.bilimiao.danmaku.platform.FontMetrics
 import cn.a10miaomiao.bilimiao.danmaku.platform.PaintStyle
-
-/**
- * 弹幕绘制填充器代理
- *
- * 用于在弹幕显示前自定义文本内容和释放资源。
- */
-interface CacheStufferProxy {
-    /**
-     * 在弹幕显示前准备绘制数据
-     *
-     * @param danmaku 弹幕对象
-     * @param fromWorkerThread 是否在工作线程（true 时可执行耗时操作）
-     */
-    fun prepareDrawing(danmaku: BaseDanmaku, fromWorkerThread: Boolean)
-
-    /**
-     * 释放弹幕相关资源
-     */
-    fun releaseResource(danmaku: BaseDanmaku)
-}
 
 /**
  * 弹幕绘制填充器基类
  *
  * 负责弹幕文本的测量和绘制。子类可覆写绘制方法实现自定义样式。
- * 通过 [CacheStufferProxy] 可在绘制前修改弹幕内容。
+ *
+ * 注意：这里只做「直接绘制」，不再有位图缓存（DFM 的 IDrawingCache / CacheStufferProxy
+ * 那套缓存与代理机制在本引擎里从未被启用，已移除）。
  */
 abstract class BaseCacheStuffer {
 
     companion object {
-        /** 默认背景色（透明） */
-        const val DEFAULT_BACKGROUND_COLOR = 0x00000000
-
-        /** 默认阴影色（透明，无阴影） */
-        const val SHADOW_COLOR = 0x00000000
-
         /** 默认描边宽度 */
         const val DEFAULT_STROKE_WIDTH = 2f
 
@@ -57,9 +31,6 @@ abstract class BaseCacheStuffer {
     /** 弹幕上下文 */
     protected var mContext: DanmakuContext? = null
 
-    /** 绘制代理 */
-    protected var mProxy: CacheStufferProxy? = null
-
     /**
      * 设置弹幕上下文
      */
@@ -68,16 +39,9 @@ abstract class BaseCacheStuffer {
     }
 
     /**
-     * 设置绘制代理
-     */
-    fun setProxy(proxy: CacheStufferProxy?) {
-        mProxy = proxy
-    }
-
-    /**
      * 测量弹幕文本的宽高
      *
-     * 测量结果会写入 danmaku.paintWidth 和 danmaku.paintHeight。
+     * 测量结果写入 danmaku.paintWidth 和 danmaku.paintHeight。
      *
      * @param danmaku 弹幕对象
      * @param paint 画笔
@@ -103,61 +67,6 @@ abstract class BaseCacheStuffer {
         fromWorkerThread: Boolean,
         paint: DanmakuPaint
     )
-
-    /**
-     * 绘制缓存的弹幕位图
-     *
-     * @param danmaku 弹幕对象
-     * @param canvas 画布
-     * @param left 左边坐标
-     * @param top 上边坐标
-     * @param paint 画笔
-     * @return 是否成功绘制缓存
-     */
-    open fun drawCache(
-        danmaku: BaseDanmaku,
-        canvas: DanmakuCanvas,
-        left: Float,
-        top: Float,
-        paint: DanmakuPaint
-    ): Boolean {
-        val cache = danmaku.getDrawingCache() ?: return false
-        val holder = cache.get() ?: return false
-        // holder 应实现 draw 方法，由平台特定实现提供
-        return false
-    }
-
-    /**
-     * 准备弹幕绘制数据
-     *
-     * 在弹幕显示前调用，可用于自定义文本内容。
-     * 默认实现委托给 [CacheStufferProxy]。
-     *
-     * @param danmaku 弹幕对象
-     * @param fromWorkerThread 是否在工作线程
-     */
-    open fun prepare(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {
-        mProxy?.prepareDrawing(danmaku, fromWorkerThread)
-    }
-
-    /**
-     * 清除缓存
-     */
-    abstract fun clearCaches()
-
-    /**
-     * 清除指定弹幕的缓存
-     */
-    open fun clearCache(danmaku: BaseDanmaku) {
-        // 默认无操作，子类可覆写
-    }
-
-    /**
-     * 释放弹幕资源
-     */
-    open fun releaseResource(danmaku: BaseDanmaku) {
-        mProxy?.releaseResource(danmaku)
-    }
 }
 
 /**
@@ -169,7 +78,7 @@ abstract class BaseCacheStuffer {
 class SimpleTextCacheStuffer : BaseCacheStuffer() {
 
     companion object {
-        /** 文本高度缓存，避免重复计算 */
+        /** 文本行高缓存，避免重复计算（按字号缓存，字号变化不会命中旧值） */
         private val sTextHeightCache = mutableMapOf<Float, Float>()
     }
 
@@ -393,9 +302,5 @@ class SimpleTextCacheStuffer : BaseCacheStuffer() {
         paint.style = PaintStyle.FILL
         paint.color = danmaku.textColor
         drawText(danmaku, lineText, canvas, left, top, paint, fromWorkerThread)
-    }
-
-    override fun clearCaches() {
-        sTextHeightCache.clear()
     }
 }

@@ -22,6 +22,7 @@ actual fun DanmakuCanvas(
     engine: DanmakuEngine,
     displayer: IDisplayer,
     frameTick: Long,
+    positionProvider: () -> Long,
     modifier: Modifier,
 ) {
     val androidDisplayer = displayer as AndroidDisplayer
@@ -43,6 +44,8 @@ actual fun DanmakuCanvas(
             androidCanvas.save()
             androidCanvas.clipRect(0f, 0f, size.width, size.height)
             androidDisplayer.setCanvas(androidCanvas)
+            // 每帧直接向播放器要当前进度，不做插值也不同步
+            engine.externalPlayerPosition = positionProvider()
             engine.drawWithSync(androidDisplayer)
             androidDisplayer.setCanvas(null)
             androidCanvas.restore()

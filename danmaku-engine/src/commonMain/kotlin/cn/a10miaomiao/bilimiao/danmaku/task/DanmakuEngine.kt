@@ -1,37 +1,50 @@
 package cn.a10miaomiao.bilimiao.danmaku.task
 
 import cn.a10miaomiao.bilimiao.danmaku.context.DanmakuContext
-import cn.a10miaomiao.bilimiao.danmaku.model.AbsDanmakuSync
 import cn.a10miaomiao.bilimiao.danmaku.model.BaseDanmaku
 import cn.a10miaomiao.bilimiao.danmaku.model.DanmakuTimer
 import cn.a10miaomiao.bilimiao.danmaku.model.IDanmakus
 import cn.a10miaomiao.bilimiao.danmaku.model.IDisplayer
 import cn.a10miaomiao.bilimiao.danmaku.parser.BaseDanmakuParser
 import cn.a10miaomiao.bilimiao.danmaku.platform.PlatformClock
-import cn.a10miaomiao.bilimiao.danmaku.renderer.IRenderer
 import cn.a10miaomiao.bilimiao.danmaku.renderer.RenderingState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.isActive
-import java.util.LinkedList
 
 /**
- * 弹幕引擎控制器
+ * 弹幕引擎控制器（双时钟模型）
  *
- * 协程驱动的弹幕渲染引擎，替代原 DrawHandler（基于 Android Handler）。
- * 负责管理渲染循环、计时器同步、播放状态机和弹幕绘制任务的生命周期。
+ * 引擎维护两个彼此独立的时钟，彻底解耦「弹幕何时出场」和「弹幕怎么飞」：
+ *
+ * - **释放时钟**（[IDrawTask.releaseClock]，播放器时间轴）：由外部播放器位置驱动，
+ *   职责只有一个——走过某条弹幕的时间点时把它放出来。它可以跟随播放器自由跳动、
+ *   采样抖动、精度不高，都不会影响画面。
+ * - **渲染时钟**（[DanmakuTimer]）：只在播放时按真实墙钟推进，与播放器位置**和播放倍速**
+ *   都无关。弹幕被放出的瞬间把当前渲染时钟记为出场锚点
+ *   （[BaseDanmaku.renderStartTime]），之后位置、超时、透明度动画全部基于
+ *   `渲染时钟 - 出场锚点` 计算。
+ *
+ * 因此：
+ * - 播放器时间再怎么抖，已出场弹幕的运动速度也不会变化；
+ * - 倍速播放时弹幕的滚动速度与停留时长在视觉上保持恒定，只有出场密度随倍速提高
+ *   （播放器时间走得更快，到点的弹幕更多），不会出现「弹幕提前消失」；
+ * - 玩家切倍速不影响已在飞的弹幕；
+ * - 只有 seek 这种硬事件会同时重锚两个时钟并清屏重建。
+ *
+ * 渲染循环由外部驱动（Compose 的 `withFrameNanos` → `DanmakuCanvas`），引擎自身不再
+ * 启动定时循环。
  *
  * 使用方式：
  * 1. 创建实例并传入 CoroutineScope
  * 2. 调用 setConfig() 设置弹幕上下文
  * 3. 调用 setParser() 设置弹幕解析器
  * 4. 调用 prepare() 准备弹幕数据
- * 5. 在 onPrepared 回调后调用 start() 开始播放
- * 6. 在 UI 层的绘制回调中调用 draw(canvas) 进行渲染
+ * 5. 播放状态变化时调用 resume() / pause()
+ * 6. 播放位置变化时写入 [externalPlayerPosition]，倍速变化时调用 [setPlaybackSpeed]
+ * 7. 在 UI 层的绘制回调中调用 [drawWithSync] 进行渲染
  *
- * @param scope 协程作用域，用于启动渲染循环
+ * @param scope 协程作用域（用于准备阶段的延迟重试）
  * @param danmakuVisible 弹幕是否初始可见
  */
 class DanmakuEngine(
@@ -39,75 +52,38 @@ class DanmakuEngine(
     danmakuVisible: Boolean = true
 ) {
 
-    /**
-     * 弹幕引擎回调接口
-     */
-    interface Callback {
-        /** 弹幕数据准备完成 */
-        fun prepared()
-
-        /** 计时器更新，可用于同步外部播放器时间 */
-        fun updateTimer(timer: DanmakuTimer) {}
-
-        /** 弹幕显示在屏幕上 */
-        fun danmakuShown(danmaku: BaseDanmaku) {}
-
-        /** 所有弹幕绘制完成 */
-        fun drawingFinished() {}
-    }
-
     companion object {
-        private const val INDEFINITE_TIME = 10000000L
-        private const val MAX_RECORD_SIZE = 500
-        private const val FRAME_UPDATE_RATE = 16L
-        private const val CORDON_TIME = 60L
-        private const val CORDON_TIME2 = 150L
+        /** 允许的倍速范围 */
+        private const val MIN_SPEED = 0.25f
+        private const val MAX_SPEED = 16f
     }
 
     // region 状态
 
-    /** 引擎是否处于停止状态 */
+    /** 引擎是否处于停止状态（暂停 / 未启动） */
     var quitFlag: Boolean = true
         private set
 
     /** 弹幕数据是否准备完成 */
     private var mReady: Boolean = false
 
-    /** 弹幕是否可见 */
-    var isDanmakusVisible: Boolean = danmakuVisible
-        private set
-
-    /** 是否正在执行跳转 */
-    private var mInSeekingAction: Boolean = false
-
-    /** 跳转目标时间 */
-    private var mDesireSeekingTime: Long = 0L
-
-    /** 是否正在同步计时器 */
-    private var mInSyncAction: Boolean = false
-
-    /** 是否处于等待渲染状态（空闲休眠） */
-    private var mInWaitingState: Boolean = false
-
-    /** 启用空闲休眠（无弹幕时暂停渲染循环） */
-    var idleSleep: Boolean = true
-
-    /** 启用非阻塞模式（由外部驱动渲染，不自行循环） */
-    var nonBlockModeEnable: Boolean = false
-
-    /** 外部播放器位置（毫秒），由 UI 线程写入，渲染线程读取 */
+    /**
+     * 外部播放器位置（毫秒），由绘制方在每次绘制前**直接读取播放器**后写入
+     *
+     * 引擎不复制、不插值、不同步这个时钟：它准不准、抖不抖、采样粒度多粗，
+     * 都只影响「弹幕什么时候出场」，不会影响任何已出场弹幕的运动。
+     */
     @Volatile
     var externalPlayerPosition: Long = -1L
 
-    /** 最近一次推断的播放倍速（不平滑，直接用最近一次的值） */
-    private var lastInferredSpeed: Float = 1.0f
-
-
-    /** 上次同步的播放器位置，用于检测位置是否真正变化 */
-    private var lastSyncedPosition: Long = -1L
-
-    /** 上次播放器位置对应的 wall clock，用于插值估算实时位置 */
-    private var lastSyncedWallTime: Long = 0L
+    /**
+     * 播放倍速
+     *
+     * 只用于两处：识别 seek 跳变时的正常增量上限，以及可见窗口的回溯放大。
+     * 不参与渲染时钟推进，因此不会改变弹幕的滚动速度。
+     */
+    var playbackSpeed: Float = 1f
+        private set
 
     // endregion
 
@@ -115,31 +91,29 @@ class DanmakuEngine(
 
     private var mContext: DanmakuContext? = null
     private var mParser: BaseDanmakuParser? = null
-    private var mCallback: Callback? = null
-    var drawTask: IDrawTask? = null
-        private set
+    private var drawTask: IDrawTask? = null
 
     // endregion
 
-    // region 计时
+    // region 时钟
 
+    /** 渲染时钟：弹幕运动与消失的唯一时间基准（只按墙钟单调递增） */
     private val timer = DanmakuTimer()
-    private var mTimeBase: Long = 0L
-    private var pausedPosition: Long = 0L
-    private var mRemainingTime: Long = 0L
-    private var mLastDeltaTime: Long = 0L
 
-    /** 渲染耗时记录 */
-    private val mDrawTimes = LinkedList<Long>()
+    /** 渲染时钟上一帧对应的墙钟时刻（0 表示尚未开始推进） */
+    private var renderWallTime: Long = 0L
+
+    /** 上一次读到的播放器位置，用于判断位置是否有变化 */
+    private var lastPlayerPosition: Long = -1L
+
+    /** 投喂游标：上一次投喂到的播放器位置，下次从这里继续投喂 */
+    private var lastFedPosition: Long = -1L
+
+    /** 渲染时钟是否已经与播放器位置对齐过（只在引擎生命周期内对齐一次） */
+    private var clockInitialized: Boolean = false
 
     /** 渲染状态 */
     private val mRenderingState = RenderingState()
-
-    // endregion
-
-    // region 协程
-
-    private var renderJob: Job? = null
 
     // endregion
 
@@ -153,14 +127,19 @@ class DanmakuEngine(
 
     fun setParser(parser: BaseDanmakuParser) {
         mParser = parser
-        val parserTimer = parser.getTimer()
-        if (parserTimer != null) {
-            timer.update(parserTimer.currMillisecond)
-        }
     }
 
-    fun setCallback(cb: Callback?) {
-        mCallback = cb
+    /**
+     * 设置播放倍速
+     *
+     * 倍速只影响弹幕的出场密度（播放器时间走得更快，到点的弹幕更多），
+     * 不影响弹幕的滚动速度：渲染时钟始终按真实墙钟推进，
+     * 所以已出场弹幕的速度、停留时长保持恒定，切换倍速也不会造成位置跳变。
+     *
+     * @param speed 播放倍速（1.0 表示原速）
+     */
+    fun setPlaybackSpeed(speed: Float) {
+        playbackSpeed = speed.coerceIn(MIN_SPEED, MAX_SPEED)
     }
 
     // endregion
@@ -170,12 +149,10 @@ class DanmakuEngine(
     /**
      * 准备弹幕数据
      *
-     * 加载并解析弹幕，完成后触发 Callback.prepared() 回调。
-     * 如果解析器或上下文未设置，会延迟重试。
+     * 加载并解析弹幕；解析器或上下文未设置时会延迟重试。
      */
     fun prepare() {
         mReady = false
-        mTimeBase = PlatformClock.uptimeMillis()
         doPrepare()
     }
 
@@ -191,9 +168,7 @@ class DanmakuEngine(
             return
         }
         prepareDrawTask(parser, context) {
-            pausedPosition = 0
             mReady = true
-            mCallback?.prepared()
         }
     }
 
@@ -212,46 +187,15 @@ class DanmakuEngine(
             override fun ready() {
                 onReady()
             }
-
-            override fun onDanmakuAdd(danmaku: BaseDanmaku) {
-                if (danmaku.isTimeOut()) return
-                val delay = danmaku.getActualTime() - getCurrentTime()
-                if (delay < context.mDanmakuFactory.MAX_DANMAKU_DURATION
-                    && (mInWaitingState || mRenderingState.nothingRendered)
-                ) {
-                    notifyRendering()
-                }
-            }
-
-            override fun onDanmakuShown(danmaku: BaseDanmaku) {
-                mCallback?.danmakuShown(danmaku)
-            }
-
-            override fun onDanmakusDrawingFinished() {
-                mCallback?.drawingFinished()
-            }
-
-            override fun onDanmakuConfigChanged() {
-                redrawIfNeeded()
-            }
         })
         task.setParser(parser)
         task.prepare()
         drawTask = task
         // 注册配置变更回调。
-        // 注意：task.prepare() 内部触发的 prepared -> start -> resume() 中
-        // drawTask 尚未赋值（为 null），因此这里必须显式调用 task.start() 注册回调，
+        // 注意：task.prepare() 内部触发的 ready 回调里 drawTask 尚未赋值（为 null），
+        // 因此这里必须显式调用 task.start() 注册回调，
         // 否则 setMaximumLines 等配置变化的 notify 无法到达 DrawTask（如最大行数过滤失效）。
         task.start()
-    }
-
-    fun isPrepared(): Boolean = mReady
-
-    /**
-     * 开始播放弹幕
-     */
-    fun start() {
-        resume()
     }
 
     /**
@@ -267,50 +211,20 @@ class DanmakuEngine(
             return
         }
         mRenderingState.reset()
-        mDrawTimes.clear()
-        mTimeBase = PlatformClock.uptimeMillis() - pausedPosition
-        timer.update(pausedPosition)
-        lastSyncedPosition = -1
-        lastSyncedWallTime = 0
-        lastInferredSpeed = 1.0f
+        // 渲染时钟从暂停位置继续推进；播放器位置每帧重新从播放器读取，
+        // 不需要在这里做任何锚定
+        renderWallTime = 0L
         drawTask?.start()
-        notifyRendering()
-        mInSeekingAction = false
-        drawTask?.onPlayStateChanged(IDrawTask.PLAY_STATE_PLAYING)
-        if (!nonBlockModeEnable) {
-            startRenderLoop()
-        }
     }
 
     /**
      * 暂停播放
+     *
+     * 渲染时钟停止推进，屏幕上的弹幕冻结在当前位置。
      */
     fun pause() {
         quitFlag = true
-        drawTask?.onPlayStateChanged(IDrawTask.PLAY_STATE_PAUSE)
-        syncTimerIfNeeded()
-        pausedPosition = timer.currMillisecond
-        stopRenderLoop()
-    }
-
-    /**
-     * 跳转到指定时间
-     *
-     * @param ms 目标时间（毫秒）
-     */
-    fun seekTo(ms: Long) {
-        mInSeekingAction = true
-        stopRenderLoop()
-        val deltaMs = ms - timer.currMillisecond
-        mTimeBase -= deltaMs
-        timer.update(ms)
-        mContext?.mGlobalFlagValues?.updateMeasureFlag()
-        drawTask?.seek(ms)
-        pausedPosition = ms
-        mInSeekingAction = false
-        if (!quitFlag && !nonBlockModeEnable) {
-            startRenderLoop()
-        }
+        renderWallTime = 0L
     }
 
     /**
@@ -318,9 +232,10 @@ class DanmakuEngine(
      */
     fun release() {
         quitFlag = true
-        stopRenderLoop()
-        syncTimerIfNeeded()
-        pausedPosition = timer.currMillisecond
+        lastPlayerPosition = -1L
+        lastFedPosition = -1L
+        clockInitialized = false
+        renderWallTime = 0L
         drawTask?.quit()
         drawTask = null
         mParser?.release()
@@ -345,105 +260,6 @@ class DanmakuEngine(
         item.flags = context.mGlobalFlagValues
         item.setTimer(timer)
         task.addDanmaku(item)
-        notifyRendering()
-    }
-
-    /**
-     * 使弹幕失效并触发重绘
-     */
-    fun invalidateDanmaku(item: BaseDanmaku, remeasure: Boolean) {
-        drawTask?.invalidateDanmaku(item, remeasure)
-        redrawIfNeeded()
-    }
-
-    /**
-     * 显示弹幕
-     *
-     * @param position 恢复播放的时间位置，null 表示从当前时间继续
-     */
-    fun showDanmakus(position: Long?) {
-        if (isDanmakusVisible) return
-        isDanmakusVisible = true
-        val task = drawTask
-        if (task != null) {
-            if (position == null) {
-                timer.update(getCurrentTime())
-                task.requestClear()
-            } else {
-                task.start()
-                task.seek(position)
-                task.requestClear()
-                // 恢复播放
-                quitFlag = false
-                pausedPosition = position
-                mTimeBase = PlatformClock.uptimeMillis() - pausedPosition
-                timer.update(pausedPosition)
-                lastSyncedPosition = -1
-                lastSyncedWallTime = 0
-                mRenderingState.reset()
-                mDrawTimes.clear()
-                task.onPlayStateChanged(IDrawTask.PLAY_STATE_PLAYING)
-                if (!nonBlockModeEnable) {
-                    startRenderLoop()
-                }
-            }
-        }
-        if (quitFlag) {
-            notifyRendering()
-        }
-    }
-
-    /**
-     * 隐藏弹幕
-     *
-     * @param quitDrawTask 是否同时退出绘制任务
-     * @return 当前时间
-     */
-    fun hideDanmakus(quitDrawTask: Boolean): Long {
-        if (!isDanmakusVisible) return timer.currMillisecond
-        isDanmakusVisible = false
-        drawTask?.requestClear()
-        drawTask?.requestHide()
-        if (quitDrawTask) {
-            drawTask?.quit()
-            pause()
-        }
-        return timer.currMillisecond
-    }
-
-    /**
-     * 移除所有弹幕
-     */
-    fun removeAllDanmakus(isClearDanmakusOnScreen: Boolean) {
-        drawTask?.removeAllDanmakus(isClearDanmakusOnScreen)
-    }
-
-    /**
-     * 移除所有直播弹幕
-     */
-    fun removeAllLiveDanmakus() {
-        drawTask?.removeAllLiveDanmakus()
-    }
-
-    /**
-     * 强制重新渲染
-     */
-    fun forceRender() {
-        drawTask?.requestRender()
-    }
-
-    /**
-     * 清除屏幕上的弹幕
-     */
-    fun clearDanmakusOnScreen() {
-        drawTask?.clearDanmakusOnScreen(getCurrentTime())
-    }
-
-    /**
-     * 获取当前可见弹幕
-     */
-    fun getCurrentVisibleDanmakus(): IDanmakus? {
-        return drawTask?.getVisibleDanmakusOnTime(getCurrentTime())
     }
 
     /**
@@ -474,328 +290,116 @@ class DanmakuEngine(
      * @return 渲染状态
      */
     fun draw(canvas: IDisplayer): RenderingState? {
-        val task = drawTask ?: return mRenderingState
-
-        if (!mInWaitingState) {
-            val danmakuSync = mContext?.danmakuSync
-            if (danmakuSync != null) {
-                val isSyncPlayingState = danmakuSync.isSyncPlayingState()
-                if (!isSyncPlayingState && quitFlag) {
-                    // 不同步
-                } else {
-                    val syncState = danmakuSync.getSyncState()
-                    if (syncState == AbsDanmakuSync.SYNC_STATE_PLAYING) {
-                        val fromTime = timer.currMillisecond
-                        val toTime = danmakuSync.getUptimeMillis()
-                        val offset = toTime - fromTime
-                        if (Math.abs(offset) > danmakuSync.getThresholdTimeMills()) {
-                            if (isSyncPlayingState && quitFlag) {
-                                resume()
-                            }
-                            task.requestSync(fromTime, toTime, offset)
-                            timer.update(toTime)
-                            mTimeBase -= offset
-                            mRemainingTime = 0
-                        }
-                    } else if (syncState == AbsDanmakuSync.SYNC_STATE_HALT) {
-                        if (isSyncPlayingState && !quitFlag) {
-                            pause()
-                        }
-                    }
-                }
-            }
-        }
-
-        val result = task.draw(canvas)
-        if (result != null) {
-            mRenderingState.set(result)
-            recordRenderingTime()
-        }
-        return mRenderingState
+        return drawTask?.draw(canvas) ?: mRenderingState
     }
 
     /**
-     * 同步计时器并绘制弹幕（外部渲染循环专用）
+     * 读取播放器位置并绘制弹幕（外部渲染循环专用）
      *
-     * 当播放器位置真正变化时（~1秒一次），直接对齐引擎计时器，避免 seekTo 清除弹幕。
-     * 两次同步之间使用 wall clock 平滑推进。
+     * 每帧调用一次：
+     * 1. 播放器位置：直接使用外部读到的真实位置，不做任何推算/插值/同步
+     * 2. 渲染时钟：按真实墙钟恒定推进（不乘倍速），与播放器位置无关
+     * 3. 绘制：由 [DrawTask] 按播放器位置放出弹幕、按渲染时钟绘制运动
      *
      * @param canvas 画布
      * @return 渲染状态
      */
     fun drawWithSync(canvas: IDisplayer): RenderingState? {
-        if (!mInSeekingAction && !mInSyncAction) {
-            mInSyncAction = true
-
+        if (!quitFlag) {
             val now = PlatformClock.uptimeMillis()
-
-            // 暂停状态：不推进 timer，但仍绘制当前帧（显示静态弹幕）
-            if (!quitFlag) {
-                // 播放器位置同步
-                val extPos = externalPlayerPosition
-                if (extPos >= 0 && extPos != lastSyncedPosition) {
-                    if (lastSyncedPosition >= 0 && lastSyncedWallTime > 0) {
-                        val posDelta = extPos - lastSyncedPosition
-                        val wallDelta = now - lastSyncedWallTime
-                        // 推断实际播放倍速：播放器位置增量 / wall clock 增量
-                        if (wallDelta > 0 && posDelta >= 0) {
-                            lastInferredSpeed = posDelta.toFloat() / wallDelta.toFloat()
-                            if (lastInferredSpeed < 0.1f) lastInferredSpeed = 0.1f
-                            if (lastInferredSpeed > 16f) lastInferredSpeed = 16f
-                        }
-                    }
-                    lastSyncedPosition = extPos
-                    lastSyncedWallTime = now
-
-                    val syncDelta = extPos - timer.currMillisecond
-                    if (kotlin.math.abs(syncDelta) > 2000) {
-                        // 大偏差：播放器 seek 或缓冲跳转，直接对齐
-                        timer.update(extPos)
-                        mTimeBase = now
-                        mRemainingTime = 0
-                        mLastDeltaTime = 0
-                        synchronized(mDrawTimes) { mDrawTimes.clear() }
-                    }
-                }
-
-                // 计算目标弹幕时间：
-                // 以最近一次播放器位置为锚点，用 wall clock 和推断倍速线性插值
-                // targetTime = extPos + (now - lastSyncedWallTime) * speed
-                val targetTime = if (lastSyncedPosition >= 0 && lastSyncedWallTime > 0) {
-                    lastSyncedPosition + ((now - lastSyncedWallTime) * lastInferredSpeed).toLong()
-                } else {
-                    now - mTimeBase
-                }
-
-                // DFM 原始平滑逻辑：逐步逼近 targetTime
-                var gapTime = targetTime - timer.currMillisecond
-                val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
-                val d: Long
-                if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME) {
-                    d = gapTime
-                    gapTime = 0
-                    synchronized(mDrawTimes) { mDrawTimes.clear() }
-                } else {
-                    var dd = averageTime + gapTime / FRAME_UPDATE_RATE
-                    dd = maxOf(FRAME_UPDATE_RATE, dd)
-                    dd = minOf(CORDON_TIME, dd)
-                    val a = dd - mLastDeltaTime
-                    if (a > 3 && a < 8 && mLastDeltaTime >= FRAME_UPDATE_RATE && mLastDeltaTime <= CORDON_TIME) {
-                        dd = mLastDeltaTime
-                    }
-                    gapTime -= dd
-                    mLastDeltaTime = dd
-                    d = dd
-                }
-                mRemainingTime = gapTime
-                timer.add(d)
-            }
-
-            mInSyncAction = false
+            applyPlayerPosition()
+            advanceRenderClock(now)
         }
         return draw(canvas)
     }
 
     /**
-     * 获取当前时间
-     */
-    fun getCurrentTime(): Long {
-        if (!mReady) return 0
-        if (mInSeekingAction) return mDesireSeekingTime
-        if (quitFlag || !mInWaitingState) {
-            return timer.currMillisecond - mRemainingTime
-        }
-        return PlatformClock.uptimeMillis() - mTimeBase
-    }
-
-    /**
-     * 获取当前计时器
-     */
-    fun getTimer(): DanmakuTimer = timer
-
-    /**
-     * 获取显示器
-     */
-    fun getDisplayer(): IDisplayer? = mContext?.mDisplayer
-
-    /**
-     * 获取当前渲染状态
-     */
-    fun getRenderingState(): RenderingState = mRenderingState
-
-    /**
-     * 获取弹幕可见性
-     */
-    fun getVisibility(): Boolean = isDanmakusVisible
-
-    // endregion
-
-    // region 渲染循环
-
-    private fun startRenderLoop() {
-        stopRenderLoop()
-        renderJob = scope.launch {
-            while (isActive && !quitFlag) {
-                val startMS = PlatformClock.uptimeMillis()
-                val d = syncTimer(startMS)
-                if (d < 0 && !nonBlockModeEnable) {
-                    delay(60 - d)
-                    continue
-                }
-                // 通知外部绘制（由外部调用 draw()）
-                val drawTime = if (isDanmakusVisible) {
-                    notifyDraw()
-                } else {
-                    0L
-                }
-                if (drawTime > CORDON_TIME2) {
-                    timer.add(drawTime)
-                    mDrawTimes.clear()
-                }
-                if (!isDanmakusVisible) {
-                    waitRendering(INDEFINITE_TIME)
-                } else if (mRenderingState.nothingRendered && idleSleep) {
-                    val dTime = mRenderingState.endTime - timer.currMillisecond
-                    if (dTime > 500) {
-                        waitRendering(dTime - 10)
-                    }
-                }
-                val elapsed = PlatformClock.uptimeMillis() - startMS
-                val sleepTime = FRAME_UPDATE_RATE - elapsed
-                if (sleepTime > 0) {
-                    delay(sleepTime)
-                }
-            }
-        }
-    }
-
-    private fun stopRenderLoop() {
-        renderJob?.cancel()
-        renderJob = null
-        mInWaitingState = false
-    }
-
-    /**
-     * 通知外部执行绘制
+     * 把播放器的真实位置交给绘制任务去投喂弹幕
      *
-     * @return 绘制耗时（毫秒）
+     * 这里既没有时钟推算，也没有 seek 推断：位置怎么来就怎么用，
+     * 只维护投喂游标——这次要投喂的是 `(上次位置, 本次位置]` 这段播放器时间。
+     * 拖动进度条由播放器通过 [seekTo] 显式通知。
      */
-    private fun notifyDraw(): Long {
-        val start = PlatformClock.uptimeMillis()
-        // 实际绘制由外部调用 draw() 完成
-        // 这里仅计算一次渲染循环的开销
-        return PlatformClock.uptimeMillis() - start
-    }
+    private fun applyPlayerPosition() {
+        val position = externalPlayerPosition
+        if (position < 0) return
 
-    // endregion
+        val previous = lastPlayerPosition
+        // 播放器位置没变：这一段没有新弹幕要投喂（位置采样粒度比帧率粗）
+        if (position == previous) return
+        lastPlayerPosition = position
 
-    // region 计时器同步
-
-    private fun syncTimer(startMS: Long): Long {
-        if (mInSeekingAction || mInSyncAction) return 0
-        mInSyncAction = true
-        var d = 0L
-        val time = startMS - mTimeBase
-        if (nonBlockModeEnable) {
-            mCallback?.updateTimer(timer)
-            d = timer.lastInterval
-        } else if (!isDanmakusVisible || mRenderingState.nothingRendered || mInWaitingState) {
-            timer.update(time)
-            mRemainingTime = 0
-            mCallback?.updateTimer(timer)
-        } else {
-            var gapTime = time - timer.currMillisecond
-            val averageTime = maxOf(FRAME_UPDATE_RATE, minOf(CORDON_TIME, getAverageRenderingTime()))
-            if (gapTime > 2000 || mRenderingState.consumingTime > CORDON_TIME) {
-                d = gapTime
-                gapTime = 0
-                synchronized(mDrawTimes) { mDrawTimes.clear() }
-            } else {
-                d = averageTime + gapTime / FRAME_UPDATE_RATE
-                d = maxOf(FRAME_UPDATE_RATE, d)
-                d = minOf(CORDON_TIME, d)
-                val a = d - mLastDeltaTime
-                if (a > 3 && a < 8 && mLastDeltaTime >= FRAME_UPDATE_RATE && mLastDeltaTime <= CORDON_TIME) {
-                    d = mLastDeltaTime
-                }
-                gapTime -= d
-                mLastDeltaTime = d
+        if (!clockInitialized) {
+            // 引擎启动后的第一次对齐：只把投喂游标对齐到播放器位置，
+            // 不补放启动前就该出场的弹幕
+            clockInitialized = true
+            lastFedPosition = position
+            drawTask?.let { task ->
+                task.releaseFromClock = position
+                task.releaseClock = position
+                task.speedFactor = playbackSpeed
             }
-            mRemainingTime = gapTime
-            timer.add(d)
-            mCallback?.updateTimer(timer)
+            return
         }
-        mInSyncAction = false
-        return d
-    }
 
-    private fun syncTimerIfNeeded() {
-        if (mInWaitingState) {
-            syncTimer(PlatformClock.uptimeMillis())
+        // 把这次采样覆盖的播放器时间段交给绘制任务，由它换算成弹幕时钟上的出场时刻
+        drawTask?.let { task ->
+            task.releaseFromClock = lastFedPosition
+            task.releaseClock = position
+            task.speedFactor = playbackSpeed
         }
+        lastFedPosition = position
     }
 
-    // endregion
-
-    // region 空闲等待
-
-    private fun notifyRendering() {
-        if (!mInWaitingState) return
-        drawTask?.requestClear()
-        mDrawTimes.clear()
-        mInWaitingState = false
+    /**
+     * 播放器显式通知 seek
+     *
+     * 由播放器侧调用（订阅 `BasePlayerDelegate.seekFlow` 后转发），弹幕层不再
+     * 靠比对播放器位置去推断——播放器位置是低频采样上报的，采样延迟、卡顿、
+     * 切分段都会造成跳变假象，推断必然误判，误判的代价是屏幕上正在飞的弹幕被整体重置。
+     *
+     * seek 会清屏并把投喂游标对齐到目标位置；弹幕时钟不动（它只按墙钟单调递增）。
+     *
+     * @param ms 目标位置（毫秒）
+     */
+    fun seekTo(ms: Long) {
+        val now = PlatformClock.uptimeMillis()
+        lastPlayerPosition = ms
+        clockInitialized = true
+        applySeek(ms, now)
     }
 
-    private fun waitRendering(dTime: Long) {
-        if (isStop() || !isPrepared() || mInSeekingAction) return
-        mRenderingState.sysTime = PlatformClock.uptimeMillis()
-        mInWaitingState = true
-        if (dTime != INDEFINITE_TIME) {
-            // 延迟唤醒
-            scope.launch {
-                delay(dTime)
-                notifyRendering()
-            }
+    /**
+     * 渲染时钟按真实墙钟恒定推进
+     *
+     * 刻意不乘播放倍速：弹幕的滚动速度和停留时长保持视觉恒定，
+     * 倍速只提高出场密度（释放时钟跟着播放器走），这样不会出现「弹幕提前消失」，
+     * 也不会因为播放器采样抖动而变速。切换倍速不影响已经在飞的弹幕。
+     */
+    private fun advanceRenderClock(now: Long) {
+        if (renderWallTime == 0L) {
+            renderWallTime = now
+            return
         }
+        val wallDelta = now - renderWallTime
+        if (wallDelta <= 0) return
+        renderWallTime = now
+        timer.add(wallDelta)
     }
 
-    // endregion
-
-    // region 渲染统计
-
-    @Synchronized
-    private fun getAverageRenderingTime(): Long {
-        val frames = mDrawTimes.size
-        if (frames <= 0) return 0
-        val first = mDrawTimes.peekFirst() ?: return 0
-        val last = mDrawTimes.peekLast() ?: return 0
-        return (last - first) / frames
-    }
-
-    @Synchronized
-    private fun recordRenderingTime() {
-        val lastTime = PlatformClock.uptimeMillis()
-        mDrawTimes.addLast(lastTime)
-        if (mDrawTimes.size > MAX_RECORD_SIZE) {
-            mDrawTimes.removeFirst()
-        }
-    }
-
-    // endregion
-
-    // region 辅助
-
-    private fun redrawIfNeeded() {
-        if (quitFlag && isDanmakusVisible) {
-            drawTask?.requestClear()
-            // 延迟触发重绘
-            scope.launch {
-                delay(100)
-                if (quitFlag && isDanmakusVisible) {
-                    drawTask?.requestClear()
-                }
-            }
-        }
+    /**
+     * 应用 seek：清屏、重置出场锚点，按新位置重新投喂
+     *
+     * 刻意**不**动弹幕时钟：它只按墙钟单调递增，一旦被 seek 目标位置回拨，
+     * 屏幕上还在飞的弹幕 `弹幕时钟 - 出场锚点` 会变小，位置整体向右跳回去
+     * （表现为「弹幕往后退」）。弹幕的出场锚点本来就是相对的，不需要和视频时间对齐。
+     */
+    private fun applySeek(target: Long, now: Long) {
+        renderWallTime = now
+        // 投喂游标对齐到目标位置，避免把跳过的这段视频的弹幕补放出来
+        lastFedPosition = target
+        // 清屏并重置全部弹幕的出场锚点，按新位置重新投喂
+        drawTask?.seek(target)
     }
 
     // endregion

@@ -18,8 +18,8 @@ open class FTDanmaku(duration: Duration) : BaseDanmaku() {
 
     override fun layout(displayer: IDisplayer, x: Float, y: Float) {
         if (mTimer != null) {
-            val deltaDuration = mTimer!!.currMillisecond - getActualTime()
-            if (deltaDuration > 0 && deltaDuration < (duration?.value ?: 0L)) {
+            val elapsed = mTimer!!.currMillisecond - getRenderStartTime()
+            if (elapsed > 0 && elapsed < getDuration()) {
                 if (!isShown()) {
                     this.x = getCenterLeft(displayer)
                     this.y = y

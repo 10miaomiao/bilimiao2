@@ -22,6 +22,7 @@ actual fun DanmakuCanvas(
     engine: DanmakuEngine,
     displayer: IDisplayer,
     frameTick: Long,
+    positionProvider: () -> Long,
     modifier: Modifier,
 ) {
     val skiaDisplayer = displayer as SkiaDisplayer
@@ -43,6 +44,8 @@ actual fun DanmakuCanvas(
             skiaCanvas.save()
             skiaCanvas.clipRect(org.jetbrains.skia.Rect.makeWH(size.width, size.height))
             skiaDisplayer.setCanvas(skiaCanvas)
+            // 每帧直接向播放器要当前进度，不做插值也不同步
+            engine.externalPlayerPosition = positionProvider()
             engine.drawWithSync(skiaDisplayer)
             skiaDisplayer.setCanvas(null)
             skiaCanvas.restore()

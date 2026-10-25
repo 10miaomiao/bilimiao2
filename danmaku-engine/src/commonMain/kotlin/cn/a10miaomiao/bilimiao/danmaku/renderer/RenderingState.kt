@@ -1,22 +1,26 @@
 package cn.a10miaomiao.bilimiao.danmaku.renderer
 
-import cn.a10miaomiao.bilimiao.danmaku.collection.Danmakus
 import cn.a10miaomiao.bilimiao.danmaku.model.BaseDanmaku
 import cn.a10miaomiao.bilimiao.danmaku.model.DanmakuTimer
-import cn.a10miaomiao.bilimiao.danmaku.model.IDanmakus
 
 /**
- * 渲染状态
+ * 单帧渲染状态
+ *
+ * 只保留过滤器需要的统计信息（同屏序号、同屏总数、各类型计数）和渲染耗时用的计时器。
+ * 早期为「空闲休眠」「运行中弹幕同步」等机制准备的字段（beginTime/endTime/runningDanmakus
+ * 等）已随那些机制一起移除。
  */
 class RenderingState {
-    companion object {
-        const val UNKNOWN_TIME = -1L
-    }
 
-    var isRunningDanmakus = false
+    /** 渲染计时器（墙钟），供过滤器判断渲染耗时 */
     var timer = DanmakuTimer()
+
+    /** 当前弹幕在本帧屏幕内的序号 */
     var indexInScreen = 0
+
+    /** 本帧屏幕内弹幕总数 */
     var totalSizeInScreen = 0
+
     var lastDanmaku: BaseDanmaku? = null
 
     var r2lDanmakuCount = 0
@@ -25,17 +29,7 @@ class RenderingState {
     var fbDanmakuCount = 0
     var specialDanmakuCount = 0
     var totalDanmakuCount = 0
-    var lastTotalDanmakuCount = 0
     var consumingTime = 0L
-    var beginTime = 0L
-    var endTime = 0L
-    var nothingRendered = false
-    var sysTime = 0L
-    var cacheHitCount = 0L
-    var cacheMissCount = 0L
-
-    private var runningDanmakus: IDanmakus = Danmakus(IDanmakus.ST_BY_LIST)
-    private var mIsObtaining = false
 
     fun addTotalCount(count: Int): Int {
         totalDanmakuCount += count
@@ -69,55 +63,12 @@ class RenderingState {
     }
 
     fun reset() {
-        lastTotalDanmakuCount = totalDanmakuCount
         r2lDanmakuCount = 0
         l2rDanmakuCount = 0
         ftDanmakuCount = 0
         fbDanmakuCount = 0
         specialDanmakuCount = 0
         totalDanmakuCount = 0
-        sysTime = 0
-        beginTime = 0
-        endTime = 0
         consumingTime = 0
-        nothingRendered = false
-        synchronized(this) {
-            runningDanmakus.clear()
-        }
-    }
-
-    fun set(other: RenderingState?) {
-        if (other == null) return
-        lastTotalDanmakuCount = other.lastTotalDanmakuCount
-        r2lDanmakuCount = other.r2lDanmakuCount
-        l2rDanmakuCount = other.l2rDanmakuCount
-        ftDanmakuCount = other.ftDanmakuCount
-        fbDanmakuCount = other.fbDanmakuCount
-        specialDanmakuCount = other.specialDanmakuCount
-        totalDanmakuCount = other.totalDanmakuCount
-        consumingTime = other.consumingTime
-        beginTime = other.beginTime
-        endTime = other.endTime
-        nothingRendered = other.nothingRendered
-        sysTime = other.sysTime
-        cacheHitCount = other.cacheHitCount
-        cacheMissCount = other.cacheMissCount
-    }
-
-    fun appendToRunningDanmakus(danmaku: BaseDanmaku) {
-        if (!mIsObtaining) {
-            runningDanmakus.addItem(danmaku)
-        }
-    }
-
-    fun obtainRunningDanmakus(): IDanmakus {
-        mIsObtaining = true
-        val danmakus: IDanmakus
-        synchronized(this) {
-            danmakus = runningDanmakus
-            runningDanmakus = Danmakus(IDanmakus.ST_BY_LIST)
-        }
-        mIsObtaining = false
-        return danmakus
     }
 }

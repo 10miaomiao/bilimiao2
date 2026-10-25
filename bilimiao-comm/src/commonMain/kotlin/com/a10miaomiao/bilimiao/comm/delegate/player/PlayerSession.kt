@@ -72,6 +72,16 @@ class PlayerSession {
     val localDanmakuFlowShared = MutableSharedFlow<LocalDanmakuInfo>(extraBufferCapacity = 8)
     val localDanmakuFlow: SharedFlow<LocalDanmakuInfo> = localDanmakuFlowShared.asSharedFlow()
 
+    /**
+     * seek 事件（毫秒）
+     *
+     * [PlayerDelegateImpl.seekTo] 成功后发出。弹幕渲染层订阅后清屏重建，
+     * 不再靠比对播放器位置去推断 seek——位置采样有延迟和抖动，推断必然误判，
+     * 而误判的代价是屏幕上正在飞的弹幕被整体重置。
+     */
+    val seekFlowShared = MutableSharedFlow<Long>(extraBufferCapacity = 8)
+    val seekFlow: SharedFlow<Long> = seekFlowShared.asSharedFlow()
+
     /** 画中画（应用外小窗）状态：由平台层 Activity 回调驱动 */
     val pictureInPictureFlow = MutableStateFlow(false)
     val pictureInPicture: StateFlow<Boolean> = pictureInPictureFlow.asStateFlow()

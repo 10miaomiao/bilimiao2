@@ -68,29 +68,22 @@ class DanmakuTransparencyDrawTest {
         override val densityDpi: Int get() = 160
         override val scaledDensity: Float get() = 1f
         override val slopPixel: Int get() = 6
-        override val strokeWidth: Float get() = 0f
-        override val isHardwareAccelerated: Boolean get() = true
-        override val maximumCacheWidth: Int get() = 1080
-        override val maximumCacheHeight: Int get() = 1920
         override val margin: Int get() = 0
         override val allMarginTop: Int get() = 0
 
-        override fun draw(danmaku: BaseDanmaku): Int {
+        override fun draw(danmaku: BaseDanmaku) {
             // 模拟 AndroidDisplayer.draw：paint.color 赋值（覆盖 alpha）后交给 cacheStuffer 绘制
             val paint = TestPaint()
             paint.color = danmaku.textColor
             paint.alpha = 255
             val stuffer = context.mCacheStuffer
             stuffer?.drawDanmaku(danmaku, canvas, danmaku.getLeft(), danmaku.getTop(), false, paint)
-            return 0
         }
         override fun recycle(danmaku: BaseDanmaku) {}
-        override fun prepare(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {}
         override fun measure(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {}
         override fun resetSlopPixel(factor: Float) {}
         override fun setDensities(density: Float, densityDpi: Int, scaledDensity: Float) {}
         override fun setSize(width: Int, height: Int) {}
-        override fun setDanmakuStyle(style: Int, data: FloatArray?) {}
         override fun setMargin(m: Int) {}
         override fun setAllMarginTop(m: Int) {}
         override fun clearTextHeightCache() {}
@@ -105,7 +98,7 @@ class DanmakuTransparencyDrawTest {
         val canvas = TestCanvas()
         val context = DanmakuContext.create()
         context.mDisplayer = DrawDisplayer(context, canvas)
-        context.setCacheStuffer(SimpleTextCacheStuffer(), null)
+        context.setCacheStuffer(SimpleTextCacheStuffer())
         context.setDanmakuTransparency(0.5f) // transparency = 127
 
         val danmaku = R2LDanmaku(Duration(5000))

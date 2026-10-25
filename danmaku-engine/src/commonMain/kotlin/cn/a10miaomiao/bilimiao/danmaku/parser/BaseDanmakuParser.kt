@@ -13,26 +13,6 @@ import cn.a10miaomiao.bilimiao.danmaku.model.IDisplayer
  */
 abstract class BaseDanmakuParser {
 
-    /**
-     * 解析器监听器
-     */
-    interface Listener {
-        /**
-         * 弹幕添加回调
-         */
-        fun onDanmakuAdd(danmaku: BaseDanmaku)
-
-        /**
-         * 弹幕数据变更回调
-         */
-        fun onDanmakuDataChanged() {}
-
-        /**
-         * 弹幕解析完成回调
-         */
-        fun onDanmakusParsed() {}
-    }
-
     /** 数据源 */
     protected var mDataSource: IDataSource<*>? = null
 
@@ -60,9 +40,6 @@ abstract class BaseDanmakuParser {
     /** 弹幕上下文 */
     protected var mContext: DanmakuContext? = null
 
-    /** 监听器 */
-    protected var mListener: Listener? = null
-
     /**
      * 设置显示器，同时更新视口状态
      */
@@ -85,14 +62,6 @@ abstract class BaseDanmakuParser {
      * 获取显示器
      */
     fun getDisplayer(): IDisplayer? = mDisp
-
-    /**
-     * 设置监听器
-     */
-    fun setListener(listener: Listener): BaseDanmakuParser {
-        mListener = listener
-        return this
-    }
 
     /**
      * 计算视口缩放因子，影响滚动弹幕的速度
@@ -134,7 +103,6 @@ abstract class BaseDanmakuParser {
         mDanmakus = parse()
         releaseDataSource()
         mContext?.mDanmakuFactory?.updateMaxDanmakuDuration()
-        mListener?.onDanmakusParsed()
         return mDanmakus
     }
 

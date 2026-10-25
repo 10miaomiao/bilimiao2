@@ -54,11 +54,19 @@ private const val LOCAL_DANMAKU_SHADOW_COLOR = 0xFF000000.toInt()
  * [appDataStore]，变化时实时应用到引擎，对齐旧版
  * `PlayerController.initDanmakuContext` 行为。
  *
- * @param currentPosition 当前播放位置（毫秒）
+ * @param positionProvider 播放器位置提供器，每帧绘制前调用一次。
+ *        应直接读取播放器当前进度（如 `playerDelegate.currentPosition.value`），
+ *        不要传 Compose 状态值，避免重组延迟导致弹幕迟到。
+ *        引擎不复制、不插值、不同步这个位置，它只决定弹幕何时出场。
  * @param isPlaying 是否正在播放。弹幕引擎由该状态驱动启停：只有视频真正开始播放
- *                  （缓冲结束）后才推进弹幕时间，缓冲/暂停期间弹幕冻结，
+ *                  （缓冲结束）后才推进弹幕时钟，缓冲/暂停期间弹幕冻结，
  *                  避免首次缓冲耗时较长时弹幕先于视频画面播放
  * @param danmakuParser 弹幕解析器
+ * @param seekFlow 播放器的 seek 事件（见 `BasePlayerDelegate.seekFlow`）。
+ *        拖动进度条、切清晰度恢复位置、重播等都由播放器显式通知，
+ *        引擎收到后清屏并按新位置重新投喂；弹幕层不做位置跳变推断。
+ * @param playbackSpeed 播放倍速。只影响弹幕的出场密度（播放器时间走得更快，
+ *                 到点投喂的弹幕更多），不影响弹幕的滚动速度和停留时长
  * @param localDanmakuFlow 本地发送成功的弹幕（见 [LocalDanmakuInfo]），加入引擎并以边框区分
  * @param modeName 当前播放模式（[SettingPreferences.Danmaku] 的 name），
  *                 用于读取对应模式的弹幕设置（small/full/pip，默认 default）
@@ -67,9 +75,11 @@ private const val LOCAL_DANMAKU_SHADOW_COLOR = 0xFF000000.toInt()
  */
 @Composable
 fun DanmakuOverlay(
-    currentPosition: Long,
+    positionProvider: () -> Long,
     isPlaying: Boolean,
     danmakuParser: BaseDanmakuParser?,
+    seekFlow: Flow<Long> = emptyFlow(),
+    playbackSpeed: Float = 1f,
     localDanmakuFlow: Flow<LocalDanmakuInfo> = emptyFlow(),
     modeName: String = "default",
     visible: Boolean = true,
@@ -91,11 +101,9 @@ fun DanmakuOverlay(
         val disp = createPlatformDisplayer(context)
         disp.setDensities(density.density, (density.density * 160).toInt(), density.density)
         context.mDisplayer = disp
-        context.setCacheStuffer(SimpleTextCacheStuffer(), null)
+        context.setCacheStuffer(SimpleTextCacheStuffer())
 
         val eng = DanmakuEngine(scope)
-        eng.nonBlockModeEnable = true
-        eng.idleSleep = false
         eng.setConfig(context)
         eng.setParser(parser)
         // 弹幕数据准备完成时不启动引擎（引擎启动时机由播放状态驱动，见下方同步逻辑），
@@ -128,21 +136,35 @@ fun DanmakuOverlay(
         }
     }
 
-    // 同步播放位置和播放/暂停状态。
+    // 同步播放/暂停状态。
     // 引擎的启停由播放状态驱动（数据准备完成时不启动，见上方 prepare 注释）：
     // 首次缓冲期间视频尚未开始播放，此时不启动引擎，弹幕不会先于画面滚动；
-    // 缓冲结束开始播放后启动引擎并按播放位置同步，暂停/缓冲时冻结弹幕。
-    LaunchedEffect(engine.value, isPlaying, currentPosition) {
+    // 缓冲结束开始播放后启动引擎，暂停/缓冲时冻结弹幕。
+    //
+    // 播放位置不在这里传：位置由 [positionProvider] 在每帧绘制前直接向播放器读取，
+    // 不经过 Compose 状态，避免重组延迟让弹幕迟到。
+    LaunchedEffect(engine.value, isPlaying) {
         val eng = engine.value ?: return@LaunchedEffect
         if (isPlaying) {
             playbackStarted = true
             if (eng.isStop()) {
                 eng.resume()
             }
-            eng.externalPlayerPosition = currentPosition
         } else if (!eng.isStop()) {
             eng.pause()
         }
+    }
+
+    // 播放倍速：只影响弹幕出场密度，弹幕的滚动速度与停留时长保持视觉恒定
+    LaunchedEffect(engine.value, playbackSpeed) {
+        engine.value?.setPlaybackSpeed(playbackSpeed)
+    }
+
+    // seek：由播放器显式通知，清屏后按新位置重新投喂。
+    // 不再靠比对播放器位置去推断——位置是低频采样上报的，延迟和抖动都会造成跳变假象。
+    LaunchedEffect(engine.value, seekFlow) {
+        val eng = engine.value ?: return@LaunchedEffect
+        seekFlow.collect { position -> eng.seekTo(position) }
     }
 
     // 弹幕设置中当前模式的"显示弹幕"开关（与播放器按钮开关 AND 后决定最终可见性）
@@ -214,6 +236,7 @@ fun DanmakuOverlay(
             engine = currentEngine,
             displayer = currentDisplayer,
             frameTick = frameTick,
+            positionProvider = positionProvider,
             modifier = modifier,
         )
     }

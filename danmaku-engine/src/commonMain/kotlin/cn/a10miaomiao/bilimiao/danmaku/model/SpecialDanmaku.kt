@@ -91,7 +91,7 @@ class SpecialDanmaku : BaseDanmaku() {
             setLinePathData(points)
         }
 
-        val deltaTime = currTime - getActualTime()
+        val deltaTime = currTime - getRenderStartTime()
 
         // 计算透明度
         if (alphaDuration > 0 && deltaAlpha != 0) {
@@ -148,7 +148,7 @@ class SpecialDanmaku : BaseDanmaku() {
         currStateValues[2] = currX + paintWidth
         currStateValues[3] = currY + paintHeight
 
-        setVisibility(!isOutside())
+        setVisibility(!isRenderOutside())
 
         return currStateValues
     }

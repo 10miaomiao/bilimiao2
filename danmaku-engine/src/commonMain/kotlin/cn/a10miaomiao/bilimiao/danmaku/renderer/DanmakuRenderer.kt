@@ -3,10 +3,8 @@ package cn.a10miaomiao.bilimiao.danmaku.renderer
 import cn.a10miaomiao.bilimiao.danmaku.context.DanmakuContext
 import cn.a10miaomiao.bilimiao.danmaku.model.BaseDanmaku
 import cn.a10miaomiao.bilimiao.danmaku.model.DanmakuTimer
-import cn.a10miaomiao.bilimiao.danmaku.model.ICacheManager
 import cn.a10miaomiao.bilimiao.danmaku.model.IDanmakus
 import cn.a10miaomiao.bilimiao.danmaku.model.IDisplayer
-import cn.a10miaomiao.bilimiao.danmaku.model.IDrawingCache
 
 /**
  * 弹幕渲染器实现
@@ -19,23 +17,19 @@ class DanmakuRenderer(
         var lastItem: BaseDanmaku? = null
         lateinit var disp: IDisplayer
         lateinit var renderingState: RenderingState
-        var startRenderTime: Long = 0
 
         override fun accept(drawItem: BaseDanmaku): Int {
             lastItem = drawItem
 
-            // 跳过超时弹幕
-            if (drawItem.isTimeOut()) {
-                disp.recycle(drawItem)
-                return if (renderingState.isRunningDanmakus) {
-                    IDanmakus.Consumer.ACTION_REMOVE
-                } else {
-                    IDanmakus.Consumer.ACTION_CONTINUE
-                }
+            // 还没被投喂（启动 / seek 后的那一帧）：不参与渲染。
+            // 这类弹幕没有出场锚点，任何位置计算都会退化成错误的基准。
+            if (!drawItem.isRenderAnchored()) {
+                return IDanmakus.Consumer.ACTION_CONTINUE
             }
 
-            // 跳过偏移弹幕
-            if (!renderingState.isRunningDanmakus && drawItem.isOffset()) {
+            // 跳过超时弹幕
+            if (drawItem.isRenderTimeOut()) {
+                disp.recycle(drawItem)
                 return IDanmakus.Consumer.ACTION_CONTINUE
             }
 
@@ -52,18 +46,14 @@ class DanmakuRenderer(
             }
 
             // 跳过过滤弹幕（优先级>0的除外）
-            if (drawItem.getActualTime() < startRenderTime
-                || (drawItem.priority.toInt() == 0 && drawItem.isFiltered())
-            ) {
+            // 这里不需要再按「seek 前旧弹幕」过滤：投喂模型下早于本次投喂区间的弹幕
+            // 已经被丢弃（见 DrawTask.releaseDanmakus）
+            if (drawItem.priority.toInt() == 0 && drawItem.isFiltered()) {
                 return IDanmakus.Consumer.ACTION_CONTINUE
             }
 
-            // 跳过未到时间的弹幕，请求缓存构建
-            if (drawItem.isLate()) {
-                val cache: IDrawingCache<*>? = drawItem.getDrawingCache()
-                if (mCacheManager != null && (cache == null || cache.get() == null)) {
-                    mCacheManager!!.addDanmaku(drawItem)
-                }
+            // 跳过还没到出场时刻的弹幕；列表按时间有序，后面的只会更晚
+            if (drawItem.isRenderWaiting(renderingState.timer.currMillisecond)) {
                 return IDanmakus.Consumer.ACTION_BREAK
             }
 
@@ -77,11 +67,6 @@ class DanmakuRenderer(
                 drawItem.measure(disp, false)
             }
 
-            // 准备绘制
-            if (!drawItem.isPrepared()) {
-                drawItem.prepare(disp, false)
-            }
-
             // 布局
             mDanmakusRetainer.fix(drawItem, disp, mVerifier)
 
@@ -90,23 +75,9 @@ class DanmakuRenderer(
                 if (drawItem.lines == null && drawItem.getBottom() > disp.height) {
                     return IDanmakus.Consumer.ACTION_CONTINUE // 跳过底部超出弹幕
                 }
-                val renderingType = drawItem.draw(disp)
-                if (renderingType == IRenderer.CACHE_RENDERING) {
-                    renderingState.cacheHitCount++
-                } else if (renderingType == IRenderer.TEXT_RENDERING) {
-                    renderingState.cacheMissCount++
-                    mCacheManager?.addDanmaku(drawItem)
-                }
+                drawItem.draw(disp)
                 renderingState.addCount(drawItem.getType(), 1)
                 renderingState.addTotalCount(1)
-                renderingState.appendToRunningDanmakus(drawItem)
-
-                if (mOnDanmakuShownListener != null
-                    && drawItem.firstShownFlag != mContext.mGlobalFlagValues.FIRST_SHOWN_RESET_FLAG
-                ) {
-                    drawItem.firstShownFlag = mContext.mGlobalFlagValues.FIRST_SHOWN_RESET_FLAG
-                    mOnDanmakuShownListener!!.onDanmakuShown(drawItem)
-                }
             }
             return IDanmakus.Consumer.ACTION_CONTINUE
         }
@@ -138,8 +109,6 @@ class DanmakuRenderer(
     }
 
     private val mDanmakusRetainer = DanmakusRetainer(mContext.isAlignBottom())
-    private var mCacheManager: ICacheManager? = null
-    private var mOnDanmakuShownListener: IRenderer.OnDanmakuShownListener? = null
     private val mConsumer = Consumer()
 
     override fun clear() {
@@ -163,26 +132,12 @@ class DanmakuRenderer(
     override fun draw(
         disp: IDisplayer,
         danmakus: IDanmakus,
-        startRenderTime: Long,
         renderingState: RenderingState
     ) {
         mStartTimer = renderingState.timer
         mConsumer.disp = disp
         mConsumer.renderingState = renderingState
-        mConsumer.startRenderTime = startRenderTime
         danmakus.forEachSync(mConsumer)
-    }
-
-    override fun setCacheManager(cacheManager: ICacheManager) {
-        mCacheManager = cacheManager
-    }
-
-    override fun setOnDanmakuShownListener(onDanmakuShownListener: IRenderer.OnDanmakuShownListener) {
-        mOnDanmakuShownListener = onDanmakuShownListener
-    }
-
-    override fun removeOnDanmakuShownListener() {
-        mOnDanmakuShownListener = null
     }
 
     override fun alignBottom(enable: Boolean) {

@@ -30,16 +30,11 @@ class MaximumLinesRenderTest {
         override val densityDpi: Int get() = 160
         override val scaledDensity: Float get() = 1f
         override val slopPixel: Int get() = 6
-        override val strokeWidth: Float get() = 0f
-        override val isHardwareAccelerated: Boolean get() = true
-        override val maximumCacheWidth: Int get() = 1080
-        override val maximumCacheHeight: Int get() = 1920
         override val margin: Int get() = 0
         override val allMarginTop: Int get() = 0
 
-        override fun draw(danmaku: BaseDanmaku): Int = 0
+        override fun draw(danmaku: BaseDanmaku) {}
         override fun recycle(danmaku: BaseDanmaku) {}
-        override fun prepare(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {}
         override fun measure(danmaku: BaseDanmaku, fromWorkerThread: Boolean) {
             danmaku.paintWidth = 300f
             danmaku.paintHeight = 30f
@@ -47,7 +42,6 @@ class MaximumLinesRenderTest {
         override fun resetSlopPixel(factor: Float) {}
         override fun setDensities(density: Float, densityDpi: Int, scaledDensity: Float) {}
         override fun setSize(width: Int, height: Int) {}
-        override fun setDanmakuStyle(style: Int, data: FloatArray?) {}
         override fun setMargin(m: Int) {}
         override fun setAllMarginTop(m: Int) {}
         override fun clearTextHeightCache() {}
@@ -64,6 +58,8 @@ class MaximumLinesRenderTest {
             d.text = "test danmaku"
             d.setTime(time)
             d.setTimer(timer)
+            // 真实链路里弹幕由 DrawTask 投喂后才锚定出场时刻，这里直接锚定以跳过投喂环节
+            d.anchorRenderStart(time)
             danmakus.addItem(d)
         }
         return danmakus
@@ -79,7 +75,7 @@ class MaximumLinesRenderTest {
         renderer.setVerifierEnabled(true)
         val renderingState = RenderingState()
         renderingState.timer = timer
-        renderer.draw(disp, danmakus, 0L, renderingState)
+        renderer.draw(disp, danmakus, renderingState)
         val shown = mutableListOf<BaseDanmaku>()
         danmakus.forEachSync(object : IDanmakus.DefaultConsumer<BaseDanmaku>() {
             override fun accept(t: BaseDanmaku): Int {
@@ -166,10 +162,6 @@ class MaximumLinesRenderTest {
 
         val task = DrawTask(timer, context, object : IDrawTask.TaskListener {
             override fun ready() {}
-            override fun onDanmakuAdd(danmaku: BaseDanmaku) {}
-            override fun onDanmakuShown(danmaku: BaseDanmaku) {}
-            override fun onDanmakusDrawingFinished() {}
-            override fun onDanmakuConfigChanged() {}
         })
         task.start() // 注册配置变更回调（引擎 prepareDrawTask 修复后必调）
         context.setMaximumLines(mapOf(BaseDanmaku.TYPE_SCROLL_RL to 1))
@@ -185,7 +177,7 @@ class MaximumLinesRenderTest {
 
         val renderingState = RenderingState()
         renderingState.timer = timer
-        task.mRenderer.draw(disp, danmakus, 0L, renderingState)
+        task.mRenderer.draw(disp, danmakus, renderingState)
 
         val shownY = mutableSetOf<Float>()
         danmakus.forEachSync(object : IDanmakus.DefaultConsumer<BaseDanmaku>() {

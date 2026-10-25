@@ -106,7 +106,6 @@ class BiliDanmakuParser : BaseDanmakuParser() {
                                 synchronized(lock) {
                                     result.addItem(item)
                                 }
-                                mListener?.onDanmakuAdd(item)
                             }
                         }
                     }
@@ -132,7 +131,6 @@ class BiliDanmakuParser : BaseDanmakuParser() {
             )
         }
 
-        mListener?.onDanmakuDataChanged()
         return result
     }
 

@@ -2,14 +2,12 @@ package cn.a10miaomiao.bilimiao.danmaku.context
 
 import cn.a10miaomiao.bilimiao.danmaku.filter.DanmakuFilters
 import cn.a10miaomiao.bilimiao.danmaku.filter.DanmakuFilters.IDanmakuFilter
-import cn.a10miaomiao.bilimiao.danmaku.model.AbsDanmakuSync
 import cn.a10miaomiao.bilimiao.danmaku.model.AlphaValue
 import cn.a10miaomiao.bilimiao.danmaku.model.BaseDanmaku
 import cn.a10miaomiao.bilimiao.danmaku.model.GlobalFlagValues
 import cn.a10miaomiao.bilimiao.danmaku.model.IDanmakus
 import cn.a10miaomiao.bilimiao.danmaku.model.IDisplayer
 import cn.a10miaomiao.bilimiao.danmaku.cache.BaseCacheStuffer
-import cn.a10miaomiao.bilimiao.danmaku.cache.CacheStufferProxy
 import cn.a10miaomiao.bilimiao.danmaku.platform.DanmakuTypeface
 import java.lang.ref.WeakReference
 
@@ -35,7 +33,6 @@ class DanmakuContext {
         TRANSPARENCY,
         SCALE_TEXTSIZE,
         MAXIMUM_NUMS_IN_SCREEN,
-        DANMAKU_STYLE,
         DANMAKU_BOLD,
         COLOR_VALUE_WHITE_LIST,
         USER_ID_BLACK_LIST,
@@ -100,8 +97,6 @@ class DanmakuContext {
      */
     var scrollSpeedFactor: Float = 1.0f
 
-    var danmakuSync: AbsDanmakuSync? = null
-
     private val mColorValueWhiteList: MutableList<Int> = mutableListOf()
     private val mUserIdBlackList: MutableList<Int> = mutableListOf()
     private val mUserHashBlackList: MutableList<String> = mutableListOf()
@@ -128,8 +123,6 @@ class DanmakuContext {
     var mDanmakuFilters: DanmakuFilters = DanmakuFilters()
 
     var mDanmakuFactory: DanmakuFactory = DanmakuFactory.create()
-
-    var cachingPolicy: CachingPolicy = CachingPolicy.POLICY_DEFAULT
 
     private var mBaseComparator: IDanmakus.BaseComparator? = null
 
@@ -326,22 +319,6 @@ class DanmakuContext {
         setFilterData(DanmakuFilters.TAG_QUANTITY_DANMAKU_FILTER, maxSize)
         mGlobalFlagValues.updateFilterFlag()
         notifyConfigureChanged(DanmakuConfigTag.MAXIMUM_NUMS_IN_SCREEN, maxSize)
-        return this
-    }
-
-    /**
-     * 设置描边样式
-     *
-     * @param style DANMAKU_STYLE_NONE DANMAKU_STYLE_SHADOW 或
-     *              DANMAKU_STYLE_STROKEN 或 DANMAKU_STYLE_PROJECTION
-     * @param values
-     *        DANMAKU_STYLE_SHADOW 阴影模式下，values传入阴影半径
-     *        DANMAKU_STYLE_STROKEN 描边模式下，values传入描边宽度
-     *        DANMAKU_STYLE_PROJECTION 投影模式下，values传入offsetX, offsetY, alpha
-     */
-    fun setDanmakuStyle(style: Int, vararg values: Float): DanmakuContext {
-        mDisplayer.setDanmakuStyle(style, values)
-        notifyConfigureChanged(DanmakuConfigTag.DANMAKU_STYLE, style, values)
         return this
     }
 
@@ -573,34 +550,12 @@ class DanmakuContext {
     fun isPreventOverlappingEnabled(): Boolean = mIsPreventOverlappingEnabled
 
     /**
-     * 设置缓存绘制填充器
+     * 设置弹幕绘制填充器
      * @param cacheStuffer 填充器
-     * @param cacheStufferAdapter 填充器代理
      */
-    fun setCacheStuffer(cacheStuffer: BaseCacheStuffer?, cacheStufferAdapter: CacheStufferProxy?): DanmakuContext {
+    fun setCacheStuffer(cacheStuffer: BaseCacheStuffer?): DanmakuContext {
         this.mCacheStuffer = cacheStuffer
-        if (this.mCacheStuffer != null) {
-            this.mCacheStuffer!!.setContext(this)
-            this.mCacheStuffer!!.setProxy(cacheStufferAdapter)
-        }
-        return this
-    }
-
-    /**
-     * 设置弹幕同步器
-     * @param danmakuSync 同步器
-     */
-    fun setDanmakuSync(danmakuSync: AbsDanmakuSync?): DanmakuContext {
-        this.danmakuSync = danmakuSync
-        return this
-    }
-
-    /**
-     * 设置缓存策略
-     * @param cachingPolicy 缓存策略
-     */
-    fun setCachingPolicy(cachingPolicy: CachingPolicy): DanmakuContext {
-        this.cachingPolicy = cachingPolicy
+        this.mCacheStuffer?.setContext(this)
         return this
     }
 

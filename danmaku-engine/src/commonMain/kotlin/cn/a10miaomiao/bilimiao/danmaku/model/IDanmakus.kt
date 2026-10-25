@@ -32,7 +32,6 @@ interface IDanmakus {
 
     fun addItem(item: BaseDanmaku): Boolean
     fun removeItem(item: BaseDanmaku): Boolean
-    fun subnew(startTime: Long, endTime: Long): IDanmakus?
     fun sub(startTime: Long, endTime: Long): IDanmakus?
     fun size(): Int
     fun clear()
@@ -73,7 +72,12 @@ interface IDanmakus {
             if (mDuplicateMergingEnable && DanmakuUtils.isDuplicate(obj1, obj2)) {
                 return 0
             }
-            return obj1.getTop().compareTo(obj2.getTop())
+            val result = obj1.getTop().compareTo(obj2.getTop())
+            if (result != 0) return result
+            // y 相同的两条弹幕不能返回 0：轨道集合是 TreeSet，
+            // compare 返回 0 会被当成重复元素直接丢掉，导致这条弹幕下次
+            // 又要重新分配轨道（表现为上下跳行）。用时间+编号兜底保证稳定且唯一。
+            return DanmakuUtils.compare(obj1, obj2)
         }
     }
 
@@ -82,7 +86,9 @@ interface IDanmakus {
             if (mDuplicateMergingEnable && DanmakuUtils.isDuplicate(obj1, obj2)) {
                 return 0
             }
-            return obj2.getTop().compareTo(obj1.getTop())
+            val result = obj2.getTop().compareTo(obj1.getTop())
+            if (result != 0) return result
+            return DanmakuUtils.compare(obj1, obj2)
         }
     }
 }

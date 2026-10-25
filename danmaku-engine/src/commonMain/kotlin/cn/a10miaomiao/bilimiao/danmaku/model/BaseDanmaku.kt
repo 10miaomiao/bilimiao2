@@ -20,25 +20,22 @@ abstract class BaseDanmaku {
 
         const val FLAG_REQUEST_REMEASURE = 0x1
         const val FLAG_REQUEST_INVALIDATE = 0x2
+
+        /** 出场锚定状态：尚未出场 */
+        const val RENDER_START_NONE = -1L
+
+        /** 出场锚定状态：播放器时钟越过时已走完存活时间，永久丢弃（不再放出） */
+        const val RENDER_START_DISCARDED = Long.MAX_VALUE
     }
 
     /** 显示时间(毫秒) */
     private var time: Long = 0L
-
-    /** 偏移时间 */
-    @JvmField var timeOffset: Long = 0L
 
     /** 文本 */
     @JvmField var text: CharSequence? = null
 
     /** 多行文本 */
     @JvmField var lines: Array<String>? = null
-
-    /** 库内部使用的临时引用 */
-    @JvmField var obj: Any? = null
-
-    /** 外部自定义数据引用 */
-    @JvmField var tag: Any? = null
 
     /** 文本颜色 */
     @JvmField var textColor: Int = 0
@@ -88,20 +85,8 @@ abstract class BaseDanmaku {
     /** 重置位 measure */
     @JvmField var measureResetFlag: Int = 0
 
-    /** 重置位 offset time */
-    @JvmField var syncTimeOffsetResetFlag: Int = 0
-
-    /** 重置位 prepare */
-    @JvmField var prepareResetFlag: Int = -1
-
-    /** 绘制用缓存 */
-    @JvmField var cache: IDrawingCache<*>? = null
-
     /** 是否是直播弹幕 */
     @JvmField var isLive: Boolean = false
-
-    /** 临时, 是否在同线程创建缓存 */
-    @JvmField var forceBuildCacheInSameThread: Boolean = false
 
     /** 弹幕发布者id, 0表示游客 */
     @JvmField var userId: Int = 0
@@ -123,10 +108,20 @@ abstract class BaseDanmaku {
     @JvmField var flags: GlobalFlagValues? = null
     @JvmField var requestFlags: Int = 0
 
-    /** 标记是否首次显示 */
-    @JvmField var firstShownFlag: Int = -1
-
-    private val mTags = mutableMapOf<Int, Any?>()
+    /**
+     * 出场锚定时刻（渲染时钟轴，毫秒）
+     *
+     * 双时钟模型下，"什么时候放出这条弹幕"由播放器时钟（释放时钟）决定，
+     * 而"放出之后怎么飞、什么时候消失"由独立的渲染时钟决定：弹幕被放出的
+     * 那一刻把当前渲染时钟记在这里，之后位置、超时、透明度动画全部基于
+     * `渲染时钟 - renderStartTime` 计算。
+     *
+     * 这样播放器时间再怎么抖动都只影响出场时刻（几十毫秒，肉眼无感），
+     * 不会改变已出场弹幕的运动速度，弹幕动画始终匀速平滑。
+     *
+     * 取值为 [RENDER_START_NONE] 表示尚未出场，[RENDER_START_DISCARDED] 表示已丢弃。
+     */
+    @JvmField var renderStartTime: Long = RENDER_START_NONE
 
     fun getDuration(): Long = duration?.value ?: 0L
 
@@ -134,8 +129,8 @@ abstract class BaseDanmaku {
         this.duration = d
     }
 
-    fun draw(displayer: IDisplayer): Int {
-        return displayer.draw(this)
+    fun draw(displayer: IDisplayer) {
+        displayer.draw(this)
     }
 
     fun isMeasured(): Boolean {
@@ -148,42 +143,80 @@ abstract class BaseDanmaku {
         this.measureResetFlag = flags?.MEASURE_RESET_FLAG ?: 0
     }
 
-    fun isPrepared(): Boolean {
-        return this.prepareResetFlag == flags?.PREPARE_RESET_FLAG
-    }
-
-    fun prepare(displayer: IDisplayer, fromWorkerThread: Boolean) {
-        displayer.prepare(this, fromWorkerThread)
-        this.prepareResetFlag = flags?.PREPARE_RESET_FLAG ?: 0
-    }
-
-    fun getDrawingCache(): IDrawingCache<*>? = cache
-
     open fun isShown(): Boolean {
         return this.visibility == VISIBLE
                 && visibleResetFlag == flags?.VISIBLE_RESET_FLAG
     }
 
-    fun isTimeOut(): Boolean {
-        return mTimer == null || isTimeOut(mTimer!!.currMillisecond)
+    // region 渲染时钟轴（双时钟模型）
+
+    /** 是否已确定出场时刻（可参与渲染） */
+    fun isRenderAnchored(): Boolean {
+        return renderStartTime >= 0 && renderStartTime != RENDER_START_DISCARDED
     }
 
-    fun isTimeOut(ctime: Long): Boolean {
-        return ctime - getActualTime() >= (duration?.value ?: 0L)
+    /** 是否已过期丢弃（不再放出） */
+    fun isRenderDiscarded(): Boolean = renderStartTime == RENDER_START_DISCARDED
+
+    /**
+     * 渲染时钟轴上的出场时刻
+     *
+     * 没有 fallback：未锚定的弹幕返回 [RENDER_START_NONE]，所有可见性判定都会把它
+     * 当作「不该显示」。绝不能退化成用视频时间当锚点——投喂前（启动 / seek 后的
+     * 那一帧）视频时间和弹幕时钟根本不同轴，那样会让弹幕凭空出现在屏幕中间。
+     */
+    fun getRenderStartTime(): Long = renderStartTime
+
+    /** 渲染时钟轴上已经过的时长 */
+    fun getRenderElapsed(renderClock: Long): Long = renderClock - renderStartTime
+
+    /** 渲染时钟轴上是否尚未到出场时刻 */
+    fun isRenderWaiting(renderClock: Long): Boolean = renderClock < renderStartTime
+
+    /** 渲染时钟轴上是否已超时（已走完存活时间）；未出场不算超时 */
+    fun isRenderTimeOut(renderClock: Long): Boolean {
+        if (isRenderDiscarded()) return true
+        if (!isRenderAnchored()) return false
+        return renderClock - renderStartTime >= getDuration()
     }
 
-    fun isOutside(): Boolean {
-        return mTimer == null || isOutside(mTimer!!.currMillisecond)
+    /** 渲染时钟轴上是否已超时（使用当前计时器时间） */
+    fun isRenderTimeOut(): Boolean {
+        return mTimer == null || isRenderTimeOut(mTimer!!.currMillisecond)
     }
 
-    fun isOutside(ctime: Long): Boolean {
-        val dtime = ctime - getActualTime()
-        return dtime <= 0 || dtime >= (duration?.value ?: 0L)
+    /** 渲染时钟轴上是否不该显示（未出场或已超时） */
+    fun isRenderOutside(renderClock: Long): Boolean {
+        if (!isRenderAnchored()) return true
+        val elapsed = renderClock - renderStartTime
+        return elapsed <= 0 || elapsed >= getDuration()
     }
 
-    fun isLate(): Boolean {
-        return mTimer == null || mTimer!!.currMillisecond < getActualTime()
+    /** 渲染时钟轴上是否尚未出场或已超时（使用当前计时器时间） */
+    fun isRenderOutside(): Boolean {
+        return mTimer == null || isRenderOutside(mTimer!!.currMillisecond)
     }
+
+    /**
+     * 在渲染时钟轴上锚定出场时刻
+     *
+     * @param startTime 出场时刻（渲染时钟轴）
+     */
+    fun anchorRenderStart(startTime: Long) {
+        renderStartTime = startTime
+    }
+
+    /** 清除出场锚点，等待重新放出（seek 时使用） */
+    fun resetRenderStart() {
+        renderStartTime = RENDER_START_NONE
+    }
+
+    /** 标记为永久丢弃，不再放出 */
+    fun discardRenderStart() {
+        renderStartTime = RENDER_START_DISCARDED
+    }
+
+    // endregion
 
     fun hasPassedFilter(): Boolean {
         if (filterResetFlag != flags?.FILTER_RESET_FLAG) {
@@ -222,35 +255,10 @@ abstract class BaseDanmaku {
     fun setTimer(timer: DanmakuTimer?) { mTimer = timer }
     fun getAlpha(): Int = alpha
 
-    fun setTag(tag: Any?) { this.tag = tag }
-    fun setTag(key: Int, tag: Any?) { mTags[key] = tag }
-    fun getTag(key: Int): Any? = mTags[key]
-
-    fun setTimeOffset(offset: Long) {
-        this.timeOffset = offset
-        this.syncTimeOffsetResetFlag = flags?.SYNC_TIME_OFFSET_RESET_FLAG ?: 0
-    }
-
+    /** 弹幕在视频时间轴上的时间（投喂依据，也是列表排序依据） */
     fun setTime(t: Long) {
         this.time = t
-        this.timeOffset = 0
     }
 
     fun getTime(): Long = time
-
-    fun getActualTime(): Long {
-        if (flags == null || flags!!.SYNC_TIME_OFFSET_RESET_FLAG != this.syncTimeOffsetResetFlag) {
-            this.timeOffset = 0
-            return time
-        }
-        return time + timeOffset
-    }
-
-    fun isOffset(): Boolean {
-        if (flags == null || flags!!.SYNC_TIME_OFFSET_RESET_FLAG != this.syncTimeOffsetResetFlag) {
-            this.timeOffset = 0
-            return false
-        }
-        return timeOffset != 0L
-    }
 }

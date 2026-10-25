@@ -100,6 +100,12 @@ class DanmakusRetainer(alignBottom: Boolean) {
                 if (mCancelFixingFlag) {
                     return IDanmakus.Consumer.ACTION_BREAK
                 }
+                // 已走完生命周期的弹幕不再占用轨道。双时钟模型下没有任何地方会
+                // 把它从轨道集合里摘掉，若一直留着，集合会无限增长，
+                // 还会干扰下面 firstItem / lastItem / minRightRow 的轨道计算。
+                if (item.isRenderTimeOut()) {
+                    return IDanmakus.Consumer.ACTION_REMOVE
+                }
                 lines++
                 if (item === drawItem) {
                     insertItem = item
@@ -146,7 +152,8 @@ class DanmakusRetainer(alignBottom: Boolean) {
         protected var mConsumer = RetainerConsumer()
 
         override fun fix(drawItem: BaseDanmaku, disp: IDisplayer, verifier: DanmakusRetainer.Verifier?) {
-            if (drawItem.isOutside()) return
+            // 用渲染时钟轴判断：弹幕是否还该出现在屏幕上，由它自己的时钟决定
+            if (drawItem.isRenderOutside()) return
 
             var topPos = disp.allMarginTop.toFloat()
             var lines = 0
@@ -304,6 +311,10 @@ class DanmakusRetainer(alignBottom: Boolean) {
                 if (mCancelFixingFlag) {
                     return IDanmakus.Consumer.ACTION_BREAK
                 }
+                // 已走完生命周期的弹幕不再占用轨道（同 AlignTopRetainer）
+                if (item.isRenderTimeOut()) {
+                    return IDanmakus.Consumer.ACTION_REMOVE
+                }
                 lines++
                 if (item === drawItem) {
                     removeItem = null
@@ -343,7 +354,8 @@ class DanmakusRetainer(alignBottom: Boolean) {
         private var mBottomVisibleDanmakus: IDanmakus = Danmakus(IDanmakus.ST_BY_YPOS_DESC)
 
         override fun fix(drawItem: BaseDanmaku, disp: IDisplayer, verifier: DanmakusRetainer.Verifier?) {
-            if (drawItem.isOutside()) return
+            // 用渲染时钟轴判断：弹幕是否还该出现在屏幕上，由它自己的时钟决定
+            if (drawItem.isRenderOutside()) return
 
             var shown = drawItem.isShown()
             var topPos = if (shown) drawItem.getTop() else -1f

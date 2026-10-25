@@ -17,18 +17,19 @@ object DanmakuUtils {
         val type2 = d2.getType()
         // 不同类型不碰撞
         if (type1 != type2) return false
-        if (d1.isOutside()) return false
+        if (d1.isRenderOutside(currTime)) return false
 
-        val dTime = d2.getActualTime() - d1.getActualTime()
+        // 出场时刻之差（渲染时钟轴）：两者都锚定在渲染轴上，差值即真实的出场间隔
+        val dTime = d2.getRenderStartTime() - d1.getRenderStartTime()
         if (dTime <= 0) return true
-        if (Math.abs(dTime) >= duration || d1.isTimeOut() || d2.isTimeOut()) {
+        if (Math.abs(dTime) >= duration || d1.isRenderTimeOut(currTime) || d2.isRenderTimeOut(currTime)) {
             return false
         }
         if (type1 == BaseDanmaku.TYPE_FIX_TOP || type1 == BaseDanmaku.TYPE_FIX_BOTTOM) {
             return true
         }
         return checkHitAtTime(disp, d1, d2, currTime)
-                || checkHitAtTime(disp, d1, d2, d1.getActualTime() + d1.getDuration())
+                || checkHitAtTime(disp, d1, d2, d1.getRenderStartTime() + d1.getDuration())
     }
 
     private fun checkHitAtTime(
@@ -72,11 +73,6 @@ object DanmakuUtils {
         if (r != 0) return if (r < 0) -1 else 1
 
         return (obj1.hashCode() - obj2.hashCode()).coerceIn(-1, 1)
-    }
-
-    fun isOverSize(disp: IDisplayer, item: BaseDanmaku): Boolean {
-        return disp.isHardwareAccelerated
-                && (item.paintWidth > disp.maximumCacheWidth || item.paintHeight > disp.maximumCacheHeight)
     }
 
     fun fillText(danmaku: BaseDanmaku, text: CharSequence?) {

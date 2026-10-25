@@ -120,12 +120,13 @@ class DanmakuFilters {
                 return false
             }
 
-            if (mLastSkipped == null || mLastSkipped!!.isTimeOut()) {
+            if (mLastSkipped == null || mLastSkipped!!.isRenderTimeOut()) {
                 mLastSkipped = danmaku
                 return false
             }
 
-            val gapTime = danmaku.getActualTime() - mLastSkipped!!.getActualTime()
+            // 两条弹幕在视频里的时间差（与出场锚点无关，用弹幕自身的视频时间）
+            val gapTime = danmaku.getTime() - mLastSkipped!!.getTime()
             val maximumScrollDuration: Duration? = context.mDanmakuFactory.MAX_Duration_Scroll_Danmaku
             if (gapTime >= 0 && maximumScrollDuration != null
                 && gapTime < (maximumScrollDuration.value * mFilterFactor)
@@ -180,7 +181,7 @@ class DanmakuFilters {
         private fun needFilter(danmaku: BaseDanmaku, orderInScreen: Int,
                                totalsizeInScreen: Int, timer: DanmakuTimer?,
                                fromCachingTask: Boolean): Boolean {
-            if (timer == null || !danmaku.isOutside()) {
+            if (timer == null || !danmaku.isRenderOutside()) {
                 return false
             }
 
@@ -343,7 +344,7 @@ class DanmakuFilters {
                     return try {
                         if (PlatformClock.uptimeMillis() - startTime > limitTime) {
                             ACTION_BREAK
-                        } else if (t.isTimeOut()) {
+                        } else if (t.isRenderTimeOut()) {
                             ACTION_REMOVE
                         } else {
                             ACTION_BREAK
@@ -362,7 +363,7 @@ class DanmakuFilters {
                 try {
                     val entry = it.next()
                     val item = entry.value
-                    if (item.isTimeOut()) {
+                    if (item.isRenderTimeOut()) {
                         it.remove()
                     } else {
                         break
@@ -382,7 +383,7 @@ class DanmakuFilters {
             removeTimeoutDanmakus(blockedDanmakus, 2)
             removeTimeoutDanmakus(passedDanmakus, 2)
             removeTimeoutDanmakus(currentDanmakus, 3)
-            if (blockedDanmakus.contains(danmaku) && !danmaku.isOutside()) {
+            if (blockedDanmakus.contains(danmaku) && !danmaku.isRenderOutside()) {
                 return true
             }
             if (passedDanmakus.contains(danmaku)) {

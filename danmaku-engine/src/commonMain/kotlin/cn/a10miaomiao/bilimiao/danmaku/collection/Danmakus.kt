@@ -18,8 +18,6 @@ class Danmakus : IDanmakus {
     private var subItems: Danmakus? = null
     private var startItem: BaseDanmaku? = null
     private var endItem: BaseDanmaku? = null
-    private var startSubItem: BaseDanmaku? = null
-    private var endSubItem: BaseDanmaku? = null
 
     private val mSize = AtomicInteger(0)
     private var mSortType: Int = IDanmakus.ST_BY_TIME
@@ -93,7 +91,10 @@ class Danmakus : IDanmakus {
     }
 
     override fun removeItem(item: BaseDanmaku): Boolean {
-        if (item.isOutside()) {
+        // 必须用弹幕时钟轴判断：这里的集合是按 getTop() 排序的 TreeSet，
+        // 一旦错误地把还在飞行的弹幕标记为不可见，重新 layout 会让它的 y 变化，
+        // TreeSet 的内部结构随之损坏，之后遍历顺序错乱、轨道分配全乱（弹幕上下跳行）
+        if (item.isRenderOutside()) {
             item.setVisibility(false)
         }
         synchronized(mLockObject) {
@@ -103,31 +104,6 @@ class Danmakus : IDanmakus {
             }
         }
         return false
-    }
-
-    private fun subset(startTime: Long, endTime: Long): Collection<BaseDanmaku>? {
-        if (mSortType == IDanmakus.ST_BY_LIST || items == null || items!!.isEmpty()) {
-            return null
-        }
-        if (subItems == null) {
-            subItems = Danmakus(mDuplicateMergingEnabled)
-        }
-        if (startSubItem == null) {
-            startSubItem = createItem("start")
-        }
-        if (endSubItem == null) {
-            endSubItem = createItem("end")
-        }
-        startSubItem!!.setTime(startTime)
-        endSubItem!!.setTime(endTime)
-        @Suppress("UNCHECKED_CAST")
-        return (items as TreeSet<BaseDanmaku>).subSet(startSubItem!!, endSubItem!!)
-    }
-
-    override fun subnew(startTime: Long, endTime: Long): IDanmakus? {
-        val subset = subset(startTime, endTime) ?: return null
-        if (subset.isEmpty()) return null
-        return Danmakus(LinkedList(subset))
     }
 
     override fun sub(startTime: Long, endTime: Long): IDanmakus? {
@@ -150,8 +126,8 @@ class Danmakus : IDanmakus {
 
         val currentSubItems = subItems
         if (currentSubItems != null) {
-            val dtime = startTime - startItem!!.getActualTime()
-            if (dtime >= 0 && endTime <= endItem!!.getActualTime()) {
+            val dtime = startTime - startItem!!.getTime()
+            if (dtime >= 0 && endTime <= endItem!!.getTime()) {
                 return currentSubItems
             }
         }
