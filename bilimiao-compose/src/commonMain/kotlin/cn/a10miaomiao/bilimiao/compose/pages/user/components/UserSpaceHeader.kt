@@ -47,6 +47,7 @@ import androidx.compose.ui.window.DialogProperties
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.image.previewer.ImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
+import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.localImagePreviewerController
 import cn.a10miaomiao.bilimiao.compose.components.image.viewer.ModelProcessor
 import cn.a10miaomiao.bilimiao.compose.components.user.UserLevelIcon
@@ -97,7 +98,7 @@ private fun UserFaceImage(
             itemState = itemState,
             transformState = previewerState,
         ) {
-            AsyncImage(
+            MiaoAsyncImage(
                 modifier = Modifier.fillMaxSize()
                     .clip(CircleShape),
                 model = UrlUtil.autoHttps(face) + "@200w_200h",

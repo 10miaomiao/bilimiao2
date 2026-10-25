@@ -74,6 +74,8 @@ kotlin {
 
                 implementation(libs.accompanist.drawablepainter)
                 implementation(libs.qrose)
+                // GIF 动图解码（coil-gif 仅支持 Android）
+                implementation(libs.coil.gif)
 
                 implementation(libs.kodein.di)
                 implementation(libs.kodein.di.compose)

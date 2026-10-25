@@ -129,6 +129,7 @@ geetest-sensebot = { group = "com.geetest.sensebot", name = "sensebot", version 
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+coil-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil" }
 qrose = { group = "io.github.alexzhirkevich", name = "qrose", version.ref = "qrose" }
 compose-preference = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "composePreference" }
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }

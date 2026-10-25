@@ -16,9 +16,9 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import coil3.compose.AsyncImage
 
 @Stable
 sealed class AnnotatedTextNode {
@@ -53,7 +53,7 @@ fun inlineAnnotatedContent(
                 placeholderVerticalAlign = inlineVerticalAlign,
             ),
             children = {
-                AsyncImage(
+                MiaoAsyncImage(
                     model = UrlUtil.autoHttps(node.url),
                     contentDescription = null,
                 )

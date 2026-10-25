@@ -33,13 +33,13 @@ import bilimiao.bilimiao_compose.generated.resources.Res
 import bilimiao.bilimiao_compose.generated.resources.top_bg1
 import bilimiao.bilimiao_compose.generated.resources.ic_message
 import bilimiao.bilimiao_compose.generated.resources.bili_akari_img
+import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import cn.a10miaomiao.bilimiao.compose.pages.message.MessagePage
 import com.a10miaomiao.bilimiao.comm.entity.user.UserInfo
 import com.a10miaomiao.bilimiao.comm.store.MessageStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
-import coil3.compose.AsyncImage
 import org.kodein.di.compose.rememberInstance
 
 
@@ -115,7 +115,7 @@ fun StartUserCard(
                             contentDescription = "login"
                         )
                     } else {
-                        AsyncImage(
+                        MiaoAsyncImage(
                             modifier = Modifier
                                 .size(userRowHeight)
                                 .clip(CircleShape),

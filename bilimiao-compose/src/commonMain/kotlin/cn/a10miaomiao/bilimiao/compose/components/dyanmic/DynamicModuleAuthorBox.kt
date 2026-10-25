@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
+import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import cn.a10miaomiao.bilimiao.compose.pages.user.UserSpacePage
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import coil3.compose.AsyncImage
 
 /**
  * 动态作者
@@ -64,7 +64,7 @@ fun DynamicModuleAuthorBox(
             .padding(10.dp)
 
     ) {
-        AsyncImage(
+        MiaoAsyncImage(
             model = UrlUtil.autoHttps(face) + "@200w_200h",
             contentDescription = null,
             modifier = Modifier

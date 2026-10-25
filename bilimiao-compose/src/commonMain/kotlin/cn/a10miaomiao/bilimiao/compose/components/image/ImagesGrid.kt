@@ -27,7 +27,6 @@ import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.VerticalDra
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberPreviewerState
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberTransformItemState
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import coil3.compose.AsyncImage
 import kotlin.math.min
 
 @Composable
@@ -69,7 +68,7 @@ private fun ImagesGridItem(
             itemState = itemState,
             transformState = previewerState,
         ) {
-            AsyncImage(
+            MiaoAsyncImage(
                 modifier = Modifier.fillMaxSize(),
                 contentDescription = null,
                 model = if (previewerController.isImageLoaded(model.originalUrl)) {

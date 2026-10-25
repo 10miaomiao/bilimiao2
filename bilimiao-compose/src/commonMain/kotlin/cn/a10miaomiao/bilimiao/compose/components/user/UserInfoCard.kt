@@ -22,9 +22,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bilimiao.bilimiao_compose.generated.resources.Res
 import bilimiao.bilimiao_compose.generated.resources.bili_akari_img
+import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -45,7 +45,7 @@ internal fun UserInfoCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AsyncImage(
+            MiaoAsyncImage(
                 model = UrlUtil.autoHttps(face) + "@200w_200h",
                 placeholder = painterResource(Res.drawable.bili_akari_img),
                 contentDescription = null,

@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.user.UserEmoteInfo
 import com.a10miaomiao.bilimiao.comm.entity.user.UserEmotePackageInfo
@@ -37,7 +38,6 @@ import com.a10miaomiao.bilimiao.comm.entity.user.UserEmotePanelInfo
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
 import com.a10miaomiao.bilimiao.comm.network.MiaoHttp.Companion.json
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
-import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -109,7 +109,7 @@ fun EmojiGridBox(
                                 }
                             },
                             leadingIcon = {
-                                AsyncImage(
+                                MiaoAsyncImage(
                                     modifier = Modifier.size(24.dp),
                                     model = UrlUtil.autoHttps(item.url),
                                     contentDescription = null,
@@ -224,7 +224,7 @@ private fun EmojiGrid(
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            AsyncImage(
+                            MiaoAsyncImage(
                                 modifier = Modifier.size(48.dp),
                                 model = UrlUtil.autoHttps(item.url),
                                 contentDescription = null,

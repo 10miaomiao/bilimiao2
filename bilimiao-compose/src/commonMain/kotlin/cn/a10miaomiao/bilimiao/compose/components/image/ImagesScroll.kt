@@ -27,7 +27,6 @@ import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.TransformIt
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.VerticalDragType
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberPreviewerState
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.rememberTransformItemState
-import coil3.compose.AsyncImage
 import kotlin.math.min
 
 @Composable
@@ -68,7 +67,7 @@ private fun ImagesScrollItem(
             itemState = itemState,
             transformState = previewerState,
         ) {
-            AsyncImage(
+            MiaoAsyncImage(
                 modifier = Modifier.fillMaxSize(),
                 contentDescription = null,
                 model = model.previewUrl,

@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.copyImageToClipboard
@@ -52,8 +50,6 @@ import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerS
 import cn.a10miaomiao.bilimiao.compose.components.zoomable.previewer.TransformLayerScope
 import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import cn.a10miaomiao.bilimiao.compose.platform.PlatformContext
-import coil3.compose.SubcomposeAsyncImage
-import coil3.compose.AsyncImagePainter
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -142,21 +138,11 @@ fun MyImagePreviewer(
         state = imagePreviewerState.previewerState,
         imageLoader = { page ->
             val model = imagePreviewerState.imageModels[page]
-            val imageUrl = model.originalUrl
-            val painterState = remember { mutableStateOf<Painter?>(null) }
-            SubcomposeAsyncImage(
-                model = imageUrl,
-                contentDescription = null,
-            ) {
-                // Coil3 的 painter.state 是 StateFlow，需要收集后再判断
-                val state by painter.state.collectAsState()
-                if (state is AsyncImagePainter.State.Success) {
-                    painterState.value = painter
-                    imagePreviewerState.onImageLoaded(page)
-                }
+            val painter = rememberMiaoImagePainter(model.originalUrl) {
+                imagePreviewerState.onImageLoaded(page)
             }
             return@ImagePreviewer Pair(
-                painterState.value,
+                painter,
                 Size(model.width, model.height)
             )
         },

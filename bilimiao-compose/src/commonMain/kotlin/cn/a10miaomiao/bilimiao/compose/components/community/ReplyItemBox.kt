@@ -42,12 +42,12 @@ import cn.a10miaomiao.bilimiao.compose.common.foundation.AnnotatedTextNode
 import cn.a10miaomiao.bilimiao.compose.common.foundation.ScaleIndication
 import cn.a10miaomiao.bilimiao.compose.common.foundation.inlineAnnotatedContent
 import cn.a10miaomiao.bilimiao.compose.components.image.ImagesGrid
+import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.PreviewImageModel
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
-import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.max
 import kotlin.math.min
@@ -264,7 +264,7 @@ fun ReplyItemBox(
             .padding(10.dp)
             .then(modifier)
     ) {
-        AsyncImage(
+        MiaoAsyncImage(
             model = UrlUtil.autoHttps(avatar) + "@200w_200h",
             placeholder = painterResource(Res.drawable.bili_akari_img),
             contentDescription = null,
