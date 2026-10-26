@@ -1,10 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.components.appbar
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -30,25 +24,29 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Tune
-import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
+import kotlinx.coroutines.launch
 
 /**
  * AppBar 组件
  * 支持竖屏和横屏两种布局
+ *
+ * 竖屏布局为「标题条 + 菜单行」的底栏，页面滚动时按 [AppBarState.collapseProgress] 整体下滑，
+ * 收起后只保留标题条（参照老项目 bbmiao 的 quick-return 行为）。
  *
  * @param title 标题
  * @param canBack 是否显示返回按钮
@@ -75,7 +73,6 @@ fun AppBar(
     menus: List<MenuItemData> = emptyList(),
     isNavigationMenu: Boolean = false,
     checkedKey: Int? = null,
-    menuExpanded: Boolean = true,
     appBarState: AppBarState,
     onBackClick: () -> Unit = {},
     onMenuClick: () -> Unit = {},
@@ -87,46 +84,63 @@ fun AppBar(
     val safePadding = WindowInsets.safeDrawing.only(
         WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
     ).asPaddingValues()
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f),
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        modifier = modifier.fillMaxWidth()
+    val collapseRangePx = with(LocalDensity.current) { AppBarConfig.MenuHeight.toPx() }
+    val scope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+    val surfaceColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f)
+
+    // 整条 Surface 下滑一个菜单行高度：菜单行滑出可视区，标题条停在底部安全区上方，
+    // 上方腾出的空间露出下面的内容；滑出窗口底部的部分靠 clipToBounds 裁掉。
+    // 收缩进度在绘制阶段读取，滚动过程中不触发重组
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clipToBounds(),
     ) {
-        Column(
-            modifier = Modifier.padding(safePadding)
+        Surface(
+            color = surfaceColor,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    translationY = collapseRangePx * appBarState.collapseProgress
+                },
         ) {
-            // 标题区域
-            AppBarTitle(
-                title = title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(AppBarConfig.TitleHeight)
-            )
+            Column(
+                modifier = Modifier.padding(safePadding)
+            ) {
+                // 标题区域（收起后标题条变成唯一的可点击入口，点击重新展开菜单行）
+                AppBarTitle(
+                    title = title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(AppBarConfig.TitleHeight)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null,
+                        ) {
+                            // 展开态下是空操作，收起态下动画展开
+                            scope.launch { appBarState.expandCollapsedAppBar() }
+                        }
+                )
 
-            // 菜单区域
-            AppBarMenuRow(
-                canBack = canBack,
-                showPointer = showPointer,
-                pointerOrientation = pointerOrientation,
-                showExchange = showExchange,
-                menus = menus,
-                isNavigationMenu = isNavigationMenu,
-                checkedKey = checkedKey,
-                menuExpanded = menuExpanded,
-                appBarState = appBarState,
-                onBackClick = onBackClick,
-                onMenuClick = onMenuClick,
-                onMenuItemClick = onMenuItemClick,
-                onPointerClick = onPointerClick,
-                onExchangeClick = onExchangeClick,
-            )
-
-            //        // 分割线
-            //        HorizontalDivider(
-            //            modifier = Modifier.fillMaxWidth(),
-            //            thickness = AppBarConfig.DividerHeight,
-            //            color = MaterialTheme.colorScheme.outlineVariant,
-            //        )
+                // 菜单区域
+                AppBarMenuRow(
+                    canBack = canBack,
+                    showPointer = showPointer,
+                    pointerOrientation = pointerOrientation,
+                    showExchange = showExchange,
+                    menus = menus,
+                    isNavigationMenu = isNavigationMenu,
+                    checkedKey = checkedKey,
+                    appBarState = appBarState,
+                    onBackClick = onBackClick,
+                    onMenuClick = onMenuClick,
+                    onMenuItemClick = onMenuItemClick,
+                    onPointerClick = onPointerClick,
+                    onExchangeClick = onExchangeClick,
+                )
+            }
         }
     }
 }
@@ -158,6 +172,8 @@ private fun AppBarTitle(
 
 /**
  * AppBar 菜单行
+ *
+ * 透明度随收缩进度在绘制阶段淡出，滚动时不参与重组
  */
 @Composable
 private fun AppBarMenuRow(
@@ -168,7 +184,6 @@ private fun AppBarMenuRow(
     menus: List<MenuItemData>,
     isNavigationMenu: Boolean,
     checkedKey: Int?,
-    menuExpanded: Boolean,
     appBarState: AppBarState,
     onBackClick: () -> Unit,
     onMenuClick: () -> Unit,
@@ -180,7 +195,8 @@ private fun AppBarMenuRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(AppBarConfig.MenuHeight)
-            .padding(start = AppBarConfig.NavigationPadding),
+            .padding(start = AppBarConfig.NavigationPadding)
+            .graphicsLayer { alpha = 1f - appBarState.collapseProgress },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NavigationIcon(
@@ -205,39 +221,32 @@ private fun AppBarMenuRow(
             )
         }
 
-        AnimatedVisibility(
-            visible = menuExpanded,
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut(),
-            modifier = Modifier.weight(1f, fill = false),
-        ) {
-            if (isNavigationMenu) {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    items(
-                        items = menus,
-                        key = { it.key },
-                    ) { menuItem ->
-                        AppBarNavigationItem(
-                            data = menuItem,
-                            checked = checkedKey == menuItem.key,
-                            onClick = onMenuItemClick,
-                            modifier = Modifier.animateItem(),
-                        )
-                    }
+        if (isNavigationMenu) {
+            LazyRow(
+                modifier = Modifier
+                    .weight(1f),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                items(
+                    items = menus,
+                    key = { it.key },
+                ) { menuItem ->
+                    AppBarNavigationItem(
+                        data = menuItem,
+                        checked = checkedKey == menuItem.key,
+                        onClick = onMenuItemClick,
+                        modifier = Modifier.animateItem(),
+                    )
                 }
-            } else {
-                VerticalAppBarMenus(
-                    menus = menus,
-                    isNavigationMenu = isNavigationMenu,
-                    checkedKey = checkedKey,
-                    appBarState = appBarState,
-                    onMenuItemClick = onMenuItemClick,
-                )
             }
+        } else {
+            VerticalAppBarMenus(
+                menus = menus,
+                isNavigationMenu = isNavigationMenu,
+                checkedKey = checkedKey,
+                appBarState = appBarState,
+                onMenuItemClick = onMenuItemClick,
+            )
         }
     }
 }

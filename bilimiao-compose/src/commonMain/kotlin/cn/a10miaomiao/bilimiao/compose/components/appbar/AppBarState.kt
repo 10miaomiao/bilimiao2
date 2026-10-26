@@ -1,11 +1,15 @@
 package cn.a10miaomiao.bilimiao.compose.components.appbar
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,13 +69,15 @@ class AppBarState {
     internal var _onPointerClick: (() -> Unit)? = null
     internal var _onExchangeClick: (() -> Unit)? = null
 
-    // 底栏是否显示（用于竖屏模式）
-    var barVisible by mutableStateOf(true)
+    // 底栏收缩进度：0 = 完全展开，1 = 完全收起（菜单行滑出，仅保留标题条）
+    var collapseProgress by mutableFloatStateOf(0f)
         internal set
 
-    // 菜单是否展开（用于竖屏模式）
-    var menuExpanded by mutableStateOf(true)
-        internal set
+    val isCollapsed: Boolean
+        get() = collapseProgress >= 1f
+
+    // 吸附动画版本号：滚动等外部写入会自增，用于打断进行中的吸附动画
+    private var collapseAnimationToken = 0
 
     var activeRootMenuPath by mutableStateOf<String?>(null)
         private set
@@ -106,22 +112,80 @@ class AppBarState {
         _onExchangeClick = listener
     }
 
-    // 显示/隐藏底栏
-    fun showBar() {
-        barVisible = true
+    /**
+     * 由页面滚动驱动收缩，参照老项目的 quick-return：内容向上滚动即收起，向下滚动即展开。
+     *
+     * @param scrollDeltaPx 内容竖向滚动增量，正数表示内容向上滚动（AppBar 收起）
+     * @param rangePx 从完全展开到完全收起的位移量（px），通常是菜单行高度
+     */
+    internal fun scrollCollapse(scrollDeltaPx: Float, rangePx: Float) {
+        if (rangePx <= 0f || scrollDeltaPx == 0f) {
+            return
+        }
+        val next = (collapseProgress + scrollDeltaPx / rangePx).coerceIn(0f, 1f)
+        if (next == collapseProgress) {
+            return
+        }
+        // 手指继续滑动时打断进行中的吸附动画
+        collapseAnimationToken++
+        collapseProgress = next
+        if (scrollDeltaPx > 0f) {
+            // 收起过程中菜单弹层会脱离锚点，直接关掉
+            closeRootMenu()
+        }
     }
 
-    fun hideBar() {
-        barVisible = false
+    /**
+     * 滚动（含惯性）结束后把收缩进度吸附到最近的一端。
+     *
+     * @param velocityY 剩余滚动速度（px/s），正数表示内容继续向下滚动（展开）
+     * @param rangePx 从完全展开到完全收起的位移量（px）
+     */
+    internal suspend fun settleCollapse(velocityY: Float, rangePx: Float) {
+        if (rangePx <= 0f) {
+            return
+        }
+        val target = when {
+            velocityY <= -CollapseFlingVelocity -> 1f
+            velocityY >= CollapseFlingVelocity -> 0f
+            collapseProgress >= 0.5f -> 1f
+            else -> 0f
+        }
+        animateCollapseTo(target)
     }
 
-    // 显示/隐藏菜单
-    fun showMenu() {
-        menuExpanded = true
+    /** 立即展开（切页、横竖屏切换等场景，不做动画） */
+    fun expandAppBar() {
+        collapseAnimationToken++
+        collapseProgress = 0f
     }
 
-    fun hideMenu() {
-        menuExpanded = false
+    /** 动画展开（点击收起后的标题条时触发） */
+    internal suspend fun expandCollapsedAppBar() {
+        animateCollapseTo(0f)
+    }
+
+    private suspend fun animateCollapseTo(target: Float) {
+        if (collapseProgress == target) {
+            return
+        }
+        val token = ++collapseAnimationToken
+        animate(
+            initialValue = collapseProgress,
+            targetValue = target,
+            animationSpec = tween(
+                durationMillis = if (target > collapseProgress) {
+                    CollapseAnimationDuration
+                } else {
+                    ExpandAnimationDuration
+                },
+                easing = FastOutSlowInEasing,
+            ),
+        ) { value, _ ->
+            if (token == collapseAnimationToken) {
+                collapseProgress = value
+            }
+        }
     }
 
     fun isRootMenuActive(path: List<Int>): Boolean {
@@ -224,8 +288,7 @@ class AppBarState {
         isNavigationMenu = false
         checkedKey = null
         orientation = AppBarOrientation.Vertical
-        barVisible = true
-        menuExpanded = true
+        collapseProgress = 0f
         clearExpandedMenus()
     }
 
@@ -244,6 +307,15 @@ class AppBarState {
         }
     }
 }
+
+/** 触发吸附的剩余滚动速度阈值（px/s） */
+private const val CollapseFlingVelocity = 600f
+
+/** 收起动画时长（ms） */
+private const val CollapseAnimationDuration = 180
+
+/** 展开动画时长（ms） */
+private const val ExpandAnimationDuration = 220
 
 private fun List<Int>.toMenuPathKey(): String {
     return joinToString(separator = "/")

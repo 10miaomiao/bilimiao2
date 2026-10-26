@@ -96,8 +96,7 @@ private fun Density.calculateComposeScaffoldGeometry(
         appBarState.orientation == AppBarOrientation.Horizontal
     val hasVerticalAppBar = !isPictureInPicture &&
         appBarState?.visible == true &&
-        appBarState.orientation == AppBarOrientation.Vertical &&
-        appBarState.barVisible
+        appBarState.orientation == AppBarOrientation.Vertical
 
     val horizontalAppBarWidth = if (hasHorizontalAppBar) {
         AppBarConfig.MenuWidth + AppBarConfig.DividerHeight

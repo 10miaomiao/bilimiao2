@@ -1,14 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -53,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.layout.onSizeChanged
@@ -60,6 +56,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
@@ -73,6 +70,7 @@ import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBar
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarConfig
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarHorizontal
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
@@ -140,49 +138,56 @@ fun ComposeScaffold(
         systemBarsController.setLightStatusBar(lightIcons)
     }
 
-    val appBarNestedScrollConnection = remember(appBarState, orientation) {
+    val density = LocalDensity.current
+    val appBarNestedScrollConnection = remember(appBarState, density, orientation) {
         if (appBarState == null) {
             null
         } else {
+            val collapseRangePx = with(density) { AppBarConfig.MenuHeight.toPx() }
             object : NestedScrollConnection {
+                // 横屏 AppBar 是侧边栏，不参与滚动收缩
+                private val enabled: Boolean
+                    get() = appBarState.visible &&
+                        appBarState.orientation == AppBarOrientation.Vertical
+
                 override fun onPostScroll(
                     consumed: androidx.compose.ui.geometry.Offset,
                     available: androidx.compose.ui.geometry.Offset,
                     source: NestedScrollSource,
                 ): androidx.compose.ui.geometry.Offset {
-                    if (appBarState.orientation != AppBarOrientation.Vertical) {
-                        appBarState.showBar()
-                        appBarState.showMenu()
+                    if (!enabled) {
                         return androidx.compose.ui.geometry.Offset.Zero
                     }
-                    if (source != NestedScrollSource.UserInput) {
+                    // consumed、available 之和即本次用户滑动位移：内容向上滑（y < 0）收起 AppBar。
+                    // 这里不消费滚动量，列表照常滚动，AppBar 只是跟随位移联动
+                    val scrollDelta = consumed.y + available.y
+                    if (scrollDelta == 0f) {
                         return androidx.compose.ui.geometry.Offset.Zero
                     }
-                    if (abs(consumed.y) < 0.5f) {
-                        return androidx.compose.ui.geometry.Offset.Zero
-                    }
-                    if (consumed.y < 0) {
-                        appBarState.hideMenu()
-                        appBarState.hideBar()
-                    } else if (consumed.y > 0) {
-                        appBarState.showBar()
-                        appBarState.showMenu()
-                    }
+                    appBarState.scrollCollapse(-scrollDelta, collapseRangePx)
                     return androidx.compose.ui.geometry.Offset.Zero
+                }
+
+                override suspend fun onPostFling(
+                    consumed: Velocity,
+                    available: Velocity,
+                ): Velocity {
+                    if (enabled) {
+                        // 惯性结束后按速度/过半阈值吸附到展开或收起
+                        appBarState.settleCollapse(available.y, collapseRangePx)
+                    }
+                    return Velocity.Zero
                 }
             }
         }
     }
 
     LaunchedEffect(appBarState?.orientation) {
-        if (appBarState?.orientation == AppBarOrientation.Horizontal) {
-            appBarState.showBar()
-            appBarState.showMenu()
-        }
+        // 切到横屏或返回竖屏时恢复展开状态（竖屏收缩只在滚动中产生）
+        appBarState?.expandAppBar()
     }
 
     val rawWindowInsets = WindowInsets.safeDrawing.toContentInsets()
-    val density = LocalDensity.current
     val densityFloat = density.density
     val playerLayoutState = remember(
         showPlayer,
@@ -351,6 +356,13 @@ fun ComposeScaffold(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
+                                .then(
+                                    if (appBarNestedScrollConnection != null) {
+                                        Modifier.nestedScroll(appBarNestedScrollConnection)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                                 .background(MaterialTheme.colorScheme.background)
                         ) {
                             content()
@@ -360,32 +372,25 @@ fun ComposeScaffold(
 
                 val verticalAppBarPlaceable = if (layoutResult.hasVerticalAppBar && appBarState != null) {
                     subcompose("appBarVertical") {
-                        AnimatedVisibility(
-                            visible = appBarState.barVisible,
-                            enter = slideInVertically { it } + fadeIn(),
-                            exit = slideOutVertically { it } + fadeOut(),
-                        ) {
-                            AppBar(
-                                title = appBarState.title,
-                                canBack = appBarState.canBack,
-                                showPointer = appBarState.showPointer,
-                                pointerOrientation = appBarState.pointerOrientation,
-                                showExchange = appBarState.showExchange,
-                                menus = appBarState.menus,
-                                isNavigationMenu = appBarState.isNavigationMenu,
-                                checkedKey = appBarState.checkedKey,
-                                menuExpanded = appBarState.menuExpanded,
-                                appBarState = appBarState,
-                                onBackClick = { appBarState._onBackClick?.invoke() },
-                                onMenuClick = { appBarState._onMenuClick?.invoke() },
-                                onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
-                                onPointerClick = { appBarState._onPointerClick?.invoke() },
-                                onExchangeClick = { appBarState._onExchangeClick?.invoke() },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .then(appBarDrawerGestureModifier),
-                            )
-                        }
+                        AppBar(
+                            title = appBarState.title,
+                            canBack = appBarState.canBack,
+                            showPointer = appBarState.showPointer,
+                            pointerOrientation = appBarState.pointerOrientation,
+                            showExchange = appBarState.showExchange,
+                            menus = appBarState.menus,
+                            isNavigationMenu = appBarState.isNavigationMenu,
+                            checkedKey = appBarState.checkedKey,
+                            appBarState = appBarState,
+                            onBackClick = { appBarState._onBackClick?.invoke() },
+                            onMenuClick = { appBarState._onMenuClick?.invoke() },
+                            onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
+                            onPointerClick = { appBarState._onPointerClick?.invoke() },
+                            onExchangeClick = { appBarState._onExchangeClick?.invoke() },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(appBarDrawerGestureModifier),
+                        )
                     }.single().measure(boundsConstraints(layoutResult.appBarVerticalBounds!!))
                 } else {
                     null

@@ -226,8 +226,7 @@ fun MainComposeHost(
             cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarOrientation.Vertical
         }
         appBarState.syncExpandedMenusWith(menus)
-        appBarState.showBar()
-        appBarState.showMenu()
+        appBarState.expandAppBar()
         val searchConfig = pageConfig.search
         startViewState.setPageSearchMethod(
             if (searchConfig?.name.isNullOrBlank()) {
