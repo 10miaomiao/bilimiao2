@@ -59,6 +59,8 @@ import cn.a10miaomiao.bilimiao.compose.common.foundation.annotatedText
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
 import cn.a10miaomiao.bilimiao.compose.common.mypage.rememberMyMenu
+import cn.a10miaomiao.bilimiao.compose.common.platform.Platform
+import cn.a10miaomiao.bilimiao.compose.common.platform.platformInfo
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerAnchorBox
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoDetailViewModel
@@ -133,9 +135,12 @@ fun VideoDetailContent(
                             key = 5
                             title = "复制BV号"
                         }
-                        myItem {
-                            key = 6
-                            title = "保存封面"
+                        // 封面查看页（CoverActivity）只有安卓端实现，桌面端不显示该入口
+                        if (platformInfo.platform == Platform.ANDROID) {
+                            myItem {
+                                key = 6
+                                title = "查看封面"
+                            }
                         }
                     }
                 }

@@ -123,6 +123,7 @@ class VideoDetailPage(
             viewModel.openUrl = { platformContext.openUrl(it) }
             viewModel.copyToClipboard = { platformContext.copyToClipboard(it) }
             viewModel.shareText = { platformContext.shareText(it) }
+            viewModel.openCoverImage = { platformContext.openCoverImage(it) }
         }
         val windowInsets = localContentInsets()
 
