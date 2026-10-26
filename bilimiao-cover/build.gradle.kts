@@ -64,6 +64,9 @@ dependencies {
 
     implementation(project(":bilimiao-comm"))
 
+    // 自己实例化 AppStore 读取主题设置（AppStore 需要 DI 容器）
+    implementation(libs.kodein.di)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
