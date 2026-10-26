@@ -76,6 +76,7 @@ import cn.a10miaomiao.bilimiao.compose.common.platform.FileStorageAndroid
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManager
 import cn.a10miaomiao.bilimiao.compose.common.download.DownloadManagerAndroid
 import cn.a10miaomiao.bilimiao.compose.platform.AndroidPlatformContext as ComposePlatformContext
+import cn.a10miaomiao.bilimiao.cover.CoverActivity
 import com.a10miaomiao.bilimiao.activity.DensitySettingLauncherAndroid
 import com.a10miaomiao.bilimiao.config.config
 import com.a10miaomiao.bilimiao.service.PlaybackService
@@ -195,7 +196,9 @@ class MainActivity : ComponentActivity(), DIAware {
      * 以本 Activity 作为窗口宿主：屏幕方向、屏幕常亮等窗口能力直接作用于当前窗口，
      * 随 Activity 重建换新实例；与 [basePlayerDelegate] 注入的是同一个实例。
      */
-    private val composePlatformContext by lazy { ComposePlatformContext(this) }
+    private val composePlatformContext by lazy {
+        ComposePlatformContext(this) { aid -> CoverActivity.launch(this, aid) }
+    }
 
     private val basePlayerDelegate: PlayerDelegateImpl by lazy {
         // 初始化平台 Provider（ExoPlayerMediampPlayer 需要 AndroidPlatformContext）

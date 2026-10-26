@@ -146,10 +146,6 @@ dependencies {
 
     implementation(libs.materialkolor)
 
-    implementation(libs.mojito)
-    implementation(libs.mojito.sketch)
-    implementation(libs.mojito.glide)
-
     // 播放器相关
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.media3.session)
@@ -163,8 +159,6 @@ dependencies {
 
     implementation(libs.okhttp3)
     implementation(libs.pbandk.runtime)
-    implementation(libs.glide)
-    annotationProcessor(libs.glide.compiler)
     implementation(libs.microg.safeparcel)
 
     implementation(project(":bilimiao-comm"))

@@ -82,7 +82,6 @@ kotlin {
 
                 implementation(libs.androidx.room.runtime)
                 implementation(project(":bilimiao-download"))
-                implementation(project(":bilimiao-cover"))
                 // mediamp (安卓端使用 ExoPlayer 后端)
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.exoplayer)

@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +60,7 @@ private class MyImagePreviewerController(
     val coroutineScope: CoroutineScope,
     val platformContext: PlatformContext,
     val imagePreviewerState: ImagePreviewerState,
+    val saveImageHandler: suspend (url: String, bytes: ByteArray) -> Boolean,
 ) {
     val isDownloading = mutableStateOf(false)
 
@@ -73,10 +75,12 @@ private class MyImagePreviewerController(
         isDownloading.value = true
         coroutineScope.launch(Dispatchers.Default) {
             try {
-                val fileName = getImageFileName(imageUrl)
                 val bytes = fetchOriginalImageBytes(imageUrl)
                 if (bytes != null && bytes.isNotEmpty()) {
-                    saveImageBytes(fileName, bytes)
+                    // 调用方自定义了保存逻辑就用调用方的，否则按图片文件名保存
+                    if (!saveImageHandler.invoke(imageUrl, bytes)) {
+                        saveImageBytes(getImageFileName(imageUrl), bytes)
+                    }
                 } else {
                     GlobalToaster.show("原图下载失败")
                 }
@@ -121,15 +125,23 @@ private class MyImagePreviewerController(
     }
 }
 
+/**
+ * @param onSaveImage 自定义保存逻辑，参数为图片 URL 与原始字节；返回 true 表示已处理，
+ *                    返回 false 时按图片自身文件名保存到相册
+ */
 @Composable
 fun MyImagePreviewer(
     imagePreviewerState: ImagePreviewerState,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    onSaveImage: (suspend (url: String, bytes: ByteArray) -> Boolean)? = null,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val platformContext = LocalPlatformContext.current
+    val currentOnSaveImage by rememberUpdatedState(onSaveImage)
     val controller = remember(imagePreviewerState) {
-        MyImagePreviewerController(coroutineScope, platformContext, imagePreviewerState)
+        MyImagePreviewerController(coroutineScope, platformContext, imagePreviewerState) { url, bytes ->
+            currentOnSaveImage?.invoke(url, bytes) ?: false
+        }
     }
     var showMoreMenu by remember { mutableStateOf(false) }
 

@@ -23,7 +23,6 @@ kotlinxCoroutines = "1.9.0"
 # third party
 kodeinDi = "7.12.0"
 okhttp = "4.10.0"
-glide = "4.13.2"
 pbandk = "0.16.0"
 # database
 room = "2.7.0"
@@ -35,7 +34,6 @@ microgSafeParcel = "1.7.1"
 
 # ui components
 constraintlayout = "2.1.4"
-mojito = "1.8.7"
 # compose additional
 sonner = "0.4.0"
 activityCompose = "1.13.0"
@@ -112,13 +110,8 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.2" }
 # image loading
-glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
-glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
 # ui components
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-mojito = { group = "com.github.mikaelzero.mojito", name = "mojito", version.ref = "mojito" }
-mojito-sketch = { group = "com.github.mikaelzero.mojito", name = "SketchImageViewLoader", version.ref = "mojito" }
-mojito-glide = { group = "com.github.mikaelzero.mojito", name = "GlideImageLoader", version.ref = "mojito" }
 
 # third party
 materialkolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }

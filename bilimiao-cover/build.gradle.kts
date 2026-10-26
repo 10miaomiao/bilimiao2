@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.jetbrains.kotlin.compose)
     kotlin("plugin.parcelize")
 }
 
@@ -28,6 +29,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        compose = true
+    }
     namespace = "cn.a10miaomiao.bilimiao.cover"
 }
 
@@ -44,13 +48,19 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.glide)
     implementation(libs.pbandk.runtime)
     implementation(libs.okhttp3)
 
-    implementation(libs.mojito)
-    implementation(libs.mojito.sketch)
-    implementation(libs.mojito.glide)
+    // 封面页使用 Compose 重写，复用 bilimiao-compose 的图片加载与预览器
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.runtime)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.activity.compose)
+    implementation(project(":bilimiao-compose"))
 
     implementation(project(":bilimiao-comm"))
 

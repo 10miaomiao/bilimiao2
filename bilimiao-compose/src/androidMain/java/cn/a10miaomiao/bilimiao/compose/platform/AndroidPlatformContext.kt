@@ -10,7 +10,6 @@ import android.net.Uri
 import android.provider.Settings
 import android.view.WindowManager
 import androidx.browser.customtabs.CustomTabsIntent
-import cn.a10miaomiao.bilimiao.cover.CoverActivity
 import com.a10miaomiao.bilimiao.comm.delegate.player.ScreenOrientationRequest
 
 /**
@@ -18,9 +17,12 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.ScreenOrientationRequest
  *
  * 因此画中画、窗口亮度、屏幕方向、屏幕常亮等窗口能力都直接作用于当前 Activity，
  * 且随 Activity 重建自动更新，无需全局持有 Activity。
+ *
+ * @param coverImageLauncher 封面页启动器，由 app 层注入，避免 compose 模块反向依赖 cover 模块
  */
 class AndroidPlatformContext(
     private val activity: Activity,
+    private val coverImageLauncher: (String) -> Unit = {},
 ) : PlatformContext {
     /** 画中画（应用外小窗）的安卓实现（宽高比状态与动作按钮都在其中） */
     private val pictureInPicture = AndroidPictureInPicture(activity)
@@ -51,7 +53,7 @@ class AndroidPlatformContext(
     }
 
     override fun openCoverImage(aid: String) {
-        CoverActivity.launch(activity, aid)
+        coverImageLauncher(aid)
     }
 
     override fun setKeepScreenOn(enabled: Boolean) {

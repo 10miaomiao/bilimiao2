@@ -41,7 +41,6 @@ kotlin {
                 implementation(libs.androidx.browser)
 
                 implementation(libs.kodein.di)
-                implementation(libs.glide)
                 // mediamp (安卓端使用 ExoPlayer 后端)
                 implementation(libs.mediamp.api)
                 implementation(libs.mediamp.exoplayer)

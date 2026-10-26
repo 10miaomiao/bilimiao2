@@ -4,9 +4,6 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import com.a10miaomiao.bilimiao.comm.BilimiaoCommApp
 import com.a10miaomiao.bilimiao.comm.delegate.theme.ThemeDelegate
-import net.mikaelzero.mojito.Mojito
-import net.mikaelzero.mojito.loader.glide.GlideImageLoader
-import net.mikaelzero.mojito.view.sketch.SketchImageLoadFactory
 
 
 class Bilimiao: Application() {
@@ -27,10 +24,6 @@ class Bilimiao: Application() {
         AppCrashHandler.getInstance(this)
         commApp.onCreate()
         setDefaultNightMode()
-        Mojito.initialize(
-            GlideImageLoader.with(this),
-            SketchImageLoadFactory()
-        )
     }
 
     private fun setDefaultNightMode() {
