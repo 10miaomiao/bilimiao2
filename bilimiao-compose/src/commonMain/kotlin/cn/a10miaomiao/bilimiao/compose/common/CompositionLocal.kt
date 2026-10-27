@@ -2,6 +2,7 @@ package cn.a10miaomiao.bilimiao.compose.common
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.DpSize
 import cn.a10miaomiao.bilimiao.compose.PlayerState
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
@@ -43,3 +44,14 @@ internal val LocalPlayerDisplayMode = staticCompositionLocalOf { PlayerDisplayMo
 
 @Composable
 fun localPlayerDisplayMode() = LocalPlayerDisplayMode.current
+
+/**
+ * 内容区可视尺寸（已扣除窗口 insets 与 appbar 占位），由 ComposeScaffold 提供。
+ *
+ * 供需要「不超过一屏」的内容使用：例如视频详情页封面按 16:9 铺满宽度时，
+ * 在宽而矮的窗口里算出来的高度会超出可视范围。
+ */
+internal val LocalContentVisibleSize = staticCompositionLocalOf { DpSize.Zero }
+
+@Composable
+fun localContentVisibleSize() = LocalContentVisibleSize.current

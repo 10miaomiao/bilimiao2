@@ -8,6 +8,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.substring
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.localContentVisibleSize
 import bilibili.app.archive.v1.Arc
 import bilibili.app.view.v1.ViewReply
 import cn.a10miaomiao.bilimiao.compose.assets.BilimiaoIcons
@@ -91,6 +93,8 @@ fun VideoDetailContent(
     val playerStore by rememberInstance<PlayerStore>()
     val playListStore by rememberInstance<PlayListStore>()
     val playListState by playListStore.stateFlow.collectAsState()
+    // 内容区可视尺寸：用于限制封面高度不超过一屏
+    val contentVisibleSize = localContentVisibleSize()
     // listPositionFlow 为冷流，需显式提供初值；用 remember 固定，避免每次重组重算
     val listPosition by playerStore.listPositionFlow.collectAsState(
         initial = remember { playerStore.getPlayListCurrentPosition() },
@@ -198,24 +202,34 @@ fun VideoDetailContent(
         ) {
             Column {
                 if (showCover) {
-                    PlayerAnchorBox(
-                        aid = arcData.aid.toString(),
-                    ) {
-                        VideoCoverBox(
-                            modifier = Modifier
-                                .aspectRatio(16f / 9f)
-                                .padding(10.dp),
-                            aid = arcData.aid,
-                            title = arcData.title,
-                            pic = arcData.pic,
-                            duration = arcData.duration,
-                            progress = videoHistory?.progress ?: 0L,
-                            progressTitle = videoHistory?.cid?.let { cid ->
-                                videoPages.find { it.cid == cid }?.part
-                            } ?: "",
-                            onClick = viewModel::playVideo,
-                            onLongClick = viewModel::openCoverActivity
-                        )
+                    // 封面铺满宽度，高度按 16:9 算，但不超过一屏（留 100dp 给下方标题、UP 主等信息）。
+                    // 高度被截断时不再保持 16:9，图片由 VideoCoverBox 内部的 Crop 填充
+                    val coverMaxHeight = (contentVisibleSize.height - 100.dp)
+                        .takeIf { it > 0.dp }
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val fullWidthHeight = maxWidth * 9f / 16f
+                        val coverHeight = coverMaxHeight?.let { minOf(fullWidthHeight, it) }
+                            ?: fullWidthHeight
+                        PlayerAnchorBox(
+                            aid = arcData.aid.toString(),
+                        ) {
+                            VideoCoverBox(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(coverHeight)
+                                    .padding(10.dp),
+                                aid = arcData.aid,
+                                title = arcData.title,
+                                pic = arcData.pic,
+                                duration = arcData.duration,
+                                progress = videoHistory?.progress ?: 0L,
+                                progressTitle = videoHistory?.cid?.let { cid ->
+                                    videoPages.find { it.cid == cid }?.part
+                                } ?: "",
+                                onClick = viewModel::playVideo,
+                                onLongClick = viewModel::openCoverActivity
+                            )
+                        }
                     }
                 }
                 VideoUpperBox(

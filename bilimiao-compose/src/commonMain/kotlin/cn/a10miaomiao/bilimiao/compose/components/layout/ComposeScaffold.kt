@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpRect
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
@@ -70,6 +71,7 @@ import cn.a10miaomiao.bilimiao.compose.PlayerState
 import cn.a10miaomiao.bilimiao.compose.StartViewState
 
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.LocalContentVisibleSize
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
@@ -294,6 +296,13 @@ fun ComposeScaffold(
         val viewportWidth = maxWidth
         val viewportHeight = maxHeight
         val maxHeightPx = with(density) { maxHeight.toPx() }
+        // 内容区可视尺寸：页面上「不超过一屏」的内容（如详情页封面）据此限制高度
+        val contentVisibleSize = DpSize(
+            width = (maxWidth - layoutResult.contentInsets.left - layoutResult.contentInsets.right)
+                .coerceAtLeast(0.dp),
+            height = (maxHeight - layoutResult.contentInsets.top - layoutResult.contentInsets.bottom)
+                .coerceAtLeast(0.dp),
+        )
         val leftEdgeWidthPx = with(density) { 40.dp.toPx() }
         val appBarGestureRect = layoutResult.appBarHorizontalBounds ?: layoutResult.appBarVerticalBounds
         val drawerWidth = if (maxWidth > DrawerMaxWidth.dp) DrawerMaxWidth.dp else maxWidth
@@ -393,6 +402,7 @@ fun ComposeScaffold(
                     CompositionLocalProvider(
                         LocalContentInsets provides layoutResult.contentInsets,
                         LocalPlayerState provides playerState,
+                        LocalContentVisibleSize provides contentVisibleSize,
                     ) {
                         Box(
                             modifier = Modifier
