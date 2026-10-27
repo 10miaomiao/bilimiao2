@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Tune
-import kotlinx.coroutines.launch
 
 /**
  * AppBar 组件
@@ -85,7 +83,6 @@ fun AppBar(
         WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
     ).asPaddingValues()
     val collapseRangePx = with(LocalDensity.current) { AppBarConfig.MenuHeight.toPx() }
-    val scope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
     val surfaceColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f)
 
@@ -120,7 +117,7 @@ fun AppBar(
                             indication = null,
                         ) {
                             // 展开态下是空操作，收起态下动画展开
-                            scope.launch { appBarState.expandCollapsedAppBar() }
+                            appBarState.expandAppBar()
                         }
                 )
 

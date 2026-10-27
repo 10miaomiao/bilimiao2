@@ -16,6 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.a10miaomiao.bilimiao.comm.mypage.MenuItemPropInfo
 import com.a10miaomiao.bilimiao.comm.mypage.MyPageMenu
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /**
  * AppBar 状态管理
@@ -76,8 +79,22 @@ class AppBarState {
     val isCollapsed: Boolean
         get() = collapseProgress >= 1f
 
-    // 吸附动画版本号：滚动等外部写入会自增，用于打断进行中的吸附动画
-    private var collapseAnimationToken = 0
+    // 程序化收缩/展开动画的运行环境：由 Scaffold 注入组合期 scope，
+    // 这样点击、滚动吸附等场景共用同一套动画驱动（不依赖调用方协程上下文）
+    private var animationScope: CoroutineScope? = null
+    private var collapseAnimator: Job? = null
+
+    internal fun attachAnimationScope(scope: CoroutineScope) {
+        animationScope = scope
+    }
+
+    internal fun detachAnimationScope(scope: CoroutineScope) {
+        if (animationScope === scope) {
+            collapseAnimator?.cancel()
+            collapseAnimator = null
+            animationScope = null
+        }
+    }
 
     var activeRootMenuPath by mutableStateOf<String?>(null)
         private set
@@ -126,8 +143,9 @@ class AppBarState {
         if (next == collapseProgress) {
             return
         }
-        // 手指继续滑动时打断进行中的吸附动画
-        collapseAnimationToken++
+        // 手指继续滑动时打断进行中的收缩/展开动画
+        collapseAnimator?.cancel()
+        collapseAnimator = null
         collapseProgress = next
         if (scrollDeltaPx > 0f) {
             // 收起过程中菜单弹层会脱离锚点，直接关掉
@@ -141,7 +159,7 @@ class AppBarState {
      * @param velocityY 剩余滚动速度（px/s），正数表示内容继续向下滚动（展开）
      * @param rangePx 从完全展开到完全收起的位移量（px）
      */
-    internal suspend fun settleCollapse(velocityY: Float, rangePx: Float) {
+    internal fun settleCollapse(velocityY: Float, rangePx: Float) {
         if (rangePx <= 0f) {
             return
         }
@@ -154,35 +172,35 @@ class AppBarState {
         animateCollapseTo(target)
     }
 
-    /** 立即展开（切页、横竖屏切换等场景，不做动画） */
+    /** 动画展开（切页、横竖屏切换、点击收起后的标题条等场景） */
     fun expandAppBar() {
-        collapseAnimationToken++
-        collapseProgress = 0f
-    }
-
-    /** 动画展开（点击收起后的标题条时触发） */
-    internal suspend fun expandCollapsedAppBar() {
         animateCollapseTo(0f)
     }
 
-    private suspend fun animateCollapseTo(target: Float) {
+    private fun animateCollapseTo(target: Float) {
         if (collapseProgress == target) {
             return
         }
-        val token = ++collapseAnimationToken
-        animate(
-            initialValue = collapseProgress,
-            targetValue = target,
-            animationSpec = tween(
-                durationMillis = if (target > collapseProgress) {
-                    CollapseAnimationDuration
-                } else {
-                    ExpandAnimationDuration
-                },
-                easing = FastOutSlowInEasing,
-            ),
-        ) { value, _ ->
-            if (token == collapseAnimationToken) {
+        val scope = animationScope
+        if (scope == null) {
+            // 尚未接入组合环境（例如构造阶段），直接落位
+            collapseProgress = target
+            return
+        }
+        collapseAnimator?.cancel()
+        collapseAnimator = scope.launch {
+            animate(
+                initialValue = collapseProgress,
+                targetValue = target,
+                animationSpec = tween(
+                    durationMillis = if (target > collapseProgress) {
+                        CollapseAnimationDuration
+                    } else {
+                        ExpandAnimationDuration
+                    },
+                    easing = FastOutSlowInEasing,
+                ),
+            ) { value, _ ->
                 collapseProgress = value
             }
         }
@@ -288,6 +306,8 @@ class AppBarState {
         isNavigationMenu = false
         checkedKey = null
         orientation = AppBarOrientation.Vertical
+        collapseAnimator?.cancel()
+        collapseAnimator = null
         collapseProgress = 0f
         clearExpandedMenus()
     }

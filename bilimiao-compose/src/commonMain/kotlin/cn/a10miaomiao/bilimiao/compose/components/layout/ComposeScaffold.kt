@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
@@ -159,6 +160,14 @@ fun ComposeScaffold(
     }
 
     val density = LocalDensity.current
+    // AppBar 收缩/展开动画统一由组合期 scope 驱动（滚动吸附、点击标题条、切页复位共用）
+    val appBarAnimationScope = rememberCoroutineScope()
+    DisposableEffect(appBarState, appBarAnimationScope) {
+        appBarState?.attachAnimationScope(appBarAnimationScope)
+        onDispose {
+            appBarState?.detachAnimationScope(appBarAnimationScope)
+        }
+    }
     val appBarNestedScrollConnection = remember(appBarState, density, orientation) {
         if (appBarState == null) {
             null
