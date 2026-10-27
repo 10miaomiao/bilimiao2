@@ -61,7 +61,6 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.BilibiliNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.navigation.SheetPageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.navigation.rememberBottomBarBackStack
-import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffoldPlayerLayoutState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
@@ -178,32 +177,10 @@ fun MainComposeHost(
     val bottomSheetPage by bottomSheetState.page.collectAsState()
     val playerState = startViewState.playerState
     val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
-    val showPlayer = playerState.showPlayer
     val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
     val pictureInPicture by playerState.pictureInPicture.collectAsState()
     // 画中画窗口内不响应抽屉手势：窗口已被播放器铺满，抽屉只会被画在播放器下层而不可见
     val allowDrawerOpenGesture = bottomSheetPage == null && !fullScreenPlayer && !pictureInPicture
-    val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
-    val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
-    val playerLayoutState = remember(
-        showPlayer,
-        fullScreenPlayer,
-        orientation,
-        portraitPlayerLayoutState,
-        floatingPlayerLayoutState,
-        playerState.playerVideoRatio,
-        playerState.anchorBounds,
-    ) {
-        ComposeScaffoldPlayerLayoutState(
-            showPlayer = showPlayer,
-            fullScreenPlayer = fullScreenPlayer,
-            orientation = orientation,
-            portraitState = portraitPlayerLayoutState,
-            floatingState = floatingPlayerLayoutState,
-            playerVideoRatio = playerState.playerVideoRatio,
-            anchorBounds = playerState.anchorBounds,
-        )
-    }
     LaunchedEffect(initialDeepLink, bottomBar) {
         initialDeepLink?.let {
             if (navigator.navigateByUri(it)) {

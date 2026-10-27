@@ -224,7 +224,7 @@ fun BiliVideoScaffold(
         showPlayer = playerState.showPlayer,
         fullScreenPlayer = isFullscreen,
         pictureInPicture = pictureInPicture,
-        anchorBounds = playerState.anchorBounds,
+        anchorEnabled = playerState.anchorEnabled,
         orientation = scaffoldOrientation,
     )
     // 当前生效的画中画展示（未展示播放器时本组件不会被组合，与状态源等价）

@@ -84,7 +84,28 @@ class PlayerState(
     val playerVideoRatio get() = _playerVideoRatio.value
 
     private val _anchorBounds = mutableStateOf<Rect?>(null)
-    val anchorBounds get() = _anchorBounds.value
+
+    /**
+     * 播放器落点矩形，由播放器锚点容器（PlayerAnchorBox）布局后上报。
+     *
+     * 上报与是否正在播放无关：页面一进入就上报当前位置，播放器起播时即可直接落到这里；
+     * 是否可用由 [anchorEnabled] 决定。
+     */
+    val anchorBounds: Rect? get() = _anchorBounds.value
+
+    /**
+     * 落点是否启用，由锚点容器自己判断（落点所属视频就是当前播放视频）后上报。
+     *
+     * 与 [anchorBounds] 是两个独立状态：
+     * - 显示模式判定只读这个布尔值，页面滚动导致落点位置变化时不会连带重组读取方；
+     * - 两者可以组合出「落点待定」——已启用但矩形还没上报（容器已组合、坐标要等布局结束），
+     *   宿主据此先不显示播放器，避免多闪一帧悬浮窗。
+     */
+    private val _anchorEnabled = mutableStateOf(false)
+    val anchorEnabled: Boolean get() = _anchorEnabled.value
+
+    /** 正在组合的落点容器数量（普通字段）：决定何时可以清理落点 */
+    private var anchorHostCount = 0
 
     private var floatingSaveJob: Job? = null
 
@@ -191,8 +212,51 @@ class PlayerState(
         _playerVideoRatio.value = ratio
     }
 
+    /**
+     * 上报落点是否启用（锚点容器自己判断后调用，与矩形的上报是分开的两步）。
+     *
+     * 锚点容器在组合（SideEffect）时就上报，宿主布局在测量阶段即可读到，
+     * 因此「播放与页面内容同帧出现」时也能直接按锚点布局，不必先显示一帧悬浮窗。
+     */
+    fun setAnchorEnabled(enabled: Boolean) {
+        if (_anchorEnabled.value == enabled) {
+            return
+        }
+        _anchorEnabled.value = enabled
+    }
+
+    /** 上报播放器落点矩形（锚点容器布局后调用，与是否正在播放无关） */
     fun setAnchorBounds(bounds: Rect?) {
+        if (_anchorBounds.value == bounds) {
+            return
+        }
         _anchorBounds.value = bounds
+    }
+
+    /** 登记一个落点容器（锚点容器进入组合时调用） */
+    fun attachAnchorHost() {
+        anchorHostCount++
+    }
+
+    /**
+     * 注销一个落点容器（锚点容器离开组合时调用）。
+     *
+     * 只有最后一个容器离开时才清理落点：导航转场期间新旧页面会同时组合，
+     * 旧页面退出不能把新页面刚上报的落点清掉（否则播放器会先退化成悬浮窗）。
+     */
+    fun detachAnchorHost() {
+        if (anchorHostCount > 0) {
+            anchorHostCount--
+        }
+        if (anchorHostCount > 0) {
+            return
+        }
+        if (_anchorBounds.value != null) {
+            _anchorBounds.value = null
+        }
+        if (_anchorEnabled.value) {
+            _anchorEnabled.value = false
+        }
     }
 
 }

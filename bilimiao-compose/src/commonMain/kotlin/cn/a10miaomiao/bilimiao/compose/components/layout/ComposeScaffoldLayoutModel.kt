@@ -23,9 +23,6 @@ internal data class ComposeScaffoldGeometryResult(
 
     val hasHorizontalAppBar: Boolean
         get() = appBarHorizontalBounds != null
-
-    val hasPlayer: Boolean
-        get() = playerBounds != null
 }
 
 internal data class ComposeScaffoldLayoutResult(
@@ -41,17 +38,11 @@ internal data class ComposeScaffoldLayoutResult(
     val appBarHorizontalBounds: Rect?
         get() = geometry.appBarHorizontalBounds
 
-    val playerBounds: Rect?
-        get() = geometry.playerBounds
-
     val hasVerticalAppBar: Boolean
         get() = geometry.hasVerticalAppBar
 
     val hasHorizontalAppBar: Boolean
         get() = geometry.hasHorizontalAppBar
-
-    val hasPlayer: Boolean
-        get() = geometry.hasPlayer
 }
 
 internal fun Density.calculateComposeScaffoldLayout(
@@ -60,6 +51,7 @@ internal fun Density.calculateComposeScaffoldLayout(
     rawWindowInsets: ContentInsets,
     appBarState: AppBarState?,
     playerState: ComposeScaffoldPlayerLayoutState,
+    anchorBounds: Rect? = null,
 ): ComposeScaffoldLayoutResult {
     val geometry = calculateComposeScaffoldGeometry(
         viewportWidth = viewportWidth,
@@ -67,6 +59,7 @@ internal fun Density.calculateComposeScaffoldLayout(
         rawWindowInsets = rawWindowInsets,
         appBarState = appBarState,
         playerState = playerState,
+        anchorBounds = anchorBounds,
     )
     val contentInsets = calculateComposeScaffoldContentInsets(
         rawWindowInsets = rawWindowInsets,
@@ -85,6 +78,7 @@ private fun Density.calculateComposeScaffoldGeometry(
     rawWindowInsets: ContentInsets,
     appBarState: AppBarState?,
     playerState: ComposeScaffoldPlayerLayoutState,
+    anchorBounds: Rect?,
 ): ComposeScaffoldGeometryResult {
     val viewportWidthPx = viewportWidth.roundToPx()
     val viewportHeightPx = viewportHeight.roundToPx()
@@ -108,6 +102,7 @@ private fun Density.calculateComposeScaffoldGeometry(
         viewportWidth = viewportWidth,
         viewportHeight = viewportHeight,
         playerState = playerState,
+        anchorBounds = anchorBounds,
     )
 
     val embeddedPortraitContentTopPx = if (
@@ -186,10 +181,17 @@ private fun Density.calculateComposeScaffoldContentInsets(
     )
 }
 
-private fun Density.calculatePlayerBounds(
+/**
+ * 计算播放器矩形。
+ *
+ * @param anchorBounds 播放器落点矩形。组合阶段判定显示模式时可能还不知道落点位置，
+ *   此时传 null，`AnchorOverlay` 仅用于占位（播放器实际几何在测量阶段用最新落点重算）
+ */
+internal fun Density.calculatePlayerBounds(
     viewportWidth: Dp,
     viewportHeight: Dp,
     playerState: ComposeScaffoldPlayerLayoutState,
+    anchorBounds: Rect?,
 ): Rect? {
     return when (playerState.displayMode) {
         PlayerDisplayMode.Hidden -> null
@@ -201,7 +203,7 @@ private fun Density.calculatePlayerBounds(
             right = viewportWidth.roundToPx().toFloat(),
             bottom = viewportHeight.roundToPx().toFloat(),
         )
-        PlayerDisplayMode.AnchorOverlay -> playerState.anchorBounds
+        PlayerDisplayMode.AnchorOverlay -> anchorBounds ?: Rect.Zero
         PlayerDisplayMode.EmbeddedPortrait -> {
             val maxHeightByRatio = viewportWidth.value / playerState.playerVideoRatio
             val maxHeight = min(maxHeightByRatio, viewportHeight.value / 2f).dp
