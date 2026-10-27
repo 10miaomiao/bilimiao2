@@ -51,15 +51,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
-import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.HapticFeedbackType
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
-import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
+import cn.a10miaomiao.bilimiao.compose.common.localPlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.common.rememberHapticFeedback
 import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
-import cn.a10miaomiao.bilimiao.compose.components.layout.calculatePlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.FastForwardIndicator
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoScaffold
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState
@@ -211,22 +208,15 @@ fun BiliVideoScaffold(
         screenType = PlayerScreenType.ofValue(savedScreenType ?: PlayerScreenType.Default.value)
     }
 
-    // 与 ComposeScaffold/PlayerLayer 共用 calculatePlayerDisplayMode 统一判定显示模式
     val playerState = LocalPlayerState.current
+    // 显示模式由宿主布局判定后下发（落点是否在屏幕内等条件都已在彼处算好），
+    // 这里直接沿用，避免重复判定造成两边不一致
+    val displayMode = localPlayerDisplayMode()
     // 全屏状态统一由 PlayerState 提供（数据源为 FullscreenController.isFullscreen）
     val isFullscreen by playerState.fullScreenPlayer.collectAsState()
     // 画中画（应用外小窗）状态：由平台层（Activity 的 onPictureInPictureModeChanged）注入，
     // 与 ComposeScaffold 共享同一状态源：宿主布局让出整个窗口，本组件负责小窗内的播放器展示
     val pictureInPicture by playerState.pictureInPicture.collectAsState()
-    // ComposeScaffold 中 orientation = if (isCompactWindow()) PORTRAIT else LANDSCAPE
-    val scaffoldOrientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
-    val displayMode = calculatePlayerDisplayMode(
-        showPlayer = playerState.showPlayer,
-        fullScreenPlayer = isFullscreen,
-        pictureInPicture = pictureInPicture,
-        anchorEnabled = playerState.anchorEnabled,
-        orientation = scaffoldOrientation,
-    )
     // 当前生效的画中画展示（未展示播放器时本组件不会被组合，与状态源等价）
     val inPictureInPicture = displayMode == PlayerDisplayMode.PictureInPicture
     // 画面铺满的布局条件：全屏或画中画窗口（画中画窗口内不做 16:9 限制，铺满整个小窗）

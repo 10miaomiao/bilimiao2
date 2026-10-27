@@ -52,7 +52,9 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -60,6 +62,7 @@ import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_LANDSCAPE
 import cn.a10miaomiao.bilimiao.compose.ORIENTATION_PORTRAIT
 import cn.a10miaomiao.bilimiao.compose.LocalAppDarkTheme
@@ -68,6 +71,7 @@ import cn.a10miaomiao.bilimiao.compose.StartViewState
 
 import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
+import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.common.isCompactWindow
 import cn.a10miaomiao.bilimiao.compose.common.ContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.toContentInsets
@@ -116,10 +120,15 @@ fun ComposeScaffold(
     val portraitPlayerLayoutState = playerState.portraitPlayerLayoutState
     val floatingPlayerLayoutState = playerState.floatingPlayerLayoutState
     val playerVideoRatio = playerState.playerVideoRatio
-    // 播放器落点是否启用：只读这个布尔值。落点矩形随页面滚动持续变化，
-    // 若在这里读矩形，滚动时会反复重组整个脚手架（矩形在测量阶段才读取）
+    // 播放器落点：启用位 + 矩形一并交给显示模式判定，
+    // 由判定函数结合宿主视口判断落点是否还在屏幕内（滚出屏幕后不再按锚点布局）
     val anchorEnabled = if (showPlayer) playerState.anchorEnabled else false
+    val anchorBounds = if (anchorEnabled) playerState.anchorBounds else null
     val drawerState = startViewState.drawerState
+    // 宿主布局在根坐标系中的可视矩形：内容区按其判断落点是否还在屏幕内。
+    // 不用 maxWidth/maxHeight 直接换算，是因为窗口可能有自绘边框/标题栏，
+    // 锚点容器上报的是 positionInRoot，两者必须用同一坐标系
+    var viewportRect by remember { mutableStateOf(Rect.Zero) }
 
     // 播放器显示模式（唯一判定源，与 ComposeScaffoldPlayerLayoutState/PlayerLayer 共用，
     // 见 calculatePlayerDisplayMode）
@@ -128,6 +137,8 @@ fun ComposeScaffold(
         fullScreenPlayer = fullScreenPlayer,
         pictureInPicture = pictureInPicture,
         anchorEnabled = anchorEnabled,
+        anchorBounds = anchorBounds,
+        viewport = viewportRect,
         orientation = orientation,
     )
     // 状态栏前景色统一由本组件控制，平台实现经 LocalSystemBarsController 注入；
@@ -209,6 +220,8 @@ fun ComposeScaffold(
         floatingPlayerLayoutState,
         playerVideoRatio,
         anchorEnabled,
+        anchorBounds,
+        viewportRect,
     ) {
         ComposeScaffoldPlayerLayoutState(
             showPlayer = showPlayer,
@@ -218,6 +231,8 @@ fun ComposeScaffold(
             floatingState = floatingPlayerLayoutState,
             playerVideoRatio = playerVideoRatio,
             anchorEnabled = anchorEnabled,
+            anchorBounds = anchorBounds,
+            viewport = viewportRect,
             pictureInPicture = pictureInPicture,
         )
     }
@@ -249,8 +264,23 @@ fun ComposeScaffold(
         drawerController.syncWrapperState()
     }
 
+    // 宿主布局在根坐标系中的可视矩形：内容区据此判断播放器落点是否还在屏幕内
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .onGloballyPositioned { coordinates ->
+                val position = coordinates.positionInRoot()
+                val size = coordinates.size
+                val rect = Rect(
+                    left = position.x,
+                    top = position.y,
+                    right = position.x + size.width,
+                    bottom = position.y + size.height,
+                )
+                if (viewportRect != rect) {
+                    viewportRect = rect
+                }
+            }
     ) {
         val layoutResult = with(density) {
             calculateComposeScaffoldLayout(
@@ -432,7 +462,7 @@ fun ComposeScaffold(
                 }
 
                 // 锚点容器在组合时已上报「落点是否启用」，矩形要等本帧布局结束才上报，因此：
-                // - 已启用且有矩形：直接按锚点算几何；
+                // - 已启用且有矩形：直接按锚点算几何（落点是否在屏幕内由判定函数处理）；
                 // - 已启用但矩形还没到：只有「播放器当前没显示」时才等（如详情页加载完立即自动播放），
                 //   保持不显示、下一帧直接落在锚点；播放器已经在显示（如悬浮窗）时保持原样，
                 //   等矩形到了再滑过去——否则会先把播放器销毁重建，模式切换动画就丢了；
@@ -445,10 +475,9 @@ fun ComposeScaffold(
                     !fullScreenPlayer &&
                     !pictureInPicture &&
                     orientation == ORIENTATION_LANDSCAPE
-                // 没有矩形又不在等待时不能按锚点布局（会得到空矩形），先保持原来的模式
-                val useAnchorLayout = measuredAnchorEnabled && (measuredAnchorBounds != null || anchorPending)
                 val measuredPlayerState = playerLayoutState.copy(
-                    anchorEnabled = useAnchorLayout,
+                    anchorEnabled = measuredAnchorEnabled,
+                    anchorBounds = measuredAnchorBounds,
                     showPlayer = showPlayer && !anchorPending,
                 )
                 val measuredPlayerBounds = with(density) {
@@ -783,6 +812,15 @@ internal fun PlayerLayer(
         }
     }
 
+    // 目标矩形的最新值：动画只插值进度、每帧读取这里的目标，
+    // 这样动画期间页面滚动改变了落点，动画目标也能实时跟随
+    val liveTargetRect = remember { mutableStateOf(targetRect) }
+    SideEffect {
+        if (liveTargetRect.value != targetRect) {
+            liveTargetRect.value = targetRect
+        }
+    }
+
     var currentWidth by remember { mutableStateOf(targetRect.right - targetRect.left) }
     var currentHeight by remember { mutableStateOf(targetRect.bottom - targetRect.top) }
     val scope = rememberCoroutineScope()
@@ -795,6 +833,15 @@ internal fun PlayerLayer(
     var lastDisplayMode by remember { mutableStateOf(displayMode) }
     // 滑行动画进行中：期间不做直接落位，避免把动画跳到终点
     var isAnimating by remember { mutableStateOf(false) }
+
+    // 立即落位到目标矩形（不播放动画）
+    fun applyTargetRect() {
+        val target = liveTargetRect.value
+        currentWidth = target.right - target.left
+        currentHeight = target.bottom - target.top
+        offsetX = target.left
+        offsetY = target.top
+    }
 
     fun updateFloatingState() {
         playerState.updateFloatingPlayerLayoutState(
@@ -845,72 +892,40 @@ internal fun PlayerLayer(
     }
 
     /**
-     * 将播放器矩形（左上角 + 尺寸）平滑动画到目标值。
+     * 从当前几何滑行到目标矩形。
      *
-     * 所有显示模式共用同一套几何状态（offsetX/offsetY/currentWidth/currentHeight），
-     * 因此模式切换时能实现跨位置的滑行过渡（锚点区域 → 悬浮窗、悬浮窗 → 全屏等）。
+     * 只对「动画进度」做插值，每帧重新读取最新目标：页面滚动会让落点不断移动，
+     * 动画期间目标必须实时跟随，否则动画结束时会停在启动那一刻的旧目标上（表现为卡住）。
      */
-    suspend fun animatePlayerRectTo(
-        targetLeft: Dp,
-        targetTop: Dp,
-        targetWidth: Dp,
-        targetHeight: Dp,
-    ) {
-        if (offsetX == targetLeft && offsetY == targetTop &&
-            currentWidth == targetWidth && currentHeight == targetHeight
-        ) {
+    suspend fun animatePlayerRectTo() {
+        val startLeftPx = with(density) { offsetX.toPx() }
+        val startTopPx = with(density) { offsetY.toPx() }
+        val startWidthPx = with(density) { currentWidth.toPx() }
+        val startHeightPx = with(density) { currentHeight.toPx() }
+        val startRect = DpRect(offsetX, offsetY, offsetX + currentWidth, offsetY + currentHeight)
+        if (startRect == liveTargetRect.value) {
             return
         }
-        val animationSpec = tween<Float>(
-            durationMillis = 350,
-            easing = CubicBezierEasing(0.2f, 0f, 0f, 1f),
-        )
-        coroutineScope {
-            launch {
-                animate(
-                    initialValue = with(density) { offsetX.toPx() },
-                    targetValue = with(density) { targetLeft.toPx() },
-                    animationSpec = animationSpec,
-                ) { value, _ ->
-                    offsetX = with(density) { value.toDp() }
-                }
-            }
-            launch {
-                animate(
-                    initialValue = with(density) { offsetY.toPx() },
-                    targetValue = with(density) { targetTop.toPx() },
-                    animationSpec = animationSpec,
-                ) { value, _ ->
-                    offsetY = with(density) { value.toDp() }
-                }
-            }
-            launch {
-                animate(
-                    initialValue = with(density) { currentWidth.toPx() },
-                    targetValue = with(density) { targetWidth.toPx() },
-                    animationSpec = animationSpec,
-                ) { value, _ ->
-                    currentWidth = with(density) { value.toDp() }
-                }
-            }
-            launch {
-                animate(
-                    initialValue = with(density) { currentHeight.toPx() },
-                    targetValue = with(density) { targetHeight.toPx() },
-                    animationSpec = animationSpec,
-                ) { value, _ ->
-                    currentHeight = with(density) { value.toDp() }
-                }
-            }
+        val progress = Animatable(0f)
+        progress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = 350,
+                easing = CubicBezierEasing(0.2f, 0f, 0f, 1f),
+            ),
+        ) {
+            val target = liveTargetRect.value
+            val targetLeftPx = with(density) { target.left.toPx() }
+            val targetTopPx = with(density) { target.top.toPx() }
+            val targetWidthPx = with(density) { (target.right - target.left).toPx() }
+            val targetHeightPx = with(density) { (target.bottom - target.top).toPx() }
+            offsetX = with(density) { lerp(startLeftPx, targetLeftPx, value).toDp() }
+            offsetY = with(density) { lerp(startTopPx, targetTopPx, value).toDp() }
+            currentWidth = with(density) { lerp(startWidthPx, targetWidthPx, value).toDp() }
+            currentHeight = with(density) { lerp(startHeightPx, targetHeightPx, value).toDp() }
         }
-    }
-
-    // 立即落位到目标矩形（不播放动画）
-    fun applyTargetRect() {
-        currentWidth = targetRect.right - targetRect.left
-        currentHeight = targetRect.bottom - targetRect.top
-        offsetX = targetRect.left
-        offsetY = targetRect.top
+        // 进度走完后可能仍有残差（动画期间目标又变了），补一次精确落位
+        applyTargetRect()
     }
 
     /**
@@ -975,12 +990,7 @@ internal fun PlayerLayer(
         // 模式切换：从旧模式矩形滑行到新模式目标矩形（如封面锚点 ↔ 悬浮窗、悬浮窗 ↔ 全屏）
         isAnimating = true
         try {
-            animatePlayerRectTo(
-                targetRect.left,
-                targetRect.top,
-                targetRect.right - targetRect.left,
-                targetRect.bottom - targetRect.top,
-            )
+            animatePlayerRectTo()
         } finally {
             isAnimating = false
         }
@@ -1100,7 +1110,10 @@ internal fun PlayerLayer(
             )
             .then(modifier)
     ) {
-        CompositionLocalProvider(LocalPlayerState provides playerState) {
+        CompositionLocalProvider(
+            LocalPlayerState provides playerState,
+            LocalPlayerDisplayMode provides displayMode,
+        ) {
             playerContent()
         }
     }
