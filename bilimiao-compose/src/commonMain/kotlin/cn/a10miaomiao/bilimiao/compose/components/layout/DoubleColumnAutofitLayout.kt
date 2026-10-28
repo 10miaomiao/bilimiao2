@@ -5,10 +5,8 @@ import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -76,16 +74,7 @@ fun DoubleColumnAutofitLayout(
                 }
             }
         } else {
-            val density = LocalDensity.current
-            val topContentHeightPx = remember(density) {
-                density.run {
-                    topContentHeight.roundToPx().toFloat() - chainScrollableLayoutState.minScrollPosition.roundToPx()
-                }
-            }
             val scrollableState = rememberScrollableState { 0f }
-            val scrollOffset = chainScrollableLayoutState.getHeightOffset()
-            val alpha = (1f - scrollOffset / topContentHeightPx).coerceIn(0f, 1f)
-            val offsetY = (-scrollOffset).roundToInt()
             ChainScrollableLayout(
                 modifier = modifier,
                 state = chainScrollableLayoutState,
@@ -93,8 +82,15 @@ fun DoubleColumnAutofitLayout(
                 Box(
                     modifier = Modifier
                         .height(topContentHeight)
-                        .offset { IntOffset(0, offsetY) }
-                        .alpha(alpha)
+                        // 偏移与透明度都在布局/绘制阶段读取 state，
+                        // 这样 topContentHeight 变化（如封面显示/隐藏的动画）
+                        // 以及滚动时都能立即跟随，无需等待重组
+                        .offset {
+                            IntOffset(0, (-state.getHeightOffset()).roundToInt())
+                        }
+                        .graphicsLayer {
+                            alpha = state.headerFraction
+                        }
                         .scrollable(scrollableState, Orientation.Vertical),
                 ) {
                     leftContent(
@@ -113,7 +109,7 @@ fun DoubleColumnAutofitLayout(
                         .offset {
                             IntOffset(
                                 0,
-                                state.maxPx.roundToInt() + offsetY
+                                (state.maxPx - state.getHeightOffset()).roundToInt()
                             )
                         }
                 ) {

@@ -291,7 +291,7 @@ private fun UserSpacePageDetailContent(
         modifier = Modifier.fillMaxSize(),
         state = chainScrollableLayoutState,
     ) { state ->
-        val alpha = (1f - state.getHeightOffset() / state.maxCollapsiblePx).coerceIn(0f, 1f)
+        val alpha = state.headerFraction
         Box(
             modifier = Modifier
                 .fillMaxWidth()

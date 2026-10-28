@@ -1,6 +1,11 @@
 package cn.a10miaomiao.bilimiao.compose.components.layout.chain_scrollable
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -19,36 +24,79 @@ fun rememberChainScrollableLayoutState(
     val heightOffset = rememberSaveable() {
         mutableFloatStateOf(0f)
     }
-    return remember(maxScrollPosition, minScrollPosition, density) {
-        ChainScrollableLayoutState(
-            heightOffset,
-            maxScrollPosition,
-            minScrollPosition,
-            density,
-        )
+    // 状态对象本身保持稳定，只在 density 变化时重建，
+    // 否则头部高度动画（如视频详情页封面显示/隐藏）会让整棵子树反复重建状态
+    val state = remember(density) {
+        ChainScrollableLayoutState(heightOffset, density)
     }
+    // 头部高度可能在动画中持续变化，这里同步刷新可折叠范围，
+    // 让布局立即跟随新的高度，而不是等下一次滚动才校正
+    state.updateScrollRange(maxScrollPosition, minScrollPosition)
+    return state
 }
 
 @Stable
 class ChainScrollableLayoutState(
     private val heightOffsetState: MutableState<Float>,
-    val maxScrollPosition: Dp,
-    val minScrollPosition: Dp,
     val density: Density,
 ) {
-    val maxPx = density.run { maxScrollPosition.toPx() }
-    val minPx = density.run { minScrollPosition.toPx() }
+    private val maxScrollPositionState = mutableStateOf(0.dp)
+    private val minScrollPositionState = mutableStateOf(0.dp)
+
+    /**
+     * 完全折叠时头部保留的高度（通常是状态栏高度）
+     */
+    val maxScrollPosition: Dp get() = maxScrollPositionState.value
+
+    /**
+     * 头部最少可见的高度
+     */
+    val minScrollPosition: Dp get() = minScrollPositionState.value
+
+    val maxPx: Float get() = density.run { maxScrollPosition.toPx() }
+    val minPx: Float get() = density.run { minScrollPosition.toPx() }
 
     /**
      * 可折叠的总高度（px）
      */
-    val maxCollapsiblePx: Float get() = maxPx - minPx
+    val maxCollapsiblePx: Float get() = (maxPx - minPx).coerceAtLeast(0f)
+
+    /**
+     * 头部可见比例（px 无关）
+     * 1 = 完全展开，0 = 完全折叠
+     */
+    val headerFraction: Float
+        get() {
+            val collapsible = maxCollapsiblePx
+            if (collapsible <= 0f) return 1f
+            return (1f - getHeightOffset() / collapsible).coerceIn(0f, 1f)
+        }
+
+    /**
+     * 同步可折叠范围。
+     * 头部高度变化时，需要把已有的折叠偏移量收敛到新的范围内，
+     * 否则会出现内容错位（偏移量比可折叠高度还大）。
+     */
+    fun updateScrollRange(maxScrollPosition: Dp, minScrollPosition: Dp) {
+        if (this.maxScrollPosition != maxScrollPosition) {
+            maxScrollPositionState.value = maxScrollPosition
+        }
+        if (this.minScrollPosition != minScrollPosition) {
+            minScrollPositionState.value = minScrollPosition
+        }
+        val current = heightOffsetState.value
+        val clamped = current.coerceIn(0f, maxCollapsiblePx)
+        if (clamped != current) {
+            heightOffsetState.value = clamped
+        }
+    }
 
     /**
      * 当前头部折叠偏移量（px）
      * 0 = 完全展开，maxCollapsiblePx = 完全折叠
      */
-    fun getHeightOffset(): Float = heightOffsetState.value
+    fun getHeightOffset(): Float =
+        heightOffsetState.value.coerceIn(0f, maxCollapsiblePx)
 
     fun setHeightOffset(value: Float) {
         heightOffsetState.value = value.coerceIn(0f, maxCollapsiblePx)
