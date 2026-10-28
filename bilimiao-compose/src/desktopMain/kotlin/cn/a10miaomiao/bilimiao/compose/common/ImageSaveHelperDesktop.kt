@@ -1,6 +1,5 @@
 package cn.a10miaomiao.bilimiao.compose.common
 
-import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -12,31 +11,54 @@ import java.awt.datatransfer.Transferable
 import java.awt.datatransfer.UnsupportedFlavorException
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.IOException
 import javax.imageio.ImageIO
 
-actual fun saveImageBytes(fileName: String, bytes: ByteArray): Boolean {
-    return try {
-        val userHome = System.getProperty("user.home")
-        val dir = File(userHome, "Pictures/Bilimiao")
-        if (!dir.exists()) dir.mkdirs()
-        val file = File(dir, fileName)
-        if (file.exists()) {
-            GlobalToaster.show("图片已存在")
-            return true
+actual suspend fun saveImageBytes(fileName: String, bytes: ByteArray): SaveImageResult =
+    withContext(Dispatchers.IO) {
+        try {
+            val userHome = System.getProperty("user.home")
+            val dir = File(userHome, "Pictures/Bilimiao")
+            if (!dir.exists() && !dir.mkdirs()) throw IOException("无法创建目录：${dir.absolutePath}")
+            val file = uniqueFile(dir, sanitizeFileName(fileName))
+            file.writeBytes(bytes)
+            SaveImageResult.Success(
+                fileName = file.name,
+                location = file.parent.orEmpty(),
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            SaveImageResult.Failure("保存失败：${e.message}")
         }
-        file.writeBytes(bytes)
-        GlobalToaster.show("已保存至 ${file.absolutePath}")
-        true
-    } catch (e: Exception) {
-        e.printStackTrace()
-        GlobalToaster.show("保存失败：${e.message}")
-        false
     }
-}
 
 actual fun getImageFileName(url: String): String {
-    return url.split("/").last().takeIf { it.isNotEmpty() } ?: "image.png"
+    // 去掉查询串和锚点，避免把 "?x-oss-process=..." 之类拼进文件名
+    val path = url.substringBefore('?').substringBefore('#')
+    return path.split("/").last().takeIf { it.isNotBlank() } ?: "image"
 }
+
+/** 重名时在文件名后追加序号，避免同名图片互相覆盖 */
+private fun uniqueFile(dir: File, fileName: String): File {
+    val baseName = fileName.substringBeforeLast('.', fileName)
+    val extension = fileName.substringAfterLast('.', "")
+    var file = File(dir, fileName)
+    var index = 1
+    while (file.exists()) {
+        file = File(
+            dir,
+            if (extension.isEmpty()) "$baseName ($index)" else "$baseName ($index).$extension",
+        )
+        index++
+    }
+    return file
+}
+
+/** 去掉 Windows 文件名里不允许的字符（桌面端需兼容各平台文件系统） */
+private fun sanitizeFileName(fileName: String): String =
+    fileName.replace(ILLEGAL_FILE_NAME_CHARS, "_").trim().ifBlank { "image" }
+
+private val ILLEGAL_FILE_NAME_CHARS = Regex("[\\\\/:*?\"<>|\\u0000-\\u001F]")
 
 actual suspend fun fetchOriginalImageBytes(url: String): ByteArray? {
     return withContext(Dispatchers.IO) {

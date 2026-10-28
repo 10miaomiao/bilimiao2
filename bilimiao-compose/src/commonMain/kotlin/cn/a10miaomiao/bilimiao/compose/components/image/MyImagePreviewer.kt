@@ -41,6 +41,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.SaveImageResult
 import cn.a10miaomiao.bilimiao.compose.common.copyImageToClipboard
 import cn.a10miaomiao.bilimiao.compose.common.fetchOriginalImageBytes
 import cn.a10miaomiao.bilimiao.compose.common.getImageFileName
@@ -79,7 +80,12 @@ private class MyImagePreviewerController(
                 if (bytes != null && bytes.isNotEmpty()) {
                     // 调用方自定义了保存逻辑就用调用方的，否则按图片文件名保存
                     if (!saveImageHandler.invoke(imageUrl, bytes)) {
-                        saveImageBytes(getImageFileName(imageUrl), bytes)
+                        when (val result = saveImageBytes(getImageFileName(imageUrl), bytes)) {
+                            is SaveImageResult.Success ->
+                                GlobalToaster.show("已保存至${result.location}，文件名：${result.fileName}")
+                            is SaveImageResult.Failure ->
+                                GlobalToaster.show(result.message)
+                        }
                     }
                 } else {
                     GlobalToaster.show("原图下载失败")

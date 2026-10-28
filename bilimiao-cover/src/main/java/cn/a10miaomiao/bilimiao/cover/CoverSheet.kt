@@ -64,6 +64,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.BackHandler
+import cn.a10miaomiao.bilimiao.compose.common.SaveImageResult
 import cn.a10miaomiao.bilimiao.compose.common.fetchOriginalImageBytes
 import cn.a10miaomiao.bilimiao.compose.common.saveImageBytes
 import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
@@ -134,10 +135,17 @@ internal fun CoverSheet(
         toast("图片链接已复制到剪切板")
     }
 
-    fun saveCoverBytes(bytes: ByteArray): Boolean {
-        val name = "${fileName.ifBlank { "未命名" }}.jpg"
-        val saved = saveImageBytes(name, bytes)
-        toast(if (saved) "已保存至相册，文件名：$name" else "保存失败")
+    suspend fun saveCoverBytes(bytes: ByteArray): Boolean {
+        // 封面页是独立 Activity，拿不到主界面的 Toaster，这里用系统 Toast 自己提示
+        val result = saveImageBytes("${fileName.ifBlank { "未命名" }}.jpg", bytes)
+        val (message, saved) = when (result) {
+            is SaveImageResult.Success ->
+                "已保存至${result.location}，文件名：${result.fileName}" to true
+            is SaveImageResult.Failure ->
+                result.message to false
+        }
+        // 预览器触发的保存在后台线程回调，系统 Toast 必须切回主线程弹出
+        withContext(Dispatchers.Main) { toast(message) }
         return saved
     }
 
@@ -386,10 +394,7 @@ internal fun CoverSheet(
             imagePreviewerState = previewerStateHolder,
             // 下载行为与外面的「保存封面」保持一致（文件名、保存位置、提示）
             onSaveImage = { _, bytes ->
-                // 预览器的下载在后台线程回调，保存与提示切回主线程
-                withContext(Dispatchers.Main) {
-                    saveCoverBytes(bytes)
-                }
+                saveCoverBytes(bytes)
                 true
             },
         )
