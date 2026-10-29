@@ -31,7 +31,7 @@ internal fun TimeCard(
             .padding(10.dp, 0.dp, 10.dp, 10.dp)
             .alpha(alpha),
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(
             modifier = Modifier.clickable(

@@ -38,6 +38,8 @@ class TimeSettingPage : ComposePage {
 
 }
 
+private val TimeSettingContentMaxWidth = 640.dp
+
 @Composable
 private fun TimeSettingPageContent(
     viewModel: TimeSettingViewMode,
@@ -50,34 +52,44 @@ private fun TimeSettingPageContent(
 
     val scrollState = rememberScrollState()
 
+    // 桌面端窗口可能很宽，限制内容宽度并居中，避免卡片和日历日期格被拉得过宽
+    val contentModifier = Modifier
+        .widthIn(max = TimeSettingContentMaxWidth)
+        .fillMaxWidth()
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
         Column(
-            modifier = Modifier.verticalScroll(scrollState)
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.height(windowInsets.topDp.dp))
 
-            TimeCard(
-                title = "当前时间线",
-                active = cardIndex == TimeSettingStore.TIME_TYPE_CURRENT,
-                onActiveChange = viewModel::setCurrentCardAsCurrent,
-            ) {
-                CurrentTime(viewModel)
-            }
-            TimeCard(
-                title = "按月份选择",
-                active = cardIndex == TimeSettingStore.TIME_TYPE_MONTH,
-                onActiveChange = viewModel::setCurrentCardAsMonth,
-            ) {
-                MonthTime(viewModel)
-            }
-            TimeCard(
-                title = "自定义范围",
-                active = cardIndex == TimeSettingStore.TIME_TYPE_CUSTOM,
-                onActiveChange = viewModel::setCurrentCardAsCustom,
-            ) {
-                CustomTime(viewModel)
+            Column(modifier = contentModifier) {
+                TimeCard(
+                    title = "当前时间线",
+                    active = cardIndex == TimeSettingStore.TIME_TYPE_CURRENT,
+                    onActiveChange = viewModel::setCurrentCardAsCurrent,
+                ) {
+                    CurrentTime(viewModel)
+                }
+                TimeCard(
+                    title = "按月份选择",
+                    active = cardIndex == TimeSettingStore.TIME_TYPE_MONTH,
+                    onActiveChange = viewModel::setCurrentCardAsMonth,
+                ) {
+                    MonthTime(viewModel)
+                }
+                TimeCard(
+                    title = "自定义范围",
+                    active = cardIndex == TimeSettingStore.TIME_TYPE_CUSTOM,
+                    onActiveChange = viewModel::setCurrentCardAsCustom,
+                ) {
+                    CustomTime(viewModel)
+                }
             }
 
             Spacer(modifier = Modifier.height(windowInsets.bottom + 50.dp))
@@ -88,10 +100,12 @@ private fun TimeSettingPageContent(
                 .fillMaxSize()
                 .padding(10.dp)
                 .padding(bottom = windowInsets.bottom),
-            contentAlignment = Alignment.BottomStart
+            contentAlignment = Alignment.BottomCenter
         ) {
             Button(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .widthIn(max = TimeSettingContentMaxWidth)
+                    .fillMaxWidth(),
                 onClick = viewModel::save,
             ) {
                 Text(
@@ -105,5 +119,3 @@ private fun TimeSettingPageContent(
     }
 
 }
-
-

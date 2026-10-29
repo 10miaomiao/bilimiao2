@@ -14,6 +14,14 @@ internal fun getWeek(y: Int, m: Int, d: Int): Int {
 }
 
 /**
+ * 计算某月 1 号在「周一开头」日历中的列偏移（0 = 周一）。
+ *
+ * [getWeek] 返回的是「周日开头」的星期值，这里换算成周一开头，
+ * 与日历表头的「一 … 日」顺序保持一致。
+ */
+internal fun getMonthStartOffset(y: Int, m: Int): Int = (getWeek(y, m, 1) + 6) % 7
+
+/**
  * 是否闰年
  */
 internal fun isLeapYear(y: Int): Boolean {

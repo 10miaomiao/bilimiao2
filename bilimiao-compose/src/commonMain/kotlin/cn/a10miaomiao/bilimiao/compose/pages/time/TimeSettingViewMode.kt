@@ -32,9 +32,6 @@ class TimeSettingViewMode(
     val maxDate = DateModel().also {
         it.setDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
     }
-
-    val yearCount = maxDate.year - minDate.year + 1
-
     val currentTime = MutableStateFlow(TimeInfo().apply {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         timeTo.setDate(today)
