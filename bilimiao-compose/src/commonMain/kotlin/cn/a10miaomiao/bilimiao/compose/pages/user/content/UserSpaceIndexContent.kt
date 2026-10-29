@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.components.bangumi.MiniBangumiItemBox
@@ -144,7 +145,10 @@ fun UserSpaceIndexContent(
             )
         }
         item {
+            val previewListState = rememberLazyListState()
             LazyRow(
+                state = previewListState,
+                modifier = Modifier.horizontalWheelScroll(previewListState),
                 contentPadding = PaddingValues(horizontal = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -178,7 +182,10 @@ fun UserSpaceIndexContent(
                 )
             }
             item {
+                val previewListState = rememberLazyListState()
                 LazyRow(
+                    state = previewListState,
+                    modifier = Modifier.horizontalWheelScroll(previewListState),
                     contentPadding = PaddingValues(horizontal = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -239,7 +246,10 @@ fun UserSpaceIndexContent(
                 )
             }
             item {
+                val previewListState = rememberLazyListState()
                 LazyRow(
+                    state = previewListState,
+                    modifier = Modifier.horizontalWheelScroll(previewListState),
                     contentPadding = PaddingValues(horizontal = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -274,7 +284,10 @@ fun UserSpaceIndexContent(
                 )
             }
             item {
+                val previewListState = rememberLazyListState()
                 LazyRow(
+                    state = previewListState,
+                    modifier = Modifier.horizontalWheelScroll(previewListState),
                     contentPadding = PaddingValues(horizontal = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -311,7 +324,10 @@ fun UserSpaceIndexContent(
                 )
             }
             item {
+                val previewListState = rememberLazyListState()
                 LazyRow(
+                    state = previewListState,
+                    modifier = Modifier.horizontalWheelScroll(previewListState),
                     contentPadding = PaddingValues(horizontal = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {

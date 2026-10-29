@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,7 @@ import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -218,8 +220,12 @@ fun TypeBangumiContent(
             )
     ) {
         val currentStatus = viewModel.currentStatus.collectAsState().value
+        val statusListState = rememberLazyListState()
         LazyRow(
-            modifier = Modifier.fillMaxWidth(),
+            state = statusListState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalWheelScroll(statusListState),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(
                 horizontal = 8.dp

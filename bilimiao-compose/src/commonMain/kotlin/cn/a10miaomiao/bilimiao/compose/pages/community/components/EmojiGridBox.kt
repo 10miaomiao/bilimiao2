@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.components.image.MiaoAsyncImage
 import com.a10miaomiao.bilimiao.comm.entity.ResponseData
 import com.a10miaomiao.bilimiao.comm.entity.user.UserEmoteInfo
@@ -97,6 +98,7 @@ fun EmojiGridBox(
             Column {
                 LazyRow(
                     state = packageListState,
+                    modifier = Modifier.horizontalWheelScroll(packageListState),
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
                     items(packageList.size) {

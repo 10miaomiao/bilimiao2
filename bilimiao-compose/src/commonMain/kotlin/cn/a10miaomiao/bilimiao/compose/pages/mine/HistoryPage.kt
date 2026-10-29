@@ -71,6 +71,7 @@ import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.addPaddingValues
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -603,6 +604,7 @@ private fun CalendarRowView(
         }
         LazyRow(
             state = listState,
+            modifier = Modifier.horizontalWheelScroll(listState),
         ) {
             items(
                 count = Int.MAX_VALUE,

@@ -26,6 +26,7 @@ import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -633,7 +634,9 @@ private fun BangumiDetailPageContent(
                                     )
                                     LazyRow(
                                         state = seasonsListState,
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .horizontalWheelScroll(seasonsListState),
                                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
                                         items(seasons, { it.season_id }) {
@@ -662,8 +665,12 @@ private fun BangumiDetailPageContent(
 
                 if (sectionList.size > 1) {
                     item("sectionList") {
+                        val sectionListState = rememberLazyListState()
                         LazyRow(
-                            modifier = Modifier.padding(horizontal = 8.dp),
+                            state = sectionListState,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .horizontalWheelScroll(sectionListState),
                             horizontalArrangement = Arrangement.spacedBy(5.dp)
                         ) {
                             items(sectionList, { it.id }) {

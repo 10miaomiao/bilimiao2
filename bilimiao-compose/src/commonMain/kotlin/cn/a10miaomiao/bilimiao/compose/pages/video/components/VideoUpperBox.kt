@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import coil3.compose.AsyncImage
@@ -30,7 +32,11 @@ fun VideoUpperBox(
     onUserClick: (String) -> Unit,
 ) {
     if (staffList.isNotEmpty()) {
-        LazyRow {
+        val staffListState = rememberLazyListState()
+        LazyRow(
+            modifier = Modifier.horizontalWheelScroll(staffListState),
+            state = staffListState,
+        ) {
             items(staffList) { staff ->
                 Column(
                     modifier = Modifier

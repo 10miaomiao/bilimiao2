@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.utils.NumberUtil
 import org.kodein.di.compose.rememberInstance
@@ -50,6 +52,7 @@ fun VideoPagesBox(
 ) {
     val playerStore by rememberInstance<PlayerStore>()
     val currentPlay by playerStore.stateFlow.collectAsState()
+    val pagesListState = rememberLazyListState()
 
     Box(
         modifier = Modifier
@@ -57,6 +60,8 @@ fun VideoPagesBox(
             .height(60.dp)
     ) {
         LazyRow(
+            modifier = Modifier.horizontalWheelScroll(pagesListState),
+            state = pagesListState,
             contentPadding = PaddingValues(
                 start = 10.dp,
                 top = 5.dp,

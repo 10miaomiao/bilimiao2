@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -36,6 +37,7 @@ import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
@@ -271,7 +273,10 @@ internal fun SendDanmakuPageContent(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(end = 10.dp),
             )
+            val danmakuTypeState = rememberLazyListState()
             LazyRow(
+                modifier = Modifier.horizontalWheelScroll(danmakuTypeState),
+                state = danmakuTypeState,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(viewModel.danmakuTypeList) {
@@ -296,7 +301,10 @@ internal fun SendDanmakuPageContent(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(end = 10.dp),
             )
+            val danmakuTextSizeState = rememberLazyListState()
             LazyRow(
+                modifier = Modifier.horizontalWheelScroll(danmakuTextSizeState),
+                state = danmakuTextSizeState,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(viewModel.danmakuTextSizeList) {
@@ -320,7 +328,10 @@ internal fun SendDanmakuPageContent(
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(end = 10.dp),
             )
+            val danmakuColorState = rememberLazyListState()
             LazyRow(
+                modifier = Modifier.horizontalWheelScroll(danmakuColorState),
+                state = danmakuColorState,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(viewModel.danmakuColorList) {

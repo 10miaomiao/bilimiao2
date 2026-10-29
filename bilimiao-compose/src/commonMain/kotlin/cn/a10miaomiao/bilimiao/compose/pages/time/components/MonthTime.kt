@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.pages.time.TimeSettingViewMode
 import kotlinx.coroutines.launch
 
@@ -172,7 +173,9 @@ internal fun MonthTime(
                 .padding(top = 4.dp),
         ) {
             LazyRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalWheelScroll(yearListState),
                 state = yearListState,
                 // 两侧留出悬浮箭头的位置，避免箭头压住年份标签
                 contentPadding = PaddingValues(horizontal = 34.dp),

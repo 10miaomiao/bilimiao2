@@ -52,6 +52,7 @@ import androidx.lifecycle.viewModelScope
 import cn.a10miaomiao.bilimiao.compose.base.ComposePage
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.flow.stateMap
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigation
@@ -402,10 +403,13 @@ private fun BangumiEpisodesPageContent(
                 item(
                     span = { GridItemSpan(maxLineSpan) }
                 ) {
+                    val sectionListState = rememberLazyListState()
                     LazyRow(
+                        state = sectionListState,
                         modifier = Modifier.padding(horizontal = 8.dp)
                             .background(MaterialTheme.colorScheme.background)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .horizontalWheelScroll(sectionListState),
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         items(sectionList, { it.id }) {

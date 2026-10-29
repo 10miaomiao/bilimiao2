@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material3.FilterChip
@@ -41,6 +42,7 @@ import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menufold
 import cn.a10miaomiao.bilimiao.compose.assets.bilimiaoicons.common.Menuunfold
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.foundation.horizontalWheelScroll
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageListener
@@ -384,8 +386,12 @@ internal fun UserSeasonDetailContent(
             }
         )
         if (sections.size > 1) {
+            val sectionsListState = rememberLazyListState()
             LazyRow(
-                modifier = Modifier.padding(horizontal = 5.dp),
+                state = sectionsListState,
+                modifier = Modifier
+                    .padding(horizontal = 5.dp)
+                    .horizontalWheelScroll(sectionsListState),
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 items(sections, { it.id }) {
