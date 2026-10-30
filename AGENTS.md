@@ -45,11 +45,10 @@ bilimiao-comm/          - KMP：核心共享库（API、实体、Store、网络�
 bilimiao-compose/       - KMP：所有 Compose UI（页面、组件、导航、主题）
 bilimiao-download/      - 安卓：下载功能
 bilimiao-cover/         - 安卓：封面图片处理
-bilimiao-appwidget/     - 安卓：桌面小组件
-DanmakuFlameMaster/     - 安卓：弹幕引擎
+bilimiao-appwidget/     - 安卓：桌面小组件（占位模块，暂未被 app 引用）
+bilimiao-grpc/          - KMP：B站 gRPC 接口（proto/ 生成代码，generator/ 代码生成器）
 danmaku-engine/         - KMP：跨平台弹幕引擎
 benchmark/              - 安卓：性能基准测试
-grpc-generator/         - Protobuf/gRPC 代码生成
 ```
 
 ### KMP 源集结构

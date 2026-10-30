@@ -27,13 +27,10 @@ pbandk = "0.16.0"
 # database
 room = "2.7.0"
 ksp = "2.3.11"
-gsyVideoPlayer = "v10.0.0" # 已移除：统一使用 mediamp
 accompanist = "0.37.3"
 materialKolor = "2.1.1"
 microgSafeParcel = "1.7.1"
 
-# ui components
-constraintlayout = "2.1.4"
 # compose additional
 sonner = "0.4.0"
 activityCompose = "1.13.0"
@@ -85,7 +82,6 @@ compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 compose-material-icons-extended-kmp = { group = "org.jetbrains.compose.material", name = "material-icons-extended", version = "1.7.3" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 navigation3-ui-jb = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3UiJb" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
@@ -110,8 +106,6 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.2" }
 # image loading
-# ui components
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
 # third party
 materialkolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
@@ -130,7 +124,6 @@ reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.r
 mediamp-api = { module = "org.openani.mediamp:mediamp-api", version.ref = "mediamp" }
 mediamp-mpv = { module = "org.openani.mediamp:mediamp-mpv", version.ref = "mediamp" }
 mediamp-exoplayer = { module = "org.openani.mediamp:mediamp-exoplayer", version.ref = "mediamp" }
-mediamp-native-loader = { module = "org.openani.mediamp:mediamp-native-loader", version.ref = "mediamp" }
 # jna
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }

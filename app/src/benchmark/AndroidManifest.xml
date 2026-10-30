@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  仅 benchmark 构建类型（*Benchmark 变体）生效。
+  macrobenchmark / baseline profile 采集需要目标 App 可被 shell 采集 profile：
+  AndroidManifest 里声明 android:profileable 后，非 debuggable 的 release 型变体才能采集。
+  注意：不要把这个标记放到 src/main，避免正式包暴露给 shell。
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <profileable
+            android:shell="true"
+            tools:targetApi="29" />
+    </application>
+
+</manifest>
