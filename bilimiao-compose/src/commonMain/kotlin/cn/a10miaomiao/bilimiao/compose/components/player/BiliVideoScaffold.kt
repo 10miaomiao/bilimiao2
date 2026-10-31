@@ -66,6 +66,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rem
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberGestureIndicatorState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberPlayerFastSkipState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSwipeSeekerState
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSystemVolumeLevelController
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.MediaProgressIndicatorText
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.MediaProgressSliderDefaults
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerControllerBar
@@ -340,9 +341,11 @@ fun BiliVideoScaffold(
         val exit = fadeOut()
 
         // 音量/亮度手势控制器:
-        // - 音量 = 播放器自身音量 (PlayerDelegate.setVolume, 安卓/桌面共用 0-100 的音量状态)
+        // - 音量 = 系统媒体音量 (安卓直接调 AudioManager, 与硬件音量键一致);
+        //   桌面端不接管系统音量, 回退到播放器自身音量 (PlayerDelegate.setVolume)
         // - 亮度 = 平台窗口亮度 (安卓生效; 桌面不支持逐窗口亮度, 为 no-op)
-        val audioController = remember(playerDelegate) { PlayerVolumeLevelController(playerDelegate) }
+        val playerVolumeController = remember(playerDelegate) { PlayerVolumeLevelController(playerDelegate) }
+        val audioController = rememberSystemVolumeLevelController() ?: playerVolumeController
         val brightnessController = rememberBrightnessLevelController()
 
         VideoScaffold(
@@ -689,7 +692,10 @@ private fun SmallScreenDanmakuSendButton(
  * 基于 [PlayerDelegateImpl] 音量的 [LevelController] 实现.
  *
  * 将手势的 0..1 归一化等级映射到播放器的 0-100 音量,
- * 与底栏音量、音量键等共用同一音量状态, 保证安卓/桌面行为一致.
+ * 与底栏音量、音量键等共用同一音量状态.
+ *
+ * 仅在平台不提供系统音量控制时使用 (见 [rememberSystemVolumeLevelController]):
+ * 安卓端手势直接调节系统媒体音量, 桌面端才回退到这里的播放器音量.
  */
 private class PlayerVolumeLevelController(
     private val delegate: PlayerDelegateImpl,
