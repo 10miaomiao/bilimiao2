@@ -9,12 +9,10 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.DisplayCutout
 import android.view.KeyEvent
@@ -333,21 +331,20 @@ class MainActivity : ComponentActivity(), DIAware {
         }
 
         findViewById<View>(android.R.id.content).post {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
-                findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { _, insets ->
-                    setWindowInsets(insets)
-                    insets
-                }
-            } else {
-                setWindowInsetsAndroidL()
+            val contentView = findViewById<View>(android.R.id.content)
+            contentView.rootWindowInsets?.let(::setWindowInsets)
+            contentView.setOnApplyWindowInsetsListener { _, insets ->
+                setWindowInsets(insets)
+                insets
             }
-            // 窗口尺寸兜底事件源：规避 API 32~33「尺寸类配置变化不派发到 View」的系统 bug
-            // （该 bug 会导致 LocalWindowInfo.containerSize 不刷新），用 onLayoutChange 直接
-            // 把真实窗口宽度写入 WindowSizeState，驱动 isCompactWindow() 实时更新。
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2
-                || Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU) {
-                val contentView = findViewById<View>(android.R.id.content)
+            // 窗口尺寸兜底事件源：规避系统「尺寸类配置变化不派发到 View」的 bug
+            // （该 bug 会导致 LocalWindowInfo.containerSize 不刷新）。实测 API 30~33 都存在，
+            // 典型表现是退出全屏由横屏转回竖屏后骨架布局仍按横屏排布（appbar 卡在侧边栏）；
+            // API 34 起系统已修复，故只在 34 之前注册，34+ 继续走官方 currentWindowAdaptiveInfo。
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                if (contentView.width > 0) {
+                    WindowSizeState.widthPx.value = contentView.width
+                }
                 contentView.addOnLayoutChangeListener { _, left, _, right, _, _, _, _, _ ->
                     WindowSizeState.widthPx.value = right - left
                 }
@@ -373,24 +370,6 @@ class MainActivity : ComponentActivity(), DIAware {
 
     fun goBackHome() {
         composeNavigator.goBackHome()
-    }
-
-
-    fun setWindowInsetsAndroidL() {
-        val rectangle = Rect()
-        val displayMetrics = DisplayMetrics()
-        window.decorView.getWindowVisibleDisplayFrame(rectangle)
-        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-        val top = getStatusBarHeight()
-        val bottom = displayMetrics.heightPixels - rectangle.bottom - rectangle.top
-        val right = displayMetrics.widthPixels - rectangle.right
-        setWindowInsets(0, top, right, bottom, null)
-    }
-
-    /** 获取状态栏高度（px），用于 Android L 窗口 inset 兜底计算 */
-    private fun getStatusBarHeight(): Int {
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
     }
 
     fun setWindowInsets(insets: WindowInsets) {
@@ -516,26 +495,25 @@ class MainActivity : ComponentActivity(), DIAware {
         }
     }
 
+    /**
+     * 跳转系统通知设置页
+     *
+     * minSdk 24，无需版本分支：应用维度的通知设置入口即 [Settings.ACTION_APP_NOTIFICATION_SETTINGS]。
+     * 个别 ROM 未实现该入口，回退到应用详情页。
+     */
     private fun jumpNotificationSetting() {
-        val intent = Intent()
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                intent.putExtra("app_package", packageName)
-                intent.putExtra("app_uid", applicationInfo.uid)
-            } else {
-                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                intent.addCategory(Intent.CATEGORY_DEFAULT)
-                intent.data = Uri.parse("package:$packageName")
+        runCatching {
+            startActivity(
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+            )
+        }.onFailure {
+            runCatching {
+                startActivity(
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        .setData(Uri.fromParts("package", packageName, null))
+                )
             }
-            startActivity(intent)
-        } catch (_: Exception) {
-            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            intent.data = Uri.fromParts("package", packageName, null)
-            startActivity(intent)
         }
     }
 
@@ -580,11 +558,7 @@ class MainActivity : ComponentActivity(), DIAware {
         updateSmallModePlayerMaxHeight()
         basePlayerDelegate.onConfigurationChanged(newConfig.orientation)
         basePlayerDelegate.fullscreenController.onOrientationChanged(newConfig.orientation)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            setWindowInsetsAndroidL()
-        } else {
-            findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
-        }
+        findViewById<View>(android.R.id.content).rootWindowInsets?.let(::setWindowInsets)
     }
 
     override fun onBackPressed() {
