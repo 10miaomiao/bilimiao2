@@ -343,6 +343,13 @@ private fun VideoSettingPageContent(
                 title = {
                     Text("底部进度条显示控制")
                 },
+                summary = { value ->
+                    if (value != 0) {
+                        Text("帘幕落下，时间在底边悄悄流淌")
+                    } else {
+                        Text("封印之中，底边一片寂静")
+                    }
+                },
                 defaultValue = 0,
                 values = viewModel.bottomProgressBarShowSelectionList,
                 valueToText = viewModel::bottomProgressBarShowName

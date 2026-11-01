@@ -74,6 +74,8 @@ import androidx.compose.ui.unit.max
  * @param framePreviewOverlay 位于整个播放器区域正中央的叠层, 不应用系统窗口边距.
  * @param rhsBar 右侧控制栏, 锁定手势等.
  * @param bottomBar [PlayerControllerBar]
+ * @param bottomProgressBar 画面底部的细进度条（见 `BottomProgressBar`）.
+ * 只在控制器显示时自动隐藏，避免与 [bottomBar] 内的进度滑块重复.
  * @param expanded 当前是否处于全屏模式. 全屏时此框架会 [Modifier.fillMaxSize], 否则会限制为一个 16:9 的框.
  */
 @Composable
@@ -106,6 +108,11 @@ fun VideoScaffold(
     leftSideButtons: @Composable ColumnScope.() -> Unit = {},
     gestureLock: @Composable ColumnScope.() -> Unit = {},
     bottomBar: @Composable RowScope.() -> Unit = {},
+    /**
+     * 画面底部的细进度条，控制器显示时自动隐藏（底栏内已有进度滑块）。
+     * 是否启用以及按哪种播放模式启用由调用方决定（见 `PlayerBottomProgressBarShow`）。
+     */
+    bottomProgressBar: @Composable BoxScope.() -> Unit = {},
     detachedProgressSlider: @Composable () -> Unit = {},
     floatingBottomEnd: @Composable RowScope.() -> Unit = {},
     rhsSheet: @Composable () -> Unit = {},
@@ -397,6 +404,21 @@ fun VideoScaffold(
                             ) {
                                 gestureLock()
                             }
+                        }
+                    }
+                }
+
+                // 底部细进度条: 控制器隐藏时贴画面底边显示播放进度, 控制器一显示就让位
+                Box(
+                    Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                ) {
+                    AnimatedVisibility(
+                        visible = !controllerVisibility.bottomBar && !controllerVisibility.detachedSlider,
+                        enter = enterTransition,
+                        exit = exitTransition,
+                    ) {
+                        Box(Modifier.fillMaxWidth()) {
+                            bottomProgressBar()
                         }
                     }
                 }

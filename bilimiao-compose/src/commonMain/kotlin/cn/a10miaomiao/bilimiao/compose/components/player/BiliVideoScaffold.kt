@@ -72,6 +72,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rem
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberPlayerFastSkipState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSwipeSeekerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSystemVolumeLevelController
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.BottomProgressBar
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.MediaProgressIndicatorText
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.MediaProgressSliderDefaults
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerControllerBar
@@ -79,6 +80,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.Pl
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerProgressSliderState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.formatSpeedNumber
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenMenuOptions
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.rememberSmoothedProgressState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberAlwaysOnRequester
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberVideoControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMoreActionsButton
@@ -93,6 +95,7 @@ import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.datastore.editPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
@@ -103,6 +106,7 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.kodein.di.compose.rememberInstance
 import org.openani.mediamp.MediampPlayer
@@ -244,6 +248,22 @@ fun BiliVideoScaffold(
         PlayerDisplayMode.Fullscreen -> SettingPreferences.DanmakuFullMode.name
         else -> SettingPreferences.DanmakuSmallMode.name
     }
+    // 底部进度条显示控制（「播放设置 - 底部进度条显示控制」按位组合的三个开关，默认全关，与旧版一致）。
+    // 设置项变化需要立刻生效，因此订阅 DataStore 而不是启动时读一次
+    val bottomProgressBarShow by remember(appDataStore) {
+        appDataStore.data.map { it[SettingPreferences.PlayerBottomProgressBarShow] ?: 0 }
+    }.collectAsState(initial = 0)
+    // 按当前展示方式取对应的开关位：全屏、画中画各自独立，其余（嵌入竖屏/悬浮横屏/锚点浮层）算作小屏
+    val bottomProgressBarEnabled = when (displayMode) {
+        PlayerDisplayMode.PictureInPicture ->
+            (bottomProgressBarShow and SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_PIP) != 0
+
+        PlayerDisplayMode.Fullscreen ->
+            (bottomProgressBarShow and SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_FULL) != 0
+
+        else ->
+            (bottomProgressBarShow and SettingConstants.PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_SMALL) != 0
+    }
     // 悬浮横屏模式关闭完整手势操作（拖动/缩放由外层悬浮窗口处理），仅保留单击切换控制器；
     // 画中画窗口内控制器恒隐藏，任何播放器手势都无意义，同样关闭
     val gesturesEnabled = displayMode != PlayerDisplayMode.FloatingLandscape &&
@@ -353,6 +373,15 @@ fun BiliVideoScaffold(
                 onPreviewFinished = { pos -> playerDelegate.seekTo(pos) },
             )
         }
+
+        // 缓动进度：播放位置是 200ms 轮询采样，逐帧外推后再画，底部进度条才是平滑前进而不是一跳一跳。
+        // 状态一律从 delegate 实时读取（不是组合期快照），暂停/缓冲/倍速变化才能立即生效。
+        val smoothedProgress = rememberSmoothedProgressState(
+            positionMillis = { playerDelegate.currentPosition.value },
+            durationMillis = { currentDuration },
+            isPlaying = { playerDelegate.playbackState.value.status == PlaybackStatus.Playing },
+            playbackSpeed = { playerDelegate.playbackState.value.playbackSpeed },
+        )
 
         // 长按画面加速状态（手势宿主与悬浮提示共用）：
         // 按住时按当前倍速 ×[LONG_PRESS_SPEED_FACTOR] 播放，松手恢复原倍速；仅播放中响应
@@ -675,6 +704,16 @@ fun BiliVideoScaffold(
                     progressSliderState = progressSliderState,
                     cacheProgressInfoFlow = kotlinx.coroutines.flow.flowOf(null),
                 )
+            },
+            bottomProgressBar = {
+                // 底部细进度条：控制器隐藏时显示播放进度（旧版 mBottomProgressBar 的行为）。
+                // 用逐帧平滑位置绘制，与底栏进度滑块共享同一状态，拖动预览时跟手显示
+                if (bottomProgressBarEnabled) {
+                    BottomProgressBar(
+                        state = progressSliderState,
+                        smoothedProgress = smoothedProgress,
+                    )
+                }
             },
             floatingBottomEnd = {
 //                PlayerControllerDefaults.FullscreenIcon(
