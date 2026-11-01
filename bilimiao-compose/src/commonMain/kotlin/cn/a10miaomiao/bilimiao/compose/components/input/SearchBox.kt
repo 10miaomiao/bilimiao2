@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -69,6 +70,10 @@ fun SearchBox(
                     }
                 },
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                // 显式使用主题前景色，避免深色模式下文字被渲染成黑色
+                textStyle = LocalTextStyle.current.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
                 modifier = Modifier
                     .padding(8.dp)
                     .focusRequester(focusRequester),
