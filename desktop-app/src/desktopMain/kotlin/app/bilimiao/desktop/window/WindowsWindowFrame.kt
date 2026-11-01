@@ -62,6 +62,7 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.zIndex
 import app.bilimiao.desktop.DesktopWindowState
+import cn.a10miaomiao.bilimiao.compose.common.platform.LocalWindowTitleBarInsets
 import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import cn.a10miaomiao.bilimiao.compose.platform.SystemBarsControllerDesktop
 import kotlinx.coroutines.delay
@@ -119,6 +120,8 @@ fun FrameWindowScope.WindowsWindowFrame(
             LocalCaptionButtonInsets provides frameState.captionButtonsInsets,
             LocalTitleBarThemeController provides frameState.titleBarThemeController,
             LocalSystemBarsController provides systemBarsController,
+            // 供铺满窗口的界面（播放器全屏）避让自绘标题栏
+            LocalWindowTitleBarInsets provides frameState.titleBarInsets,
             androidx.compose.ui.platform.LocalPlatformWindowInsets provides desktopWindowInsets,
         ) {
             content()
@@ -246,7 +249,14 @@ class WindowsWindowFrameState(
         captionButtonsRect[0].contains(x, y) -> WindowsWindowHitResult.CAPTION_MIN
         captionButtonsRect[1].contains(x, y) -> WindowsWindowHitResult.CAPTION_MAX
         captionButtonsRect[2].contains(x, y) -> WindowsWindowHitResult.CAPTION_CLOSE
-        y <= titleBarInsets.getTop(density) && layoutHitTestOwner?.hitTest(x, y) != true -> WindowsWindowHitResult.CAPTION
+        // 标题栏区域：
+        // - 普通窗口（含播放器「铺满窗口」）：标题栏常显，整条都用于拖动窗口。
+        //   此时内容本应已按 insets 让开标题栏，若再让 Compose 的可点击/悬停节点优先，
+        //   铺满窗口的播放器画面（整块可悬停唤出控制器）会把整条标题栏吃掉，窗口就拖不动了。
+        // - 无边框全屏：标题栏浮在内容之上且会自动隐藏，必须让内容里的可点击元素优先。
+        y <= titleBarInsets.getTop(density) &&
+            (!desktopWindow.isUndecoratedFullscreen || layoutHitTestOwner?.hitTest(x, y) != true) ->
+            WindowsWindowHitResult.CAPTION
         else -> WindowsWindowHitResult.CLIENT
     }
 
