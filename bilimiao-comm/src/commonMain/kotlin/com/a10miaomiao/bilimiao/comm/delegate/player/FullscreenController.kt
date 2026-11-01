@@ -2,15 +2,18 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
+import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.datastore.editPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 全屏模式
@@ -90,9 +93,17 @@ class FullscreenController(
     private val _isFullscreen = MutableStateFlow(false)
     val isFullscreen: StateFlow<Boolean> = _isFullscreen.asStateFlow()
 
-    /** 当前全屏模式设置（持久化） */
+    /**
+     * 用户设置的全屏模式（[SettingPreferences.PlayerFullMode] 的镜像）
+     *
+     * 由 [observeFullscreenModeSetting] 跟随 DataStore 刷新，单次全屏调用不会改写它，
+     * 这样设置页改动即时生效，自动全屏也不会把用户的选择冲掉。
+     */
     private val _fullscreenMode = MutableStateFlow(FullscreenMode.AUTO)
     val fullscreenMode: StateFlow<FullscreenMode> = _fullscreenMode.asStateFlow()
+
+    /** 全屏模式设置监听任务 */
+    private var settingsJob: Job? = null
 
     /** 当前屏幕方向请求 */
     private val _screenOrientation = MutableStateFlow(ScreenOrientationRequest.UNSPECIFIED)
@@ -111,12 +122,32 @@ class FullscreenController(
     var orientation: Int = ORIENTATION_PORTRAIT
 
     init {
-        // 加载持久化的全屏模式设置
-        scope.launch(Dispatchers.IO) {
-            val mode = SettingPreferences.mapPreferences {
-                FullscreenMode.fromValue(it[SettingPreferences.PlayerFullMode] ?: SettingConstants.PLAYER_FULL_MODE_AUTO)
+        // 跟随设置页的「全屏播放屏幕方向」
+        observeFullscreenModeSetting()
+    }
+
+    /**
+     * 监听「全屏播放屏幕方向」设置
+     *
+     * 旧版每次进入全屏都实时读 DataStore，因此设置页改完立刻生效；
+     * 这里用订阅保持 [_fullscreenMode] 与设置同步，达到同样的效果。
+     * 全屏状态中改动设置时按新方向重新应用（旧版长按菜单选完也会立即生效）。
+     *
+     * 幂等：重复调用只保留一个监听协程。
+     */
+    private fun observeFullscreenModeSetting() {
+        if (settingsJob?.isActive == true) return
+        settingsJob = scope.launch {
+            appDataStore.data.collect { preferences ->
+                val mode = FullscreenMode.fromValue(
+                    preferences[SettingPreferences.PlayerFullMode] ?: SettingConstants.PLAYER_FULL_MODE_AUTO
+                )
+                if (_fullscreenMode.value == mode) return@collect
+                _fullscreenMode.value = mode
+                if (_isFullscreen.value) {
+                    applyScreenOrientation(mode)
+                }
             }
-            _fullscreenMode.value = mode
         }
     }
 
@@ -134,6 +165,10 @@ class FullscreenController(
     /**
      * 进入全屏
      *
+     * 只按 [mode] 应用屏幕方向，**不写回** [SettingPreferences.PlayerFullMode]：
+     * 自动全屏传入的 [FullscreenMode.UNSPECIFIED] 若写回设置，会把用户在设置页
+     * 选的方向冲掉（旧版 fullScreen 同样不持久化，只有长按菜单选择时才写入）。
+     *
      * @param mode 全屏模式
      * @param onlyFull 是否仅全屏（退出时关闭播放器）
      */
@@ -141,14 +176,7 @@ class FullscreenController(
         onlyFullscreen = onlyFull
         canAutoCloseFullscreen = false
         _isFullscreen.value = true
-        _fullscreenMode.value = mode
         applyScreenOrientation(mode)
-        // 持久化设置
-        scope.launch(Dispatchers.IO) {
-            SettingPreferences.editPreferences {
-                it[SettingPreferences.PlayerFullMode] = mode.value
-            }
-        }
     }
 
     /**
@@ -187,11 +215,14 @@ class FullscreenController(
             }
             val autoFullScreenPortrait = openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN != 0
             val autoFullScreenLandscape = openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE != 0
+            val autoFull = (orientation == ORIENTATION_PORTRAIT && autoFullScreenPortrait) ||
+                    (orientation == ORIENTATION_LANDSCAPE && autoFullScreenLandscape)
 
-            if (orientation == ORIENTATION_PORTRAIT && autoFullScreenPortrait) {
-                fullscreen(_fullscreenMode.value, onlyFull = true)
-            } else if (orientation == ORIENTATION_LANDSCAPE && autoFullScreenLandscape) {
-                fullscreen(_fullscreenMode.value, onlyFull = true)
+            // 方向请求会直接落到 Activity 窗口，必须回主线程执行
+            withContext(Dispatchers.Main) {
+                if (autoFull) {
+                    fullscreen(_fullscreenMode.value, onlyFull = true)
+                }
             }
         }
     }
@@ -216,12 +247,17 @@ class FullscreenController(
                 openMode and SettingConstants.PLAYER_OPEN_MODE_AUTO_FULL_SCREEN_LANDSCAPE != 0
             }
             if (autoFullScreen && !_isFullscreen.value) {
-                // 自动切换全屏
-                fullscreen(FullscreenMode.UNSPECIFIED)
-                canAutoCloseFullscreen = true
+                // 方向请求会直接落到 Activity 窗口，必须回主线程执行
+                withContext(Dispatchers.Main) {
+                    // 自动切换全屏
+                    fullscreen(FullscreenMode.UNSPECIFIED)
+                    canAutoCloseFullscreen = true
+                }
             } else if (!autoFullScreen && canAutoCloseFullscreen && _isFullscreen.value) {
-                // 自动切回小屏
-                smallScreen()
+                withContext(Dispatchers.Main) {
+                    // 自动切回小屏
+                    smallScreen()
+                }
             }
         }
     }
@@ -230,6 +266,17 @@ class FullscreenController(
      * 是否仅全屏模式（退出时关闭播放器而非回小屏）
      */
     fun isOnlyFullscreen(): Boolean = onlyFullscreen
+
+    /**
+     * 释放设置监听
+     *
+     * 控制器随界面重建而重建、但协程作用域是进程级的，
+     * 界面销毁时需取消订阅，否则旧实例会一直持有已销毁 Activity 的方向回调。
+     */
+    fun release() {
+        settingsJob?.cancel()
+        settingsJob = null
+    }
 
     /**
      * 根据全屏模式应用屏幕方向

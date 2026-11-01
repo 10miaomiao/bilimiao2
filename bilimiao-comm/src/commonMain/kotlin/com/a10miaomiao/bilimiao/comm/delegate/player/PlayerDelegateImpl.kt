@@ -771,6 +771,8 @@ class PlayerDelegateImpl(
         // 因此这里不取消协程；只注销需要 Store 的回调，避免会话持有已销毁界面的对象
         session.onPlaybackCompleted = null
         onShowPlayerChanged = null
+        // 界面销毁：取消设置订阅，避免旧实例继续持有已销毁窗口的方向回调
+        fullscreenController.release()
     }
 
     override fun onBackPressed(): Boolean {
