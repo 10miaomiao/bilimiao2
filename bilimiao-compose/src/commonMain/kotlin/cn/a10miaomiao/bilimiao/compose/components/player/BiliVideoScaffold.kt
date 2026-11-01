@@ -72,6 +72,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.Me
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerControllerBar
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerControllerDefaults
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerProgressSliderState
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.formatSpeedNumber
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberVideoControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMoreActionsButton
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenType
@@ -136,9 +137,10 @@ private const val MAX_QUALITY_NOT_LOGIN = 48
 private const val MAX_QUALITY_NOT_VIP = 80
 
 /**
- * 长按画面快进倍速（2 倍速，松手恢复原倍速）
+ * 长按画面的加速倍数：按住时按「当前倍速 × 该倍数」播放，松手恢复原倍速。
+ * 对齐旧版（DanmakuVideoPlayer.startLongClickSpeedPlay 的 `speed *= 2`）。
  */
-private const val FAST_FORWARD_SPEED = 2.0f
+private const val LONG_PRESS_SPEED_FACTOR = 2.0f
 
 /**
  * 小屏（非全屏）模式画面左侧弹幕发送按钮的测试标签
@@ -317,15 +319,22 @@ fun BiliVideoScaffold(
             )
         }
 
-        // 长按画面 2 倍速快进状态（手势宿主与悬浮提示共用）
+        // 长按画面加速状态（手势宿主与悬浮提示共用）：
+        // 按住时按当前倍速 ×[LONG_PRESS_SPEED_FACTOR] 播放，松手恢复原倍速；仅播放中响应
         val hapticFeedback = rememberHapticFeedback()
         var speedBeforeFastSkip by remember { mutableFloatStateOf(playbackSpeed) }
         var fastForwarding by remember { mutableStateOf(false) }
+        var fastForwardSpeed by remember { mutableFloatStateOf(0f) }
         val fastSkipState = rememberPlayerFastSkipState(
             gestureIndicatorState = indicatorState,
             onStart = {
-                speedBeforeFastSkip = playbackSpeed
-                playerDelegate.setPlaybackSpeed(FAST_FORWARD_SPEED)
+                // 直接读 delegate 的实时倍速，而不是组合期捕获的 playbackSpeed 快照，
+                // 保证 2.5x/3x/4x 等自定义倍速下长按是「该倍速 ×2」，松手也回到该倍速
+                val baseSpeed = playerDelegate.playbackState.value.playbackSpeed
+                speedBeforeFastSkip = baseSpeed
+                val skipSpeed = baseSpeed * LONG_PRESS_SPEED_FACTOR
+                fastForwardSpeed = skipSpeed
+                playerDelegate.setPlaybackSpeed(skipSpeed)
                 fastForwarding = true
                 // 长按触发震动反馈（对齐旧版 performHapticFeedback(LONG_PRESS)）
                 hapticFeedback.perform(HapticFeedbackType.LONG_PRESS)
@@ -334,7 +343,6 @@ fun BiliVideoScaffold(
                 playerDelegate.setPlaybackSpeed(speedBeforeFastSkip)
                 fastForwarding = false
             },
-            fastForwardSpeed = FAST_FORWARD_SPEED,
         )
 
         val enter = fadeIn()
@@ -477,6 +485,9 @@ fun BiliVideoScaffold(
                         onToggleDanmaku = { playerDelegate.toggleDanmaku() },
                         gestureIndicatorState = indicatorState,
                         fastSkipState = fastSkipState,
+                        // 只有播放中才响应长按加速（暂停/播放结束/出错时不响应），
+                        // 长按期间播放中断时该开关变化会摘除手势并自动恢复原倍速
+                        fastSkipEnabled = isPlaying,
                     )
                 } else {
                     // 单击切换控制器显隐；detectTapGestures 超过触摸滑动阈值或事件被
@@ -499,14 +510,15 @@ fun BiliVideoScaffold(
                 }
             },
             floatingMessage = {
-                // 长按倍速浮窗（样式对齐旧版），居中偏上
+                // 长按倍速浮窗（样式对齐旧版，提示「x倍速播放中」）
                 if (fastForwarding) {
                     Box(
                         Modifier.align(Alignment.TopCenter)
                             .padding(top = 40.dp)
                     ) {
                         FastForwardIndicator(
-                            modifier = Modifier.align(Alignment.TopCenter)
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            text = "${formatSpeedNumber(fastForwardSpeed)}倍速播放中",
                         )
                     }
                 }

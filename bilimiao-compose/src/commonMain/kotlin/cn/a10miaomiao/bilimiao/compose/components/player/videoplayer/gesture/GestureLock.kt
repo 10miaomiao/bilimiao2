@@ -128,6 +128,7 @@ fun LockableVideoGestureHost(
     family: GestureFamily = GestureFamily.TOUCH,
     gestureIndicatorState: GestureIndicatorState = rememberGestureIndicatorState(),
     fastSkipState: FastSkipState? = null,
+    fastSkipEnabled: Boolean = true,
 ) {
     if (locked) {
         LockedScreenGestureHost(
@@ -153,6 +154,7 @@ fun LockableVideoGestureHost(
             onToggleDanmaku = onToggleDanmaku,
             onTogglePlayerStats = onTogglePlayerStats,
             family = family,
+            fastSkipEnabled = fastSkipEnabled,
         )
     }
 }

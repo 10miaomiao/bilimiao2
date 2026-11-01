@@ -59,6 +59,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.Ges
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState.State.RESUMED_ONCE
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState.State.SEEKING
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState.State.VOLUME
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.formatSpeedValue
 
 @Stable
 private fun renderTime(seconds: Int): String {
@@ -238,18 +239,6 @@ internal fun gestureIndicatorPresentation(
 }
 
 /**
- * 格式化播放速度, 替代原 animeko 的 formatSpeedValue.
- * 保留一位小数, 例如 1.0, 1.5, 2.0.
- */
-private fun formatSpeedValue(speed: Float): String {
-    // 保留一位小数, 例如 1.0, 1.5, 2.0. 纯 Kotlin 实现以兼容 KMP commonMain.
-    val rounded = (speed * 10).toInt() / 10f
-    val intPart = rounded.toInt()
-    val decPart = ((rounded - intPart) * 10).toInt()
-    return "$intPart.$decPart"
-}
-
-/**
  * 展示当前快进/快退秒数的指示器.
  *
  * `<< 00:00` / `>> 00:00`
@@ -373,7 +362,7 @@ fun GestureIndicator(
 
                         GestureIndicatorState.State.PLAYBACK_SPEED -> {
                             Icon(Icons.Rounded.FastForward, null, Modifier.size(iconSize))
-                            Text("${formatSpeedValue(state.playbackSpeed)}x", maxLines = 1)
+                            Text(formatSpeedValue(state.playbackSpeed), maxLines = 1)
                         }
                     }
                 }

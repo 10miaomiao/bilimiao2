@@ -153,7 +153,7 @@ private fun rememberSwipeSeekInteraction(
  * - 横向滑动快进/快退 (seek)
  * - 左侧滑动调节亮度, 右侧滑动调节音量
  * - 中间垂直滑动进入/退出全屏
- * - 长按快进
+ * - 长按加速（仅播放中响应, 具体加速倍数由调用方决定）
  *
  * 鼠标家族支持点击暂停、双击全屏、滚轮调节音量、悬停显示控制器.
  */
@@ -175,6 +175,7 @@ fun PlayerGestureHost(
     onExitFullscreen: () -> Unit = {},
     onToggleDanmaku: () -> Unit = {},
     onTogglePlayerStats: () -> Unit = {},
+    fastSkipEnabled: Boolean = true,
 ) {
     val onTogglePauseResumeState by rememberUpdatedState(onTogglePauseResume)
 
@@ -370,7 +371,7 @@ fun PlayerGestureHost(
                     ) {
                         systemGesturesPadding()
                     }
-                    .thenIf(family.longPressForFastSkip) {
+                    .thenIf(family.longPressForFastSkip && fastSkipEnabled) {
                         fastSkipState?.let {
                             longPressFastSkip(it, SkipDirection.FORWARD)
                         } ?: Modifier

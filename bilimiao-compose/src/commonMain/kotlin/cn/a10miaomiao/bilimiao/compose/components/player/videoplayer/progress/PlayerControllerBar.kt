@@ -151,9 +151,21 @@ fun renderAspectRatioMode(mode: Int): String = when (mode) {
 
 /**
  * 格式化倍速值为字符串.
- * 替换自 animeko 的 formatSpeedValue, 简化为 "${speed}x".
+ *
+ * 整数倍速去掉多余的小数位: 2f -> "2x", 2.5f -> "2.5x".
+ * 替换自 animeko 的 formatSpeedValue.
  */
-fun formatSpeedValue(speed: Float): String = "${speed}x"
+fun formatSpeedValue(speed: Float): String = "${formatSpeedNumber(speed)}x"
+
+/**
+ * 格式化倍速数值本身 (不含 "x" 后缀), 整数倍速省略 ".0": 2f -> "2", 2.5f -> "2.5".
+ *
+ * 纯 Kotlin 实现以兼容 KMP commonMain (不使用 String.format).
+ */
+fun formatSpeedNumber(speed: Float): String {
+    val text = speed.toString()
+    return if (text.endsWith(".0")) text.dropLast(2) else text
+}
 
 @Stable
 object PlayerControllerDefaults {
