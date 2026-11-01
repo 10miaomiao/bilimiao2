@@ -20,7 +20,11 @@ import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
+import cn.a10miaomiao.bilimiao.compose.common.platform.Platform
+import cn.a10miaomiao.bilimiao.compose.common.platform.platformInfo
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.desktopFullscreenModeLabel
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.desktopFullscreenModeOrder
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenModeLabel
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenModeMenuOrder
 import cn.a10miaomiao.bilimiao.compose.components.preference.customSetsPreference
@@ -29,6 +33,8 @@ import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
+import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopFullscreenMode
+import com.a10miaomiao.bilimiao.comm.delegate.player.FullscreenMode
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import kotlinx.serialization.Serializable
 import cn.a10miaomiao.bilimiao.compose.common.preference.ProvidePreferenceLocals
@@ -79,15 +85,26 @@ private class VideoSettingPageViewModel(
     val smartSourceSelectionList = smartSourceSelection.keys.toList()
 
 
-    // 文案与顺序与播放器长按全屏按钮弹出的方向菜单共用一份定义
+    // 文案与顺序与播放器长按/右键全屏按钮弹出的方向菜单共用一份定义
     private val fullModeSelection = fullscreenModeMenuOrder.associate {
         it.value to AnnotatedString(fullscreenModeLabel(it))
     }
 
+    // 未知值按运行时的解释回落（FullscreenMode.fromValue 兜底 AUTO），避免把裸数字显示给用户
     fun fullModeSelectionName(value: Int) =
-        fullModeSelection[value] ?: AnnotatedString(value.toString())
+        AnnotatedString(fullscreenModeLabel(FullscreenMode.fromValue(value)))
 
     val fullModeSelectionList = fullModeSelection.keys.toList()
+
+    // 桌面端全屏方式：铺满屏幕 / 铺满窗口（与方向共用 PlayerFullMode 键，取值域不重叠）
+    private val desktopFullModeSelection = desktopFullscreenModeOrder.associate {
+        it.value to AnnotatedString(desktopFullscreenModeLabel(it))
+    }
+
+    fun desktopFullModeSelectionName(value: Int) =
+        AnnotatedString(desktopFullscreenModeLabel(DesktopFullscreenMode.fromValue(value)))
+
+    val desktopFullModeSelectionList = desktopFullModeSelection.keys.toList()
 
 
     private val openModeSelection = mapOf(
@@ -292,18 +309,35 @@ private fun VideoSettingPageContent(
                 },
                 defaultValue = false,
             )
-            listPreference(
-                key = SettingPreferences.PlayerFullMode.name,
-                title = {
-                    Text("全屏播放屏幕方向")
-                },
-                summary = {
-                    Text("可以在播放器长按全屏按钮召唤此选项")
-                },
-                defaultValue = SettingConstants.PLAYER_FULL_MODE_AUTO,
-                values = viewModel.fullModeSelectionList,
-                valueToText = viewModel::fullModeSelectionName
-            )
+            // 全屏形态：桌面端没有屏幕方向，只需在「窗口是否进入全屏」之间选择；
+            // 两端共用 PlayerFullMode 键，只是取值域不同
+            if (platformInfo.platform == Platform.DESKTOP) {
+                listPreference(
+                    key = SettingPreferences.PlayerFullMode.name,
+                    title = {
+                        Text("全屏播放方式")
+                    },
+                    summary = {
+                        Text("铺满屏幕：窗口进入全屏；铺满窗口：窗口保持不变。也可以在播放器长按或右键全屏按钮召唤此选项")
+                    },
+                    defaultValue = SettingConstants.PLAYER_DESKTOP_FULL_MODE_SCREEN,
+                    values = viewModel.desktopFullModeSelectionList,
+                    valueToText = viewModel::desktopFullModeSelectionName
+                )
+            } else {
+                listPreference(
+                    key = SettingPreferences.PlayerFullMode.name,
+                    title = {
+                        Text("全屏播放屏幕方向")
+                    },
+                    summary = {
+                        Text("可以在播放器长按全屏按钮召唤此选项")
+                    },
+                    defaultValue = SettingConstants.PLAYER_FULL_MODE_AUTO,
+                    values = viewModel.fullModeSelectionList,
+                    valueToText = viewModel::fullModeSelectionName
+                )
+            }
             multiSelectIntPreference(
                 key = SettingPreferences.PlayerBottomProgressBarShow.name,
                 title = {

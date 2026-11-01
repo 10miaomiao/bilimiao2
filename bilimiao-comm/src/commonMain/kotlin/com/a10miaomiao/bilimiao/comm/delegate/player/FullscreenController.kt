@@ -43,6 +43,35 @@ enum class FullscreenMode(val value: Int) {
 }
 
 /**
+ * 桌面端全屏方式
+ *
+ * 桌面窗口没有屏幕方向可言，全屏只需要决定「窗口本身要不要进入全屏」：
+ * - [SCREEN] 铺满屏幕：窗口去边框铺满显示器（桌面端的原有行为，默认值）
+ * - [WINDOW] 铺满窗口：窗口大小与边框保持不变，只有播放器铺满窗口内容区
+ *
+ * 与 [FullscreenMode] 共用 [SettingPreferences.PlayerFullMode] 偏好项
+ * （两端互斥，同一台设备只有其中一套取值），因此取值域特意避开方向值。
+ */
+enum class DesktopFullscreenMode(val value: Int) {
+    /** 铺满屏幕（默认） */
+    SCREEN(SettingConstants.PLAYER_DESKTOP_FULL_MODE_SCREEN),
+
+    /** 铺满窗口 */
+    WINDOW(SettingConstants.PLAYER_DESKTOP_FULL_MODE_WINDOW);
+
+    companion object {
+        /**
+         * 由偏好值还原桌面端全屏方式
+         *
+         * 读到的若是安卓写入的方向值则回落到默认的「铺满屏幕」，
+         * 与桌面端的实际行为保持一致（方向值在桌面端没有意义）。
+         */
+        fun fromValue(value: Int): DesktopFullscreenMode =
+            entries.firstOrNull { it.value == value } ?: SCREEN
+    }
+}
+
+/**
  * 屏幕方向请求（平台无关）
  *
  * 由 [FullscreenController] 计算后通过其构造参数 `setRequestedOrientation` 应用到平台。
@@ -102,6 +131,15 @@ class FullscreenController(
     private val _fullscreenMode = MutableStateFlow(FullscreenMode.AUTO)
     val fullscreenMode: StateFlow<FullscreenMode> = _fullscreenMode.asStateFlow()
 
+    /**
+     * 桌面端全屏方式（与 [fullscreenMode] 共用 [SettingPreferences.PlayerFullMode] 的镜像）
+     *
+     * 只在桌面端有意义：桌面宿主据此决定是否让窗口进入全屏。
+     * 安卓端不读该设置，全屏形态由 [screenOrientation] 表示。
+     */
+    private val _desktopFullscreenMode = MutableStateFlow(DesktopFullscreenMode.SCREEN)
+    val desktopFullscreenMode: StateFlow<DesktopFullscreenMode> = _desktopFullscreenMode.asStateFlow()
+
     /** 全屏模式设置监听任务 */
     private var settingsJob: Job? = null
 
@@ -127,11 +165,14 @@ class FullscreenController(
     }
 
     /**
-     * 监听「全屏播放屏幕方向」设置
+     * 监听「全屏播放屏幕方向 / 桌面端全屏方式」设置
      *
+     * 两个平台共用 [SettingPreferences.PlayerFullMode]，只是取值域不同（见 [DesktopFullscreenMode]）。
      * 旧版每次进入全屏都实时读 DataStore，因此设置页改完立刻生效；
-     * 这里用订阅保持 [_fullscreenMode] 与设置同步，达到同样的效果。
+     * 这里用订阅保持两个模式流与设置同步，达到同样的效果。
      * 全屏状态中改动设置时按新方向重新应用（旧版长按菜单选完也会立即生效）。
+     *
+     * 桌面端全屏方式只做同步：窗口全屏与否由桌面宿主消费该状态决定。
      *
      * 幂等：重复调用只保留一个监听协程。
      */
@@ -139,9 +180,11 @@ class FullscreenController(
         if (settingsJob?.isActive == true) return
         settingsJob = scope.launch {
             appDataStore.data.collect { preferences ->
-                val mode = FullscreenMode.fromValue(
-                    preferences[SettingPreferences.PlayerFullMode] ?: SettingConstants.PLAYER_FULL_MODE_AUTO
+                val value = preferences[SettingPreferences.PlayerFullMode]
+                _desktopFullscreenMode.value = DesktopFullscreenMode.fromValue(
+                    value ?: SettingConstants.PLAYER_DESKTOP_FULL_MODE_SCREEN
                 )
+                val mode = FullscreenMode.fromValue(value ?: SettingConstants.PLAYER_FULL_MODE_AUTO)
                 if (_fullscreenMode.value == mode) return@collect
                 _fullscreenMode.value = mode
                 if (_isFullscreen.value) {
@@ -195,6 +238,22 @@ class FullscreenController(
         if (_isFullscreen.value) {
             applyScreenOrientation(mode)
         }
+        scope.launch(Dispatchers.IO) {
+            SettingPreferences.editPreferences {
+                it[SettingPreferences.PlayerFullMode] = mode.value
+            }
+        }
+    }
+
+    /**
+     * 设置桌面端全屏方式（桌面端长按/右键全屏按钮时调用）
+     *
+     * 写的是共用的 [SettingPreferences.PlayerFullMode]，取值见 [DesktopFullscreenMode]。
+     * 不在这里动窗口：窗口形态由桌面宿主观察 [desktopFullscreenMode] 后应用，
+     * 这样切换模式时（含全屏播放中切换）两处行为一致。
+     */
+    fun setDesktopFullscreenMode(mode: DesktopFullscreenMode) {
+        _desktopFullscreenMode.value = mode
         scope.launch(Dispatchers.IO) {
             SettingPreferences.editPreferences {
                 it[SettingPreferences.PlayerFullMode] = mode.value

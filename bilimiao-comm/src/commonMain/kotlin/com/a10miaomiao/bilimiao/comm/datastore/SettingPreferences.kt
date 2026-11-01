@@ -96,6 +96,7 @@ object SettingPreferences {
     val PlayerOrder = intPreferencesKey("player_order")
     val PlayerOrderRandom = booleanPreferencesKey("player_order_random")
     val PlayerNotification = booleanPreferencesKey("player_notification")
+    // 播放器全屏形态：安卓端为屏幕方向，桌面端为铺满屏幕/铺满窗口（两端取值域不重叠）
     val PlayerFullMode = intPreferencesKey("player_full_mode")
     val PlayerBottomProgressBarShow = intPreferencesKey("player_bottom_progress_bar_show")
     val PlayerSpeedValues = stringSetPreferencesKey("player_speed_values")

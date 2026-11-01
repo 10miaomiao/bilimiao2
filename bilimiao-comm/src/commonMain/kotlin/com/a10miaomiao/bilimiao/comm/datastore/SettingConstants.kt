@@ -57,6 +57,13 @@ object SettingConstants {
     // 横向全屏(固定方向2)
     const val PLAYER_FULL_MODE_REVERSE_LANDSCAPE = 2
 
+    // 桌面端全屏方式：与屏幕方向共用 PlayerFullMode 偏好项，取值特意避开方向值（0/1/2/3/8），
+    // 这样同一个键里的数值不会同时代表两种含义
+    // 铺满屏幕（窗口无边框铺满显示器）
+    const val PLAYER_DESKTOP_FULL_MODE_SCREEN = 16
+    // 铺满窗口（窗口保持不变，播放器铺满窗口内容区）
+    const val PLAYER_DESKTOP_FULL_MODE_WINDOW = 17
+
     // 小屏时显示底部进度条
     const val  PLAYER_BOTTOM_PROGRESS_BAR_SHOW_IN_SMALL = 1
     // 全屏时显示底部进度条

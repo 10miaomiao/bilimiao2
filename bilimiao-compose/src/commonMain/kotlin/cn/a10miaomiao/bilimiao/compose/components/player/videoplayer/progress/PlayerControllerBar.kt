@@ -91,6 +91,10 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
@@ -105,7 +109,6 @@ import androidx.compose.ui.window.PopupProperties
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.keepLayoutWhenHidden
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlayerControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlaybackSpeedControllerState
-import com.a10miaomiao.bilimiao.comm.delegate.player.FullscreenMode
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
@@ -576,12 +579,16 @@ object PlayerControllerDefaults {
     /**
      * 全屏切换按钮
      *
-     * 长按弹出「全屏播放屏幕方向」菜单（对照旧版 `fullscreenButton.setOnLongClickListener
-     * { showFullModeMenu(it) }`，菜单项同为 `menu/player_full_mode`），
-     * 选择后经 [onSelectFullscreenMode] 写回设置；未提供该回调时不响应长按。
+     * 弹出全屏方式菜单（对照旧版 `fullscreenButton.setOnLongClickListener
+     * { showFullModeMenu(it) }`）：安卓端为屏幕方向，桌面端为「铺满屏幕 / 铺满窗口」，
+     * 选项由调用方按平台通过 [menuOptions] 提供；未提供 [onSelectMenuValue] 时不响应。
      *
-     * @param fullscreenMode 当前全屏方向设置（用于菜单选中标记）
-     * @param onSelectFullscreenMode 选择全屏方向的回调，为空表示不支持长按菜单（如桌面端之外的场景）
+     * 触发方式同时支持触摸长按与鼠标右键：桌面端用鼠标时按住不放并不自然，
+     * 右键是更符合直觉的入口（安卓端触摸事件没有次要按键，只有 OTG 鼠标才会走右键分支）。
+     *
+     * @param menuOptions 菜单项（值 + 文案）
+     * @param currentMenuValue 当前设置值（用于选中标记）
+     * @param onSelectMenuValue 选择回调
      * @param onModeMenuExpandedChanged 菜单展开状态变化回调（供调用方在菜单展开期间保持控制器常显）
      */
     @Composable
@@ -589,8 +596,9 @@ object PlayerControllerDefaults {
         isFullscreen: Boolean,
         onClickFullscreen: () -> Unit,
         modifier: Modifier = Modifier,
-        fullscreenMode: FullscreenMode = FullscreenMode.AUTO,
-        onSelectFullscreenMode: ((FullscreenMode) -> Unit)? = null,
+        menuOptions: List<FullscreenMenuOption> = emptyList(),
+        currentMenuValue: Int? = null,
+        onSelectMenuValue: ((Int) -> Unit)? = null,
         onModeMenuExpandedChanged: (Boolean) -> Unit = {},
     ) {
         var modeMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -598,16 +606,35 @@ object PlayerControllerDefaults {
         LaunchedEffect(modeMenuExpanded) {
             onModeMenuExpandedChanged(modeMenuExpanded)
         }
+        val menuEnabled = onSelectMenuValue != null && menuOptions.isNotEmpty()
         // needWorkaroundForFocusManager 简化为 false, 移除焦点 workaround
         // IconButton 不支持长按，改用与 IconButton 同尺寸(48dp)的 combinedClickable 容器
         Box(
             modifier = modifier
                 .size(48.dp)
+                // 右键：Initial 阶段先于 combinedClickable 拿到事件，消费掉按键后
+                // 同一次按下不会再被当成单击（切换全屏）
+                .pointerInput(menuEnabled) {
+                    if (!menuEnabled) return@pointerInput
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+                                event.changes.forEach { change -> change.consume() }
+                                modeMenuExpanded = true
+                            }
+                        }
+                    }
+                }
                 .combinedClickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = LocalIndication.current,
                     onClick = onClickFullscreen,
-                    onLongClick = onSelectFullscreenMode?.let { { modeMenuExpanded = true } },
+                    onLongClick = if (menuEnabled) {
+                        { modeMenuExpanded = true }
+                    } else {
+                        null
+                    },
                 ),
             contentAlignment = Alignment.Center,
         ) {
@@ -616,14 +643,14 @@ object PlayerControllerDefaults {
             } else {
                 Icon(Icons.Rounded.Fullscreen, contentDescription = "全屏", Modifier.size(32.dp))
             }
-            if (onSelectFullscreenMode != null) {
+            if (menuEnabled) {
                 DropdownMenu(
                     expanded = modeMenuExpanded,
                     onDismissRequest = { modeMenuExpanded = false },
                     modifier = Modifier.testTag(TAG_FULLSCREEN_MODE_DROPDOWN_MENU),
                 ) {
-                    fullscreenModeMenuOrder.forEach { mode ->
-                        val selected = mode == fullscreenMode
+                    menuOptions.forEach { option ->
+                        val selected = option.value == currentMenuValue
                         DropdownMenuItem(
                             text = {
                                 val color = if (selected) {
@@ -632,7 +659,7 @@ object PlayerControllerDefaults {
                                     LocalContentColor.current
                                 }
                                 CompositionLocalProvider(LocalContentColor provides color) {
-                                    Text(fullscreenModeLabel(mode))
+                                    Text(option.label)
                                 }
                             },
                             leadingIcon = if (selected) {
@@ -648,7 +675,7 @@ object PlayerControllerDefaults {
                             },
                             onClick = {
                                 modeMenuExpanded = false
-                                onSelectFullscreenMode(mode)
+                                onSelectMenuValue?.invoke(option.value)
                             },
                         )
                     }

@@ -50,6 +50,7 @@ import com.a10miaomiao.bilimiao.comm.platform.JvmDeviceInfoProvider
 import com.a10miaomiao.bilimiao.comm.platform.JvmPlatformContext
 import com.a10miaomiao.bilimiao.comm.platform.PlatformProviders
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopFullscreenMode
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
 import cn.a10miaomiao.bilimiao.compose.components.player.BiliVideoScaffold
 import com.a10miaomiao.bilimiao.comm.store.AppStore
@@ -242,9 +243,15 @@ fun main() {
                                 playerContent = {
                                     // 观察全屏状态变化，同步到桌面窗口
                                     val isFullscreen by startViewState.playerState.fullScreenPlayer.collectAsState()
-                                    LaunchedEffect(isFullscreen) {
+                                    // 全屏方式：铺满屏幕时窗口进入全屏；铺满窗口时窗口保持不变，
+                                    // 只有播放器铺满窗口内容区（布局由 BiliVideoScaffold 负责）。
+                                    // 只以「窗口是否该全屏」为 LaunchedEffect 的 key：切换全屏方式但窗口
+                                    // 形态不变时（如未播放时在设置里切换）不重复调用窗口接口。
+                                    val fullMode by playerDelegate.fullscreenController.desktopFullscreenMode.collectAsState()
+                                    val windowFullscreen = isFullscreen && fullMode == DesktopFullscreenMode.SCREEN
+                                    LaunchedEffect(windowFullscreen) {
                                         WindowsWindowUtils.instance.setUndecoratedFullscreen(
-                                            desktopWindow, windowState, isFullscreen
+                                            desktopWindow, windowState, windowFullscreen
                                         )
                                     }
                                     BiliVideoScaffold(

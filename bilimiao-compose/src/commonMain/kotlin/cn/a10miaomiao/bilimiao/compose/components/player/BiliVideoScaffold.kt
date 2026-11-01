@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -48,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -55,6 +57,9 @@ import cn.a10miaomiao.bilimiao.compose.base.BottomSheetState
 import cn.a10miaomiao.bilimiao.compose.common.HapticFeedbackType
 import cn.a10miaomiao.bilimiao.compose.common.LocalPlayerState
 import cn.a10miaomiao.bilimiao.compose.common.localPlayerDisplayMode
+import cn.a10miaomiao.bilimiao.compose.common.platform.Platform
+import cn.a10miaomiao.bilimiao.compose.common.platform.LocalWindowTitleBarInsets
+import cn.a10miaomiao.bilimiao.compose.common.platform.platformInfo
 import cn.a10miaomiao.bilimiao.compose.common.rememberHapticFeedback
 import cn.a10miaomiao.bilimiao.compose.components.layout.PlayerDisplayMode
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.FastForwardIndicator
@@ -73,6 +78,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.Pl
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerControllerDefaults
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerProgressSliderState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.formatSpeedNumber
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenMenuOptions
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberAlwaysOnRequester
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberVideoControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMoreActionsButton
@@ -90,6 +96,8 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.editPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
+import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopFullscreenMode
+import com.a10miaomiao.bilimiao.comm.delegate.player.FullscreenMode
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
@@ -218,8 +226,11 @@ fun BiliVideoScaffold(
     val displayMode = localPlayerDisplayMode()
     // 全屏状态统一由 PlayerState 提供（数据源为 FullscreenController.isFullscreen）
     val isFullscreen by playerState.fullScreenPlayer.collectAsState()
-    // 全屏播放屏幕方向设置（长按全屏按钮弹出的菜单使用，与设置页同一数据源）
+    // 全屏方式设置：安卓为屏幕方向，桌面为「铺满屏幕 / 铺满窗口」（长按全屏按钮的菜单使用）
     val fullscreenMode by playerDelegate.fullscreenController.fullscreenMode.collectAsState()
+    val desktopFullscreenMode by playerDelegate.fullscreenController.desktopFullscreenMode.collectAsState()
+    val desktopPlatform = platformInfo.platform == Platform.DESKTOP
+    val fullMenuOptions = remember { fullscreenMenuOptions() }
     // 画中画（应用外小窗）状态：由平台层（Activity 的 onPictureInPictureModeChanged）注入，
     // 与 ComposeScaffold 共享同一状态源：宿主布局让出整个窗口，本组件负责小窗内的播放器展示
     val pictureInPicture by playerState.pictureInPicture.collectAsState()
@@ -237,8 +248,27 @@ fun BiliVideoScaffold(
     // 画中画窗口内控制器恒隐藏，任何播放器手势都无意义，同样关闭
     val gesturesEnabled = displayMode != PlayerDisplayMode.FloatingLandscape &&
         !inPictureInPicture
+    // 桌面端「铺满窗口」时窗口保持带标题栏的普通窗口，标题栏叠在内容上方且占用了拖动区域，
+    // 播放器内容必须让开它（否则顶栏按钮会落在标题栏里点不到）。
+    // 与安全区取最大值，避免 safeDrawing 已经包含标题栏时重复叠加。
+    val windowTitleBarInsets = LocalWindowTitleBarInsets.current
     val contentWindowInsets = if (isFullscreen) {
-        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+        val safe = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+        if (desktopPlatform && desktopFullscreenMode == DesktopFullscreenMode.WINDOW) {
+            val density = LocalDensity.current
+            // 左右沿用安全区，顶部取「安全区顶部」与「标题栏高度」的较大值
+            val topPx = maxOf(safe.getTop(density), windowTitleBarInsets.getTop(density))
+            WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).union(
+                WindowInsets(
+                    left = 0.dp,
+                    top = with(density) { topPx.toDp() },
+                    right = 0.dp,
+                    bottom = 0.dp,
+                )
+            )
+        } else {
+            safe
+        }
     } else {
         WindowInsets(0.dp)
     }
@@ -603,13 +633,27 @@ fun BiliVideoScaffold(
                                 onValueChange = { subtitle -> playerDelegate.setSubtitle(subtitle) },
                             )
                         }
-                        // 全屏按钮（长按弹出全屏方向菜单，对照旧版长按全屏按钮）
+                        // 全屏按钮（长按弹出全屏方式菜单，对照旧版长按全屏按钮：
+                        // 安卓选择屏幕方向，桌面选择铺满屏幕/铺满窗口）
                         PlayerControllerDefaults.FullscreenIcon(
                             isFullscreen = isFullscreen,
                             onClickFullscreen = onToggleFullscreen,
-                            fullscreenMode = fullscreenMode,
-                            onSelectFullscreenMode = { mode ->
-                                playerDelegate.fullscreenController.setFullscreenMode(mode)
+                            menuOptions = fullMenuOptions,
+                            currentMenuValue = if (desktopPlatform) {
+                                desktopFullscreenMode.value
+                            } else {
+                                fullscreenMode.value
+                            },
+                            onSelectMenuValue = { value ->
+                                if (desktopPlatform) {
+                                    playerDelegate.fullscreenController.setDesktopFullscreenMode(
+                                        DesktopFullscreenMode.fromValue(value)
+                                    )
+                                } else {
+                                    playerDelegate.fullscreenController.setFullscreenMode(
+                                        FullscreenMode.fromValue(value)
+                                    )
+                                }
                             },
                             onModeMenuExpandedChanged = { expanded ->
                                 if (expanded) {
