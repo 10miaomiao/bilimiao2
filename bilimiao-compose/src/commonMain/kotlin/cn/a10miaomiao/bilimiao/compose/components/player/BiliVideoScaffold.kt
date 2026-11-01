@@ -73,6 +73,7 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.Pl
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerControllerDefaults
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerProgressSliderState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.formatSpeedNumber
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberAlwaysOnRequester
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberVideoControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMoreActionsButton
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenType
@@ -217,6 +218,8 @@ fun BiliVideoScaffold(
     val displayMode = localPlayerDisplayMode()
     // 全屏状态统一由 PlayerState 提供（数据源为 FullscreenController.isFullscreen）
     val isFullscreen by playerState.fullScreenPlayer.collectAsState()
+    // 全屏播放屏幕方向设置（长按全屏按钮弹出的菜单使用，与设置页同一数据源）
+    val fullscreenMode by playerDelegate.fullscreenController.fullscreenMode.collectAsState()
     // 画中画（应用外小窗）状态：由平台层（Activity 的 onPictureInPictureModeChanged）注入，
     // 与 ComposeScaffold 共享同一状态源：宿主布局让出整个窗口，本组件负责小窗内的播放器展示
     val pictureInPicture by playerState.pictureInPicture.collectAsState()
@@ -241,6 +244,8 @@ fun BiliVideoScaffold(
     }
 
     val controllerState = rememberVideoControllerState()
+    // 长按全屏按钮弹出的方向菜单展开期间保持控制器常显，避免控制器自动隐藏把菜单一起收走
+    val fullModeMenuAlwaysOnRequester = rememberAlwaysOnRequester(controllerState, "fullscreenModeMenu")
     var isLocked by remember { mutableStateOf(false) }
     val indicatorState = rememberGestureIndicatorState()
 
@@ -598,10 +603,21 @@ fun BiliVideoScaffold(
                                 onValueChange = { subtitle -> playerDelegate.setSubtitle(subtitle) },
                             )
                         }
-                        // 全屏按钮
+                        // 全屏按钮（长按弹出全屏方向菜单，对照旧版长按全屏按钮）
                         PlayerControllerDefaults.FullscreenIcon(
                             isFullscreen = isFullscreen,
                             onClickFullscreen = onToggleFullscreen,
+                            fullscreenMode = fullscreenMode,
+                            onSelectFullscreenMode = { mode ->
+                                playerDelegate.fullscreenController.setFullscreenMode(mode)
+                            },
+                            onModeMenuExpandedChanged = { expanded ->
+                                if (expanded) {
+                                    fullModeMenuAlwaysOnRequester.request()
+                                } else {
+                                    fullModeMenuAlwaysOnRequester.cancelRequest()
+                                }
+                            },
                         )
                     },
                     expanded = isFullscreen,

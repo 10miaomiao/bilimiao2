@@ -1,4 +1,7 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@file:OptIn(
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+)
 
 package cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress
 
@@ -7,7 +10,9 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -100,6 +105,7 @@ import androidx.compose.ui.window.PopupProperties
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.keepLayoutWhenHidden
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlayerControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlaybackSpeedControllerState
+import com.a10miaomiao.bilimiao.comm.delegate.player.FullscreenMode
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
 import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
@@ -117,6 +123,7 @@ const val TAG_QUALITY_SELECTOR_TEXT_BUTTON = "QualitySelectorTextButton"
 const val TAG_QUALITY_SELECTOR_DROPDOWN_MENU = "QualitySelectorDropdownMenu"
 const val TAG_SUBTITLE_SWITCHER_TEXT_BUTTON = "SubtitleSwitcherTextButton"
 const val TAG_SUBTITLE_SWITCHER_DROPDOWN_MENU = "SubtitleSwitcherDropdownMenu"
+const val TAG_FULLSCREEN_MODE_DROPDOWN_MENU = "FullscreenModeDropdownMenu"
 
 /**
  * 视频宽高比控制器的简化状态.
@@ -568,22 +575,84 @@ object PlayerControllerDefaults {
 
     /**
      * 全屏切换按钮
+     *
+     * 长按弹出「全屏播放屏幕方向」菜单（对照旧版 `fullscreenButton.setOnLongClickListener
+     * { showFullModeMenu(it) }`，菜单项同为 `menu/player_full_mode`），
+     * 选择后经 [onSelectFullscreenMode] 写回设置；未提供该回调时不响应长按。
+     *
+     * @param fullscreenMode 当前全屏方向设置（用于菜单选中标记）
+     * @param onSelectFullscreenMode 选择全屏方向的回调，为空表示不支持长按菜单（如桌面端之外的场景）
+     * @param onModeMenuExpandedChanged 菜单展开状态变化回调（供调用方在菜单展开期间保持控制器常显）
      */
     @Composable
     fun FullscreenIcon(
         isFullscreen: Boolean,
         onClickFullscreen: () -> Unit,
         modifier: Modifier = Modifier,
+        fullscreenMode: FullscreenMode = FullscreenMode.AUTO,
+        onSelectFullscreenMode: ((FullscreenMode) -> Unit)? = null,
+        onModeMenuExpandedChanged: (Boolean) -> Unit = {},
     ) {
+        var modeMenuExpanded by rememberSaveable { mutableStateOf(false) }
+        // 通知调用方：菜单展开期间控制器不能自动隐藏，否则菜单会随控制栏一起消失
+        LaunchedEffect(modeMenuExpanded) {
+            onModeMenuExpandedChanged(modeMenuExpanded)
+        }
         // needWorkaroundForFocusManager 简化为 false, 移除焦点 workaround
-        IconButton(
-            onClick = onClickFullscreen,
-            modifier,
+        // IconButton 不支持长按，改用与 IconButton 同尺寸(48dp)的 combinedClickable 容器
+        Box(
+            modifier = modifier
+                .size(48.dp)
+                .combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = LocalIndication.current,
+                    onClick = onClickFullscreen,
+                    onLongClick = onSelectFullscreenMode?.let { { modeMenuExpanded = true } },
+                ),
+            contentAlignment = Alignment.Center,
         ) {
             if (isFullscreen) {
                 Icon(Icons.Rounded.FullscreenExit, contentDescription = "退出全屏", Modifier.size(32.dp))
             } else {
                 Icon(Icons.Rounded.Fullscreen, contentDescription = "全屏", Modifier.size(32.dp))
+            }
+            if (onSelectFullscreenMode != null) {
+                DropdownMenu(
+                    expanded = modeMenuExpanded,
+                    onDismissRequest = { modeMenuExpanded = false },
+                    modifier = Modifier.testTag(TAG_FULLSCREEN_MODE_DROPDOWN_MENU),
+                ) {
+                    fullscreenModeMenuOrder.forEach { mode ->
+                        val selected = mode == fullscreenMode
+                        DropdownMenuItem(
+                            text = {
+                                val color = if (selected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    LocalContentColor.current
+                                }
+                                CompositionLocalProvider(LocalContentColor provides color) {
+                                    Text(fullscreenModeLabel(mode))
+                                }
+                            },
+                            leadingIcon = if (selected) {
+                                {
+                                    Icon(
+                                        Icons.Rounded.Check,
+                                        "已选择",
+                                        Modifier.size(18.dp),
+                                    )
+                                }
+                            } else {
+                                null
+                            },
+                            onClick = {
+                                modeMenuExpanded = false
+                                onSelectFullscreenMode(mode)
+                            },
+                        )
+                    }
+                }
             }
         }
     }

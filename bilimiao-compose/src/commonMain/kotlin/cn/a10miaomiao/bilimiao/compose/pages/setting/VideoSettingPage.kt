@@ -21,6 +21,8 @@ import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
 import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenModeLabel
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenModeMenuOrder
 import cn.a10miaomiao.bilimiao.compose.components.preference.customSetsPreference
 import cn.a10miaomiao.bilimiao.compose.components.preference.multiSelectIntPreference
 import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
@@ -77,13 +79,10 @@ private class VideoSettingPageViewModel(
     val smartSourceSelectionList = smartSourceSelection.keys.toList()
 
 
-    private val fullModeSelection = mapOf(
-        SettingConstants.PLAYER_FULL_MODE_AUTO to AnnotatedString("跟随视频"),
-        SettingConstants.PLAYER_FULL_MODE_UNSPECIFIED to AnnotatedString("跟随系统"),
-        SettingConstants.PLAYER_FULL_MODE_SENSOR_LANDSCAPE to AnnotatedString("横向全屏(自动)"),
-        SettingConstants.PLAYER_FULL_MODE_LANDSCAPE to AnnotatedString("横向全屏(固定方向1)"),
-        SettingConstants.PLAYER_FULL_MODE_REVERSE_LANDSCAPE to AnnotatedString("横向全屏(固定方向2)"),
-    )
+    // 文案与顺序与播放器长按全屏按钮弹出的方向菜单共用一份定义
+    private val fullModeSelection = fullscreenModeMenuOrder.associate {
+        it.value to AnnotatedString(fullscreenModeLabel(it))
+    }
 
     fun fullModeSelectionName(value: Int) =
         fullModeSelection[value] ?: AnnotatedString(value.toString())
