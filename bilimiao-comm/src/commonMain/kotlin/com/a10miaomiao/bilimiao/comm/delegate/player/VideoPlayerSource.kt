@@ -1,14 +1,17 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import bilibili.app.playurl.v1.CodeType
 import bilibili.app.playurl.v1.PlayURLGRPC
 import bilibili.app.playurl.v1.PlayViewReq
 import bilibili.app.playurl.v1.Stream
 import bilibili.community.service.dm.v1.DMGRPC
 import bilibili.community.service.dm.v1.DmViewReq
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.selectDashVideo
 import com.a10miaomiao.bilimiao.comm.delegate.player.source.SourceUrlSet
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
 import com.a10miaomiao.bilimiao.comm.network.BiliApiService
@@ -29,7 +32,8 @@ open class VideoPlayerSource(
     var pages = emptyList<PageInfo>()
 
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
-        getGrpcPlayerUrl(quality, fnval)?.let {
+        val codecId = SettingConstants.playerDecoderToCodecId(decoder)
+        getGrpcPlayerUrl(quality, fnval, codecId)?.let {
             return it
         }
         val res = BiliApiService.playerAPI
@@ -51,8 +55,7 @@ open class VideoPlayerSource(
                 it.duration = dash.duration * 1000L
                 // 选取规则与 DashSource.getMDPUrl 内部保持一致：换源要给「实际会播的那条流」
                 // 测速，否则会把另一条 rep 的地址塞进按本条 rep 生成的 MPD
-                val dashVideo = dash.video.firstOrNull { item -> item.id == res.quality }
-                    ?: dash.video.lastOrNull()
+                val dashVideo = selectDashVideo(dash.video, res.quality, codecId)
                     ?: throw Exception("未找到可播放的dash视频")
                 it.height = dashVideo.height
                 it.width = dashVideo.width
@@ -68,7 +71,8 @@ open class VideoPlayerSource(
                 )
                 it.url = dashSource.getMDPUrl(
                     dashData = dash,
-                    quality = res.quality
+                    quality = res.quality,
+                    codecId = codecId,
                 )
             } else {
                 val durl = res.durl!!
@@ -88,7 +92,7 @@ open class VideoPlayerSource(
         }
     }
 
-    private suspend fun getGrpcPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo? {
+    private suspend fun getGrpcPlayerUrl(quality: Int, fnval: Int, codecId: Int?): PlayerSourceInfo? {
         val result = BiliGRPCHttp.request {
             val req = PlayViewReq(
                 aid = aid.toLong(),
@@ -99,6 +103,12 @@ open class VideoPlayerSource(
                 fnver = 0,
                 forceHost = 2,
                 fourk = true,
+                preferCodecType = when (codecId) {
+                    7 -> CodeType.CODE264
+                    12 -> CodeType.CODE265
+                    13 -> CodeType.CODEAV1
+                    else -> CodeType.NOCODE
+                },
             )
             PlayURLGRPC.playView(req)
         }.awaitCall()
@@ -120,9 +130,17 @@ open class VideoPlayerSource(
                 acceptInfo.newDescription
             )
         }
-        val stream = availableStreamList.firstOrNull {
+        // 强制编码时优先只保留对应 codecid 的 DASH 流；服务端没给该编码就退回全部，
+        // 避免「选了 AVC 却实际播了 HEVC」在老旧设备上绿屏
+        val codecStreamList = codecId?.let { cid ->
+            availableStreamList.filter { stream ->
+                val dashVideo = stream.content as? Stream.Content.DashVideo
+                dashVideo == null || dashVideo.value.codecid == cid
+            }.ifEmpty { availableStreamList }
+        } ?: availableStreamList
+        val stream = codecStreamList.firstOrNull {
             it.streamInfo?.quality == quality
-        } ?: availableStreamList.firstOrNull()
+        } ?: codecStreamList.firstOrNull()
         val streamContent = stream?.content ?: return null
         playerSource.quality = stream.streamInfo?.quality ?: videoInfo.quality
         playerSource.duration = videoInfo.timelength

@@ -80,6 +80,7 @@ object SettingPreferences {
     /**
      * Player
      */
+    // 视频解码器（编码流）选择：自动 / AVC / HEVC / AV1，取值见 SettingConstants
     val PlayerDecoder = intPreferencesKey("player_decoder")
     val PlayerQuality = intPreferencesKey("player_quality")
     val PlayerSpeed = floatPreferencesKey("player_speed")

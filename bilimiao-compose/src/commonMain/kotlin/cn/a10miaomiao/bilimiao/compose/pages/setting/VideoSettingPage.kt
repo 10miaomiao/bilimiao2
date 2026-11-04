@@ -71,6 +71,19 @@ private class VideoSettingPageViewModel(
     fun fnvalSelectionName(value: Int) = fnvalSelection[value] ?: AnnotatedString(value.toString())
     val fnvalSelectionList = fnvalSelection.keys.toList()
 
+    // 视频解码器（编码流）选择：默认强制 AVC 以避免老旧设备播放 HEVC/AV1 绿屏
+    private val decoderSelection = mapOf(
+        SettingConstants.PLAYER_DECODER_AUTO to AnnotatedString("自动"),
+        SettingConstants.PLAYER_DECODER_AVC to AnnotatedString("AVC (H.264)"),
+        SettingConstants.PLAYER_DECODER_HEVC to AnnotatedString("HEVC (H.265)"),
+        SettingConstants.PLAYER_DECODER_AV1 to AnnotatedString("AV1"),
+    )
+
+    fun decoderSelectionName(value: Int) =
+        decoderSelection[value] ?: AnnotatedString(value.toString())
+
+    val decoderSelectionList = decoderSelection.keys.toList()
+
     private val smartSourceSelection = mapOf(
         SettingConstants.PLAYER_SMART_SOURCE_OFF to AnnotatedString("关闭"),
         SettingConstants.PLAYER_SMART_SOURCE_BACKGROUND to AnnotatedString("开启"),
@@ -212,6 +225,18 @@ private fun VideoSettingPageContent(
                     Text("关闭后可以与其它APP同时播放")
                 },
                 defaultValue = true,
+            )
+            listPreference(
+                key = SettingPreferences.PlayerDecoder.name,
+                title = {
+                    Text("视频解码器")
+                },
+                summary = {
+                    Text("指定播放的视频编码流；老旧设备播 HEVC/AV1 容易绿屏，默认强制 AVC")
+                },
+                defaultValue = SettingConstants.PLAYER_DECODER_DEFAULT,
+                values = viewModel.decoderSelectionList,
+                valueToText = viewModel::decoderSelectionName
             )
 
             preferenceCategory(

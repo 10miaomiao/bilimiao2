@@ -112,6 +112,7 @@ class PlayerDelegateImpl(
     // 播放参数（清晰度切换需要跨界面保留；quality 的写入统一走 session.setQuality 以便持久化）
     private val quality: Int get() = session.quality
     private val fnval: Int get() = session.fnval
+    private val decoder: Int get() = session.decoder
 
     // 播放状态（低频稳定状态，见 PlaybackState）
     private val _playbackState get() = session.playbackStateFlow
@@ -273,6 +274,7 @@ class PlayerDelegateImpl(
                 session.ensurePlayerConfigLoaded()
                 source.proxyServer = session.proxyServer
                 source.uposHost = session.uposHost
+                source.decoder = decoder
                 val sourceInfo = source.getPlayerUrl(quality, fnval)
                 fullscreenController.playbackInfo = sourceInfo
                 _sourceState.update {
