@@ -192,6 +192,10 @@ class PlayerDelegateImpl(
         _sourceState.update { it.copy(currentSource = source) }
         playerStore.setPlayerSource(source)
         onShowPlayerChanged?.invoke(true)
+        // 倍速由播放会话持有，打开新视频时复位为 1x：否则上一个视频设置的倍速
+        // （如 2x）会被带到新视频，且加载新媒体后播放器倍速与会话状态脱节，
+        // 在新视频里再点 1x 也无法生效。
+        _playbackState.update { it.copy(playbackSpeed = 1.0f) }
         loadAndPlay(source)
         // 检查是否默认全屏播放
         fullscreenController.checkIsPlayerDefaultFull()
@@ -359,6 +363,11 @@ class PlayerDelegateImpl(
                 } else {
                     player.resume()
                 }
+
+                // 加载新媒体后把会话中的倍速重新应用到播放器：mediamp 在
+                // setMediaData/playUri 之后可能把倍速恢复成 1x，若不重新同步，
+                // 切换视频（含自动连播）后状态与实际播放速度会不一致，倍速按钮也会失效。
+                player.features[PlaybackSpeed]?.set(_playbackState.value.playbackSpeed)
 
                 // 播放历史恢复
                 if (sourceInfo.lastPlayCid == source.id
