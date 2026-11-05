@@ -2,6 +2,7 @@ package com.a10miaomiao.bilimiao.comm.delegate.player
 
 import cn.a10miaomiao.bilimiao.danmaku.parser.BiliDanmakuParser
 import cn.a10miaomiao.bilimiao.danmaku.parser.IDataSource
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
@@ -30,6 +31,8 @@ abstract class BasePlayerSource() : DanmakuProvider {
     var defaultPlayerSource = PlayerSourceInfo()
     var proxyServer: ProxyServerInfo? = null
     var uposHost: String = ""
+    // 视频解码器（编码流）选择，在线播放前由 PlayerDelegateImpl 写入；本地播放不使用
+    var decoder: Int = SettingConstants.PLAYER_DECODER_DEFAULT
     var isLoop: Boolean = false // 循环播放
 
     /**

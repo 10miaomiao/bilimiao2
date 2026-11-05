@@ -7,10 +7,12 @@ import bilibili.pgc.gateway.player.v2.PlayURLGRPC
 import bilibili.pgc.gateway.player.v2.PlayViewReq
 import bilibili.pgc.gateway.player.v2.CodeType
 import bilibili.pgc.gateway.player.v2.Stream
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.DashSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceIds
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.selectDashVideo
 import com.a10miaomiao.bilimiao.comm.delegate.player.source.SourceUrlSet
 import com.a10miaomiao.bilimiao.comm.exception.DabianException
 import com.a10miaomiao.bilimiao.comm.network.ApiHelper
@@ -38,12 +40,13 @@ open class BangumiPlayerSource(
     var episodes = emptyList<EpisodeInfo>()
 
     override suspend fun getPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo {
+        val codecId = SettingConstants.playerDecoderToCodecId(decoder)
         val proxy = proxyServer
         if (proxy != null) {
-            return getProxyPlayerUrl(proxy, quality, fnval)
+            return getProxyPlayerUrl(proxy, quality, fnval, codecId)
         }
         // grpc
-        getGrpcPlayerUrl(quality, fnval)?.let {
+        getGrpcPlayerUrl(quality, fnval, codecId)?.let {
             return it
         }
         // 如果grpc api获取失败则使用旧版api
@@ -65,8 +68,7 @@ open class BangumiPlayerSource(
                 it.duration = dash.duration * 1000L
                 // 选取规则与 DashSource.getMDPUrl 内部保持一致：换源要给「实际会播的那条流」
                 // 测速，否则会把另一条 rep 的地址塞进按本条 rep 生成的 MPD
-                val dashVideo = dash.video.firstOrNull { item -> item.id == res.quality }
-                    ?: dash.video.lastOrNull()
+                val dashVideo = selectDashVideo(dash.video, res.quality, codecId)
                     ?: throw Exception("未找到可播放的dash视频")
                 it.height = dashVideo.height
                 it.width = dashVideo.width
@@ -82,7 +84,8 @@ open class BangumiPlayerSource(
                 )
                 it.url = dashSource.getMDPUrl(
                     dashData = dash,
-                    quality = res.quality
+                    quality = res.quality,
+                    codecId = codecId,
                 )
             } else {
                 val durl = res.durl!!
@@ -106,7 +109,7 @@ open class BangumiPlayerSource(
         }
     }
 
-    private suspend fun getGrpcPlayerUrl(quality: Int, fnval: Int): PlayerSourceInfo? {
+    private suspend fun getGrpcPlayerUrl(quality: Int, fnval: Int, codecId: Int?): PlayerSourceInfo? {
         val result = BiliGRPCHttp.request {
             val req = PlayViewReq(
                 seasonId = sid.toLong(),
@@ -118,7 +121,12 @@ open class BangumiPlayerSource(
                 fourk = true,
                 forceHost = 2,
                 download = 0,
-                preferCodecType = CodeType.CODE264,
+                // pgc 的 CodeType 没有 AV1 选项，AV1 交给下面的 codecid 过滤尽力匹配
+                preferCodecType = when (codecId) {
+                    7 -> CodeType.CODE264
+                    12 -> CodeType.CODE265
+                    else -> CodeType.NOCODE
+                },
             )
             PlayURLGRPC.playView(req)
         }.awaitCall()
@@ -144,9 +152,17 @@ open class BangumiPlayerSource(
                 acceptInfo.newDescription
             )
         }
-        val stream = availableStreamList.firstOrNull {
+        // 强制编码时优先只保留对应 codecid 的 DASH 流；服务端没给该编码就退回全部，
+        // 避免「选了 AVC 却实际播了 HEVC」在老旧设备上绿屏
+        val codecStreamList = codecId?.let { cid ->
+            availableStreamList.filter { stream ->
+                val dashVideo = stream.content as? Stream.Content.DashVideo
+                dashVideo == null || dashVideo.value.codecid == cid
+            }.ifEmpty { availableStreamList }
+        } ?: availableStreamList
+        val stream = codecStreamList.firstOrNull {
             it.info?.quality == quality
-        } ?: availableStreamList.firstOrNull()
+        } ?: codecStreamList.firstOrNull()
         val streamContent = stream?.content ?: return null
         playerSource.quality = stream.info?.quality ?: videoInfo.quality
         playerSource.duration = videoInfo.timelength
@@ -189,7 +205,8 @@ open class BangumiPlayerSource(
     suspend fun getProxyPlayerUrl(
         proxy: ProxyServerInfo,
         quality: Int,
-        fnval: Int
+        fnval: Int,
+        codecId: Int?,
     ): PlayerSourceInfo {
         val res = BiliApiService
             .playerAPI
@@ -211,8 +228,7 @@ open class BangumiPlayerSource(
                 it.duration = dash.duration * 1000L
                 // 选取规则与 DashSource.getMDPUrl 内部保持一致：换源要给「实际会播的那条流」
                 // 测速，否则会把另一条 rep 的地址塞进按本条 rep 生成的 MPD
-                val dashVideo = dash.video.firstOrNull { item -> item.id == res.quality }
-                    ?: dash.video.lastOrNull()
+                val dashVideo = selectDashVideo(dash.video, res.quality, codecId)
                     ?: throw Exception("未找到可播放的dash视频")
                 it.height = dashVideo.height
                 it.width = dashVideo.width
@@ -228,7 +244,8 @@ open class BangumiPlayerSource(
                 )
                 it.url = dashSource.getMDPUrl(
                     dashData = dash,
-                    quality = res.quality
+                    quality = res.quality,
+                    codecId = codecId,
                 )
             } else {
                 val durl = res.durl!!

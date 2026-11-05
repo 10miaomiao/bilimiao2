@@ -1,5 +1,6 @@
 package com.a10miaomiao.bilimiao.comm.delegate.player
 
+import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.datastore.editPreferences
@@ -111,6 +112,8 @@ class PlayerSession {
         private set
     var fnval = 4048 // DASH 格式
         private set
+    var decoder = SettingConstants.PLAYER_DECODER_DEFAULT // 视频解码器（编码流）选择
+        private set
 
     /** 清晰度是否已确定（已从磁盘恢复或被手动切换，见 [ensurePlayerConfigLoaded]） */
     private var qualityResolved = false
@@ -119,15 +122,19 @@ class PlayerSession {
      * 读取播放参数（每次取播放地址前调用）
      *
      * 清晰度只在会话内第一次确定：之后以用户本次的选择为准，否则切换清晰度后
-     * 会被磁盘里的旧值覆盖；视频格式是设置项，每次都按最新设置应用。
+     * 会被磁盘里的旧值覆盖；视频格式、视频解码器都是设置项，每次都按最新设置应用。
      *
      * 播放会话虽然与进程同寿命，但进程重启后字段是默认值，仍要从磁盘取回，
      * 否则用户每次重启应用都要重新选清晰度（对齐旧版 `PlayerDelegate2.openPlayer`）。
      */
     suspend fun ensurePlayerConfigLoaded() {
-        val saved = try {
-            SettingPreferences.mapPreferences<Pair<Int?, Int?>> {
-                it[SettingPreferences.PlayerQuality] to it[SettingPreferences.PlayerFnval]
+        val (savedQuality, savedFnval, savedDecoder) = try {
+            SettingPreferences.mapPreferences<Triple<Int?, Int?, Int?>> {
+                Triple(
+                    it[SettingPreferences.PlayerQuality],
+                    it[SettingPreferences.PlayerFnval],
+                    it[SettingPreferences.PlayerDecoder],
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -136,10 +143,11 @@ class PlayerSession {
         // 读取期间用户可能已经手动切过清晰度（[setQuality] 会置位 qualityResolved），
         // 此时不能被磁盘里的旧值覆盖
         if (!qualityResolved) {
-            saved.first?.let { quality = it }
+            savedQuality?.let { quality = it }
             qualityResolved = true
         }
-        saved.second?.let { fnval = it }
+        savedFnval?.let { fnval = it }
+        decoder = savedDecoder ?: SettingConstants.PLAYER_DECODER_DEFAULT
     }
 
     /**

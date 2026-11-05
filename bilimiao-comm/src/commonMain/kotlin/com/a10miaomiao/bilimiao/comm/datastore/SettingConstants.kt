@@ -9,8 +9,21 @@ object SettingConstants {
     const val THEME_TYPE_DEFAULT = 0
     const val THEME_TYPE_DYNAMIC_COLOR = 1
 
-    const val PLAYER_DECODER_DEFAULT = "default"
-    const val PLAYER_DECODER_AV1 = "AV1"
+    // 视频解码器（编码流）选择：决定请求 / 播放 AVC、HEVC、AV1 中的哪条流。
+    // 老旧设备对 HEVC / AV1 硬解支持不佳容易绿屏，故默认强制 AVC(H.264)。
+    const val PLAYER_DECODER_AUTO = 0   // 不强制，跟随服务端 / 播放器默认
+    const val PLAYER_DECODER_AVC = 1    // H.264 / AVC
+    const val PLAYER_DECODER_HEVC = 2   // H.265 / HEVC
+    const val PLAYER_DECODER_AV1 = 3    // AV1
+    const val PLAYER_DECODER_DEFAULT = PLAYER_DECODER_AVC
+
+    /** 解码器选项 → B 站视频编码 codecid；「自动」返回 null，表示不按编码过滤。 */
+    fun playerDecoderToCodecId(decoder: Int): Int? = when (decoder) {
+        PLAYER_DECODER_AVC -> 7
+        PLAYER_DECODER_HEVC -> 12
+        PLAYER_DECODER_AV1 -> 13
+        else -> null
+    }
 
     const val PLAYER_FNVAL_FLV = 2
     const val PLAYER_FNVAL_MP4 = 2

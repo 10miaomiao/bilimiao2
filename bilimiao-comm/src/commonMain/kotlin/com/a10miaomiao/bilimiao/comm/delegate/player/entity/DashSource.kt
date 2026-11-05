@@ -3,6 +3,28 @@ package com.a10miaomiao.bilimiao.comm.delegate.player.entity
 import com.a10miaomiao.bilimiao.comm.apis.PlayerAPI
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 
+/**
+ * 从 playurl 返回的 dash.video 中挑选本次播放的视频流。
+ *
+ * 强制编码时优先取「清晰度 + codecid」都匹配的流，找不到再退回该清晰度的第一条；
+ * getMDPUrl 生成 MPD 时也用这一规则，保证实际播放地址与 MPD 声明的是同一条流。
+ * codecId 为 null 表示「自动」，不按编码过滤。
+ */
+fun selectDashVideo(
+    videos: List<PlayerAPI.DashItem>,
+    quality: Int,
+    codecId: Int?,
+): PlayerAPI.DashItem? {
+    val byQuality = videos.filter { it.id == quality }
+    return if (codecId != null) {
+        byQuality.firstOrNull { it.codecid == codecId }
+            ?: byQuality.firstOrNull()
+            ?: videos.lastOrNull()
+    } else {
+        byQuality.firstOrNull() ?: videos.lastOrNull()
+    }
+}
+
 class DashSource(
     val uposHost: String = "",
     /**
@@ -178,10 +200,9 @@ class DashSource(
     fun getMDPUrl(
         dashData: PlayerAPI.Dash,
         quality: Int,
+        codecId: Int? = null,
     ): String {
-        val video = dashData.video.firstOrNull {
-            it.id == quality
-        } ?: dashData.video.lastOrNull() ?: return ""
+        val video = selectDashVideo(dashData.video, quality, codecId) ?: return ""
         val audio = dashData.audio?.firstOrNull()
         return getMDPUrl(
             video = DashItem(
