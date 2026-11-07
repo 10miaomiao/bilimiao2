@@ -30,6 +30,7 @@ import cn.a10miaomiao.bilimiao.compose.components.list.SwipeToRefresh
 import cn.a10miaomiao.bilimiao.compose.components.video.VideoItemBox
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowViewModel
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +46,7 @@ private class RankListContentViewModel(
 ) : ViewModel(), DIAware {
 
     private val pageNavigation by instance<PageNavigation>()
+    private val filterStore: FilterStore by instance()
 
     val count = MutableStateFlow(1)
     val isRefreshing = MutableStateFlow(false)
@@ -76,26 +78,17 @@ private class RankListContentViewModel(
                     RankGRPC.rankRegion(req)
                 }
             }.awaitCall()
-//            var totalCount = 0 // 屏蔽前数量
-//            if (result.size < list.pageSize) {
-//                ui.setState { list.finished = true }
-//            }
-//            totalCount = result.size
-//            result = result.filter {
-//                filterStore.filterWord(it.title)
-//                        && filterStore.filterUpper(it.mid.toLong())
-//            }
+            val items = result.items.filter {
+                filterStore.filterWord(it.title) && filterStore.filterUpper(it.mid)
+            }
             if (pageNum == 1) {
-                list.data.value = result.items
+                list.data.value = items
             } else {
                 list.data.value = list.data.value
                     .toMutableList()
-                    .also { it.addAll(result.items) }
+                    .also { it.addAll(items) }
             }
             list.pageNum = pageNum
-//            if (list.data.size < 10 && totalCount != result.size) {
-//                _loadData(pageNum + 1)
-//            }
         } catch (e: Exception) {
             e.printStackTrace()
             list.fail.value = "无法连接到御坂网络"

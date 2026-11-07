@@ -139,7 +139,12 @@ class VideoDetailViewModel(
             val res = BiliGRPCHttp.request {
                 ViewGRPC.view(req)
             }.awaitCall()
-            _detailData.value = res
+            _detailData.value = res.copy(
+                relates = res.relates.filter {
+                    filterStore.filterWord(it.title)
+                            && filterStore.filterUpper(it.author?.mid ?: 0L)
+                }
+            )
             autoStartPlay()
         } catch (e: Exception) {
             e.printStackTrace()

@@ -101,3 +101,8 @@ fun htmlText(
         }
     }
 }
+
+/**
+ * 去掉标题中的高亮标签，用于屏蔽关键字等纯文本匹配
+ */
+fun plainText(html: String): String = parseHtmlText(html).joinToString("") { it.content }
