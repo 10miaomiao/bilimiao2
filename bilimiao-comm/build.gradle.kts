@@ -74,6 +74,8 @@ kotlin {
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspDesktop", libs.androidx.room.compiler)
+    // src/test/java 下的 Android 单元测试使用 JUnit 4（对齐 app 模块）
+    testImplementation(libs.junit)
 }
 
 android {
