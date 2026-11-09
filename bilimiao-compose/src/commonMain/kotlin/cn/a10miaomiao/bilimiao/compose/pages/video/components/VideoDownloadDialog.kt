@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -79,6 +80,18 @@ class VideoDownloadDialogState(
     private val _downloadedSet = mutableStateOf(setOf<Long>()) // 已下载
     val downloadedSet: Set<Long> get() = _downloadedSet.value
 
+    // 可勾选（未下载）的分P及其下标
+    private val selectablePages: List<Pair<Int, Page>>
+        get() = list.withIndex()
+            .filterNot { downloadedSet.contains(it.value.cid) }
+            .map { it.index to it.value }
+    // 是否可全选
+    val canCheckAll: Boolean get() = selectablePages.isNotEmpty()
+    // 可勾选的分P是否已全部选中
+    val isAllChecked: Boolean get() = selectablePages.let { pages ->
+        pages.isNotEmpty() && pages.all { checkedMap.containsKey(it.second.cid) }
+    }
+
     private val _qualityList = mutableStateOf(listOf<Pair<Int, String>>()) // Quality: Description
     val qualityList: List<Pair<Int, String>> get() = _qualityList.value
 
@@ -94,6 +107,12 @@ class VideoDownloadDialogState(
         videoArc: Arc,
         videoPages: List<Page>,
     ) {
+        // 页面内切视频（VideoDetailViewModel.changeVideo）会复用同一个 state 实例，
+        // 不清空的话上一个视频的勾选会残留：列表里看不出勾选，但「开始下载(n)」的计数虚高，
+        // 且点击后提示的成功条数与实际创建数不符。同一视频重开弹窗则保留上次勾选。
+        if (_arcData.value?.aid != videoArc.aid) {
+            _checkedMap.clear()
+        }
         downloadManager = manager
         _visible.value = true
         _list.value = videoPages
@@ -142,6 +161,19 @@ class VideoDownloadDialogState(
             _checkedMap.remove(cid)
         } else {
             _checkedMap[cid] = index
+        }
+    }
+
+    /**
+     * 全选/取消全选（只处理未下载的分P）
+     */
+    fun toggleAllChecked() {
+        if (isAllChecked) {
+            _checkedMap.clear()
+        } else {
+            selectablePages.forEach { (index, page) ->
+                _checkedMap[page.cid] = index
+            }
         }
     }
 
@@ -314,14 +346,27 @@ fun VideoDownloadDialog(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                Text(
-                    text = "请选择分P下载",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                Row(
                     modifier = Modifier
-                        .padding(10.dp)
                         .fillMaxWidth()
-                )
+                        .padding(start = 10.dp, end = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "请选择分P下载",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .padding(vertical = 10.dp)
+                            .weight(1f)
+                    )
+                    TextButton(
+                        onClick = state::toggleAllChecked,
+                        enabled = state.canCheckAll,
+                    ) {
+                        Text(text = if (state.isAllChecked) "取消全选" else "全选")
+                    }
+                }
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
