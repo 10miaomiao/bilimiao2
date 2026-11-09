@@ -36,6 +36,7 @@ import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
+import cn.a10miaomiao.bilimiao.compose.common.foundation.plainText
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localEmitter
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfig
@@ -55,6 +56,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import cn.a10miaomiao.bilimiao.compose.store.RegionStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.coroutines.Dispatchers
@@ -74,6 +76,7 @@ private class SearchAllContentViewModel(
 
     private val pageNavigation: PageNavigation by instance()
     private val regionStore: RegionStore by instance()
+    private val filterStore: FilterStore by instance()
 
     private var _next = ""
     val list = FlowPaginationInfo<SearchItem>()
@@ -124,16 +127,14 @@ private class SearchAllContentViewModel(
             val result = BiliGRPCHttp.request {
                 SearchGRPC.searchAll(req)
             }.awaitCall()
-            val itemList = if (next.isNotBlank()
-                || hasFilter.value
-                || order != 0
-            ) {
-                result.item.filter { it.cardItem is CardItem.Av }
-            } else {
-                result.item
+            val itemList = result.item.filter {
+                val cardItem = it.cardItem
+                cardItem is CardItem.Av
+                        && filterStore.filterWord(plainText(cardItem.value.title))
+                        && filterStore.filterUpper(cardItem.value.mid)
             }
             _next = result.pagination?.next ?: ""
-            list.finished.value = itemList.isEmpty() || _next.isBlank()
+            list.finished.value = result.item.isEmpty() || _next.isBlank()
             if (next.isBlank()) {
                 list.data.value = itemList
             } else {

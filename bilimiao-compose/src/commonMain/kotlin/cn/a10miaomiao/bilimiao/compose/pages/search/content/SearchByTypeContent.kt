@@ -24,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bilibili.polymer.app.search.v1.Item.CardItem
 import bilibili.polymer.app.search.v1.SearchByTypeRequest
 import bilibili.polymer.app.search.v1.SearchGRPC
 import cn.a10miaomiao.bilimiao.compose.common.constant.PageTabIds
 import cn.a10miaomiao.bilimiao.compose.common.diViewModel
+import cn.a10miaomiao.bilimiao.compose.common.foundation.plainText
 import cn.a10miaomiao.bilimiao.compose.common.emitter.EmitterAction
 import cn.a10miaomiao.bilimiao.compose.common.entity.FlowPaginationInfo
 import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
@@ -46,6 +48,7 @@ import com.a10miaomiao.bilimiao.comm.mypage.MenuKeys
 import com.a10miaomiao.bilimiao.comm.mypage.SearchConfigInfo
 import com.a10miaomiao.bilimiao.comm.mypage.myMenu
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
+import com.a10miaomiao.bilimiao.comm.store.FilterStore
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,6 +65,7 @@ private class SearchByTypeContentViewModel(
 ) : ViewModel(), DIAware {
 
     private val pageNavigation: PageNavigation by instance()
+    private val filterStore: FilterStore by instance()
 
     private var _next = ""
     val list = FlowPaginationInfo<SearchItem>()
@@ -109,9 +113,19 @@ private class SearchByTypeContentViewModel(
             val result = BiliGRPCHttp.request {
                 SearchGRPC.searchByType(req)
             }.awaitCall()
-            val itemList = result.items
+            val itemList = result.items.filter { item ->
+                val cardItem = item.cardItem
+                when (cardItem) {
+                    is CardItem.Av -> filterStore.filterWord(plainText(cardItem.value.title))
+                            && filterStore.filterUpper(cardItem.value.mid)
+                    is CardItem.Bangumi -> filterStore.filterWord(plainText(cardItem.value.title))
+                    is CardItem.Author -> filterStore.filterWord(plainText(cardItem.value.title))
+                            && filterStore.filterUpper(item.param.toLongOrNull() ?: 0L)
+                    else -> true
+                }
+            }
             _next = result.pagination?.next ?: ""
-            list.finished.value = itemList.isEmpty() || _next.isBlank()
+            list.finished.value = result.items.isEmpty() || _next.isBlank()
             if (next.isBlank()) {
                 list.data.value = itemList
             } else {
