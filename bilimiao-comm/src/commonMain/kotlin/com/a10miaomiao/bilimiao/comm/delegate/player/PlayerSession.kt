@@ -301,18 +301,39 @@ class PlayerSession {
     fun observePlaybackState(player: MediampPlayer) {
         playbackStateJob?.cancel()
         playbackStateJob = coroutineScope.launch {
-            player.playbackState.collect { state ->
-                when (state) {
-                    MediampPlaybackState.PLAYING -> setPlaybackStatus(PlaybackStatus.Playing)
-                    MediampPlaybackState.PAUSED -> setPlaybackStatus(PlaybackStatus.Paused)
-                    MediampPlaybackState.PAUSED_BUFFERING -> setPlaybackStatus(PlaybackStatus.Buffering)
-                    MediampPlaybackState.ERROR -> playbackStateFlow.update {
-                        it.copy(
-                            status = PlaybackStatus.Error,
-                            errorMessage = it.errorMessage ?: "播放出错",
-                        )
+            launch {
+                player.playbackState.collect { state ->
+                    when (state) {
+                        MediampPlaybackState.PLAYING -> setPlaybackStatus(PlaybackStatus.Playing)
+                        MediampPlaybackState.PAUSED -> setPlaybackStatus(PlaybackStatus.Paused)
+                        MediampPlaybackState.PAUSED_BUFFERING -> setPlaybackStatus(PlaybackStatus.Buffering)
+                        MediampPlaybackState.ERROR -> playbackStateFlow.update {
+                            it.copy(
+                                status = PlaybackStatus.Error,
+                                errorMessage = it.errorMessage ?: "播放出错",
+                            )
+                        }
+                        else -> Unit
                     }
-                    else -> Unit
+                }
+            }
+            // 用播放器从媒体流中解析出的真实时长修正接口下发的时长。
+            // playurl 返回的 timelength / dash.duration 是整集元数据时长：非大会员
+            // 只能拿到番剧前几分钟的试看流，接口却仍下发整集时长，导致进度条显示
+            // 24 分钟、视频 3 分钟就播完。播放器实际加载媒体后得到的 durationMillis
+            // 才是真正传输的视频时长，以此为准。
+            // 分段视频（[concatenating]）一次只加载一段，mediaProperties 只代表当前段，
+            // 其总时长由各段 length 累加得到，不能在此覆盖。
+            launch {
+                player.mediaProperties.collect { properties ->
+                    val realDuration = properties?.durationMillis
+                    if (realDuration != null
+                        && realDuration > 0
+                        && segmentUrls.isEmpty()
+                        && playbackStateFlow.value.duration != realDuration
+                    ) {
+                        playbackStateFlow.update { it.copy(duration = realDuration) }
+                    }
                 }
             }
         }
