@@ -198,7 +198,15 @@ class PlayerDelegateImpl(
         fullscreenController.checkIsPlayerDefaultFull()
     }
 
-    private fun loadAndPlay(source: BasePlayerSource, reloadSubtitle: Boolean = true) {
+    /**
+     * @param reloadSubtitle 是否重新拉取字幕列表（切换清晰度时保留现有字幕）
+     * @param restoreHistory 是否恢复上次观看进度；重新播放时须为 false，避免跳回旧进度
+     */
+    private fun loadAndPlay(
+        source: BasePlayerSource,
+        reloadSubtitle: Boolean = true,
+        restoreHistory: Boolean = true,
+    ) {
         val player = _mediampPlayer ?: return
         // 确保播放器状态订阅存在（closePlayer 后重新打开时需重新订阅）
         session.observePlaybackState(player)
@@ -362,8 +370,9 @@ class PlayerDelegateImpl(
                     player.resume()
                 }
 
-                // 播放历史恢复
-                if (sourceInfo.lastPlayCid == source.id
+                // 播放历史恢复（重新播放时跳过，否则会跳回上次观看位置）
+                if (restoreHistory
+                    && sourceInfo.lastPlayCid == source.id
                     && sourceInfo.lastPlayTime > 0
                     && sourceInfo.lastPlayTime < sourceInfo.duration - 10000
                 ) {
@@ -669,8 +678,14 @@ class PlayerDelegateImpl(
     }
 
     override fun replay() {
-        seekTo(0)
-        resume()
+        val source = _sourceState.value.currentSource ?: return
+        // 复位完成状态，让播放完成覆盖层立即消失
+        _playbackState.update { it.copy(status = PlaybackStatus.Loading) }
+        _currentPosition.value = 0L
+        // 播放完成后播放器处于结束态，直接 seekTo(0)+resume 无法可靠地从头起播。
+        // 重新加载媒体并跳过历史进度恢复：默认会按缓存的 lastPlayTime 跳回上次观看
+        // 位置，视频一旦有播放进度，重播就会又从旧进度开始。
+        loadAndPlay(source, reloadSubtitle = false, restoreHistory = false)
     }
 
     override fun playNext() {
