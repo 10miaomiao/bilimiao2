@@ -50,6 +50,14 @@ val VIDEO_GESTURE_MOUSE_MOVE_SHOW_CONTROLLER_DURATION = 3.seconds
 val VIDEO_GESTURE_TOUCH_SHOW_CONTROLLER_DURATION = 3.seconds
 
 /**
+ * 手势区域距屏幕顶部的边距.
+ *
+ * 全屏沉浸时状态栏被隐藏, 顶部这一条不接管手势(含水平快进), 系统的「从顶部边缘下滑
+ * 唤出状态栏」才能第一次就生效; 否则下滑只会调到亮度/音量或触发临时的快进预览.
+ */
+private val GESTURE_AREA_TOP_INSET = 24.dp
+
+/**
  * 条件性地应用 Modifier, 替代原 animeko 的 `ifThen`.
  *
  * 仅当 [condition] 为 `true` 时, 将 [content] 返回的 Modifier 作用于本 Modifier.
@@ -291,6 +299,8 @@ fun PlayerGestureHost(
         val mouseMoveScope = rememberCoroutineScope()
         Box(
             keyboardModifier
+                // 顶部 24dp 不接管任何手势, 交给系统的「从顶部边缘下滑唤出状态栏」
+                .padding(top = GESTURE_AREA_TOP_INSET)
                 .combineClickableWithFamilyGesture()
                 .thenIf(family.swipeToSeek && enableSwipeToSeek) {
                     val swipeSeekInteraction = rememberSwipeSeekInteraction(
