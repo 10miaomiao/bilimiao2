@@ -3,14 +3,22 @@ package com.a10miaomiao.bilimiao.comm.store
 import androidx.lifecycle.ViewModel
 import bilibili.app.view.v1.ViewGRPC
 import bilibili.app.view.v1.ViewReq
+import com.a10miaomiao.bilimiao.comm.db.FilterImportPreview
+import com.a10miaomiao.bilimiao.comm.db.FilterMergeResult
 import com.a10miaomiao.bilimiao.comm.db.createFilterDatabase
 import com.a10miaomiao.bilimiao.comm.db.entity.FilterUpperEntity
+import com.a10miaomiao.bilimiao.comm.db.mergeFilterBackup
+import com.a10miaomiao.bilimiao.comm.db.previewFilterBackup
+import com.a10miaomiao.bilimiao.comm.entity.filter.FilterBackupInfo
+import com.a10miaomiao.bilimiao.comm.entity.filter.FilterBackupSelection
+import com.a10miaomiao.bilimiao.comm.entity.filter.FilterBackupUpper
 import com.a10miaomiao.bilimiao.comm.network.BiliGRPCHttp
 import com.a10miaomiao.bilimiao.comm.store.base.BaseStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
+import kotlin.time.Clock
 
 class FilterStore(override val di: DI) :
     ViewModel(), BaseStore<FilterStore.State> {
@@ -196,4 +204,39 @@ class FilterStore(override val di: DI) :
     }
 
     fun filterTagListIsEmpty() = state.filterTagList.isEmpty()
+
+    /**
+     * 生成屏蔽设置备份，供导出为文本文件
+     */
+    fun buildBackup(selection: FilterBackupSelection = FilterBackupSelection.All): FilterBackupInfo =
+        FilterBackupInfo(
+            exportedAt = Clock.System.now().toString(),
+            filterWords = state.filterWordList.toList(),
+            filterUppers = state.filterUpperList.map { FilterBackupUpper(mid = it.mid, name = it.name) },
+            filterTags = state.filterTagList.toList(),
+        ).selected(selection)
+
+    /**
+     * 预览导入结果（不写库），供确认对话框展示“共 n 条 / 可导入 x 条 …”
+     */
+    suspend fun previewImport(
+        backup: FilterBackupInfo,
+        selection: FilterBackupSelection = FilterBackupSelection.All,
+    ): FilterImportPreview = previewFilterBackup(db, backup, selection)
+
+    /**
+     * 把备份合并进当前设置，返回各项实际新增的条数。
+     * 相同内容不会重复写入，因此同一份备份重复导入是安全的。
+     */
+    fun importBackup(
+        backup: FilterBackupInfo,
+        selection: FilterBackupSelection = FilterBackupSelection.All,
+    ): FilterMergeResult {
+        val result = runBlocking { mergeFilterBackup(db, backup, selection) }
+        // 只刷新真正发生变化的列表，避免无谓的状态抖动
+        if (result.addedWords > 0) queryFilterWord()
+        if (result.addedUppers > 0) queryFilterUpper()
+        if (result.addedTags > 0) queryFilterTag()
+        return result
+    }
 }
