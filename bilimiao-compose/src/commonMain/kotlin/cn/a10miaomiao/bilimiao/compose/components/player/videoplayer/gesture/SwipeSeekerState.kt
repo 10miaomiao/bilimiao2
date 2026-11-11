@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -86,6 +87,23 @@ internal fun isVerticalDragCancelled(
 ): Boolean {
     return position.isSpecified &&
         dragStartY - position.y > cancelVerticalDragDistancePx
+}
+
+/**
+ * 判断本次滑动是否以竖直方向为主.
+ *
+ * 快进用的是 `draggable(Orientation.Horizontal)`, 它只累计水平位移, 手指竖直滑动时只要带一点
+ * 水平抖动就会越过 touch slop 被识别成快进 (并且还会被 touch slop 补偿成好几秒), 表现为
+ * 「上下滑也在调进度」. 这里以按下点为基准比较两个方向的绝对位移, 竖直位移更大就认为用户
+ * 是在上下滑 (调亮度/音量、进出全屏), 取消本次快进, 松手时不再跳转进度.
+ */
+internal fun isVerticalDominantDrag(
+    dragStartX: Float,
+    dragStartY: Float,
+    position: Offset,
+): Boolean {
+    if (!position.isSpecified || dragStartX.isNaN() || dragStartY.isNaN()) return false
+    return abs(position.y - dragStartY) > abs(position.x - dragStartX)
 }
 
 /**
@@ -160,10 +178,16 @@ class SwipeSeekerState internal constructor(
      */
     private var dragStartY: Float = Float.NaN
 
+    /**
+     * 手指按下位置的 X 坐标, 用于判断滑动主轴. [Float.NaN] 表示未在滑动.
+     */
+    private var dragStartX: Float = Float.NaN
+
     @UiThread
     internal fun onPointerDown(position: Offset) {
         if (!isSeeking && position.isSpecified) {
             dragStartY = position.y
+            dragStartX = position.x
         }
     }
 
@@ -182,6 +206,7 @@ class SwipeSeekerState internal constructor(
         seekDelta = Float.NaN
         isCancelled = false
         dragStartY = Float.NaN
+        dragStartX = Float.NaN
     }
 
     @UiThread
@@ -193,7 +218,8 @@ class SwipeSeekerState internal constructor(
     internal fun updateCancellation(position: Offset): Boolean {
         val wasCancelled = isCancelled
         if (isSeeking) {
-            isCancelled = isVerticalDragCancelled(dragStartY, position, cancelVerticalDragDistancePx)
+            isCancelled = isVerticalDragCancelled(dragStartY, position, cancelVerticalDragDistancePx) ||
+                isVerticalDominantDrag(dragStartX, dragStartY, position)
         }
         return isCancelled != wasCancelled
     }

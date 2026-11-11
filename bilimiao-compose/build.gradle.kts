@@ -59,6 +59,12 @@ kotlin {
                 implementation(project(":bilimiao-comm"))
             }
         }
+        val commonTest by getting {
+            dependencies {
+                // 纯逻辑单测: 播放器手势判定、下载状态文案
+                implementation(kotlin("test"))
+            }
+        }
         androidMain {
             kotlin.srcDir("src/androidMain/java")
             resources.srcDir("src/androidMain/res")
