@@ -89,18 +89,27 @@ class VideoAddFavoriteDialogState(
     val snackbar = SnackbarHostState()
 
     suspend fun loadData() {
+        // 记录本次请求对应的视频，返回时若已切换到别的视频则丢弃结果
+        val requestAid = aid
         try {
             withContext(Dispatchers.Main) {
                 _listLoading.value = true
                 _listFail.value = ""
             }
             val res = BiliApiService.videoAPI
-                .favoriteCreated(aid)
+                .favoriteCreated(requestAid)
                 .awaitCall()
                 .json<ResponseData<MediaResponseInfo>>()
             withContext(Dispatchers.Main) {
+                if (requestAid != aid) {
+                    // 请求期间用户切换了视频，这份结果已过期
+                    return@withContext
+                }
+                // 复用同一个 state 时列表里可能残留上一个视频的收藏夹，
+                // 直接 addAll 会让同一个收藏夹出现两次，LazyColumn 的 key 重复会直接崩溃
+                _list.clear()
                 if (res.isSuccess) {
-                    _list.addAll(res.requireData().list)
+                    _list.addAll(res.requireData().list.distinctBy { it.id })
                 } else {
                     _listFail.value = res.message
                 }
@@ -108,11 +117,15 @@ class VideoAddFavoriteDialogState(
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                _listFail.value = e.message ?: e.toString()
+                if (requestAid == aid) {
+                    _listFail.value = e.message ?: e.toString()
+                }
             }
         } finally {
             withContext(Dispatchers.Main) {
-                _listLoading.value = false
+                if (requestAid == aid) {
+                    _listLoading.value = false
+                }
             }
         }
     }
@@ -175,10 +188,14 @@ class VideoAddFavoriteDialogState(
 
     fun show(videoAid: String) {
         if (videoAid != aid || list.isEmpty()) {
+            // 先切换 aid 再发起请求，避免 loadData 读到上一个视频的 aid
+            aid = videoAid
+            // 切换视频后旧列表与勾选状态都属于上一个视频，必须丢弃
+            _list.clear()
+            _selectedMap.clear()
             scope.launch {
                 loadData()
             }
-            aid = videoAid
         }
         _visible.value = true
     }
