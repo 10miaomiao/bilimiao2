@@ -9,6 +9,7 @@ import com.a10miaomiao.bilimiao.comm.network.MiaoHttp
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -61,6 +62,12 @@ abstract class BaseDownloadService(
         }
     private var curMediaFile: File? = null
     private var curMediaFileInfo: BiliDownloadMediaFileInfo? = null
+
+    /** 预取到的播放地址，key 为 entryDirPath。 */
+    private val playUrlCache = MutableStateFlow<Map<String, BiliDownloadMediaFileInfo>>(emptyMap())
+
+    /** 正在预取的分P（entryDirPath），避免同一个分P重复请求。 */
+    private val playUrlPrefetching = MutableStateFlow<Set<String>>(emptySet())
 
     /**
      * 服务初始化入口，由子类在其生命周期/启动时调用一次。
@@ -151,6 +158,8 @@ abstract class BaseDownloadService(
             startDownload(biliDownInfo)
         } else {
             waitDownloadQueue.add(biliDownInfo)
+            // 排队期间先把播放地址解析好，轮到它时就不用再等一次网络请求
+            prefetchPlayUrl(biliDownInfo)
         }
     }
 
@@ -231,7 +240,8 @@ abstract class BaseDownloadService(
                 status = CurrentDownloadInfo.STATUS_GET_PLAYURL,
             )
             //获取播放地址并下载
-            val mediaFileInfo = BiliPalyUrlHelper.playUrl(entry)
+            val mediaFileInfo = takePrefetchedPlayUrl(biliDownInfo.entryDirPath)
+                ?: BiliPalyUrlHelper.playUrl(entry)
             val httpHeader = mediaFileInfo.httpHeader()
             val mediaJsonFile = File(videoDir, "index.json")
             val mediaJsonStr = MiaoJson.toJson(mediaFileInfo)
@@ -298,12 +308,45 @@ abstract class BaseDownloadService(
 
                 }
             }
+            // 当前分P已经开始下载，趁这段时间把队列里下一个分P的播放地址解析好
+            waitDownloadQueue.firstOrNull()?.let(::prefetchPlayUrl)
         } catch (e: Exception) {
             curDownload.value = currentDownloadInfo.copy(
                 status = CurrentDownloadInfo.STATUS_FAIL_PLAYURL,
             )
             e.printStackTrace()
         }
+    }
+
+    /**
+     * 预取播放地址。
+     *
+     * 每个分P都要先请求一次 playurl 才能开始下载，串行处理时每次分P切换都会停顿一下。
+     * 在队列里还没轮到时提前解析，真正开始下载就能直接命中缓存。
+     */
+    private fun prefetchPlayUrl(biliDownInfo: BiliDownloadEntryAndPathInfo) {
+        val key = biliDownInfo.entryDirPath
+        if (playUrlCache.value.containsKey(key) || playUrlPrefetching.value.contains(key)) {
+            return
+        }
+        playUrlPrefetching.update { it + key }
+        scope.launch {
+            try {
+                val mediaFileInfo = BiliPalyUrlHelper.playUrl(biliDownInfo.entry)
+                playUrlCache.update { it + (key to mediaFileInfo) }
+            } catch (e: Exception) {
+                // 预取失败不影响正常流程，真正开始下载时会重新请求
+            } finally {
+                playUrlPrefetching.update { it - key }
+            }
+        }
+    }
+
+    /** 取出预取到的播放地址，没有预取到时返回 null。 */
+    private fun takePrefetchedPlayUrl(entryDirPath: String): BiliDownloadMediaFileInfo? {
+        val mediaFileInfo = playUrlCache.value[entryDirPath] ?: return null
+        playUrlCache.update { it - entryDirPath }
+        return mediaFileInfo
     }
 
     fun cancelDownload(taskId: Long) {
