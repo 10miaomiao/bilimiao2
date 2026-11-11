@@ -360,10 +360,17 @@ object PlayerControllerDefaults {
     }
 
     /**
-     * 选集按钮
+     * 选集按钮（分P / 剧集入口）
+     *
+     * 对照旧版播放器顶栏的拓展按钮：视频有多个分P时文案为「分P」，
+     * 番剧有多个剧集时文案为「剧集」，由调用方传入 [text]。
+     *
+     * @param text 按钮文案
+     * @param onClick 点击回调
      */
     @Composable
     fun SelectEpisodeIcon(
+        text: String,
         onClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
@@ -374,7 +381,11 @@ object PlayerControllerDefaults {
                 contentColor = LocalContentColor.current,
             ),
         ) {
-            Text("选集")
+            Text(
+                text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 
@@ -872,26 +883,9 @@ object PlayerControllerDefaults {
                 modifier = Modifier.testTag(TAG_SUBTITLE_SWITCHER_DROPDOWN_MENU),
             ) {
                 options.forEach { option ->
-                    val selected = option == currentSubtitle
-                    DropdownMenuItem(
-                        text = {
-                            val color = if (selected) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                LocalContentColor.current
-                            }
-                            CompositionLocalProvider(LocalContentColor provides color) {
-                                if (option == null) {
-                                    Text("关闭")
-                                } else {
-                                    Text(
-                                        option.lan_doc,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
-                            }
-                        },
+                    SubtitleMenuItem(
+                        option = option,
+                        selected = option == currentSubtitle,
                         onClick = {
                             expanded = false
                             onValueChange(option)
@@ -942,52 +936,181 @@ object PlayerControllerDefaults {
                 modifier = Modifier.testTag(TAG_QUALITY_SELECTOR_DROPDOWN_MENU),
             ) {
                 options.forEach { option ->
-                    val selected = option.quality == currentQuality
                     val enabled = isOptionEnabled(option)
-                    DropdownMenuItem(
-                        text = {
-                            val color = when {
-                                selected -> MaterialTheme.colorScheme.primary
-                                !enabled -> LocalContentColor.current.copy(alpha = 0.38f)
-                                else -> LocalContentColor.current
-                            }
-                            CompositionLocalProvider(LocalContentColor provides color) {
-                                Text(option.description)
-                            }
-                        },
-                        leadingIcon = when {
-                            selected -> {
-                                {
-                                    Icon(
-                                        Icons.Rounded.Check,
-                                        "已选择",
-                                        Modifier.size(18.dp),
-                                    )
-                                }
-                            }
-
-                            !enabled -> {
-                                {
-                                    Icon(
-                                        Icons.Rounded.Lock,
-                                        "不可用",
-                                        Modifier.size(18.dp),
-                                    )
-                                }
-                            }
-
-                            else -> null
-                        },
+                    QualityMenuItem(
+                        option = option,
+                        selected = option.quality == currentQuality,
+                        enabled = enabled,
                         onClick = {
+                            expanded = false
                             if (enabled) {
-                                expanded = false
                                 onValueChange(option.quality)
                             }
                         },
-                        enabled = enabled,
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * 单个清晰度菜单项（[QualitySwitcher] 与 [QualityMenuItems] 共用）
+     */
+    @Composable
+    private fun QualityMenuItem(
+        option: PlayerSourceInfo.AcceptInfo,
+        selected: Boolean,
+        enabled: Boolean,
+        onClick: () -> Unit,
+    ) {
+        DropdownMenuItem(
+            text = {
+                val color = when {
+                    selected -> MaterialTheme.colorScheme.primary
+                    !enabled -> LocalContentColor.current.copy(alpha = 0.38f)
+                    else -> LocalContentColor.current
+                }
+                CompositionLocalProvider(LocalContentColor provides color) {
+                    Text(option.description)
+                }
+            },
+            leadingIcon = when {
+                selected -> {
+                    {
+                        Icon(
+                            Icons.Rounded.Check,
+                            "已选择",
+                            Modifier.size(18.dp),
+                        )
+                    }
+                }
+
+                !enabled -> {
+                    {
+                        Icon(
+                            Icons.Rounded.Lock,
+                            "不可用",
+                            Modifier.size(18.dp),
+                        )
+                    }
+                }
+
+                else -> null
+            },
+            onClick = onClick,
+            enabled = enabled,
+        )
+    }
+
+    /**
+     * 清晰度选项列表（作为「更多」菜单的二级菜单内容，小屏播放器不占用底栏空间）
+     *
+     * @param isOptionEnabled 需要登录/大会员的清晰度置灰禁用
+     */
+    @Composable
+    fun QualityMenuItems(
+        currentQuality: Int,
+        options: List<PlayerSourceInfo.AcceptInfo>,
+        onValueChange: (Int) -> Unit,
+        isOptionEnabled: (PlayerSourceInfo.AcceptInfo) -> Boolean = { true },
+    ) {
+        if (options.isEmpty()) return
+        options.forEach { option ->
+            val enabled = isOptionEnabled(option)
+            QualityMenuItem(
+                option = option,
+                selected = option.quality == currentQuality,
+                enabled = enabled,
+                onClick = { if (enabled) onValueChange(option.quality) },
+            )
+        }
+    }
+
+    /**
+     * 倍速选项列表（作为「更多」菜单的二级菜单内容）
+     */
+    @Composable
+    fun SpeedMenuItems(
+        currentSpeed: Float,
+        options: List<Float>,
+        onValueChange: (Float) -> Unit,
+    ) {
+        if (options.isEmpty()) return
+        options.forEach { speed ->
+            val selected = speed == currentSpeed
+            DropdownMenuItem(
+                text = {
+                    val color = if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        LocalContentColor.current
+                    }
+                    CompositionLocalProvider(LocalContentColor provides color) {
+                        Text(formatSpeedValue(speed))
+                    }
+                },
+                leadingIcon = if (selected) {
+                    {
+                        Icon(
+                            Icons.Rounded.Check,
+                            "已选择",
+                            Modifier.size(18.dp),
+                        )
+                    }
+                } else {
+                    null
+                },
+                onClick = { onValueChange(speed) },
+            )
+        }
+    }
+
+    /**
+     * 单个字幕菜单项（[SubtitleSwitcher] 与 [SubtitleMenuItems] 共用）
+     */
+    @Composable
+    private fun SubtitleMenuItem(
+        option: SubtitleSourceInfo?,
+        selected: Boolean,
+        onClick: () -> Unit,
+    ) {
+        val color = if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            LocalContentColor.current
+        }
+        DropdownMenuItem(
+            text = {
+                CompositionLocalProvider(LocalContentColor provides color) {
+                    Text(
+                        option?.lan_doc ?: "关闭",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            },
+            onClick = onClick,
+        )
+    }
+
+    /**
+     * 字幕选项列表（作为「更多」菜单的二级菜单内容）
+     *
+     * [options] 第一项为 `null`（关闭字幕）；只有「关闭」一项时不显示任何内容。
+     */
+    @Composable
+    fun SubtitleMenuItems(
+        currentSubtitle: SubtitleSourceInfo?,
+        options: List<SubtitleSourceInfo?>,
+        onValueChange: (SubtitleSourceInfo?) -> Unit,
+    ) {
+        if (options.size <= 1) return
+        options.forEach { option ->
+            SubtitleMenuItem(
+                option = option,
+                selected = option == currentSubtitle,
+                onClick = { onValueChange(option) },
+            )
         }
     }
 

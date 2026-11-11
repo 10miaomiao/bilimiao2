@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.PictureInPicture
@@ -83,14 +84,19 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fu
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.rememberSmoothedProgressState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberAlwaysOnRequester
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.rememberVideoControllerState
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.formatSpeedValue
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMenuSubMenu
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerMoreActionsButton
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenType
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerScreenTypeButton
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.top.PlayerTopBar
 import cn.a10miaomiao.bilimiao.compose.components.status.BiliAnimTV
+import cn.a10miaomiao.bilimiao.compose.pages.bangumi.BangumiEpisodesPage
 import cn.a10miaomiao.bilimiao.compose.pages.player.SendDanmakuPage
+import cn.a10miaomiao.bilimiao.compose.pages.playlist.PlayListPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.DanmakuDisplaySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
+import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
@@ -98,12 +104,16 @@ import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.datastore.editPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.mapPreferences
+import com.a10miaomiao.bilimiao.comm.delegate.player.BangumiPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopFullscreenMode
 import com.a10miaomiao.bilimiao.comm.delegate.player.FullscreenMode
 import com.a10miaomiao.bilimiao.comm.delegate.player.PlayerDelegateImpl
+import com.a10miaomiao.bilimiao.comm.delegate.player.VideoPlayerSource
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlaybackStatus
+import com.a10miaomiao.bilimiao.comm.delegate.player.entity.PlayerSourceInfo
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleSourceInfo
+import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.store.UserStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import kotlinx.coroutines.flow.map
@@ -199,6 +209,43 @@ fun BiliVideoScaffold(
     // 播放器控制依赖的服务（通过 Kodein 注入）
     val userStore: UserStore by rememberInstance()
     val bottomSheetState: BottomSheetState by rememberInstance()
+    // 播放列表入口暂时关闭，需要时连同下方 actions 中的入口一起取消注释
+//    val playListStore: PlayListStore by rememberInstance()
+//    val playListState by playListStore.stateFlow.collectAsState()
+
+    // 选集入口文案：视频看分P数量，番剧看剧集数量。
+    // 对齐旧版逻辑，只有 1 P / 1 集时没有选集的意义，不显示入口。
+    // 这里每次重组都重新判断（不做 remember），避免分P/剧集列表在播放源创建后才写入时取到旧值。
+    val episodeEntryText = when (val source = currentSource) {
+        is BangumiPlayerSource -> if (source.episodes.size > 1) "剧集" else null
+        is VideoPlayerSource -> if (source.pages.size > 1) "分P" else null
+        else -> null
+    }
+
+    // 选集统一用全局 BottomSheet 打开，避免打断正在进行的播放
+    fun openEpisodeSheet() {
+        when (val source = currentSource) {
+            is BangumiPlayerSource -> bottomSheetState.open(
+                BangumiEpisodesPage(
+                    sid = source.sid,
+                    title = source.ownerName,
+                )
+            )
+
+            is VideoPlayerSource -> bottomSheetState.open(
+                VideoPagesPage(aid = source.aid)
+            )
+
+            else -> {}
+        }
+    }
+
+    // 清晰度可用性：1080P 以上需要大会员，480P 以上需要登录
+    fun isQualityEnabled(accept: PlayerSourceInfo.AcceptInfo): Boolean = when {
+        accept.quality > MAX_QUALITY_NOT_VIP -> userStore.isVip()
+        accept.quality > MAX_QUALITY_NOT_LOGIN -> userStore.isLogin()
+        else -> true
+    }
 
     // 倍速菜单预设值（设置中的 PlayerSpeedValues，默认 0.5x/1.0x/2.0x）
     var speedOptions by remember {
@@ -209,6 +256,66 @@ fun BiliVideoScaffold(
             (it[SettingPreferences.PlayerSpeedValues] ?: SettingConstants.PLAYER_SPEED_SETS)
                 .map { value -> value.toFloat() }
                 .sorted()
+        }
+    }
+
+    // 小屏（非全屏）底栏空间有限，清晰度 / 倍速 / 字幕收进「更多」菜单的二级菜单：
+    // 一级菜单只显示当前值，点进去再选具体选项；无可用项时不生成对应入口
+    val moreMenuSubMenus = buildList {
+        val qualityOptions = playbackInfo?.acceptList ?: emptyList()
+        if (qualityOptions.isNotEmpty()) {
+            add(
+                PlayerMenuSubMenu(
+                    title = "清晰度",
+                    value = qualityOptions.find { it.quality == currentQuality }?.description
+                        ?: qualityOptions.last().description,
+                ) { dismiss ->
+                    PlayerControllerDefaults.QualityMenuItems(
+                        currentQuality = currentQuality,
+                        options = qualityOptions,
+                        onValueChange = { quality ->
+                            dismiss()
+                            playerDelegate.changeQuality(quality)
+                        },
+                        isOptionEnabled = { accept -> isQualityEnabled(accept) },
+                    )
+                }
+            )
+        }
+        if (speedOptions.isNotEmpty()) {
+            add(
+                PlayerMenuSubMenu(
+                    title = "倍速",
+                    value = formatSpeedValue(playbackSpeed),
+                ) { dismiss ->
+                    PlayerControllerDefaults.SpeedMenuItems(
+                        currentSpeed = playbackSpeed,
+                        options = speedOptions,
+                        onValueChange = { speed ->
+                            dismiss()
+                            playerDelegate.setPlaybackSpeed(speed)
+                        },
+                    )
+                }
+            )
+        }
+        val subtitleOptions = listOf<SubtitleSourceInfo?>(null) + subtitleList
+        if (subtitleOptions.size > 1) {
+            add(
+                PlayerMenuSubMenu(
+                    title = "字幕",
+                    value = currentSubtitle?.lan_doc ?: "关闭",
+                ) { dismiss ->
+                    PlayerControllerDefaults.SubtitleMenuItems(
+                        currentSubtitle = currentSubtitle,
+                        options = subtitleOptions,
+                        onValueChange = { subtitle ->
+                            dismiss()
+                            playerDelegate.setSubtitle(subtitle)
+                        },
+                    )
+                }
+            )
         }
     }
 
@@ -296,6 +403,8 @@ fun BiliVideoScaffold(
     val controllerState = rememberVideoControllerState()
     // 长按全屏按钮弹出的方向菜单展开期间保持控制器常显，避免控制器自动隐藏把菜单一起收走
     val fullModeMenuAlwaysOnRequester = rememberAlwaysOnRequester(controllerState, "fullscreenModeMenu")
+    // 「更多」菜单（含二级菜单）展开期间同样需要保持常显
+    val moreMenuAlwaysOnRequester = rememberAlwaysOnRequester(controllerState, "moreMenu")
     var isLocked by remember { mutableStateOf(false) }
     val indicatorState = rememberGestureIndicatorState()
 
@@ -435,6 +544,29 @@ fun BiliVideoScaffold(
                     onExitFullscreen = onExitFullscreen,
                     onClose = onBack,
                     actions = {
+                        // 小屏（非全屏）播放器顶栏空间有限，选集/播放列表入口只在全屏控制器中显示
+                        if (isFullscreen) {
+                            // 选集入口（分P / 剧集），对齐旧版播放器顶栏的拓展按钮
+                            episodeEntryText?.let { text ->
+                                PlayerControllerDefaults.SelectEpisodeIcon(
+                                    text = text,
+                                    onClick = { openEpisodeSheet() },
+                                )
+                            }
+                            // 当前播放列表入口（列表非空时才显示），同样用全局 BottomSheet 打开。
+                            // 暂时关闭，需要时取消注释
+//                            if (playListState.items.isNotEmpty()) {
+//                                IconButton(
+//                                    onClick = { bottomSheetState.open(PlayListPage()) },
+//                                ) {
+//                                    Icon(
+//                                        Icons.AutoMirrored.Rounded.PlaylistPlay,
+//                                        "播放列表",
+//                                        tint = LocalContentColor.current,
+//                                    )
+//                                }
+//                            }
+                        }
                         // 画中画（仅安卓 8.0+ 支持，桌面端暂不支持）
                         if (platformContext.isPictureInPictureSupported()) {
                             IconButton(
@@ -475,6 +607,20 @@ fun BiliVideoScaffold(
                             onDanmakuSetting = {
                                 // 以 bottom sheet 弹出当前播放模式的弹幕显示设置（对齐旧版行为）
                                 bottomSheetState.open(DanmakuDisplaySettingPage(danmakuModeName))
+                            },
+                            // 小屏（非全屏）底栏空间有限：清晰度 / 倍速 / 字幕作为「更多」菜单的二级菜单；
+                            // 全屏底栏已有这些入口，不再重复
+                            subMenus = if (isFullscreen) {
+                                emptyList()
+                            } else {
+                                moreMenuSubMenus
+                            },
+                            onExpandedChanged = { expanded ->
+                                if (expanded) {
+                                    moreMenuAlwaysOnRequester.request()
+                                } else {
+                                    moreMenuAlwaysOnRequester.cancelRequest()
+                                }
                             },
                         )
                     },
@@ -639,15 +785,7 @@ fun BiliVideoScaffold(
                                 currentQuality = currentQuality,
                                 options = playbackInfo?.acceptList ?: emptyList(),
                                 onValueChange = { quality -> playerDelegate.changeQuality(quality) },
-                                isOptionEnabled = { accept ->
-                                    when {
-                                        // 1080P 以上需要大会员
-                                        accept.quality > MAX_QUALITY_NOT_VIP -> userStore.isVip()
-                                        // 480P 以上需要登录
-                                        accept.quality > MAX_QUALITY_NOT_LOGIN -> userStore.isLogin()
-                                        else -> true
-                                    }
-                                },
+                                isOptionEnabled = { accept -> isQualityEnabled(accept) },
                             )
                             // 倍速菜单
                             PlayerControllerDefaults.SpeedSelector(
