@@ -40,7 +40,9 @@ data class CurrentDownloadInfo(
         const val STATUS_COMPLETED = 200
         const val STATUS_PAUSE = 201
         const val STATUS_GET_DANMAKU = 102
-        const val STATUS_GET_PLAYURL = 101
+        // 注意：曾与 STATUS_AUDIO_DOWNLOADING(101) 撞值，导致 statusText 永远显示「正在下载音频」，
+        // 「获取播放地址」分支不可达；这里单独分配一个值
+        const val STATUS_GET_PLAYURL = 103
         const val STATUS_FAIL_DOWNLOAD = -100
         const val STATUS_FAIL_DANMAKU = -102
         const val STATUS_FAIL_PLAYURL = -101
