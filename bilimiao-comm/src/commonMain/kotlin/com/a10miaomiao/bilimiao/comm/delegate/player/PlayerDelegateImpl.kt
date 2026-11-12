@@ -193,6 +193,17 @@ class PlayerDelegateImpl(
         _sourceState.update { it.copy(currentSource = source) }
         playerStore.setPlayerSource(source)
         onShowPlayerChanged?.invoke(true)
+        // 倍速是会话内记忆的，换了视频仍沿用上次设置。若当前不是 1 倍速，
+        // 开播时提示并给出一键恢复，避免用户没察觉视频被加速/减速播放。
+        val speed = _playbackState.value.playbackSpeed
+        if (speed != 1f) {
+            val speedText = speed.toString().removeSuffix(".0")
+            GlobalToaster.showWithAction(
+                message = "注意，当前为${speedText}倍速",
+                actionLabel = "恢复1倍速",
+                onAction = { setPlaybackSpeed(1f) },
+            )
+        }
         loadAndPlay(source)
         // 检查是否默认全屏播放
         fullscreenController.checkIsPlayerDefaultFull()
