@@ -49,10 +49,10 @@ data class FilterBackupSelection(
 }
 
 /**
- * @param mid 屏蔽依据的 UID。备份文件里允许省略，此时为 null，
+ * @param uid 屏蔽依据的 UID。备份文件里允许省略，此时为 null，
  *            合并时会跳过（当前版本只按 UID 屏蔽，昵称屏蔽还没实现）
  */
 data class FilterBackupUpper(
-    val mid: Long? = null,
+    val uid: Long? = null,
     val name: String = "",
 )

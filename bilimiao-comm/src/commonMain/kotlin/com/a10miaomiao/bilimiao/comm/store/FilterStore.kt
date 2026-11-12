@@ -212,7 +212,7 @@ class FilterStore(override val di: DI) :
         FilterBackupInfo(
             exportedAt = Clock.System.now().toString(),
             filterWords = state.filterWordList.toList(),
-            filterUppers = state.filterUpperList.map { FilterBackupUpper(mid = it.mid, name = it.name) },
+            filterUppers = state.filterUpperList.map { FilterBackupUpper(uid = it.mid, name = it.name) },
             filterTags = state.filterTagList.toList(),
         ).selected(selection)
 

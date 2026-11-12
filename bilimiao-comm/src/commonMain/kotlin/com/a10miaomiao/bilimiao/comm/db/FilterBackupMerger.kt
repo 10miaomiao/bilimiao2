@@ -10,7 +10,7 @@ import com.a10miaomiao.bilimiao.comm.entity.filter.FilterBackupSelection
  * 导入前的预演结果，用来在确认对话框里告诉用户会发生什么。
  *
  * 恒等式：total = importable + duplicated + existCount
- * （缺少 mid 的 UP 主不计入 total，单独用 [skippedUppers] 统计）
+ * （缺少 uid 的 UP 主不计入 total，单独用 [skippedUppers] 统计）
  */
 data class FilterImportPreview(
     val total: Int = 0,
@@ -26,7 +26,7 @@ data class FilterImportPreview(
         if (importable > 0) parts.add("可导入 $importable 条")
         if (duplicated > 0) parts.add("$duplicated 条重复")
         if (existCount > 0) parts.add("$existCount 条已存在")
-        if (skippedUppers > 0) parts.add("$skippedUppers 条缺少 mid 无法导入")
+        if (skippedUppers > 0) parts.add("$skippedUppers 条缺少 uid 无法导入")
         return if (parts.isEmpty()) "没有可导入的内容" else parts.joinToString("，")
     }
 }
@@ -45,7 +45,7 @@ data class FilterMergeResult(
     fun summary(): String = buildString {
         append("新增 $addedWords 个屏蔽词、$addedUppers 个 UP 主、$addedTags 个标签")
         if (skippedUppers > 0) {
-            append("；跳过 $skippedUppers 个缺少 mid 的 UP 主")
+            append("；跳过 $skippedUppers 个缺少 uid 的 UP 主")
         }
     }
 }
@@ -159,13 +159,13 @@ private suspend fun buildMergePlan(
         val existUppers = db.filterUpperDao().queryAll().mapTo(HashSet()) { it.mid }
         val seen = HashSet<Long>()
         backup.filterUppers.forEach { upper ->
-            val mid = upper.mid
+            val uid = upper.uid
             when {
-                // 没有 mid 就没法按 UID 屏蔽，昵称屏蔽还是 TODO
-                mid == null -> skippedUppers++
-                !seen.add(mid) -> duplicated++
-                mid in existUppers -> existCount++
-                else -> uppers.add(FilterUpperEntity(mid = mid, name = upper.name))
+                // 没有 uid 就没法按 UID 屏蔽，昵称屏蔽还是 TODO
+                uid == null -> skippedUppers++
+                !seen.add(uid) -> duplicated++
+                uid in existUppers -> existCount++
+                else -> uppers.add(FilterUpperEntity(mid = uid, name = upper.name))
             }
         }
     }

@@ -98,7 +98,7 @@ internal object LegacyFilterMigrator {
             buildList {
                 while (cursor.moveToNext()) {
                     val name = if (cursor.isNull(1)) "" else cursor.getString(1)
-                    add(FilterBackupUpper(mid = cursor.getLong(0), name = name))
+                    add(FilterBackupUpper(uid = cursor.getLong(0), name = name))
                 }
             }
         }

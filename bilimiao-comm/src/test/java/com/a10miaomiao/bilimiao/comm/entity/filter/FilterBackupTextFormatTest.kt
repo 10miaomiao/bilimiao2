@@ -17,7 +17,7 @@ class FilterBackupTextFormatTest {
             # 哔哩喵屏蔽关键字备份
             # 转义说明：
             # `\\` -> `\`, `\#` ->  `#`, `\t` -> TAB(0x09), `\ `(反斜杠+空格) -> 空格
-            # upper格式为 `name\tk1=v2\tk=v`，也可以为`name k1=v1 k2=v2`，mid为可选字段
+            # upper格式为 `name\tk1=v2\tk=v`，也可以为`name k1=v1 k2=v2`，uid为可选字段
             # upper行用未转义的空格/TAB分隔字段，所以名称里的空格要写成`\ `
 
             ## WORDS ##
@@ -25,7 +25,7 @@ class FilterBackupTextFormatTest {
             哈哈哈
 
             ## UPPERS ##
-            L另唐 mid=31261235
+            L另唐 uid=31261235
 
             ## TAGS ##
             兰兰
@@ -41,7 +41,7 @@ class FilterBackupTextFormatTest {
 
     @Test
     fun escapesEverySpaceSoUpperFieldsStayUnambiguous() {
-        // upper 行允许用未转义空格分隔 mid=xxx，所以名称里的空格（含中间的）必须转义，
+        // upper 行允许用未转义空格分隔 uid=xxx，所以名称里的空格（含中间的）必须转义，
         // 否则解析时分不清哪个空格是字段分隔符
         val backup = FilterBackupInfo(
             filterWords = listOf("你好 世界"),
@@ -58,12 +58,12 @@ class FilterBackupTextFormatTest {
     }
 
     @Test
-    fun upperWithOnlyMidKeepsItAsMid() {
-        // 没有昵称时必须保留前导 TAB，否则 mid=xxx 会被当成昵称
+    fun upperWithOnlyUidKeepsItAsUid() {
+        // 没有昵称时必须保留前导 TAB，否则 uid=xxx 会被当成昵称
         val backup = FilterBackupInfo(filterUppers = listOf(FilterBackupUpper(42L, "")))
 
         val upper = FilterBackupInfo.parseText(backup.toText()).filterUppers.single()
-        assertEquals(42L, upper.mid)
+        assertEquals(42L, upper.uid)
         assertEquals("", upper.name)
     }
 
@@ -106,14 +106,14 @@ class FilterBackupTextFormatTest {
     }
 
     @Test
-    fun keepsMidExactly() {
-        val mid = 1234567890123456789L
-        val backup = FilterBackupInfo(filterUppers = listOf(FilterBackupUpper(mid, "某UP主")))
+    fun keepsUidExactly() {
+        val uid = 1234567890123456789L
+        val backup = FilterBackupInfo(filterUppers = listOf(FilterBackupUpper(uid, "某UP主")))
 
         val text = backup.toText()
-        assertTrue("mid 必须以十进制原样写出", text.contains("mid=$mid"))
+        assertTrue("uid 必须以十进制原样写出", text.contains("uid=$uid"))
 
-        assertEquals(mid, FilterBackupInfo.parseText(text).filterUppers.single().mid)
+        assertEquals(uid, FilterBackupInfo.parseText(text).filterUppers.single().uid)
     }
 
     @Test
@@ -121,11 +121,11 @@ class FilterBackupTextFormatTest {
         // name 里的空格不需要转义，只有真实 TAB 才是分隔符
         val text = """
             ## UPPERS ##
-            名字 带空格 的UP	mid=42
+            名字 带空格 的UP	uid=42
         """.trimIndent()
 
         val upper = FilterBackupInfo.parseText(text).filterUppers.single()
-        assertEquals(42L, upper.mid)
+        assertEquals(42L, upper.uid)
         assertEquals("名字 带空格 的UP", upper.name)
     }
 
@@ -133,16 +133,29 @@ class FilterBackupTextFormatTest {
     fun supportsSpaceSeparatedUpperWithEscapedSpaceInName() {
         val text = """
             ## UPPERS ##
-            名字\ 带空格 mid=42
+            名字\ 带空格 uid=42
         """.trimIndent()
 
         val upper = FilterBackupInfo.parseText(text).filterUppers.single()
-        assertEquals(42L, upper.mid)
+        assertEquals(42L, upper.uid)
         assertEquals("名字 带空格", upper.name)
     }
 
     @Test
-    fun keepsUpperWithoutMidAsItsName() {
+    fun readsLegacyMidKeyForCompatibility() {
+        // 早期备份文件里这个字段叫 mid，改名成 uid 后仍要能读回来
+        val text = """
+            ## UPPERS ##
+            L另唐 mid=31261235
+        """.trimIndent()
+
+        val upper = FilterBackupInfo.parseText(text).filterUppers.single()
+        assertEquals(31261235L, upper.uid)
+        assertEquals("L另唐", upper.name)
+    }
+
+    @Test
+    fun keepsUpperWithoutUidAsItsName() {
         // 昵称恰好长得像 k=v 时不能被当成字段吃掉
         val text = """
             ## UPPERS ##
@@ -151,7 +164,7 @@ class FilterBackupTextFormatTest {
 
         val upper = FilterBackupInfo.parseText(text).filterUppers.single()
         assertEquals("a=b", upper.name)
-        assertNull(upper.mid)
+        assertNull(upper.uid)
     }
 
     @Test

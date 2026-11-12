@@ -40,13 +40,13 @@ class FilterImportPreviewTest {
     }
 
     @Test
-    fun summaryMentionsUppersWithoutMid() {
+    fun summaryMentionsUppersWithoutUid() {
         val preview = FilterImportPreview(
             total = 5,
             importable = 5,
             skippedUppers = 2,
         )
-        assertEquals("共 5 条，可导入 5 条，2 条缺少 mid 无法导入", preview.summary())
+        assertEquals("共 5 条，可导入 5 条，2 条缺少 uid 无法导入", preview.summary())
     }
 
     @Test

@@ -13,7 +13,7 @@ package com.a10miaomiao.bilimiao.comm.entity.filter
  * 你好
  *
  * ## UPPERS ##
- * L另唐 mid=31261235
+ * L另唐 uid=31261235
  *
  * ## TAGS ##
  * 兰兰
@@ -49,7 +49,7 @@ object FilterBackupTextFormat {
         append("# 哔哩喵屏蔽关键字备份\n")
         append("# 转义说明：\n")
         append("# `\\\\` -> `\\`, `\\#` ->  `#`, `\\t` -> TAB(0x09), `\\ `(反斜杠+空格) -> 空格\n")
-        append("# upper格式为 `name\\tk1=v2\\tk=v`，也可以为`name k1=v1 k2=v2`，mid为可选字段\n")
+        append("# upper格式为 `name\\tk1=v2\\tk=v`，也可以为`name k1=v1 k2=v2`，uid为可选字段\n")
         append("# upper行用未转义的空格/TAB分隔字段，所以名称里的空格要写成`\\ `\n")
         append('\n')
 
@@ -69,7 +69,7 @@ object FilterBackupTextFormat {
      * 转义单个值。
      *
      * 空格无论出现在首尾还是中间都转义成 `\ `：upper 行允许用未转义的空格分隔
-     * `mid=xxx` 字段，如果名称里的空格不转义，解析时就分不清哪个空格是分隔符、
+     * `uid=xxx` 字段，如果名称里的空格不转义，解析时就分不清哪个空格是分隔符、
      * 哪个是名称的一部分。
      */
     private fun escapeValue(value: String): String = buildString {
@@ -86,16 +86,16 @@ object FilterBackupTextFormat {
 
     /**
      * UP 主用真实 TAB 分隔，这样昵称里的空格不会被当成字段分隔符。
-     * 只有 mid 没有昵称时也必须保留一个前导 TAB，否则解析端会把 `mid=xxx`
+     * 只有 uid 没有昵称时也必须保留一个前导 TAB，否则解析端会把 `uid=xxx`
      * 当成昵称（昵称至少要占一段）。
      */
     private fun escapeUpper(upper: FilterBackupUpper): String {
         val name = escapeValue(upper.name)
-        val midPart = upper.mid?.let { "mid=$it" }
+        val uidPart = upper.uid?.let { "uid=$it" }
         return when {
-            midPart == null -> name
-            name.isEmpty() -> "\t$midPart"
-            else -> "$name\t$midPart"
+            uidPart == null -> name
+            name.isEmpty() -> "\t$uidPart"
+            else -> "$name\t$uidPart"
         }
     }
 
@@ -169,7 +169,7 @@ object FilterBackupTextFormat {
     }
 
     /**
-     * 解析 `name`、`name\tmid=123`、`name mid=123` 三种写法。
+     * 解析 `name`、`name\tuid=123`、`name uid=123` 三种写法。
      *
      * 从右往左把 `k=v` 形式的段当作字段，剩下的部分拼回昵称；
      * 但至少保留一段作为昵称，避免把昵称恰好是 `abc=1` 的行当成字段丢弃。
@@ -185,22 +185,24 @@ object FilterBackupTextFormat {
         }
 
         val name = unescape(segments.subList(0, nameEnd).joinToString(" "))
-        var mid: Long? = null
+        var uid: Long? = null
         for (index in nameEnd until segments.size) {
             val segment = segments[index]
             val eq = segment.indexOf('=')
             if (eq <= 0) {
                 continue
             }
-            // 目前只认 mid，其他字段留给以后扩展
-            if (segment.substring(0, eq).equals("mid", ignoreCase = true)) {
-                mid = segment.substring(eq + 1).toLongOrNull()
+            // 目前只认 uid，其他字段留给以后扩展；
+            // mid 是旧版备份文件里的写法，继续兼容读取
+            val key = segment.substring(0, eq)
+            if (key.equals("uid", ignoreCase = true) || key.equals("mid", ignoreCase = true)) {
+                uid = segment.substring(eq + 1).toLongOrNull()
             }
         }
-        if (name.isBlank() && mid == null) {
+        if (name.isBlank() && uid == null) {
             return null
         }
-        return FilterBackupUpper(mid = mid, name = name)
+        return FilterBackupUpper(uid = uid, name = name)
     }
 
     private fun splitUpperSegments(line: String): List<String> =
