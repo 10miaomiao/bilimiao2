@@ -1,5 +1,9 @@
 package cn.a10miaomiao.bilimiao.compose.platform
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
+
 /**
  * 桌面端系统栏控制器。
  *
@@ -30,3 +34,8 @@ class SystemBarsControllerDesktop(
     override fun restoreSystemBars() {
     }
 }
+
+actual val WindowInsets.Companion.stableStatusBars: WindowInsets
+    @Composable @NonRestartableComposable
+    // 桌面端没有系统状态栏，窗口顶部由自绘标题栏（LocalWindowTitleBarInsets）单独让开
+    get() = WindowInsets(0, 0, 0, 0)

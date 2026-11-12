@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -99,6 +100,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.video.VideoPagesPage
 import cn.a10miaomiao.bilimiao.compose.platform.LocalPlatformContext
 import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
+import cn.a10miaomiao.bilimiao.compose.platform.stableStatusBars
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
@@ -139,6 +141,8 @@ import kotlin.math.roundToInt
  *   控制器全部隐藏, 弹幕按「画中画」弹幕显示设置渲染, 播放/暂停经系统动作按钮
  *   (经 PlatformContext 注册的系统动作按钮) 操作; 状态由 PlayerState.pictureInPicture
  *   (平台层注入, 与 ComposeScaffold 共享) 驱动.
+ * - 全屏模式: 系统栏随控制器显隐, 但控制器顶栏按「状态栏可见时占用的高度」让开状态栏
+ *   (见 stableStatusBarInsets), 不跟随系统栏显隐动画, 控制器出现即落在最终位置.
  * - 非全屏模式: 控制器布局忽略窗口安全边距.
  *
  * 替代旧的 `VideoScaffold.kt`（已被删除）。
@@ -379,13 +383,27 @@ fun BiliVideoScaffold(
     // 播放器内容必须让开它（否则顶栏按钮会落在标题栏里点不到）。
     // 与安全区取最大值，避免 safeDrawing 已经包含标题栏时重复叠加。
     val windowTitleBarInsets = LocalWindowTitleBarInsets.current
+    // 全屏时控制器要让开状态栏区域。顶部的 inset 刻意不用 WindowInsets.safeDrawing
+    // （它是跟随系统栏显隐动画逐帧变化的）：控制器淡入的同时，那段边距正从 0 往状态栏
+    // 高度增长，控制器会先出现在画面最顶部，随后被增长的边距顶下去。
+    // 改用「状态栏可见时占用」的固定高度（WindowInsets.stableStatusBars），控制器一出现就落在
+    // 最终位置，状态栏的显隐动画只影响它自己的图标；挖孔屏横屏时刘海可能比状态栏更宽，
+    // 再与 displayCutout 取较大值兜底。
+    val stableTopInsets = WindowInsets.stableStatusBars
+        .union(WindowInsets.displayCutout)
+        .only(WindowInsetsSides.Top)
     val contentWindowInsets = if (isFullscreen) {
-        val safe = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+        // 左右沿用安全区（横屏挖孔 / 手势条），顶部改用上面的稳定值
+        val safeHorizontal = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
         if (desktopPlatform && desktopFullscreenMode == DesktopFullscreenMode.WINDOW) {
             val density = LocalDensity.current
-            // 左右沿用安全区，顶部取「安全区顶部」与「标题栏高度」的较大值
-            val topPx = maxOf(safe.getTop(density), windowTitleBarInsets.getTop(density))
-            WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).union(
+            // 顶部取「安全区 / 状态栏 / 标题栏」三者的较大值
+            val topPx = maxOf(
+                WindowInsets.safeDrawing.getTop(density),
+                stableTopInsets.getTop(density),
+                windowTitleBarInsets.getTop(density),
+            )
+            safeHorizontal.union(
                 WindowInsets(
                     left = 0.dp,
                     top = with(density) { topPx.toDp() },
@@ -393,8 +411,11 @@ fun BiliVideoScaffold(
                     bottom = 0.dp,
                 )
             )
+        } else if (desktopPlatform) {
+            // 桌面窗口没有系统状态栏显隐动画，沿用安全区即可
+            safeHorizontal.union(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
         } else {
-            safe
+            safeHorizontal.union(stableTopInsets)
         }
     } else {
         WindowInsets(0.dp)

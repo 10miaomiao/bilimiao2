@@ -1,5 +1,7 @@
 package cn.a10miaomiao.bilimiao.compose.platform
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
@@ -56,3 +58,18 @@ object NoopSystemBarsController : SystemBarsController {
 val LocalSystemBarsController = staticCompositionLocalOf<SystemBarsController> {
     NoopSystemBarsController
 }
+
+/**
+ * 系统状态栏在「可见」状态下占用的窗口 insets。
+ *
+ * 与 [WindowInsets.Companion.statusBars] 的区别：后者跟随系统栏的显隐动画逐帧变化
+ * （隐藏时是 0，显示时一路涨到状态栏高度），凡是按它 padding 的控件都会被这段增长的边距
+ * 一路顶下去；本值取状态栏「显示时会占用」的高度，不随显隐动画变化。
+ *
+ * 需要提前为状态栏留出空间的场合（如全屏播放器控制器，见 BiliVideoScaffold）使用本值，
+ * 控件一出现就直接落在最终位置，系统的显隐动画只影响状态栏自身的图标。
+ *
+ * 安卓端取自 `WindowInsets.statusBarsIgnoringVisibility`；桌面端没有系统状态栏，恒为 0。
+ */
+expect val WindowInsets.Companion.stableStatusBars: WindowInsets
+    @Composable get

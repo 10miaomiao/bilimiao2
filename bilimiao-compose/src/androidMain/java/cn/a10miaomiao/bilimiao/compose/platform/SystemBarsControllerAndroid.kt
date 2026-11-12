@@ -3,6 +3,11 @@ package cn.a10miaomiao.bilimiao.compose.platform
 import android.app.Activity
 import android.graphics.Color
 import android.view.WindowManager
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -70,3 +75,8 @@ class SystemBarsControllerAndroid(
         return WindowCompat.getInsetsController(activity.window, activity.window.decorView)
     }
 }
+
+@OptIn(ExperimentalLayoutApi::class)
+actual val WindowInsets.Companion.stableStatusBars: WindowInsets
+    @Composable @NonRestartableComposable
+    get() = WindowInsets.statusBarsIgnoringVisibility
