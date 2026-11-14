@@ -16,6 +16,10 @@ import androidx.compose.ui.platform.LocalPlatformWindowInsets
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
@@ -148,12 +152,33 @@ fun main() {
             position = WindowPosition(Alignment.Center),
         )
 
+        // 桌面端没有系统返回键：返回链路与 Android 完全相同（AppBackHandler），
+        // 入口换成 app bar 返回按钮和 Esc。导航器提到 Window 之外，供窗口级按键回调使用。
+        val platformContext = remember { DesktopPlatformContext() }
+        val composeNavigator = remember {
+            MainComposeNavigator(
+                launchUrl = { url -> platformContext.openUrl(url) },
+            )
+        }
+
         @OptIn(ExperimentalComposeUiApi::class)
         Window(
             onCloseRequest = ::exitApplication,
             title = "bilimiao",
             state = windowState,
             icon = appIcon,
+            onPreviewKeyEvent = { event ->
+                // Esc 等价于系统返回：无路可退时不消费按键（allowExit = false），
+                // 避免在首页按 Esc 直接进入「再按一次退出」流程
+                if (event.type == KeyEventType.KeyDown &&
+                    event.key == Key.Escape &&
+                    composeNavigator.handleBack(allowExit = false)
+                ) {
+                    true
+                } else {
+                    false
+                }
+            },
         ) {
             val composeWindow = this.window
             val windowHandle = remember { composeWindow.windowHandle }
@@ -181,7 +206,6 @@ fun main() {
                 WindowsWindowUtils.instance.setupBorderlessWindow(windowHandle)
             }
 
-            val platformContext = remember { DesktopPlatformContext() }
             val scope = rememberCoroutineScope()
             val startViewState = remember {
                 StartViewState(
@@ -207,11 +231,6 @@ fun main() {
                             val emitter = remember { SharedFlowEmitter() }
                             val messageDialogState = remember { MessageDialogState() }
                             val bottomSheetState = remember { BottomSheetState() }
-                            val composeNavigator = remember {
-                                MainComposeNavigator(
-                                    launchUrl = { url -> platformContext.openUrl(url) },
-                                )
-                            }
 
                             val hostDi = remember {
                                 DI {
@@ -240,6 +259,7 @@ fun main() {
                                 messageDialogState = messageDialogState,
                                 bottomSheetState = bottomSheetState,
                                 platformContext = platformContext,
+                                playerDelegate = playerDelegate,
                                 playerContent = {
                                     // 观察全屏状态变化，同步到桌面窗口
                                     val isFullscreen by startViewState.playerState.fullScreenPlayer.collectAsState()
@@ -261,11 +281,7 @@ fun main() {
                                         onToggleFullscreen = { playerDelegate.fullscreenController.toggleFullscreen() },
                                     )
                                 },
-                                onBackClick = {
-                                    if (composeNavigator.canPopBackStack()) {
-                                        composeNavigator.popBackStack()
-                                    }
-                                },
+                                onExitApp = ::exitApplication,
                             )
                         }
                     }

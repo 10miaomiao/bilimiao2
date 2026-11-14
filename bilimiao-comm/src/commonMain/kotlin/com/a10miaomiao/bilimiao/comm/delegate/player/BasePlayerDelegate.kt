@@ -71,6 +71,13 @@ interface BasePlayerDelegate : com.a10miaomiao.bilimiao.comm.delegate.BaseDelega
     val pictureInPicture: kotlinx.coroutines.flow.StateFlow<Boolean>
 
     /**
+     * 全屏控制器：全屏/小屏切换与屏幕方向
+     *
+     * 返回操作需要据此判断「是否处于全屏」，以及退出全屏（保持小窗播放）。
+     */
+    val fullscreenController: FullscreenController
+
+    /**
      * 创建平台特定的 MediampPlayer 实例
      */
     fun createPlayer(): MediampPlayer

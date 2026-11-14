@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
@@ -54,6 +55,9 @@ import cn.a10miaomiao.bilimiao.compose.common.LocalContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.LocalEmitter
 import cn.a10miaomiao.bilimiao.compose.common.LocalPageNavigation
 import cn.a10miaomiao.bilimiao.compose.common.bottomSheetContentInsets
+import cn.a10miaomiao.bilimiao.compose.common.back.AppBackHandler
+import cn.a10miaomiao.bilimiao.compose.common.back.BackDispatcher
+import cn.a10miaomiao.bilimiao.compose.common.back.LocalBackDispatcher
 import cn.a10miaomiao.bilimiao.compose.common.emitter.SharedFlowEmitter
 import cn.a10miaomiao.bilimiao.compose.common.navigation.BottomBarBackStack
 import cn.a10miaomiao.bilimiao.compose.common.navigation.decorateEntries
@@ -72,6 +76,7 @@ import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffold
 import cn.a10miaomiao.bilimiao.compose.components.start.SearchOverlay
+import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.store.AppStore
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
@@ -110,6 +115,45 @@ class MainComposeNavigator(
         this.pageNavigationImpl = pageNavigation
     }
 
+    /**
+     * 统一返回链路。在 MainComposeHost 组合期间通过 attachBackHandler() 设置。
+     */
+    private var backHandlerImpl: AppBackHandler? = null
+
+    internal fun attachBackHandler(backHandler: AppBackHandler) {
+        backHandlerImpl = backHandler
+    }
+
+    /**
+     * 覆盖层返回（BottomSheet / 全屏播放 / 搜索框 / 抽屉）
+     *
+     * @return 是否被覆盖层消费
+     */
+    fun handleOverlayBack(): Boolean {
+        return backHandlerImpl?.handleOverlayBack() ?: false
+    }
+
+    /**
+     * 导航返回与退出（页面导航后退 → 两次返回退出）
+     *
+     * @return 是否已消费
+     */
+    fun handleNavigationBack(): Boolean {
+        return backHandlerImpl?.handleNavigationBack() ?: false
+    }
+
+    /**
+     * 完整返回链路：覆盖层 → 应用返回栈 → 导航后退/退出
+     *
+     * 无系统返回通道的平台（桌面端）使用；Android 的页面级返回由系统分发器负责。
+     *
+     * @param allowExit 无路可退时是否进入两次返回退出流程；快捷键入口传 false
+     * @return 是否已消费；false 表示无路可退或 Compose 侧尚未就绪
+     */
+    fun handleBack(allowExit: Boolean = true): Boolean {
+        return backHandlerImpl?.handleBack(allowExit) ?: false
+    }
+
     fun navigateByUri(deepLink: String): Boolean {
         return pageNavigation.navigateByUri(deepLink)
     }
@@ -145,8 +189,16 @@ fun MainComposeHost(
     messageDialogState: MessageDialogState,
     bottomSheetState: BottomSheetState,
     platformContext: PlatformContext,
+    playerDelegate: BasePlayerDelegate,
     playerContent: (@Composable () -> Unit)? = null,
-    onBackClick: () -> Unit,
+    /**
+     * app bar 返回按钮的行为。默认走 [AppBackHandler.handleBack]（覆盖层 → 应用返回栈 → 导航后退）。
+     *
+     * 有系统返回通道的平台（Android）传入系统返回入口，让 app bar 返回与系统返回
+     * 走同一条原生分发链路（含页面级 BackHandler、弹窗窗口内的返回）。
+     */
+    onBackClick: (() -> Unit)? = null,
+    onExitApp: () -> Unit = {},
     initialDeepLink: String? = null,
     onInitialDeepLinkConsumed: () -> Unit = {},
     onReady: () -> Unit = {},
@@ -171,6 +223,21 @@ fun MainComposeHost(
     }
     LaunchedEffect(bottomBar, pageNavigation) {
         onReady()
+    }
+    // 跨平台返回：页面/组件统一注册到同一个返回栈，各平台的原生返回入口
+    // （Android 系统返回、桌面端 Esc、app bar 返回按钮）全部收敛到 appBackHandler，
+    // 从而保证 app bar 返回按钮在任何一个平台上都与系统返回完全等价。
+    val backDispatcher = remember { BackDispatcher() }
+    val currentOnExitApp by rememberUpdatedState(onExitApp)
+    val appBackHandler = remember(backDispatcher, pageNavigation, bottomSheetState, startViewState, playerDelegate) {
+        AppBackHandler(
+            backDispatcher = backDispatcher,
+            bottomSheetState = bottomSheetState,
+            startViewState = startViewState,
+            playerDelegate = playerDelegate,
+            pageNavigation = pageNavigation,
+            onExitApp = { currentOnExitApp() },
+        ).also { navigator.attachBackHandler(it) }
     }
     val appBarState = remember { AppBarState() }
     val pageConfig = pageConfigState.collectConfigAsState().value
@@ -219,8 +286,11 @@ fun MainComposeHost(
             }
         )
     }
-    LaunchedEffect(onBackClick) {
-        appBarState.setOnBackClickListener(onBackClick)
+    LaunchedEffect(appBarState, appBackHandler, onBackClick) {
+        appBarState.setOnBackClickListener {
+            // 有系统返回通道的平台交给系统返回入口，其余平台走应用自己的返回链路
+            onBackClick?.invoke() ?: appBackHandler.handleBack()
+        }
         appBarState.setOnMenuClickListener {
             startViewState.openDrawer()
         }
@@ -244,6 +314,7 @@ fun MainComposeHost(
         LocalEmitter provides emitter,
         LocalUriHandler provides navigator.uriHandler,
         LocalAppBarState provides appBarState,
+        LocalBackDispatcher provides backDispatcher,
     ) {
         withDI(di = hostDi) {
             BilimiaoTheme(appState = appState) {

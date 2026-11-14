@@ -103,7 +103,7 @@ class PlayerDelegateImpl(
         }
 
     /** 全屏与屏幕方向控制器 */
-    val fullscreenController = FullscreenController(
+    override val fullscreenController = FullscreenController(
         scope = session.coroutineScope,
         isLockScreenOrientationPortraitProvider = isLockScreenOrientationPortraitProvider,
         setRequestedOrientation = setRequestedOrientation,
