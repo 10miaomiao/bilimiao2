@@ -14,6 +14,7 @@ import com.a10miaomiao.bilimiao.comm.proxy.ProxyServerInfo
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
 import com.a10miaomiao.bilimiao.comm.store.PlayListStore
 import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
+import com.a10miaomiao.bilimiao.comm.toast.ToastPosition
 import com.a10miaomiao.bilimiao.comm.utils.CompressionTools
 import com.a10miaomiao.bilimiao.comm.utils.UrlUtil
 import com.a10miaomiao.bilimiao.comm.utils.miaoLogger
@@ -201,6 +202,8 @@ class PlayerDelegateImpl(
             GlobalToaster.showWithAction(
                 message = "注意，当前为${speedText}倍速",
                 actionLabel = "恢复1倍速",
+                // 播放器相关提示走顶部，避免被底部播放控制栏遮挡
+                position = ToastPosition.Top,
                 onAction = { setPlaybackSpeed(1f) },
             )
         }
@@ -389,7 +392,11 @@ class PlayerDelegateImpl(
                 ) {
                     delay(300) // 等待播放器加载
                     seekTo(sourceInfo.lastPlayTime)
-                    GlobalToaster.show("自动恢复: ${formatTime(sourceInfo.lastPlayTime)}")
+                    // 播放器相关提示走顶部，避免被底部播放控制栏遮挡
+                    GlobalToaster.show(
+                        "自动恢复: ${formatTime(sourceInfo.lastPlayTime)}",
+                        position = ToastPosition.Top,
+                    )
                 }
 
                 // 开始进度跟踪（任务归 PlayerSession，界面重建不中断）

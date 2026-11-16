@@ -23,7 +23,6 @@ kotlin {
                 implementation(libs.okhttp3)
                 implementation(libs.kodein.di.core)
                 implementation(libs.kmp.lifecycle.viewmodel.compose)
-                implementation(libs.sonner)
                 api(libs.androidx.datastore.preferences)
                 api(libs.androidx.room.runtime)
                 // bilibili gRPC API（proto 生成代码 + service stub），公共类型需透出给下游模块

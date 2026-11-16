@@ -31,9 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
-import com.dokar.sonner.Toaster
-import com.dokar.sonner.rememberToasterState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
@@ -76,8 +73,11 @@ import cn.a10miaomiao.bilimiao.compose.components.image.MyImagePreviewer
 import cn.a10miaomiao.bilimiao.compose.components.image.provider.ImagePreviewerProvider
 import cn.a10miaomiao.bilimiao.compose.components.layout.ComposeScaffold
 import cn.a10miaomiao.bilimiao.compose.components.start.SearchOverlay
+import cn.a10miaomiao.bilimiao.compose.components.toast.MiaoToastHost
+import cn.a10miaomiao.bilimiao.compose.components.toast.rememberMiaoToastState
 import com.a10miaomiao.bilimiao.comm.delegate.player.BasePlayerDelegate
 import com.a10miaomiao.bilimiao.comm.store.AppStore
+import com.a10miaomiao.bilimiao.comm.toast.GlobalToaster
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.compose.rememberInstance
@@ -318,9 +318,10 @@ fun MainComposeHost(
     ) {
         withDI(di = hostDi) {
             BilimiaoTheme(appState = appState) {
-                val toasterState = rememberToasterState()
-                LaunchedEffect(toasterState) {
-                    GlobalToaster.init(toasterState)
+                // 每个宿主一份 toast state：换宿主自然得到空列表，不需要跨宿主的清理逻辑
+                val toastState = rememberMiaoToastState()
+                LaunchedEffect(toastState) {
+                    GlobalToaster.init(toastState)
                 }
                 ImagePreviewerProvider(
                     previewer = { state, innerPadding ->
@@ -360,10 +361,10 @@ fun MainComposeHost(
                     )
                 }
                 MessageDialog(messageDialogState)
-                Toaster(
-                    state = toasterState,
-                    alignment = Alignment.BottomCenter,
-                    richColors = true,
+                // 自研 PopTip 风格轻提示；放在最后确保盖在脚手架/播放器/抽屉等组合内浮层之上
+                // （MessageDialog 在 Android 上是独立窗口，toast 仍在它下方）
+                MiaoToastHost(
+                    state = toastState,
                 )
             }
         }

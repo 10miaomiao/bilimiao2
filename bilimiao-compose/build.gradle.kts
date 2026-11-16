@@ -45,7 +45,6 @@ kotlin {
                 implementation(libs.pbandk.runtime)
                 implementation(libs.materialkolor)
                 implementation(libs.reorderable)
-                implementation(libs.sonner)
                 implementation(libs.coil.compose)
                 implementation(libs.coil.network.okhttp)
                 implementation(libs.androidx.navigation3.runtime)

@@ -282,7 +282,7 @@ bilimiao-comm/src/commonMain/kotlin/com/a10miaomiao/bilimiao/comm/
 ├── network/         # MiaoHttp、BiliApiService、BiliGRPCHttp
 ├── platform/        # 平台抽象（PlatformContext、CookieProvider 等）
 ├── store/           # 状态 Store（AppStore、PlayerStore、UserStore 等）
-├── toast/           # GlobalToaster（基于 sonner）
+├── toast/           # GlobalToaster（自研 PopTip 风格轻提示，见 MiaoToastHost）
 └── utils/           # AES/RSA 加密、数字工具
 
 bilimiao-compose/src/commonMain/kotlin/cn/a10miaomiao/bilimiao/compose/

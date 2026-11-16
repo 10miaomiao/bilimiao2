@@ -49,7 +49,6 @@ bilimiao原为哔哩哔哩时光机，原始功能主要为查看各个分区在
 * [pbandk](https://github.com/streem/pbandk)
 * [Coil](https://github.com/coil-kt/coil)
 * [MaterialKolor](https://github.com/jordond/MaterialKolor)
-* [sonner](https://github.com/dokar3/sonner)
 * [qrose](https://github.com/alexzhirkevich/qrose)
 * [ComposePreference](https://github.com/zhanghai/ComposePreference)
 * [Reorderable](https://github.com/Calvin-LL/Reorderable)
