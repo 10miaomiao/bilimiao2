@@ -1124,7 +1124,15 @@ internal fun PlayerLayer(
                         .background(Color.Black)
                         .size(currentWidth, currentHeight)
                 } else {
-                    Modifier.size(currentWidth, currentHeight)
+                    // 悬浮窗 / 全屏：播放器容器补不透明黑底。
+                    // 视频层（AndroidView 里的 SurfaceView）的画面靠"在窗口上打洞"露出，
+                    // 画面比例「全屏裁减」时画面框会被撑大到超出容器，超出部分只能靠容器外的
+                    // 不透明像素遮住；其余显示模式（嵌入竖屏 / 落点浮层 / 画中画）已经各自补了黑底，
+                    // 这里补齐最后两个，避免浮窗宽高不是精确 16:9（历史持久化值、dp↔px 取整）时
+                    // 出现「画面框外的带透出页面色」或漏 1px 视频。
+                    Modifier
+                        .background(Color.Black)
+                        .size(currentWidth, currentHeight)
                 }
             )
             .then(modifier)
