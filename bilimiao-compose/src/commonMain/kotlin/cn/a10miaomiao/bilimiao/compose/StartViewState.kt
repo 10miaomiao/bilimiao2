@@ -17,11 +17,17 @@ class StartViewState(
 
     val playerState = PlayerState(fullScreenPlayer, pictureInPicture, scope)
 
+    /** 抽屉对外状态（唯一状态源），取值见 [DRAWER_STATE_COLLAPSED] 等常量 */
     private val _drawerState = mutableStateOf(DRAWER_STATE_COLLAPSED)
     val drawerState get() = _drawerState.value
 
-    private val _drawerOpen = mutableStateOf(false)
-    val drawerOpen get() = _drawerOpen.value
+    /**
+     * 抽屉是否处于打开（含打开过程）状态
+     *
+     * 只要不是 [DRAWER_STATE_COLLAPSED] 就算打开：[DRAWER_STATE_DRAGGING] / [DRAWER_STATE_SETTLING]
+     * 也是用户可见的打开过程，返回键应据此先关抽屉，而不是穿透到页面返回。
+     */
+    val drawerOpen get() = _drawerState.value != DRAWER_STATE_COLLAPSED
 
     private val _touchStart = mutableFloatStateOf(0f)
     val touchStart get() = _touchStart.floatValue
@@ -64,22 +70,19 @@ class StartViewState(
     }
 
     fun openDrawer() {
-        _drawerOpen.value = true
         _drawerState.value = DRAWER_STATE_EXPANDED
     }
 
     fun closeDrawer() {
-        _drawerOpen.value = false
         _drawerState.value = DRAWER_STATE_COLLAPSED
     }
 
     fun setDrawerState(state: Int) {
         _drawerState.value = state
-        _drawerOpen.value = state != DRAWER_STATE_COLLAPSED
     }
 
     fun isDrawerOpen(): Boolean {
-        return _drawerOpen.value
+        return drawerOpen
     }
 
     companion object {

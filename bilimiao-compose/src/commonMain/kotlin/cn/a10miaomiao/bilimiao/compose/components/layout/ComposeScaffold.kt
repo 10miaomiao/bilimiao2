@@ -43,6 +43,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -86,6 +87,7 @@ import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import cn.a10miaomiao.bilimiao.compose.platform.LocalSystemBarsController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -247,32 +249,31 @@ fun ComposeScaffold(
             pictureInPicture = pictureInPicture,
         )
     }
-    val drawerController = rememberComposeDrawerController(
-        initialState = drawerState,
-        onStateChanged = startViewState::setDrawerState,
-    )
+    val drawerController = rememberComposeDrawerController(initialState = drawerState)
     var drawerMeasuredWidthPx by remember(orientation) { mutableIntStateOf(0) }
 
     LaunchedEffect(drawerMeasuredWidthPx) {
         drawerController.updateDrawerWidth(drawerMeasuredWidthPx.toFloat())
     }
 
+    // 状态镜像：抽屉真实状态 → StartViewState，供返回键等组合外逻辑判断
+    // 用 snapshotFlow（而不是按派生值取 key 的 LaunchedEffect）：
+    // settled / isAnimationRunning 也参与订阅，手势松手后没有位移帧也能收到终态
+    LaunchedEffect(drawerController, startViewState) {
+        snapshotFlow { drawerController.deriveState() }
+            .distinctUntilChanged()
+            .collect { startViewState.setDrawerState(it) }
+    }
+    // 程序化开合：只对外部请求（EXPANDED / COLLAPSED）驱动动画；
+    // 动画在控制器 scope 内启动，本 effect 因镜像回写（SETTLING/DRAGGING）重启也不会取消它
     LaunchedEffect(drawerState, drawerMeasuredWidthPx) {
         if (drawerMeasuredWidthPx <= 0) {
             return@LaunchedEffect
         }
         when (drawerState) {
-            StartViewState.DRAWER_STATE_EXPANDED -> drawerController.open()
-            StartViewState.DRAWER_STATE_COLLAPSED -> drawerController.close()
+            StartViewState.DRAWER_STATE_EXPANDED -> drawerController.requestTarget(ComposeDrawerValue.Open)
+            StartViewState.DRAWER_STATE_COLLAPSED -> drawerController.requestTarget(ComposeDrawerValue.Closed)
         }
-    }
-
-    LaunchedEffect(
-        drawerController.openFraction,
-        drawerController.currentValue,
-        drawerController.targetValue,
-    ) {
-        drawerController.syncWrapperState()
     }
 
     // 宿主布局在根坐标系中的可视矩形：内容区据此判断播放器落点是否还在屏幕内
@@ -558,9 +559,7 @@ fun ComposeScaffold(
                         .background(Color.Black.copy(alpha = scrimAlpha))
                         .pointerInput(Unit) {
                             detectTapGestures {
-                                drawerController.scope.launch {
-                                    drawerController.close()
-                                }
+                                drawerController.requestTarget(ComposeDrawerValue.Closed)
                             }
                         }
                 )
@@ -595,22 +594,47 @@ private fun isDrawerOpenGestureStart(
     return position.x <= leftEdgeWidthPx || appBarGestureRect?.contains(position) == true
 }
 
+/**
+ * 抽屉对外状态推导（唯一推导源）
+ *
+ * 只依赖真实的拖拽/吸附状态，因此「松手刚好停在锚点上、之后没有任何位移帧」也能收敛到终态：
+ * settled 的写入本身就是一次快照变更，snapshotFlow 会重新求值。
+ *
+ * @param settledOpen 已吸附的位是否展开
+ * @param targetOpen 动画目标位是否展开（无动画时按 settledOpen 传即可）
+ * @param openFraction 抽屉可见比例，0 = 完全收起，1 = 完全展开；几何尚未测量时传 Float.NaN（视为未知，只按 settled 判定）
+ * @param isAnimationRunning 是否正在执行开合动画
+ */
+internal fun deriveDrawerWrapperState(
+    settledOpen: Boolean,
+    targetOpen: Boolean,
+    openFraction: Float,
+    isAnimationRunning: Boolean,
+): Int {
+    // 朝关闭的过渡不算「打开」：抽屉正在消失，返回键不该为它让路（否则会静默吞掉一次返回）。
+    // 只覆盖带目标位的动画（程序化开合、settle 吸附）；Modifier 手势松手后的 fling 走无目标位的拖拽，
+    // isAnimationRunning 为 false，落在下面的 DRAGGING 分支（算打开），这是有意的保守处理
+    if (isAnimationRunning) {
+        return if (targetOpen) StartViewState.DRAWER_STATE_SETTLING else StartViewState.DRAWER_STATE_COLLAPSED
+    }
+    val fractionKnown = !openFraction.isNaN()
+    return when {
+        settledOpen && (!fractionKnown || openFraction >= 1f) -> StartViewState.DRAWER_STATE_EXPANDED
+        !settledOpen && (!fractionKnown || openFraction <= 0f) -> StartViewState.DRAWER_STATE_COLLAPSED
+        else -> StartViewState.DRAWER_STATE_DRAGGING
+    }
+}
+
 private class ComposeDrawerController(
     initialState: Int,
-    private val onStateChanged: (Int) -> Unit,
     val scope: CoroutineScope,
 ) {
     private var drawerWidthPx by mutableFloatStateOf(0f)
-    private var lastDispatchedState by mutableIntStateOf(initialState)
-    private var programmaticChange by mutableStateOf(false)
     var dragConsumedDelta by mutableFloatStateOf(0f)
 
     val state = AnchoredDraggableState(
         initialValue = initialState.toDrawerValue(),
     )
-
-    val currentValue: ComposeDrawerValue
-        get() = state.currentValue
 
     val targetValue: ComposeDrawerValue
         get() = state.targetValue
@@ -630,6 +654,14 @@ private class ComposeDrawerController(
     val isOpen: Boolean
         get() = openFraction > 0f || settledValue == ComposeDrawerValue.Open || isAnimationRunning
 
+    /** 真实状态 → 对外状态：读到 settled/offset/isAnimationRunning，全部参与 snapshotFlow 订阅 */
+    fun deriveState(): Int = deriveDrawerWrapperState(
+        settledOpen = settledValue == ComposeDrawerValue.Open,
+        targetOpen = targetValue == ComposeDrawerValue.Open,
+        openFraction = if (drawerWidthPx <= 0f || state.offset.isNaN()) Float.NaN else openFraction,
+        isAnimationRunning = isAnimationRunning,
+    )
+
     suspend fun updateDrawerWidth(widthPx: Float) {
         if (widthPx <= 0f || drawerWidthPx == widthPx) {
             return
@@ -643,30 +675,22 @@ private class ComposeDrawerController(
         )
     }
 
-    suspend fun open() {
-        if (drawerWidthPx <= 0f || targetValue == ComposeDrawerValue.Open) {
+    /**
+     * 请求开合到 [target]（供外部状态驱动）
+     *
+     * 动画必须在本控制器自己的 scope 里启动：调用方（组合期 effect）重启不会取消它，
+     * 新的动画由 [AnchoredDraggableState] 自身的 MutatorMutex 取消旧的。
+     */
+    fun requestTarget(target: ComposeDrawerValue) {
+        if (drawerWidthPx <= 0f || targetValue == target) {
             return
         }
-        programmaticChange = true
-        state.animateTo(
-            ComposeDrawerValue.Open,
-            animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
-        )
-        programmaticChange = false
-        dispatchState(StartViewState.DRAWER_STATE_EXPANDED)
-    }
-
-    suspend fun close() {
-        if (drawerWidthPx <= 0f || targetValue == ComposeDrawerValue.Closed) {
-            return
+        scope.launch {
+            state.animateTo(
+                target,
+                animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
+            )
         }
-        programmaticChange = true
-        state.animateTo(
-            ComposeDrawerValue.Closed,
-            animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
-        )
-        programmaticChange = false
-        dispatchState(StartViewState.DRAWER_STATE_COLLAPSED)
     }
 
     suspend fun settle(velocity: Float) {
@@ -680,61 +704,21 @@ private class ComposeDrawerController(
             openFraction >= 0.5f -> ComposeDrawerValue.Open
             else -> ComposeDrawerValue.Closed
         }
-        programmaticChange = true
-        dispatchState(StartViewState.DRAWER_STATE_SETTLING)
         state.animateTo(
             target,
             animationSpec = tween(durationMillis = DrawerSettleDurationMillis),
         )
-        programmaticChange = false
-        dispatchState(
-            if (target == ComposeDrawerValue.Open) {
-                StartViewState.DRAWER_STATE_EXPANDED
-            } else {
-                StartViewState.DRAWER_STATE_COLLAPSED
-            }
-        )
-    }
-
-    fun syncWrapperState() {
-        if (programmaticChange) {
-            return
-        }
-        when {
-            isAnimationRunning -> {
-                dispatchState(StartViewState.DRAWER_STATE_SETTLING)
-            }
-            settledValue == ComposeDrawerValue.Open && targetValue == ComposeDrawerValue.Open -> {
-                dispatchState(StartViewState.DRAWER_STATE_EXPANDED)
-            }
-            settledValue == ComposeDrawerValue.Closed && targetValue == ComposeDrawerValue.Closed -> {
-                dispatchState(StartViewState.DRAWER_STATE_COLLAPSED)
-            }
-            else -> {
-                dispatchState(StartViewState.DRAWER_STATE_DRAGGING)
-            }
-        }
-    }
-
-    private fun dispatchState(state: Int) {
-        if (lastDispatchedState == state) {
-            return
-        }
-        lastDispatchedState = state
-        onStateChanged(state)
     }
 }
 
 @Composable
 private fun rememberComposeDrawerController(
     initialState: Int,
-    onStateChanged: (Int) -> Unit,
 ): ComposeDrawerController {
     val scope = rememberCoroutineScope()
-    return remember(scope, onStateChanged) {
+    return remember(scope) {
         ComposeDrawerController(
             initialState = initialState,
-            onStateChanged = onStateChanged,
             scope = scope,
         )
     }
