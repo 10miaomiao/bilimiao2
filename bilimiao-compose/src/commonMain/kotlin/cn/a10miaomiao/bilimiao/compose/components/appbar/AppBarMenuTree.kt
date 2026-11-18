@@ -28,8 +28,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -46,6 +44,9 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -55,9 +56,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoCard
 import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
-import com.a10miaomiao.bilimiao.comm.utils.MiaoLogger
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -74,6 +73,16 @@ private enum class RootPopupPlacement {
 }
 
 private val VerticalRootPopupWidth = 168.dp
+
+/**
+ * 一级菜单弹层最小高度。
+ *
+ * 弹层高度上限来自真实可用空间，但当锚点贴近安全区边缘（例如 AppBar 贴着屏幕顶部）
+ * 时可用空间会趋近 0。此时若直接 heightIn(max = 0.dp)，菜单列会被压成 0 高度而完全
+ * 不可见（内部 verticalScroll 也失去意义），因此给一个「至少能看到两三个菜单项」的
+ * 下限，再与窗口安全区可用高度一起 clamp，保证永远不会超出屏幕。
+ */
+private val RootPopupMinHeight = 120.dp
 
 @Composable
 internal fun VerticalAppBarMenus(
@@ -340,8 +349,12 @@ private fun SharedRootMenuPopup(
         RootPopupPlacement.AboveAppBar -> VerticalRootPopupWidth
         RootPopupPlacement.RightOfAppBar -> AppBarConfig.MenuWidth
     }
-    var popupHeightPx by remember(popupRootPath, popupParentPath, placement) { mutableIntStateOf(0) }
-    var screenHeightPx by remember(popupRootPath, popupParentPath, placement) { mutableIntStateOf(Int.MAX_VALUE) }
+    // Popup 定位回调实测到的「弹层所在窗口」高度（px）。
+    // 0 表示尚未测得（首帧），调用方必须把它当成「未知」显式处理，绝不能当哨兵参与换算。
+    // key 只绑定 placement：进入子菜单时 popupParentPath 会变，但窗口高度并没有变，
+    // 若把它放进 key 会重建一个 0 值状态，而 popupPositionProvider 捕获的仍是旧状态对象，
+    // 于是「实测窗口高度」这一支路会静默失效（只能靠 LocalWindowInfo 兜底）。
+    var measuredWindowHeightPx by remember(placement) { mutableIntStateOf(0) }
 
     val popupPositionProvider = remember(
         placement,
@@ -358,7 +371,10 @@ private fun SharedRootMenuPopup(
                 layoutDirection: LayoutDirection,
                 popupContentSize: androidx.compose.ui.unit.IntSize,
             ): IntOffset {
-                screenHeightPx = windowSize.height
+                // 记录弹层所在窗口的真实高度，供后续帧计算最大高度（只在变化时写入，避免多余重组）
+                if (measuredWindowHeightPx != windowSize.height) {
+                    measuredWindowHeightPx = windowSize.height
+                }
                 val actualPopupWidth = popupContentSize.width
                 val actualPopupHeight = popupContentSize.height
                 return when (placement) {
@@ -385,10 +401,26 @@ private fun SharedRootMenuPopup(
         }
     }
 
-    val maxHeightPx = when (placement) {
-        RootPopupPlacement.AboveAppBar -> max(activeAnchor.y - safeTopPx, 0)
-        RootPopupPlacement.RightOfAppBar -> max(screenHeightPx - safeTopPx - safeBottomPx, 0)
-    }
+    // 弹层最大高度只能来自真实可用空间：
+    // ① 优先用 Popup 定位回调实测到的窗口高度（与 Popup 的坐标系一致，最准确）；
+    // ② 首帧还没测得时回退到 LocalWindowInfo 的窗口高度；
+    // ③ 仍然拿不到（例如桌面端窗口尚未测量）时返回 null —— 显式表示「未知」，
+    //    此时不给 heightIn 传任何限制，由布局自身按窗口约束测量。
+    // 旧实现把 Int.MAX_VALUE 当作「窗口高度未知」的哨兵，而窗口高度要到
+    // calculatePosition（内容测量之后）才写入，于是首帧直接拿 Int.MAX_VALUE 去算
+    // heightIn(max = maxHeightPx.toDp())：dp→px 往返换算后得到 ≈2^31 的像素值
+    // （实测设备上是 2147483520），它远超 Constraints 能打包的尺寸上限，
+    // 抛出 "Can't represent a width of 0 and height of 2147483520 in Constraints"。
+    val windowHeightPx = measuredWindowHeightPx.takeIf { it > 0 }
+        ?: LocalWindowInfo.current.containerSize.height.takeIf { it > 0 }
+    val popupMaxHeightDp = resolveRootPopupMaxHeight(
+        placement = placement,
+        anchorTopPx = activeAnchor.y,
+        windowHeightPx = windowHeightPx,
+        safeTopPx = safeTopPx,
+        safeBottomPx = safeBottomPx,
+        density = density,
+    )
 
     val popupTransformOrigin = remember(placement) {
         when (placement) {
@@ -426,8 +458,8 @@ private fun SharedRootMenuPopup(
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .width(popupWidthDp)
-                        .heightIn(max = with(density) { maxHeightPx.toDp() })
-                        .onGloballyPositioned { popupHeightPx = it.size.height }
+                        // Dp.Unspecified 表示窗口高度未知，此时不给高度限制
+                        .heightIn(max = popupMaxHeightDp ?: Dp.Unspecified)
                         .verticalScroll(rememberScrollState()),
                 ) {
                     if (appBarState.hasExpandedSubMenus) {
@@ -507,6 +539,57 @@ private fun MenuPanelBackButton(
     }
 }
 
+/**
+ * 计算一级菜单弹层的最大高度。
+ *
+ * 返回值语义：
+ * - `null` 表示「不做高度限制」：窗口高度未知，或窗口安全区内已无可用高度；
+ * - 非 `null` 时一定是有限值（不会出现无穷大/溢出值），且不超过窗口安全区可用高度；
+ *   唯一例外是 [RootPopupPlacement.AboveAppBar] 的退化分支——锚点上方空间小于
+ *   [RootPopupMinHeight] 时会抬到该下限（仍受窗口安全区可用高度约束）。
+ *
+ * @param placement 弹层相对 AppBar 的放置方式
+ * @param anchorTopPx 锚点（被点击的菜单项）在窗口坐标中的上边缘
+ * @param windowHeightPx 弹层所在窗口高度，null 或 <= 0 表示未知
+ * @param safeTopPx 安全区上内边距
+ * @param safeBottomPx 安全区下内边距
+ * @param density 用于 px↔dp 换算
+ */
+private fun resolveRootPopupMaxHeight(
+    placement: RootPopupPlacement,
+    anchorTopPx: Int,
+    windowHeightPx: Int?,
+    safeTopPx: Int,
+    safeBottomPx: Int,
+    density: Density,
+): Dp? {
+    // 窗口安全区内的可用高度；窗口高度未知时按「未知」处理，不做限制
+    val windowAvailable = windowHeightPx
+        ?.takeIf { it > 0 }
+        ?.let { heightPx ->
+            with(density) {
+                (heightPx.toDp() - safeTopPx.toDp() - safeBottomPx.toDp()).coerceAtLeast(0.dp)
+            }
+        }
+        ?.takeIf { it > 0.dp }
+
+    return when (placement) {
+        RootPopupPlacement.AboveAppBar -> {
+            // 锚点上方到安全区顶部的空间；AppBar 贴近安全区顶部时会退化成 0
+            val spaceAbove = with(density) {
+                (anchorTopPx.toDp() - safeTopPx.toDp()).coerceAtLeast(0.dp)
+            }
+            // 退化时不写 heightIn(max = 0.dp)（那会把菜单压成不可见），而是抬到最小可用高度，
+            // 再与窗口安全区可用高度一起 clamp，保证既不超出屏幕、也至少能看到几个菜单项。
+            // 抬到下限时弹层底部会盖住被点击的菜单项（定位仍限制在安全区内），这是可接受的降级。
+            spaceAbove.coerceAtLeast(RootPopupMinHeight)
+                .let { limit -> windowAvailable?.let { limit.coerceAtMost(it) } ?: limit }
+        }
+        // 横向 AppBar：菜单在侧边栏，弹层整列显示，可用高度就是整个安全区高度
+        RootPopupPlacement.RightOfAppBar -> windowAvailable
+    }
+}
+
 private fun findMenuItemByPath(
     menus: List<MenuItemData>,
     path: List<Int>,
@@ -531,11 +614,4 @@ private fun findMenuItemByPath(
 
 private fun List<Int>.toPathKey(): String {
     return joinToString(separator = "/")
-}
-
-private fun String.toPathList(): List<Int> {
-    if (isEmpty()) {
-        return emptyList()
-    }
-    return split("/").map { it.toInt() }
 }
