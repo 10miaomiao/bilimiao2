@@ -60,17 +60,18 @@ import cn.a10miaomiao.bilimiao.compose.components.miao.MiaoOutlinedCard
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-private data class MenuAnchor(
+/**
+ * 锚点在窗口坐标系中的矩形（px）。
+ *
+ * 一级菜单弹层与返回键长按网格面板共用：两者都需要「被点击元素在窗口中的真实位置」
+ * 才能把弹层贴到锚点旁边，因此这里提升为同包可见的共享类型。
+ */
+internal data class MenuAnchor(
     val x: Int,
     val y: Int,
     val width: Int,
     val height: Int,
 )
-
-private enum class RootPopupPlacement {
-    AboveAppBar,
-    RightOfAppBar,
-}
 
 private val VerticalRootPopupWidth = 168.dp
 
@@ -127,7 +128,7 @@ internal fun VerticalAppBarMenus(
             appBarState = appBarState,
             onMenuItemClick = onMenuItemClick,
             anchors = anchors,
-            placement = RootPopupPlacement.AboveAppBar,
+            placement = AppBarPopupPlacement.AboveAppBar,
         )
     }
 }
@@ -174,7 +175,7 @@ internal fun HorizontalAppBarMenus(
             appBarState = appBarState,
             onMenuItemClick = onMenuItemClick,
             anchors = anchors,
-            placement = RootPopupPlacement.RightOfAppBar,
+            placement = AppBarPopupPlacement.RightOfAppBar,
         )
     }
 }
@@ -289,7 +290,7 @@ private fun SharedRootMenuPopup(
     appBarState: AppBarState,
     onMenuItemClick: (MenuItemData) -> Unit,
     anchors: Map<String, MenuAnchor>,
-    placement: RootPopupPlacement,
+    placement: AppBarPopupPlacement,
 ) {
     val activeRootPath = appBarState.activeRootMenuPath
     var renderedRootPath by remember { mutableStateOf<String?>(null) }
@@ -346,8 +347,8 @@ private fun SharedRootMenuPopup(
     val safeLeftPx = with(density) { safePadding.calculateLeftPadding(LayoutDirection.Ltr).roundToPx() }
     val safeRightPx = with(density) { safePadding.calculateRightPadding(LayoutDirection.Ltr).roundToPx() }
     val popupWidthDp = when (placement) {
-        RootPopupPlacement.AboveAppBar -> VerticalRootPopupWidth
-        RootPopupPlacement.RightOfAppBar -> AppBarConfig.MenuWidth
+        AppBarPopupPlacement.AboveAppBar -> VerticalRootPopupWidth
+        AppBarPopupPlacement.RightOfAppBar -> AppBarConfig.MenuWidth
     }
     // Popup 定位回调实测到的「弹层所在窗口」高度（px）。
     // 0 表示尚未测得（首帧），调用方必须把它当成「未知」显式处理，绝不能当哨兵参与换算。
@@ -378,7 +379,7 @@ private fun SharedRootMenuPopup(
                 val actualPopupWidth = popupContentSize.width
                 val actualPopupHeight = popupContentSize.height
                 return when (placement) {
-                    RootPopupPlacement.AboveAppBar -> {
+                    AppBarPopupPlacement.AboveAppBar -> {
                         val anchorCenterX = activeAnchor.x + activeAnchor.width / 2
                         val preferredLeft = anchorCenterX - actualPopupWidth / 2
                         val maxLeft = max(windowSize.width - safeRightPx - actualPopupWidth, safeLeftPx)
@@ -387,7 +388,7 @@ private fun SharedRootMenuPopup(
                             y = max(activeAnchor.y - actualPopupHeight, safeTopPx),
                         )
                     }
-                    RootPopupPlacement.RightOfAppBar -> {
+                    AppBarPopupPlacement.RightOfAppBar -> {
                         val anchorCenterY = activeAnchor.y + activeAnchor.height / 2
                         val preferredTop = anchorCenterY - actualPopupHeight / 2
                         val maxTop = max(windowSize.height - safeBottomPx - actualPopupHeight, safeTopPx)
@@ -424,8 +425,8 @@ private fun SharedRootMenuPopup(
 
     val popupTransformOrigin = remember(placement) {
         when (placement) {
-            RootPopupPlacement.AboveAppBar -> TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 1f)
-            RootPopupPlacement.RightOfAppBar -> TransformOrigin(pivotFractionX = 0f, pivotFractionY = 0.5f)
+            AppBarPopupPlacement.AboveAppBar -> TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 1f)
+            AppBarPopupPlacement.RightOfAppBar -> TransformOrigin(pivotFractionX = 0f, pivotFractionY = 0.5f)
         }
     }
 
@@ -540,23 +541,23 @@ private fun MenuPanelBackButton(
 }
 
 /**
- * 计算一级菜单弹层的最大高度。
+ * 计算 AppBar 弹层的最大高度（一级菜单弹层与返回键长按网格面板共用，全仓只此一份实现）。
  *
  * 返回值语义：
  * - `null` 表示「不做高度限制」：窗口高度未知，或窗口安全区内已无可用高度；
  * - 非 `null` 时一定是有限值（不会出现无穷大/溢出值），且不超过窗口安全区可用高度；
- *   唯一例外是 [RootPopupPlacement.AboveAppBar] 的退化分支——锚点上方空间小于
+ *   唯一例外是 [AppBarPopupPlacement.AboveAppBar] 的退化分支——锚点上方空间小于
  *   [RootPopupMinHeight] 时会抬到该下限（仍受窗口安全区可用高度约束）。
  *
  * @param placement 弹层相对 AppBar 的放置方式
- * @param anchorTopPx 锚点（被点击的菜单项）在窗口坐标中的上边缘
+ * @param anchorTopPx 锚点（被点击的菜单项 / 返回键）在窗口坐标中的上边缘
  * @param windowHeightPx 弹层所在窗口高度，null 或 <= 0 表示未知
  * @param safeTopPx 安全区上内边距
  * @param safeBottomPx 安全区下内边距
  * @param density 用于 px↔dp 换算
  */
-private fun resolveRootPopupMaxHeight(
-    placement: RootPopupPlacement,
+internal fun resolveRootPopupMaxHeight(
+    placement: AppBarPopupPlacement,
     anchorTopPx: Int,
     windowHeightPx: Int?,
     safeTopPx: Int,
@@ -574,7 +575,7 @@ private fun resolveRootPopupMaxHeight(
         ?.takeIf { it > 0.dp }
 
     return when (placement) {
-        RootPopupPlacement.AboveAppBar -> {
+        AppBarPopupPlacement.AboveAppBar -> {
             // 锚点上方到安全区顶部的空间；AppBar 贴近安全区顶部时会退化成 0
             val spaceAbove = with(density) {
                 (anchorTopPx.toDp() - safeTopPx.toDp()).coerceAtLeast(0.dp)
@@ -586,7 +587,7 @@ private fun resolveRootPopupMaxHeight(
                 .let { limit -> windowAvailable?.let { limit.coerceAtMost(it) } ?: limit }
         }
         // 横向 AppBar：菜单在侧边栏，弹层整列显示，可用高度就是整个安全区高度
-        RootPopupPlacement.RightOfAppBar -> windowAvailable
+        AppBarPopupPlacement.RightOfAppBar -> windowAvailable
     }
 }
 

@@ -448,6 +448,9 @@ fun ComposeScaffold(
                             onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
                             onPointerClick = { appBarState._onPointerClick?.invoke() },
                             onExchangeClick = { appBarState._onExchangeClick?.invoke() },
+                            // 返回键长按：有动作时弹网格面板，无动作时回调宿主（例如直接回首页）
+                            onBackLongClick = { appBarState._onBackLongClick?.invoke() },
+                            backLongPressActions = appBarState.backLongPressActions,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .then(appBarDrawerGestureModifier),
@@ -474,6 +477,9 @@ fun ComposeScaffold(
                             onMenuItemClick = { appBarState._onMenuItemClick?.invoke(it) },
                             onPointerClick = { appBarState._onPointerClick?.invoke() },
                             onExchangeClick = { appBarState._onExchangeClick?.invoke() },
+                            // 返回键长按：有动作时弹网格面板（横屏向右弹），无动作时回调宿主
+                            onBackLongClick = { appBarState._onBackLongClick?.invoke() },
+                            backLongPressActions = appBarState.backLongPressActions,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }.single().measure(boundsConstraints(layoutResult.appBarHorizontalBounds!!))

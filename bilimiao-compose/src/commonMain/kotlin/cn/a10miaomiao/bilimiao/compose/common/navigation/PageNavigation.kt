@@ -44,6 +44,19 @@ class PageNavigation(
         return navigateByUriInternal(uriString)
     }
 
+    /**
+     * 回到根页面：只把「当前 Tab 的页面栈」弹回它自己的根页面，
+     * 与老项目 bbmiao 的 `popBackStack(dest.main, false)` 语义一致——不切换 Tab、不切内容区，
+     * 也不调用 [onClose]（不退出应用）。
+     *
+     * 与 [popBackStack] 的区别：本方法一次性回到根页面，不逐级回退；其它 Tab 的页面栈保持不变。
+     *
+     * @return 是否发生了实际变化；当前栈本来就只有根页面时返回 false
+     */
+    fun popToRoot(): Boolean {
+        return bottomBar.popToRoot()
+    }
+
     override fun navigateToVideoInfo(id: String) {
         navigate(VideoDetailPage(
             id = id

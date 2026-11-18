@@ -59,6 +59,8 @@ import androidx.compose.material.icons.filled.Tune
  * @param onMenuItemClick 菜单项点击
  * @param onPointerClick 指针点击
  * @param onExchangeClick 交换按钮点击
+ * @param onBackLongClick 返回键长按且没有可展示动作时的回调（宿主用它实现「未播放时直接回首页」）
+ * @param backLongPressActions 返回键长按弹出的网格面板动作，为空时走 [onBackLongClick]
  * @param modifier 修饰符
  */
 @Composable
@@ -77,6 +79,8 @@ fun AppBar(
     onMenuItemClick: (MenuItemData) -> Unit = {},
     onPointerClick: () -> Unit = {},
     onExchangeClick: () -> Unit = {},
+    onBackLongClick: () -> Unit = {},
+    backLongPressActions: List<AppBarBackAction> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
     val safePadding = WindowInsets.safeDrawing.only(
@@ -136,6 +140,8 @@ fun AppBar(
                     onMenuItemClick = onMenuItemClick,
                     onPointerClick = onPointerClick,
                     onExchangeClick = onExchangeClick,
+                    onBackLongClick = onBackLongClick,
+                    backLongPressActions = backLongPressActions,
                 )
             }
         }
@@ -187,6 +193,8 @@ private fun AppBarMenuRow(
     onMenuItemClick: (MenuItemData) -> Unit,
     onPointerClick: () -> Unit,
     onExchangeClick: () -> Unit,
+    onBackLongClick: () -> Unit,
+    backLongPressActions: List<AppBarBackAction>,
 ) {
     Row(
         modifier = Modifier
@@ -196,9 +204,15 @@ private fun AppBarMenuRow(
             .graphicsLayer { alpha = 1f - appBarState.collapseProgress },
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // 长按参数直接透传：NavigationIcon 内部只在「当前图标是返回箭头」时响应长按，
+        // 因此这里不需要再按 canBack 分支一次
         NavigationIcon(
             icon = if (canBack) AppBarNavigationIcon.Back else AppBarNavigationIcon.Menu,
             onClick = if (canBack) onBackClick else onMenuClick,
+            onLongClick = onBackLongClick,
+            longPressActions = backLongPressActions,
+            // 竖屏 AppBar 是屏幕底部的横条，面板向「上」弹出
+            longPressPlacement = AppBarPopupPlacement.AboveAppBar,
         )
 
         if (showPointer) {

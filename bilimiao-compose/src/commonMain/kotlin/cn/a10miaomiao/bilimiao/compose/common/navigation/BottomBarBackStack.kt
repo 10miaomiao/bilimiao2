@@ -72,6 +72,25 @@ class BottomBarBackStack(
     }
 
     /**
+     * 把「当前 Tab 的页面栈」回退到它的根页面（等价老项目 bbmiao 的
+     * `popBackStack(dest.main, false)`）：只清当前 Tab，不切换 Tab，也不动其它 Tab 的栈。
+     *
+     * 之所以不切 Tab：bbmiao 的 `dest.main` 是当前 NavHost 图的起始目的地，
+     * 弹回的是「当前内容区自己的根页面」；切换 Tab 属于底部栏导航，语义不同。
+     *
+     * @return 是否发生了实际变化（栈本来就只有根页面时返回 false，且不写入任何快照状态）
+     */
+    fun popToRoot(): Boolean {
+        val cur = current
+        var changed = false
+        while (cur.size > 1) {
+            cur.removeLastOrNull()
+            changed = true
+        }
+        return changed
+    }
+
+    /**
      * 导航到任意 key：若是 top-level 则切 Tab，否则 push 到当前栈。
      *
      * 仅对“同一个实例”去重，避免同一对象被重复压栈。

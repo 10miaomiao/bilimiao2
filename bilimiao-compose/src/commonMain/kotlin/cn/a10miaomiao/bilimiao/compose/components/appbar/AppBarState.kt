@@ -65,12 +65,25 @@ class AppBarState {
     var orientation by mutableStateOf(AppBarOrientation.Vertical)
         internal set
 
+    /**
+     * 返回键「长按」弹出的网格面板动作。
+     *
+     * 默认空列表（长按不弹面板）。具体动作由宿主按当前状态动态提供——
+     * 典型场景是「播放器是否正在显示」：播放中提供「返回首页 / 退出播放」，
+     * 否则保持为空，长按直接走 [_onBackLongClick]（返回首页）。
+     */
+    var backLongPressActions by mutableStateOf<List<AppBarBackAction>>(emptyList())
+        internal set
+
     // 事件回调
     internal var _onBackClick: (() -> Unit)? = null
     internal var _onMenuClick: (() -> Unit)? = null
     internal var _onMenuItemClick: ((MenuItemData) -> Unit)? = null
     internal var _onPointerClick: (() -> Unit)? = null
     internal var _onExchangeClick: (() -> Unit)? = null
+
+    /** 返回键长按、且 [backLongPressActions] 为空时的回调（宿主用于「直接回首页」） */
+    internal var _onBackLongClick: (() -> Unit)? = null
 
     // 底栏收缩进度：0 = 完全展开，1 = 完全收起（菜单行滑出，仅保留标题条）
     var collapseProgress by mutableFloatStateOf(0f)
@@ -127,6 +140,11 @@ class AppBarState {
     // 设置交换按钮点击事件
     fun setOnExchangeClickListener(listener: () -> Unit) {
         _onExchangeClick = listener
+    }
+
+    // 设置返回键长按事件（仅在没有任何长按面板动作时生效）
+    fun setOnBackLongClickListener(listener: () -> Unit) {
+        _onBackLongClick = listener
     }
 
     /**
@@ -306,6 +324,12 @@ class AppBarState {
         isNavigationMenu = false
         checkedKey = null
         orientation = AppBarOrientation.Vertical
+        // 长按面板的「动作」是页面级临时状态，切页时必须清掉，
+        // 否则新页面会继承上一页的「退出播放」等动作。
+        // 但长按「回调」(_onBackLongClick) 不能在这里置空：宿主的注册发生在 LaunchedEffect 里、
+        // 不会随 clear() 重跑，一旦置空长按将永久失效；这也与 _onBackClick/_onMenuClick
+        // 等既有回调「不在 clear 里置空」的约定一致
+        backLongPressActions = emptyList()
         collapseAnimator?.cancel()
         collapseAnimator = null
         collapseProgress = 0f

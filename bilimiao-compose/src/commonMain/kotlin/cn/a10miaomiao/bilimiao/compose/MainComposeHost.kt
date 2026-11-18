@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -30,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +66,7 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.SheetPageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.navigation.rememberBottomBarBackStack
 import cn.a10miaomiao.bilimiao.compose.common.mypage.LocalPageConfigState
 import cn.a10miaomiao.bilimiao.compose.common.mypage.PageConfigState
+import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarBackAction
 import cn.a10miaomiao.bilimiao.compose.components.appbar.AppBarState
 import cn.a10miaomiao.bilimiao.compose.components.appbar.LocalAppBarState
 import cn.a10miaomiao.bilimiao.compose.components.dialogs.AutoSheetDialogHost
@@ -243,6 +246,45 @@ fun MainComposeHost(
     val pageConfig = pageConfigState.collectConfigAsState().value
     val bottomSheetPage by bottomSheetState.page.collectAsState()
     val playerState = startViewState.playerState
+    // 播放器是否正在显示。必须在组合期读取（snapshot state），这样播放器开关时会重组、
+    // 重新算出下面的长按动作列表；若放到 effect 里读，播放器状态变化不会触发本层重组。
+    val showPlayer = playerState.showPlayer
+    // AppBar 返回键「长按」面板的动作列表（对齐老项目 bbmiao 语义）：
+    // 播放中 → 弹网格面板（返回首页 / 退出播放）；未播放 → 空列表，长按直接回当前 Tab 的根页面。
+    // 动作列表必须跟着 showPlayer 重建，所以以 (showPlayer, pageNavigation, playerDelegate, appBackHandler)
+    // 为 remember 键缓存：同一状态下复用同一个 List 实例，避免每次重组都新建 lambda，
+    // 进而避免 AppBarState 被反复赋「内容相同但引用不同」的列表而导致面板无谓重组。
+    // appBackHandler 也要进键：动作 lambda 捕获它，漏掉键就可能捕获到已废弃的实例，导致收敛覆盖层失效。
+    val backLongPressActions = remember(showPlayer, pageNavigation, playerDelegate, appBackHandler) {
+        if (showPlayer) {
+            listOf(
+                AppBarBackAction(
+                    icon = Icons.Filled.Home,
+                    title = "返回首页",
+                    // 先把覆盖层（BottomSheet 及其内部页 / 全屏播放 / 搜索框 / 抽屉）全部收敛，
+                    // 再把当前 Tab 的页面栈回退到它的根页面——不切换 Tab、不动其它 Tab 的栈。
+                    // 顺序不能颠倒：先改导航会让浮层留在新页面之上。
+                    onClick = {
+                        appBackHandler.closeOverlays()
+                        pageNavigation.popToRoot()
+                    },
+                ),
+                AppBarBackAction(
+                    icon = Icons.Filled.Close,
+                    title = "退出播放",
+                    // 只关闭播放器，不改变当前页面
+                    onClick = { playerDelegate.closePlayer() },
+                ),
+            )
+        } else {
+            emptyList()
+        }
+    }
+    // 赋值是「写状态」，不能放在组合体里直接写（会触发「在组合中写状态」告警/额外重组），
+    // 因此放进 SideEffect：组合成功提交后同步一次；列表内容相等时 snapshot 按结构相等判重，不会引起额外重组
+    SideEffect {
+        appBarState.backLongPressActions = backLongPressActions
+    }
     val orientation = if (isCompactWindow()) ORIENTATION_PORTRAIT else ORIENTATION_LANDSCAPE
     val fullScreenPlayer by playerState.fullScreenPlayer.collectAsState()
     val pictureInPicture by playerState.pictureInPicture.collectAsState()
@@ -286,10 +328,19 @@ fun MainComposeHost(
             }
         )
     }
-    LaunchedEffect(appBarState, appBackHandler, onBackClick) {
+    LaunchedEffect(appBarState, appBackHandler, onBackClick, pageNavigation) {
         appBarState.setOnBackClickListener {
             // 有系统返回通道的平台交给系统返回入口，其余平台走应用自己的返回链路
             onBackClick?.invoke() ?: appBackHandler.handleBack()
+        }
+        appBarState.setOnBackLongClickListener {
+            // 未播放时（此时 backLongPressActions 为空）长按返回 = 回到「当前 Tab 的根页面」。
+            // 同样先收敛覆盖层（BottomSheet / 全屏播放 / 搜索框 / 抽屉），再回退页面栈。
+            // 两者都返回 false 表示已经在根页面且没有任何覆盖层，此时什么都不做
+            // （与 bbmiao 一致：不提示、不退栈、不退出应用）。
+            val overlayClosed = appBackHandler.closeOverlays()
+            val poppedToRoot = pageNavigation.popToRoot()
+            if (!overlayClosed && !poppedToRoot) return@setOnBackLongClickListener
         }
         appBarState.setOnMenuClickListener {
             startViewState.openDrawer()

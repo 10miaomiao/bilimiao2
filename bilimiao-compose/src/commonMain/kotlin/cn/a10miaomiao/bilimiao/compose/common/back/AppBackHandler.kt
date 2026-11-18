@@ -65,6 +65,46 @@ class AppBackHandler(
     }
 
     /**
+     * 收敛所有覆盖层：BottomSheet（连同内部页面）、全屏播放、搜索框、抽屉，全部关闭。
+     * 供「返回首页 / 退出播放」这类一次性跳转的动作使用——直接改导航会让浮层留在新页面之上。
+     *
+     * 与 [handleOverlayBack] 的区别：后者按优先级只消费一层；本方法不关心优先级，一次全关。
+     * 各项条件都是「当前是否处于该覆盖层」的读-判-关，已关闭时判空跳过，
+     * 因此重复调用不会产生额外副作用（幂等），返回值只在本次真正关掉了东西时为 true。
+     *
+     * @return 关闭过程中是否有任何覆盖层被处理
+     */
+    fun closeOverlays(): Boolean {
+        var handled = false
+        // BottomSheet：先逐级弹空内部页面（popInnerPage 返回“是否仍有内部页”，弹空后为 false），
+        // 再关闭 sheet 本身；没有内部页时直接跳过，不会死循环
+        if (bottomSheetState.hasInnerPage) {
+            while (bottomSheetState.popInnerPage()) {
+                // 逐级弹出内部页面，直到只剩初始页
+            }
+            handled = true
+        }
+        if (bottomSheetState.page.value != null) {
+            bottomSheetState.close()
+            handled = true
+        }
+        // 全屏播放：退出全屏（播放器保持小窗播放，不关闭播放器）
+        if (playerDelegate.fullscreenController.isFullscreen.value) {
+            playerDelegate.fullscreenController.smallScreen()
+            handled = true
+        }
+        if (startViewState.showSearchDialog) {
+            startViewState.closeSearchDialog()
+            handled = true
+        }
+        if (startViewState.isDrawerOpen()) {
+            startViewState.closeDrawer()
+            handled = true
+        }
+        return handled
+    }
+
+    /**
      * 导航返回与退出
      *
      * 页面导航后退直至首页；已在首页且 [allowExit] 时进入两次返回退出。

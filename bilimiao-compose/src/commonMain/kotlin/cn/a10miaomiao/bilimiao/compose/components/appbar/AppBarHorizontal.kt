@@ -55,6 +55,8 @@ import androidx.compose.material.icons.filled.Tune
  * @param onMenuItemClick 菜单项点击
  * @param onPointerClick 指针点击
  * @param onExchangeClick 交换按钮点击
+ * @param onBackLongClick 返回键长按且没有可展示动作时的回调（宿主用它实现「未播放时直接回首页」）
+ * @param backLongPressActions 返回键长按弹出的网格面板动作，为空时走 [onBackLongClick]
  * @param modifier 修饰符
  */
 @Composable
@@ -73,6 +75,8 @@ fun AppBarHorizontal(
     onMenuItemClick: (MenuItemData) -> Unit = {},
     onPointerClick: () -> Unit = {},
     onExchangeClick: () -> Unit = {},
+    onBackLongClick: () -> Unit = {},
+    backLongPressActions: List<AppBarBackAction> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
     val safePadding = WindowInsets.safeDrawing.only(
@@ -90,10 +94,15 @@ fun AppBarHorizontal(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // 返回/菜单按钮
+            // 长按参数直接透传：NavigationIcon 内部只在「当前图标是返回箭头」时响应长按
             NavigationIcon(
                 icon = if (showBack) AppBarNavigationIcon.Back else AppBarNavigationIcon.Menu,
                 onClick = if (showBack) onBackClick else onMenuClick,
                 modifier = Modifier.width(AppBarConfig.MenuWidth),
+                onLongClick = onBackLongClick,
+                longPressActions = backLongPressActions,
+                // 横屏 AppBar 是屏幕左侧的竖条，面板向「右」弹出
+                longPressPlacement = AppBarPopupPlacement.RightOfAppBar,
             )
 
             if (showPointer) {
