@@ -51,6 +51,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import cn.a10miaomiao.bilimiao.compose.components.player.ResolvedSubtitleStyle
+import cn.a10miaomiao.bilimiao.compose.components.player.SUBTITLE_FRAME_HORIZONTAL_PADDING
+import cn.a10miaomiao.bilimiao.compose.components.player.SubtitleStyleSpec
 
 /**
  * 视频播放器框架, 可以自定义组合控制器等部分.
@@ -95,9 +98,18 @@ fun VideoScaffold(
     /**
      * CC 字幕层，为独立叠加层（位于弹幕与手势之间），不参与控制器布局。
      * 底部边距由底部控制区（底栏/进度条）的实际占用高度驱动，控制器显示时字幕
-     * 自动避让到底栏上方，隐藏时画面底部留出边距。
+     * 自动避让到底栏上方，隐藏时按用户设置的距离留出边距。
+     *
+     * 参数为按当前画面**宽高**解析好的 [ResolvedSubtitleStyle]（字号、距底距离）：
+     * 百分比模式下字号按画面**短边** `min(宽, 高)`、距底按画面**高度**换算，
+     * 调用方直接使用即可。
      */
-    subtitle: @Composable BoxScope.() -> Unit = {},
+    subtitle: @Composable BoxScope.(ResolvedSubtitleStyle) -> Unit = {},
+    /**
+     * 字幕样式，距底距离与字号由用户设置驱动（见 [SubtitleStyleSpec]）；
+     * 控制器显示时仍按底栏实际高度避让，此时距底距离设置不生效。
+     */
+    subtitleStyle: SubtitleStyleSpec = SubtitleStyleSpec.Default,
     gestureHost: @Composable BoxWithConstraintsScope.() -> Unit = {},
     floatingMessage: @Composable BoxScope.() -> Unit = {},
     rhsButtons: @Composable ColumnScope.() -> Unit = {},
@@ -176,19 +188,31 @@ fun VideoScaffold(
                 // 字幕：独立层（弹幕之上、手势之下），不参与控制器的布局
                 // 底部边距由底部控制区实际高度驱动：
                 // - 控制器显示时贴到底栏上方，无多余间距；
-                // - 控制器隐藏时画面底部留出边距避免贴边（动画过渡）。
+                // - 控制器隐藏时按用户设置的距离留边，避免贴边（动画过渡）。
+                // 左右各留固定 20dp（[SUBTITLE_FRAME_HORIZONTAL_PADDING]），避免字幕贴到画面边缘；
+                // 该常量与设置页预览共用，预览里的换行宽度与这里一致。
                 // 字幕在弹幕之上绘制，弹幕不会盖住字幕。
-                val subtitleBottomMargin by animateDpAsState(
-                    targetValue = max(bottomControlsHeightDp, SUBTITLE_BOTTOM_MARGIN),
-                    label = "subtitleBottomMargin",
-                )
-                Box(
-                    Modifier
-                        .matchParentSize()
-                        .padding(bottom = subtitleBottomMargin),
-                    contentAlignment = Alignment.BottomCenter,
-                ) {
-                    subtitle()
+                // 用 BoxWithConstraints 拿到画面宽高（dp）解析百分比模式：
+                // 字号按短边、距底按高度；
+                // padding 必须加在内层 Box 上，外层保持撑满画面，maxHeight 才是画面真实高度。
+                BoxWithConstraints(Modifier.matchParentSize()) {
+                    val resolvedSubtitleStyle = subtitleStyle.resolve(maxWidth, maxHeight, density)
+                    val currentSubtitleBottomMargin by animateDpAsState(
+                        targetValue = max(bottomControlsHeightDp, resolvedSubtitleStyle.bottomMargin),
+                        label = "subtitleBottomMargin",
+                    )
+                    Box(
+                        Modifier
+                            .matchParentSize()
+                            .padding(
+                                bottom = currentSubtitleBottomMargin,
+                                start = SUBTITLE_FRAME_HORIZONTAL_PADDING,
+                                end = SUBTITLE_FRAME_HORIZONTAL_PADDING,
+                            ),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        subtitle(resolvedSubtitleStyle)
+                    }
                 }
 
                 // 控制手势
@@ -493,8 +517,3 @@ private fun ControllerVisibility.withExpanded(isExpanded: Boolean): ControllerVi
         this
     }
 }
-
-/**
- * 控制器隐藏（画面底部无底栏/进度条占用）时，字幕距画面底部的间距（避免字幕贴边）
- */
-private val SUBTITLE_BOTTOM_MARGIN = 12.dp

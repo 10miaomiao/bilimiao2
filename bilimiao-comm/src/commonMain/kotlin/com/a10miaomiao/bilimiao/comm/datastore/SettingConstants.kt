@@ -99,4 +99,36 @@ object SettingConstants {
     // 播放器定时关闭默认值(秒)，0表示关闭
     const val PLAYER_AUTO_STOP_DURATION_DEFAULT = 0
 
+    // CC 字幕字号默认值（sp），对齐旧版 bottom_subtitle 的 16sp
+    const val PLAYER_SUBTITLE_FONT_SIZE_DEFAULT = 16
+
+    // CC 字幕距画面底部距离默认值（dp），与控制器隐藏时的默认留白一致
+    const val PLAYER_SUBTITLE_BOTTOM_MARGIN_DEFAULT = 12
+
+    // CC 字幕单位取值：字号单位与距底位置单位各自独立设置，共用下面这套取值
+    // 0 = 固定值（字号 sp / 距底 dp），不随画面尺寸变化
+    const val PLAYER_SUBTITLE_UNIT_MODE_FIXED = 0
+    // 1 = 按百分比，对应尺寸随画面等比缩放（字号按画面短边，距底按画面高度）
+    const val PLAYER_SUBTITLE_UNIT_MODE_PERCENT = 1
+    const val PLAYER_SUBTITLE_UNIT_MODE_DEFAULT = PLAYER_SUBTITLE_UNIT_MODE_FIXED
+
+    // CC 字幕字号（字号单位为百分比时）默认占画面短边（宽高中的较小者）的比例：4.5%
+    // 用短边做基准，竖屏播放时短边是宽度，字号随宽度缩放，不会被高度放大到撑爆画面
+    const val PLAYER_SUBTITLE_FONT_SIZE_PERCENT_DEFAULT = 0.045f
+    // CC 字幕距底部距离（距底单位为百分比时）默认占画面高度的比例：3.5%
+    const val PLAYER_SUBTITLE_BOTTOM_MARGIN_PERCENT_DEFAULT = 0.035f
+
+    // 以下取值范围同时供设置页滑杆与渲染时 clamp 使用，两端必须一致
+    // CC 字幕字号取值范围（sp，固定值模式）
+    const val PLAYER_SUBTITLE_FONT_SIZE_MIN = 10
+    const val PLAYER_SUBTITLE_FONT_SIZE_MAX = 40
+    // CC 字幕距底部距离取值范围（dp，固定值模式）
+    const val PLAYER_SUBTITLE_BOTTOM_MARGIN_MIN = 0
+    const val PLAYER_SUBTITLE_BOTTOM_MARGIN_MAX = 200
+    // CC 字幕字号取值范围（占画面短边（宽高中的较小者）的比例，百分比模式）：1% ~ 15%
+    const val PLAYER_SUBTITLE_FONT_SIZE_PERCENT_MIN = 0.01f
+    const val PLAYER_SUBTITLE_FONT_SIZE_PERCENT_MAX = 0.15f
+    // CC 字幕距底部距离取值范围（占画面高度的比例，百分比模式）：0% ~ 25%
+    const val PLAYER_SUBTITLE_BOTTOM_MARGIN_PERCENT_MIN = 0f
+    const val PLAYER_SUBTITLE_BOTTOM_MARGIN_PERCENT_MAX = 0.25f
 }

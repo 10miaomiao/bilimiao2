@@ -39,6 +39,7 @@ import cn.a10miaomiao.bilimiao.compose.pages.setting.HomeSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.ProxySettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.SettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.AutoStopTimerPage
+import cn.a10miaomiao.bilimiao.compose.pages.setting.SubtitleStyleSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.VideoSettingPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.AddProxyServerPage
 import cn.a10miaomiao.bilimiao.compose.pages.setting.proxy.EditProxyServerPage
@@ -124,6 +125,7 @@ object BilimiaoPageRoute {
         scope.entry<HomeSettingPage> { it.Content() }
         scope.entry<ThemeSettingPage> { it.Content() }
         scope.entry<VideoSettingPage> { it.Content() }
+        scope.entry<SubtitleStyleSettingPage> { it.Content() }
         scope.entry<AutoStopTimerPage> { it.Content() }
         scope.entry<DanmakuSettingPage> { it.Content() }
         scope.entry<DanmakuDisplaySettingPage> { it.Content() }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -23,19 +24,22 @@ import cn.a10miaomiao.bilimiao.compose.common.navigation.PageNavigator
 import cn.a10miaomiao.bilimiao.compose.common.platform.Platform
 import cn.a10miaomiao.bilimiao.compose.common.platform.platformInfo
 import cn.a10miaomiao.bilimiao.compose.common.preference.rememberPreferenceFlow
+import cn.a10miaomiao.bilimiao.compose.components.player.SubtitleStyleSpec
+import cn.a10miaomiao.bilimiao.compose.components.player.bottomMarginDescription
+import cn.a10miaomiao.bilimiao.compose.components.player.fontSizeDescription
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.desktopFullscreenModeLabel
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.desktopFullscreenModeOrder
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenModeLabel
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.fullscreenModeMenuOrder
 import cn.a10miaomiao.bilimiao.compose.components.preference.customSetsPreference
 import cn.a10miaomiao.bilimiao.compose.components.preference.multiSelectIntPreference
-import cn.a10miaomiao.bilimiao.compose.components.preference.sliderIntPreference
 import com.a10miaomiao.bilimiao.comm.datastore.SettingConstants
 import com.a10miaomiao.bilimiao.comm.datastore.SettingPreferences
 import com.a10miaomiao.bilimiao.comm.datastore.appDataStore
 import com.a10miaomiao.bilimiao.comm.delegate.player.DesktopFullscreenMode
 import com.a10miaomiao.bilimiao.comm.delegate.player.FullscreenMode
 import com.a10miaomiao.bilimiao.comm.store.PlayerStore
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import cn.a10miaomiao.bilimiao.compose.common.preference.ProvidePreferenceLocals
 import cn.a10miaomiao.bilimiao.compose.common.preference.listPreference
@@ -165,6 +169,10 @@ private class VideoSettingPageViewModel(
 
     fun autoStopTimerClick() {
         pageNavigation.navigate(AutoStopTimerPage())
+    }
+
+    fun subtitleStyleClick() {
+        pageNavigation.navigate(SubtitleStyleSettingPage())
     }
 
 }
@@ -482,6 +490,24 @@ private fun VideoSettingPageContent(
                     Text("此AI字幕是指UP主手动生成的AI字幕，并非每个视频都有")
                 },
                 defaultValue = false,
+            )
+            // 字幕样式（字号 / 距底部距离 / 单位模式）集中到独立设置页，带预览与尺寸标注
+            preference(
+                key = "subtitle_style",
+                title = {
+                    Text("字幕样式")
+                },
+                summary = {
+                    // 摘要取真实当前值：与字幕样式页预览读的是同一份数据
+                    val subtitleSpec = remember(dataStore) {
+                        dataStore.data.map { readSubtitleStyleSpec(it) }
+                    }.collectAsState(initial = SubtitleStyleSpec.Default).value
+                    Text(
+                        "${subtitleSpec.fontSizeDescription()} · " +
+                                "距底部 ${subtitleSpec.bottomMarginDescription()}"
+                    )
+                },
+                onClick = viewModel::subtitleStyleClick
             )
 
             item("bottom") {
