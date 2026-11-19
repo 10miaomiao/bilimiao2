@@ -10,10 +10,16 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -297,6 +303,7 @@ class UpdateDialogState {
 }
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun HomePageContent(
     viewModel: HomePageViewModel
@@ -398,12 +405,13 @@ private fun HomePageContent(
         }
     }
 
-    // Update dialog
+    // Update dialog（对齐 bbmiao：内容可滚动 + 「不再提醒此版本」）
     val updateState = viewModel.updateDialogState
     if (updateState.isVisible && updateState.version != null) {
         val version = updateState.version!!
         AlertDialog(
             onDismissRequest = {
+                // 强制更新时不允许通过点击外部/返回键关闭，对齐 bbmiao 的 setCancelable(false)
                 if (!updateState.isForceUpdate) {
                     updateState.dismiss()
                 }
@@ -412,12 +420,23 @@ private fun HomePageContent(
                 Text(text = "有新版本：" + version.versionName)
             },
             text = {
-                Text(text = version.content)
+                // 对齐 bbmiao 的 setMessage：更新内容可能很长，限制最大高度后允许滚动查看，
+                // 避免把底部按钮挤出屏幕；内容为空时不渲染空白块
+                if (version.content.isNotBlank()) {
+                    val scrollState = rememberScrollState()
+                    Text(
+                        text = version.content,
+                        modifier = Modifier
+                            .heightIn(max = 320.dp)
+                            .verticalScroll(scrollState),
+                    )
+                }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
                         platformContext.openUrl(version.url)
+                        // 强制更新时不关闭对话框，必须由用户完成更新
                         if (!updateState.isForceUpdate) {
                             updateState.dismiss()
                         }
@@ -428,10 +447,27 @@ private fun HomePageContent(
             },
             dismissButton = if (updateState.isForceUpdate) null else {
                 {
-                    TextButton(
-                        onClick = { updateState.dismiss() }
+                    // Material3 AlertDialog 没有 neutral 槽位，用 FlowRow 承载
+                    // 「不再提醒此版本」+「取消」：窄屏/大字体时自动换行而不溢出。
+                    // dismissButton 位于 confirmButton 左侧，视觉顺序为
+                    // 「不再提醒此版本、取消、去更新」，与 bbmiao 一致
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(text = "取消")
+                        TextButton(
+                            onClick = {
+                                // 对齐 bbmiao：记录被忽略的版本号，后续不再提示该版本
+                                viewModel.setIgnoreUpdateVersion(version.versionCode)
+                                updateState.dismiss()
+                            }
+                        ) {
+                            Text(text = "不再提醒此版本")
+                        }
+                        TextButton(
+                            onClick = { updateState.dismiss() }
+                        ) {
+                            Text(text = "取消")
+                        }
                     }
                 }
             },
