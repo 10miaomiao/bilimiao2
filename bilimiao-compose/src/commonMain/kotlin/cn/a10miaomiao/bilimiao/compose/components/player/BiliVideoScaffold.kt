@@ -364,6 +364,27 @@ fun BiliVideoScaffold(
     val bottomProgressBarShow by remember(appDataStore) {
         appDataStore.data.map { it[SettingPreferences.PlayerBottomProgressBarShow] ?: 0 }
     }.collectAsState(initial = 0)
+    // CC 字幕样式设置（「播放设置 - 字幕设置」：字号单位 / 字号 / 距底部距离单位 / 距底部距离），
+    // 字号单位与位置单位各自独立设置，两者可混合使用；
+    // 订阅 DataStore 而不是启动时读一次，设置项变化后立刻生效；各字段读不到时回落到默认值
+    val subtitleStyle by remember(appDataStore) {
+        appDataStore.data.map { prefs ->
+            SubtitleStyleSpec(
+                fontSizeUnitMode = prefs[SettingPreferences.PlayerSubtitleFontSizeUnitMode]
+                    ?: SettingConstants.PLAYER_SUBTITLE_UNIT_MODE_DEFAULT,
+                bottomMarginUnitMode = prefs[SettingPreferences.PlayerSubtitleBottomMarginUnitMode]
+                    ?: SettingConstants.PLAYER_SUBTITLE_UNIT_MODE_DEFAULT,
+                fontSizeSp = prefs[SettingPreferences.PlayerSubtitleFontSize]
+                    ?: SettingConstants.PLAYER_SUBTITLE_FONT_SIZE_DEFAULT,
+                bottomMarginDp = prefs[SettingPreferences.PlayerSubtitleBottomMargin]
+                    ?: SettingConstants.PLAYER_SUBTITLE_BOTTOM_MARGIN_DEFAULT,
+                fontSizePercent = prefs[SettingPreferences.PlayerSubtitleFontSizePercent]
+                    ?: SettingConstants.PLAYER_SUBTITLE_FONT_SIZE_PERCENT_DEFAULT,
+                bottomMarginPercent = prefs[SettingPreferences.PlayerSubtitleBottomMarginPercent]
+                    ?: SettingConstants.PLAYER_SUBTITLE_BOTTOM_MARGIN_PERCENT_DEFAULT,
+            )
+        }
+    }.collectAsState(initial = SubtitleStyleSpec.Default)
     // 按当前展示方式取对应的开关位：全屏、画中画各自独立，其余（嵌入竖屏/悬浮横屏/锚点浮层）算作小屏
     val bottomProgressBarEnabled = when (displayMode) {
         PlayerDisplayMode.PictureInPicture ->
@@ -558,6 +579,9 @@ fun BiliVideoScaffold(
             // 播放异常/播放完成覆盖层显示时同样关闭手势，避免手势穿透到覆盖层下方
             gestureLocked = isLocked || inPictureInPicture || showStatusOverlay,
             contentWindowInsets = contentWindowInsets,
+            // 字幕样式由用户设置驱动（固定值 sp/dp 或按百分比；百分比模式下字号按画面短边
+            // min(宽, 高)、距底按画面高度；控制器显示时仍避让到底栏上方）
+            subtitleStyle = subtitleStyle,
             topBar = {
                 PlayerTopBar(
                     title = currentSource?.title ?: "",
@@ -680,11 +704,14 @@ fun BiliVideoScaffold(
                 )
             },
             // CC 字幕层：位于视频底部、控制栏上方，按播放位置绘制当前字幕
-            subtitle = {
+            subtitle = { resolved ->
                 SubtitleOverlay(
                     subtitleItems = subtitleItems,
                     currentPosition = currentPosition,
                     modifier = Modifier.fillMaxWidth(),
+                    // 字号按当前画面宽高解析好的样式（固定值模式为设置的字号，
+                    // 百分比模式为画面短边 min(宽, 高) × 比例换算后的字号）
+                    fontSize = resolved.fontSize,
                 )
             },
             gestureHost = {

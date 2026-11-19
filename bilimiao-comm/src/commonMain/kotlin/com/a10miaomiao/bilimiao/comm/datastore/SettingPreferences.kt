@@ -104,6 +104,18 @@ object SettingPreferences {
     val PlayerAudioFocus = booleanPreferencesKey("player_audio_focus")
     val PlayerSubtitleShow = booleanPreferencesKey("player_subtitle_show")
     val PlayerAiSubtitleShow = booleanPreferencesKey("player_ai_subtitle_show")
+    // CC 字幕字号（sp）
+    val PlayerSubtitleFontSize = intPreferencesKey("player_subtitle_font_size")
+    // CC 字幕距画面底部的距离（dp），仅控制器隐藏时生效（控制器显示时字幕避让到底栏上方）
+    val PlayerSubtitleBottomMargin = intPreferencesKey("player_subtitle_bottom_margin")
+    // CC 字幕字号单位：0 = 固定值（sp），1 = 按画面短边 min(宽, 高) 百分比，取值见 SettingConstants
+    val PlayerSubtitleFontSizeUnitMode = intPreferencesKey("player_subtitle_font_size_unit_mode")
+    // CC 字幕字号相对画面短边 min(宽, 高) 的比例（0.045 表示 4.5%），仅字号单位为百分比时生效
+    val PlayerSubtitleFontSizePercent = floatPreferencesKey("player_subtitle_font_size_percent")
+    // CC 字幕距底部距离单位：0 = 固定值（dp），1 = 按画面高度百分比，取值见 SettingConstants
+    val PlayerSubtitleBottomMarginUnitMode = intPreferencesKey("player_subtitle_bottom_margin_unit_mode")
+    // CC 字幕距底部距离相对画面高度的比例（0.035 表示 3.5%），仅距底单位使用百分比时生效
+    val PlayerSubtitleBottomMarginPercent = floatPreferencesKey("player_subtitle_bottom_margin_percent")
     val PlayerSmallShowArea = intPreferencesKey("player_small_show_area")
     val PlayerHoldShowArea = intPreferencesKey("player_hold_show_area")
     val PlayerSmallDraggable = booleanPreferencesKey("player_small_draggable")

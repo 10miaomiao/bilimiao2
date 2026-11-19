@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleItem
@@ -37,19 +38,21 @@ import com.a10miaomiao.bilimiao.comm.delegate.player.entity.SubtitleItem
  * 起止时间与索引，播放位置更新时先判断是否仍位于当前行内，再决定向前/向后移动，
  * 顺序播放时每次仅 O(1) 判断，仅 seek 跳转时才会线性推进到目标行。
  *
- * 样式对齐旧版：白色文字 + 半透明黑色圆角底，字号固定 16sp。
+ * 样式对齐旧版：白色文字 + 半透明黑色圆角底，字号可由用户设置（默认 16sp，见 [fontSize]）。
  * 字幕距底部的间距由 [VideoScaffold][cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoScaffold]
- * 字幕槽位按控制栏可见状态提供：底栏显示时贴底栏上缘，隐藏时画面底部留白。
+ * 字幕槽位按控制栏可见状态提供：底栏显示时贴底栏上缘，隐藏时按用户设置的距离留白。
  *
  * @param subtitleItems 字幕行（毫秒时间轴，按开始时间升序）
  * @param currentPosition 当前播放位置（毫秒）
  * @param modifier 布局修饰符
+ * @param fontSize 字幕字号，由用户设置驱动（默认 [SUBTITLE_FONT_SIZE]），行高按 1.35 倍字号计算
  */
 @Composable
 fun SubtitleOverlay(
     subtitleItems: List<SubtitleItem>,
     currentPosition: Long,
     modifier: Modifier = Modifier,
+    fontSize: TextUnit = SUBTITLE_FONT_SIZE,
 ) {
     // 当前字幕行的索引（推进式查找状态）；字幕列表切换（换视频/换字幕源）时重置
     var subtitleIndex by remember(subtitleItems) { mutableIntStateOf(-1) }
@@ -73,26 +76,63 @@ fun SubtitleOverlay(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        Text(
+        SubtitleTextBox(
             text = item.content,
-            color = Color.White,
-            fontSize = SUBTITLE_FONT_SIZE,
-            lineHeight = SUBTITLE_FONT_SIZE * 1.35f,
-            textAlign = TextAlign.Center,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color(0x66000000))
-                .padding(horizontal = 10.dp, vertical = 4.dp),
+            fontSize = fontSize,
         )
     }
 }
 
 /**
- * 字幕字号（对齐旧版 layout_danmaku_palyer.xml 中 bottom_subtitle 的 16sp）
+ * 单条 CC 字幕的文本框（白字 + 半透明黑色圆角底）。
+ *
+ * 字幕叠加层 [SubtitleOverlay] 与「字幕样式」设置页的预览框都复用本组件，
+ * 保证设置页里看到的字号、行高、底衬与播放器实际绘制效果完全一致（所见即所得）。
+ * 样式对齐旧版 layout_danmaku_palyer.xml 的 bottom_subtitle：白色文字、黑色 40% 底衬、
+ * 行高 1.35 倍字号、最多 3 行，超出省略。
+ *
+ * @param text 字幕文本
+ * @param fontSize 字号，由用户设置（或按画面短边 min(宽, 高) 百分比换算）驱动
+ * @param modifier 布局修饰符
+ */
+@Composable
+fun SubtitleTextBox(
+    text: String,
+    fontSize: TextUnit,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        color = Color.White,
+        fontSize = fontSize,
+        lineHeight = fontSize * 1.35f,
+        textAlign = TextAlign.Center,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(Color(0x66000000))
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+    )
+}
+
+/**
+ * 字幕默认字号（对齐旧版 layout_danmaku_palyer.xml 中 bottom_subtitle 的 16sp）。
+ * 用户可在「播放设置 - 字幕设置」中调整，经 [SubtitleOverlay] 的 `fontSize` 参数传入。
  */
 private val SUBTITLE_FONT_SIZE = 16.sp
+
+/**
+ * 字幕黑底块与画面左右边缘之间的固定水平边距。
+ *
+ * 写死、不开放设置：字幕块只在左右两侧各留这么宽，超出部分自动换行，
+ * 避免长句字幕直接贴到画面边缘（尤其全屏时观感很差）。
+ *
+ * 播放器（[VideoScaffold][cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoScaffold]
+ * 的字幕槽位）与「字幕样式」设置页的预览卡片共用本常量，保证预览里的换行宽度
+ * 与实际播放时完全一致（所见即所得）。
+ */
+val SUBTITLE_FRAME_HORIZONTAL_PADDING = 20.dp
 
 /**
  * 推进式查找当前播放位置对应的字幕行索引
