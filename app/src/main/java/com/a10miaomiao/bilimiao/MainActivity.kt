@@ -15,7 +15,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.DisplayCutout
-import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
@@ -457,38 +456,6 @@ class MainActivity : ComponentActivity(), DIAware {
     override fun onStop() {
         super.onStop()
         basePlayerDelegate.onStop()
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        val showPlayer = startViewState.playerState.showPlayer
-        when (keyCode) {
-            KeyEvent.KEYCODE_SPACE -> {
-                if (showPlayer) {
-                    if (basePlayerDelegate.isPlaying()) {
-                        basePlayerDelegate.pause()
-                    } else {
-                        basePlayerDelegate.resume()
-                    }
-                    return true
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_LEFT -> {
-                if (showPlayer) {
-                    basePlayerDelegate.seekTo(basePlayerDelegate.currentPosition() - 5000)
-                }
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (showPlayer) {
-                    basePlayerDelegate.seekTo(basePlayerDelegate.currentPosition() + 5000)
-                }
-            }
-            KeyEvent.KEYCODE_ESCAPE -> {
-                if (showPlayer) {
-                    basePlayerDelegate.onBackPressed()
-                }
-            }
-        }
-        return super.onKeyUp(keyCode, event)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

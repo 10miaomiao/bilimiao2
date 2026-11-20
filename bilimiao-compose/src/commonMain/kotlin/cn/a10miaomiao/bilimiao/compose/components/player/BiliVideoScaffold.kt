@@ -69,9 +69,11 @@ import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.VideoScaffo
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.GestureIndicatorState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.LevelController
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.LockableVideoGestureHost
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.PlayerKeyboardHelpOverlay
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberBrightnessLevelController
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberGestureIndicatorState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberPlayerFastSkipState
+import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberPlayerKeyboardActions
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSwipeSeekerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.gesture.rememberSystemVolumeLevelController
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.BottomProgressBar
@@ -571,6 +573,19 @@ fun BiliVideoScaffold(
         val audioController = rememberSystemVolumeLevelController() ?: playerVolumeController
         val brightnessController = rememberBrightnessLevelController()
 
+        // 键盘快捷键的动作实现（seek / 静音 / 音量 / 倍速 / 帮助）。
+        // remember 出来的实例在整段播放期间保持同一引用：实时数据（是否在播、片长、进度、
+        // 倍速、音量）全部在回调执行时从 delegate 的 StateFlow.value / 控制器属性读取，
+        // 不随重组变化；只有帮助浮层显隐是需要触发重组的 Compose 状态。
+        val keyboardActions = rememberPlayerKeyboardActions(
+            playerDelegate = playerDelegate,
+            audioController = audioController,
+            gestureIndicatorState = indicatorState,
+            onToggleFullscreen = onToggleFullscreen,
+            onExitFullscreen = onExitFullscreen,
+            isFullscreen = { isFullscreen },
+        )
+
         VideoScaffold(
             expanded = expandedLayout,
             modifier = modifier,
@@ -734,18 +749,20 @@ fun BiliVideoScaffold(
                         enableSwipeToSeek = duration > 0,
                         audioController = audioController,
                         brightnessController = brightnessController,
-                        playbackSpeedControllerState = null,
                         onTogglePauseResume = {
                             if (isPlaying) playerDelegate.pause() else playerDelegate.resume()
                         },
                         onToggleFullscreen = onToggleFullscreen,
                         onExitFullscreen = onExitFullscreen,
-                        onToggleDanmaku = { playerDelegate.toggleDanmaku() },
                         gestureIndicatorState = indicatorState,
                         fastSkipState = fastSkipState,
                         // 只有播放中才响应长按加速（暂停/播放结束/出错时不响应），
                         // 长按期间播放中断时该开关变化会摘除手势并自动恢复原倍速
                         fastSkipEnabled = isPlaying,
+                        // 键盘快捷键挂载在手势层: 点画面时 combinedClickable 会聚焦
+                        // 手势层节点, 按键即能被播放器消费 (控制器按钮不在手势层子树内,
+                        // 点按钮后焦点离开手势层, 按键不再由播放器处理)
+                        keyboardShortcuts = keyboardActions.callbacks,
                     )
                 } else {
                     // 单击切换控制器显隐；detectTapGestures 超过触摸滑动阈值或事件被
@@ -787,6 +804,13 @@ fun BiliVideoScaffold(
                         modifier = Modifier.align(Alignment.Center),
                     )
                 }
+                // 键盘快捷键帮助浮层（H / ? 切换，显示 5 秒后自动关闭）。
+                // 放在最后并居中，避免被上面的 loading / 长按倍速提示挤压布局。
+                PlayerKeyboardHelpOverlay(
+                    visible = keyboardActions.helpVisible,
+                    onDismiss = keyboardActions::dismissHelp,
+                    modifier = Modifier.align(Alignment.Center),
+                )
             },
             bottomBar = {
                 PlayerControllerBar(
@@ -974,7 +998,7 @@ private fun SmallScreenDanmakuSendButton(
         color = Color.Black.copy(alpha = 0.3f),
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
     ) {
-        IconButton(onClick) {
+        IconButton(onClick = onClick) {
             CompositionLocalProvider(LocalContentColor provides Color.White) {
                 Icon(
                     Icons.AutoMirrored.Rounded.Send,

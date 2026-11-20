@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.ControllerVisibility
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.GestureFamily
-import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlaybackSpeedControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlayerControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerProgressSliderState
 import kotlinx.coroutines.delay
@@ -108,6 +107,8 @@ fun LockedScreenGestureHost(
  *
  * 简化自 animeko: 移除了 `playerState: MediampPlayer` 参数及基于 `PlaybackSpeed` feature
  * 的 `rememberPlayerFastSkipState` 默认值, `fastSkipState` 改由调用方直接传入.
+ *
+ * @param keyboardShortcuts 键盘快捷键回调集合, 原样透传给 [PlayerGestureHost]; `null` 时不安装快捷键
  */
 @Composable
 fun LockableVideoGestureHost(
@@ -118,17 +119,15 @@ fun LockableVideoGestureHost(
     enableSwipeToSeek: Boolean,
     audioController: LevelController,
     brightnessController: LevelController,
-    playbackSpeedControllerState: PlaybackSpeedControllerState?,
     modifier: Modifier = Modifier,
     onTogglePauseResume: () -> Unit = {},
     onToggleFullscreen: () -> Unit = {},
     onExitFullscreen: () -> Unit = {},
-    onToggleDanmaku: () -> Unit = {},
-    onTogglePlayerStats: () -> Unit = {},
     family: GestureFamily = GestureFamily.TOUCH,
     gestureIndicatorState: GestureIndicatorState = rememberGestureIndicatorState(),
     fastSkipState: FastSkipState? = null,
     fastSkipEnabled: Boolean = true,
+    keyboardShortcuts: PlayerKeyboardShortcutCallbacks? = null,
 ) {
     if (locked) {
         LockedScreenGestureHost(
@@ -137,24 +136,23 @@ fun LockableVideoGestureHost(
             modifier.testTag("LockedScreenGestureHost"),
         )
     } else {
+        // 全部使用命名参数, 避免 PlayerGestureHost 参数顺序调整后位置参数错位
         PlayerGestureHost(
-            controllerState,
-            seekerState,
-            progressSliderState,
-            gestureIndicatorState,
-            fastSkipState,
-            enableSwipeToSeek,
-            audioController,
-            brightnessController,
-            playbackSpeedControllerState,
-            modifier,
+            controllerState = controllerState,
+            seekerState = seekerState,
+            progressSliderState = progressSliderState,
+            indicatorState = gestureIndicatorState,
+            fastSkipState = fastSkipState,
+            enableSwipeToSeek = enableSwipeToSeek,
+            audioController = audioController,
+            brightnessController = brightnessController,
+            modifier = modifier,
             onTogglePauseResume = onTogglePauseResume,
             onToggleFullscreen = onToggleFullscreen,
             onExitFullscreen = onExitFullscreen,
-            onToggleDanmaku = onToggleDanmaku,
-            onTogglePlayerStats = onTogglePlayerStats,
             family = family,
             fastSkipEnabled = fastSkipEnabled,
+            keyboardShortcuts = keyboardShortcuts,
         )
     }
 }

@@ -168,13 +168,16 @@ fun main() {
             state = windowState,
             icon = appIcon,
             onPreviewKeyEvent = { event ->
-                // Esc 等价于系统返回：无路可退时不消费按键（allowExit = false），
-                // 避免在首页按 Esc 直接进入「再按一次退出」流程
-                if (event.type == KeyEventType.KeyDown &&
-                    event.key == Key.Escape &&
-                    composeNavigator.handleBack(allowExit = false)
-                ) {
-                    true
+                if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
+                    if (playerDelegate.fullscreenController.isFullscreen.value) {
+                        // 播放器全屏时 Esc 先退出全屏，而不是导航返回
+                        playerDelegate.fullscreenController.toggleFullscreen()
+                        true
+                    } else {
+                        // Esc 等价于系统返回：无路可退时不消费按键（allowExit = false），
+                        // 避免在首页按 Esc 直接进入「再按一次退出」流程
+                        composeNavigator.handleBack(allowExit = false)
+                    }
                 } else {
                     false
                 }

@@ -27,8 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -37,7 +40,6 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.ControllerVisibility
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.GestureFamily
-import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlaybackSpeedControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.PlayerControllerState
 import cn.a10miaomiao.bilimiao.compose.components.player.videoplayer.progress.PlayerProgressSliderState
 import kotlinx.coroutines.delay
@@ -164,6 +166,11 @@ private fun rememberSwipeSeekInteraction(
  * - 长按加速（仅播放中响应, 具体加速倍数由调用方决定）
  *
  * 鼠标家族支持点击暂停、双击全屏、滚轮调节音量、悬停显示控制器.
+ *
+ * 键盘快捷键也挂在本组件的手势层上 (见 [playerKeyboardShortcuts]): 手势层显式持有
+ * `FocusRequester`, 首次出现与点击画面时主动请求焦点, 快捷键随之可用.
+ *
+ * @param keyboardShortcuts 键盘快捷键回调集合; 为 `null` 时不安装键盘快捷键
  */
 @Composable
 fun PlayerGestureHost(
@@ -175,17 +182,25 @@ fun PlayerGestureHost(
     enableSwipeToSeek: Boolean,
     audioController: LevelController,
     brightnessController: LevelController,
-    playbackSpeedControllerState: PlaybackSpeedControllerState?,
     modifier: Modifier = Modifier,
     family: GestureFamily = GestureFamily.TOUCH,
     onTogglePauseResume: () -> Unit = {},
     onToggleFullscreen: () -> Unit = {},
     onExitFullscreen: () -> Unit = {},
-    onToggleDanmaku: () -> Unit = {},
-    onTogglePlayerStats: () -> Unit = {},
     fastSkipEnabled: Boolean = true,
+    keyboardShortcuts: PlayerKeyboardShortcutCallbacks? = null,
 ) {
     val onTogglePauseResumeState by rememberUpdatedState(onTogglePauseResume)
+    // 手势层是键盘快捷键的宿主节点, 由它自己请求并持有焦点 (不再依赖点击时的隐式聚焦)
+    val gestureFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(gestureFocusRequester) {
+        // 节点首帧可能尚未 attach: 失败则等一帧重试一次（只重试一次，不做焦点编排）
+        if (runCatching { gestureFocusRequester.requestFocus() }.isFailure) {
+            withFrameNanos { }
+            runCatching { gestureFocusRequester.requestFocus() }
+        }
+    }
 
     BoxWithConstraints {
         Row(
@@ -203,43 +218,18 @@ fun PlayerGestureHost(
 
         // 替代原 animeko 的 rememberUiMonoTasker: 使用 rememberCoroutineScope + launch
         val indicatorScope = rememberCoroutineScope()
-        // 简化: 原始实现根据 family == MOUSE 决定是否使用 mediamp 的 AudioLevelController,
-        // 此处统一使用 audioController (LevelController), 故 useMediaAudioController 恒为 false.
-        val useMediaAudioController = false
         val systemFullscreen = false // 替代 isSystemInFullscreen()
 
-        val keyboardModifier = modifier
-            .testTag("VideoGestureHost")
-            .playerKeyboardShortcuts(
-                seekerState = seekerState,
-                fastSkipState = fastSkipState,
-                currentPlaybackSpeed = playbackSpeedControllerState?.currentSpeed,
-                playbackSpeedRange = playbackSpeedControllerState?.speedRange
-                    ?: PlaybackSpeedControllerState.DEFAULT_SPEED_RANGE,
-                onPlaybackSpeedChanged = {
-                    playbackSpeedControllerState?.commitSpeed(it)
-                    indicatorScope.launch { indicatorState.showPlaybackSpeed(it) }
-                },
-                volumeEnabled = !useMediaAudioController,
-                onVolumeUp = { fineAdjustment ->
-                    audioController.increaseLevel(if (fineAdjustment) audioController.levelStep else 0.10f)
-                    indicatorScope.launch {
-                        indicatorState.showVolumeRange(audioController.level)
-                    }
-                },
-                onVolumeDown = { fineAdjustment ->
-                    audioController.decreaseLevel(if (fineAdjustment) audioController.levelStep else 0.10f)
-                    indicatorScope.launch {
-                        indicatorState.showVolumeRange(audioController.level)
-                    }
-                },
-                onTogglePauseResume = onTogglePauseResumeState,
-                onToggleFullscreen = onToggleFullscreen,
-                onExitFullscreen = onExitFullscreen,
-                onToggleDanmaku = onToggleDanmaku,
-                onTogglePlayerStats = onTogglePlayerStats,
-            )
-        // 替代原 animeko 的 playerFocusHost: focus 管理简化为直接使用 keyboardModifier
+        // 键盘快捷键挂在手势层: 手势层节点带 focusable + focusRequester (见下方 Box),
+        // 首次出现与点击画面时主动请求焦点, 按键即能被播放器消费.
+        val shortcuts = keyboardShortcuts
+        val gestureModifier = if (shortcuts != null) {
+            modifier
+                .testTag("VideoGestureHost")
+                .playerKeyboardShortcuts(seekerState, fastSkipState, shortcuts)
+        } else {
+            modifier.testTag("VideoGestureHost")
+        }
 
         if (family.autoHideController) {
             LaunchedEffect(controllerState.visibility, controllerState.alwaysOn) {
@@ -273,24 +263,25 @@ fun PlayerGestureHost(
                     indication = null,
                     onClick = remember(family) {
                         {
+                            // 点击画面时显式把焦点交回手势层, 快捷键随后生效
+                            runCatching { gestureFocusRequester.requestFocus() }
                             if (family.clickToPauseResume) {
                                 onTogglePauseResumeState()
                             }
                             if (family.clickToToggleController) {
                                 controllerState.toggleFullVisible()
                             }
-                            // 简化: playerFocusState.requestPlayerFocus() 省略
                         }
                     },
                     onDoubleClick = remember(family, onToggleFullscreen) {
                         {
+                            runCatching { gestureFocusRequester.requestFocus() }
                             if (family.doubleClickToFullscreen) {
                                 onToggleFullscreen()
                             }
                             if (family.doubleClickToPauseResume) {
                                 onTogglePauseResumeState()
                             }
-                            // 简化: playerFocusState.requestPlayerFocus() 省略
                         }
                     },
                 )
@@ -298,7 +289,7 @@ fun PlayerGestureHost(
         // 替代原 animeko 的 rememberUiMonoTasker (鼠标移动延迟隐藏)
         val mouseMoveScope = rememberCoroutineScope()
         Box(
-            keyboardModifier
+            gestureModifier
                 // 顶部 24dp 不接管任何手势, 交给系统的「从顶部边缘下滑唤出状态栏」
                 .padding(top = GESTURE_AREA_TOP_INSET)
                 .combineClickableWithFamilyGesture()
@@ -368,6 +359,8 @@ fun PlayerGestureHost(
                 // 不要删除此 focusable, 它与 combinedClickable 并非冗余.
                 // combinedClickable 的焦点目标在 Android 触摸模式下不可聚焦,
                 // 这个始终可聚焦的子节点是保持硬件快捷键可用的回退.
+                // focusRequester 必须与 focusable 在同一个节点上并排在它之前, 否则请求无效.
+                .focusRequester(gestureFocusRequester)
                 .focusable()
                 .fillMaxSize(),
         ) {
