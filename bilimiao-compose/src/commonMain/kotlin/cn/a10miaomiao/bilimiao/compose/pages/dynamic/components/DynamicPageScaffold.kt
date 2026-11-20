@@ -57,7 +57,6 @@ fun DynamicPageScaffold(
     pagerState: PagerState,
     selectedUpper: UpListItem? = null,
 ) {
-    val windowInsets = localContentInsets()
     val scope = rememberCoroutineScope()
 
     BoxWithConstraints {
@@ -194,14 +193,12 @@ private fun DynamicAllAndVideoWrap(
             }
         } else {
             LazyRow(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(
-                        top = windowInsets.topDp.dp,
-                        end = windowInsets.rightDp.dp,
-                    ),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(
-                    horizontal = 8.dp
+                    start = 8.dp,
+                    top = windowInsets.topDp.dp,
+                    end = 8.dp + windowInsets.rightDp.dp,
                 )
             ) {
                 items(tabs.size, { it }) { index ->
@@ -242,12 +239,8 @@ fun DynamicUpperWrap(
     isMiniUpList: Boolean = false,
     selectedUpper: UpListItem,
 ) {
-    val windowInsets = localContentInsets()
-
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(windowInsets.toPaddingValues())
+        modifier = Modifier.fillMaxWidth()
     ) {
         if (isMiniUpList) {
             upperList(72.dp)

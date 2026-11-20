@@ -199,8 +199,9 @@ fun DynamicUpperContent(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = windowInsets.addPaddingValues(
-                addTop = -windowInsets.topDp.dp + 10.dp,
-                addBottom = 10.dp
+                addLeft = -windowInsets.leftDp.dp,
+                addTop = 10.dp,
+                addBottom = 10.dp,
             ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp),

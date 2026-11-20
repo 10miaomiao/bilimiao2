@@ -28,7 +28,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bilibili.app.dynamic.v2.UpListItem
+import cn.a10miaomiao.bilimiao.compose.common.localContentInsets
 import cn.a10miaomiao.bilimiao.compose.common.localPageNavigation
+import cn.a10miaomiao.bilimiao.compose.common.toPaddingValues
 import cn.a10miaomiao.bilimiao.compose.pages.mine.MyFollowPage
 import coil3.compose.AsyncImage
 
@@ -41,6 +43,7 @@ fun DynamicMiniUpperList(
     onBackAll: () -> Unit,
     onSelected: (UpListItem) -> Unit
 ) {
+    val windowInsets = localContentInsets()
     val pageNavigation = localPageNavigation()
     fun toFollowPage() {
         pageNavigation.navigate(
@@ -54,6 +57,8 @@ fun DynamicMiniUpperList(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                // 只避让左、上安全边距
+                .padding(windowInsets.toPaddingValues(right = 0.dp, bottom = 0.dp))
         ) {
             TextButton(
                 onClick = onBackAll,
@@ -87,7 +92,9 @@ fun DynamicMiniUpperList(
             modifier = modifier
                 .fillMaxWidth()
                 .weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            // 只避让左、下安全边距（顶部由上方头部避让）
+            contentPadding = windowInsets.toPaddingValues(top = 0.dp, right = 0.dp),
         ) {
             items(upperList.size, { upperList[it].uid }) { index ->
                 val item = upperList[index]

@@ -5,7 +5,6 @@ import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import cn.a10miaomiao.bilimiao.compose.common.BackHandler
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
@@ -128,10 +127,7 @@ private fun DynamicPageContent(
                     modifier = Modifier
                         .width(maxWidth)
                         .fillMaxHeight(),
-                    safePadding = PaddingValues(
-                        top = windowInsets.topDp.dp,
-                        bottom = windowInsets.bottom
-                    ),
+                    safePadding = windowInsets.toPaddingValues(right = 0.dp),
                     upperList = upperList,
                     selectedUpper = if (pagerState.currentPage == 1) {
                         selectedUpper
